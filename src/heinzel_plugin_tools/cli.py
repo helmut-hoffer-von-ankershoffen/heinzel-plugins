@@ -799,6 +799,25 @@ def dispatch_publication(project: Project, tag: str | None, registry: str | None
     print("Dispatched the protected release workflow. Follow its verified result in GitHub Actions.", flush=True)
 
 
+def hook_changes() -> list[str]:
+    """Read staged or pushed plugin paths, including deletions omitted by hook filename filtering."""
+    before, after = os.environ.get("PRE_COMMIT_FROM_REF"), os.environ.get("PRE_COMMIT_TO_REF")
+    if before and not after:
+        raise ValueError("The pre-push hook must provide PRE_COMMIT_TO_REF")
+    if after and not before:
+        command = ["git", "ls-tree", "-rz", "--name-only", after, "--", "plugins/"]
+    else:
+        scope = [before, after] if before and after else ["--cached"]
+        command = ["git", "diff", "--name-only", "--no-renames", "-z", *scope, "--", "plugins/"]
+    changed = subprocess.check_output(
+        command,
+        cwd=ROOT,
+        text=True,
+        timeout=30,
+    )
+    return [path for path in changed.split("\0") if path]
+
+
 def main() -> int:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
@@ -812,6 +831,7 @@ def main() -> int:
             "test",
             "check",
             "check-fast",
+            "check-changed",
             "preflight",
             "build",
             "profile",
@@ -839,7 +859,8 @@ def main() -> int:
         default=[os.environ["PLUGIN_CONTRACT"]] if os.environ.get("PLUGIN_CONTRACT") else [],
         help="Check consumers of a changed public contract",
     )
-    parser.add_argument("--changed", action="append", default=[])
+    parser.add_argument("--changed", action="extend", nargs="+", default=[])
+    parser.add_argument("--git-hook", action="store_true", help="Include staged or pushed plugin deletions")
     parser.add_argument("--output", type=Path)
     parser.add_argument("--wheel", type=Path, help="Test this exact prebuilt owning wheel without rebuilding it")
     parser.add_argument(
@@ -859,6 +880,13 @@ def main() -> int:
     if args.publish:
         parser.error("Local release previews artifacts only. Publish through the protected release workflow.")
     inventory = projects()
+    if args.command == "check-changed":
+        changed = hook_changes() if args.git_hook else args.changed
+        selected = {entry["name"] for entry in plan(changed, inventory, ROOT)["include"]}
+        for project in inventory:
+            if project.name in selected:
+                check(project, args.core, fast=True)
+        return 0
     if args.command == "new":
         if not args.name:
             parser.error("Choose a plugin name, for example: new harbor")

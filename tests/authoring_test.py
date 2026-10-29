@@ -127,6 +127,34 @@ def test_local_release_has_no_alternate_upload_path(monkeypatch, capsys):
     assert "protected release workflow" in capsys.readouterr().err
 
 
+@pytest.mark.parametrize("private", [False, True])
+def test_owning_publish_dispatches_the_generic_host_workflow_without_building_core(project, monkeypatch, private):
+    revision = "a" * 40
+    replies = iter(["main\n", "", revision, revision])
+    monkeypatch.setattr(cli.subprocess, "check_output", lambda *_, **__: next(replies))
+    monkeypatch.setattr(cli, "repository_private", lambda: private)
+    commands = []
+    monkeypatch.setattr(cli, "run", lambda command, **_: commands.append(command))
+    cli.dispatch_publication(project, None)
+    assert commands == [
+        ["git", "fetch", "--quiet", "origin", "main"],
+        [
+            "gh",
+            "workflow",
+            "run",
+            "release.yml",
+            "--ref",
+            "main",
+            "--field",
+            "plugin=heinzel-unforeseen",
+            "--field",
+            "publish=true",
+            "--field",
+            "registry=github" if private else "registry=pypi",
+        ],
+    ]
+
+
 @pytest.fixture
 def released_artifacts(tmp_path):
     whl = wheel(tmp_path / "heinzel_unforeseen-1.0.0-py3-none-any.whl")

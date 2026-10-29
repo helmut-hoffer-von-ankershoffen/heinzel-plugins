@@ -67,6 +67,201 @@ def test_unknown_plugin_selects_only_itself_and_contract_consumers(tmp_path):
     assert not any(plan[key] for key in ("core", "core_build", "core_tests"))
 
 
+@pytest.mark.parametrize(
+    "changed", [[], ["plugins/heinzel-unforeseen/src/plugin.py", "plugins/heinzel-unforeseen/README.md"]]
+)
+def test_hook_dispatch_checks_owners_and_contract_consumers_without_core(tmp_path, monkeypatch, changed):
+    (tmp_path / "pyproject.toml").write_text(
+        '[project]\nname="heinzel"\nversion="0.9.1"\n[project.entry-points.pytest11]\nheinzel="heinzel.testing"\n'
+    )
+    project(tmp_path, "heinzel-unforeseen", provides=["metrics:read@1"])
+    project(tmp_path, "heinzel-reader", requires=["metrics:read@1"])
+    project(tmp_path, "heinzel-independent")
+    inventory = plugins.projects(tmp_path)
+    assert all(item.name != "heinzel" for item in inventory)
+    monkeypatch.setattr(plugins, "ROOT", tmp_path)
+    monkeypatch.setattr(plugins, "projects", lambda: inventory)
+    monkeypatch.setattr(sys, "argv", ["hz-plugin", "check-changed", *(["--changed", *changed] if changed else [])])
+    calls = []
+    monkeypatch.setattr(plugins, "check", lambda item, core, *, fast: calls.append((item.name, fast)))
+    assert plugins.main() == 0
+    assert set(calls) == ({("heinzel-unforeseen", True), ("heinzel-reader", True)} if changed else set())
+
+
+def test_plugin_only_hooks_do_not_run_collection_checks():
+    import re
+
+    import yaml
+
+    config = yaml.safe_load((Path(__file__).parents[1] / ".pre-commit-config.yaml").read_text())
+    hooks = {hook["id"]: hook for repo in config["repos"] for hook in repo["hooks"]}
+    core = hooks["check-fast"]
+    assert not core.get("always_run")
+    assert re.search(core["exclude"], "plugins/heinzel-harbor/src/plugin.py")
+    owner = hooks["owning-plugin-checks"]
+    assert "check-changed" in owner["entry"]
+    assert owner["require_serial"] is True
+    assert owner["entry"].endswith("--git-hook")
+    assert owner["pass_filenames"] is False and owner["always_run"] is True
+
+
+@pytest.fixture(params=[False, True])
+def isolated_hook_environment(tmp_path, monkeypatch, request):
+    """Neither a hook's alternate index nor its foreign repository may escape a disposable fixture."""
+    if request.param:
+        foreign = tmp_path / "foreign-index"
+        foreign.write_bytes(b"must remain unchanged")
+        monkeypatch.setenv("GIT_INDEX_FILE", str(foreign))
+        monkeypatch.setenv("GIT_DIR", str(tmp_path / "foreign-repository"))
+        monkeypatch.setenv("GIT_WORK_TREE", str(tmp_path / "foreign-tree"))
+    for key in list(os.environ):
+        if key.startswith("GIT_") or key.startswith("PRE_COMMIT_"):
+            monkeypatch.delenv(key)
+    yield
+    if request.param:
+        assert foreign.read_bytes() == b"must remain unchanged"
+        assert not (tmp_path / "foreign-repository").exists()
+        assert not (tmp_path / "foreign-tree").exists()
+
+
+@pytest.mark.parametrize("pushed", [False, True])
+def test_hook_git_scope_retains_deleted_paths_and_ignores_core(
+    tmp_path, monkeypatch, pushed, isolated_hook_environment
+):
+    git = shutil.which("git")
+    assert git
+
+    def run(*args):
+        return subprocess.check_output([git, *args], cwd=tmp_path, text=True, timeout=30)  # noqa: S603 - resolved git, disposable repository
+
+    run("init", "--quiet")
+    run("config", "user.name", "Example Author")
+    run("config", "user.email", "author@example.test")
+    directory = project(tmp_path, "heinzel-unforeseen")
+    obsolete = directory / "src/obsolete.py"
+    obsolete.write_text("obsolete = True\n")
+    run("add", ".")
+    run("-c", "core.hooksPath=/dev/null", "commit", "--quiet", "-m", "feat: add example")
+    before = run("rev-parse", "HEAD").strip()
+    obsolete.unlink()
+    (tmp_path / "core.py").write_text("core = True\n")
+    run("add", "--all")
+    monkeypatch.setattr(plugins, "ROOT", tmp_path)
+    monkeypatch.delenv("PRE_COMMIT_FROM_REF", raising=False)
+    monkeypatch.delenv("PRE_COMMIT_TO_REF", raising=False)
+    if pushed:
+        run("-c", "core.hooksPath=/dev/null", "commit", "--quiet", "-m", "refactor: remove obsolete")
+        monkeypatch.setenv("PRE_COMMIT_FROM_REF", before)
+        monkeypatch.setenv("PRE_COMMIT_TO_REF", run("rev-parse", "HEAD").strip())
+    assert plugins.hook_changes() == ["plugins/heinzel-unforeseen/src/obsolete.py"]
+
+
+@pytest.mark.parametrize("stage", ["pre-commit", "pre-push"])
+@pytest.mark.parametrize("change", ["delete", "core-only"])
+def test_actual_prek_dispatch_includes_deletions_and_noops_for_unrelated_changes(
+    tmp_path, stage, change, isolated_hook_environment
+):
+    import yaml
+
+    git, prek = shutil.which("git"), shutil.which("prek")
+    assert git and prek
+
+    def run(*args):
+        return subprocess.check_output([git, *args], cwd=tmp_path, text=True, timeout=30)  # noqa: S603 - resolved git and disposable repository
+
+    run("init", "--quiet")
+    run("config", "user.name", "Example Author")
+    run("config", "user.email", "author@example.test")
+    directory = project(tmp_path, "heinzel-unforeseen", provides=["metrics:read@1"])
+    project(tmp_path, "heinzel-reader", requires=["metrics:read@1"])
+    project(tmp_path, "heinzel-unrelated")
+    obsolete = directory / "src/obsolete.py"
+    obsolete.write_text("obsolete = True\n")
+    log = tmp_path / "checked.json"
+    driver = tmp_path / "driver.py"
+    driver.write_text(
+        "import json,sys\n"
+        f"sys.path.insert(0, {str(Path(plugins.__file__).parents[1])!r})\n"
+        "from heinzel_plugin_tools import cli\n"
+        "from pathlib import Path\n"
+        "selected=[]\n"
+        "cli.check=lambda project,core,fast: selected.append(project.name)\n"
+        "sys.argv=['hz-plugin','check-changed','--git-hook']\n"
+        "assert cli.main() == 0\n"
+        f"Path({str(log)!r}).write_text(json.dumps(selected))\n"
+    )
+    config = yaml.safe_load((Path(__file__).parents[1] / ".pre-commit-config.yaml").read_text())
+    hook = next(hook for repo in config["repos"] for hook in repo["hooks"] if hook["id"] == "owning-plugin-checks")
+    hook["entry"] = shlex.join([sys.executable, str(driver)])
+    (tmp_path / ".pre-commit-config.yaml").write_text(yaml.safe_dump({"repos": [{"repo": "local", "hooks": [hook]}]}))
+    run("add", ".")
+    run("-c", "core.hooksPath=/dev/null", "commit", "--quiet", "-m", "feat: add example")
+    before = run("rev-parse", "HEAD").strip()
+    if change == "delete":
+        obsolete.unlink()
+    else:
+        (tmp_path / "core.py").write_text("core = True\n")
+    run("add", "--all")
+    command = [prek, "run", "owning-plugin-checks", "--hook-stage", stage]
+    if stage == "pre-push":
+        run("-c", "core.hooksPath=/dev/null", "commit", "--quiet", "-m", "refactor: update example")
+        command += ["--from-ref", before, "--to-ref", run("rev-parse", "HEAD").strip()]
+    result = subprocess.run(command, cwd=tmp_path, text=True, capture_output=True, timeout=30, check=False)  # noqa: S603 - actual hook runner and disposable repository
+    assert result.returncode == 0, result.stdout + result.stderr
+    assert json.loads(log.read_text()) == (["heinzel-reader", "heinzel-unforeseen"] if change == "delete" else [])
+
+
+def test_actual_first_push_and_new_branch_deletion_select_the_owning_contract_consumers(
+    tmp_path, isolated_hook_environment
+):
+    import yaml
+
+    git, prek = shutil.which("git"), shutil.which("prek")
+    assert git and prek
+    remote, root = tmp_path / "origin.git", tmp_path / "work"
+    root.mkdir()
+
+    def run(*args):
+        return subprocess.check_output([git, *args], cwd=root, text=True, stderr=subprocess.STDOUT, timeout=30)  # noqa: S603 - resolved git, disposable repository
+
+    run("init", "--quiet", "--bare", str(remote))
+    run("init", "--quiet", "--initial-branch=main")
+    run("config", "user.name", "Example Author")
+    run("config", "user.email", "author@example.test")
+    run("remote", "add", "origin", str(remote))
+    owner = project(root, "heinzel-unforeseen", provides=["metrics:read@1"])
+    project(root, "heinzel-reader", requires=["metrics:read@1"])
+    project(root, "heinzel-unrelated")
+    obsolete = owner / "src/obsolete.py"
+    obsolete.write_text("obsolete = True\n")
+    log = tmp_path / "selected.json"
+    driver = tmp_path / "driver.py"
+    driver.write_text(
+        "import json,sys\n"
+        f"sys.path.insert(0, {str(Path(plugins.__file__).parents[1])!r})\n"
+        "from heinzel_plugin_tools import cli\nfrom pathlib import Path\nselected=[]\n"
+        "cli.check=lambda project,core,fast: selected.append(project.name)\n"
+        "sys.argv=['hz-plugin','check-changed','--git-hook']\nassert cli.main() == 0\n"
+        f"Path({str(log)!r}).write_text(json.dumps(selected))\n"
+    )
+    config = yaml.safe_load((Path(__file__).parents[1] / ".pre-commit-config.yaml").read_text())
+    hook = next(hook for repo in config["repos"] for hook in repo["hooks"] if hook["id"] == "owning-plugin-checks")
+    hook["entry"] = shlex.join([sys.executable, str(driver)])
+    (root / ".pre-commit-config.yaml").write_text(yaml.safe_dump({"repos": [{"repo": "local", "hooks": [hook]}]}))
+    subprocess.run([prek, "install", "--hook-type", "pre-push"], cwd=root, check=True, capture_output=True)  # noqa: S603 - actual hook runner, disposable repository
+    run("add", ".")
+    run("commit", "--quiet", "-m", "feat: add example")
+    run("push", "--quiet", "origin", "main")
+    assert set(json.loads(log.read_text())) == {"heinzel-unforeseen", "heinzel-reader", "heinzel-unrelated"}
+    log.unlink()
+    run("switch", "--quiet", "--create", "refactor/remove-obsolete")
+    obsolete.unlink()
+    run("add", "--all")
+    run("commit", "--quiet", "-m", "refactor: remove obsolete")
+    run("push", "--quiet", "origin", "HEAD")
+    assert json.loads(log.read_text()) == ["heinzel-reader", "heinzel-unforeseen"]
+
+
 def test_shared_tooling_discovers_a_different_repository_without_parent_edits(tmp_path):
     project(tmp_path, "heinzel-unforeseen")
     result = subprocess.run(  # noqa: S603 - fixed interpreter, checked-in script and synthetic project
