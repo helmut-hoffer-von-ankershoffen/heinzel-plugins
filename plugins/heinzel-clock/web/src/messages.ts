@@ -1,0 +1,36 @@
+const messages: Record<string, string> = {
+  "settings.primary": "Primary",
+  "status.editZones": "Edit time zones",
+  "work.unavailable": "Working hours unavailable",
+  "work.state.working": "Working hours",
+  "work.state.off-duty": "Off duty · time for fun",
+  "work.state.sleeping": "Likely sleeping",
+  "work.state.unavailable": "Work state unavailable",
+  "work.hours": "Mon–Fri {from}–{until}",
+  "work.active": "Working · {elapsed} since start · {remaining} left",
+  "work.startsIn": "Starts in {remaining}",
+  "work.sinceEnd": "{elapsed} since end",
+  "work.starts": "Starts {at}",
+  "work.ends": "Ends {at}",
+  "worldClock.title": "World clock",
+  "worldClock.panel": "World clock panel",
+  "worldClock.close": "Close World clock",
+  "worldClock.loading": "Loading time zones…",
+  "worldClock.empty": "Add the clock plugin and choose your team's time zones.",
+  "worldClock.map": "Static time-zone map",
+  "worldClock.daylight": "Approximate daylight",
+  "worldClock.left": "Rotate globe left",
+  "worldClock.right": "Rotate globe right",
+  "worldClock.leftLabel": "Rotate left",
+  "worldClock.rightLabel": "Rotate right",
+  "worldClock.static": "Static map · ",
+  "worldClock.drag": "Drag to turn · ",
+  "worldClock.explanation":
+    "Approximate daylight. Markers locate time-zone names, not people. Orange is your primary zone.",
+  "worldClock.unavailable": "Time unavailable in this browser",
+  "worldClock.choose": "Choose time zones",
+  "ticker.label": "World clock",
+};
+export function t(key: string, params: Record<string, string | number> = {}): string {
+  return (messages[key] ?? key).replace(/\{(\w+)\}/g, (_, name: string) => String(params[name] ?? ""));
+}

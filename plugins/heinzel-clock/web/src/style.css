@@ -1,0 +1,45 @@
+@import "tailwindcss/utilities.css" source(".");
+@theme inline {
+  --color-background: var(--color-background);
+  --color-foreground: var(--color-foreground);
+  --color-muted: var(--color-muted);
+  --color-muted-foreground: var(--color-muted-foreground);
+  --color-card: var(--color-card);
+  --color-border: var(--color-border);
+  --color-primary: var(--color-primary);
+  --color-primary-foreground: var(--color-primary-foreground);
+  --color-accent: var(--color-accent);
+  --color-ok: var(--color-ok);
+  --color-warn: var(--color-warn);
+  --color-bad: var(--color-bad);
+  --color-ring: var(--color-ring);
+  --color-sidebar: var(--color-sidebar);
+  --color-popover: var(--color-popover);
+  --color-input: var(--color-input);
+  --font-sans: var(--font-sans);
+  --font-mono: var(--font-mono);
+  /* The type scale, density and corners a theme may set (ADR 0044): `text-ui`, `text-ui-sm`, `size-(--icon)`,
+     `h-(--row)`, `rounded-lg` for controls and `rounded-xl` for cards and dialogs. */
+  --text-ui: var(--text-ui);
+  --text-ui-sm: var(--text-ui-sm);
+  --icon: var(--icon);
+  --row: var(--row);
+  --radius-lg: var(--radius-lg);
+  --radius-xl: var(--radius-xl);
+  /* Every other corner follows the theme's two radii (`radius_control`, `radius`) by ratio, so `rounded`,
+     `rounded-sm`, `-md` and `-2xl` change with a theme too: 0.5rem gives Tailwind's 0.125, 0.25 and 0.375rem, 0.75rem
+     its 1rem and 1.5rem. `rounded-full` stays a pill. */
+  --radius-xs: var(--radius-xs);
+  --radius: var(--radius);
+  --radius-sm: var(--radius-sm);
+  --radius-md: var(--radius-md);
+  --radius-2xl: var(--radius-2xl);
+  --radius-3xl: var(--radius-3xl);
+  --heading-tracking: var(--heading-tracking);
+  --color-accent-foreground: var(--color-accent-foreground);
+  --color-icon: var(--color-icon);
+  /* A switch that is on; white knob on it in both modes. */
+  --color-switch: var(--color-switch);
+  /* A theme's soft tint at the top of the main area (`main_tint`, ADR 0044); none by default. */
+  --color-main-tint: var(--color-main-tint);
+}

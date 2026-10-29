@@ -1,0 +1,129 @@
+name: Plugin CI
+on:
+  push:
+    branches: [main]
+  pull_request:
+  workflow_dispatch:
+    inputs:
+      core_artifact:
+        description: Immutable candidate core wheel URL (empty uses each declared released version)
+        type: string
+      core_run:
+        description: Official core Actions run ID providing a candidate built wheel
+        type: string
+permissions: {}
+concurrency:
+  group: plugins-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  policy:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e # v10.3.2
+      - name: Preserve commit, title, branch and confidentiality checks
+        env:
+          CHECK_BASE: ${{ github.event.pull_request.base.sha || github.event.before }}
+          CHECK_TITLE: ${{ github.event.pull_request.title }}
+          CHECK_BRANCH: ${{ github.head_ref || github.ref_name }}
+          CONFIDENTIAL_TERMS: ${{ secrets.CONFIDENTIAL_TERMS }}
+          CONFIDENTIALITY_REQUIRED: ${{ github.event_name != 'pull_request' || (github.event.pull_request.head.repo.full_name == github.repository && github.actor != 'dependabot[bot]') }}
+        run: make policies
+      - name: Scan the complete source history for credentials
+        run: make secrets
+  plan:
+    permissions:
+      contents: read
+    runs-on: ubuntu-latest
+    outputs:
+      matrix: ${{ steps.plan.outputs.matrix }}
+      selected: ${{ steps.plan.outputs.selected }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e # v10.3.2
+      - run: make tooling-check
+      - id: plan
+        env:
+          BASE: ${{ github.event.pull_request.base.sha || github.event.before }}
+        run: |
+          if [ -n "$BASE" ] && git cat-file -e "$BASE" 2>/dev/null; then
+            uv run --script scripts/plugins.py plan --base "$BASE" > plan.json
+          else
+            uv run --script scripts/plugins.py plan --changed scripts/plugins.py > plan.json
+          fi
+          matrix="$(python -c 'import json; print(json.dumps({"include":json.load(open("plan.json"))["include"]}))')"
+          echo "matrix=$matrix" >> "$GITHUB_OUTPUT"
+          echo "selected=$(python -c 'import json; print(bool(json.load(open("plan.json"))["include"]))')" >> "$GITHUB_OUTPUT"
+          cat plan.json >> "$GITHUB_STEP_SUMMARY"
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: work-plan
+          path: plan.json
+  plugin:
+    permissions:
+      contents: read
+      actions: read
+    needs: plan
+    if: needs.plan.outputs.selected == 'True'
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.plan.outputs.matrix) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e # v10.3.2
+        with:
+          enable-cache: true
+      - id: core
+        env:
+          CORE_URL: ${{ inputs.core_artifact || vars.CORE_ARTIFACT }}
+          CORE_RUN: ${{ inputs.core_run || vars.CORE_CANDIDATE_RUN }}
+          GH_TOKEN: ${{ github.token }}
+        run: uv run --no-project --script scripts/core_artifact.py
+      - name: Check only this plugin against the installed core artifact
+        env:
+          PLUGIN: ${{ matrix.name }}
+          CORE: ${{ steps.core.outputs.wheel }}
+        run: make check NAME="$PLUGIN" CORE="$CORE"
+      - name: Audit the owning runtime dependency closure
+        env:
+          PLUGIN: ${{ matrix.name }}
+          CORE: ${{ steps.core.outputs.wheel }}
+        run: make audit NAME="$PLUGIN" CORE="$CORE"
+      - name: Build only this plugin
+        env:
+          PLUGIN: ${{ matrix.name }}
+        run: make build NAME="$PLUGIN"
+      - name: Test the installed owning wheel in the browser when declared
+        env:
+          PLUGIN: ${{ matrix.name }}
+          DIRECTORY: ${{ matrix.path }}
+          CORE: ${{ steps.core.outputs.wheel }}
+        run: |
+          if [ -d "$DIRECTORY/tests/browser" ] || [ -d "$DIRECTORY/tests/acceptance" ]; then make acceptance NAME="$PLUGIN" CORE="$CORE"; fi
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: ${{ matrix.name }}
+          path: ${{ matrix.path }}/dist/*
+  ok:
+    name: CI OK
+    if: always()
+    needs: [policy, plan, plugin]
+    runs-on: ubuntu-latest
+    steps:
+      - env:
+          POLICY: ${{ needs.policy.result }}
+          PLAN: ${{ needs.plan.result }}
+          PLUGIN: ${{ needs.plugin.result }}
+        run: test "$POLICY" = success && test "$PLAN" = success && { test "$PLUGIN" = success || test "$PLUGIN" = skipped; }

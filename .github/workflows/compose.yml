@@ -1,0 +1,59 @@
+name: Standard app composition
+on:
+  workflow_dispatch:
+    inputs:
+      core_wheel:
+        description: Immutable core wheel URL from its verified release
+        required: true
+        type: string
+      version:
+        description: Core version for this app profile
+        required: true
+        type: string
+permissions: {}
+jobs:
+  compose:
+    permissions:
+      contents: read
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e # v10.3.2
+      - name: Build and verify the locally enrolled standard profile
+        env:
+          GH_TOKEN: ${{ github.token }}
+          CORE_URL: ${{ inputs.core_wheel }}
+          VERSION: ${{ inputs.version }}
+          REF: ${{ github.ref }}
+        run: |
+          test "$REF" = refs/heads/main
+          uv run --no-project --script scripts/compose.py --core-url "$CORE_URL" --version "$VERSION"
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: standard-app
+          path: dist/standard/*
+  publish:
+    needs: compose
+    runs-on: ubuntu-latest
+    environment: standard-app
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e # v10.3.2
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: standard-app
+          path: dist
+      - name: Publish the approved immutable app profile
+        env:
+          VERSION: ${{ inputs.version }}
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          REVISION: ${{ github.sha }}
+        run: uv run --no-project --script scripts/publish.py --tag "app-v$VERSION" --revision "$REVISION" --directory dist
