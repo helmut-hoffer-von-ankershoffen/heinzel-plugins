@@ -1,6 +1,9 @@
 """The planner and boundary guard must work for a new plugin without registry edits."""
 
 import importlib.util
+import json
+import os
+import subprocess
 import sys
 from pathlib import Path
 
@@ -34,6 +37,21 @@ def test_unknown_plugin_selects_only_itself_and_contract_consumers(tmp_path):
     plan = plugins.plan(["plugins/heinzel-unforeseen/src/plugin.py"], plugins.projects(tmp_path), tmp_path)
     assert {entry["name"] for entry in plan["include"]} == {"heinzel-unforeseen", "heinzel-reader", "heinzel-display"}
     assert not any(plan[key] for key in ("core", "core_build", "core_tests"))
+
+
+def test_shared_tooling_discovers_a_different_repository_without_parent_edits(tmp_path):
+    project(tmp_path, "heinzel-unforeseen")
+    result = subprocess.run(  # noqa: S603 - fixed interpreter, checked-in script and synthetic project
+        [sys.executable, str(Path(plugins.__file__)), "plan", "--changed", "plugins/heinzel-unforeseen/src/plugin.py"],
+        env={**os.environ, "PLUGIN_SOURCE_ROOT": str(tmp_path)},
+        capture_output=True,
+        text=True,
+        check=True,
+        timeout=30,
+    )
+    work = json.loads(result.stdout)
+    assert [entry["name"] for entry in work["include"]] == ["heinzel-unforeseen"]
+    assert not any(work[key] for key in ("core", "core_build", "core_tests"))
 
 
 def test_docs_only_change_selects_no_builds_and_shared_tooling_selects_all(tmp_path):

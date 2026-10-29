@@ -32,7 +32,7 @@ def compose(core: Path, destination: Path, base_url: str | None) -> None:
         if Path(artifact["url"]).resolve() != target.resolve():
             shutil.copyfile(artifact["url"], target)
     environment = destination / "acceptance"
-    run(["uv", "venv", str(environment)])
+    run(["uv", "venv", "--clear", str(environment)])
     interpreter = environment / "bin/python"
     run(["uv", "pip", "install", "--python", str(interpreter), str(core)])
     isolated = {key: value for key, value in os.environ.items() if not key.startswith("HZ_")}

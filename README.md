@@ -22,9 +22,9 @@ CI can download a candidate wheel from an official core Actions run with the `co
 `CORE_CANDIDATE_RUN` repository variable. It installs the artifact and never builds or tests core.
 Once 0.9 is released, remove the bootstrap variable; each project's lock selects its compatible released core.
 
-`check` runs the owning plugin's formatting, lint, strict mypy/Pyright, Python tests and coverage (at least 90%),
-plus its declared frontend checks. `acceptance` installs built core/plugin wheels into a separate environment
-and runs the owning browser tests. `release` checks and builds one plugin and prints its independent tag/artifacts.
+`check` runs the owning plugin's formatting, lint, spelling, strict mypy/Pyright, Python tests and coverage (at least
+90%), plus its declared frontend checks. `acceptance` installs built core/plugin wheels into a separate environment
+and runs the owning head and browser tests. `release` checks and builds one plugin and prints its independent tag/artifacts.
 It publishes nothing. The Release workflow previews by default; its explicit publish option creates that plugin's
 tag, GitHub release and PyPI artifacts with build provenance, behind the publishing environment.
 

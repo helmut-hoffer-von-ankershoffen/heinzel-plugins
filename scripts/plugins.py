@@ -26,7 +26,8 @@ from packaging.requirements import Requirement
 from packaging.utils import canonicalize_name
 from packaging.version import Version
 
-ROOT = Path(__file__).resolve().parents[1]
+TOOLING_ROOT = Path(__file__).resolve().parents[1]
+ROOT = Path(os.environ.get("PLUGIN_SOURCE_ROOT") or TOOLING_ROOT).resolve()
 
 
 @dataclass(frozen=True)
@@ -166,6 +167,8 @@ def dependency_inputs(project: Project) -> list[str]:
         [
             *project.metadata["project"].get("dependencies", []),
             *requirements(project, "test"),
+            *requirements(project, "dev"),
+            *requirements(project, "tooling"),
             *project.metadata["build-system"]["requires"],
         ]
     )
@@ -329,7 +332,7 @@ def check(project: Project, core: str | None, *, tests_only: bool = False) -> No
     """Run only the owning package's checks against an installed core/SDK artifact."""
     prepare_environment(project, core)
     run(
-        python_command(project, core, ["python", str(ROOT / "scripts/plugins.py"), "boundary", project.name]),
+        python_command(project, core, ["python", str(TOOLING_ROOT / "scripts/plugins.py"), "boundary", project.name]),
         cwd=project.directory,
     )
     steps = (
@@ -348,6 +351,21 @@ def check(project: Project, core: str | None, *, tests_only: bool = False) -> No
         steps.append(["coverage", "report"])
     for command in steps:
         run(python_command(project, core, command), cwd=project.directory)
+    if not tests_only:
+        run(
+            [
+                "uv",
+                "run",
+                "--project",
+                str(TOOLING_ROOT),
+                "--frozen",
+                "--group",
+                "tooling",
+                "typos",
+                str(project.directory),
+            ],
+            cwd=project.directory,
+        )
     frontend = project.directory / "web/package.json"
     if frontend.is_file():
         scripts = json.loads(frontend.read_text()).get("scripts", {})
@@ -476,7 +494,21 @@ def profile(inventory: list[Project], core: Path, destination: Path, base_url: s
 def audit(project: Project, core: str | None) -> None:
     """Audit only the installed runtime closure of the owning plugin."""
     interpreter = prepare_environment(project, core)
-    run(["uv", "run", "--frozen", "--group", "audit", "python", "scripts/audit.py", str(interpreter), project.name])
+    run(
+        [
+            "uv",
+            "run",
+            "--project",
+            str(TOOLING_ROOT),
+            "--frozen",
+            "--group",
+            "audit",
+            "python",
+            str(TOOLING_ROOT / "scripts/audit.py"),
+            str(interpreter),
+            project.name,
+        ]
+    )
 
 
 def release_info(project: Project) -> dict:
