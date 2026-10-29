@@ -68,7 +68,8 @@ project. Core's catalog reads metadata automatically, including new plugin direc
 Only locally reviewed metadata can enroll a plugin in the `standard` profile. Topic discovery never enrolls defaults.
 The composition workflow verifies an official core release's provenance, runs the selected default plugins' own
 checks and browser tests, and proves installation into a fresh environment before publishing a digest-pinned profile.
-Clock, Resource and Tailscale are included and active by default; sharing stays off until explicitly enabled.
+Clock, Resource, Tailscale and the Heinzelmännchen theme are included and active by default. Sharing stays off until
+explicitly enabled, and installing the theme plugin starts no playback or theme-selection change.
 User disable/removal choices survive a profile refresh. Minimal core has no plugin dependencies.
 
 ```bash
