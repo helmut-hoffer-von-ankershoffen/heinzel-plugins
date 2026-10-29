@@ -17,10 +17,11 @@ make acceptance NAME=clock
 make release NAME=clock
 ```
 
-Until the compatible core is released, add `CORE=/path/to/heinzel-0.9.0-py3-none-any.whl`.
+Until the compatible core is released, add `CORE=/path/to/heinzel-0.9.1-py3-none-any.whl`.
 CI can download a candidate wheel from an official core Actions run with the `core_run` input or
 `CORE_CANDIDATE_RUN` repository variable. It installs the artifact and never builds or tests core.
-Once 0.9 is released, remove the bootstrap variable; each project's lock selects its compatible released core.
+Once 0.9.1 is released, remove the bootstrap variable; each project's lock selects its compatible released core.
+Core 0.9.0 predates these plugin contracts and is outside every migrated plugin's supported range.
 
 `check` runs the owning plugin's formatting, lint, spelling, strict mypy/Pyright, Python tests and coverage (at least
 90%), plus its declared frontend checks. `acceptance` installs built core/plugin wheels into a separate environment

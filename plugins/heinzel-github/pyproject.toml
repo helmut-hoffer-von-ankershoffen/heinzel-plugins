@@ -1,12 +1,12 @@
 [project]
 name = "heinzel-github"
-version = "0.9.0"
+version = "0.9.1"
 description = "Read pull requests and issues from GitHub: the code-host and tracker capabilities."
 readme = "README.md"
 license = "MIT"
 license-files = ["LICENSE"]
 requires-python = ">=3.12"
-dependencies = ["heinzel>=0.9.0,<0.10"]
+dependencies = ["heinzel>=0.9.1,<0.10"]
 
 [project.urls]
 Source = "https://github.com/helmut-hoffer-von-ankershoffen/heinzel-plugins/tree/main/plugins/heinzel-github"
