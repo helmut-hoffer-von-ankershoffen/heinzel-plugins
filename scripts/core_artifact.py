@@ -30,7 +30,7 @@ def select(url: str, run: str) -> str:
                 "--repo",
                 "helmut-hoffer-von-ankershoffen/heinzel",
                 "--name",
-                "dist",
+                "plugin-core",
                 "--dir",
                 str(destination),
             ],
