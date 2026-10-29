@@ -7,69 +7,76 @@ on:
         required: true
         type: string
       publish:
-        description: Publish this version with its own tag, provenance and PyPI artifacts
+        description: Publish the verified artifacts
         type: boolean
         default: false
+      registry:
+        description: Artifact destination (private plugins use GitHub)
+        type: choice
+        options: [github, pypi]
+        default: pypi
+      resume_tag:
+        description: Existing plugin tag to verify and upload without rebuilding
+        type: string
 permissions: {}
 jobs:
   build:
     runs-on: ubuntu-latest
     timeout-minutes: 20
+    env:
+      PLUGIN_PRIVATE: ${{ github.event.repository.private }}
     permissions:
       contents: read
       actions: read
       id-token: write
       attestations: write
     outputs:
-      tag: ${{ steps.identity.outputs.tag }}
-      name: ${{ steps.identity.outputs.name }}
+      tag: ${{ steps.verify.outputs.tag || steps.resume.outputs.tag }}
+      name: ${{ steps.verify.outputs.name || steps.resume.outputs.name }}
+      revision: ${{ steps.verify.outputs.revision || steps.resume.outputs.revision }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
       - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e # v10.3.2
-      - name: Resolve the owning version and immutable tag
-        id: identity
+      - name: Restore the original verified artifact set
+        id: resume
+        if: inputs.resume_tag != ''
         env:
+          TAG: ${{ inputs.resume_tag }}
           PLUGIN: ${{ inputs.plugin }}
-          PUBLISH: ${{ inputs.publish }}
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
           REF: ${{ github.ref }}
         run: |
-          test "$PUBLISH" != true || test "$REF" = refs/heads/main
-          uv run --no-project --script scripts/plugins.py release-info "$PLUGIN" > release.json
-          jq -r '"tag=" + .tag, "name=" + .name' release.json >> "$GITHUB_OUTPUT"
+          test "$REF" = refs/heads/main
+          uv run --frozen --group tooling python -m heinzel_plugin_tools.publishing --restore --name "$PLUGIN" --tag "$TAG" --directory release-dist
       - id: core
+        if: inputs.resume_tag == ''
         env:
           CORE_URL: ${{ vars.CORE_ARTIFACT }}
           CORE_RUN: ${{ vars.CORE_CANDIDATE_RUN }}
           GH_TOKEN: ${{ github.token }}
         run: uv run --no-project --script scripts/core_artifact.py
-      - name: Check and build only this release
+      - name: Check, build and test this exact owning release
+        id: verify
+        if: inputs.resume_tag == ''
         env:
-          PLUGIN: ${{ steps.identity.outputs.name }}
+          PLUGIN: ${{ inputs.plugin }}
           CORE: ${{ steps.core.outputs.wheel }}
+          REF: ${{ github.ref }}
+          PUBLISH: ${{ inputs.publish }}
+          REGISTRY: ${{ inputs.registry }}
+          PRIVATE: ${{ github.event.repository.private }}
         run: |
-          make release NAME="$PLUGIN" CORE="$CORE"
-          uv run --no-project --script scripts/plugins.py release-info "$PLUGIN" > release.json
-          uv run --no-project python - <<'PYTHON'
-          import json, pathlib, shutil
-          pathlib.Path("release-dist").mkdir()
-          for artifact in json.loads(pathlib.Path("release.json").read_text())["artifacts"]:
-              shutil.copyfile(artifact, pathlib.Path("release-dist") / pathlib.Path(artifact).name)
-          PYTHON
-      - name: Audit the owning runtime dependency closure
-        env:
-          PLUGIN: ${{ steps.identity.outputs.name }}
-          CORE: ${{ steps.core.outputs.wheel }}
-        run: make audit NAME="$PLUGIN" CORE="$CORE"
-      - name: Verify the installed owning wheel in the browser when declared
-        env:
-          PLUGIN: ${{ steps.identity.outputs.name }}
-          CORE: ${{ steps.core.outputs.wheel }}
-        run: |
-          directory="$(jq -r .path release.json)"
-          if [ -d "$directory/tests/browser" ] || [ -d "$directory/tests/acceptance" ] || [ -d "$directory/tests/e2e" ]; then make acceptance NAME="$PLUGIN" CORE="$CORE"; fi
+          test "$PUBLISH" != true || test "$REF" = refs/heads/main
+          if [ "$REGISTRY" = pypi ] && [ "$PRIVATE" = true ]; then
+            echo "Private plugins publish to GitHub; PyPI is public." >&2
+            exit 1
+          fi
+          uv run --frozen --group tooling hz-plugin verify-release "$PLUGIN" --core "$CORE" --output release-dist
       - uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
+        if: inputs.resume_tag == '' && (!github.event.repository.private || vars.PRIVATE_ATTESTATIONS == 'true')
         with:
           subject-path: release-dist/*
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
@@ -77,7 +84,7 @@ jobs:
           name: release
           path: release-dist/*
   publish:
-    if: inputs.publish
+    if: inputs.publish && inputs.registry == 'pypi' && !github.event.repository.private
     needs: build
     runs-on: ubuntu-latest
     environment: pypi
@@ -93,12 +100,32 @@ jobs:
           name: release
           path: dist
       - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e # v10.3.2
-      - name: Publish this independently versioned artifact set
+      - name: Publish the original independently verified artifact set
         env:
           RELEASE_TAG: ${{ needs.build.outputs.tag }}
-          PLUGIN: ${{ needs.build.outputs.name }}
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
-          REVISION: ${{ github.sha }}
-        run: |
-          uv run --no-project --script scripts/publish.py --tag "$RELEASE_TAG" --revision "$REVISION" --directory dist --pypi
+          REVISION: ${{ needs.build.outputs.revision }}
+        run: uv run --frozen --group tooling python -m heinzel_plugin_tools.publishing --tag "$RELEASE_TAG" --revision "$REVISION" --directory dist --pypi
+  github-publish:
+    if: inputs.publish && inputs.registry == 'github'
+    needs: build
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: release
+          path: dist
+      - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e # v10.3.2
+      - name: Publish the original private or public GitHub artifact set
+        env:
+          RELEASE_TAG: ${{ needs.build.outputs.tag }}
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          REVISION: ${{ needs.build.outputs.revision }}
+        run: uv run --frozen --group tooling python -m heinzel_plugin_tools.publishing --tag "$RELEASE_TAG" --revision "$REVISION" --directory dist

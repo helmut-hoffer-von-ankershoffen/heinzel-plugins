@@ -1,10 +1,28 @@
 [project]
-name = "heinzel-plugin-tooling"
-version = "0.0.0"
+name = "heinzel-plugin-tools"
+version = "0.1.0"
 requires-python = ">=3.12"
+description = "Independent development tools for Heinzelmännchen plugins."
+readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE"]
+dependencies = ["packaging==26.3", "typos==1.51.1"]
 
-[tool.uv]
-package = false
+[project.scripts]
+hz-plugin = "heinzel_plugin_tools.cli:entrypoint"
+
+[project.optional-dependencies]
+checks = ["editables>=0.5", "hatchling>=1.29.0", "pytest>=9.0.3,<10", "pytest-timeout>=2.4.0,<3", "pytest-xdist>=3.8", "ruff==0.17.2", "mypy>=1.19.0,<3", "coverage>=7.12", "pyright[nodejs]==1.1.414"]
+
+[build-system]
+requires = ["hatchling>=1.29.0"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/heinzel_plugin_tools"]
+
+[tool.hatch.build.targets.sdist]
+include = ["src/heinzel_plugin_tools", "pyproject.toml", "README.md", "LICENSE"]
 
 [dependency-groups]
 tooling = ["pytest>=9.0.3,<10", "ruff==0.17.2", "packaging==26.3", "actionlint-py==1.7.12.25", "zizmor==1.31.1", "typos==1.51.1", "pyyaml==6.0.3", "commitizen>=4.10.0,<5", "prek>=0.2"]
@@ -16,11 +34,13 @@ line-length = 120
 select = ["E", "F", "I", "B", "UP", "S"]
 [tool.ruff.lint.per-file-ignores]
 "scripts/*.py" = ["S603", "S607"] # tools resolve from PATH; fixed argument lists, no shell
+"src/heinzel_plugin_tools/*.py" = ["S603", "S607"] # trusted tool arguments, no shell
 "tests/*.py" = ["S101"]
 [tool.pytest]
 testpaths = ["tests"]
 addopts = ["--import-mode=importlib"]
 filterwarnings = ["error"]
+markers = ["unit: Isolated tooling behavior.", "integration: Processes and artifact contracts.", "e2e: Published author journey."]
 
 [tool.commitizen]
 name = "cz_conventional_commits"

@@ -39,10 +39,11 @@ def main() -> None:
     interpreter, name = sys.argv[1:]
     result = subprocess.run([interpreter, "-c", INSPECT, name], check=True, text=True, capture_output=True, timeout=60)
     versions = json.loads(result.stdout)
+    allowlist = Path(".license-allowlist")
+    if not allowlist.is_file():
+        allowlist = Path(__file__).with_name("defaults") / "license-allowlist"
     allowed = ";".join(
-        line.strip()
-        for line in Path(".license-allowlist").read_text().splitlines()
-        if line.strip() and not line.startswith("#")
+        line.strip() for line in allowlist.read_text().splitlines() if line.strip() and not line.startswith("#")
     )
     subprocess.run(
         [
