@@ -62,6 +62,8 @@ def test_partial_pypi_failure_is_resumable_without_changing_tag_or_replacing_ass
 
     def api(path, data=None, method="POST", **_):
         nonlocal release
+        if path == "graphql":
+            return {"data": {"repository": {"release": {"databaseId": 7} if release else None}}}
         if "/git/ref/" in path:
             return {"object": {"type": "commit", "sha": REVISION}}
         if data is not None and method == "PATCH":
@@ -69,7 +71,7 @@ def test_partial_pypi_failure_is_resumable_without_changing_tag_or_replacing_ass
             release["draft"] = data["draft"]
         elif data is not None:
             assert data["draft"] is True
-            release = {"id": 7, "assets": [], "draft": True}
+            release = {"id": 7, "tag_name": "plugin/v1.0.0", "assets": [], "draft": True}
         return release
 
     def execute(command, **_):
@@ -93,6 +95,55 @@ def test_partial_pypi_failure_is_resumable_without_changing_tag_or_replacing_ass
     assert len(uploads) == 1
     assert "--clobber" not in uploads[0]
     assert all("--check-url" in command for command in calls if command[0] == "uv")
+
+
+def test_a_draft_hidden_from_rest_tag_lookup_is_resumed_and_verified_by_id(tmp_path, monkeypatch):
+    wheel = tmp_path / "artifact.whl"
+    wheel.write_bytes(b"checked artifact")
+    asset = {"name": wheel.name, "digest": "sha256:" + hashlib.sha256(wheel.read_bytes()).hexdigest()}
+    release = {"id": 7, "tag_name": "plugin/v1.0.0", "assets": [], "draft": True}
+    calls = []
+
+    def api(path, data=None, method="POST", **_):
+        calls.append((path, method))
+        if path == "graphql":
+            assert data["variables"] == {"owner": "example", "name": "plugins", "tag": "plugin/v1.0.0"}
+            return {"data": {"repository": {"release": {"databaseId": 7}}}}
+        if "/git/ref/" in path:
+            return {"object": {"type": "commit", "sha": REVISION}}
+        assert path == "repos/example/plugins/releases/7", (
+            "Never create a duplicate draft or use its hidden REST tag route"
+        )
+        if method == "PATCH":
+            assert release["assets"] == [asset]
+            release["draft"] = False
+        return release
+
+    def execute(command, **_):
+        assert command[:3] == ["gh", "release", "upload"]
+        release["assets"].append(asset)
+        return subprocess.CompletedProcess(command, 0)
+
+    monkeypatch.setattr(publisher, "api", api)
+    monkeypatch.setattr(publisher.subprocess, "run", execute)
+    publisher.publish(REPOSITORY, "plugin/v1.0.0", REVISION, [wheel])
+    publisher.publish(REPOSITORY, "plugin/v1.0.0", REVISION, [wheel])
+    assert release["draft"] is False
+    assert sum(method == "PATCH" for _, method in calls) == 1
+
+
+@pytest.mark.parametrize(
+    "answer",
+    [
+        {"errors": [{"message": "Unavailable"}]},
+        {"data": {"repository": None}},
+        {"data": {"repository": {"release": {"databaseId": "not-an-id"}}}},
+    ],
+)
+def test_release_identity_errors_fail_closed(monkeypatch, answer):
+    monkeypatch.setattr(publisher, "api", lambda *_, **__: answer)
+    with pytest.raises(ValueError, match="GitHub"):
+        publisher.find_release(REPOSITORY, "plugin/v1.0.0")
 
 
 @pytest.mark.parametrize("digest", [None, "sha256:" + "0" * 64])
