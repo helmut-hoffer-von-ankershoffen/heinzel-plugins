@@ -48,6 +48,8 @@ make check NAME=<distribution> CORE=<compatible-built-core-wheel>
 
 Commit both `requirements.lock` and `plugin-lock.json`. Checks enforce the lock's hashes, refuse changed dependency
 inputs, and reject incompatible core metadata. Dependencies on concrete plugin implementations are rejected.
+Plugins can add ordinary runtime and development dependencies in their own `pyproject.toml`, then regenerate their
+own lock. This requires no core dependency change or sibling environment.
 Plugins may implement and consume public interfaces, capabilities and lets from the SDK or an implementation-free
 contract package. Provider selection happens through contracts and bindings. Declare versioned `requires` and
 `provides` contract identifiers in `[tool.heinzel.plugin]` so the planner also selects affected consumers.
