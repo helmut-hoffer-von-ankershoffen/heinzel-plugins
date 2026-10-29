@@ -1,0 +1,14 @@
+.venv/
+.tools/
+__pycache__/
+.pytest_cache/
+.mypy_cache/
+.pyright/
+.coverage*
+htmlcov/
+node_modules/
+dist/
+*.egg-info/
+.acceptance/
+.preview/
+.candidates/

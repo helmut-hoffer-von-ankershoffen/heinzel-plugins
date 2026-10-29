@@ -1,0 +1,27 @@
+[project]
+name = "heinzel-plugin-tooling"
+version = "0.0.0"
+requires-python = ">=3.12"
+
+[tool.uv]
+package = false
+
+[dependency-groups]
+tooling = ["pytest>=9.0.3,<10", "ruff==0.17.2", "packaging==26.3", "actionlint-py==1.7.12.25", "zizmor==1.31.1", "typos==1.51.1", "pyyaml==6.0.3", "commitizen>=4.10.0,<5", "prek>=0.2"]
+audit = ["pip-audit==2.10.1", "pip-licenses==5.5.5"]
+
+[tool.ruff]
+line-length = 120
+[tool.ruff.lint]
+select = ["E", "F", "I", "B", "UP", "S"]
+[tool.ruff.lint.per-file-ignores]
+"scripts/*.py" = ["S603", "S607"] # tools resolve from PATH; fixed argument lists, no shell
+"tests/*.py" = ["S101"]
+[tool.pytest]
+testpaths = ["tests"]
+addopts = ["--import-mode=importlib"]
+filterwarnings = ["error"]
+
+[tool.commitizen]
+name = "cz_conventional_commits"
+version_provider = "pep621"
