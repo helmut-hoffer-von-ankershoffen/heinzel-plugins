@@ -11,6 +11,7 @@ import io
 import json
 import os
 import re
+import shlex
 import shutil
 import subprocess
 import sys
@@ -699,7 +700,7 @@ def scaffold(name: str, core: str | None, template: str | None, ref: str | None,
     [project] = projects(destination)
     lock(project, core)
     fix(project, core)
-    print(f"Created {project.name}. Run make check-fast NAME={project.name}.", flush=True)
+    print(f"Created {project.name}. Next:\n  cd {shlex.quote(str(destination))} && make check-fast", flush=True)
 
 
 def require_clean_source() -> None:

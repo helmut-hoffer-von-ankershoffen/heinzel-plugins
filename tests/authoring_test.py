@@ -127,6 +127,20 @@ def test_local_release_has_no_alternate_upload_path(monkeypatch, capsys):
     assert "protected release workflow" in capsys.readouterr().err
 
 
+def test_scaffold_prints_the_portable_owning_directory_next_step(tmp_path, monkeypatch, capsys):
+    monkeypatch.setattr(cli, "ROOT", tmp_path / "collection with spaces")
+    destination = cli.ROOT / "plugins/heinzel-harbor"
+    project = cli.Project(destination, "heinzel-harbor", "0.0.0", {})
+    monkeypatch.setattr(cli, "run", lambda *_, **__: None)
+    monkeypatch.setattr(cli, "projects", lambda *_: [project])
+    monkeypatch.setattr(cli, "lock", lambda *_: None)
+    monkeypatch.setattr(cli, "fix", lambda *_: None)
+    cli.scaffold("harbor", "candidate.whl", "candidate-template", "HEAD", "minimal")
+    output = capsys.readouterr().out
+    assert f"cd '{destination}' && make check-fast\n" in output
+    assert "NAME=" not in output
+
+
 @pytest.mark.parametrize("private", [False, True])
 def test_owning_publish_dispatches_the_generic_host_workflow_without_building_core(project, monkeypatch, private):
     revision = "a" * 40
