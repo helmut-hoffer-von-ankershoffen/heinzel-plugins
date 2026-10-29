@@ -28,11 +28,13 @@ repos:
         entry: uv run --group tooling ruff format
         language: system
         types: [python]
+        exclude: ^plugins/
       - id: ruff-check
         name: ruff check
         entry: uv run --group tooling ruff check --fix
         language: system
         types: [python]
+        exclude: ^plugins/
       - id: confidentiality
         name: confidential terms
         entry: uv run --no-project --script scripts/check_confidentiality.py
@@ -60,8 +62,16 @@ repos:
         entry: bash -c 'test -f pyproject.toml || exit 0; exec make check-fast' # prek also runs this from template/, which has no project
         language: system
         pass_filenames: false
-        always_run: true
+        exclude: ^plugins/
         stages: [pre-push]
+      - id: owning-plugin-checks
+        name: owning plugin lint and unit tests
+        entry: uv run --frozen --group tooling hz-plugin check-changed --git-hook
+        language: system
+        pass_filenames: false
+        always_run: true # Git supplies deleted paths as well as existing files; unrelated changes are a no-op.
+        require_serial: true
+        stages: [pre-commit, pre-push]
       - id: commitizen
         name: conventional commit message
         entry: uv run --group tooling cz check --commit-msg-file

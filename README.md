@@ -48,6 +48,8 @@ make acceptance NAME=harbor
 
 The minimal starter contains one operation and behavior test, installed acceptance and concise human/agent guides.
 It adds only `plugins/heinzel-harbor/`, without a parent registration, copied workflow or embedded Git repository.
+The new directory includes its own small Makefile: `cd plugins/heinzel-harbor` and use `make check-fast`,
+`make check`, `make build` and `make publish` directly. Root `NAME=<owner>` commands are optional conveniences.
 Use `make new NAME=harbor PRESET=contributions` when a richer example is useful.
 Each Python operation becomes a CLI command, MCP tool and API operation.
 `hz system plugin sdk <new-directory>` exports the versioned browser SDK and types for bundled views.
@@ -76,6 +78,8 @@ make plan CONTRACT=core:plugin-api@1 CORE=<candidate-core-wheel>
 The work plan and command timings are visible in CI. Plugin-only changes select no core tests, core build or native
 app jobs. A standalone external repository works equally: add its `heinzel-plugin` GitHub topic and a valid root
 project. Core's catalog reads metadata automatically, including new plugin directories in configured source repos.
+Commit and push hooks select the owning plugin and declared contract consumers through `hz-plugin check-changed
+--git-hook`, including deleted paths. Unrelated changes are a no-op; shared-tooling changes still check tooling.
 
 ## Custom public and private repositories
 
