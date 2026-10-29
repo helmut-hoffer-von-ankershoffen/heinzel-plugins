@@ -1,19 +1,47 @@
 """The planner and boundary guard must work for a new plugin without registry edits."""
 
-import importlib.util
 import json
 import os
+import shlex
+import shutil
 import subprocess
 import sys
 from pathlib import Path
 
 import pytest
 
-spec = importlib.util.spec_from_file_location("plugin_tools", Path(__file__).parents[1] / "scripts/plugins.py")
-assert spec and spec.loader
-plugins = importlib.util.module_from_spec(spec)
-sys.modules[spec.name] = plugins
-spec.loader.exec_module(plugins)
+from heinzel_plugin_tools import cli as plugins
+
+pytestmark = pytest.mark.integration
+
+
+@pytest.mark.parametrize("name", ["harbor", None])
+def test_actual_collection_make_fast_loop_dispatches_only_the_selected_scope(tmp_path, monkeypatch, name):
+    monkeypatch.setenv("MAKELEVEL", "5")  # CI invokes pytest under make; its nested-driver flags must not leak.
+    make = shutil.which("make")
+    assert make
+    driver = tmp_path / "driver.py"
+    driver.write_text('import json, os, sys\nprint(json.dumps([sys.argv[1:], os.environ.get("PLUGIN_NAME")]))\n')
+    command = shlex.join([sys.executable, str(driver)])
+    # An unselected collection calls its shared tooling target through a recursive make.
+    (tmp_path / "Makefile").write_text(f"tooling-check:\n\t@{command} tooling-check\n")
+    arguments = [make, "-f", str(Path(__file__).parents[1] / "Makefile"), "check-fast", f"PLUGIN={command}"]
+    if name:
+        arguments.append(f"NAME={name}")
+    result = subprocess.run(  # noqa: S603 - actual repository Makefile, disposable driver and fixed arguments
+        arguments,
+        cwd=tmp_path,
+        env={
+            key: value
+            for key, value in os.environ.items()
+            if key not in {"NAME", "PLUGIN_NAME"} and not key.startswith("MAKE")
+        },
+        text=True,
+        capture_output=True,
+        check=True,
+        timeout=30,
+    )
+    assert json.loads(result.stdout) == [["check-fast"] if name else ["tooling-check"], name or ""]
 
 
 def project(root, name, *, requires=(), provides=(), dependency=None, source=""):
@@ -280,7 +308,7 @@ def test_make_does_not_evaluate_untrusted_name_as_make_code(tmp_path):
     assert make
     result = subprocess.run(  # noqa: S603, S607 - test passes inert make input directly, no shell
         [make, "check", f"NAME=$(shell touch {sentinel})"],
-        cwd=Path(plugins.__file__).parents[1],
+        cwd=Path(__file__).parents[1],
         capture_output=True,
         text=True,
         check=False,

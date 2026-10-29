@@ -1,0 +1,66 @@
+name: Release developer tools
+on:
+  workflow_dispatch:
+    inputs:
+      publish:
+        description: Publish the verified developer toolkit to GitHub
+        type: boolean
+        default: false
+permissions: {}
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      id-token: write
+      attestations: write
+    outputs:
+      tag: ${{ steps.version.outputs.tag }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e # v10.3.2
+      - name: Check the provider-independent tooling
+        run: make tooling-check
+      - id: version
+        env:
+          REF: ${{ github.ref }}
+          PUBLISH: ${{ inputs.publish }}
+        run: |
+          test "$PUBLISH" != true || test "$REF" = refs/heads/main
+          printf 'tag=tools-v%s\n' "$(uv version --short)" >> "$GITHUB_OUTPUT"
+      - name: Build only the developer toolkit
+        run: |
+          uv export --frozen --all-groups --all-extras --no-emit-project --output-file /tmp/plugin-tool-constraints.txt
+          uv build --build-constraints /tmp/plugin-tool-constraints.txt --out-dir release-dist
+      - uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
+        with:
+          subject-path: release-dist/*
+      - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        with:
+          name: plugin-tools
+          path: release-dist/*
+  publish:
+    if: inputs.publish
+    needs: build
+    runs-on: ubuntu-latest
+    environment: standard-app
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e # v10.3.2
+      - uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: plugin-tools
+          path: release-dist
+      - name: Publish the immutable GitHub toolkit artifact
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          TAG: ${{ needs.build.outputs.tag }}
+          REVISION: ${{ github.sha }}
+        run: uv run --frozen --group tooling python -m heinzel_plugin_tools.publishing --tag "$TAG" --revision "$REVISION" --directory release-dist

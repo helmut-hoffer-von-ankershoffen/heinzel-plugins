@@ -1,16 +1,14 @@
 """A retry never moves an existing tag or overwrites differently identified published artifacts."""
 
 import hashlib
-import importlib.util
 import subprocess
-from pathlib import Path
 
 import pytest
 
-spec = importlib.util.spec_from_file_location("publisher", Path(__file__).parents[1] / "scripts/publish.py")
-assert spec and spec.loader
-publisher = importlib.util.module_from_spec(spec)
-spec.loader.exec_module(publisher)
+from heinzel_plugin_tools import publishing as publisher
+
+pytestmark = pytest.mark.unit
+
 REVISION = "a" * 40
 REPOSITORY = "example/plugins"
 

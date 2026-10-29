@@ -8,6 +8,7 @@ __pycache__/
 htmlcov/
 node_modules/
 dist/
+release-dist/
 *.egg-info/
 .acceptance/
 .preview/

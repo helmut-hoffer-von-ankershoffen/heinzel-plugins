@@ -36,7 +36,7 @@ uv run --quiet --group tooling cz check --message "$title" >/dev/null
 uv run --quiet --script scripts/check_confidentiality.py --text "$title"
 uv run --quiet --script scripts/check_confidentiality.py --branch
 git fetch --quiet "$base" main
-git merge-base --is-ancestor "$base/main" HEAD || { echo "Behind $base/main; run make sync first." >&2; exit 2; }
+git merge-base --is-ancestor "$base/main" HEAD || { echo "Behind $base/main; run git merge $base/main first." >&2; exit 2; }
 
 # The update-prs workflow may have merged main into the remote branch; the push below builds on top of that instead
 # of being rejected. But a branch rebased onto main here (or squashed, amended, reordered) diverges from its remote
@@ -75,7 +75,9 @@ if [ -n "${BODY_FILE:-}" ]; then body="$(cat "$BODY_FILE")"; else body="${BODY:-
 [ -n "$body" ] || body="$(git log --reverse --format='- %s' "$base/main..HEAD")"
 uv run --quiet --script scripts/check_confidentiality.py --text "$body"
 
-[ -z "$remote_branch" ] || git rebase --quiet "$remote_branch"
+if [ -n "$remote_branch" ] && ! git merge-base --is-ancestor "$remote_branch" HEAD; then
+  git rebase --quiet "$remote_branch"
+fi
 git push --quiet --set-upstream origin HEAD
 url="$(gh pr list --repo "$repo" --head "$branch" --state open --json url,headRepositoryOwner \
   --jq "map(select(.headRepositoryOwner.login == \"$owner\"))[0].url // empty")"

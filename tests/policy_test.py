@@ -6,6 +6,8 @@ from pathlib import Path
 
 import pytest
 
+pytestmark = pytest.mark.unit
+
 spec = importlib.util.spec_from_file_location("policy", Path(__file__).parents[1] / "scripts/check_policy.py")
 assert spec and spec.loader
 policy = importlib.util.module_from_spec(spec)

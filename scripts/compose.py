@@ -14,19 +14,31 @@ from urllib.parse import urlsplit
 from packaging.utils import parse_wheel_filename
 from packaging.version import Version
 
-from plugins import ROOT, acceptance, build, check, profile, projects, run
+from heinzel_plugin_tools.cli import ROOT, acceptance, profile, projects, run, validate_lock
+from heinzel_plugin_tools.publishing import restore, tag_revision
 
 
 def compose(core: Path, destination: Path, base_url: str | None) -> None:
-    """Check and build defaults only, then prove the profile installs into a fresh environment."""
+    """Install the verified independent releases, then prove the profile in a fresh environment."""
     inventory = projects()
+    repository = os.environ.get("GH_REPO")
+    if not repository:
+        raise ValueError("Set GH_REPO to the reviewed composition repository's owner/name")
+    selected = {}
     for project in inventory:
         if "standard" in project.options.get("profiles", []):
-            check(project, str(core))
-            build(project)
+            validate_lock(project, str(core))
+            release = restore(
+                repository,
+                f"{project.name}/v{project.version}",
+                project.name,
+                destination / ".verified" / project.name,
+            )
+            wheel = next(Path(path) for path in release["artifacts"] if path.endswith(".whl"))
+            selected[project.name] = wheel
             if any((project.directory / "tests" / name).is_dir() for name in ("acceptance", "browser", "e2e")):
-                acceptance(project, str(core))
-    result = profile(inventory, core, destination / "local.json", None)
+                acceptance(project, str(core), wheel=wheel)
+    result = profile(inventory, core, destination / "local.json", None, selected_wheels=selected)
     for artifact in result["artifacts"]:
         target = destination / artifact["filename"]
         if Path(artifact["url"]).resolve() != target.resolve():
@@ -68,10 +80,11 @@ def compose(core: Path, destination: Path, base_url: str | None) -> None:
         ],
         env=isolated,
     )
-    profile(inventory, core, destination / "standard.json", base_url)
+    profile(inventory, core, destination / "standard.json", base_url, selected_wheels=selected)
     (destination / "local.json").unlink()
     shutil.rmtree(environment)
     shutil.rmtree(destination / "acceptance-state", ignore_errors=True)
+    shutil.rmtree(destination / ".verified")
 
 
 def main() -> None:
@@ -100,7 +113,21 @@ def main() -> None:
     if len(content) > 128 * 1024 * 1024:
         parser.error("Core wheel exceeds its size limit")
     core.write_bytes(content)
-    run(["gh", "attestation", "verify", str(core), "--repo", "helmut-hoffer-von-ankershoffen/heinzel"])
+    repository = "helmut-hoffer-von-ankershoffen/heinzel"
+    revision = tag_revision(repository, f"v{version}")
+    run(
+        [
+            "gh",
+            "attestation",
+            "verify",
+            str(core),
+            "--repo",
+            repository,
+            "--source-digest",
+            revision,
+            "--deny-self-hosted-runners",
+        ]
+    )
     compose(
         core,
         destination,

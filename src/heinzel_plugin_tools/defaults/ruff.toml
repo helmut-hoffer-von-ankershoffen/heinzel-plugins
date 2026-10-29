@@ -1,0 +1,12 @@
+line-length = 120
+target-version = "py312"
+
+[lint]
+select = ["E", "F", "I", "B", "UP", "S", "D", "ANN"]
+ignore = ["D203", "D213"]
+
+[lint.per-file-ignores]
+"tests/**/*.py" = ["ANN", "D", "S101"]
+
+[lint.pydocstyle]
+convention = "google"
