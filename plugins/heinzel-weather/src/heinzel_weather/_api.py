@@ -147,7 +147,7 @@ class OpenWeather:
         if not isinstance(places, list) or not places:
             msg = f"OpenWeather knows no place called {query!r}; try a city and a country code, such as 'Berlin, DE'."
             raise HeinzelError(msg)
-        return self._parse(Place, cast("list[object]", places)[0])
+        return self._parse(Place, cast("list[object]", places)[0])  # checked JSON array; the item is validated next
 
     def one_call(self, lat: float, lon: float, units: Units) -> OneCall:
         """The weather now, by the hour and by the day, and the alerts, at a place.

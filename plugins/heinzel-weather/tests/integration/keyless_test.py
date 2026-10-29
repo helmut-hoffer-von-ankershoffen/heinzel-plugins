@@ -1,6 +1,7 @@
 """The plugin through hz's real heads with its default provider: Open-Meteo, no key, the recorded Lisbon answers."""
 
 from datetime import UTC, datetime
+from functools import wraps
 
 import pytest
 
@@ -13,24 +14,25 @@ pytestmark = pytest.mark.integration
 def open_meteo(monkeypatch, meteo):
     """No provider, no key, no OPENWEATHER_API_KEY: only the default, with the network replaced."""
     monkeypatch.setattr(WeatherService, "transport", meteo())
-
-    class RecordedDateTime(datetime):
-        @classmethod
-        def now(cls, tz=None):
-            return datetime(2026, 10, 24, 23, 15, tzinfo=UTC)
-
-    monkeypatch.setattr("heinzel_weather._service.datetime", RecordedDateTime)
     monkeypatch.setenv("HZ_WEATHER__LOCATIONS", '["Lisbon, PT"]')
     monkeypatch.setenv("HZ_WEATHER__UNITS", "metric")
     monkeypatch.delenv("OPENWEATHER_API_KEY", raising=False)
     monkeypatch.delenv("HZ_CREDENTIAL_WEATHER_API_KEY", raising=False)
+    initialize = WeatherService.__init__
+
+    @wraps(initialize)
+    def fixed_clock(self, *args, **kwargs):
+        initialize(self, *args, **kwargs)
+        self.clock = lambda: datetime(2026, 10, 26, 10, 0, tzinfo=UTC)
+
+    monkeypatch.setattr(WeatherService, "__init__", fixed_clock)
 
 
 def test_hz_weather_works_without_a_key(hz):
     now = hz("weather").json
     assert now["location"] == "Lisbon, PT"
     assert now["temperature"] == 12.4
-    assert hz("weather", "forecast", "--days", "3").json["days"][2]["description"] == "rain"
+    assert hz("weather", "forecast", "--days", "3").json["days"][2]["description"] == "partly cloudy"
 
 
 def test_doctor_asks_for_no_key_with_the_default_provider(hz):
@@ -58,7 +60,7 @@ def test_the_web_app_gets_a_status_item_and_widgets_as_data(hz):
     graphic = widgets["weather:weather-today"]
     assert (graphic["kind"], graphic["value"]) == ("graphic", "12°C")
     assert graphic["caption"].startswith("mainly clear · Weather data by Open-Meteo.com (CC BY 4.0)")
-    assert graphic["avatar"] == {"accessories": []}  # recorded mainly-clear conditions need no umbrella
+    assert graphic["avatar"] == {"accessories": ["umbrella"]}
     assert widgets["weather:forecast-today"]["items"][-1]["text"].startswith("Weather data by Open-Meteo.com")
 
 

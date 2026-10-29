@@ -111,7 +111,7 @@ jobs:
           DIRECTORY: ${{ matrix.path }}
           CORE: ${{ steps.core.outputs.wheel }}
         run: |
-          if [ -d "$DIRECTORY/tests/browser" ] || [ -d "$DIRECTORY/tests/acceptance" ]; then make acceptance NAME="$PLUGIN" CORE="$CORE"; fi
+          if [ -d "$DIRECTORY/tests/browser" ] || [ -d "$DIRECTORY/tests/acceptance" ] || [ -d "$DIRECTORY/tests/e2e" ]; then make acceptance NAME="$PLUGIN" CORE="$CORE"; fi
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: ${{ matrix.name }}

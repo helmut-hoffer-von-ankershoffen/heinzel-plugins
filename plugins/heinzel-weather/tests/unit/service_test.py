@@ -82,6 +82,8 @@ def test_forecast_and_signals(service):
 
 def test_app_weather_uses_one_observation_until_the_900_second_boundary(service, monkeypatch):
     weather = service()
+    elapsed = [0.0]
+    weather.monotonic = lambda: elapsed[0]
     report = weather.report()
     calls = 0
 
@@ -93,9 +95,11 @@ def test_app_weather_uses_one_observation_until_the_900_second_boundary(service,
     monkeypatch.setattr(weather, "report", counted_report)
     assert weather.ui_weather().conditions.now == report.now
     weather.clock = lambda: NOW + timedelta(seconds=899)
+    elapsed[0] = 899
     assert weather.ui_weather().conditions.now == report.now
     assert calls == 1
     weather.clock = lambda: NOW + timedelta(seconds=900)
+    elapsed[0] = 900
     assert weather.ui_weather().conditions.now == report.now
     assert calls == 2
 
@@ -125,8 +129,11 @@ def test_simultaneous_app_placements_share_the_initial_provider_request(service,
 
 def test_app_keeps_the_last_observation_and_marks_it_stale_on_refresh_failure(service, monkeypatch):
     weather = service()
+    elapsed = [0.0]
+    weather.monotonic = lambda: elapsed[0]
     fresh = weather.ui_weather()
     weather.clock = lambda: NOW + timedelta(minutes=16)
+    elapsed[0] = 16 * 60
     attempts = 0
 
     def unavailable(*args, **kwargs):
@@ -142,12 +149,15 @@ def test_app_keeps_the_last_observation_and_marks_it_stale_on_refresh_failure(se
     assert weather.ui_weather() == stale
     assert attempts == 1
     weather.clock = lambda: NOW + timedelta(minutes=31)
+    elapsed[0] = 31 * 60
     assert weather.ui_weather().stale is True
     assert attempts == 2
 
 
 def test_app_throttles_repeated_failures_before_the_first_observation(service, monkeypatch):
     weather = service()
+    elapsed = [0.0]
+    weather.monotonic = lambda: elapsed[0]
     attempts = 0
 
     def unavailable(*args, **kwargs):
@@ -160,10 +170,12 @@ def test_app_throttles_repeated_failures_before_the_first_observation(service, m
     with pytest.raises(HeinzelError, match="OpenWeather is unavailable"):
         weather.ui_weather()
     weather.clock = lambda: NOW + timedelta(minutes=14, seconds=59)
+    elapsed[0] = 14 * 60 + 59
     with pytest.raises(HeinzelError, match="OpenWeather is unavailable"):
         weather.ui_weather()
     assert attempts == 1
     weather.clock = lambda: NOW + timedelta(minutes=15)
+    elapsed[0] = 15 * 60
     with pytest.raises(HeinzelError, match="OpenWeather is unavailable"):
         weather.ui_weather()
     assert attempts == 2

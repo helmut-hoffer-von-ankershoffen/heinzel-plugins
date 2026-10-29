@@ -1,4 +1,4 @@
-"""The weather module's logic, independent of any head: ask OpenWeather, check the answer, shape it, watch it."""
+"""The weather module's logic, independent of any head: ask its provider, check the answer, shape it, watch it."""
 
 import json
 import os
@@ -7,6 +7,7 @@ from collections.abc import Callable  # noqa: TC003 - pydantic and the kernel re
 from datetime import UTC, datetime, timedelta, timezone, tzinfo
 from pathlib import Path
 from threading import Lock
+from time import monotonic
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
 import httpx
@@ -24,6 +25,7 @@ from heinzel_weather._models import (
     Hour,
     Info,
     Now,
+    Observation,
     Provider,
     Report,
     Signals,
@@ -83,7 +85,10 @@ class WeatherService:
         self._places_file = hz.state_dir / "weather" / "places.json"
         self.clock: Callable[[], datetime] = lambda: datetime.now(UTC)
         """What time it is; a fixed one in tests."""
-        self._ui_cache: UiWeather | None = None
+        self.monotonic: Callable[[], float] = monotonic
+        """Elapsed time for cache age; immune to wall-clock corrections."""
+        self._ui_cache: Observation | None = None
+        self._ui_attempted_monotonic: float | None = None
         self._ui_attempted_at: datetime | None = None
         self._ui_error: str | None = None
         self._ui_lock = Lock()
@@ -165,22 +170,78 @@ class WeatherService:
         Raises:
             HeinzelError: If no observation has been cached and no location/key is available or the provider fails.
         """
+        observed = self.observation()
+        report = observed.report
+        conditions = Conditions(
+            needs_location=observed.needs_location,
+            now=report.now if report else None,
+            days=report.days[:4] if report else [],
+            accessories=(
+                accessories(report.now, units=report.now.units, rain=self._settings.rain_chance) if report else []
+            ),
+            provider=observed.provider,
+            attribution=observed.attribution,
+        )
+        return UiWeather(conditions=conditions, fetched_at=observed.fetched_at, stale=observed.stale)
+
+    def observation(self) -> Observation:
+        """Read the shared 15-minute report and its candidate changes without consuming or delivering them.
+
+        Raises:
+            HeinzelError: If no prior observation exists and the provider or required credentials are unavailable.
+        """
         with self._ui_lock:
             now = self.clock()
+            elapsed = self.monotonic()
             cached = self._ui_cache
-            if self._ui_attempted_at is not None and now - self._ui_attempted_at < UI_REFRESH:
+            within_refresh = (
+                self._ui_attempted_monotonic is not None
+                and self._ui_attempted_at is not None
+                and 0 <= elapsed - self._ui_attempted_monotonic < UI_REFRESH.total_seconds()
+                and now - self._ui_attempted_at < UI_REFRESH
+            )
+            if within_refresh:
                 if cached is not None:
-                    return cached
+                    current_changes = (
+                        changes(
+                            cached.report,
+                            now=now,
+                            rain_chance=self._settings.rain_chance,
+                            swing=self._settings.temperature_swing,
+                        )
+                        if cached.report is not None and not cached.stale
+                        else []
+                    )
+                    return cached.model_copy(update={"changes": current_changes})
                 if self._ui_error is not None:
                     raise HeinzelError(self._ui_error)
+            self._ui_attempted_monotonic = elapsed
             self._ui_attempted_at = now
             try:
-                result = UiWeather(conditions=self.conditions(), fetched_at=now, stale=False)
+                report = self.report() if self._settings.locations else None
+                result = Observation(
+                    needs_location=not self._settings.locations,
+                    report=report,
+                    provider=self.provider,
+                    attribution=self.attribution(),
+                    fetched_at=now,
+                    stale=False,
+                    changes=(
+                        changes(
+                            report,
+                            now=now,
+                            rain_chance=self._settings.rain_chance,
+                            swing=self._settings.temperature_swing,
+                        )
+                        if report
+                        else []
+                    ),
+                )
             except HeinzelError as error:
                 self._ui_error = str(error)
                 if cached is None:
                     raise
-                stale = cached.model_copy(update={"stale": True})
+                stale = cached.model_copy(update={"stale": True, "changes": []})
                 self._ui_cache = stale
                 return stale
             self._ui_error = None
@@ -191,7 +252,7 @@ class WeatherService:
         """The weather now, the next hours and `days` days, and alerts, at `location` or the primary one.
 
         Raises:
-            HeinzelError: If no location is configured, the API key is missing, or OpenWeather fails.
+            HeinzelError: If no location is configured, the selected provider needs a key, or the provider fails.
         """
         query = location or self.primary()
         if self.provider is Provider.OPEN_METEO:

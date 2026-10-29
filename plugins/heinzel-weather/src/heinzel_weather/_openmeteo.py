@@ -267,8 +267,8 @@ def _convert(forecast: _Forecast, *, imperial: bool) -> OneCall:
     days = [
         RawDay(
             dt=at,
-            sunrise=_at(daily.sunrise, index, None),
-            sunset=_at(daily.sunset, index, None),
+            sunrise=daily.sunrise[index] if index < len(daily.sunrise) else None,
+            sunset=daily.sunset[index] if index < len(daily.sunset) else None,
             temp=RawTemperatures(
                 min=_at(daily.temperature_2m_min, index, now.temperature_2m),
                 max=_at(daily.temperature_2m_max, index, now.temperature_2m),

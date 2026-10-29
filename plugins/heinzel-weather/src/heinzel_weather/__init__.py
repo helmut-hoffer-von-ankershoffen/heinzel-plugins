@@ -11,6 +11,7 @@ sunglasses, a scarf): the `accessories` of its avatar.
 """
 
 from importlib.metadata import PackageNotFoundError, version
+from pathlib import Path
 from typing import Annotated
 
 from heinzel import (
@@ -48,6 +49,7 @@ from heinzel_weather._models import (
     Hour,
     Info,
     Now,
+    Observation,
     Provider,
     Report,
     Signals,
@@ -61,6 +63,7 @@ from heinzel_weather._service import MAX_DAYS, WeatherService
 
 module.settings(WeatherSettings)
 module.service(WeatherService)
+module.skill(Path(__file__).parent / "skills")
 module.nav(
     "weather",
     title="Weather",
@@ -211,6 +214,16 @@ def ui(service: WeatherService) -> UiWeather:
     return service.ui_weather()
 
 
+@module.operation
+def observe(service: WeatherService) -> Observation:
+    """Read the shared 15-minute weather evidence and candidate changes without emitting notices.
+
+    Raises:
+        HeinzelError: If no prior observation exists and the provider or required credentials are unavailable.
+    """
+    return service.observation()
+
+
 @module.status(source="ui", name="weather-now", refresh="15m", slots={"footer": True, "sidebar": True})
 def current_weather(value: UiWeather) -> StatusItem:
     """Show the current condition and temperature in the footer and sidebar."""
@@ -234,7 +247,7 @@ def weather(service: WeatherService) -> Now:
     """Show the weather now at your primary location, with today's high, low and chance of rain.
 
     Raises:
-        HeinzelError: If no location or API key is set, or OpenWeather fails.
+        HeinzelError: If no location is set, the selected provider needs a key, or the provider fails.
     """
     return service.now()
 
@@ -244,7 +257,8 @@ def show(service: WeatherService, location: Location = None) -> Report:
     """Show the weather now, the next 12 hours, the next 5 days and any severe weather alerts.
 
     Raises:
-        HeinzelError: If no location or API key is set, the place is unknown, or OpenWeather fails.
+        HeinzelError: If no location is set, the place is unknown, the selected provider needs a key,
+            or the provider fails.
     """
     return service.report(location)
 
@@ -254,7 +268,8 @@ def forecast(service: WeatherService, location: Location = None, days: Days = 5)
     """Show the next days: high, low, chance of rain and the sky.
 
     Raises:
-        HeinzelError: If no location or API key is set, the place is unknown, or OpenWeather fails.
+        HeinzelError: If no location is set, the place is unknown, the selected provider needs a key,
+            or the provider fails.
     """
     return service.forecast(location, days)
 
@@ -264,7 +279,7 @@ def signals(service: WeatherService) -> Signals:
     """Show what a theme can follow: the weather now in one word, and today's sunrise and sunset.
 
     Raises:
-        HeinzelError: If no location or API key is set, or OpenWeather fails.
+        HeinzelError: If no location is set, the selected provider needs a key, or the provider fails.
     """
     return service.signals()
 
@@ -354,6 +369,7 @@ __all__ = [
     "Hour",
     "Info",
     "Now",
+    "Observation",
     "Provider",
     "Report",
     "Signals",

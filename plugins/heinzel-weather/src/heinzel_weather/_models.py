@@ -259,6 +259,18 @@ class Change(_Strict):
     urgent: bool = Field(description="Whether it may interrupt outside working hours: severe weather alerts.")
 
 
+class Observation(_Strict):
+    """Cached weather evidence and candidate signals, without delivery or approval authority."""
+
+    needs_location: bool = Field(description="Whether the primary location still needs to be configured.")
+    report: Report | None = Field(description="The last complete report; absent until a location is configured.")
+    provider: Provider = Field(description="Who supplied this observation.")
+    attribution: str = Field(description="The provider attribution to retain in derived drafts.")
+    fetched_at: AwareDatetime = Field(description="When this evidence was fetched; unchanged on refresh failure.")
+    stale: bool = Field(description="Whether the latest refresh failed; stale evidence cannot offer new signals.")
+    changes: list[Change] = Field(description="Candidate signals from this report, not delivery receipts or approval.")
+
+
 class Watched(_Strict):
     """What a run of the watch job did."""
 

@@ -421,10 +421,16 @@ def acceptance(project: Project, core: str | None) -> None:
         raise ValueError("Build exactly one owning wheel before acceptance")
     run(["uv", "pip", "install", "--python", str(interpreter), "--no-deps", selected, str(wheels[0])])
     run(["uv", "pip", "check", "--python", str(interpreter)])
-    suites = [f"tests/{name}" for name in ("acceptance", "browser") if (project.directory / "tests" / name).is_dir()]
+    suites = [
+        f"tests/{name}" for name in ("acceptance", "browser", "e2e") if (project.directory / "tests" / name).is_dir()
+    ]
     if not suites:
         raise ValueError("Declare installed-wheel tests under tests/acceptance or tests/browser")
-    environment = dict(os.environ) | {"PLUGIN_TEST_CORE": selected, "PLUGIN_TEST_WHEEL": str(wheels[0])}
+    environment = dict(os.environ) | {
+        "PLUGIN_TEST_CORE": selected,
+        "HZ_SPEC": selected,
+        "PLUGIN_TEST_WHEEL": str(wheels[0]),
+    }
     run([str(interpreter), "-m", "pytest", *suites, "-q"], cwd=project.directory, env=environment)
 
 

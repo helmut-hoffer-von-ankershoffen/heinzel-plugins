@@ -24,7 +24,7 @@ def compose(core: Path, destination: Path, base_url: str | None) -> None:
         if "standard" in project.options.get("profiles", []):
             check(project, str(core))
             build(project)
-            if any((project.directory / "tests" / name).is_dir() for name in ("acceptance", "browser")):
+            if any((project.directory / "tests" / name).is_dir() for name in ("acceptance", "browser", "e2e")):
                 acceptance(project, str(core))
     result = profile(inventory, core, destination / "local.json", None)
     for artifact in result["artifacts"]:

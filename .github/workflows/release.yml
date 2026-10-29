@@ -68,7 +68,7 @@ jobs:
           CORE: ${{ steps.core.outputs.wheel }}
         run: |
           directory="$(jq -r .path release.json)"
-          if [ -d "$directory/tests/browser" ] || [ -d "$directory/tests/acceptance" ]; then make acceptance NAME="$PLUGIN" CORE="$CORE"; fi
+          if [ -d "$directory/tests/browser" ] || [ -d "$directory/tests/acceptance" ] || [ -d "$directory/tests/e2e" ]; then make acceptance NAME="$PLUGIN" CORE="$CORE"; fi
       - uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
         with:
           subject-path: release-dist/*

@@ -46,6 +46,7 @@ Until a place is set, the status item says "Set a location".
 | Current weather and its coordinates, the next 12 hours, 5 days and severe weather alerts | `hz weather show [--location PLACE]` | `weather_show` | `GET /weather/show?location=...` |
 | The next days | `hz weather forecast [--location PLACE] [--days N]` | `weather_forecast` | `GET /weather/forecast` |
 | What the app shows: the weather now, the days, what to wear, the attribution | `hz weather conditions` | `weather_conditions` | `GET /weather/conditions` |
+| Shared timestamped report and candidate changes, without notices | `hz weather observe` | `weather_observe` | `GET /weather/observe` |
 | The provider, the plugin version and the attribution the data asks for | `hz weather info` | `weather_info` | `GET /weather/info` |
 | What a theme can follow: the weather in one word, sunrise, sunset | `hz weather signals` | `weather_signals` | `GET /weather/signals` |
 | Notices when rain starts within the hour, the temperature swings, or an alert is issued | the daemon's `weather.watch` job | | |
@@ -86,3 +87,23 @@ The tests and the docs' recordings use the same fake (`heinzel_weather.fake`).
 Development and release commands: [repository guide](../../README.md).
 
 Migration provenance: heinzel-contrib, before the 0.9 plugin-boundary migration.
+## Weather workflow evidence
+
+`hz weather observe --json` reads the same in-process 15-minute observation as the app and includes the full
+report, provider attribution, original fetch timestamp and candidate rain, temperature-swing and alert signals.
+Reading these candidates does not emit a notice or consume the watch job's deduplication state. On refresh failure,
+the last report remains visible with `stale: true` and no actionable changes. Without an initial observation, a
+provider failure remains an error; an unconfigured location is explicit.
+Candidate windows are evaluated against the current clock on every read, including cache hits: expired alerts and
+forecast windows stop being actionable, and entering windows appear without another provider fetch. The cached
+report and its original `fetched_at` stay unchanged.
+The cache refreshes when either elapsed time or forward wall time reaches 15 minutes. This prevents a backward
+clock correction from extending freshness and refreshes after system sleep even on clocks that pause during
+suspend. Failed refreshes remain throttled from their attempt time and never restore actionable stale signals.
+
+The wheel ships the checked `weather-trend` skill. Inspect it with `hz system skill show weather-trend`. It advises
+how to interpret evidence and propose bounded Sheets/Docs drafts and an exact email preview for human approval.
+A skill grants no operation, target, recipient or approval. The scheduled durable workflow, document writers and
+mail approval are separate integration work; installing this plugin does not activate them. Candidate change keys
+are not durable delivery receipts, and a new process has its own cache. The independent watch job keeps its
+existing schedule and notice policy.

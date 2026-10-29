@@ -43,12 +43,16 @@ def test_shared_tooling_discovers_a_different_repository_without_parent_edits(tm
     project(tmp_path, "heinzel-unforeseen")
     result = subprocess.run(  # noqa: S603 - fixed interpreter, checked-in script and synthetic project
         [sys.executable, str(Path(plugins.__file__)), "plan", "--changed", "plugins/heinzel-unforeseen/src/plugin.py"],
-        env={**os.environ, "PLUGIN_SOURCE_ROOT": str(tmp_path)},
+        env={
+            **{key: value for key, value in os.environ.items() if not key.startswith("PLUGIN_")},
+            "PLUGIN_SOURCE_ROOT": str(tmp_path),
+        },
         capture_output=True,
         text=True,
-        check=True,
+        check=False,
         timeout=30,
     )
+    assert result.returncode == 0, result.stderr
     work = json.loads(result.stdout)
     assert [entry["name"] for entry in work["include"]] == ["heinzel-unforeseen"]
     assert not any(work[key] for key in ("core", "core_build", "core_tests"))
