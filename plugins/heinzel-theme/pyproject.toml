@@ -1,0 +1,129 @@
+[project]
+name = "heinzel-theme"
+version = "0.1.0"
+description = "The Heinzelmännchen theme and its soundscapes."
+license = "MIT"
+license-files = ["LICENSE"]
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = ["heinzel>=0.9.0,<0.10"]
+
+[project.entry-points."heinzel.modules"]
+theme = "heinzel_theme"
+
+[project.urls]
+Source = "https://github.com/helmut-hoffer-von-ankershoffen/heinzel-plugins/tree/main/plugins/heinzel-theme"
+Issues = "https://github.com/helmut-hoffer-von-ankershoffen/heinzel-plugins/issues"
+
+[tool.heinzel.plugin]
+profiles = ["standard"]
+requires = ["core:plugin-api@1"]
+provides = []
+
+
+[tool.ruff]
+line-length = 120
+fix = true
+extend-exclude = ["template"] # rendered and checked by `make template-test`
+
+[tool.ruff.lint]
+select = ["ALL"]
+# pydoclint (DOC): docstring sections must match what the code raises, returns and yields. Preview rules, opted into
+# one by one so no other preview rule sneaks in.
+preview = true
+explicit-preview-rules = true
+extend-select = ["DOC201", "DOC202", "DOC402", "DOC403", "DOC501", "DOC502"]
+ignore = [
+    "COM812",  # conflicts with the ruff formatter
+    "CPY001",  # no copyright header in OSS files
+    "D203",    # incompatible with D211
+    "DOC201",  # a return value is documented by the type and the summary line; Returns: only when it adds meaning
+    "DOC502",  # documenting exceptions raised by callees is useful for callers
+    "D213",    # incompatible with D212
+    "FBT001",  # boolean positional arguments are idiomatic for Typer options
+    "FBT002",  # same as FBT001
+    "ISC001",  # conflicts with the ruff formatter
+    "TD003",   # todos don't need an issue link
+    "FIX002",  # todos are allowed
+]
+
+[tool.ruff.lint.per-file-ignores]
+".claude/hooks/*.py" = [
+    "D103",    # hook entry points are documented by the module docstring
+    "INP001",  # hooks are scripts, not a package
+    "S603",    # subprocess calls with fixed argument lists
+    "S607",    # tools (uv, git, make) are resolved from PATH on purpose
+    "T201",    # hooks talk to the agent through stdout/stderr
+]
+"fuzz/*.py" = [
+    "INP001",  # fuzz targets are scripts, not a package
+]
+"hatch_build.py" = [
+    "INP001",  # the build hook hatch loads by path, not a package
+]
+"scripts/*.py" = [
+    "INP001",  # scripts are not a package
+    "T201",    # scripts report on stdout/stderr
+]
+"**/tests/**/*.py" = [
+    "ANN",     # fixtures and tests don't need full annotations
+    "DOC",     # test docstrings describe behaviour, not interfaces
+    "ARG",     # fixtures are used for their side effects
+    "D",       # test names are the documentation
+    "INP001",  # tests are not a package
+    "PLC0415", # local imports keep fixtures isolated
+    "PLR2004", # magic values are fine in assertions
+    "S101",    # asserts are what tests do
+    "S105",    # fake tokens and passwords are test data (credentials, adapters for tracker and document services)
+    "S106",    # same as S105, passed as arguments
+    "S603",    # subprocess calls with trusted input
+    "S607",    # partial executable paths (uv, hz) are resolved from PATH on purpose
+    "SLF001",  # private access is needed for solitary unit tests
+]
+
+[tool.ruff.lint.pydocstyle]
+convention = "google"
+
+[tool.ruff.format]
+docstring-code-format = true
+
+[tool.mypy]
+strict = true
+mypy_path = ["src"]
+files = ["src"]
+plugins = ["pydantic.mypy"]
+
+[tool.pydantic-mypy]
+init_forbid_extra = true
+init_typed = true
+warn_required_dynamic_aliases = true
+
+[tool.pytest]
+minversion = "9.0"
+strict = true
+testpaths = ["tests"]
+addopts = ["-ra", "--import-mode=importlib"]
+filterwarnings = ["error"]
+markers = ["unit: Offline isolated behavior.", "integration: Offline public-contract integration.", "e2e: Installed artifacts or real external services.", "perf: Explicit timing tests.", "long_running: Extended end-to-end budget."]
+
+[tool.coverage.run]
+source = ["heinzel_theme"]
+branch = true
+
+[tool.coverage.report]
+fail_under = 90
+show_missing = true
+[build-system]
+requires = ["hatchling>=1.29.0"]
+build-backend = "hatchling.build"
+
+[dependency-groups]
+test = ["editables>=0.5", "pytest>=9.0.3,<10", "pytest-timeout>=2.4.0,<3", "pytest-xdist>=3.8", "ruff==0.17.2", "mypy>=1.19.0,<3", "coverage>=7.12", "pyright[nodejs]==1.1.414"]
+
+[tool.pyright]
+typeCheckingMode = "strict"
+include = ["src"]
+pythonVersion = "3.12"
+
+[tool.hatch.build.targets.sdist]
+exclude = [".venv", ".acceptance", ".preview", "dist", "web/node_modules", "**/__pycache__", ".pytest_cache", ".mypy_cache", ".coverage*"]
