@@ -299,19 +299,23 @@ def test_metadata_cannot_inject_matrix_outputs_or_commands(tmp_path, name):
         plugins.projects(tmp_path)
 
 
-def test_make_does_not_evaluate_untrusted_name_as_make_code(tmp_path):
-    import shutil
-    import subprocess
-
+@pytest.mark.parametrize(
+    "option", ["NAME", "CORE", "TAG", "REGISTRY", "TOOLING", "PRESET", "TEMPLATE", "REF", "BASE", "CONTRACT"]
+)
+def test_make_does_not_evaluate_forwarded_options_as_make_code(tmp_path, option):
     sentinel = tmp_path / "must-not-exist"
     make = shutil.which("make")
     assert make
+    stub = tmp_path / "uv"
+    stub.write_text("#!/bin/sh\nexit 0\n")
+    stub.chmod(0o755)
     result = subprocess.run(  # noqa: S603, S607 - test passes inert make input directly, no shell
-        [make, "check", f"NAME=$(shell touch {sentinel})"],
+        [make, "check", f"{option}=$(shell touch {sentinel})"],
         cwd=Path(__file__).parents[1],
+        env={**os.environ, "PATH": str(tmp_path) + os.pathsep + os.environ["PATH"]},
         capture_output=True,
         text=True,
         check=False,
     )
-    assert result.returncode != 0
+    assert result.returncode == 0, result.stderr
     assert not sentinel.exists()

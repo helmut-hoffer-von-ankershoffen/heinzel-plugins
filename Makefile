@@ -4,7 +4,7 @@ ifneq ($(origin TOOLING),undefined)
 export HZ_PLUGIN_TOOLING := $(value TOOLING)
 PLUGIN := uv run --quiet --no-project --with "$$HZ_PLUGIN_TOOLING" hz-plugin
 endif
-unexport NAME CORE BASE CONTRACT TAG TEMPLATE REF REGISTRY PRESET
+unexport NAME CORE BASE CONTRACT TAG TEMPLATE REF REGISTRY PRESET TOOLING
 MAKEOVERRIDES =
 export PLUGIN_NAME := $(value NAME)
 export PLUGIN_CORE := $(value CORE)
