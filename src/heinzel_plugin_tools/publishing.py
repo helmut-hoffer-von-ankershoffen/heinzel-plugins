@@ -64,6 +64,37 @@ def existing_assets(release: dict | None, artifacts: list[Path]) -> list[Path]:
     return missing
 
 
+def find_release(repository: str, tag: str) -> dict | None:
+    """Resolve drafts as well as published releases; GitHub's REST tag endpoint hides drafts."""
+    owner, name = repository.split("/", 1)
+    answer = api(
+        "graphql",
+        data={
+            "query": (
+                "query($owner:String!,$name:String!,$tag:String!){"
+                "repository(owner:$owner,name:$name){release(tagName:$tag){databaseId}}}"
+            ),
+            "variables": {"owner": owner, "name": name, "tag": tag},
+        },
+    )
+    if not answer or answer.get("errors"):
+        raise ValueError("GitHub could not resolve the release identity")
+    data = answer.get("data")
+    repo = data.get("repository") if isinstance(data, dict) else None
+    if not isinstance(repo, dict) or "release" not in repo:
+        raise ValueError("GitHub did not return an accessible release repository")
+    identity = repo["release"]
+    if identity is None:
+        return None
+    identifier = identity.get("databaseId") if isinstance(identity, dict) else None
+    if type(identifier) is not int or identifier <= 0:
+        raise ValueError("GitHub did not return a release identity")
+    release = api(f"repos/{repository}/releases/{identifier}")
+    if not release or release.get("id") != identifier or release.get("tag_name") != tag:
+        raise ValueError("GitHub returned a different release identity")
+    return release
+
+
 def publish(repository: str, tag: str, revision: str, artifacts: list[Path], *, pypi: bool = False) -> None:
     if not re.fullmatch(r"[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+", repository):
         raise ValueError("Use an owner/repository identity")
@@ -72,8 +103,7 @@ def publish(repository: str, tag: str, revision: str, artifacts: list[Path], *, 
     if not artifacts or len(artifacts) > 128 or any(not path.is_file() or path.is_symlink() for path in artifacts):
         raise ValueError("Select the exact built artifact files")
     exact_tag(repository, tag, revision)
-    path = f"repos/{repository}/releases/tags/{quote(tag, safe='')}"
-    release = api(path, missing=True)
+    release = find_release(repository, tag)
     pending = existing_assets(release, artifacts)
     if release is not None and not release.get("draft", False) and pending:
         raise ValueError("A published release is incomplete; refusing to change immutable published artifacts")
@@ -90,7 +120,7 @@ def publish(repository: str, tag: str, revision: str, artifacts: list[Path], *, 
                 "tag_name": tag,
                 "target_commitish": revision,
                 "name": tag,
-                "body": "Independently checked artifacts with build provenance.",
+                "body": "Independently checked artifacts from the exact tagged source commit.",
                 "draft": True,
             },
         )
@@ -100,7 +130,7 @@ def publish(repository: str, tag: str, revision: str, artifacts: list[Path], *, 
             check=True,
             timeout=600,
         )
-    if existing_assets(api(path), artifacts):
+    if not release or existing_assets(api(f"repos/{repository}/releases/{release['id']}"), artifacts):
         raise ValueError("Publication is incomplete; retry the same built artifacts")
     exact_tag(repository, tag, revision)
     if release and release.get("draft", False):
