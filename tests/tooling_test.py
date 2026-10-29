@@ -216,6 +216,52 @@ def test_hash_verification_rejects_tampering_and_neutral_contract_works_in_fresh
     assert completed.returncode == 0, completed.stderr
 
 
+def test_plugin_can_add_and_execute_its_own_runtime_dependency_without_sibling_environments(tmp_path):
+    import hashlib
+    import shutil
+    import zipfile
+
+    dependency = tmp_path / "sample_helper-1.0.0-py3-none-any.whl"
+    prefix = "sample_helper-1.0.0.dist-info"
+    with zipfile.ZipFile(dependency, "w") as archive:
+        archive.writestr("sample_helper/__init__.py", "def label(value): return 'helper:' + value\n")
+        archive.writestr(f"{prefix}/METADATA", "Metadata-Version: 2.1\nName: sample-helper\nVersion: 1.0.0\n")
+        archive.writestr(f"{prefix}/WHEEL", "Wheel-Version: 1.0\nRoot-Is-Purelib: true\nTag: py3-none-any\n")
+        archive.writestr(f"{prefix}/RECORD", "")
+    owner = project(
+        tmp_path,
+        "heinzel-unforeseen",
+        dependency="sample-helper>=1",
+        source="from sample_helper import label\nresult = label('ready')\n",
+    )
+    sibling = project(tmp_path, "heinzel-unrelated")
+    selected = next(item for item in plugins.projects(tmp_path) if item.directory == owner)
+    plugins.boundaries(selected)
+    lock = owner / "requirements.lock"
+    lock.write_text(
+        f"sample-helper @ {dependency.as_uri()} --hash=sha256:{hashlib.sha256(dependency.read_bytes()).hexdigest()}\n"
+    )
+    interpreter = owner / ".venv/bin/python"
+    uv = shutil.which("uv")
+    assert uv
+    subprocess.run(  # noqa: S603 - resolved executable and local test directory
+        [uv, "venv", "--python", "3.12", str(interpreter.parents[1])],
+        check=True,
+        capture_output=True,
+        timeout=30,
+    )
+    subprocess.run(  # noqa: S603 - owning hashed local fixture dependency
+        [uv, "pip", "sync", "--python", str(interpreter), "--require-hashes", str(lock)],
+        check=True,
+        capture_output=True,
+        timeout=30,
+    )
+    command = f"import runpy; assert runpy.run_path({str(owner / 'src/plugin.py')!r})['result'] == 'helper:ready'"
+    subprocess.run([str(interpreter), "-c", command], check=True, capture_output=True, timeout=30)  # noqa: S603 - synthetic owned plugin only
+    assert not (sibling / ".venv").exists()
+    assert not (tmp_path / "pyproject.toml").exists()
+
+
 @pytest.mark.parametrize("name", ["heinzel-unsafe;command", "heinzel-unsafe\noutput", "Heinzel-Unsafe"])
 def test_metadata_cannot_inject_matrix_outputs_or_commands(tmp_path, name):
     directory = project(tmp_path, "heinzel-unforeseen")
