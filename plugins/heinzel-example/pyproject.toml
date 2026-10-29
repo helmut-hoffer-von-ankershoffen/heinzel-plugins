@@ -17,7 +17,7 @@ classifiers = [
     "Typing :: Typed",
 ]
 # Heinzelmännchen resolves to the installed Heinzelmännchen when the plugin is added with `hz system plugin add`.
-dependencies = ["heinzel>=0.9.0,<0.10"]
+dependencies = ["heinzel>=0.9.1,<0.10"]
 
 [project.entry-points."heinzel.modules"]
 example = "heinzel_example"
