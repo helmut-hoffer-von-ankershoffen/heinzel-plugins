@@ -16,7 +16,8 @@ pytestmark = pytest.mark.integration
 
 
 @pytest.mark.parametrize("name", ["harbor", None])
-def test_actual_collection_make_fast_loop_dispatches_only_the_selected_scope(tmp_path, name):
+def test_actual_collection_make_fast_loop_dispatches_only_the_selected_scope(tmp_path, monkeypatch, name):
+    monkeypatch.setenv("MAKELEVEL", "5")  # CI invokes pytest under make; its nested-driver flags must not leak.
     make = shutil.which("make")
     assert make
     driver = tmp_path / "driver.py"
@@ -33,7 +34,7 @@ def test_actual_collection_make_fast_loop_dispatches_only_the_selected_scope(tmp
         env={
             key: value
             for key, value in os.environ.items()
-            if key not in {"NAME", "PLUGIN_NAME", "MAKEFLAGS", "MAKEOVERRIDES"}
+            if key not in {"NAME", "PLUGIN_NAME"} and not key.startswith("MAKE")
         },
         text=True,
         capture_output=True,

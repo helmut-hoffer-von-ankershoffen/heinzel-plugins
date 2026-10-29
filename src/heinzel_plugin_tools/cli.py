@@ -370,7 +370,11 @@ def fix(project: Project, core: str | None) -> None:
     if not path.is_file() or json.loads(path.read_text())["inputs"] != dependency_inputs(project):
         lock(project, core)
     prepare_environment(project, core)
-    for command in (["ruff", "format", "src", "tests"], ["ruff", "check", "--fix", "src", "tests"]):
+    for command in (
+        ["ruff", "format", "src", "tests"],
+        ["ruff", "check", "--fix", "src", "tests"],
+        ["ruff", "format", "src", "tests"],
+    ):
         run(python_command(project, core, [*command, *ruff_configuration(project)]), cwd=project.directory)
 
 
