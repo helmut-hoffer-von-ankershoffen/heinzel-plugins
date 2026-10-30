@@ -1,18 +1,46 @@
 name: Standard app composition
 on:
+  schedule:
+    - cron: '7,22,37,52 * * * *'
   workflow_dispatch:
     inputs:
       core_wheel:
-        description: Immutable core wheel URL from its verified release
-        required: true
+        description: Optional official SDK wheel URL; leave both inputs empty to select automatically
+        required: false
         type: string
       version:
-        description: Core version for this app profile
-        required: true
+        description: Optional SDK version paired with the wheel URL
+        required: false
         type: string
 permissions: {}
+concurrency:
+  group: standard-app-${{ github.repository }}
+  cancel-in-progress: false
 jobs:
+  select:
+    if: github.event_name == 'workflow_dispatch' || github.repository == 'helmut-hoffer-von-ankershoffen/heinzel-plugins'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    outputs:
+      version: ${{ steps.next.outputs.version }}
+      core_wheel: ${{ steps.next.outputs.core_wheel }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e # v10.3.2
+      - id: next
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          CORE_URL: ${{ inputs.core_wheel }}
+          VERSION: ${{ inputs.version }}
+        run: uv run --frozen --group tooling python scripts/next_app.py
   compose:
+    needs: select
+    if: needs.select.outputs.version != ''
     permissions:
       contents: read
     runs-on: ubuntu-latest
@@ -26,8 +54,8 @@ jobs:
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
-          CORE_URL: ${{ inputs.core_wheel }}
-          VERSION: ${{ inputs.version }}
+          CORE_URL: ${{ needs.select.outputs.core_wheel }}
+          VERSION: ${{ needs.select.outputs.version }}
           REF: ${{ github.ref }}
         run: |
           test "$REF" = refs/heads/main
@@ -37,7 +65,7 @@ jobs:
           name: standard-app
           path: dist/standard/*
   publish:
-    needs: compose
+    needs: [select, compose]
     runs-on: ubuntu-latest
     environment: standard-app
     permissions:
@@ -53,7 +81,7 @@ jobs:
           path: dist
       - name: Publish the approved immutable app profile
         env:
-          VERSION: ${{ inputs.version }}
+          VERSION: ${{ needs.select.outputs.version }}
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
           REVISION: ${{ github.sha }}

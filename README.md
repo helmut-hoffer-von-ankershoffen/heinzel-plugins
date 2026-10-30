@@ -18,13 +18,11 @@ make acceptance NAME=clock
 make release NAME=clock
 ```
 
-Until the compatible core is released, add `CORE=/path/to/heinzel-0.9.1-py3-none-any.whl`.
-CI can download a candidate wheel from an official core Actions run with the `core_run` input or
-`CORE_CANDIDATE_RUN` repository variable. It installs the artifact and never builds or tests core.
-Once 0.9.1 is released, remove the bootstrap variable; each project's lock selects its compatible released core.
-Core 0.9.0 predates these plugin contracts and is outside every migrated plugin's supported range.
+Each project's lock selects its compatible released SDK. For a candidate SDK, add `CORE=/path/to/core.whl`.
+CI can download a candidate wheel from an official Core Actions run with the `core_run` input or
+`CORE_CANDIDATE_RUN` repository variable. It installs the artifact and never builds or tests Core.
 
-`check-fast` runs owning lint and unit tests. `check` runs the owning plugin's formatting, lint, spelling, strict mypy/Pyright, Python tests and coverage (at least
+`check-fast` runs owning lint and offline unit/integration tests. `check` runs the owning plugin's formatting, lint, spelling, strict mypy/Pyright, Python tests and coverage (at least
 90%), plus its declared frontend checks. `acceptance` installs built core/plugin wheels into a separate environment
 and runs the owning head and browser tests. `release` checks and builds one plugin and prints its independent tag/artifacts.
 It publishes nothing. The Release workflow previews by default; its explicit publish option creates that plugin's
@@ -112,9 +110,12 @@ build, audit and installed acceptance. Toolkit tests do not run core's suite.
 Only locally reviewed metadata can enroll a plugin in the `standard` profile. Topic discovery never enrolls defaults.
 The composition workflow verifies an official core release and independently released plugin artifacts, runs
 installed acceptance on those exact wheels, and proves installation into a fresh environment before publishing a
-digest-pinned profile. It does not rebuild plugin releases.
+digest-pinned profile. It does not rebuild plugin releases. Every fifteen minutes it checks for a newly published
+SDK without a complete standard app, verifies GitHub/PyPI artifact identity, and composes the missing release.
+An existing complete composition is a no-op. The public quick start is always `uvx heinzel@latest`; versions stay in
+machine-readable release metadata and locks.
 Clock, Resource, Tailscale and the Heinzelmännchen theme are included and active by default. Sharing stays off until
-explicitly enabled, and installing the theme plugin starts no playback or theme-selection change.
+explicitly enabled. An unconfigured app uses its theme recommendation; saved theme choices stay authoritative and installation starts no playback.
 User disable/removal choices survive a profile refresh. Minimal core has no plugin dependencies.
 
 ```bash
@@ -122,13 +123,13 @@ make profile CORE=<built-core-wheel>
 ```
 
 This writes a local profile from already-built owning artifacts. The approved composition workflow produces the
-release profile consumed by `uvx --from heinzel hz-install`. Plugin releases remain independent of app composition.
+release profile consumed automatically by `uvx heinzel@latest`. Plugin releases remain independent of app composition.
 
 ## Migration provenance
 
 The initial migration moves Clock, Tailscale, Atlassian, GitHub, Google and Zoom from
 [heinzel](https://github.com/helmut-hoffer-von-ankershoffen/heinzel), and Weather and Example from
 [heinzel-contrib](https://github.com/helmut-hoffer-von-ankershoffen/heinzel-contrib).
-Resource is the only built-in module extracted for 0.9. Sound, Theme and the other core modules remain in core.
+Resource is the only built-in module extracted in this migration. Sound, Theme and the other core modules remain in core.
 Their earlier history and attribution remain in the original repositories. Existing public distribution names stay
 stable; the migration versions advance independently before publishing the changed artifacts.
