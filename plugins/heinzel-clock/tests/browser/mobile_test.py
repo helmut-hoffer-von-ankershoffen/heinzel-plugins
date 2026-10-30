@@ -15,8 +15,8 @@ ROOT = Path(__file__).resolve().parents[2]
 
 
 @pytest.mark.timeout(600)
-@pytest.mark.parametrize("script", ["mobile.mjs", "globe.mjs"])
-def test_installed_clock_mobile_gesture(tmp_path, script):
+@pytest.mark.parametrize("script", ["mobile.mjs", "globe.mjs", "contrast.mjs"])
+def test_installed_clock_browser_contract(tmp_path, script):
     environment = dict(os.environ)
     environment["HZ_PLUGINS_ENABLED"] = "true"
     environment["HZ_CLOCK__ZONES"] = (

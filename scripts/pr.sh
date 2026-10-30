@@ -69,7 +69,11 @@ if git fetch --quiet origin "$branch" 2>/dev/null; then
     exit 2
   fi
 fi
-[ -n "${NO_PREFLIGHT:-}" ] || make --no-print-directory preflight BASE="$base/main"
+if [ -z "${NO_PREFLIGHT:-}" ]; then
+  # The outer Makefile deliberately does not export NAME and CORE or propagate
+  # make overrides. Restore only the selected plugin context as literal arguments.
+  make --no-print-directory preflight BASE="$base/main" "NAME=${PLUGIN_NAME:-}" "CORE=${PLUGIN_CORE:-}"
+fi
 
 if [ -n "${BODY_FILE:-}" ]; then body="$(cat "$BODY_FILE")"; else body="${BODY:-}"; fi
 [ -n "$body" ] || body="$(git log --reverse --format='- %s' "$base/main..HEAD")"
