@@ -28,18 +28,25 @@ from heinzel.kernel import CapabilitySettings
 from pydantic import JsonValue
 
 from heinzel_google import _captured_source_enabled
-from heinzel_google._calendar import GoogleCalendar
-from heinzel_google._existing_lease import ReadWindow
+from heinzel_google._calendar import _EVENT_ID, GoogleCalendar
+from heinzel_google._connected_items import MAX_ITEMS, with_item_identity
+from heinzel_google._existing_lease import ReadWindow, _invalid_constant, _unique_pairs
 from heinzel_google._gws import GoogleSession, Gws, Process
 from heinzel_google._selected_gws import SelectedCapturedGwsRead, source_digest
 
 _OPERATION = "capability-method:calendar.events"
+_DISCLOSURE = (
+    "This read accepts at most 100 candidate calendar occurrences; narrow the window if it finds more. "
+    "The provider IDs identify returned occurrences only; they do not establish complete history, "
+    "a revision, or whether an occurrence needs attention."
+)
 _SOURCE_FILES = (
     "__init__.py",
     "_calendar.py",
     "_captured_mail.py",
     "_captured_artifact.py",
     "_connected_calendar.py",
+    "_connected_items.py",
     "_connected_mail.py",
     "_connected_artifact.py",
     "_documents.py",
@@ -97,6 +104,7 @@ class _CalendarSourceGuard(Gws):
 
     def __init__(self, lease: SelectedCapturedGwsRead, version: str, source: str, binding: _OwnerBinding) -> None:
         self._lease, self._version, self._source, self._binding = lease, version, source, binding
+        self._ids: set[str] = set()
 
     def run(self, executable: str, arguments: Sequence[str], timeout: float) -> Process:
         """Run a single page only with the same source snapshot.
@@ -108,7 +116,27 @@ class _CalendarSourceGuard(Gws):
         if _source_revision(self._lease, self._version) != self._source:
             msg = "The Google read implementation changed"
             raise HeinzelError(msg)
-        return self._lease.run(executable, arguments, timeout)
+        result = self._lease.run(executable, arguments, timeout)
+        if list(arguments[:3]) == ["calendar", "events", "list"] and result.exit_code == 0 and not result.truncated:
+            self._check_ids(result.stdout)
+        return result
+
+    def _check_ids(self, data: bytes) -> None:
+        try:
+            payload = json.loads(data, object_pairs_hook=_unique_pairs, parse_constant=_invalid_constant)
+            if not isinstance(payload, dict) or not isinstance(payload.get("items", []), list):
+                raise TypeError  # noqa: TRY301
+            for item in payload.get("items", []):
+                identity = item.get("id") if isinstance(item, dict) else None
+                if not isinstance(identity, str) or not _EVENT_ID.fullmatch(identity) or identity in self._ids:
+                    raise ValueError  # noqa: TRY301
+                self._ids.add(identity)
+                if len(self._ids) > MAX_ITEMS:
+                    msg = "The reviewed calendar window contains more than 100 occurrences; narrow the window"
+                    raise HeinzelError(msg)
+        except (ValueError, TypeError, RecursionError):
+            msg = "The Google calendar returned invalid or ambiguous occurrence identities"
+            raise HeinzelError(msg) from None
 
 
 class _CalendarReadLease(ConnectedReadLease):
@@ -176,7 +204,7 @@ class _CalendarReadLease(ConnectedReadLease):
             msg = "The Google connection account or scopes changed"
             raise HeinzelError(msg)
         _, schema_sha256 = capability_read_schema("calendar", "events")
-        return ConnectedReadReview(
+        review = ConnectedReadReview(
             owner=self._owner,
             session=self._session_id,
             operation=_OPERATION,
@@ -186,7 +214,9 @@ class _CalendarReadLease(ConnectedReadLease):
             account_display=identity.email,
             provider_scopes=scopes,
             fixed_arguments=self._fixed,
+            candidate_read_disclosure=_DISCLOSURE,
         )
+        return with_item_identity(review)
 
     def read(self, arguments: Mapping[str, JsonValue]) -> JsonValue:
         """Read only the fixed reviewed primary-calendar window; no dynamic arguments or writes.
@@ -201,6 +231,9 @@ class _CalendarReadLease(ConnectedReadLease):
         guarded = _CalendarSourceGuard(self._lease, self._version, self._source, self._binding)
         session = GoogleSession(self._session.settings, guarded)
         events = GoogleCalendar(session).events(Window(since=self._window.since, until=self._window.until))
+        if len(events) > MAX_ITEMS:
+            msg = "The reviewed calendar window contains more than 100 occurrences; narrow the window"
+            raise HeinzelError(msg)
         return [event.model_dump(mode="json") for event in events]
 
     def close(self) -> None:

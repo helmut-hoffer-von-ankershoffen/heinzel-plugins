@@ -3,6 +3,7 @@
 import json
 import time
 
+import heinzel
 import pytest
 from heinzel import Config, CurrentUser, HeinzelError, Kernel, Module, ModuleRecord, Settings
 from heinzel.kernel import Origin
@@ -15,6 +16,34 @@ from heinzel_google._mail import Gmail
 from heinzel_google._models import GoogleSettings
 
 pytestmark = pytest.mark.unit
+
+
+def _bounded_page(count, params):
+    assert params["maxResults"] == 100
+    start = 100 if "pageToken" in params else 0
+    end = min(start + 100, count)
+    page = {"messages": [{"id": f"m{index}"} for index in range(start, end)]}
+    if end < count:
+        page["nextPageToken"] = "next"
+    return Process(0, json.dumps(page).encode())
+
+
+def _metadata_page(params, state):
+    item = {
+        "id": "foreign" if state["bad_id"] else params["id"],
+        "internalDate": "1767261600000",
+        "payload": {
+            "headers": [
+                {"name": "Subject", "value": "Example"},
+                {"name": "From", "value": "A Person <person@example.org>"},
+            ]
+        },
+    }
+    if state["snippet"]:
+        item["snippet"] = "private-body-excerpt"
+    if state["extra_header"]:
+        item["payload"]["headers"].append({"name": "X-Secret", "value": "private-body-excerpt"})
+    return Process(0, json.dumps(item).encode())
 
 
 @pytest.fixture
@@ -41,6 +70,7 @@ def prepared(tmp_path, monkeypatch):  # noqa: C901 - multiple explicit fake prov
         "provider_error": False,
         "repeat": False,
         "rotate_on_first_page": False,
+        "list_size": None,
     }
 
     class FakeLease(CapturedGmailRead):
@@ -66,6 +96,8 @@ def prepared(tmp_path, monkeypatch):  # noqa: C901 - multiple explicit fake prov
                 return Process(0, b'{"labels":[]}')
             if args[:4] == ["gmail", "users", "messages", "list"]:
                 params = json.loads(args[5])
+                if state["list_size"] is not None:
+                    return _bounded_page(state["list_size"], params)
                 if "pageToken" not in params:
                     if state["rotate_on_first_page"]:
                         state["account"] = "other"
@@ -74,22 +106,7 @@ def prepared(tmp_path, monkeypatch):  # noqa: C901 - multiple explicit fake prov
                     return Process(0, b'{"messages":[{"id":"m2"}],"nextPageToken":"next"}')
                 return Process(0, b'{"messages":[{"id":"m1"},{"id":"m2"}]}')
             if args[:4] == ["gmail", "users", "messages", "get"]:
-                params = json.loads(args[5])
-                item = {
-                    "id": "foreign" if state["bad_id"] else params["id"],
-                    "internalDate": "1767261600000",
-                    "payload": {
-                        "headers": [
-                            {"name": "Subject", "value": "Example"},
-                            {"name": "From", "value": "A Person <person@example.org>"},
-                        ]
-                    },
-                }
-                if state["snippet"]:
-                    item["snippet"] = "private-body-excerpt"
-                if state["extra_header"]:
-                    item["payload"]["headers"].append({"name": "X-Secret", "value": "private-body-excerpt"})
-                return Process(0, json.dumps(item).encode())
+                return _metadata_page(json.loads(args[5]), state)
             msg = "unexpected command"
             raise AssertionError(msg)
 
@@ -125,8 +142,16 @@ def test_bound_metadata_pagination_deduplicates_and_rejects_unreviewed_reads(pre
         "documents.read",
     }
     lease = service.open_lease("hz-test", "capability-method:mail.messages", fixed)
-    assert lease.review().fixed_arguments == fixed
-    assert "candidate metadata outside" in lease.review().candidate_read_disclosure
+    review = lease.review()
+    assert review.fixed_arguments == fixed
+    assert "candidate metadata outside" in review.candidate_read_disclosure
+    assert "at most 100" in review.candidate_read_disclosure
+    if hasattr(heinzel, "ConnectedItemIdentity"):
+        assert review.item_identity.collection == ()
+        assert review.item_identity.identity_field == "id"
+        assert review.item_identity.revision_field is None
+    else:
+        assert "item_identity" not in review.model_dump()
     values = lease.read({})
     assert [item["id"] for item in values] == ["m1", "m2"]
     gets = [item for item in state["commands"] if item[:4] == ["gmail", "users", "messages", "get"]]
@@ -136,6 +161,22 @@ def test_bound_metadata_pagination_deduplicates_and_rejects_unreviewed_reads(pre
     with pytest.raises(HeinzelError):
         lease.read({"id": "foreign"})
     lease.close()
+
+
+@pytest.mark.parametrize("count", [100, 101])
+def test_mail_bounded_listing_never_silently_truncates(prepared, count):
+    service, fixed, state, _ = prepared
+    state["list_size"] = count
+    lease = service.open_lease("hz-test", "capability-method:mail.messages", fixed)
+    try:
+        if count == 100:
+            assert len(lease.read({})) == 100
+        else:
+            with pytest.raises(HeinzelError):
+                lease.read({})
+            assert not any(args[:4] == ["gmail", "users", "messages", "get"] for args in state["commands"])
+    finally:
+        lease.close()
 
 
 def test_changed_account_credentials_or_mail_selection_fail_closed(prepared):

@@ -1,11 +1,13 @@
 """Owner-reviewed rolling schedule through the real Google plugin with offline boundaries."""
 
 import json
+import re
 import subprocess
 import sys
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
+import heinzel
 import pytest
 from fastapi.testclient import TestClient
 from heinzel import CompiledJobs, ConnectedReadService, CurrentUser, OperationLet
@@ -36,6 +38,7 @@ payload=json.load(sys.stdin)
 try: n=len(open({str(calls)!r}).read())
 except FileNotFoundError: n=0
 open({str(calls)!r},'a').write('x')
+if n == 3: open({str(calls.with_suffix(".input"))!r},'w').write(json.dumps(payload))
 if n in (0,2):
  name='agent:propose' if n == 0 else 'connected_read'
  args={{'expected_revision':0,'contract':'Inspect my selected source.','timeout_seconds':30}} if n == 0 else {{}}
@@ -73,10 +76,14 @@ def _fake_transport(monkeypatch, calls, launches):
         assert args[:3] == ["calendar", "events", "list"]
         params = json.loads(args[args.index("--params") + 1])
         calls.append(params)
-        return Process(
-            0,
-            b'{"items":[{"id":"fictional-1","summary":"Example","start":{"dateTime":"2026-01-01T10:00:00Z"},"end":{"dateTime":"2026-01-01T11:00:00Z"}}]}',
-        )
+        start = datetime.fromisoformat(params["timeMin"]) + timedelta(seconds=120)
+        item = {
+            "id": "fictional-1",
+            "summary": "Example",
+            "start": {"dateTime": start.isoformat()},
+            "end": {"dateTime": (start + timedelta(seconds=60)).isoformat()},
+        }
+        return Process(0, json.dumps({"items": [item]}).encode())
 
     class ExchangeProcess:
         pid = 123456789
@@ -125,6 +132,46 @@ def _confirm(client, session, request, route, operation, *, expected):  # noqa: 
     result = _post(client, "/api/system/runner/chat/confirm", params={"session": chat["id"], "action": action["id"]})
     assert next(item for item in result["actions"] if item["id"] == action["id"])["status"] == "done"
     return action
+
+
+def _observed_items(value):
+    if isinstance(value, dict):
+        if "observed_items" in value:
+            return value["observed_items"]
+        for child in value.values():
+            found = _observed_items(child)
+            if found is not None:
+                return found
+    if isinstance(value, list):
+        for child in value:
+            found = _observed_items(child)
+            if found is not None:
+                return found
+    if isinstance(value, str):
+        try:
+            return _observed_items(json.loads(value))
+        except (ValueError, RecursionError):
+            pass
+    return None
+
+
+def _assert_item_reference(path):
+    observed = _observed_items(json.loads(path.read_text()))
+    assert isinstance(observed, list)
+    assert len(observed) == 1
+    assert observed[0]["index"] == 0
+    assert re.fullmatch(r"[0-9a-f]{64}", observed[0]["reference"])
+
+
+def _assert_connected_completed(client, session, model_calls):
+    activity = client.get(
+        "/api/heinzel/tool-activity",
+        params={"session_id": session},
+        headers={"Authorization": "Bearer fixture-token"},
+    ).json()
+    assert any(item["tool"] == "connected_read" and item["status"] == "completed" for item in activity["items"])
+    if hasattr(heinzel, "ConnectedItemIdentity"):
+        _assert_item_reference(model_calls.with_suffix(".input"))
 
 
 def _daemon_tick(kernel):
@@ -240,6 +287,12 @@ def test_owner_reviewed_rolling_calendar_schedule_survives_daemon_restart(boot, 
         )
         assert grant["review"]["account_identity"] == "fixture-account"
         assert grant["review"]["provider_scopes"] == list(_SCOPES)
+        if hasattr(heinzel, "ConnectedItemIdentity"):
+            assert grant["review"]["item_identity"] == {
+                "collection": [],
+                "identity_field": "id",
+                "revision_field": None,
+            }
         _confirm(
             client,
             session,
@@ -279,10 +332,20 @@ def test_owner_reviewed_rolling_calendar_schedule_survives_daemon_restart(boot, 
         assert (end - start).total_seconds() == 660
         assert abs((datetime.now(UTC) - start).total_seconds() - 60) < 60
         assert model_calls.read_text() == "xxxx"
-        restarted = boot()
-        _daemon_tick(restarted)
-        assert len(calls) == 1
-        assert model_calls.read_text() == "xxxx"
+        _assert_connected_completed(client, session, model_calls)
+        # If the real clock crosses a cadence boundary, compare another restart in the new slot.
+        previous = report
+        for _ in range(3):
+            previous_calls, previous_model = len(calls), model_calls.read_text()
+            restarted = _daemon_tick(boot())
+            if int(previous.at.timestamp()) // 300 == int(restarted.at.timestamp()) // 300:
+                assert len(calls) == previous_calls
+                assert model_calls.read_text() == previous_model
+                break
+            previous = restarted
+        else:
+            pytest.fail("Could not test two daemon ticks within one schedule slot")
+        before_revoke = len(calls)
         _post(client, "/api/heinzel/revoke-connected-read", body={"session_id": session, "request_id": "grant"})
         response = client.get(
             "/api/heinzel/agent-schedule",
@@ -291,4 +354,4 @@ def test_owner_reviewed_rolling_calendar_schedule_survives_daemon_restart(boot, 
         )
         assert response.status_code == 200
         assert response.json()["status"] == "stale"
-        assert len(calls) == 1
+        assert len(calls) == before_revoke

@@ -3,6 +3,7 @@
 import json
 import time
 
+import heinzel
 import pytest
 from heinzel import CallIdentity, Config, CurrentUser, HeinzelError, Kernel, Module, ModuleRecord, Principal, Settings
 from heinzel.kernel import Origin
@@ -14,6 +15,20 @@ from heinzel_google._models import GoogleSettings
 from heinzel_google._selected_gws import SelectedCapturedGwsRead
 
 pytestmark = pytest.mark.unit
+
+
+def _calendar_page(state, args):
+    if state["mutation"]:
+        return Process(0, b'{"items":[],"nextPageToken":"next"}')
+    if state["pages"] is not None:
+        index = 1 if "pageToken" in json.loads(args[4]) else 0
+        return Process(0, json.dumps(state["pages"][index]).encode())
+    if state["items"] is not None:
+        return Process(0, json.dumps({"items": state["items"]}).encode())
+    return Process(
+        0,
+        b'{"items":[{"id":"event-1","summary":"Example","start":{"dateTime":"2026-01-01T10:00:00Z"},"end":{"dateTime":"2026-01-01T11:00:00Z"}}]}',
+    )
 
 
 @pytest.fixture
@@ -29,7 +44,15 @@ def prepared(tmp_path, monkeypatch):
     credential = json.dumps(
         {"type": "authorized_user", "client_id": "client", "client_secret": "secret", "refresh_token": "refresh"}
     ).encode()
-    state = {"account": "account-one", "reads": 0, "exports": 0, "mutation": None, "source_changed": False}
+    state = {
+        "account": "account-one",
+        "reads": 0,
+        "exports": 0,
+        "mutation": None,
+        "source_changed": False,
+        "items": None,
+        "pages": None,
+    }
     original_digest = connected.source_digest
     monkeypatch.setattr(
         connected,
@@ -61,12 +84,7 @@ def prepared(tmp_path, monkeypatch):
                 config_state["current"] = Config(
                     files=(), data={"google": {"gws_path": str(executable)}, "capabilities": {"calendar": "other"}}
                 )
-            if state["mutation"]:
-                return Process(0, b'{"items":[],"nextPageToken":"next"}')
-            return Process(
-                0,
-                b'{"items":[{"id":"event-1","summary":"Example","start":{"dateTime":"2026-01-01T10:00:00Z"},"end":{"dateTime":"2026-01-01T11:00:00Z"}}]}',
-            )
+            return _calendar_page(state, args)
 
     monkeypatch.setattr(connected, "SelectedCapturedGwsRead", FakeLease)
     module = Module("google", "fixture")
@@ -96,6 +114,13 @@ def test_owner_bound_service_observes_and_reads_selected_calendar(prepared, monk
     assert review.account_identity == "account-one"
     assert review.account_display is None
     assert review.fixed_arguments == fixed
+    assert "at most 100" in review.candidate_read_disclosure
+    if hasattr(heinzel, "ConnectedItemIdentity"):
+        assert review.item_identity.collection == ()
+        assert review.item_identity.identity_field == "id"
+        assert review.item_identity.revision_field is None
+    else:
+        assert "item_identity" not in review.model_dump()
     with pytest.raises(HeinzelError):
         lease.read({"unreviewed": "value"})
     events = lease.read({})
@@ -127,6 +152,48 @@ def test_owner_bound_service_observes_and_reads_selected_calendar(prepared, monk
     kernel.bind(GoogleSession, GoogleSession(GoogleSettings(gws_path=str(executable)), Gws()))
     with pytest.raises(HeinzelError):
         service.open_lease("hz-test", "capability-method:calendar.events", fixed)
+
+
+@pytest.mark.parametrize("identities", [["duplicate", "duplicate"], ["bad\nidentity"], [""]])
+def test_calendar_refuses_invalid_or_ambiguous_occurrence_ids(prepared, identities):
+    service, _current, _kernel, _executable, fixed, state, _config, _config_state = prepared
+    state["items"] = [{"id": identity, "start": {"dateTime": "2026-01-01T10:00:00Z"}} for identity in identities]
+    lease = service.open_lease("hz-test", "capability-method:calendar.events", fixed)
+    try:
+        with pytest.raises(HeinzelError, match="invalid or ambiguous"):
+            lease.read({})
+    finally:
+        lease.close()
+
+
+@pytest.mark.parametrize("count", [100, 101])
+def test_calendar_bound_never_silently_truncates(prepared, count):
+    service, _current, _kernel, _executable, fixed, state, _config, _config_state = prepared
+    state["items"] = [{"id": f"event-{index}", "start": {"dateTime": "2026-01-01T10:00:00Z"}} for index in range(count)]
+    lease = service.open_lease("hz-test", "capability-method:calendar.events", fixed)
+    try:
+        if count == 100:
+            assert len(lease.read({})) == 100
+        else:
+            with pytest.raises(HeinzelError, match="more than 100"):
+                lease.read({})
+    finally:
+        lease.close()
+
+
+def test_calendar_refuses_conflicting_duplicate_across_pages(prepared):
+    service, _current, _kernel, _executable, fixed, state, _config, _config_state = prepared
+    event = {"id": "event-1", "start": {"dateTime": "2026-01-01T10:00:00Z"}}
+    state["pages"] = [
+        {"items": [event], "nextPageToken": "next"},
+        {"items": [{**event, "summary": "A different version"}]},
+    ]
+    lease = service.open_lease("hz-test", "capability-method:calendar.events", fixed)
+    try:
+        with pytest.raises(HeinzelError, match="invalid or ambiguous"):
+            lease.read({})
+    finally:
+        lease.close()
 
 
 @pytest.mark.parametrize("mutation", ["source", "config"])

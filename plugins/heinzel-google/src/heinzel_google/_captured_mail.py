@@ -9,6 +9,7 @@ from typing import cast
 
 from heinzel import CurrentUser, HeinzelError, MailQuery, Window
 
+from heinzel_google._connected_items import MAX_ITEMS
 from heinzel_google._existing_lease import (
     _MAX_CREDENTIAL_BYTES,
     _MAX_TIMEOUT,
@@ -101,7 +102,9 @@ class CapturedGmailRead(SelectedCapturedGwsRead):
             raise ValueError
         self._check_page_query(params)
         projected = [*args]
-        projected[5] = json.dumps({**params, "fields": "messages(id),nextPageToken"}, separators=(",", ":"))
+        projected[5] = json.dumps(
+            {**params, "maxResults": MAX_ITEMS, "fields": "messages(id),nextPageToken"}, separators=(",", ":")
+        )
         result = self._read_page(projected, timeout)
         if result.exit_code == 0 and not result.truncated:
             payload = json.loads(result.stdout, object_pairs_hook=_unique_pairs, parse_constant=_invalid_constant)
@@ -117,7 +120,7 @@ class CapturedGmailRead(SelectedCapturedGwsRead):
                 ):
                     raise ValueError
                 self._listed.add(item["id"])
-            if len(self._listed) > MAX_MESSAGES:
+            if len(self._listed) > MAX_ITEMS:
                 raise ValueError
         return result
 

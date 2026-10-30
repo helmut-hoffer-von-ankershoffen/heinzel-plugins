@@ -9,6 +9,7 @@ from pydantic import JsonValue
 
 from heinzel_google._captured_mail import CapturedGmailRead
 from heinzel_google._connected_calendar import _check_binding, _OwnerBinding, _source_revision
+from heinzel_google._connected_items import with_item_identity
 from heinzel_google._existing_lease import ReadWindow
 from heinzel_google._gws import GoogleSession, Gws, Process
 from heinzel_google._mail import Gmail
@@ -18,7 +19,9 @@ _MAX_QUERY = 1000
 _DISCLOSURE = (
     "Gmail may return candidate metadata outside the exact sender or time window; the adapter filters results locally. "
     "The token has gmail.readonly scope, which can access message content, while this read requests only message "
-    "IDs, timestamps, labels and From, To, Cc and Subject headers. Subject filters are unsupported."
+    "IDs, timestamps, labels and From, To, Cc and Subject headers. Subject filters are unsupported. "
+    "This read accepts at most 100 distinct listed messages; narrow the query or window if it finds more. "
+    "Message IDs do not establish a revision, complete history, or whether a message needs attention."
 )
 
 
@@ -96,7 +99,7 @@ class MailReadLease(ConnectedReadLease):
             msg = "The Google connection account or scopes changed"
             raise HeinzelError(msg)
         _, schema_sha256 = capability_read_schema("mail", "messages")
-        return ConnectedReadReview(
+        review = ConnectedReadReview(
             owner=self._owner,
             session=self._session_id,
             operation=_OPERATION,
@@ -108,6 +111,7 @@ class MailReadLease(ConnectedReadLease):
             fixed_arguments=self._fixed,
             candidate_read_disclosure=_DISCLOSURE,
         )
+        return with_item_identity(review)
 
     def read(self, arguments: Mapping[str, JsonValue]) -> JsonValue:
         """Read metadata matching the reviewed query, never message bodies or writes.

@@ -4,6 +4,7 @@ import json
 import subprocess
 import sys
 
+import heinzel
 import pytest
 from fastapi.testclient import TestClient
 from heinzel.heads import web
@@ -11,7 +12,7 @@ from heinzel.heads import web
 from heinzel_google import _existing_lease as lease_module
 from heinzel_google._existing_lease import CapturedGwsRead
 from heinzel_google._gws import Process
-from tests.support.connected_schedule_support import _confirm, _post
+from tests.support.connected_schedule_support import _assert_item_reference, _confirm, _post
 
 pytestmark = pytest.mark.integration
 
@@ -35,6 +36,7 @@ payload=json.load(sys.stdin)
 try: n=len(open({str(model_calls)!r}).read())
 except FileNotFoundError: n=0
 open({str(model_calls)!r},'a').write('x')
+if n == 3: open({str(model_calls.with_suffix(".input"))!r},'w').write(json.dumps(payload))
 if n in (0,2,4):
  name='agent:propose' if n == 0 else 'connected_read'
  args={{'expected_revision':0,'contract':'Inspect my selected source.','timeout_seconds':30}} if n == 0 else {{}}
@@ -144,6 +146,12 @@ def test_mail_read_requires_its_own_review_and_revocation(boot, tmp_path, monkey
         assert "candidate metadata outside" in grant["review"]["candidate_read_disclosure"]
         assert "gmail.readonly" in grant["review"]["candidate_read_disclosure"]
         assert grant["review"]["provider_scopes"] == sorted(lease_module._MAIL_SCOPES)
+        if hasattr(heinzel, "ConnectedItemIdentity"):
+            assert grant["review"]["item_identity"] == {
+                "collection": [],
+                "identity_field": "id",
+                "revision_field": None,
+            }
         assert calls == []
         _confirm(
             client,
@@ -162,6 +170,10 @@ def test_mail_read_requires_its_own_review_and_revocation(boot, tmp_path, monkey
             ["gmail", "users", "messages", "list"],
             ["gmail", "users", "messages", "get"],
         ]
+        activity = client.get("/api/heinzel/tool-activity", params={"session_id": session}, headers=auth).json()
+        assert any(item["tool"] == "connected_read" and item["status"] == "completed" for item in activity["items"])
+        if hasattr(heinzel, "ConnectedItemIdentity"):
+            _assert_item_reference((tmp_path / "model-calls").with_suffix(".input"))
         _post(client, "/api/heinzel/revoke-connected-read", body={"session_id": session, "request_id": "mail"})
         status = client.get("/api/heinzel/connected-read-state", params={"session_id": session}, headers=auth).json()
         assert status["status"] == "revoked"
