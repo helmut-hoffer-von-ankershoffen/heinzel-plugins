@@ -200,7 +200,10 @@ def test_the_status_item_ticks_in_the_primary_zone_and_lists_the_others():
     item = primary_zone(TIMES)
     assert item is not None
     assert (item.text, item.icon, item.live) == ("Lisbon", "globe", LiveClock(zone="Europe/Lisbon"))
-    assert [line.text for line in item.detail] == ["Lisbon", "New York", "Tokyo"]
+    from heinzel import DetailLine
+
+    first = "Lisbon" if "badge" in DetailLine.model_fields else "Lisbon (Primary)"
+    assert [line.text for line in item.detail] == [first, "New York", "Tokyo"]
     assert [line.live.zone for line in item.detail] == [zone.zone for zone in TIMES]
     assert item.presentation == "value"
     assert item.effect == Navigate(path="/?panel=clock:world-clock")
@@ -274,3 +277,51 @@ def test_workday_countdown_is_owned_by_the_plugin(moment, expected):
 
     value = ZoneTime(zone="UTC", time="", hours=(9, 18), working=False)
     assert _work_status(value, datetime.fromisoformat(moment)) == expected
+
+
+@pytest.mark.parametrize(
+    ("moment", "icon", "label"),
+    [
+        ("2026-10-26T02:00:00+00:00", "moon", "Sleeping"),
+        ("2026-10-26T10:00:00+00:00", "briefcase-business", "Working"),
+        ("2026-10-26T20:00:00+00:00", "party-popper", "Off duty"),
+        ("2026-10-31T10:00:00+00:00", "party-popper", "Off duty"),
+    ],
+)
+def test_detail_matches_panel_designation_and_activity(moment, icon, label, monkeypatch):
+    from datetime import datetime
+
+    import heinzel_clock
+
+    class FixedDateTime(datetime):
+        @classmethod
+        def now(cls, tz=None):
+            return datetime.fromisoformat(moment)
+
+    monkeypatch.setattr(heinzel_clock, "datetime", FixedDateTime)
+    zone = ZoneTime(zone="UTC", time="", hours=(9, 18), working=False)
+    item = primary_zone([zone, zone.model_copy(update={"zone": "Europe/London"})])
+    assert item is not None
+    first, second = item.detail
+    if "badge" in heinzel_clock.DetailLine.model_fields:
+        assert first.model_dump()["badge"] == "Primary"
+        assert second.model_dump()["badge"] is None
+        assert first.icon == icon
+        assert first.tooltip == label
+    else:
+        assert first.text == "UTC (Primary)"
+        assert second.text == "London"
+    assert first.secondary == heinzel_clock._work_status(zone, datetime.fromisoformat(moment))
+
+
+def test_older_hosts_keep_the_primary_designation_without_new_fields(monkeypatch):
+    import heinzel_clock
+
+    fields = {key: value for key, value in heinzel_clock.DetailLine.model_fields.items() if key != "badge"}
+    monkeypatch.setattr(heinzel_clock.DetailLine, "model_fields", fields)
+    zone = ZoneTime(zone="UTC", time="", hours=(9, 18), working=False)
+    item = primary_zone([zone])
+    assert item is not None
+    assert item.detail[0].text == "UTC (Primary)"
+    assert item.detail[0].icon is None
+    assert item.detail[0].secondary
