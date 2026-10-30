@@ -1,5 +1,5 @@
 @import "tailwindcss/utilities.css" source(".");
-@theme inline {
+@theme inline reference {
   --color-background: var(--color-background);
   --color-foreground: var(--color-foreground);
   --color-muted: var(--color-muted);

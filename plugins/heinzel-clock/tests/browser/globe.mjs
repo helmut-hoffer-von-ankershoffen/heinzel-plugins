@@ -30,6 +30,10 @@ try {
     await setup.getByRole("button", { name: "Close setup" }).click();
     await setup.waitFor({ state: "hidden" });
   }
+  assert.ok(
+    await page.evaluate(() => getComputedStyle(document.documentElement).getPropertyValue("--color-switch").trim()),
+    "loading the clock stylesheet must preserve host switch colors",
+  );
   const canvas = panel.locator("canvas");
   await canvas.waitFor({ timeout: 15_000 });
   // Cobe draws asynchronously. Wait for a painted frame instead of treating canvas creation as a loaded map.

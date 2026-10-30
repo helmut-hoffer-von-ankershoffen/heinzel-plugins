@@ -84,3 +84,22 @@ it("closes through the declared host lifecycle callback", async () => {
   await userEvent.click(screen.getByRole("button", {name:"Close World clock"}));
   expect(props.onClose).toHaveBeenCalledOnce();
 });
+
+it("paints visible markers above night shading with a contrasting outline", () => {
+  vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockReturnValue({} as WebGLRenderingContext);
+  create.mockReturnValue({destroy, update});
+  const {container} = show();
+  const marker = container.querySelector('[data-zone-marker="Europe/Berlin"]');
+  expect(marker).toHaveAttribute("fill", "#ff9a3c");
+  expect(marker).toHaveAttribute("stroke", "#ffffff");
+  expect(marker?.closest("svg")?.previousElementSibling?.querySelector("path[clip-path]")).toBeInTheDocument();
+});
+
+it("shows the workday subline below each city in the sidebar panel", () => {
+  vi.useFakeTimers({toFake:["Date"]});
+  vi.setSystemTime(new Date("2026-10-26T06:00:00Z"));
+  vi.spyOn(HTMLCanvasElement.prototype, "getContext").mockReturnValue(null);
+  show();
+  const row = screen.getByText("Berlin").closest("li")!;
+  expect(within(row).getByText(/^Starts in 2h/)).toBeVisible();
+});

@@ -18,6 +18,10 @@ The settings before per-zone hours (`zones` as names and one `working_hours` for
 `hz system doctor` reports them as degraded. `hz setup clock` rewrites them in the new shape when they are in your
 user file; remove `working_hours` from a project `hz.toml` or `HZ_CLOCK__WORKING_HOURS` yourself.
 
+The World Clock sidebar shows each city's workday countdown. Its markers retain bright outlines through night
+shading. On hosts that support detail badges, the footer pane also shows the Primary tag and working, sleeping or
+off-duty icon; older hosts keep the primary designation as text.
+
 Development and release commands: [repository guide](../../README.md).
 
 Migration provenance: heinzel, before the 0.9 plugin-boundary migration.
