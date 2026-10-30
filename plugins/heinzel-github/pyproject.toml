@@ -129,3 +129,12 @@ pythonVersion = "3.12"
 
 [tool.hatch.build.targets.sdist]
 exclude = [".venv", ".acceptance", ".preview", "dist", "web/node_modules", "**/__pycache__", ".pytest_cache", ".mypy_cache", ".coverage*"]
+
+[tool.heinzel.catalog]
+title = "GitHub"
+category = "connectors"
+highlights = [
+    "Pull requests and issues through GitHub CLI",
+    "Implements code-host and tracker contracts",
+    "Use the same operations from CLI, MCP and REST",
+]

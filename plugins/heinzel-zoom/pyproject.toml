@@ -128,3 +128,12 @@ pythonVersion = "3.12"
 
 [tool.hatch.build.targets.sdist]
 exclude = [".venv", ".acceptance", ".preview", "dist", "web/node_modules", "**/__pycache__", ".pytest_cache", ".mypy_cache", ".coverage*"]
+
+[tool.heinzel.catalog]
+title = "Zoom"
+category = "connectors"
+highlights = [
+    "Meeting context from meeting-summary emails",
+    "Uses a bound mail adapter",
+    "Implements the meetings contract",
+]

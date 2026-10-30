@@ -129,3 +129,12 @@ pythonVersion = "3.12"
 
 [tool.hatch.build.targets.sdist]
 exclude = [".venv", ".acceptance", ".preview", "dist", "web/node_modules", "**/__pycache__", ".pytest_cache", ".mypy_cache", ".coverage*"]
+
+[tool.heinzel.catalog]
+title = "Atlassian"
+category = "connectors"
+highlights = [
+    "Jira issues and Confluence pages",
+    "Implements tracker and documents contracts",
+    "Configure your own Atlassian access",
+]

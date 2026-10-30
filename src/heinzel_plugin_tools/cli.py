@@ -401,7 +401,9 @@ def check(project: Project, core: str | None, *, tests_only: bool = False, fast:
     if not tests_only:
         for command in steps[:2]:
             command += ruff_configuration(project)
-    marker = "unit and not perf" if fast else "not e2e and not perf"
+    # A small plugin may contain only offline integration tests; filtering to unit would exit 5.
+    # Fast skips strict types and coverage, while still checking every owning offline behavior.
+    marker = "not e2e and not perf"
     test = ["pytest", "-c", "pyproject.toml", "tests", "-m", marker, "-q"]
     steps.append(test if tests_only or fast else ["coverage", "run", "-m", *test])
     if not tests_only and not fast:

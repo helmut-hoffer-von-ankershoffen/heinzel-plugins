@@ -127,3 +127,13 @@ pythonVersion = "3.12"
 
 [tool.hatch.build.targets.sdist]
 exclude = [".venv", ".acceptance", ".preview", "dist", "web/node_modules", "**/__pycache__", ".pytest_cache", ".mypy_cache", ".coverage*"]
+
+[tool.heinzel.catalog]
+title = "Heinzelmännchen"
+category = "themes"
+highlights = [
+    "Warm light and dark palettes with character artwork",
+    "Claude FM, Die Heinzelmännchen and Hyper Focus soundscapes",
+    "Theme content owned entirely by this plugin",
+]
+themes = ["src/heinzel_theme/themes/heinzelmaennchen.toml"]

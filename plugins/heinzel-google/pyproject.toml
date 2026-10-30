@@ -129,3 +129,12 @@ pythonVersion = "3.12"
 
 [tool.hatch.build.targets.sdist]
 exclude = [".venv", ".acceptance", ".preview", "dist", "web/node_modules", "**/__pycache__", ".pytest_cache", ".mypy_cache", ".coverage*"]
+
+[tool.heinzel.catalog]
+title = "Google Workspace"
+category = "connectors"
+highlights = [
+    "Docs, Sheets, Drive, Calendar and Gmail",
+    "Uses the Google Workspace CLI",
+    "Implements documents, calendar and mail contracts",
+]

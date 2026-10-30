@@ -140,3 +140,12 @@ pythonVersion = "3.12"
 
 [tool.hatch.build.targets.sdist]
 exclude = [".venv", ".acceptance", ".preview", "dist", "web/node_modules", "**/__pycache__", ".pytest_cache", ".mypy_cache", ".coverage*"]
+
+[tool.heinzel.catalog]
+title = "Weather"
+category = "utilities"
+highlights = [
+    "Open-Meteo forecasts without an API key",
+    "Weather page, footer status, Today widget and notices",
+    "Weather-aware character signals",
+]

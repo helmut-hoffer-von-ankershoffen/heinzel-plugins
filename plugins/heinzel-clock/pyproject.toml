@@ -131,3 +131,12 @@ pythonVersion = "3.12"
 
 [tool.hatch.build.targets.sdist]
 exclude = [".venv", ".acceptance", ".preview", "dist", "web/node_modules", "**/__pycache__", ".pytest_cache", ".mypy_cache", ".coverage*"]
+
+[tool.heinzel.catalog]
+title = "World Clock"
+category = "utilities"
+highlights = [
+    "Team time zones across sidebar, footer, header and ticker",
+    "Clock operations through CLI, MCP and REST",
+    "World Clock page and Today contribution",
+]
