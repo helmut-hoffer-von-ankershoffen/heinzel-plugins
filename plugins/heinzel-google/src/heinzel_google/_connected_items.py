@@ -1,7 +1,13 @@
 """Optional host item-evidence declaration for bounded returned provider IDs."""
 
+from __future__ import annotations
+
+from typing import TYPE_CHECKING
+
 import heinzel
-from heinzel import ConnectedReadReview
+
+if TYPE_CHECKING:
+    from heinzel import ConnectedReadReview
 
 MAX_ITEMS = 100
 

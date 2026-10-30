@@ -3,9 +3,13 @@
 import json
 import time
 
+import heinzel
 import pytest
 from heinzel import Config, CurrentUser, HeinzelError, Kernel, Module, ModuleRecord, Settings
 from heinzel.kernel import Origin
+
+if not hasattr(heinzel, "ConnectedReadLease"):
+    pytest.skip("Captured reads require the newer host SDK", allow_module_level=True)
 
 from heinzel_google import _connected_artifact as artifact
 from heinzel_google._captured_artifact import CapturedDocument, CapturedSpreadsheet

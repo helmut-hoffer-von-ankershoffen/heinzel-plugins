@@ -8,6 +8,9 @@ import pytest
 from heinzel import Config, CurrentUser, HeinzelError, Kernel, Module, ModuleRecord, Settings
 from heinzel.kernel import Origin
 
+if not hasattr(heinzel, "ConnectedReadLease"):
+    pytest.skip("Captured reads require the newer host SDK", allow_module_level=True)
+
 from heinzel_google import _connected_mail as mail
 from heinzel_google._captured_mail import CapturedGmailRead
 from heinzel_google._connected_calendar import GoogleConnectedReadService

@@ -13,7 +13,6 @@ import pytest
 import uvicorn
 from heinzel.heads import web
 
-from tests.support.connected_mail_support import _setup_mail
 from tests.support.installed_browser_support import run_installed_browser
 
 pytestmark = pytest.mark.e2e
@@ -26,6 +25,8 @@ def test_mounted_google_mail_review(tmp_path, engine):
 
 
 def _exercise_mounted_google_mail_review(boot, tmp_path, monkeypatch, engine):
+    from tests.support.connected_mail_support import _setup_mail
+
     package = Path(os.environ["HZ_TEST_BROWSER_PACKAGE"])
     browser_cache = Path(os.environ["HZ_TEST_BROWSER_CACHE"])
     monkeypatch.setenv("PLAYWRIGHT_BROWSERS_PATH", str(browser_cache))

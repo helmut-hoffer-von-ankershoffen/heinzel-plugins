@@ -8,6 +8,9 @@ import pytest
 from heinzel import CallIdentity, Config, CurrentUser, HeinzelError, Kernel, Module, ModuleRecord, Principal, Settings
 from heinzel.kernel import Origin
 
+if not hasattr(heinzel, "ConnectedReadLease"):
+    pytest.skip("Captured reads require the newer host SDK", allow_module_level=True)
+
 from heinzel_google import _connected_calendar as connected
 from heinzel_google._calendar import GoogleCalendar
 from heinzel_google._gws import GoogleSession, Gws, Process
