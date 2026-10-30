@@ -56,7 +56,8 @@ def complete_app(repository, version, release, metadata):
     profile = json.loads(content)
     if (
         set(profile) != {"format", "sdk", "core_version", "artifacts"}
-        or profile["format"] != 1
+        or type(profile["format"]) is not int
+        or profile["format"] not in {1, 2}
         or profile["sdk"] != 1
         or profile["core_version"] != version
         or not isinstance(profile["artifacts"], list)

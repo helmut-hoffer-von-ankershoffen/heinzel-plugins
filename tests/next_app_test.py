@@ -48,7 +48,7 @@ def existing_app(releases, monkeypatch, change=lambda _profile: None):
                 "url": f"https://github.com/example/plugins/releases/download/app-v1.2.3/{filename}",
             }
         )
-    profile = {"format": 1, "sdk": 1, "core_version": "1.2.3", "artifacts": artifacts}
+    profile = {"format": 2, "sdk": 1, "core_version": "1.2.3", "artifacts": artifacts}
     change(profile)
     content = json.dumps(profile).encode()
     release = {
@@ -63,8 +63,9 @@ def existing_app(releases, monkeypatch, change=lambda _profile: None):
     return release
 
 
-def test_an_existing_complete_app_is_a_noop(releases, monkeypatch):
-    existing_app(releases, monkeypatch)
+@pytest.mark.parametrize("profile_format", [1, 2])
+def test_an_existing_complete_app_is_immutable_even_when_its_lifecycle_is_legacy(releases, monkeypatch, profile_format):
+    existing_app(releases, monkeypatch, lambda profile: profile.update(format=profile_format))
     assert SELECT("example/plugins") is None
 
 

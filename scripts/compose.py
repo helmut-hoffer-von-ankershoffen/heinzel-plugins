@@ -5,6 +5,7 @@
 """Compose a standard app from a verified released core and locally enrolled plugin metadata."""
 
 import argparse
+import hashlib
 import os
 import shutil
 import urllib.request
@@ -14,16 +15,37 @@ from urllib.parse import urlsplit
 from packaging.utils import parse_wheel_filename
 from packaging.version import Version
 
-from heinzel_plugin_tools.cli import ROOT, acceptance, profile, projects, run, validate_lock
+from heinzel_plugin_tools.cli import ROOT, acceptance, profile, projects, run, validate_lock, write_accepted_profile
+from heinzel_plugin_tools.installation import check_profile_format, isolated_environment, verify_managed_profile
 from heinzel_plugin_tools.publishing import restore, tag_revision
 
 
-def compose(core: Path, destination: Path, base_url: str | None) -> None:
+def compose(core: Path, destination: Path, base_url: str | None, *, core_sha256: str | None = None) -> None:
     """Install the verified independent releases, then prove the profile in a fresh environment."""
     inventory = projects()
     repository = os.environ.get("GH_REPO")
     if not repository:
         raise ValueError("Set GH_REPO to the reviewed composition repository's owner/name")
+    verified = {core: core_sha256 or hashlib.sha256(core.read_bytes()).hexdigest()}
+
+    def unchanged():
+        for artifact, digest in verified.items():
+            if hashlib.sha256(artifact.read_bytes()).hexdigest() != digest:
+                raise ValueError("A verified release artifact changed before composition")
+
+    unchanged()
+    environment = destination / "acceptance"
+    isolated = isolated_environment(destination / "acceptance-state")
+    run(["uv", "venv", "--clear", str(environment)], env=isolated)
+    interpreter = environment / "bin/python"
+    unchanged()
+    run(["uv", "pip", "install", "--python", str(interpreter), str(core)], env=isolated)
+    # Check the accepted SDK's actual profile parser before restoring or testing independent providers.
+    # Format 2 promises managed startup continuity; the plugin ABI remains sdk=1.
+    probe = destination / "protocol.json"
+    profile([], core, probe, None)
+    check_profile_format(interpreter, probe, env=isolated, runner=run)
+    probe.unlink()
     selected = {}
     for project in inventory:
         if "standard" in project.options.get("profiles", []):
@@ -35,25 +57,22 @@ def compose(core: Path, destination: Path, base_url: str | None) -> None:
                 destination / ".verified" / project.name,
             )
             wheel = next(Path(path) for path in release["artifacts"] if path.endswith(".whl"))
+            verified[wheel] = release["artifact_hashes"][str(wheel)]
+            unchanged()
             selected[project.name] = wheel
             if any((project.directory / "tests" / name).is_dir() for name in ("acceptance", "browser", "e2e")):
                 acceptance(project, str(core), wheel=wheel)
+            unchanged()
+    unchanged()
     result = profile(inventory, core, destination / "local.json", None, selected_wheels=selected)
     for artifact in result["artifacts"]:
         target = destination / artifact["filename"]
         if Path(artifact["url"]).resolve() != target.resolve():
             shutil.copyfile(artifact["url"], target)
-    environment = destination / "acceptance"
-    run(["uv", "venv", "--clear", str(environment)])
-    interpreter = environment / "bin/python"
-    run(["uv", "pip", "install", "--python", str(interpreter), str(core)])
-    isolated = {key: value for key, value in os.environ.items() if not key.startswith("HZ_")}
-    for name in ("CONFIG_HOME", "DATA_DIR", "CACHE_DIR", "STATE_DIR", "LOG_DIR"):
-        isolated[f"HZ_{name}"] = str(destination / "acceptance-state" / name.lower())
-    isolated["HZ_PLUGINS_ENABLED"] = "true"
     run(
         [
             str(interpreter),
+            "-I",
             "-m",
             "heinzel.heads.install",
             "--profile",
@@ -67,6 +86,7 @@ def compose(core: Path, destination: Path, base_url: str | None) -> None:
     run(
         [
             str(interpreter),
+            "-I",
             "-c",
             "from heinzel.kernel import discover; r,e=discover(); assert not e,e; "
             f"expected={set(p.name for p in inventory if 'standard' in p.options.get('profiles', []))!r}; "
@@ -80,7 +100,15 @@ def compose(core: Path, destination: Path, base_url: str | None) -> None:
         ],
         env=isolated,
     )
-    profile(inventory, core, destination / "standard.json", base_url, selected_wheels=selected)
+    verify_managed_profile(interpreter, destination / "local.json")
+    unchanged()
+    write_accepted_profile(
+        result,
+        destination / "local.json",
+        destination / "standard.json",
+        base_url,
+        artifact_directory=destination,
+    )
     (destination / "local.json").unlink()
     shutil.rmtree(environment)
     shutil.rmtree(destination / "acceptance-state", ignore_errors=True)
@@ -132,6 +160,7 @@ def main() -> None:
         core,
         destination,
         f"https://github.com/helmut-hoffer-von-ankershoffen/heinzel-plugins/releases/download/app-v{version}",
+        core_sha256=hashlib.sha256(content).hexdigest(),
     )
 
 

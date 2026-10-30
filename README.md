@@ -116,6 +116,8 @@ The composition workflow verifies an official core release and independently rel
 installed acceptance on those exact wheels, and proves installation into a fresh environment before publishing a
 digest-pinned profile. It does not rebuild plugin releases. Every fifteen minutes it checks for a newly published
 SDK without a complete standard app, verifies GitHub/PyPI artifact identity, and composes the missing release.
+The accepted SDK must first validate the current app lifecycle (`format=2`, independently of the plugin ABI `sdk=1`),
+before any provider acceptance work. Legacy compositions remain immutable and are never relabeled as compatible.
 An existing complete composition is a no-op. The public quick start is always `uvx heinzel@latest`; versions stay in
 machine-readable release metadata and locks.
 Clock, Resource, Tailscale and the Heinzelmännchen theme are included and active by default. Sharing stays off until
