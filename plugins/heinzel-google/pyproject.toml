@@ -16,6 +16,9 @@ Issues = "https://github.com/helmut-hoffer-von-ankershoffen/heinzel-plugins/issu
 [project.entry-points."heinzel.modules"]
 google = "heinzel_google"
 
+[project.entry-points."heinzel.connected_sources"]
+google = "heinzel_google"
+
 [build-system]
 requires = ["hatchling>=1.29.0"]
 build-backend = "hatchling.build"

@@ -166,4 +166,9 @@ Token-shaped strings in anything `gws` says are redacted before it is shortened.
 
 Development and release commands: [repository guide](../../README.md).
 
+Installed browser acceptance requires npm and preinstalled Playwright Chromium and WebKit browsers. The tests install
+their own pinned Playwright and axe dependencies from `tests/browser/package-lock.json`, with package scripts disabled.
+The captured-read acceptance tests also require a core SDK with source-capture support, supplied as `CORE=<wheel>`;
+ordinary Google capabilities remain available on the declared older supported cores.
+
 Migration provenance: heinzel, before the 0.9 plugin-boundary migration.
