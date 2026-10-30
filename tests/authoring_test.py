@@ -41,13 +41,13 @@ def wheel(path, name="heinzel-unforeseen", version="1.0.0"):
     return path
 
 
-def test_fast_loop_checks_only_own_lint_and_unit_behavior(project, monkeypatch):
+def test_fast_loop_checks_only_own_lint_and_offline_behavior(project, monkeypatch):
     calls = []
     monkeypatch.setattr(cli, "prepare_environment", lambda *_: project.directory / ".venv/bin/python")
     monkeypatch.setattr(cli, "run", lambda command, **_: calls.append(command))
     cli.check(project, "candidate.whl", fast=True)
     assert any("--no-fix" in command for command in calls)
-    assert any("unit and not perf" in command for command in calls)
+    assert any("not e2e and not perf" in command for command in calls)
     assert not any("mypy" in Path(command[0]).name or "coverage" in command or "typos" in command for command in calls)
     assert all("heinzel_unrelated" not in " ".join(command) for command in calls)
 

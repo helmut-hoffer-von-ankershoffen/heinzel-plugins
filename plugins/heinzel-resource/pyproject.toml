@@ -127,3 +127,12 @@ pythonVersion = "3.12"
 
 [tool.hatch.build.targets.sdist]
 exclude = [".venv", ".acceptance", ".preview", "dist", "web/node_modules", "**/__pycache__", ".pytest_cache", ".mypy_cache", ".coverage*"]
+
+[tool.heinzel.catalog]
+title = "System Resources"
+category = "utilities"
+highlights = [
+    "Live CPU, memory and system load",
+    "Resource visualizer and Today widget",
+    "Independently installed and tested utility",
+]

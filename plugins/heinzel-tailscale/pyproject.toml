@@ -129,3 +129,12 @@ pythonVersion = "3.12"
 
 [tool.hatch.build.targets.sdist]
 exclude = [".venv", ".acceptance", ".preview", "dist", "web/node_modules", "**/__pycache__", ".pytest_cache", ".mypy_cache", ".coverage*"]
+
+[tool.heinzel.catalog]
+title = "Tailscale"
+category = "utilities"
+highlights = [
+    "Opt-in private connectivity for your workspace",
+    "Private sharing status and operations",
+    "Your network remains an explicit choice",
+]

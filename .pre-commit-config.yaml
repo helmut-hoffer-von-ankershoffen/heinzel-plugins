@@ -65,7 +65,7 @@ repos:
         exclude: ^plugins/
         stages: [pre-push]
       - id: owning-plugin-checks
-        name: owning plugin lint and unit tests
+        name: owning plugin lint and offline tests
         entry: uv run --frozen --group tooling hz-plugin check-changed --git-hook
         language: system
         pass_filenames: false

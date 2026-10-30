@@ -141,3 +141,12 @@ pythonVersion = "3.12"
 
 [tool.hatch.build.targets.sdist]
 exclude = [".venv", ".acceptance", ".preview", "dist", "web/node_modules", "**/__pycache__", ".pytest_cache", ".mypy_cache", ".coverage*"]
+
+[tool.heinzel.catalog]
+title = "Example Plugin"
+category = "reference"
+highlights = [
+    "A working reference for extension authors",
+    "Operations, settings and head contributions",
+    "Source to explore alongside the scaffold guide",
+]
