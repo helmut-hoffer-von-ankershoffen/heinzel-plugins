@@ -10,12 +10,16 @@ import pytest
 pytestmark = pytest.mark.integration
 
 
+@pytest.mark.parametrize("selected", [False, True])
 @pytest.mark.parametrize("conflict", [False, True])
 @pytest.mark.parametrize("inherited_git", [False, True])
-def test_pr_preserves_pushed_ancestry_and_a_resolved_main_merge(tmp_path, monkeypatch, conflict, inherited_git):
+def test_pr_preserves_pushed_ancestry_and_a_resolved_main_merge(
+    tmp_path, monkeypatch, conflict, inherited_git, selected
+):
     git = shutil.which("git")
     bash = shutil.which("bash")
-    assert git and bash
+    make = shutil.which("make")
+    assert git and bash and make
     foreign = tmp_path / "foreign.git"
     foreign.mkdir()
     index = foreign / "index"
@@ -28,6 +32,12 @@ def test_pr_preserves_pushed_ancestry_and_a_resolved_main_merge(tmp_path, monkey
     origin, work = tmp_path / "origin.git", tmp_path / "work"
     binaries = tmp_path / "bin"
     binaries.mkdir()
+    marker = tmp_path / "executed"
+    core = str(tmp_path / f"a wheel $(touch {marker}) `touch {marker}`.whl")
+    probe = tmp_path / "preflight.txt"
+    overrides = tmp_path / "preflight.mk"
+    overrides.write_text("tooling-check policies secrets:\n\t@:\n")
+    makefile = Path(__file__).parents[1] / "Makefile"
     for name in ("uv", "make", "gh"):
         stub = binaries / name
         stub.write_text(
@@ -35,7 +45,12 @@ def test_pr_preserves_pushed_ancestry_and_a_resolved_main_merge(tmp_path, monkey
             + (
                 'test "$2" != create || echo https://github.com/example/plugins/pull/1\n'
                 if name == "gh"
-                else "exit 0\n"
+                else f'exec "{make}" -f "{makefile}" -f "{overrides}" "$@"\n'
+                if name == "make"
+                else (
+                    'if [ "$5" = hz-plugin ] && [ "$6" = preflight ]; then\n'
+                    'printf "%s\n%s\n" "$PLUGIN_NAME" "$PLUGIN_CORE" > "$PROBE"\nfi\n'
+                )
             )
         )
         stub.chmod(0o755)
@@ -44,6 +59,9 @@ def test_pr_preserves_pushed_ancestry_and_a_resolved_main_merge(tmp_path, monkey
         "PATH": str(binaries) + os.pathsep + os.environ["PATH"],
         "GIT_CONFIG_GLOBAL": os.devnull,
         "GIT_CONFIG_NOSYSTEM": "1",
+        "PLUGIN_NAME": "harbor" if selected else "",
+        "PLUGIN_CORE": core if selected else "",
+        "PROBE": str(probe),
         **{
             f"GIT_{role}_{key}": value
             for role in ("AUTHOR", "COMMITTER")
@@ -84,6 +102,11 @@ def test_pr_preserves_pushed_ancestry_and_a_resolved_main_merge(tmp_path, monkey
     shutil.copyfile(Path(__file__).parents[1] / "scripts/pr.sh", script)
     result = run(bash, str(script), "feat: add widget", check=False)
     assert result.returncode == 0, result.stderr
+    assert not marker.exists()
+    if selected:
+        assert probe.read_text().splitlines() == ["harbor", core]
+    else:
+        assert not probe.exists()
     assert run(git, "ls-remote", "origin", "refs/heads/feature").stdout.split()[0] == revision
     assert run(git, "status", "--porcelain").stdout == ""
     assert (work / "base").read_text() == ("feature and main\n" if conflict else "feature\n")
