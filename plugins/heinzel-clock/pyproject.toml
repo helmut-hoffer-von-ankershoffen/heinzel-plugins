@@ -1,6 +1,6 @@
 [project]
 name = "heinzel-clock"
-version = "0.9.1"
+version = "0.9.2"
 description = "What time it is for everyone on the team: a Heinzelmännchen plugin."
 readme = "README.md"
 license = "MIT"
