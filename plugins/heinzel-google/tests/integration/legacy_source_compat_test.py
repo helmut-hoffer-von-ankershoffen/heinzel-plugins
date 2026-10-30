@@ -12,7 +12,7 @@ def test_old_sdk_retains_ordinary_providers_without_captured_service(tmp_path):
     script = r"""
 import subprocess, sys
 import heinzel
-from heinzel import ConnectedReadService, HeinzelError
+from heinzel import HeinzelError
 from heinzel.kernel import boot, discover, ProviderLet, ServiceLet
 discover(plugins=False)
 if hasattr(heinzel, 'captured_source_active'):
@@ -28,14 +28,15 @@ providers = {(let.capability, record.qualname) for record, let in kernel.lets(Pr
 assert {('calendar', 'google'), ('documents', 'google'), ('mail', 'google')} <= providers
 for record, let in kernel.lets(ServiceLet):
     if record.qualname == 'google':
-        assert not issubclass(let.provides, ConnectedReadService)
-from heinzel_google._connected_calendar import GoogleConnectedReadService
-try:
-    GoogleConnectedReadService(None, None)
-except HeinzelError:
-    pass
-else:
-    raise AssertionError('an unverified direct service could be constructed')
+        assert let.name != 'GoogleConnectedReadService'
+if hasattr(heinzel, 'ConnectedReadService'):
+    from heinzel_google._connected_calendar import GoogleConnectedReadService
+    try:
+        GoogleConnectedReadService(None, None)
+    except HeinzelError:
+        pass
+    else:
+        raise AssertionError('an unverified direct service could be constructed')
 assert not calls
 """
     env = {"PATH": "/usr/bin:/bin", "HOME": str(tmp_path)}
