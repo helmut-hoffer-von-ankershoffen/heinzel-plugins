@@ -4,6 +4,10 @@ Independent public plugins for [Heinzelmännchen](https://github.com/helmut-hoff
 Each project under `plugins/` owns its code, assets, dependency locks, tests, version and artifacts.
 Adding a project changes only its own directory. Core remains independently buildable and testable.
 
+For macOS and Linux, start with the [standard app installation guide](https://helmut.hoffer-von-ankershoffen.me/heinzel/guides/install/).
+Use `uvx heinzel@latest` if uv is available, or its guided curl/wget installer to install prerequisites automatically.
+Windows may work, but is not supported.
+
 ## Work on one plugin
 
 You need git, make and uv. No core checkout or sibling plugin environment is needed.
