@@ -185,6 +185,22 @@ export function WorldClock({ data, loading, visible = true, onClose, flowing = f
                 )}
               </svg>
               {!flat && (
+                <svg aria-hidden viewBox="0 0 100 100" className="pointer-events-none absolute inset-0 h-full w-full">
+                  {markers.filter((point) => point.visible).map((point) => (
+                    <circle
+                      key={point.zone}
+                      data-zone-marker={point.zone}
+                      cx={point.x}
+                      cy={point.y}
+                      r={point.zone === times[0]?.zone ? 1.15 : 0.9}
+                      fill={point.zone === times[0]?.zone ? "#ff9a3c" : "#62dcff"}
+                      stroke="#ffffff"
+                      strokeWidth="0.35"
+                    />
+                  ))}
+                </svg>
+              )}
+              {!flat && (
                 <div
                   className="absolute inset-0 touch-pan-y"
                   onPointerDown={(event) => {
@@ -303,6 +319,9 @@ export function WorldClock({ data, loading, visible = true, onClose, flowing = f
                             </span>
                           )}
                         </span>
+                      </span>
+                      <span className="block text-xs text-muted-foreground" title={work.detail}>
+                        {work.summary}
                       </span>
                     </button>
                     <WorkStateIcon work={work} />

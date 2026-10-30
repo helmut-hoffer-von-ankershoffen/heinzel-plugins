@@ -40,6 +40,7 @@ module.nav(
 )
 
 DEFAULT_HOURS = (9, 18)
+SLEEP_HOURS = (22, 6)
 DEFAULT_ZONES = ("Europe/Berlin", "America/New_York", "America/Los_Angeles")
 SATURDAY = 5
 """`datetime.weekday()` of Saturday: working days are Monday to Friday."""
@@ -190,12 +191,34 @@ def _work_status(zone: ZoneTime, moment: datetime) -> str:
     return f"{label} in {duration}"
 
 
-def _detail(zone: ZoneTime) -> DetailLine:
-    return DetailLine(
-        text=city(zone.zone),
-        live=LiveClock(zone=zone.zone),
-        secondary=_work_status(zone, datetime.now(UTC)),
-        tone="ok" if zone.working else "neutral",
+def _detail(zone: ZoneTime, *, primary: bool = False) -> DetailLine:
+    moment = datetime.now(UTC)
+    local = moment.astimezone(ZoneInfo(zone.zone))
+    working_now = local.weekday() < SATURDAY and zone.hours[0] <= local.hour < zone.hours[1]
+    icon = (
+        "briefcase-business"
+        if working_now
+        else "moon"
+        if local.hour < SLEEP_HOURS[1] or local.hour >= SLEEP_HOURS[0]
+        else "party-popper"
+    )
+    if "badge" not in DetailLine.model_fields:
+        return DetailLine(
+            text=f"{city(zone.zone)} (Primary)" if primary else city(zone.zone),
+            live=LiveClock(zone=zone.zone),
+            secondary=_work_status(zone, moment),
+            tone="ok" if working_now else "neutral",
+        )
+    return DetailLine.model_validate(
+        {
+            "text": city(zone.zone),
+            "live": LiveClock(zone=zone.zone),
+            "secondary": _work_status(zone, moment),
+            "badge": "Primary" if primary else None,
+            "icon": icon,
+            "tooltip": "Working" if working_now else "Sleeping" if icon == "moon" else "Off duty",
+            "tone": "ok" if working_now else "neutral",
+        }
     )
 
 
@@ -210,7 +233,7 @@ def primary_zone(times: list[ZoneTime]) -> StatusItem | None:
         icon="globe",
         live=LiveClock(zone=first.zone),
         presentation="value",
-        detail=[_detail(zone) for zone in times],
+        detail=[_detail(zone, primary=index == 0) for index, zone in enumerate(times)],
         effect=Navigate(path="/?panel=clock:world-clock"),
     )
 
