@@ -9,13 +9,14 @@ in heinzel-contrib and the archived heinzel-example repository.
 
 ## Install
 
-With Heinzelmännchen installed (`uv tool install git+https://github.com/helmut-hoffer-von-ankershoffen/heinzel`):
+Start Heinzelmännchen with `uvx heinzel@latest`. In another terminal, add this optional plugin:
 
-```bash
-hz system plugin add "heinzel-example @ git+https://github.com/helmut-hoffer-von-ankershoffen/heinzel-plugins#subdirectory=plugins/heinzel-example"
+```sh
+hz system plugin add example --confirm
 ```
 
-Running `hz system plugin add` again upgrades; `hz system plugin remove heinzel-example` removes it.
+The catalog resolves its compatible project metadata automatically. Use `hz system update` to update the app and
+compatible plugins; `hz system plugin remove heinzel-example` removes this plugin.
 
 ## Use
 

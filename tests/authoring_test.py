@@ -181,7 +181,7 @@ def released_artifacts(tmp_path):
     return {path.name: path.read_bytes() for path in (whl, sdist)}
 
 
-@pytest.mark.parametrize("failure", [None, "digest", "provenance"])
+@pytest.mark.parametrize("failure", [None, "digest", "provenance", "attestation-change"])
 def test_deferred_upload_verifies_original_commit_and_bytes_without_rebuilding(
     tmp_path, monkeypatch, released_artifacts, failure
 ):
@@ -209,6 +209,9 @@ def test_deferred_upload_verifies_original_commit_and_bytes_without_rebuilding(
             (directory / filename).write_bytes(released_artifacts[filename])
         elif failure == "provenance":
             raise subprocess.CalledProcessError(1, command)
+        elif failure == "attestation-change":
+            artifact = Path(command[3])
+            artifact.write_bytes(artifact.read_bytes() + b"replaced during attestation")
         return subprocess.CompletedProcess(command, 0)
 
     monkeypatch.setattr(publishing, "api", api)
@@ -221,6 +224,9 @@ def test_deferred_upload_verifies_original_commit_and_bytes_without_rebuilding(
         result = publishing.restore("example/plugins", "heinzel-unforeseen/v1.0.0", "unforeseen", destination)
         assert result["revision"] == original
         assert all(path.read_bytes() == released_artifacts[path.name] for path in destination.iterdir())
+        assert result["artifact_hashes"] == {
+            str(destination / name): hashlib.sha256(data).hexdigest() for name, data in released_artifacts.items()
+        }
         verifications = [command for command in calls if command[:3] == ["gh", "attestation", "verify"]]
         assert len(verifications) == 2
         assert all(original in command and "--deny-self-hosted-runners" in command for command in verifications)

@@ -204,6 +204,7 @@ def restore(repository: str, tag: str, name: str, destination: Path) -> dict:
         raise ValueError("The release source distribution does not match the selected plugin version")
     destination.mkdir(parents=True, exist_ok=False)
     files = []
+    artifact_hashes = {}
     for asset in assets:
         filename = asset["name"]
         if Path(filename).name != filename or asset["size"] > 128 * 1024 * 1024:
@@ -238,8 +239,18 @@ def restore(repository: str, tag: str, name: str, destination: Path) -> dict:
             check=True,
             timeout=120,
         )
+        if "sha256:" + hashlib.sha256(artifact.read_bytes()).hexdigest() != digest:
+            raise ValueError("The verified release artifact changed during attestation")
         files.append(str(artifact))
-    return {"tag": tag, "name": name, "version": version, "revision": revision, "artifacts": files}
+        artifact_hashes[str(artifact)] = digest.removeprefix("sha256:")
+    return {
+        "tag": tag,
+        "name": name,
+        "version": version,
+        "revision": revision,
+        "artifacts": files,
+        "artifact_hashes": artifact_hashes,
+    }
 
 
 def main() -> None:

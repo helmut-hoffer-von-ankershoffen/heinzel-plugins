@@ -526,7 +526,7 @@ def profile(
     *,
     selected_wheels: dict[str, Path] | None = None,
 ) -> dict:
-    """Only the selected composition repository can enroll defaults; topic discovery never feeds this function."""
+    """Draft locally enrolled metadata; CLI and publication require installed acceptance before exposing it."""
     wheels = [core]
     for project in inventory:
         if "standard" not in project.options.get("profiles", []):
@@ -570,7 +570,36 @@ def profile(
         )
     if core_version is None:
         raise ValueError("The composition needs its core wheel")
-    result = {"format": 1, "core_version": core_version, "sdk": 1, "artifacts": artifacts}
+    result = {"format": 2, "core_version": core_version, "sdk": 1, "artifacts": artifacts}
+    destination.parent.mkdir(parents=True, exist_ok=True)
+    destination.write_text(json.dumps(result, indent=2) + "\n")
+    return result
+
+
+def write_accepted_profile(
+    accepted: dict,
+    candidate: Path,
+    destination: Path,
+    base_url: str | None,
+    *,
+    artifact_directory: Path | None = None,
+) -> dict:
+    """Expose the exact accepted selection; never select or digest a replacement after acceptance."""
+    if json.loads(candidate.read_text()) != accepted:
+        raise ValueError("The profile changed during installed acceptance")
+    artifacts = []
+    for artifact in accepted["artifacts"]:
+        source = Path(artifact["url"])
+        if hashlib.sha256(source.read_bytes()).hexdigest() != artifact["sha256"]:
+            raise ValueError("An accepted artifact changed before profile publication")
+        if artifact_directory is not None:
+            copied = artifact_directory / artifact["filename"]
+            if hashlib.sha256(copied.read_bytes()).hexdigest() != artifact["sha256"]:
+                raise ValueError("A copied artifact differs from its accepted bytes")
+        artifacts.append(
+            artifact | {"url": f"{base_url.rstrip('/')}/{artifact['filename']}" if base_url else artifact["url"]}
+        )
+    result = accepted | {"artifacts": artifacts}
     destination.parent.mkdir(parents=True, exist_ok=True)
     destination.write_text(json.dumps(result, indent=2) + "\n")
     return result
@@ -914,13 +943,18 @@ def main() -> int:
         print(json.dumps(plan(changed, inventory, contracts=args.contract, core=args.core)))
         return 0
     if args.command == "profile":
+        from heinzel_plugin_tools.installation import verify_profile
+
         if not args.core or not Path(args.core).is_file():
             parser.error("profile needs --core with a built wheel")
-        print(
-            json.dumps(
-                profile(inventory, Path(args.core), args.output or ROOT / "dist/standard.json", args.base_url), indent=2
+        with tempfile.TemporaryDirectory(prefix="hz-profile-draft-") as temporary:
+            candidate = Path(temporary) / "standard.json"
+            accepted = profile(inventory, Path(args.core), candidate, None)
+            verify_profile(Path(args.core), candidate)
+            result = write_accepted_profile(
+                accepted, candidate, args.output or ROOT / "dist/standard.json", args.base_url
             )
-        )
+        print(json.dumps(result, indent=2))
         return 0
     selected = [
         item
