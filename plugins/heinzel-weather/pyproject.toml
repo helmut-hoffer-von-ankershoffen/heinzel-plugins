@@ -149,3 +149,13 @@ highlights = [
     "Weather page, footer status, Today widget and notices",
     "Weather-aware character signals",
 ]
+
+[[tool.heinzel.catalog.screenshots]]
+path = "docs/assets/cli.png"
+surface = "cli"
+caption = "hz weather --help — isolated demonstration profile"
+
+[[tool.heinzel.catalog.screenshots]]
+path = "docs/assets/ui.png"
+surface = "ui"
+caption = "Plugin settings in the app; no external account connected"

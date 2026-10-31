@@ -136,3 +136,13 @@ highlights = [
     "Resource visualizer and Today widget",
     "Independently installed and tested utility",
 ]
+
+[[tool.heinzel.catalog.screenshots]]
+path = "docs/assets/cli.png"
+surface = "cli"
+caption = "hz resource --json | jq 'del(.hostname)' — isolated demonstration profile"
+
+[[tool.heinzel.catalog.screenshots]]
+path = "docs/assets/ui.png"
+surface = "ui"
+caption = "Live computer resource widget in Today"
