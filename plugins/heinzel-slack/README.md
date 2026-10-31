@@ -117,3 +117,26 @@ make check-fast
 
 The in-memory Slack in `tests/conftest.py` is a labelled fake. `tests/e2e/live_test.py` talks to a real workspace when
 `SLACK_PROOF=1`; the tokens come from the environment (the official `slack run` injects them without printing them).
+
+<!-- screenshots:start -->
+## Screenshots
+
+<img src="docs/assets/screenshots/draft-in-slack.png" alt="Demo data: Lotte&#x27;s fictional weekly report, rendered from Slack message blocks in the app terminal; printed approval buttons, no Slack connection." width="960">
+
+Demo data: Lotte&#x27;s fictional weekly report, rendered from Slack message blocks in the app terminal; printed approval buttons, no Slack connection.
+
+<img src="docs/assets/screenshots/who-can-approve.png" alt="Demo data: Mira&#x27;s synthetic click records one approval; non-owner, mismatched-fingerprint, typed-reply, replay and late attempts are refused by real decision code." width="960">
+
+Demo data: Mira&#x27;s synthetic click records one approval; non-owner, mismatched-fingerprint, typed-reply, replay and late attempts are refused by real decision code.
+
+<details>
+<summary>Command line</summary>
+
+<img src="docs/assets/screenshots/answers-cli.png" alt="Demo data: replaying the fictional clicks keeps one host approval reply; Mira&#x27;s approval and the late request&#x27;s expiry are already recorded." width="960">
+
+Demo data: replaying the fictional clicks keeps one host approval reply; Mira&#x27;s approval and the late request&#x27;s expiry are already recorded.
+
+</details>
+
+[Open the screenshot gallery](docs/assets/screenshots/index.html).
+<!-- screenshots:end -->

@@ -1,0 +1,71 @@
+{
+  "format": 1,
+  "plugin": "heinzel-slack",
+  "core_version": "0.9.9",
+  "inputs_sha256": "0a2c51037643394c4e17f18557931f37cff8d88f1795f1cc3466c85321d262b1",
+  "images": {
+    "docs/assets/screenshots/draft-in-slack.png": "10ceb27e190e0cb6802a9af34c366e8835d511e67c0a268f5d8b42c399959ec0",
+    "docs/assets/screenshots/who-can-approve.png": "50730e77f4008592a5716f835d7d98daba4e54411cc5e9802d854069497ad5d6",
+    "docs/assets/screenshots/answers-cli.png": "c4975117dc35b3f96a35b687b319b2733617a971893d8b2efa31d2069b18611e"
+  },
+  "review_bundle": {
+    "format": 1,
+    "definition": {
+      "format": 1,
+      "reviewer": "Codex feature-story agent",
+      "source_sha256": "d0203d5498b3f5632ec7f03362a08c8da6c2c3348802e6b22b5206692ee529df",
+      "plan_sha256": "678ac5a6a3f8729b007143ff158f056bf7d2c61b3afdbfd3cb5a99e6b5a707ed",
+      "story_sha256": "e4d3ccc2559ab7df4d8f41b6d41ebe8e2b5864156de1583ef521ab637e799ed9"
+    },
+    "plugin": "heinzel-slack",
+    "core_version": "0.9.9",
+    "inputs_sha256": "0a2c51037643394c4e17f18557931f37cff8d88f1795f1cc3466c85321d262b1",
+    "screenshots": [
+      {
+        "path": "docs/assets/screenshots/draft-in-slack.png",
+        "surface": "ui",
+        "caption": "Demo data: Lotte's fictional weekly report, rendered from Slack message blocks in the app terminal; printed approval buttons, no Slack connection."
+      },
+      {
+        "path": "docs/assets/screenshots/who-can-approve.png",
+        "surface": "ui",
+        "caption": "Demo data: Mira's synthetic click records one approval; non-owner, mismatched-fingerprint, typed-reply, replay and late attempts are refused by real decision code."
+      },
+      {
+        "path": "docs/assets/screenshots/answers-cli.png",
+        "surface": "cli",
+        "caption": "Demo data: replaying the fictional clicks keeps one host approval reply; Mira's approval and the late request's expiry are already recorded."
+      }
+    ],
+    "images": {
+      "draft-in-slack.png": "10ceb27e190e0cb6802a9af34c366e8835d511e67c0a268f5d8b42c399959ec0",
+      "who-can-approve.png": "50730e77f4008592a5716f835d7d98daba4e54411cc5e9802d854069497ad5d6",
+      "answers-cli.png": "c4975117dc35b3f96a35b687b319b2733617a971893d8b2efa31d2069b18611e"
+    },
+    "transcripts": {
+      "draft-in-slack.txt": "9e7c782483dba8ee302c6598160d49c4f4771ee62f8c2b33f2286f0d52cc5a74",
+      "who-can-approve.txt": "13fcbb3bb42b15ac6531a46e2f47918b81db39b6bda6ef541a5fbda79651bd4f",
+      "answers-cli.txt": "b43288e5ea0b3d67978e8ae1c398ccef2b3b13ba2a0331f00c69a2917fc64575"
+    },
+    "bundle_sha256": "082b280e6faf305b323468f935f42bcdffc19084c5c9ca90c4a8df28dc1f54ce"
+  },
+  "privacy_review": {
+    "format": 1,
+    "bundle_sha256": "082b280e6faf305b323468f935f42bcdffc19084c5c9ca90c4a8df28dc1f54ce",
+    "reviewer": "Codex privacy agent",
+    "decision": "approve",
+    "checked_images": [
+      "draft-in-slack.png",
+      "who-can-approve.png",
+      "answers-cli.png"
+    ],
+    "checks": {
+      "tokens_absent": true,
+      "personal_data_absent": true,
+      "feature_relevant": true,
+      "multiple_ui_scenes": true,
+      "captions_accurate": true
+    },
+    "findings": []
+  }
+}

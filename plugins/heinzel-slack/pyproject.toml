@@ -61,3 +61,18 @@ highlights = [
     "Drafts shared with Approve and Decline, bound to the exact text",
     "Your own private Slack app: no bot shared with anyone, nothing hosted",
 ]
+
+[[tool.heinzel.catalog.screenshots]]
+path = "docs/assets/screenshots/draft-in-slack.png"
+surface = "ui"
+caption = "Demo data: Lotte's fictional weekly report, rendered from Slack message blocks in the app terminal; printed approval buttons, no Slack connection."
+
+[[tool.heinzel.catalog.screenshots]]
+path = "docs/assets/screenshots/who-can-approve.png"
+surface = "ui"
+caption = "Demo data: Mira's synthetic click records one approval; non-owner, mismatched-fingerprint, typed-reply, replay and late attempts are refused by real decision code."
+
+[[tool.heinzel.catalog.screenshots]]
+path = "docs/assets/screenshots/answers-cli.png"
+surface = "cli"
+caption = "Demo data: replaying the fictional clicks keeps one host approval reply; Mira's approval and the late request's expiry are already recorded."

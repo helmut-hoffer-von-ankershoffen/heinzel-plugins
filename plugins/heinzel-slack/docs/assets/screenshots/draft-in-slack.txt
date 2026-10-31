@@ -1,0 +1,44 @@
+Skip to content
+Heinzelmännchen
+Heinzelmännchen
+Contracts
+Team graph
+Organisation
+Team roster
+M
+Mira
+· EM
+Home
+Today
+Doctor: 12 checks need attention
+
+ai.access ai access, slack owner, slack bot token…
+
+Open
+Ask about it
+v0.9.9
+Updates, off
+0
+System health, warning
+No calendar connected, error
+Daemon not installed, off
+Chat
+Terminal
+Demo complete
+$ hz showcase share; printf '\033]0;Demo complete\007'
+╭──────────────────────── Slack direct message from Heinzelmännchen (demo workspace) ────────────────────────╮
+│ Lotte has a draft for you                                                                                  │
+│ Send the weekly report to the team                                                                         │
+│ Why you are seeing this: Lotte will not do this until you say yes.                                         │
+│ ╭────────────────────────────────────────────────────────────────────────────────────────────────────────╮ │
+│ │ Weekly report, 2 to 6 November                                                                         │ │
+│ │                                                                                                        │ │
+│ │ - Shipped the reading list to ten percent of phones                                                    │ │
+│ │ - Crash reports are quiet; rollout continues Thursday                                                  │ │
+│ │ - Next: release notes, owner Jonas                                                                     │ │
+│ ╰────────────────────────────────────────────────────────────────────────────────────────────────────────╯ │
+│ Nothing goes out until you say so. Fingerprint 51613b2b810b · answer by 14:00 · only your click counts,    │
+│ not a reply or a reaction.                                                                                 │
+│ [ Approve ]  [ Decline ]                                                                                   │
+╰────────────────────────────────────────────────────────────────────────────────────────────────────────────╯
+$

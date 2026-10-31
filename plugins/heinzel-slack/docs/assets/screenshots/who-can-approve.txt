@@ -1,0 +1,41 @@
+Skip to content
+Heinzelmännchen
+Heinzelmännchen
+Contracts
+Team graph
+Organisation
+Team roster
+M
+Mira
+· EM
+Home
+Today
+Doctor: 12 checks need attention
+
+ai.access ai access, slack owner, slack bot token…
+
+Open
+Ask about it
+v0.9.9
+Updates, off
+0
+System health, warning
+No calendar connected, error
+Daemon not installed, off
+Chat
+Terminal
+Demo complete
+$ hz showcase answers; printf '\033]0;Demo complete\007'
+             Only the owner's click on this exact draft counts
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃ Click                                  ┃ What the plugin did            ┃
+┡━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┩
+│ Jonas (not the owner) presses Approve  │ refused: not the owner         │
+│ A button made for an older draft       │ refused: stale draft           │
+│ A typed reply 'approve' or a thumbs-up │ refused: not a button          │
+│ Mira presses Approve                   │ recorded: approved             │
+│ Same click again (a replay)            │ refused: already approved      │
+│ Host asks for replies                  │ 1 reply: approve by U0MIRA0001 │
+│ Mira presses Approve five hours later  │ refused: expired               │
+└────────────────────────────────────────┴────────────────────────────────┘
+$
