@@ -29,3 +29,34 @@ Migration provenance: heinzel, before the 0.9 plugin-boundary migration.
 The fallback land outline is simplified [Natural Earth land](https://www.naturalearthdata.com/about/terms-of-use/)
 (public domain); representative zone points come from IANA's public-domain zone.tab. Bundled frontend dependency
 license notices are packaged alongside the built view.
+
+<!-- screenshots:start -->
+## Screenshots
+
+<img src="docs/assets/screenshots/world-clock.png" alt="Find overlap across Berlin, New York and Los Angeles while staying on Today — demonstration time" width="960">
+
+Find overlap across Berlin, New York and Los Angeles while staying on Today — demonstration time
+
+<img src="docs/assets/screenshots/team-overview.png" alt="Team working hours at a glance: Today, sidebar ticker and primary footer clock — demonstration time" width="960">
+
+Team working hours at a glance: Today, sidebar ticker and primary footer clock — demonstration time
+
+<img src="docs/assets/screenshots/footer-detail.png" alt="Inspect every configured time zone from the primary footer clock — demonstration time" width="960">
+
+Inspect every configured time zone from the primary footer clock — demonstration time
+
+<img src="docs/assets/screenshots/phone-world-clock.png" alt="The live globe and all three team clocks on a phone — fixed demonstration time" width="960">
+
+The live globe and all three team clocks on a phone — fixed demonstration time
+
+<details>
+<summary>Command line</summary>
+
+<img src="docs/assets/screenshots/cli-times.png" alt="The same team zones and working hours in the CLI — fixed fictional demonstration time" width="960">
+
+The same team zones and working hours in the CLI — fixed fictional demonstration time
+
+</details>
+
+[Open the screenshot gallery](docs/assets/screenshots/index.html).
+<!-- screenshots:end -->

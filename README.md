@@ -12,6 +12,74 @@ Independent public plugins for [Heinzelmännchen](https://github.com/helmut-hoff
 Each project under `plugins/` owns its code, assets, dependency locks, tests, version and artifacts.
 Adding a project changes only its own directory. Core remains independently buildable and testable.
 
+## See what the plugins add
+
+[Explore the plugin catalog →](https://helmut.hoffer-von-ankershoffen.me/heinzel/CATALOG/) · [Install the standard app →](https://helmut.hoffer-von-ankershoffen.me/heinzel/guides/install/)
+
+These are real plugin interfaces running with fictional demonstration data. Each catalog page includes its full
+UI and CLI gallery; theme pages also list their optional soundscapes.
+
+### Find a time that works across the team
+
+[![Find overlap across Berlin, New York and Los Angeles while staying on Today — demonstration time](plugins/heinzel-clock/docs/assets/screenshots/world-clock.png)](https://helmut.hoffer-von-ankershoffen.me/heinzel/catalog/heinzel-clock-a8638667a9/)
+
+Find overlap across Berlin, New York and Los Angeles while staying on Today — demonstration time · [Explore Clock →](https://helmut.hoffer-von-ankershoffen.me/heinzel/catalog/heinzel-clock-a8638667a9/)
+
+<table><tr>
+<td align="center" valign="top"><a href="https://helmut.hoffer-von-ankershoffen.me/heinzel/catalog/heinzel-clock-a8638667a9/"><img src="plugins/heinzel-clock/docs/assets/screenshots/team-overview.png" alt="Team working hours at a glance: Today, sidebar ticker and primary footer clock — demonstration time" height="300"></a><br><sub>Team working hours at a glance: Today, sidebar ticker and primary footer clock — demonstration time</sub></td>
+<td align="center" valign="top"><a href="https://helmut.hoffer-von-ankershoffen.me/heinzel/catalog/heinzel-clock-a8638667a9/"><img src="plugins/heinzel-clock/docs/assets/screenshots/phone-world-clock.png" alt="The live globe and all three team clocks on a phone — fixed demonstration time" height="300"></a><br><sub>The live globe and all three team clocks on a phone — fixed demonstration time</sub></td>
+</tr></table>
+
+### Understand what is slowing this computer down
+
+[![A quick CPU summary on Today, with three compact footer meters — demonstration values](plugins/heinzel-resource/docs/assets/screenshots/today-resources.png)](https://helmut.hoffer-von-ankershoffen.me/heinzel/catalog/heinzel-resource-c3ccd26ae0/)
+
+A quick CPU summary on Today, with three compact footer meters — demonstration values · [Explore Resource →](https://helmut.hoffer-von-ankershoffen.me/heinzel/catalog/heinzel-resource-c3ccd26ae0/)
+
+<table><tr>
+<td align="center" valign="top"><a href="https://helmut.hoffer-von-ankershoffen.me/heinzel/catalog/heinzel-resource-c3ccd26ae0/"><img src="plugins/heinzel-resource/docs/assets/screenshots/resources-pane.png" alt="CPU, memory and scaled load in the expanded monitor — fictional demo workstation" height="300"></a><br><sub>CPU, memory and scaled load in the expanded monitor — fictional demo workstation</sub></td>
+<td align="center" valign="top"><a href="https://helmut.hoffer-von-ankershoffen.me/heinzel/catalog/heinzel-resource-c3ccd26ae0/"><img src="plugins/heinzel-resource/docs/assets/screenshots/phone-resources.png" alt="Read CPU, memory and queued load on a phone — fictional demo workstation" height="300"></a><br><sub>Read CPU, memory and queued load on a phone — fictional demo workstation</sub></td>
+</tr></table>
+
+### See the weather before your next meeting or commute
+
+[![Current weather and the coming days on Today — fictional Berlin forecast](plugins/heinzel-weather/docs/assets/screenshots/today-weather.png)](https://helmut.hoffer-von-ankershoffen.me/heinzel/catalog/heinzel-weather-d59846a40e/)
+
+Current weather and the coming days on Today — fictional Berlin forecast · [Explore Weather →](https://helmut.hoffer-von-ankershoffen.me/heinzel/catalog/heinzel-weather-d59846a40e/)
+
+<table><tr>
+<td align="center" valign="top"><a href="https://helmut.hoffer-von-ankershoffen.me/heinzel/catalog/heinzel-weather-d59846a40e/"><img src="plugins/heinzel-weather/docs/assets/screenshots/weather-detail.png" alt="Inspect conditions, feels-like temperature and rain chance — fictional local forecast" height="300"></a><br><sub>Inspect conditions, feels-like temperature and rain chance — fictional local forecast</sub></td>
+<td align="center" valign="top"><a href="https://helmut.hoffer-von-ankershoffen.me/heinzel/catalog/heinzel-weather-d59846a40e/"><img src="plugins/heinzel-weather/docs/assets/screenshots/phone-weather.png" alt="Weather and near forecast in the phone-sized Today view — fictional local forecast" height="300"></a><br><sub>Weather and near forecast in the phone-sized Today view — fictional local forecast</sub></td>
+</tr></table>
+
+### Make the whole app yours in light and dark
+
+<table><tr>
+<td align="center" valign="top" width="50%"><a href="https://helmut.hoffer-von-ankershoffen.me/heinzel/catalog/heinzel-theme-5e723a7d8a/"><img src="plugins/heinzel-theme/docs/assets/screenshots/theme-light.png" alt="The installed Heinzelmännchen theme on a representative local contract — light appearance" width="100%"></a><br><sub>The installed Heinzelmännchen theme on a representative local contract — light appearance</sub></td>
+<td align="center" valign="top" width="50%"><a href="https://helmut.hoffer-von-ankershoffen.me/heinzel/catalog/heinzel-theme-5e723a7d8a/"><img src="plugins/heinzel-theme/docs/assets/screenshots/theme-dark.png" alt="The installed Heinzelmännchen theme on a representative local contract — dark appearance" width="100%"></a><br><sub>The installed Heinzelmännchen theme on a representative local contract — dark appearance</sub></td>
+</tr></table>
+
+[Explore the standard theme →](https://helmut.hoffer-von-ankershoffen.me/heinzel/catalog/heinzel-theme-5e723a7d8a/)
+
+<details>
+<summary>Command line</summary>
+
+<img src="plugins/heinzel-clock/docs/assets/screenshots/cli-times.png" alt="The same team zones and working hours in the CLI — fixed fictional demonstration time" width="960">
+
+The same team zones and working hours in the CLI — fixed fictional demonstration time
+
+<img src="plugins/heinzel-resource/docs/assets/screenshots/cli-resources.png" alt="The same fictional CPU, memory and raw load measurements in the CLI" width="960">
+
+The same fictional CPU, memory and raw load measurements in the CLI
+
+<img src="plugins/heinzel-weather/docs/assets/screenshots/cli-forecast.png" alt="A concise three-day outlook through the real CLI — local fictional forecast" width="960">
+
+A concise three-day outlook through the real CLI — local fictional forecast
+
+</details>
+
+Connectors and the example plugin have their own feature stories too. [Browse all plugins and their galleries →](https://helmut.hoffer-von-ankershoffen.me/heinzel/CATALOG/)
+
 For macOS and Linux, start with the [standard app installation guide](https://helmut.hoffer-von-ankershoffen.me/heinzel/guides/install/).
 Use `uvx heinzel@latest` if uv is available, or its guided curl/wget installer to install prerequisites automatically.
 Windows may work, but is not supported.
@@ -25,6 +93,8 @@ make list
 make check-fast NAME=resource
 make check NAME=resource
 make preview NAME=clock
+make screenshots NAME=clock OPEN=1
+make screenshots-check NAME=clock
 make build NAME=clock
 make acceptance NAME=clock
 make release NAME=clock
@@ -43,6 +113,15 @@ workflow from clean, current main. Public PyPI publication uses its protected en
 
 `preview` uses isolated application state under the owning `.preview/`. It preserves your normal configuration.
 Restart after rebuilding loaded view assets; Ctrl-C stops the preview.
+
+## Capture your plugin
+
+`make screenshots NAME=<plugin> OPEN=1` first asks an agent to define a useful story from the owning source,
+then captures the real UI and CLI with fictional fixtures. An independent agent reviews every image and transcript
+before gallery assets, catalog metadata and the owning README update. Missing review preserves the private draft.
+Use `hz-plugin screenshots <plugin> --plan` to edit the story first, `--draft --open` for a private preview, and
+`--check --json` for offline freshness. New collection plugins use this same workflow.
+See [Screenshot authoring](docs/SCREENSHOT_AUTHORING.md) for editable scenes, prepared interpreters and exact review receipts.
 
 ## Add a plugin
 

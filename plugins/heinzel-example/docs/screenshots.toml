@@ -1,0 +1,93 @@
+format = 1
+bootstrap = "docs/screenshot_fixture.py"
+
+[[scenes]]
+name = "widget-and-status"
+surface = "ui"
+route = "/"
+caption = "One tiny plugin contributes a Today widget and sidebar status from the same value"
+
+[[scenes.steps]]
+action = "wait"
+text = "Example value"
+
+[[scenes.steps]]
+action = "wait"
+text = "Example: 42"
+
+[[scenes.steps]]
+action = "click"
+role = "button"
+name_regex = "^Dismiss Doctor"
+optional = true
+
+[[scenes]]
+name = "inspector"
+surface = "ui"
+route = "/?panel=example:inspector"
+caption = "Open the plugin-owned inspector and read the same value 42"
+
+[[scenes.steps]]
+action = "wait"
+role = "region"
+name = "Example"
+
+[[scenes.steps]]
+action = "wait"
+text = "The value is 42."
+
+[[scenes.steps]]
+action = "click"
+role = "button"
+name_regex = "^Dismiss Doctor"
+optional = true
+
+[[scenes]]
+name = "greeting-terminal"
+surface = "ui"
+route = "/"
+caption = "The same typed greeting as structured output in the real app terminal"
+
+[[scenes.steps]]
+action = "terminal"
+command = ["example", "hello", "--name", "Mira", "--json"]
+
+[[scenes]]
+name = "plugin-notice"
+surface = "ui"
+route = "/"
+caption = "A plugin notice in the shared in-app notification panel — isolated demonstration"
+
+[[scenes.steps]]
+action = "wait"
+text = "Example value"
+
+[[scenes.steps]]
+action = "click"
+role = "button"
+name_regex = "^Dismiss Doctor"
+optional = true
+
+[[scenes.steps]]
+action = "click"
+role = "button"
+name_regex = "^Notifications"
+
+[[scenes.steps]]
+action = "wait"
+text = "Example is ready"
+
+[scenes.viewport]
+width = 1280
+height = 650
+[[scenes]]
+name = "greeting-cli"
+surface = "cli"
+caption = "A typed plugin operation greets Mira from the CLI"
+command = ["example", "hello", "--name", "Mira"]
+
+[[scenes]]
+name = "sample-json"
+surface = "cli"
+caption = "The typed value behind the widget, status and inspector"
+command = ["example", "sample", "--json"]

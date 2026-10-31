@@ -1,0 +1,54 @@
+format = 1
+bootstrap = "docs/screenshot_fixture.py"
+
+# Preserved behavior and scene order; captions and completion waits clarified.
+# The bootstrap supplies documentation-only showcase commands with demo data.
+
+[[scenes]]
+name = "jira-issues"
+surface = "ui"
+route = "/"
+caption = "Demo data: fictional Jira changes, owners and states in the app terminal, using the real adapter and a fixture-only requester."
+timeout_ms = 30000
+
+[[scenes.steps]]
+action = "terminal"
+command = ["showcase", "issues", "WID"]
+[scenes.viewport]
+width = 1280
+height = 650
+[[scenes]]
+name = "confluence-plan"
+surface = "ui"
+route = "/"
+caption = "Demo data: read the fictional Widget launch plan with its source and revision, using the real adapter and a fixture-only requester."
+timeout_ms = 30000
+
+[[scenes.steps]]
+action = "terminal"
+command = ["showcase", "page"]
+[scenes.viewport]
+width = 1280
+height = 650
+[[scenes]]
+name = "issues-json"
+surface = "cli"
+caption = "Demo data: structured fictional Jira changes through the real adapter, using a fixture-only requester and local vendor replies."
+command = ["showcase", "issues", "WID", "--json"]
+
+[[scenes]]
+name = "confluence-cli"
+surface = "cli"
+caption = "Demo data: the fictional Confluence plan, source and revision in the shell, using a fixture-only requester and local vendor replies."
+command = ["showcase", "page"]
+[[scenes]]
+name = "workflow-context"
+surface = "ui"
+route = "/contracts/weekly-work-review"
+caption = "Weekly work review combines the declared source inputs — local demonstration, no report generated"
+timeout_ms = 30000
+
+[[scenes.steps]]
+action = "wait"
+role = "heading"
+name = "Weekly work review"

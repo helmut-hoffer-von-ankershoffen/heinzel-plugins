@@ -52,3 +52,34 @@ network policy and the remote browser's credential.
 Development and release commands: [repository guide](../../README.md).
 
 Migration provenance: heinzel, before the 0.9 plugin-boundary migration.
+
+<!-- screenshots:start -->
+## Screenshots
+
+<img src="docs/assets/screenshots/sharing-ready.png" alt="Share the app privately with an explicit ready state — local Tailscale fixture; session hidden" width="960">
+
+Share the app privately with an explicit ready state — local Tailscale fixture; session hidden
+
+<img src="docs/assets/screenshots/phone-sharing-ready.png" alt="Inspect and copy the private link on a phone — local Tailscale fixture; session hidden" width="960">
+
+Inspect and copy the private link on a phone — local Tailscale fixture; session hidden
+
+<img src="docs/assets/screenshots/sharing-off.png" alt="Turn private sharing off explicitly — local Tailscale fixture" width="960">
+
+Turn private sharing off explicitly — local Tailscale fixture
+
+<details>
+<summary>Command line</summary>
+
+<img src="docs/assets/screenshots/sharing-request-cli.png" alt="Inspect the saved sharing request from a separate CLI process — local fictional network" width="960">
+
+Inspect the saved sharing request from a separate CLI process — local fictional network
+
+<img src="docs/assets/screenshots/sharing-off-cli.png" alt="Verify private sharing is off from the shell — local fictional network" width="960">
+
+Verify private sharing is off from the shell — local fictional network
+
+</details>
+
+[Open the screenshot gallery](docs/assets/screenshots/index.html).
+<!-- screenshots:end -->

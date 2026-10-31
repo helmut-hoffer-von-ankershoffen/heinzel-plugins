@@ -16,11 +16,11 @@ export PLUGIN_TEMPLATE_REF := $(value REF)
 export PLUGIN_REGISTRY := $(value REGISTRY)
 export PLUGIN_PRESET := $(value PRESET)
 
-.PHONY: setup install check-fast preflight policies secrets pr help new list plan lock test check build profile release publish preview acceptance audit tooling-check
+.PHONY: setup install check-fast preflight policies secrets pr help new list plan lock test check build profile release publish preview acceptance audit tooling-check screenshots screenshots-check
 help:
 	@echo 'make check NAME=resource [CORE=/path/to/core.whl]'
 	@echo 'make lock NAME=<plugin> CORE=<compatible-core.whl>'
-	@echo 'make preview|test|build|acceptance|release NAME=<plugin> [CORE=<wheel>]'
+	@echo 'make preview|screenshots|screenshots-check|test|build|acceptance|release NAME=<plugin> [CORE=<wheel>]'
 	@echo 'make profile CORE=<wheel>; make tooling-check'
 list:
 	@$(PLUGIN) list
@@ -36,6 +36,10 @@ check:
 	@$(PLUGIN) check
 build:
 	@$(PLUGIN) build
+screenshots:
+	@$(PLUGIN) screenshots $(if $(OPEN),--open) $(if $(JSON),--json)
+screenshots-check:
+	@$(PLUGIN) screenshots-check $(if $(JSON),--json)
 preview:
 	@$(PLUGIN) preview
 acceptance:

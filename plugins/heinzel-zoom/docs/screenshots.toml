@@ -1,0 +1,55 @@
+format = 1
+bootstrap = "docs/screenshot_fixture.py"
+
+[[scenes]]
+name = "meeting-decisions"
+surface = "ui"
+route = "/"
+caption = "Decisions and next steps from a summary email — fixture-only requester, real Zoom parser"
+timeout_ms = 30000
+
+[[scenes.steps]]
+action = "terminal"
+command = ["showcase", "one", "sync"]
+
+[scenes.viewport]
+width = 1280
+height = 650
+
+[[scenes]]
+name = "recent-meetings"
+surface = "ui"
+route = "/"
+caption = "Find the recent summarized meetings — fixture-only requester and fictional mailbox"
+timeout_ms = 30000
+
+[[scenes.steps]]
+action = "terminal"
+command = ["showcase", "ended"]
+
+[scenes.viewport]
+width = 1280
+height = 650
+
+[[scenes]]
+name = "summary-cli"
+surface = "cli"
+caption = "Read a meeting summary in the shell — fixture-only requester, real Zoom parser and fictional mailbox"
+command = ["showcase", "one", "sync"]
+
+[[scenes]]
+name = "meeting-list-json"
+surface = "cli"
+caption = "Structured summarized-meeting results for workflows — fixture-only requester, no verbatim transcription"
+command = ["showcase", "ended", "--json"]
+[[scenes]]
+name = "workflow-context"
+surface = "ui"
+route = "/contracts/meeting-notes"
+caption = "Meeting notes combines the declared source inputs — local demonstration, no report generated"
+timeout_ms = 30000
+
+[[scenes.steps]]
+action = "wait"
+role = "heading"
+name = "Meeting notes"

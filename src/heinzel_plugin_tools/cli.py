@@ -113,6 +113,7 @@ def plan(
         "core": False,
         "core_build": False,
         "core_tests": False,
+        "tooling": shared,
         "include": [
             {"name": project.name, "path": project.directory.relative_to(root).as_posix()}
             for project in inventory
@@ -389,8 +390,27 @@ def fix(project: Project, core: str | None) -> None:
         run(python_command(project, core, [*command, *ruff_configuration(project)]), cwd=project.directory)
 
 
+def build_view_assets(project: Project) -> None:
+    """Build the owning frontend, when it has one, with its pinned package manager."""
+    frontend = project.directory / "web/package.json"
+    if frontend.is_file() and "build" in json.loads(frontend.read_text()).get("scripts", {}):
+        run(["uv", "run", "--no-project", "--script", str(project.directory / "web/build.py"), "run", "build"])
+
+
+def check_screenshots(project: Project) -> dict:
+    """Verify gallery freshness offline; the digest covers built view assets, so a clean checkout builds them first."""
+    from heinzel_plugin_tools.capture import check_capture
+
+    build_view_assets(project)
+    return check_capture(project.directory)
+
+
 def check(project: Project, core: str | None, *, tests_only: bool = False, fast: bool = False) -> None:
     """Run only the owning package's checks against an installed core/SDK artifact."""
+    if (project.directory / "docs/screenshots.toml").exists() or (
+        project.directory / "docs/assets/screenshots/capture.json"
+    ).exists():
+        check_screenshots(project)
     prepare_environment(project, core)
     run(
         python_command(project, core, ["python", str(TOOLING_SCRIPT), "boundary", project.name]),
@@ -441,9 +461,7 @@ def check(project: Project, core: str | None, *, tests_only: bool = False, fast:
 def preview(project: Project, core: str | None) -> None:
     """Launch only this plugin with isolated application state and a compatible installed core."""
     interpreter = prepare_environment(project, core)
-    frontend = project.directory / "web/package.json"
-    if frontend.is_file() and "build" in json.loads(frontend.read_text()).get("scripts", {}):
-        run(["uv", "run", "--no-project", "--script", str(project.directory / "web/build.py"), "run", "build"])
+    build_view_assets(project)
     environment = {key: value for key, value in os.environ.items() if not key.startswith("HZ_")}
     environment.pop("VIRTUAL_ENV", None)
     for name in ("CONFIG_HOME", "DATA_DIR", "CACHE_DIR", "STATE_DIR", "LOG_DIR"):
@@ -701,7 +719,59 @@ def setup(project: Project, core: str | None) -> None:
     print("Ready. Run make check-fast, make preview or make build.", flush=True)
 
 
-def scaffold(name: str, core: str | None, template: str | None, ref: str | None, preset: str) -> None:
+def capture_plugin(
+    project: Project,
+    core: str | None,
+    *,
+    json_output: bool = False,
+    headed: bool = False,
+    open_preview: bool = False,
+    draft_only: bool = False,
+    review_receipt: Path | None = None,
+    prepared_python: Path | None = None,
+) -> int:
+    """Record the owning gallery with on-demand pinned browser tooling and clean machine output."""
+    command = [
+        "uv",
+        "run",
+        "--quiet",
+        "--script",
+        str(TOOLING_SCRIPT.with_name("capture.py")),
+        "--project",
+        str(project.directory),
+    ]
+    if core:
+        command += ["--core", core]
+    if prepared_python:
+        command += ["--python", str(prepared_python.absolute())]
+    if review_receipt:
+        command += ["--review-receipt", str(review_receipt.resolve())]
+    for enabled, flag in (
+        (json_output, "--json"),
+        (headed, "--headed"),
+        (open_preview, "--open"),
+        (draft_only, "--draft"),
+    ):
+        if enabled:
+            command.append(flag)
+    if not json_output:
+        return subprocess.call(command, cwd=project.directory)
+    result = subprocess.run(command, cwd=project.directory, stdout=subprocess.PIPE, text=True, check=False)
+    try:
+        report = json.loads(result.stdout)
+    except ValueError:
+        report = {
+            "ok": False,
+            "error": "Capture tooling could not start; see stderr for the failing dependency step",
+            "next": f"hz-plugin screenshots {project.name} --json",
+        }
+    print(json.dumps(report))
+    return result.returncode or (0 if report.get("ok") else 1)
+
+
+def scaffold(
+    name: str, core: str | None, template: str | None, ref: str | None, preset: str, *, screenshots: bool = True
+) -> None:
     """Generate one collection project and its lock without changing any parent file."""
     short = name.removeprefix("heinzel-")
     if not re.fullmatch(r"[a-z][a-z0-9-]*", short):
@@ -742,6 +812,13 @@ def scaffold(name: str, core: str | None, template: str | None, ref: str | None,
     [project] = projects(destination)
     lock(project, core)
     fix(project, core)
+    if screenshots:
+        from heinzel_plugin_tools.capture import write_default_plan
+
+        write_default_plan(project.directory, preset=preset)
+        status = capture_plugin(project, core)
+        if status:
+            raise ValueError(f"Plugin created, but capture needs attention. Run hz-plugin screenshots {project.name}")
     print(f"Created {project.name}. Next:\n  cd {shlex.quote(str(destination))} && make check-fast", flush=True)
 
 
@@ -861,7 +938,118 @@ def hook_changes() -> list[str]:
     return [path for path in changed.split("\0") if path]
 
 
+def screenshot_main(arguments: list[str], *, check: bool = False) -> int:
+    """Keep capture help focused and all agent results machine-readable."""
+    from heinzel_plugin_tools.capture import PLAN, safe_failure_message, write_default_plan
+    from heinzel_plugin_tools.privacy import CaptureError
+
+    parser = argparse.ArgumentParser(
+        prog="hz-plugin screenshots",
+        description="Capture real UI and CLI screenshots in an isolated demo profile. Review the local contact sheet.",
+        epilog="Examples: hz-plugin screenshots clock --open; hz-plugin screenshots harbor --json; "
+        "hz-plugin screenshots --check. Edit docs/screenshots.toml for richer scenes.",
+    )
+    parser.add_argument(
+        "name",
+        nargs="?",
+        default=os.environ.get("PLUGIN_NAME") or None,
+        help="Plugin name; omit when running inside its directory",
+    )
+    parser.add_argument(
+        "--core", default=os.environ.get("PLUGIN_CORE") or None, help="Candidate SDK wheel or artifact URL"
+    )
+    parser.add_argument("--json", action="store_true", help="JSON on stdout, progress on stderr")
+    parser.add_argument(
+        "--check", action="store_true", help="Check committed captures offline; no browser or plugin execution"
+    )
+    parser.add_argument(
+        "--init", action="store_true", help="Write an editable starter plan; agent definition is still required"
+    )
+    parser.add_argument(
+        "--plan",
+        "--generate",
+        action="store_true",
+        dest="define_plan",
+        help="Ask a read-only agent to define or update the useful source-based screenshot story",
+    )
+    parser.add_argument(
+        "--python",
+        type=Path,
+        dest="prepared_python",
+        help="Use an explicitly prepared Python with the owning plugin and compatible SDK installed",
+    )
+    parser.add_argument("--open", action="store_true", help="Open the local contact sheet after a successful capture")
+    parser.add_argument("--headed", action="store_true", help="Show the capture browser for debugging scenes")
+    parser.add_argument("--draft", action="store_true", help="Capture privately; defer the required agent review")
+    parser.add_argument(
+        "--review-receipt", type=Path, help="Publish an existing draft approved by an independent agent"
+    )
+    args = parser.parse_args(arguments)
+    try:
+        if sum((bool(check or args.check), args.init, args.define_plan, bool(args.review_receipt))) > 1 or (
+            args.review_receipt and args.draft
+        ):
+            raise CaptureError("Choose one screenshot mode: --plan, --init, --check, capture, or --review-receipt")
+        inventory = projects()
+        selected = [
+            p
+            for p in inventory
+            if p.name == args.name
+            or p.name.removeprefix("heinzel-") == args.name
+            or (args.name is None and p.directory == Path.cwd())
+        ]
+        if len(selected) != 1:
+            raise CaptureError(
+                "Choose a plugin name, or run inside its directory. Available: " + ", ".join(p.name for p in inventory)
+            )
+        project = selected[0]
+        if args.define_plan:
+            from heinzel_plugin_tools.planning import DEFINITION, STORY, ensure_definition
+
+            ensure_definition(project.directory, refresh=True)
+            result = {
+                "ok": True,
+                "plugin": project.name,
+                "plan": str(project.directory / PLAN),
+                "story": str(project.directory / STORY),
+                "definition": str(project.directory / DEFINITION),
+                "next": f"hz-plugin screenshots {project.name} --open",
+            }
+        elif args.init:
+            write_default_plan(project.directory)
+            result = {
+                "ok": True,
+                "plan": str(project.directory / PLAN),
+                "next": f"hz-plugin screenshots {project.name}",
+            }
+        elif check or args.check:
+            result = check_screenshots(project)
+        else:
+            return capture_plugin(
+                project,
+                args.core,
+                json_output=args.json,
+                headed=args.headed,
+                open_preview=args.open,
+                draft_only=args.draft,
+                review_receipt=args.review_receipt,
+                prepared_python=args.prepared_python,
+            )
+        print(json.dumps(result) if args.json else f"✓ {project.name}: {result.get('plan', 'screenshots are fresh')}")
+        return 0
+    except Exception as error:  # Workflow boundary: return safe JSON even for malformed untrusted plan data.
+        if args.json:
+            print(
+                json.dumps({"ok": False, "error": safe_failure_message(error), "next": "hz-plugin screenshots --help"})
+            )
+        else:
+            print(f"Screenshot check failed: {safe_failure_message(error)}", file=sys.stderr)
+        return 1
+
+
 def main() -> int:
+    if sys.argv[1:2] in (["screenshots"], ["screenshots-check"]):
+        return screenshot_main(sys.argv[2:], check=sys.argv[1] == "screenshots-check")
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
         "command",
@@ -886,6 +1074,8 @@ def main() -> int:
             "acceptance",
             "preview",
             "release-info",
+            "screenshots",
+            "screenshots-check",
             "audit",
         ],
     )
@@ -917,6 +1107,13 @@ def main() -> int:
         "--preset", choices=["minimal", "contributions"], default=os.environ.get("PLUGIN_PRESET") or "minimal"
     )
     parser.add_argument("--registry", choices=["github", "pypi"], default=os.environ.get("PLUGIN_REGISTRY") or None)
+    parser.add_argument("--json", action="store_true", help="Screenshot result as JSON; progress goes to stderr")
+    parser.add_argument("--headed", action="store_true", help="Show the browser while recording screenshots")
+    parser.add_argument("--open", action="store_true", help="Open the local screenshot contact sheet after capturing")
+    parser.add_argument("--init", action="store_true", help="Write a default screenshot scene plan without running it")
+    parser.add_argument(
+        "--no-screenshots", action="store_true", help="Defer initial screenshots when scaffolding a plugin"
+    )
     parser.add_argument("--base-url")
     parser.add_argument("--publish", action="store_true", help=argparse.SUPPRESS)
     args = parser.parse_args()
@@ -935,7 +1132,7 @@ def main() -> int:
     if args.command == "new":
         if not args.name:
             parser.error("Choose a plugin name, for example: new harbor")
-        scaffold(args.name, args.core, args.template, args.ref, args.preset)
+        scaffold(args.name, args.core, args.template, args.ref, args.preset, screenshots=not args.no_screenshots)
         return 0
     if args.command == "list":
         print(

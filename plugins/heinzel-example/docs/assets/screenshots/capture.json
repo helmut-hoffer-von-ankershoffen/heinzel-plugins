@@ -1,0 +1,98 @@
+{
+  "format": 1,
+  "plugin": "heinzel-example",
+  "core_version": "0.9.1",
+  "inputs_sha256": "53537e23ef51318f39b0ec519d4479d456b0154c53b69a2bf081f63584175fa4",
+  "images": {
+    "docs/assets/screenshots/widget-and-status.png": "94bfb80ee68993410a34d64705f088146b6ec55479cb4b33e7f9899591f7cb30",
+    "docs/assets/screenshots/inspector.png": "d11ed520e9ad29602e03713291eed1e3335d7a8ced96f2cd72c39902818ddd72",
+    "docs/assets/screenshots/greeting-terminal.png": "8f5ac31b7a7b920a22fa9d5caf307ddb26a0f8758600a2998b7d9e05afeefeef",
+    "docs/assets/screenshots/plugin-notice.png": "333ff1cd7fde5acb02eccab36ee2d4ca4250e1b282512652f0b68c49ca537a93",
+    "docs/assets/screenshots/greeting-cli.png": "375b8962cc5c7c30ab9c63248ea2ac468f325afc3bc53932dd70c9c5da5478fd",
+    "docs/assets/screenshots/sample-json.png": "fcebdd36aba06edc9113cb2009094d20c07f83342ffec053e78d5e47d715e1f5"
+  },
+  "review_bundle": {
+    "format": 1,
+    "definition": {
+      "format": 1,
+      "reviewer": "Codex feature-story agent",
+      "source_sha256": "cd74bf34390a8735436c34a0e46c926d7d403a902bc3ac4565ccbfd056264cf9",
+      "plan_sha256": "6f3d3c238be5604e669d901c73963a24c081fcaad252500dc03d83611de34236",
+      "story_sha256": "e5d8dde8014d03bd17c67142442f21bb5a6032399df383f9546ecc8350a23539"
+    },
+    "plugin": "heinzel-example",
+    "core_version": "0.9.1",
+    "inputs_sha256": "53537e23ef51318f39b0ec519d4479d456b0154c53b69a2bf081f63584175fa4",
+    "screenshots": [
+      {
+        "path": "docs/assets/screenshots/widget-and-status.png",
+        "surface": "ui",
+        "caption": "One tiny plugin contributes a Today widget and sidebar status from the same value"
+      },
+      {
+        "path": "docs/assets/screenshots/inspector.png",
+        "surface": "ui",
+        "caption": "Open the plugin-owned inspector and read the same value 42"
+      },
+      {
+        "path": "docs/assets/screenshots/greeting-terminal.png",
+        "surface": "ui",
+        "caption": "The same typed greeting as structured output in the real app terminal"
+      },
+      {
+        "path": "docs/assets/screenshots/plugin-notice.png",
+        "surface": "ui",
+        "caption": "A plugin notice in the shared in-app notification panel \u2014 isolated demonstration"
+      },
+      {
+        "path": "docs/assets/screenshots/greeting-cli.png",
+        "surface": "cli",
+        "caption": "A typed plugin operation greets Mira from the CLI"
+      },
+      {
+        "path": "docs/assets/screenshots/sample-json.png",
+        "surface": "cli",
+        "caption": "The typed value behind the widget, status and inspector"
+      }
+    ],
+    "images": {
+      "widget-and-status.png": "94bfb80ee68993410a34d64705f088146b6ec55479cb4b33e7f9899591f7cb30",
+      "inspector.png": "d11ed520e9ad29602e03713291eed1e3335d7a8ced96f2cd72c39902818ddd72",
+      "greeting-terminal.png": "8f5ac31b7a7b920a22fa9d5caf307ddb26a0f8758600a2998b7d9e05afeefeef",
+      "plugin-notice.png": "333ff1cd7fde5acb02eccab36ee2d4ca4250e1b282512652f0b68c49ca537a93",
+      "greeting-cli.png": "375b8962cc5c7c30ab9c63248ea2ac468f325afc3bc53932dd70c9c5da5478fd",
+      "sample-json.png": "fcebdd36aba06edc9113cb2009094d20c07f83342ffec053e78d5e47d715e1f5"
+    },
+    "transcripts": {
+      "widget-and-status.txt": "843bb673ab55ba77582cdc13eb5ad3326e0805558c345629955ed2164297150a",
+      "inspector.txt": "30dc56c4ad65162217c5a64477a68df743a5b988d25f121a71cee2d4a18bad02",
+      "greeting-terminal.txt": "fb21ebeaee55ab9973ef48e1600cbbb9229e3719f27b2b56adf7b96c3ec1e9f9",
+      "plugin-notice.txt": "59816df2c570b514e5cd242276997d426dfa29acdc9ee00da0eb20a2eac2d1b0",
+      "greeting-cli.txt": "0a315745bb1e963bf40b1ccfdc9a822532fa703f2c1b5013c8fe303b8cf0f59f",
+      "sample-json.txt": "084c799cd551dd1d8d5c5f9a5d593b2e931f5e36122ee5c793c1d08a19839cc0"
+    },
+    "bundle_sha256": "bf6331938d5ef069843e1e1069574a179880bc57adafc7ebfca008da2aeda7cb"
+  },
+  "privacy_review": {
+    "format": 1,
+    "bundle_sha256": "bf6331938d5ef069843e1e1069574a179880bc57adafc7ebfca008da2aeda7cb",
+    "reviewer": "Codex privacy agent",
+    "decision": "approve",
+    "checked_images": [
+      "widget-and-status.png",
+      "inspector.png",
+      "greeting-terminal.png",
+      "plugin-notice.png",
+      "greeting-cli.png",
+      "sample-json.png"
+    ],
+    "checks": {
+      "tokens_absent": true,
+      "personal_data_absent": true,
+      "feature_relevant": true,
+      "multiple_ui_scenes": true,
+      "captions_accurate": true
+    },
+    "findings": []
+  }
+}

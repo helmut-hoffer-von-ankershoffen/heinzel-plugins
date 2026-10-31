@@ -1,0 +1,89 @@
+{
+  "format": 1,
+  "plugin": "heinzel-github",
+  "core_version": "0.9.1",
+  "inputs_sha256": "5649a0e22695b36293b7155a5bfde2a7da71436af403a41199d96c29b4f49c81",
+  "images": {
+    "docs/assets/screenshots/merged-work.png": "5962b069ad52f471ea4f72182ee050b641bd23d6b8030056aa95c63391b46b10",
+    "docs/assets/screenshots/issue-changes.png": "d3bb56f3024fbd8bbd1a246f7227e7b5a78dc8aaab6c81ada182d6e136376ca1",
+    "docs/assets/screenshots/merged-cli.png": "787d4a4a73a860dbf4b33fd849f9737e0a58e5495e3e94ea1104a0e60bdf7233",
+    "docs/assets/screenshots/issues-json.png": "ba32601ae9d5cbf3c0925b64388c8786141602e603d5343e8e03efd6365d52bd",
+    "docs/assets/screenshots/workflow-context.png": "9a4c851980ad4dcff690f96bc7f35f45cf17f405b4b116924dc1e9369e0582d8"
+  },
+  "review_bundle": {
+    "format": 1,
+    "definition": {
+      "format": 1,
+      "reviewer": "Codex feature-story agent",
+      "source_sha256": "cf0ee1feb66e62a235762cdfc48ef3ef2f864980adb434f990f4e053eca709d1",
+      "plan_sha256": "303f04e14b89f788597caea10c49b0e1552276b8c1658ebf9bb98743c6e2a518",
+      "story_sha256": "f91a908a4999b40c89b0334f2e1ff3390085033ab54d1aa1b72bf8212fe6e965"
+    },
+    "plugin": "heinzel-github",
+    "core_version": "0.9.1",
+    "inputs_sha256": "5649a0e22695b36293b7155a5bfde2a7da71436af403a41199d96c29b4f49c81",
+    "screenshots": [
+      {
+        "path": "docs/assets/screenshots/merged-work.png",
+        "surface": "ui",
+        "caption": "Merged pull requests in the app terminal \u2014 fixture-only requester, real GitHub adapter"
+      },
+      {
+        "path": "docs/assets/screenshots/issue-changes.png",
+        "surface": "ui",
+        "caption": "Issue changes, owners and states in the app terminal \u2014 fictional GitHub repository"
+      },
+      {
+        "path": "docs/assets/screenshots/merged-cli.png",
+        "surface": "cli",
+        "caption": "Read merged work in the shell \u2014 fixture-only requester, real GitHub adapter"
+      },
+      {
+        "path": "docs/assets/screenshots/issues-json.png",
+        "surface": "cli",
+        "caption": "Typed issue results for scripts and agents \u2014 fixture-only requester, fictional GitHub data"
+      },
+      {
+        "path": "docs/assets/screenshots/workflow-context.png",
+        "surface": "ui",
+        "caption": "Weekly code review combines the declared source inputs \u2014 local demonstration, no report generated"
+      }
+    ],
+    "images": {
+      "merged-work.png": "5962b069ad52f471ea4f72182ee050b641bd23d6b8030056aa95c63391b46b10",
+      "issue-changes.png": "d3bb56f3024fbd8bbd1a246f7227e7b5a78dc8aaab6c81ada182d6e136376ca1",
+      "merged-cli.png": "787d4a4a73a860dbf4b33fd849f9737e0a58e5495e3e94ea1104a0e60bdf7233",
+      "issues-json.png": "ba32601ae9d5cbf3c0925b64388c8786141602e603d5343e8e03efd6365d52bd",
+      "workflow-context.png": "9a4c851980ad4dcff690f96bc7f35f45cf17f405b4b116924dc1e9369e0582d8"
+    },
+    "transcripts": {
+      "merged-work.txt": "b9d85845e44284b50b1f57f1ec17c0b65e8dc9d9dbbcd7aee8228d84d78f6fcc",
+      "issue-changes.txt": "451aa1dd967f8e71e5785b16e16061cef577df2ea682bb780d4a053395b85f20",
+      "merged-cli.txt": "e4df52085e704c49ba37bd75f62656de48cd879405856220a53bcebb7efdebb4",
+      "issues-json.txt": "0478f05c2513c3aec957a26c792f41ff2893fb1eddea11b4f9b472e93b9ac0a4",
+      "workflow-context.txt": "c689fe4c7f5fb5b76f8d552736108b1f68674bcb892b93a4cc8186010867feba"
+    },
+    "bundle_sha256": "b0e5b6c27b2ee6a8b423d457a50a2266b9469ddc6943191c421e21e9bf2ee12a"
+  },
+  "privacy_review": {
+    "format": 1,
+    "bundle_sha256": "b0e5b6c27b2ee6a8b423d457a50a2266b9469ddc6943191c421e21e9bf2ee12a",
+    "reviewer": "Codex privacy agent",
+    "decision": "approve",
+    "checked_images": [
+      "merged-work.png",
+      "issue-changes.png",
+      "merged-cli.png",
+      "issues-json.png",
+      "workflow-context.png"
+    ],
+    "checks": {
+      "tokens_absent": true,
+      "personal_data_absent": true,
+      "feature_relevant": true,
+      "multiple_ui_scenes": true,
+      "captions_accurate": true
+    },
+    "findings": []
+  }
+}

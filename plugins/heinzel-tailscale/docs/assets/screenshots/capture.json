@@ -1,0 +1,89 @@
+{
+  "format": 1,
+  "plugin": "heinzel-tailscale",
+  "core_version": "0.9.1",
+  "inputs_sha256": "82b378b7751a6952957d95d803a4735473e3a428484c3692999c989c2b742241",
+  "images": {
+    "docs/assets/screenshots/sharing-ready.png": "aa7eef4b1aab78b786ef526886359976f1ce7d42dd2a2f79032a69f6125c34d0",
+    "docs/assets/screenshots/phone-sharing-ready.png": "4cc7f3f73511134760c4a1ea43fd91cc95ea32c1070cd80f60c07a1fbf277f5a",
+    "docs/assets/screenshots/sharing-request-cli.png": "3637b57e42fe70617665121009f5a31b6308f200cad01185f582847fece38c79",
+    "docs/assets/screenshots/sharing-off.png": "da65c400932287e70314d9f4d13ad33ae321daf11cece0f9e1a7b578a12992f7",
+    "docs/assets/screenshots/sharing-off-cli.png": "258d18283c592905ed4faac4dcb3dd47ab1930071da6db5e1aac866b1c2f4250"
+  },
+  "review_bundle": {
+    "format": 1,
+    "definition": {
+      "format": 1,
+      "reviewer": "Codex feature-story agent",
+      "source_sha256": "9f2b7c048cc2c76a5a87a35c62ff97f2bca00677b36fe313d8a754c3db1331c0",
+      "plan_sha256": "8f20e85e3eed0cc3b60bd0de380c43832b0c190fa825a5c6fe7d1f53aafa7e19",
+      "story_sha256": "ccaa627bf994e8a6c462827a2b98e45b1697c130314671f1dfcc92ceefd9c1a0"
+    },
+    "plugin": "heinzel-tailscale",
+    "core_version": "0.9.1",
+    "inputs_sha256": "82b378b7751a6952957d95d803a4735473e3a428484c3692999c989c2b742241",
+    "screenshots": [
+      {
+        "path": "docs/assets/screenshots/sharing-ready.png",
+        "surface": "ui",
+        "caption": "Share the app privately with an explicit ready state \u2014 local Tailscale fixture; session hidden"
+      },
+      {
+        "path": "docs/assets/screenshots/phone-sharing-ready.png",
+        "surface": "ui",
+        "caption": "Inspect and copy the private link on a phone \u2014 local Tailscale fixture; session hidden"
+      },
+      {
+        "path": "docs/assets/screenshots/sharing-request-cli.png",
+        "surface": "cli",
+        "caption": "Inspect the saved sharing request from a separate CLI process \u2014 local fictional network"
+      },
+      {
+        "path": "docs/assets/screenshots/sharing-off.png",
+        "surface": "ui",
+        "caption": "Turn private sharing off explicitly \u2014 local Tailscale fixture"
+      },
+      {
+        "path": "docs/assets/screenshots/sharing-off-cli.png",
+        "surface": "cli",
+        "caption": "Verify private sharing is off from the shell \u2014 local fictional network"
+      }
+    ],
+    "images": {
+      "sharing-ready.png": "aa7eef4b1aab78b786ef526886359976f1ce7d42dd2a2f79032a69f6125c34d0",
+      "phone-sharing-ready.png": "4cc7f3f73511134760c4a1ea43fd91cc95ea32c1070cd80f60c07a1fbf277f5a",
+      "sharing-request-cli.png": "3637b57e42fe70617665121009f5a31b6308f200cad01185f582847fece38c79",
+      "sharing-off.png": "da65c400932287e70314d9f4d13ad33ae321daf11cece0f9e1a7b578a12992f7",
+      "sharing-off-cli.png": "258d18283c592905ed4faac4dcb3dd47ab1930071da6db5e1aac866b1c2f4250"
+    },
+    "transcripts": {
+      "sharing-ready.txt": "a0e4e6cb0748ff0300e1cacbc774b884550075bed29ab662216f01de3162fc57",
+      "phone-sharing-ready.txt": "0a56b0e9e56dfadfeaf1d8ab9f28a527706a96f3adb36d820b3daf246a4940a4",
+      "sharing-request-cli.txt": "2dd0ceec77cc55353d25ca7ad4cad87fb0149addeecd44785b7ef4c6b588c9f0",
+      "sharing-off.txt": "4e4d90e850a5eebb50d7860c0113d94816bf431eb390eff2f1cd7a3eb18732a1",
+      "sharing-off-cli.txt": "4d0c6d11c3a596857032c07677d48bb49d42f898f73f9e031a4388d922710890"
+    },
+    "bundle_sha256": "6d5ba26caf0d3c581ef58451730f49673332ade688e24ae8730f61d3920ebfb7"
+  },
+  "privacy_review": {
+    "format": 1,
+    "bundle_sha256": "6d5ba26caf0d3c581ef58451730f49673332ade688e24ae8730f61d3920ebfb7",
+    "reviewer": "Codex privacy agent",
+    "decision": "approve",
+    "checked_images": [
+      "sharing-ready.png",
+      "phone-sharing-ready.png",
+      "sharing-request-cli.png",
+      "sharing-off.png",
+      "sharing-off-cli.png"
+    ],
+    "checks": {
+      "tokens_absent": true,
+      "personal_data_absent": true,
+      "feature_relevant": true,
+      "multiple_ui_scenes": true,
+      "captions_accurate": true
+    },
+    "findings": []
+  }
+}

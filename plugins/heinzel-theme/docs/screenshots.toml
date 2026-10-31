@@ -1,0 +1,53 @@
+format = 1
+bootstrap = "docs/screenshot_fixture.py"
+
+[[scenes]]
+name = "theme-light"
+surface = "ui"
+route = "/contracts/launch-review"
+caption = "The installed Heinzelmännchen theme on a representative local contract — light appearance"
+theme = "heinzelmaennchen"
+appearance = "light"
+
+[[scenes.steps]]
+action = "wait"
+role = "heading"
+name = "Launch review"
+[[scenes]]
+name = "theme-dark"
+surface = "ui"
+route = "/contracts/launch-review"
+caption = "The installed Heinzelmännchen theme on a representative local contract — dark appearance"
+theme = "heinzelmaennchen"
+appearance = "dark"
+
+[[scenes.steps]]
+action = "wait"
+role = "heading"
+name = "Launch review"
+[[scenes]]
+name = "theme-soundscapes"
+surface = "ui"
+route = "/?settings=appearance"
+caption = "The theme supplies three optional YouTube soundscapes; playback starts only after Play"
+theme = "heinzelmaennchen"
+
+[[scenes.steps]]
+action = "wait"
+text = "Claude FM"
+
+[[scenes.steps]]
+action = "wait"
+text = "Hyper Focus"
+
+[[scenes]]
+name = "theme-cli"
+surface = "cli"
+caption = "Inspect the owning theme and its light/dark palette from the CLI"
+command = ["system", "theme", "list"]
+
+[[scenes]]
+name = "soundscapes-cli"
+surface = "cli"
+caption = "List the three theme-owned soundscapes without starting playback"
+command = ["system", "sound", "list"]
