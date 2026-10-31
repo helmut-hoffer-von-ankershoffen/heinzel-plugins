@@ -151,3 +151,81 @@ def test_mismatched_sdk_bytes_fail_before_any_composition(releases):
 def test_explicit_unreviewed_core_urls_are_rejected(releases):
     with pytest.raises(ValueError, match="official immutable"):
         SELECT("example/plugins", version="1.2.3", core_wheel="https://example.test/not-the-sdk.whl")
+
+
+EDGE = "0.9.10.dev7"
+EDGE_WHEEL = (
+    "https://github.com/helmut-hoffer-von-ankershoffen/heinzel/releases/download/"
+    f"edge-v{EDGE}/heinzel-{EDGE}-py3-none-any.whl"
+)
+
+
+def _pointer(monkeypatch, pointer):
+    monkeypatch.setitem(SELECT.__globals__, "download", lambda *_args: json.dumps(pointer).encode())
+
+
+def test_edge_composes_from_its_pointer(monkeypatch):
+    _pointer(monkeypatch, {"version": EDGE, "wheel": EDGE_WHEEL})
+    monkeypatch.setitem(SELECT.__globals__, "find_release", lambda *_args: None)
+    assert SELECT.__globals__["select_edge"]("owner/repo") == {"version": EDGE, "core_wheel": EDGE_WHEEL}
+
+
+def test_an_existing_edge_composition_is_a_no_op(monkeypatch):
+    _pointer(monkeypatch, {"version": EDGE, "wheel": EDGE_WHEEL})
+    monkeypatch.setitem(SELECT.__globals__, "find_release", lambda *_args: {"tag_name": f"app-v{EDGE}"})
+    assert SELECT.__globals__["select_edge"]("owner/repo") is None
+
+
+@pytest.mark.parametrize(
+    "pointer",
+    [
+        {"version": "0.9.10", "wheel": EDGE_WHEEL},
+        {"version": EDGE, "wheel": "https://example.org/heinzel.whl"},
+    ],
+)
+def test_a_wrong_pointer_never_composes(monkeypatch, pointer):
+    _pointer(monkeypatch, pointer)
+    with pytest.raises(ValueError, match="edge pointer"):
+        SELECT.__globals__["select_edge"]("owner/repo")
+
+
+def test_the_default_selection_still_refuses_edge(releases):
+    with pytest.raises(ValueError, match="stable"):
+        SELECT("owner/repo", version=EDGE, core_wheel=EDGE_WHEEL)
+
+
+def _core_releases(monkeypatch, releases, app=None):
+    monkeypatch.setitem(SELECT.__globals__, "api", lambda *_args, **_kwargs: releases)
+    monkeypatch.setitem(SELECT.__globals__, "find_release", lambda *_args: app)
+
+
+def test_a_held_core_release_gets_a_prerelease_app(monkeypatch):
+    filename = "heinzel-1.2.3-py3-none-any.whl"
+    _core_releases(monkeypatch, [{"tag_name": "v1.2.3", "prerelease": True, "assets": [{"name": filename}]}])
+    chosen = SELECT.__globals__["select_held"]("owner/repo")
+    assert chosen["version"] == "1.2.3"
+    assert chosen["core_wheel"].endswith(f"/v1.2.3/{filename}")
+
+
+@pytest.mark.parametrize(
+    "release",
+    [
+        {"tag_name": "v1.2.3", "prerelease": False, "assets": [{"name": "heinzel-1.2.3-py3-none-any.whl"}]},
+        {"tag_name": "edge-v1.2.3.dev4", "prerelease": True, "assets": []},
+        {"tag_name": "v1.2.3", "prerelease": True, "assets": []},
+    ],
+)
+def test_only_a_complete_held_final_is_composed(monkeypatch, release):
+    _core_releases(monkeypatch, [release])
+    assert SELECT.__globals__["select_held"]("owner/repo") is None
+
+
+def test_a_held_app_finalizes_only_after_its_core_matches_pypi(monkeypatch):
+    monkeypatch.setitem(SELECT.__globals__, "package", lambda *_args: {"info": {"version": "1.2.3"}})
+    monkeypatch.setitem(SELECT.__globals__, "find_release", lambda *_args: {"prerelease": True})
+    checked = []
+    monkeypatch.setitem(SELECT.__globals__, "complete_app", lambda *args: checked.append(args))
+    assert SELECT.__globals__["held_to_finalize"]("owner/repo") == "1.2.3"
+    assert checked
+    monkeypatch.setitem(SELECT.__globals__, "find_release", lambda *_args: {"prerelease": False})
+    assert SELECT.__globals__["held_to_finalize"]("owner/repo") is None

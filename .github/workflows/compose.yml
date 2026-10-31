@@ -26,6 +26,7 @@ jobs:
     outputs:
       version: ${{ steps.next.outputs.version }}
       core_wheel: ${{ steps.next.outputs.core_wheel }}
+      finalize: ${{ steps.next.outputs.finalize }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -85,4 +86,26 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
           REVISION: ${{ github.sha }}
-        run: uv run --frozen --no-build --group tooling python scripts/publish.py --tag "app-v$VERSION" --revision "$REVISION" --directory dist --make-latest true
+        run: |
+          released="$(gh release view "v$VERSION" --repo helmut-hoffer-von-ankershoffen/heinzel --json isPrerelease --jq .isPrerelease 2>/dev/null || echo true)"
+          if [ "$released" = false ] && [[ "$VERSION" != *dev* ]]; then
+            uv run --frozen --no-build --group tooling python scripts/publish.py --tag "app-v$VERSION" --revision "$REVISION" --directory dist --make-latest true
+          else # an edge or held app is a pre-release: the default install paths can never select it
+            uv run --frozen --no-build --group tooling python scripts/publish.py --tag "app-v$VERSION" --revision "$REVISION" --directory dist --make-latest false
+            gh release edit "app-v$VERSION" --prerelease
+          fi
+  finalize:
+    needs: select
+    if: needs.select.outputs.finalize != ''
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    environment: standard-app
+    permissions:
+      contents: write
+    steps:
+      - name: Make the accepted held app the latest, now that its core is on PyPI
+        env:
+          VERSION: ${{ needs.select.outputs.finalize }}
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: gh release edit "app-v$VERSION" --prerelease=false --latest

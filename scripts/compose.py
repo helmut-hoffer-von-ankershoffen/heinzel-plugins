@@ -142,7 +142,7 @@ def main() -> None:
         parser.error("Core wheel exceeds its size limit")
     core.write_bytes(content)
     repository = "helmut-hoffer-von-ankershoffen/heinzel"
-    revision = tag_revision(repository, f"v{version}")
+    revision = tag_revision(repository, f"{'edge-v' if Version(version).is_devrelease else 'v'}{version}")
     run(
         [
             "gh",
