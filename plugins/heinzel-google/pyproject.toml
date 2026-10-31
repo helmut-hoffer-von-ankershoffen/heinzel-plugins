@@ -138,3 +138,13 @@ highlights = [
     "Uses the Google Workspace CLI",
     "Implements documents, calendar and mail contracts",
 ]
+
+[[tool.heinzel.catalog.screenshots]]
+path = "docs/assets/cli.png"
+surface = "cli"
+caption = "hz google --help — isolated demonstration profile"
+
+[[tool.heinzel.catalog.screenshots]]
+path = "docs/assets/ui.png"
+surface = "ui"
+caption = "Google connector capabilities in the plugin manager; no account connected"

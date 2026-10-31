@@ -138,3 +138,13 @@ highlights = [
     "Implements code-host and tracker contracts",
     "Use the same operations from CLI, MCP and REST",
 ]
+
+[[tool.heinzel.catalog.screenshots]]
+path = "docs/assets/cli.png"
+surface = "cli"
+caption = "hz github --help — isolated demonstration profile"
+
+[[tool.heinzel.catalog.screenshots]]
+path = "docs/assets/ui.png"
+surface = "ui"
+caption = "Plugin settings in the app; no external account connected"

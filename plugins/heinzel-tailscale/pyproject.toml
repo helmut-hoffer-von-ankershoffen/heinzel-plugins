@@ -138,3 +138,13 @@ highlights = [
     "Private sharing status and operations",
     "Your network remains an explicit choice",
 ]
+
+[[tool.heinzel.catalog.screenshots]]
+path = "docs/assets/cli.png"
+surface = "cli"
+caption = "hz tailscale --help — isolated demonstration profile"
+
+[[tool.heinzel.catalog.screenshots]]
+path = "docs/assets/ui.png"
+surface = "ui"
+caption = "Plugin settings in the app; no external account connected"

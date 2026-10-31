@@ -140,3 +140,13 @@ highlights = [
     "Clock operations through CLI, MCP and REST",
     "World Clock page and Today contribution",
 ]
+
+[[tool.heinzel.catalog.screenshots]]
+path = "docs/assets/cli.png"
+surface = "cli"
+caption = "hz clock — isolated demonstration profile"
+
+[[tool.heinzel.catalog.screenshots]]
+path = "docs/assets/ui.png"
+surface = "ui"
+caption = "World Clock panel with the plugin-owned globe"

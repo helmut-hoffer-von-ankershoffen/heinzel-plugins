@@ -137,3 +137,18 @@ highlights = [
     "Theme content owned entirely by this plugin",
 ]
 themes = ["src/heinzel_theme/themes/heinzelmaennchen.toml"]
+
+[[tool.heinzel.catalog.screenshots]]
+path = "docs/assets/cli.png"
+surface = "cli"
+caption = "hz system theme list — isolated demonstration profile"
+
+[[tool.heinzel.catalog.screenshots]]
+path = "docs/assets/ui.png"
+surface = "ui"
+caption = "Installed Heinzelmännchen theme in the app"
+
+[[tool.heinzel.catalog.screenshots]]
+path = "docs/assets/ui-dark.png"
+surface = "ui"
+caption = "Installed Heinzelmännchen theme in the app — dark appearance"
