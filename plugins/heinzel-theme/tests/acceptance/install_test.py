@@ -53,9 +53,8 @@ def installed(tmp_path):
 def test_installed_catalog_is_complete_and_silent_by_default(installed):
     hz, _ = installed
     themes = hz("system", "theme", "list")
-    assert themes["selected"] == "default"
+    assert themes["selected"] == "heinzelmaennchen"
     assert [(item["name"], item["plugin"]) for item in themes["themes"]] == [
-        ("default", None),
         ("heinzelmaennchen", "heinzel-theme"),
     ]
     sounds = hz("system", "sound", "list")
@@ -67,6 +66,8 @@ def test_installed_catalog_is_complete_and_silent_by_default(installed):
 
 def test_theme_pairing_disable_and_removal_use_only_generic_operations(installed):
     hz, _ = installed
+    assert hz("system", "theme", "use", "default")["selected"] == "default"
+    assert {item["name"] for item in hz("system", "theme", "list")["themes"]} == {"default", "heinzelmaennchen"}
     assert hz("system", "theme", "use", "heinzelmaennchen")["selected"] == "heinzelmaennchen"
     hz("system", "config", "set", "system.sound.follow_theme", "true")
     assert hz("system", "sound", "list")["effective"] == "focus"

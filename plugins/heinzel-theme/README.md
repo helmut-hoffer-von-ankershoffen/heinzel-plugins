@@ -1,8 +1,9 @@
 # Heinzelmännchen theme
 
 The standard Heinzelmännchen appearance and its three soundscapes: Claude FM, Die Heinzelmännchen and Hyper Focus.
-The standard app installs and enables this plugin automatically. Installation leaves the current theme choice and
-playback state alone; sound starts only after the person presses Play.
+The standard app installs and enables this plugin automatically. It recommends its appearance when no available
+theme has been selected. An explicit available theme choice is preserved, and the inactive built-in fallback is hidden
+to avoid duplicate previews. Sound starts only after the person presses Play.
 
 Select **Heinzelmännchen** in Settings → Appearance, or run `hz system theme use heinzelmaennchen`. With **Follow my
 theme** enabled, its paired soundscape is Die Heinzelmännchen (`focus`). Choose any of its soundscapes manually with
