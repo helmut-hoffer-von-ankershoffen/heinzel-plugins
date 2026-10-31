@@ -48,3 +48,8 @@ version_provider = "pep621"
 
 [tool.uv]
 no-build = true
+
+[tool.coverage.run]
+source = ["heinzel_plugin_tools"]
+branch = true
+relative_files = true

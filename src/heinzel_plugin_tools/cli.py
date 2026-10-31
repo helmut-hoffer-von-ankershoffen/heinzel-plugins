@@ -265,6 +265,15 @@ def validate_installed_core(project: Project) -> None:
         )
 
 
+def core_install_spec(core: str | None, version: str) -> str:
+    """Keep a selected local wheel an absolute operand, even when its filename starts with an option."""
+    if not core:
+        return f"heinzel=={version}"
+    if core.startswith("https://"):
+        return core
+    return str(Path(core).resolve())
+
+
 def prepare_environment(project: Project, core: str | None) -> Path:
     """Authenticate the owning lock before installing core and this plugin without resolving new dependencies."""
     record = validate_lock(project, core)
@@ -284,11 +293,7 @@ def prepare_environment(project: Project, core: str | None) -> Path:
             str(project.directory / "requirements.lock"),
         ]
     )
-    selected = (
-        (core if core.startswith("https://") else str(Path(core).resolve()))
-        if core
-        else f"heinzel=={record['core']['version']}"
-    )
+    selected = core_install_spec(core, record["core"]["version"])
     run(["uv", "pip", "install", "--python", str(interpreter), "--no-deps", "--no-build", selected])
     run(
         [
@@ -458,11 +463,7 @@ def acceptance(project: Project, core: str | None, *, wheel: Path | None = None)
     record = validate_lock(project, core)
     if wheel is None:
         build(project)
-    selected = (
-        (core if core.startswith("https://") else str(Path(core).resolve()))
-        if core
-        else f"heinzel=={record['core']['version']}"
-    )
+    selected = core_install_spec(core, record["core"]["version"])
     environment = project.directory / ".acceptance"
     interpreter = environment / "bin/python"
     if not interpreter.is_file():
