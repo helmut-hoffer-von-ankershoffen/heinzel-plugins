@@ -192,3 +192,40 @@ def test_a_wrong_pointer_never_composes(monkeypatch, pointer):
 def test_the_default_selection_still_refuses_edge(releases):
     with pytest.raises(ValueError, match="stable"):
         SELECT("owner/repo", version=EDGE, core_wheel=EDGE_WHEEL)
+
+
+def _core_releases(monkeypatch, releases, app=None):
+    monkeypatch.setitem(SELECT.__globals__, "api", lambda *_args, **_kwargs: releases)
+    monkeypatch.setitem(SELECT.__globals__, "find_release", lambda *_args: app)
+
+
+def test_a_held_core_release_gets_a_prerelease_app(monkeypatch):
+    filename = "heinzel-1.2.3-py3-none-any.whl"
+    _core_releases(monkeypatch, [{"tag_name": "v1.2.3", "prerelease": True, "assets": [{"name": filename}]}])
+    chosen = SELECT.__globals__["select_held"]("owner/repo")
+    assert chosen["version"] == "1.2.3"
+    assert chosen["core_wheel"].endswith(f"/v1.2.3/{filename}")
+
+
+@pytest.mark.parametrize(
+    "release",
+    [
+        {"tag_name": "v1.2.3", "prerelease": False, "assets": [{"name": "heinzel-1.2.3-py3-none-any.whl"}]},
+        {"tag_name": "edge-v1.2.3.dev4", "prerelease": True, "assets": []},
+        {"tag_name": "v1.2.3", "prerelease": True, "assets": []},
+    ],
+)
+def test_only_a_complete_held_final_is_composed(monkeypatch, release):
+    _core_releases(monkeypatch, [release])
+    assert SELECT.__globals__["select_held"]("owner/repo") is None
+
+
+def test_a_held_app_finalizes_only_after_its_core_matches_pypi(monkeypatch):
+    monkeypatch.setitem(SELECT.__globals__, "package", lambda *_args: {"info": {"version": "1.2.3"}})
+    monkeypatch.setitem(SELECT.__globals__, "find_release", lambda *_args: {"prerelease": True})
+    checked = []
+    monkeypatch.setitem(SELECT.__globals__, "complete_app", lambda *args: checked.append(args))
+    assert SELECT.__globals__["held_to_finalize"]("owner/repo") == "1.2.3"
+    assert checked
+    monkeypatch.setitem(SELECT.__globals__, "find_release", lambda *_args: {"prerelease": False})
+    assert SELECT.__globals__["held_to_finalize"]("owner/repo") is None
