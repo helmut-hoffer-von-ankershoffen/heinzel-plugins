@@ -1,0 +1,12 @@
+             Only the owner's click on this exact draft counts
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃ Click                                  ┃ What the plugin did            ┃
+┡━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┩
+│ Jonas (not the owner) presses Approve  │ refused: not the owner         │
+│ A button made for an older draft       │ refused: stale draft           │
+│ A typed reply 'approve' or a thumbs-up │ refused: not a button          │
+│ Mira presses Approve                   │ refused: already approved      │
+│ Same click again (a replay)            │ refused: already approved      │
+│ Host asks for replies                  │ 1 reply: approve by U0MIRA0001 │
+│ Mira presses Approve five hours later  │ refused: already expired       │
+└────────────────────────────────────────┴────────────────────────────────┘
