@@ -271,7 +271,8 @@ class _WriteLease(CapturedWriteLease):
                 msg = "The spreadsheet changed since this draft"
                 raise HeinzelError(msg)
             _write_rows(self._lease, self._file_id, draft.section, text)
-        revision = _revision(self._lease, self._kind, self._file_id)[0]
+        # A spreadsheet's Drive version keeps moving after a write, so it can't identify this one.
+        revision = "" if self._kind == "spreadsheet" else _revision(self._lease, self._kind, self._file_id)[0]
         return CapturedWriteAcknowledgement(reference=draft.reference, revision=revision or None)
 
     def close(self) -> None:

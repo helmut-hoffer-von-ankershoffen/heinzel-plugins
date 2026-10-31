@@ -25,11 +25,14 @@ Chat
 Terminal
 Demo complete
 $ hz google files --days 3 --name Launch; printf '\033]0;Demo complete\007'
-┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━┓
-┃ Ref                                                        ┃ Name                       ┃ Kind        ┃ Modified at          ┃
-┡━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━┩
-│ https://docs.google.com/document/d/launch-plan/edit        │ Launch plan                │ document    │ 2026-10-31T15:25:58Z │
-│ https://docs.google.com/spreadsheets/d/launch-metrics/edit │ Launch metrics             │ spreadsheet │ 2026-10-31T15:25:58Z │
-│ https://docs.google.com/document/d/launch-readiness/edit   │ Launch readiness checklist │ document    │ 2026-10-31T15:25:58Z │
-└────────────────────────────────────────────────────────────┴────────────────────────────┴─────────────┴──────────────────────┘
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━┓
+┃ Ref                                      ┃ Name                       ┃ Kind        ┃ Modified at          ┃
+┡━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━┩
+│ https://docs.google.com/document/d/launc │ Launch plan                │ document    │ 2026-10-31T16:11:00Z │
+│ h-plan/edit                              │                            │             │                      │
+│ https://docs.google.com/spreadsheets/d/l │ Launch metrics             │ spreadsheet │ 2026-10-31T16:11:00Z │
+│ aunch-metrics/edit                       │                            │             │                      │
+│ https://docs.google.com/document/d/launc │ Launch readiness checklist │ document    │ 2026-10-31T16:11:00Z │
+│ h-readiness/edit                         │                            │             │                      │
+└──────────────────────────────────────────┴────────────────────────────┴─────────────┴──────────────────────┘
 $

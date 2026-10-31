@@ -26,7 +26,7 @@ Terminal
 Demo complete
 $ hz showcase notes launch-plan; printf '\033]0;Demo complete\007'
 Launch plan
-                                                          Launch plan
+                                                 Launch plan
 Goal
 Ship reliable widgets with a measured rollout.
 Owners and next checks

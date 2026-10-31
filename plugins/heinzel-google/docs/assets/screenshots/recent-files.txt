@@ -28,8 +28,8 @@ $ hz google files --days 7; printf '\033]0;Demo complete\007'
 ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━┓
 ┃ Ref                                                        ┃ Name                       ┃ Kind        ┃ Modified at          ┃
 ┡━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━┩
-│ https://docs.google.com/document/d/launch-plan/edit        │ Launch plan                │ document    │ 2026-10-31T15:25:47Z │
-│ https://docs.google.com/spreadsheets/d/launch-metrics/edit │ Launch metrics             │ spreadsheet │ 2026-10-31T15:25:47Z │
-│ https://docs.google.com/document/d/launch-readiness/edit   │ Launch readiness checklist │ document    │ 2026-10-31T15:25:47Z │
+│ https://docs.google.com/document/d/launch-plan/edit        │ Launch plan                │ document    │ 2026-10-31T16:10:54Z │
+│ https://docs.google.com/spreadsheets/d/launch-metrics/edit │ Launch metrics             │ spreadsheet │ 2026-10-31T16:10:54Z │
+│ https://docs.google.com/document/d/launch-readiness/edit   │ Launch readiness checklist │ document    │ 2026-10-31T16:10:54Z │
 └────────────────────────────────────────────────────────────┴────────────────────────────┴─────────────┴──────────────────────┘
 $
