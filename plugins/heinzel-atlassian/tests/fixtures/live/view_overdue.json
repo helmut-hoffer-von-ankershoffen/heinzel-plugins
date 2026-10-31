@@ -1,0 +1,115 @@
+{
+ "changelog": null,
+ "editmeta": null,
+ "expand": "renderedFields,names,schema,operations,editmeta,changelog,versionedRepresentations",
+ "fields": {
+  "assignee": {
+   "accountId": "acct-wren",
+   "accountType": "atlassian",
+   "active": true,
+   "displayName": "Wren Calder",
+   "emailAddress": "wren@example.com",
+   "self": "https://jira-prod-eu-32-5.prod.atl-paas.net/rest/api/3/user?accountId=acct-wren",
+   "timeZone": "Europe/Berlin"
+  },
+  "comment": {
+   "comments": [
+    {
+     "author": {
+      "accountId": "acct-wren",
+      "accountType": "atlassian",
+      "active": true,
+      "displayName": "Wren Calder",
+      "emailAddress": "wren@example.com",
+      "self": "https://jira-prod-eu-32-5.prod.atl-paas.net/rest/api/3/user?accountId=acct-wren",
+      "timeZone": "Europe/Berlin"
+     },
+     "body": {
+      "content": [
+       {
+        "content": [
+         {
+          "text": "Reproduced: the page shows 14:05 for a 15:05 local high tide.",
+          "type": "text"
+         }
+        ],
+        "type": "paragraph"
+       }
+      ],
+      "type": "doc",
+      "version": 1
+     },
+     "created": "2026-10-31T13:00:22.421+0100",
+     "id": "10001",
+     "jsdPublic": true,
+     "self": "https://jira-prod-eu-32-5.prod.atl-paas.net/rest/api/3/issue/10019/comment/10001",
+     "updateAuthor": {
+      "accountId": "acct-wren",
+      "accountType": "atlassian",
+      "active": true,
+      "displayName": "Wren Calder",
+      "emailAddress": "wren@example.com",
+      "self": "https://jira-prod-eu-32-5.prod.atl-paas.net/rest/api/3/user?accountId=acct-wren",
+      "timeZone": "Europe/Berlin"
+     },
+     "updated": "2026-10-31T13:00:22.421+0100"
+    }
+   ],
+   "maxResults": 1,
+   "self": "https://jira-prod-eu-32-5.prod.atl-paas.net/rest/api/3/issue/10019/comment",
+   "startAt": 0,
+   "total": 1
+  },
+  "created": "2026-10-31T12:57:38.975+0100",
+  "description": null,
+  "duedate": "2026-11-02",
+  "issuetype": {
+   "avatarId": 10318,
+   "description": "Tasks track small, distinct pieces of work.",
+   "entityId": "fde73f53-3454-4607-8969-89f0c275ea73",
+   "hierarchyLevel": 0,
+   "iconUrl": "https://jira-prod-eu-32-5.prod.atl-paas.net/rest/api/2/universal_avatar/view/type/issuetype/avatar/10318?size=medium",
+   "id": "10007",
+   "name": "Task",
+   "self": "https://jira-prod-eu-32-5.prod.atl-paas.net/rest/api/3/issuetype/10007",
+   "subtask": false
+  },
+  "labels": [
+   "bug",
+   "harbor"
+  ],
+  "priority": {
+   "iconUrl": "https://jira-prod-eu-32-5.prod.atl-paas.net/images/icons/priorities/medium_new.svg",
+   "id": "3",
+   "name": "Medium",
+   "self": "https://jira-prod-eu-32-5.prod.atl-paas.net/rest/api/3/priority/3"
+  },
+  "status": {
+   "description": "",
+   "iconUrl": "https://jira-prod-eu-32-5.prod.atl-paas.net/images/icons/statuses/generic.png",
+   "id": "10003",
+   "name": "To Do",
+   "self": "https://jira-prod-eu-32-5.prod.atl-paas.net/rest/api/3/status/10003",
+   "statusCategory": {
+    "colorName": "blue-gray",
+    "id": 2,
+    "key": "new",
+    "name": "To Do",
+    "self": "https://jira-prod-eu-32-5.prod.atl-paas.net/rest/api/3/statuscategory/2"
+   }
+  },
+  "summary": "Fix wrong time zone on the Dunmore harbour page",
+  "updated": "2026-10-31T13:00:22.421+0100"
+ },
+ "fieldsToInclude": null,
+ "id": "10019",
+ "key": "KAN-10",
+ "names": null,
+ "operations": null,
+ "properties": null,
+ "renderedFields": null,
+ "schema": null,
+ "self": "https://jira-prod-eu-32-5.prod.atl-paas.net/rest/api/3/issue/10019",
+ "transitions": null,
+ "versionedRepresentations": null
+}
