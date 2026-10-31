@@ -4,62 +4,67 @@
 [![CI](https://img.shields.io/github/actions/workflow/status/helmut-hoffer-von-ankershoffen/heinzel-plugins/ci.yml?branch=main&label=CI)](https://github.com/helmut-hoffer-von-ankershoffen/heinzel-plugins/actions/workflows/ci.yml) [![Tooling coverage](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/helmut-hoffer-von-ankershoffen/heinzel-plugins/python-coverage-comment-action-data/endpoint.json)](https://github.com/helmut-hoffer-von-ankershoffen/heinzel-plugins/tree/python-coverage-comment-action-data) [![CodeQL](https://img.shields.io/github/actions/workflow/status/helmut-hoffer-von-ankershoffen/heinzel-plugins/codeql.yml?branch=main&label=CodeQL)](https://github.com/helmut-hoffer-von-ankershoffen/heinzel-plugins/actions/workflows/codeql.yml) [![Python](https://img.shields.io/badge/python-3.12%2B-blue)](pyproject.toml) [![Quality Gate Status](https://img.shields.io/sonar/quality_gate/helmut-hoffer-von-ankershoffen_heinzel-plugins?server=https://sonarcloud.io&label=Quality%20Gate%20Status)](https://sonarcloud.io/summary/overall?id=helmut-hoffer-von-ankershoffen_heinzel-plugins) [![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=helmut-hoffer-von-ankershoffen_heinzel-plugins&metric=security_rating)](https://sonarcloud.io/summary/overall?id=helmut-hoffer-von-ankershoffen_heinzel-plugins) [![License: MIT](https://img.shields.io/badge/license-MIT-brightgreen)](LICENSE)
 <!-- badges:end -->
 
-The tooling's installation policy and reviewed input boundaries are documented in [SECURITY_REVIEW.md](SECURITY_REVIEW.md).
+**More to see and more to read from: a world clock, resource meters, weather, themes with soundscapes, and adapters
+for GitHub, Jira and Confluence, Google Workspace and Zoom.** Ten independent plugins for
+[Heinzelmännchen](https://github.com/helmut-hoffer-von-ankershoffen/heinzel), the open-source crew of AI helpers that drafts your team's busywork and asks before anything
+leaves your machine. Real screens from the running app, with fictional data, are below; every plugin has a full gallery in the catalog.
 
-Coverage measures the shared developer toolkit; each plugin enforces its own coverage gate in its owning checks.
+[**Explore the plugin catalog →**](https://heinzel.team/CATALOG/) · [Install the app](#install) · [Build your own plugin](#add-a-plugin)
 
-Independent public plugins for [Heinzelmännchen](https://github.com/helmut-hoffer-von-ankershoffen/heinzel).
-Each project under `plugins/` owns its code, assets, dependency locks, tests, version and artifacts.
-Adding a project changes only its own directory. Core remains independently buildable and testable.
+<table><tr><td width="96"><img src="https://raw.githubusercontent.com/helmut-hoffer-von-ankershoffen/heinzel/e6c2e707726741e28ecc9360a3683fc00e968dfb/docs/assets/website/helper-timekeeper.svg" width="72" alt="Pip, a young Heinzelmännchen with a blue hat and a question mark"></td><td>
+
+**Pip:** "I find a time that works for everyone." Start with the World Clock below: it ships with the standard app.
+
+</td></tr></table>
 
 ## See what the plugins add
 
-[Explore the plugin catalog →](https://helmut.hoffer-von-ankershoffen.me/heinzel/CATALOG/) · [Install the standard app →](https://helmut.hoffer-von-ankershoffen.me/heinzel/guides/install/)
+[Explore the plugin catalog →](https://heinzel.team/CATALOG/) · [Install the standard app →](https://heinzel.team/guides/install/)
 
 These are real plugin interfaces running with fictional demonstration data. Each catalog page includes its full
 UI and CLI gallery; theme pages also list their optional soundscapes.
 
 ### Find a time that works across the team
 
-[![Find overlap across Berlin, New York and Los Angeles while staying on Today — demonstration time](plugins/heinzel-clock/docs/assets/screenshots/world-clock.png)](https://helmut.hoffer-von-ankershoffen.me/heinzel/catalog/heinzel-clock-a8638667a9/)
+[![Find overlap across Berlin, New York and Los Angeles while staying on Today — demonstration time](plugins/heinzel-clock/docs/assets/screenshots/world-clock.png)](https://heinzel.team/catalog/heinzel-clock-a8638667a9/)
 
-Find overlap across Berlin, New York and Los Angeles while staying on Today — demonstration time · [Explore Clock →](https://helmut.hoffer-von-ankershoffen.me/heinzel/catalog/heinzel-clock-a8638667a9/)
+Find overlap across Berlin, New York and Los Angeles while staying on Today — demonstration time · [Explore Clock →](https://heinzel.team/catalog/heinzel-clock-a8638667a9/)
 
 <table><tr>
-<td align="center" valign="top"><a href="https://helmut.hoffer-von-ankershoffen.me/heinzel/catalog/heinzel-clock-a8638667a9/"><img src="plugins/heinzel-clock/docs/assets/screenshots/team-overview.png" alt="Team working hours at a glance: Today, sidebar ticker and primary footer clock — demonstration time" height="300"></a><br><sub>Team working hours at a glance: Today, sidebar ticker and primary footer clock — demonstration time</sub></td>
-<td align="center" valign="top"><a href="https://helmut.hoffer-von-ankershoffen.me/heinzel/catalog/heinzel-clock-a8638667a9/"><img src="plugins/heinzel-clock/docs/assets/screenshots/phone-world-clock.png" alt="The live globe and all three team clocks on a phone — fixed demonstration time" height="300"></a><br><sub>The live globe and all three team clocks on a phone — fixed demonstration time</sub></td>
+<td align="center" valign="top"><a href="https://heinzel.team/catalog/heinzel-clock-a8638667a9/"><img src="plugins/heinzel-clock/docs/assets/screenshots/team-overview.png" alt="Team working hours at a glance: Today, sidebar ticker and primary footer clock — demonstration time" height="300"></a><br><sub>Team working hours at a glance: Today, sidebar ticker and primary footer clock — demonstration time</sub></td>
+<td align="center" valign="top"><a href="https://heinzel.team/catalog/heinzel-clock-a8638667a9/"><img src="plugins/heinzel-clock/docs/assets/screenshots/phone-world-clock.png" alt="The live globe and all three team clocks on a phone — fixed demonstration time" height="300"></a><br><sub>The live globe and all three team clocks on a phone — fixed demonstration time</sub></td>
 </tr></table>
 
 ### Understand what is slowing this computer down
 
-[![A quick CPU summary on Today, with three compact footer meters — demonstration values](plugins/heinzel-resource/docs/assets/screenshots/today-resources.png)](https://helmut.hoffer-von-ankershoffen.me/heinzel/catalog/heinzel-resource-c3ccd26ae0/)
+[![A quick CPU summary on Today, with three compact footer meters — demonstration values](plugins/heinzel-resource/docs/assets/screenshots/today-resources.png)](https://heinzel.team/catalog/heinzel-resource-c3ccd26ae0/)
 
-A quick CPU summary on Today, with three compact footer meters — demonstration values · [Explore Resource →](https://helmut.hoffer-von-ankershoffen.me/heinzel/catalog/heinzel-resource-c3ccd26ae0/)
+A quick CPU summary on Today, with three compact footer meters — demonstration values · [Explore Resource →](https://heinzel.team/catalog/heinzel-resource-c3ccd26ae0/)
 
 <table><tr>
-<td align="center" valign="top"><a href="https://helmut.hoffer-von-ankershoffen.me/heinzel/catalog/heinzel-resource-c3ccd26ae0/"><img src="plugins/heinzel-resource/docs/assets/screenshots/resources-pane.png" alt="CPU, memory and scaled load in the expanded monitor — fictional demo workstation" height="300"></a><br><sub>CPU, memory and scaled load in the expanded monitor — fictional demo workstation</sub></td>
-<td align="center" valign="top"><a href="https://helmut.hoffer-von-ankershoffen.me/heinzel/catalog/heinzel-resource-c3ccd26ae0/"><img src="plugins/heinzel-resource/docs/assets/screenshots/phone-resources.png" alt="Read CPU, memory and queued load on a phone — fictional demo workstation" height="300"></a><br><sub>Read CPU, memory and queued load on a phone — fictional demo workstation</sub></td>
+<td align="center" valign="top"><a href="https://heinzel.team/catalog/heinzel-resource-c3ccd26ae0/"><img src="plugins/heinzel-resource/docs/assets/screenshots/resources-pane.png" alt="CPU, memory and scaled load in the expanded monitor — fictional demo workstation" height="300"></a><br><sub>CPU, memory and scaled load in the expanded monitor — fictional demo workstation</sub></td>
+<td align="center" valign="top"><a href="https://heinzel.team/catalog/heinzel-resource-c3ccd26ae0/"><img src="plugins/heinzel-resource/docs/assets/screenshots/phone-resources.png" alt="Read CPU, memory and queued load on a phone — fictional demo workstation" height="300"></a><br><sub>Read CPU, memory and queued load on a phone — fictional demo workstation</sub></td>
 </tr></table>
 
 ### See the weather before your next meeting or commute
 
-[![Current weather and the coming days on Today — fictional Berlin forecast](plugins/heinzel-weather/docs/assets/screenshots/today-weather.png)](https://helmut.hoffer-von-ankershoffen.me/heinzel/catalog/heinzel-weather-d59846a40e/)
+[![Current weather and the coming days on Today — fictional Berlin forecast](plugins/heinzel-weather/docs/assets/screenshots/today-weather.png)](https://heinzel.team/catalog/heinzel-weather-d59846a40e/)
 
-Current weather and the coming days on Today — fictional Berlin forecast · [Explore Weather →](https://helmut.hoffer-von-ankershoffen.me/heinzel/catalog/heinzel-weather-d59846a40e/)
+Current weather and the coming days on Today — fictional Berlin forecast · [Explore Weather →](https://heinzel.team/catalog/heinzel-weather-d59846a40e/)
 
 <table><tr>
-<td align="center" valign="top"><a href="https://helmut.hoffer-von-ankershoffen.me/heinzel/catalog/heinzel-weather-d59846a40e/"><img src="plugins/heinzel-weather/docs/assets/screenshots/weather-detail.png" alt="Inspect conditions, feels-like temperature and rain chance — fictional local forecast" height="300"></a><br><sub>Inspect conditions, feels-like temperature and rain chance — fictional local forecast</sub></td>
-<td align="center" valign="top"><a href="https://helmut.hoffer-von-ankershoffen.me/heinzel/catalog/heinzel-weather-d59846a40e/"><img src="plugins/heinzel-weather/docs/assets/screenshots/phone-weather.png" alt="Weather and near forecast in the phone-sized Today view — fictional local forecast" height="300"></a><br><sub>Weather and near forecast in the phone-sized Today view — fictional local forecast</sub></td>
+<td align="center" valign="top"><a href="https://heinzel.team/catalog/heinzel-weather-d59846a40e/"><img src="plugins/heinzel-weather/docs/assets/screenshots/weather-detail.png" alt="Inspect conditions, feels-like temperature and rain chance — fictional local forecast" height="300"></a><br><sub>Inspect conditions, feels-like temperature and rain chance — fictional local forecast</sub></td>
+<td align="center" valign="top"><a href="https://heinzel.team/catalog/heinzel-weather-d59846a40e/"><img src="plugins/heinzel-weather/docs/assets/screenshots/phone-weather.png" alt="Weather and near forecast in the phone-sized Today view — fictional local forecast" height="300"></a><br><sub>Weather and near forecast in the phone-sized Today view — fictional local forecast</sub></td>
 </tr></table>
 
 ### Make the whole app yours in light and dark
 
 <table><tr>
-<td align="center" valign="top" width="50%"><a href="https://helmut.hoffer-von-ankershoffen.me/heinzel/catalog/heinzel-theme-5e723a7d8a/"><img src="plugins/heinzel-theme/docs/assets/screenshots/theme-light.png" alt="The installed Heinzelmännchen theme on a representative local contract — light appearance" width="100%"></a><br><sub>The installed Heinzelmännchen theme on a representative local contract — light appearance</sub></td>
-<td align="center" valign="top" width="50%"><a href="https://helmut.hoffer-von-ankershoffen.me/heinzel/catalog/heinzel-theme-5e723a7d8a/"><img src="plugins/heinzel-theme/docs/assets/screenshots/theme-dark.png" alt="The installed Heinzelmännchen theme on a representative local contract — dark appearance" width="100%"></a><br><sub>The installed Heinzelmännchen theme on a representative local contract — dark appearance</sub></td>
+<td align="center" valign="top" width="50%"><a href="https://heinzel.team/catalog/heinzel-theme-5e723a7d8a/"><img src="plugins/heinzel-theme/docs/assets/screenshots/theme-light.png" alt="The installed Heinzelmännchen theme on a representative local contract — light appearance" width="100%"></a><br><sub>The installed Heinzelmännchen theme on a representative local contract — light appearance</sub></td>
+<td align="center" valign="top" width="50%"><a href="https://heinzel.team/catalog/heinzel-theme-5e723a7d8a/"><img src="plugins/heinzel-theme/docs/assets/screenshots/theme-dark.png" alt="The installed Heinzelmännchen theme on a representative local contract — dark appearance" width="100%"></a><br><sub>The installed Heinzelmännchen theme on a representative local contract — dark appearance</sub></td>
 </tr></table>
 
-[Explore the standard theme →](https://helmut.hoffer-von-ankershoffen.me/heinzel/catalog/heinzel-theme-5e723a7d8a/)
+[Explore the standard theme →](https://heinzel.team/catalog/heinzel-theme-5e723a7d8a/)
 
 <details>
 <summary>Command line</summary>
@@ -78,15 +83,55 @@ A concise three-day outlook through the real CLI — local fictional forecast
 
 </details>
 
-Connectors and the example plugin have their own feature stories too. [Browse all plugins and their galleries →](https://helmut.hoffer-von-ankershoffen.me/heinzel/CATALOG/)
+Connectors and the example plugin have full galleries too. [Browse them all in the catalog →](https://heinzel.team/CATALOG/)
 
-For macOS and Linux, start with the [standard app installation guide](https://helmut.hoffer-von-ankershoffen.me/heinzel/guides/install/).
-Use `uvx heinzel@latest` if uv is available, or its guided curl/wget installer to install prerequisites automatically.
-Windows may work, but is not supported.
+## The plugins
+
+Each one is its own project in [`plugins/`](plugins/) with its own code, tests, version and releases.
+
+- **[World Clock](https://heinzel.team/catalog/heinzel-clock-a8638667a9/) · [source](plugins/heinzel-clock)** — What time it is for everyone on the team, on a globe and in a footer clock. *In the standard app.* Add it with `hz system plugin add clock --confirm`.
+- **[System Resources](https://heinzel.team/catalog/heinzel-resource-c3ccd26ae0/) · [source](plugins/heinzel-resource)** — CPU, memory and load meters, and a Today widget. *In the standard app.* Add it with `hz system plugin add resource --confirm`.
+- **[Tailscale](https://heinzel.team/catalog/heinzel-tailscale-d13884e4ee/) · [source](plugins/heinzel-tailscale)** — Private sharing of the web app over your tailnet. Off until you turn it on. *In the standard app; needs the Tailscale client.* Add it with `hz system plugin add tailscale --confirm`.
+- **[Heinzelmännchen theme](https://heinzel.team/catalog/heinzel-theme-5e723a7d8a/) · [source](plugins/heinzel-theme)** — The app's look in light and dark, and three soundscapes that start only when you press Play. *In the standard app.* Add it with `hz system plugin add theme --confirm`.
+- **[Weather](https://heinzel.team/catalog/heinzel-weather-d59846a40e/) · [source](plugins/heinzel-weather)** — Weather now and for the coming days, keyless from Open-Meteo, with a heads-up when it changes. *Optional.* Add it with `hz system plugin add weather --confirm`.
+- **[GitHub](https://heinzel.team/catalog/heinzel-github-2d8dc93d74/) · [source](plugins/heinzel-github)** — Pull requests and issues, read through your `gh` login. *Optional; needs `gh`.* Add it with `hz system plugin add github --confirm`.
+- **[Atlassian](https://heinzel.team/catalog/heinzel-atlassian-4aefc9d27e/) · [source](plugins/heinzel-atlassian)** — Jira issues and Confluence pages, read through your `acli` login. *Optional; needs `acli`.* Add it with `hz system plugin add atlassian --confirm`.
+- **[Google Workspace](https://heinzel.team/catalog/heinzel-google-49accfe7d6/) · [source](plugins/heinzel-google)** — Docs, Sheets, Drive, Calendar and Gmail, through the Google Workspace CLI. *Optional; needs `gws`.* Add it with `hz system plugin add google --confirm`.
+- **[Zoom](https://heinzel.team/catalog/heinzel-zoom-af3d213754/) · [source](plugins/heinzel-zoom)** — Meetings and decisions, read from Zoom's meeting-summary emails through your mail adapter. *Optional; needs a mail adapter.* Add it with `hz system plugin add zoom --confirm`.
+- **[Example](https://heinzel.team/catalog/heinzel-example-3a92941575/) · [source](plugins/heinzel-example)** — How a plugin is built: one module with an operation, settings and a health check. *Optional; for plugin authors.* Add it with `hz system plugin add example --confirm`.
+
+The adapters for your tools run as you, through each vendor's own command-line login. `hz system doctor` lists
+what is missing and the command that fixes it.
+
+## Install
+
+Plugins need Heinzelmännchen. One command installs the app with its default plugins (the first four above) and opens it:
+
+```sh
+uvx heinzel@latest
+```
+
+No uv yet? The guided installer sets it up first:
+
+```sh
+curl -LsSf https://heinzel.team/install.sh | sh
+```
+
+Supported on **macOS and Linux**; Windows may work, but is not supported. Details: the
+[standard app installation guide](https://heinzel.team/guides/install/).
+
+Add any other plugin from a second terminal. Without `--confirm` the command only previews what it would install:
+
+```sh
+hz system plugin add weather
+hz system plugin add weather --confirm
+```
 
 ## Work on one plugin
 
-You need git, make and uv. No core checkout or sibling plugin environment is needed.
+You need git, make and uv. No core checkout or sibling plugin environment is needed. The tooling's installation
+policy and reviewed input boundaries are in [SECURITY_REVIEW.md](SECURITY_REVIEW.md). Coverage measures the shared
+developer toolkit; each plugin enforces its own coverage gate in its owning checks.
 
 ```bash
 make list
@@ -196,6 +241,11 @@ It has no plugin entry point and needs no additional PyPI publisher. Root `make 
 toolkit; use `NAME=<owner>` for plugin commands. `make preflight NAME=<owner>` includes that plugin's full checks,
 build, audit and installed acceptance. Toolkit tests do not run core's suite.
 
+## For maintainers
+
+<details>
+<summary>How the standard app is composed, and where the plugins came from</summary>
+
 ## Standard app
 
 Only locally reviewed metadata can enroll a plugin in the `standard` profile. Topic discovery never enrolls defaults.
@@ -239,3 +289,5 @@ The installer resolves the public latest redirect to its canonical stable app ta
 profile and package identities/hashes. It needs no anonymous GitHub API quota or GitHub login for standard installation.
 The bootstrap SDK version does not select the app version. Existing app tags encode their profile's `core_version`;
 this repair does not introduce a new composition schema. See the Core [launcher decision](https://github.com/helmut-hoffer-von-ankershoffen/heinzel/blob/main/docs/adr/0110-one-versionless-launcher-installs-and-opens-the-standard-app.md).
+
+</details>
