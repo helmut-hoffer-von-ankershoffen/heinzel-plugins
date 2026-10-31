@@ -142,3 +142,16 @@ The initial migration moves Clock, Tailscale, Atlassian, GitHub, Google and Zoom
 Resource is the only built-in module extracted in this migration. Sound, Theme and the other core modules remain in core.
 Earlier core history and attribution remain in the core repository; current plugin sources live here. Existing public distribution names stay
 stable; the migration versions advance independently before publishing the changed artifacts.
+
+## Standard app discovery authority
+
+The standard app composition workflow owns this repository's latest GitHub release designation. It serializes
+publication, verifies the complete immutable artifact set, and explicitly publishes an `app-v` release as latest.
+Plugin and toolkit releases explicitly use `--make-latest false`, so an independent plugin release cannot replace
+the installation target. An older app retry does not supersede a newer app; unknown current app identity blocks
+promotion. This requires the one governed composition writer and does not fence arbitrary out-of-band writers.
+
+The installer resolves the public latest redirect to its canonical stable app tag, then verifies the immutable
+profile and package identities/hashes. It needs no anonymous GitHub API quota or GitHub login for standard installation.
+The bootstrap SDK version does not select the app version. Existing app tags encode their profile's `core_version`;
+this repair does not introduce a new composition schema. See the Core [launcher decision](https://github.com/helmut-hoffer-von-ankershoffen/heinzel/blob/main/docs/adr/0110-one-versionless-launcher-installs-and-opens-the-standard-app.md).

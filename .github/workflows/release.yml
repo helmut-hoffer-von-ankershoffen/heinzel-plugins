@@ -106,7 +106,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
           REVISION: ${{ needs.build.outputs.revision }}
-        run: uv run --frozen --group tooling python -m heinzel_plugin_tools.publishing --tag "$RELEASE_TAG" --revision "$REVISION" --directory dist --pypi
+        run: uv run --frozen --group tooling python -m heinzel_plugin_tools.publishing --tag "$RELEASE_TAG" --revision "$REVISION" --directory dist --pypi --make-latest false
   github-publish:
     if: inputs.publish && inputs.registry == 'github'
     needs: build
@@ -128,4 +128,4 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
           REVISION: ${{ needs.build.outputs.revision }}
-        run: uv run --frozen --group tooling python -m heinzel_plugin_tools.publishing --tag "$RELEASE_TAG" --revision "$REVISION" --directory dist
+        run: uv run --frozen --group tooling python -m heinzel_plugin_tools.publishing --tag "$RELEASE_TAG" --revision "$REVISION" --directory dist --make-latest false

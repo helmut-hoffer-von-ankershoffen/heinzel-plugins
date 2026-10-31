@@ -153,3 +153,62 @@ def test_existing_unverifiable_or_different_artifact_is_never_overwritten(tmp_pa
     release = {"assets": [{"name": wheel.name, "digest": digest}]}
     with pytest.raises(ValueError, match="differs or has no verifiable digest"):
         publisher.existing_assets(release, [wheel])
+
+
+@pytest.mark.parametrize(
+    ("policy", "current", "expected"),
+    [("false", None, "false"), ("true", None, "true"), ("true", "app-v0.9.0", "true"), ("true", "app-v0.9.2", "false")],
+)
+def test_explicit_latest_policy_is_applied_only_after_complete_asset_verification(
+    tmp_path, monkeypatch, policy, current, expected
+):
+    artifact = tmp_path / "standard.json"
+    artifact.write_bytes(b"verified profile")
+    asset = {"name": artifact.name, "digest": "sha256:" + hashlib.sha256(artifact.read_bytes()).hexdigest()}
+    release = {"id": 7, "tag_name": "app-v0.9.1", "draft": True, "assets": [asset]}
+    mutations = []
+    monkeypatch.setattr(publisher, "exact_tag", lambda *_args: None)
+    monkeypatch.setattr(publisher, "find_release", lambda *_args: release)
+
+    def api(path, data=None, method="POST", **_kwargs):
+        if path.endswith("/latest"):
+            return {"tag_name": current} if current is not None else None
+        assert path.endswith("/releases/7")
+        if method == "PATCH":
+            assert release["assets"] == [asset]
+            mutations.append(data)
+            release.update(data)
+        return release
+
+    monkeypatch.setattr(publisher, "api", api)
+    monkeypatch.setattr(
+        publisher.subprocess, "run", lambda *_args, **_kwargs: pytest.fail("Do not reupload or rebuild")
+    )
+    publisher.publish(REPOSITORY, "app-v0.9.1", REVISION, [artifact], make_latest=policy)
+    publisher.publish(REPOSITORY, "app-v0.9.1", REVISION, [artifact], make_latest=policy)
+    assert mutations == [{"draft": False, "make_latest": expected}] * 2
+
+
+@pytest.mark.parametrize("current", [None, "plugin/v1.0.0", "app-v0.9.0rc1", "app-v0.09.0", "unknown"])
+def test_unknown_current_standard_app_identity_cannot_be_promoted_over(monkeypatch, current):
+    monkeypatch.setattr(publisher, "api", lambda *_args, **_kwargs: {"tag_name": current})
+    with pytest.raises(ValueError):
+        publisher._latest_setting(REPOSITORY, "app-v0.9.1", "true")
+
+
+def test_nonlatest_plugin_publication_does_not_inspect_or_replace_the_app_alias(monkeypatch):
+    monkeypatch.setattr(publisher, "api", lambda *_args, **_kwargs: pytest.fail("No latest alias lookup or promotion"))
+    assert publisher._latest_setting(REPOSITORY, "plugin/v1.0.0", "false") == "false"
+
+
+def test_unverified_assets_cannot_change_latest_policy(tmp_path, monkeypatch):
+    artifact = tmp_path / "standard.json"
+    artifact.write_bytes(b"built profile")
+    release = {"id": 7, "draft": True, "assets": [{"name": artifact.name, "digest": "sha256:" + "0" * 64}]}
+    monkeypatch.setattr(publisher, "exact_tag", lambda *_args: None)
+    monkeypatch.setattr(publisher, "find_release", lambda *_args: release)
+    monkeypatch.setattr(
+        publisher, "api", lambda *_args, **_kwargs: pytest.fail("No upload or alias mutation before verification")
+    )
+    with pytest.raises(ValueError, match="differs or has no verifiable digest"):
+        publisher.publish(REPOSITORY, "app-v0.9.1", REVISION, [artifact], make_latest="true")

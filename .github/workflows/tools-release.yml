@@ -63,4 +63,4 @@ jobs:
           GH_REPO: ${{ github.repository }}
           TAG: ${{ needs.build.outputs.tag }}
           REVISION: ${{ github.sha }}
-        run: uv run --frozen --group tooling python -m heinzel_plugin_tools.publishing --tag "$TAG" --revision "$REVISION" --directory release-dist
+        run: uv run --frozen --group tooling python -m heinzel_plugin_tools.publishing --tag "$TAG" --revision "$REVISION" --directory release-dist --make-latest false

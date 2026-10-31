@@ -95,7 +95,40 @@ def find_release(repository: str, tag: str) -> dict | None:
     return release
 
 
-def publish(repository: str, tag: str, revision: str, artifacts: list[Path], *, pypi: bool = False) -> None:
+def _app_version(tag: str) -> Version:
+    raw = tag.removeprefix("app-v")
+    selected = Version(raw)
+    if not tag.startswith("app-v") or str(selected) != raw or selected.is_prerelease or selected.is_devrelease:
+        raise ValueError("Only a canonical stable standard app can become latest")
+    return selected
+
+
+def _latest_setting(repository: str, tag: str, setting: str | None) -> str | None:
+    if setting != "true" or not tag.startswith("app-v"):
+        return setting
+    selected = _app_version(tag)
+    # The standard-app workflow serializes its sole promotion writer; this check prevents older retries.
+    current = api(f"repos/{repository}/releases/latest", missing=True)
+    if current is not None:
+        current_tag = current.get("tag_name")
+        if not isinstance(current_tag, str):
+            raise ValueError("The current latest release identity is invalid")
+        if _app_version(current_tag) > selected:
+            return "false"
+    return "true"
+
+
+def publish(
+    repository: str,
+    tag: str,
+    revision: str,
+    artifacts: list[Path],
+    *,
+    pypi: bool = False,
+    make_latest: str | None = None,
+) -> None:
+    if make_latest not in {None, "true", "false"}:
+        raise ValueError("Choose an explicit true or false latest-release policy")
     if not re.fullmatch(r"[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+", repository):
         raise ValueError("Use an owner/repository identity")
     if not re.fullmatch(r"[a-z0-9][a-z0-9./+-]*", tag) or not re.fullmatch(r"[a-f0-9]{40}|[a-f0-9]{64}", revision):
@@ -133,8 +166,11 @@ def publish(repository: str, tag: str, revision: str, artifacts: list[Path], *, 
     if not release or existing_assets(api(f"repos/{repository}/releases/{release['id']}"), artifacts):
         raise ValueError("Publication is incomplete; retry the same built artifacts")
     exact_tag(repository, tag, revision)
-    if release and release.get("draft", False):
-        api(f"repos/{repository}/releases/{release['id']}", data={"draft": False}, method="PATCH")
+    if release and (release.get("draft", False) or make_latest is not None):
+        publication: dict[str, object] = {"draft": False}
+        if make_latest is not None:
+            publication["make_latest"] = _latest_setting(repository, tag, make_latest)
+        api(f"repos/{repository}/releases/{release['id']}", data=publication, method="PATCH")
 
 
 def tag_revision(repository: str, tag: str) -> str:
@@ -259,6 +295,7 @@ def main() -> None:
     parser.add_argument("--revision")
     parser.add_argument("--directory", type=Path, required=True)
     parser.add_argument("--pypi", action="store_true")
+    parser.add_argument("--make-latest", choices=("true", "false"))
     parser.add_argument("--restore", action="store_true")
     parser.add_argument("--name")
     args = parser.parse_args()
@@ -275,7 +312,7 @@ def main() -> None:
     if not args.revision:
         parser.error("Publication requires the exact built revision")
     files = sorted(path for path in args.directory.iterdir() if path.name != "release.json" and path.is_file())
-    publish(os.environ["GH_REPO"], args.tag, args.revision, files, pypi=args.pypi)
+    publish(os.environ["GH_REPO"], args.tag, args.revision, files, pypi=args.pypi, make_latest=args.make_latest)
 
 
 if __name__ == "__main__":
