@@ -21,7 +21,8 @@ jobs:
     if: >-
       github.event.workflow_run.conclusion == 'success' &&
       github.event.workflow_run.event == 'push' &&
-      github.event.workflow_run.head_repository.full_name == github.repository
+      github.event.workflow_run.head_repository.full_name == github.repository &&
+      github.event.workflow_run.head_sha == github.sha
     runs-on: ubuntu-latest
     timeout-minutes: 5
     permissions:
@@ -30,9 +31,11 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
-          ref: ${{ github.event.workflow_run.head_sha }}
           fetch-depth: 0
           persist-credentials: false
+      # A workflow_run checks out the default branch's tip, never the triggering ref, and runs only when that tip is
+      # the commit that just went green. Release one plugin builds main's tip too, so both see the same commit. If main
+      # has moved on, the newer commit's own green run releases what is still untagged.
       - name: Dispatch a release for each version without a tag
         env:
           CHANNELS: ${{ vars.RELEASE_CHANNELS }}
