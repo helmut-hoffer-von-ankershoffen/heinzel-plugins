@@ -553,7 +553,7 @@ def backend(interpreter: Path, env: dict, home: Path) -> tuple[subprocess.Popen,
                 continue
             if line is None:
                 break
-            found = re.search(r"http://127\.0\.0\.1:\d+/[^\s]*#token=[A-Za-z0-9_-]+", line)
+            found = re.search(r"https?://127\.0\.0\.1:\d+/[^\s]*#token=[A-Za-z0-9_-]+", line)
             if found:
                 return process, found.group()
         raise CaptureError("The app did not become ready. Run make preview to inspect it, then retry make screenshots")
@@ -871,6 +871,8 @@ def capture(
     plan = read_plan(root)
     metadata = project_data(root)
     name = metadata["project"]["name"]
+    if not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._-]*", name):
+        raise CaptureError("The plugin name must start with a letter or digit and contain no option-like text")
     if not (root / PLAN).exists():
         write_default_plan(root)
     print(f"Preparing {name}; your normal app and credentials stay separate.", file=sys.stderr, flush=True)

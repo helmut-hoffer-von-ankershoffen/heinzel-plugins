@@ -84,9 +84,11 @@ jobs:
             uv run --frozen --no-build --group tooling python scripts/plugins.py plan --changed scripts/plugins.py > plan.json
           fi
           matrix="$(python -c 'import json; print(json.dumps({"include":json.load(open("plan.json"))["include"]}))')"
-          echo "matrix=$matrix" >> "$GITHUB_OUTPUT"
-          echo "selected=$(python -c 'import json; print(bool(json.load(open("plan.json"))["include"]))')" >> "$GITHUB_OUTPUT"
-          echo "tooling=$(python -c 'import json; print(json.load(open("plan.json"))["tooling"])')" >> "$GITHUB_OUTPUT"
+          {
+            echo "matrix=$matrix"
+            echo "selected=$(python -c 'import json; print(bool(json.load(open("plan.json"))["include"]))')"
+            echo "tooling=$(python -c 'import json; print(json.load(open("plan.json"))["tooling"])')"
+          } >> "$GITHUB_OUTPUT"
           cat plan.json >> "$GITHUB_STEP_SUMMARY"
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
@@ -106,7 +108,7 @@ jobs:
           persist-credentials: false
       - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e # v10.3.2
       - name: Install the capture browser and its runner libraries
-        run: uv run --no-project --with playwright==1.64.1 playwright install --with-deps chromium
+        run: uv run --frozen --with playwright==1.64.1 --group tooling playwright install --with-deps chromium
       - name: Capture a new unknown plugin, detect staleness, fail a scene and recover
         env:
           HZ_CAPTURE_E2E: '1'
