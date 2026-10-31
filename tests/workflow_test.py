@@ -56,3 +56,19 @@ def test_only_the_serialized_standard_app_writer_can_designate_latest():
 def test_latest_policy_check_rejects_a_plugin_writer_without_explicit_policy():
     workflow = {"jobs": {"publish": {"steps": [{"run": "python -m heinzel_plugin_tools.publishing --tag example"}]}}}
     assert latest_policy_violations("release", workflow) == ["publish"]
+
+
+def test_auto_release_runs_only_trusted_code_from_a_green_main_tip():
+    workflow = yaml.safe_load((ROOT / ".github/workflows/auto-release.yml").read_text())
+    job = workflow["jobs"]["release"]
+    for guard in (
+        "workflow_run.conclusion == 'success'",
+        "workflow_run.event == 'push'",
+        "workflow_run.head_repository.full_name == github.repository",
+        "workflow_run.head_sha == github.sha",
+    ):
+        assert guard in job["if"]
+    checkout = job["steps"][0]
+    assert "actions/checkout" in checkout["uses"]
+    assert "ref" not in checkout["with"]
+    assert job["permissions"] == {"contents": "read", "actions": "write"}
