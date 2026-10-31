@@ -89,26 +89,16 @@ Connectors and the example plugin have full galleries too. [Browse them all in t
 
 Each one is its own project in [`plugins/`](plugins/) with its own code, tests, version and releases.
 
-- **[World Clock](https://helmut.hoffer-von-ankershoffen.me/heinzel/catalog/heinzel-clock-a8638667a9/) · [source](plugins/heinzel-clock)** — What time it is for everyone on the team, on a globe and in a footer clock. *In the standard app.*
-  `hz system plugin add clock --confirm`
-- **[System Resources](https://helmut.hoffer-von-ankershoffen.me/heinzel/catalog/heinzel-resource-c3ccd26ae0/) · [source](plugins/heinzel-resource)** — CPU, memory and load meters, and a Today widget. *In the standard app.*
-  `hz system plugin add resource --confirm`
-- **[Tailscale](https://helmut.hoffer-von-ankershoffen.me/heinzel/catalog/heinzel-tailscale-d13884e4ee/) · [source](plugins/heinzel-tailscale)** — Private sharing of the web app over your tailnet. Off until you turn it on. *In the standard app; needs the Tailscale client.*
-  `hz system plugin add tailscale --confirm`
-- **[Heinzelmännchen theme](https://helmut.hoffer-von-ankershoffen.me/heinzel/catalog/heinzel-theme-5e723a7d8a/) · [source](plugins/heinzel-theme)** — The app's look in light and dark, and three soundscapes that start only when you press Play. *In the standard app.*
-  `hz system plugin add theme --confirm`
-- **[Weather](https://helmut.hoffer-von-ankershoffen.me/heinzel/catalog/heinzel-weather-d59846a40e/) · [source](plugins/heinzel-weather)** — Weather now and for the coming days, keyless from Open-Meteo, with a heads-up when it changes. *Optional.*
-  `hz system plugin add weather --confirm`
-- **[GitHub](https://helmut.hoffer-von-ankershoffen.me/heinzel/catalog/heinzel-github-2d8dc93d74/) · [source](plugins/heinzel-github)** — Pull requests and issues, read through your `gh` login. *Optional; needs `gh`.*
-  `hz system plugin add github --confirm`
-- **[Atlassian](https://helmut.hoffer-von-ankershoffen.me/heinzel/catalog/heinzel-atlassian-4aefc9d27e/) · [source](plugins/heinzel-atlassian)** — Jira issues and Confluence pages, read through your `acli` login. *Optional; needs `acli`.*
-  `hz system plugin add atlassian --confirm`
-- **[Google Workspace](https://helmut.hoffer-von-ankershoffen.me/heinzel/catalog/heinzel-google-49accfe7d6/) · [source](plugins/heinzel-google)** — Docs, Sheets, Drive, Calendar and Gmail, through the Google Workspace CLI. *Optional; needs `gws`.*
-  `hz system plugin add google --confirm`
-- **[Zoom](https://helmut.hoffer-von-ankershoffen.me/heinzel/catalog/heinzel-zoom-af3d213754/) · [source](plugins/heinzel-zoom)** — Meetings and decisions, read from Zoom's meeting-summary emails through your mail adapter. *Optional; needs a mail adapter.*
-  `hz system plugin add zoom --confirm`
-- **[Example](https://helmut.hoffer-von-ankershoffen.me/heinzel/catalog/heinzel-example-3a92941575/) · [source](plugins/heinzel-example)** — How a plugin is built: one module with an operation, settings and a health check. *Optional; for plugin authors.*
-  `hz system plugin add example --confirm`
+- **[World Clock](https://helmut.hoffer-von-ankershoffen.me/heinzel/catalog/heinzel-clock-a8638667a9/) · [source](plugins/heinzel-clock)** — What time it is for everyone on the team, on a globe and in a footer clock. *In the standard app.* Add it with `hz system plugin add clock --confirm`.
+- **[System Resources](https://helmut.hoffer-von-ankershoffen.me/heinzel/catalog/heinzel-resource-c3ccd26ae0/) · [source](plugins/heinzel-resource)** — CPU, memory and load meters, and a Today widget. *In the standard app.* Add it with `hz system plugin add resource --confirm`.
+- **[Tailscale](https://helmut.hoffer-von-ankershoffen.me/heinzel/catalog/heinzel-tailscale-d13884e4ee/) · [source](plugins/heinzel-tailscale)** — Private sharing of the web app over your tailnet. Off until you turn it on. *In the standard app; needs the Tailscale client.* Add it with `hz system plugin add tailscale --confirm`.
+- **[Heinzelmännchen theme](https://helmut.hoffer-von-ankershoffen.me/heinzel/catalog/heinzel-theme-5e723a7d8a/) · [source](plugins/heinzel-theme)** — The app's look in light and dark, and three soundscapes that start only when you press Play. *In the standard app.* Add it with `hz system plugin add theme --confirm`.
+- **[Weather](https://helmut.hoffer-von-ankershoffen.me/heinzel/catalog/heinzel-weather-d59846a40e/) · [source](plugins/heinzel-weather)** — Weather now and for the coming days, keyless from Open-Meteo, with a heads-up when it changes. *Optional.* Add it with `hz system plugin add weather --confirm`.
+- **[GitHub](https://helmut.hoffer-von-ankershoffen.me/heinzel/catalog/heinzel-github-2d8dc93d74/) · [source](plugins/heinzel-github)** — Pull requests and issues, read through your `gh` login. *Optional; needs `gh`.* Add it with `hz system plugin add github --confirm`.
+- **[Atlassian](https://helmut.hoffer-von-ankershoffen.me/heinzel/catalog/heinzel-atlassian-4aefc9d27e/) · [source](plugins/heinzel-atlassian)** — Jira issues and Confluence pages, read through your `acli` login. *Optional; needs `acli`.* Add it with `hz system plugin add atlassian --confirm`.
+- **[Google Workspace](https://helmut.hoffer-von-ankershoffen.me/heinzel/catalog/heinzel-google-49accfe7d6/) · [source](plugins/heinzel-google)** — Docs, Sheets, Drive, Calendar and Gmail, through the Google Workspace CLI. *Optional; needs `gws`.* Add it with `hz system plugin add google --confirm`.
+- **[Zoom](https://helmut.hoffer-von-ankershoffen.me/heinzel/catalog/heinzel-zoom-af3d213754/) · [source](plugins/heinzel-zoom)** — Meetings and decisions, read from Zoom's meeting-summary emails through your mail adapter. *Optional; needs a mail adapter.* Add it with `hz system plugin add zoom --confirm`.
+- **[Example](https://helmut.hoffer-von-ankershoffen.me/heinzel/catalog/heinzel-example-3a92941575/) · [source](plugins/heinzel-example)** — How a plugin is built: one module with an operation, settings and a health check. *Optional; for plugin authors.* Add it with `hz system plugin add example --confirm`.
 
 The adapters for your tools run as you, through each vendor's own command-line login. `hz system doctor` lists
 what is missing and the command that fixes it.
