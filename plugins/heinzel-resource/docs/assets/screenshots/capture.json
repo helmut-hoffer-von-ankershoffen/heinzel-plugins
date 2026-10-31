@@ -1,0 +1,80 @@
+{
+  "format": 1,
+  "plugin": "heinzel-resource",
+  "core_version": "0.9.1",
+  "inputs_sha256": "b5f80f24b49ad7a8900e6e95a5da505efb776100ecc7646418009a31ed257504",
+  "images": {
+    "docs/assets/screenshots/resources-pane.png": "a9ffbbfe9ecb624256c81e4b334dce96c5b04700c907c59acebc5f00c681eff5",
+    "docs/assets/screenshots/today-resources.png": "9cf5c41c8d1056d7d02dd76e1d6f2fc1a7d06bd5decabe19d828097c8c5b26f3",
+    "docs/assets/screenshots/phone-resources.png": "3f8c480bd268edb80d63225d999df393abaa44168de882583265ffa9104d2c61",
+    "docs/assets/screenshots/cli-resources.png": "3d8012cf0ff56ee191ad3c8616855bc514e3a6692621c7248f8a72b554a96073"
+  },
+  "review_bundle": {
+    "format": 1,
+    "definition": {
+      "format": 1,
+      "reviewer": "Codex feature-story agent",
+      "source_sha256": "e4bbd772774b3b8e532fffd75b8aae827013ca7a4f6f3e059ac6b0e0be267c58",
+      "plan_sha256": "ebd4bec4b2967f1a4ef766b0cd579180d21451ca0aff3301d760ddd9ecec2dad",
+      "story_sha256": "baee244baed3b6224bb61193d9f4a1f5cd793e264822084e2f049e51d6abd7dd"
+    },
+    "plugin": "heinzel-resource",
+    "core_version": "0.9.1",
+    "inputs_sha256": "b5f80f24b49ad7a8900e6e95a5da505efb776100ecc7646418009a31ed257504",
+    "screenshots": [
+      {
+        "path": "docs/assets/screenshots/resources-pane.png",
+        "surface": "ui",
+        "caption": "CPU, memory and scaled load in the expanded monitor \u2014 fictional demo workstation"
+      },
+      {
+        "path": "docs/assets/screenshots/today-resources.png",
+        "surface": "ui",
+        "caption": "A quick CPU summary on Today, with three compact footer meters \u2014 demonstration values"
+      },
+      {
+        "path": "docs/assets/screenshots/phone-resources.png",
+        "surface": "ui",
+        "caption": "Read CPU, memory and queued load on a phone \u2014 fictional demo workstation"
+      },
+      {
+        "path": "docs/assets/screenshots/cli-resources.png",
+        "surface": "cli",
+        "caption": "The same fictional CPU, memory and raw load measurements in the CLI"
+      }
+    ],
+    "images": {
+      "resources-pane.png": "a9ffbbfe9ecb624256c81e4b334dce96c5b04700c907c59acebc5f00c681eff5",
+      "today-resources.png": "9cf5c41c8d1056d7d02dd76e1d6f2fc1a7d06bd5decabe19d828097c8c5b26f3",
+      "phone-resources.png": "3f8c480bd268edb80d63225d999df393abaa44168de882583265ffa9104d2c61",
+      "cli-resources.png": "3d8012cf0ff56ee191ad3c8616855bc514e3a6692621c7248f8a72b554a96073"
+    },
+    "transcripts": {
+      "resources-pane.txt": "f8754ab93f65e0c2ced4135a948402a47e2bb9027a940f48bc26590c629a73f5",
+      "today-resources.txt": "eacb6e26ee80e2451473f5e079fbd6ab46ad324152fbc65e71df82209b040408",
+      "phone-resources.txt": "702f1d96e760cbe0a57719f7eadcd7ff244d336926be2e92bd842a10017ffbf2",
+      "cli-resources.txt": "ddef8a589eb34e18d3fd06ab545c884ebcc82923f5270bb88a6fcfc2ae8272a7"
+    },
+    "bundle_sha256": "34ecc5a5dac55b6d11180c099bdc9af7a8a821064df10c162a5da22ead9221fa"
+  },
+  "privacy_review": {
+    "format": 1,
+    "bundle_sha256": "34ecc5a5dac55b6d11180c099bdc9af7a8a821064df10c162a5da22ead9221fa",
+    "reviewer": "Codex privacy agent",
+    "decision": "approve",
+    "checked_images": [
+      "resources-pane.png",
+      "today-resources.png",
+      "phone-resources.png",
+      "cli-resources.png"
+    ],
+    "checks": {
+      "tokens_absent": true,
+      "personal_data_absent": true,
+      "feature_relevant": true,
+      "multiple_ui_scenes": true,
+      "captions_accurate": true
+    },
+    "findings": []
+  }
+}

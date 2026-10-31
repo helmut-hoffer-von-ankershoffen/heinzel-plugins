@@ -107,3 +107,34 @@ A skill grants no operation, target, recipient or approval. The scheduled durabl
 mail approval are separate integration work; installing this plugin does not activate them. Candidate change keys
 are not durable delivery receipts, and a new process has its own cache. The independent watch job keeps its
 existing schedule and notice policy.
+
+<!-- screenshots:start -->
+## Screenshots
+
+<img src="docs/assets/screenshots/today-weather.png" alt="Current weather and the coming days on Today — fictional Berlin forecast" width="960">
+
+Current weather and the coming days on Today — fictional Berlin forecast
+
+<img src="docs/assets/screenshots/weather-detail.png" alt="Inspect conditions, feels-like temperature and rain chance — fictional local forecast" width="960">
+
+Inspect conditions, feels-like temperature and rain chance — fictional local forecast
+
+<img src="docs/assets/screenshots/phone-weather.png" alt="Weather and near forecast in the phone-sized Today view — fictional local forecast" width="960">
+
+Weather and near forecast in the phone-sized Today view — fictional local forecast
+
+<details>
+<summary>Command line</summary>
+
+<img src="docs/assets/screenshots/cli-weather.png" alt="Hourly conditions and approaching rain through the real CLI — local fictional forecast" width="960">
+
+Hourly conditions and approaching rain through the real CLI — local fictional forecast
+
+<img src="docs/assets/screenshots/cli-forecast.png" alt="A concise three-day outlook through the real CLI — local fictional forecast" width="960">
+
+A concise three-day outlook through the real CLI — local fictional forecast
+
+</details>
+
+[Open the screenshot gallery](docs/assets/screenshots/index.html).
+<!-- screenshots:end -->

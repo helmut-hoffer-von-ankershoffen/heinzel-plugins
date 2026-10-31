@@ -151,11 +151,26 @@ highlights = [
 ]
 
 [[tool.heinzel.catalog.screenshots]]
-path = "docs/assets/cli.png"
-surface = "cli"
-caption = "hz weather --help — isolated demonstration profile"
+path = "docs/assets/screenshots/today-weather.png"
+surface = "ui"
+caption = "Current weather and the coming days on Today — fictional Berlin forecast"
 
 [[tool.heinzel.catalog.screenshots]]
-path = "docs/assets/ui.png"
+path = "docs/assets/screenshots/weather-detail.png"
 surface = "ui"
-caption = "Plugin settings in the app; no external account connected"
+caption = "Inspect conditions, feels-like temperature and rain chance — fictional local forecast"
+
+[[tool.heinzel.catalog.screenshots]]
+path = "docs/assets/screenshots/phone-weather.png"
+surface = "ui"
+caption = "Weather and near forecast in the phone-sized Today view — fictional local forecast"
+
+[[tool.heinzel.catalog.screenshots]]
+path = "docs/assets/screenshots/cli-weather.png"
+surface = "cli"
+caption = "Hourly conditions and approaching rain through the real CLI — local fictional forecast"
+
+[[tool.heinzel.catalog.screenshots]]
+path = "docs/assets/screenshots/cli-forecast.png"
+surface = "cli"
+caption = "A concise three-day outlook through the real CLI — local fictional forecast"

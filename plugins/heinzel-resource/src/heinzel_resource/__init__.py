@@ -146,14 +146,14 @@ def machine(sample: Resources) -> StatusItem:
         meters=[
             StatusMeter(label="CPU", value=sample.cpu_percent, tone=tones[0]),
             StatusMeter(label="Memory", value=sample.memory_percent, tone=tones[1]),
-            StatusMeter(label="Load", value=load_percent, tone=tones[2]),
+            StatusMeter(label="Load (scaled)", value=load_percent, tone=tones[2]),
         ],
         detail=[
             DetailLine(text=f"Host: {sample.hostname}"[:80]),
             DetailLine(text=f"CPU: {_percent(sample.cpu_percent)}"),
             DetailLine(text=f"Memory: {_percent(sample.memory_percent)}"),
             DetailLine(text=f"Load (1 min): {load}; {sample.logical_cores or '?'} logical cores"),
-            DetailLine(text="Load measures queued work; it is not a CPU percentage."),
+            DetailLine(text="Load is queued work. The bar reaches 100% at twice the logical core count."),
             *[DetailLine(text=problem[:80], tone="warn") for problem in sample.problems],
         ],
     )

@@ -1,6 +1,6 @@
 [project]
 name = "heinzel-resource"
-version = "0.1.0"
+version = "0.1.1"
 description = "Machine CPU, memory and load with a compact visualizer."
 license = "MIT"
 license-files = ["LICENSE"]
@@ -138,11 +138,21 @@ highlights = [
 ]
 
 [[tool.heinzel.catalog.screenshots]]
-path = "docs/assets/cli.png"
-surface = "cli"
-caption = "hz resource --json | jq 'del(.hostname)' — isolated demonstration profile"
+path = "docs/assets/screenshots/resources-pane.png"
+surface = "ui"
+caption = "CPU, memory and scaled load in the expanded monitor — fictional demo workstation"
 
 [[tool.heinzel.catalog.screenshots]]
-path = "docs/assets/ui.png"
+path = "docs/assets/screenshots/today-resources.png"
 surface = "ui"
-caption = "Live computer resource widget in Today"
+caption = "A quick CPU summary on Today, with three compact footer meters — demonstration values"
+
+[[tool.heinzel.catalog.screenshots]]
+path = "docs/assets/screenshots/phone-resources.png"
+surface = "ui"
+caption = "Read CPU, memory and queued load on a phone — fictional demo workstation"
+
+[[tool.heinzel.catalog.screenshots]]
+path = "docs/assets/screenshots/cli-resources.png"
+surface = "cli"
+caption = "The same fictional CPU, memory and raw load measurements in the CLI"

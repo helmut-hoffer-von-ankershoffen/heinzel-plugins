@@ -1,0 +1,28 @@
+Skip to content
+M
+Home
+Today
+Computer resources
+
+CPU 36%
+
+Ask about it
+
+Nothing needs you right now. Ask anything below.
+
+Page
+Chat
+v0.9.1
+Updates, off
+Daemon not installed, off
+0
+System health, warning
+No calendar connected, error
+
+Computer resources; CPU: 36%; Memory: 62%; Load (scaled): 4.0625%
+
+Host: demo-workstation
+CPU: 36%
+Memory: 62%
+Load (1 min): 0.65; 8 logical cores
+Load is queued work. The bar reaches 100% at twice the logical core count.
