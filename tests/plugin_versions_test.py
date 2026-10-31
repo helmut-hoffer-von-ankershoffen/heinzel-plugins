@@ -1,6 +1,7 @@
 """A version bump that ships nothing broke app-v0.9.9's composition; it must fail at merge time instead."""
 
 import importlib.util
+import os
 import subprocess
 from pathlib import Path
 
@@ -12,9 +13,12 @@ PROJECT = '[project]\nname = "heinzel-a"\nversion = "{version}"\n{extra}'
 
 
 def git(*arguments, cwd):
+    # A pre-push hook exports GIT_DIR and friends, and global hooks would scan these throwaway commits.
+    environment = {key: value for key, value in os.environ.items() if not key.startswith("GIT_")}
     return subprocess.run(  # noqa: S603 - fixed git in a temporary test repository
-        ["git", *arguments],  # noqa: S607
+        ["git", "-c", "core.hooksPath=/dev/null", *arguments],  # noqa: S607
         cwd=cwd,
+        env=environment,
         check=True,
         capture_output=True,
         text=True,
@@ -23,6 +27,8 @@ def git(*arguments, cwd):
 
 
 def repository(tmp_path, monkeypatch):
+    for key in [key for key in os.environ if key.startswith("GIT_")]:
+        monkeypatch.delenv(key)
     plugin = tmp_path / "plugins/heinzel-a"
     (plugin / "src").mkdir(parents=True)
     (plugin / "docs").mkdir()
