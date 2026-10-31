@@ -1,40 +1,54 @@
 format = 1
 bootstrap = "docs/screenshot_fixture.py"
+browser_time = "2026-10-31T11:00:00Z"
 
 [[scenes]]
 name = "theme-light"
 surface = "ui"
 route = "/contracts/launch-review"
-caption = "The installed Heinzelmännchen theme on a representative local contract — light appearance"
+caption = "Demo Launch review in the applied Heinzelmännchen light theme: demo contract status, requirements and launch commands."
 theme = "heinzelmaennchen"
 appearance = "light"
+viewport = { width = 1440, height = 1000 }
+reduced_motion = "reduce"
 
 [[scenes.steps]]
 action = "wait"
 role = "heading"
 name = "Launch review"
+
 [[scenes]]
 name = "theme-dark"
 surface = "ui"
 route = "/contracts/launch-review"
-caption = "The installed Heinzelmännchen theme on a representative local contract — dark appearance"
+caption = "The same demo Launch review in the applied Heinzelmännchen dark theme: demo contract status, requirements and launch commands."
 theme = "heinzelmaennchen"
 appearance = "dark"
+viewport = { width = 1440, height = 1000 }
+reduced_motion = "reduce"
 
 [[scenes.steps]]
 action = "wait"
 role = "heading"
 name = "Launch review"
+
 [[scenes]]
 name = "theme-soundscapes"
 surface = "ui"
 route = "/?settings=appearance"
-caption = "The theme supplies three optional YouTube soundscapes; playback starts only after Play"
+caption = "Isolated demo profile: Claude FM, Die Heinzelmännchen and Hyper Focus are optional; playback waits for Play."
 theme = "heinzelmaennchen"
+appearance = "light"
+viewport = { width = 1440, height = 1000 }
+reduced_motion = "reduce"
 
 [[scenes.steps]]
 action = "wait"
 text = "Claude FM"
+
+[[scenes.steps]]
+action = "wait"
+text = "Die Heinzelmännchen"
 
 [[scenes.steps]]
 action = "wait"
@@ -43,11 +57,11 @@ text = "Hyper Focus"
 [[scenes]]
 name = "theme-cli"
 surface = "cli"
-caption = "Inspect the owning theme and its light/dark palette from the CLI"
+caption = "Isolated demo profile: list available themes to locate Heinzelmännchen before choosing an appearance."
 command = ["system", "theme", "list"]
 
 [[scenes]]
 name = "soundscapes-cli"
 surface = "cli"
-caption = "List the three theme-owned soundscapes without starting playback"
+caption = "Isolated demo profile: list available soundscapes and find this plugin's three choices without starting playback."
 command = ["system", "sound", "list"]

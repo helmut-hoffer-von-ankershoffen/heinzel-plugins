@@ -33,7 +33,7 @@ draft it now, at most 0.5 USD; the draft is saved under /demo-profile/data_dir/w
 v0.9.8
 Updates, off
 0
-System health, warning
+System health, off
 No calendar connected, error
 Daemon not installed, off
 Chat

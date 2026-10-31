@@ -20,28 +20,28 @@ or parent registry change.
 <!-- screenshots:start -->
 ## Screenshots
 
-<img src="docs/assets/screenshots/theme-light.png" alt="The installed Heinzelmännchen theme on a representative local contract — light appearance" width="960">
+<img src="docs/assets/screenshots/theme-light.png" alt="Demo Launch review in the applied Heinzelmännchen light theme: demo contract status, requirements and launch commands." width="960">
 
-The installed Heinzelmännchen theme on a representative local contract — light appearance
+Demo Launch review in the applied Heinzelmännchen light theme: demo contract status, requirements and launch commands.
 
-<img src="docs/assets/screenshots/theme-dark.png" alt="The installed Heinzelmännchen theme on a representative local contract — dark appearance" width="960">
+<img src="docs/assets/screenshots/theme-dark.png" alt="The same demo Launch review in the applied Heinzelmännchen dark theme: demo contract status, requirements and launch commands." width="960">
 
-The installed Heinzelmännchen theme on a representative local contract — dark appearance
+The same demo Launch review in the applied Heinzelmännchen dark theme: demo contract status, requirements and launch commands.
 
-<img src="docs/assets/screenshots/theme-soundscapes.png" alt="The theme supplies three optional YouTube soundscapes; playback starts only after Play" width="960">
+<img src="docs/assets/screenshots/theme-soundscapes.png" alt="Isolated demo profile: Claude FM, Die Heinzelmännchen and Hyper Focus are optional; playback waits for Play." width="960">
 
-The theme supplies three optional YouTube soundscapes; playback starts only after Play
+Isolated demo profile: Claude FM, Die Heinzelmännchen and Hyper Focus are optional; playback waits for Play.
 
 <details>
 <summary>Command line</summary>
 
-<img src="docs/assets/screenshots/theme-cli.png" alt="Inspect the owning theme and its light/dark palette from the CLI" width="960">
+<img src="docs/assets/screenshots/theme-cli.png" alt="Isolated demo profile: list available themes to locate Heinzelmännchen before choosing an appearance." width="960">
 
-Inspect the owning theme and its light/dark palette from the CLI
+Isolated demo profile: list available themes to locate Heinzelmännchen before choosing an appearance.
 
-<img src="docs/assets/screenshots/soundscapes-cli.png" alt="List the three theme-owned soundscapes without starting playback" width="960">
+<img src="docs/assets/screenshots/soundscapes-cli.png" alt="Isolated demo profile: list available soundscapes and find this plugin&#x27;s three choices without starting playback." width="960">
 
-List the three theme-owned soundscapes without starting playback
+Isolated demo profile: list available soundscapes and find this plugin&#x27;s three choices without starting playback.
 
 </details>
 

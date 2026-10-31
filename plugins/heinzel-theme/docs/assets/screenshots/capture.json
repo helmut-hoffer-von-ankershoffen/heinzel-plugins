@@ -2,12 +2,12 @@
   "format": 1,
   "plugin": "heinzel-theme",
   "core_version": "0.9.8",
-  "inputs_sha256": "a4e44459b551a5fed4a031d274ce5fa38bd8114265de188db1ee67ba3c154faa",
+  "inputs_sha256": "ed0851b0b97ce473e6254229d8c687d44954e1b133da3d44e8f9d5b74197947e",
   "images": {
-    "docs/assets/screenshots/theme-light.png": "605cbd7d5e7f313f492626c328e7ab314646be4bd1ba3d0322df6fdfa92e986a",
-    "docs/assets/screenshots/theme-dark.png": "7306fee19379e4d7aa4b57353ca475da188752fc4a2d1f73a08444443e85c81c",
-    "docs/assets/screenshots/theme-soundscapes.png": "1bdac8d5e25f2a7229cb1607360ab0c15db68be68d4aff55894e732726d65719",
-    "docs/assets/screenshots/theme-cli.png": "5329e83f404d69bdb29834d2d269b589dca223679e1708a5f69dd3048e35d99f",
+    "docs/assets/screenshots/theme-light.png": "782950043c0346aaf5c3fa3bf51c9c265b097642f5e84b00eff7e217e8e64bf7",
+    "docs/assets/screenshots/theme-dark.png": "4482c6273af5c362474b9b1ae2dc1aae37e0735b6bfe4009574fac6efa296875",
+    "docs/assets/screenshots/theme-soundscapes.png": "914c9dd304698da034f5e6954079849e1575951414a2f40d9c490f9d08369f4c",
+    "docs/assets/screenshots/theme-cli.png": "2ebc7271bafa972d57b82a6278d25aee8901031963a3342297a50658f653e015",
     "docs/assets/screenshots/soundscapes-cli.png": "1307852a559700adac312deaf632275461688a8136b7768777b141afe9a4df46"
   },
   "review_bundle": {
@@ -15,59 +15,59 @@
     "definition": {
       "format": 1,
       "reviewer": "Codex feature-story agent",
-      "source_sha256": "89855a17d1b4aedbad10caf6fe6b8396bf4ca1d203c53f032382d655196aef71",
-      "plan_sha256": "20321b39d3df301605fd0a717c26a2339ebe0b8d0efee2a9de2750c29da64a25",
-      "story_sha256": "df6f0bfa37145c34a104223629ff4b8fa93dbe39db2c5d1515a95e9160cb9569"
+      "source_sha256": "9cb4b574eead9a6c864167c44b8c2d34db26442ffbf99937c2e32e79e853d1ec",
+      "plan_sha256": "18b9529e5da91b4053df7b8344131e964e3b2bb6cfb72e8a92c870a63ed5d64e",
+      "story_sha256": "a8bec3fafe04c4a1ee20b9514fb16bdf5db61e33e95539122d04ca15aa7dfa42"
     },
     "plugin": "heinzel-theme",
     "core_version": "0.9.8",
-    "inputs_sha256": "a4e44459b551a5fed4a031d274ce5fa38bd8114265de188db1ee67ba3c154faa",
+    "inputs_sha256": "ed0851b0b97ce473e6254229d8c687d44954e1b133da3d44e8f9d5b74197947e",
     "screenshots": [
       {
         "path": "docs/assets/screenshots/theme-light.png",
         "surface": "ui",
-        "caption": "The installed Heinzelm\u00e4nnchen theme on a representative local contract \u2014 light appearance"
+        "caption": "Demo Launch review in the applied Heinzelm\u00e4nnchen light theme: demo contract status, requirements and launch commands."
       },
       {
         "path": "docs/assets/screenshots/theme-dark.png",
         "surface": "ui",
-        "caption": "The installed Heinzelm\u00e4nnchen theme on a representative local contract \u2014 dark appearance"
+        "caption": "The same demo Launch review in the applied Heinzelm\u00e4nnchen dark theme: demo contract status, requirements and launch commands."
       },
       {
         "path": "docs/assets/screenshots/theme-soundscapes.png",
         "surface": "ui",
-        "caption": "The theme supplies three optional YouTube soundscapes; playback starts only after Play"
+        "caption": "Isolated demo profile: Claude FM, Die Heinzelm\u00e4nnchen and Hyper Focus are optional; playback waits for Play."
       },
       {
         "path": "docs/assets/screenshots/theme-cli.png",
         "surface": "cli",
-        "caption": "Inspect the owning theme and its light/dark palette from the CLI"
+        "caption": "Isolated demo profile: list available themes to locate Heinzelm\u00e4nnchen before choosing an appearance."
       },
       {
         "path": "docs/assets/screenshots/soundscapes-cli.png",
         "surface": "cli",
-        "caption": "List the three theme-owned soundscapes without starting playback"
+        "caption": "Isolated demo profile: list available soundscapes and find this plugin's three choices without starting playback."
       }
     ],
     "images": {
-      "theme-light.png": "605cbd7d5e7f313f492626c328e7ab314646be4bd1ba3d0322df6fdfa92e986a",
-      "theme-dark.png": "7306fee19379e4d7aa4b57353ca475da188752fc4a2d1f73a08444443e85c81c",
-      "theme-soundscapes.png": "1bdac8d5e25f2a7229cb1607360ab0c15db68be68d4aff55894e732726d65719",
-      "theme-cli.png": "5329e83f404d69bdb29834d2d269b589dca223679e1708a5f69dd3048e35d99f",
+      "theme-light.png": "782950043c0346aaf5c3fa3bf51c9c265b097642f5e84b00eff7e217e8e64bf7",
+      "theme-dark.png": "4482c6273af5c362474b9b1ae2dc1aae37e0735b6bfe4009574fac6efa296875",
+      "theme-soundscapes.png": "914c9dd304698da034f5e6954079849e1575951414a2f40d9c490f9d08369f4c",
+      "theme-cli.png": "2ebc7271bafa972d57b82a6278d25aee8901031963a3342297a50658f653e015",
       "soundscapes-cli.png": "1307852a559700adac312deaf632275461688a8136b7768777b141afe9a4df46"
     },
     "transcripts": {
-      "theme-light.txt": "4b83c7d6816e6bb7ea197eecd22da27dceac0b7846eb57ad7f303fe9a03ca9b9",
+      "theme-light.txt": "fa68fe5f751662dc07a38f7582058d10e573b81d8299679259b986ffbffbe650",
       "theme-dark.txt": "4b83c7d6816e6bb7ea197eecd22da27dceac0b7846eb57ad7f303fe9a03ca9b9",
-      "theme-soundscapes.txt": "d6ba8f262375dccc55d378786055ed1ccc069c0f0fee277b75b14fc01d2c0cea",
+      "theme-soundscapes.txt": "2efcab840173d8fe0faddfb8991a6e0a0a504a80eb9faf9533d7cdba18907768",
       "theme-cli.txt": "36d653efa87eeec3a67c92ac4c27069a4697714578a9cd172bda926c27fdfa1f",
       "soundscapes-cli.txt": "2ca2445881fd6893242b1be527a70a7791f0f2edf486c7a51c893f2cb41f6369"
     },
-    "bundle_sha256": "8b36ef7ab0b09db31791a47379a2a5737171ba008e70ff9b28a00e24e3064edc"
+    "bundle_sha256": "b7bf186526c080257173e8222a1b2a392e3eda6d0599c83980d3302984bc4745"
   },
   "privacy_review": {
     "format": 1,
-    "bundle_sha256": "8b36ef7ab0b09db31791a47379a2a5737171ba008e70ff9b28a00e24e3064edc",
+    "bundle_sha256": "b7bf186526c080257173e8222a1b2a392e3eda6d0599c83980d3302984bc4745",
     "reviewer": "Codex privacy agent",
     "decision": "approve",
     "checked_images": [

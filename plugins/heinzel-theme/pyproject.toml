@@ -1,6 +1,6 @@
 [project]
 name = "heinzel-theme"
-version = "0.1.2"
+version = "0.1.3"
 description = "The Heinzelmännchen theme and its soundscapes."
 license = "MIT"
 license-files = ["LICENSE"]
@@ -141,24 +141,24 @@ themes = ["src/heinzel_theme/themes/heinzelmaennchen.toml"]
 [[tool.heinzel.catalog.screenshots]]
 path = "docs/assets/screenshots/theme-light.png"
 surface = "ui"
-caption = "The installed Heinzelmännchen theme on a representative local contract — light appearance"
+caption = "Demo Launch review in the applied Heinzelmännchen light theme: demo contract status, requirements and launch commands."
 
 [[tool.heinzel.catalog.screenshots]]
 path = "docs/assets/screenshots/theme-dark.png"
 surface = "ui"
-caption = "The installed Heinzelmännchen theme on a representative local contract — dark appearance"
+caption = "The same demo Launch review in the applied Heinzelmännchen dark theme: demo contract status, requirements and launch commands."
 
 [[tool.heinzel.catalog.screenshots]]
 path = "docs/assets/screenshots/theme-soundscapes.png"
 surface = "ui"
-caption = "The theme supplies three optional YouTube soundscapes; playback starts only after Play"
+caption = "Isolated demo profile: Claude FM, Die Heinzelmännchen and Hyper Focus are optional; playback waits for Play."
 
 [[tool.heinzel.catalog.screenshots]]
 path = "docs/assets/screenshots/theme-cli.png"
 surface = "cli"
-caption = "Inspect the owning theme and its light/dark palette from the CLI"
+caption = "Isolated demo profile: list available themes to locate Heinzelmännchen before choosing an appearance."
 
 [[tool.heinzel.catalog.screenshots]]
 path = "docs/assets/screenshots/soundscapes-cli.png"
 surface = "cli"
-caption = "List the three theme-owned soundscapes without starting playback"
+caption = "Isolated demo profile: list available soundscapes and find this plugin's three choices without starting playback."
