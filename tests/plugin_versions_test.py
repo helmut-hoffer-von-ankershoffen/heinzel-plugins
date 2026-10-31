@@ -5,6 +5,8 @@ import os
 import subprocess
 from pathlib import Path
 
+import pytest
+
 ROOT = Path(__file__).resolve().parents[1]
 SPEC = importlib.util.spec_from_file_location("plugin_versions", ROOT / "scripts/plugin_versions.py")
 versions = importlib.util.module_from_spec(SPEC)
@@ -83,3 +85,8 @@ def test_unreleased_lists_versions_without_a_tag(tmp_path, monkeypatch):
     repository(tmp_path, monkeypatch)
     assert versions.unreleased(tmp_path, set()) == ["heinzel-a"]
     assert versions.unreleased(tmp_path, {"heinzel-a/v0.1.0"}) == []
+
+
+def test_a_revision_cannot_be_read_as_a_git_option():
+    with pytest.raises(ValueError, match="plain commit"):
+        versions.unjustified_bumps("--output=/tmp/x")

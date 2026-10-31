@@ -1,11 +1,13 @@
 """A plugin version bump must ship something, and every bumped version gets released (ADR 0114)."""
 
+import re
 import subprocess
 import sys
 import tomllib
 from pathlib import Path, PurePosixPath
 
 PLUGINS = "plugins"
+REVISION = re.compile(r"[0-9A-Za-z][0-9A-Za-z_./~^-]*")
 NOT_SHIPPED = ("tests", "docs", "media", "screenshots")
 
 
@@ -44,7 +46,14 @@ def _shipped_metadata(text: str) -> dict[str, object]:
 
 
 def unjustified_bumps(base: str, head: str = "HEAD") -> list[str]:
-    """Plugins whose version changed in `base..head` although nothing they ship did."""
+    """Plugins whose version changed in `base..head` although nothing they ship did.
+
+    Raises:
+        ValueError: If a revision could be read as a git option.
+    """
+    if not (REVISION.fullmatch(base) and REVISION.fullmatch(head)):
+        msg = "A revision must be a plain commit or ref name."
+        raise ValueError(msg)
     changed: dict[str, list[str]] = {}
     for path in _git("diff", "--name-only", f"{base}...{head}").splitlines():
         parts = PurePosixPath(path).parts
