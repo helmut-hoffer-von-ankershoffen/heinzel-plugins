@@ -76,6 +76,8 @@ class DemoAcli(Acli):
         command = tuple(args[:3])
         if command == ("jira", "workitem", "search"):
             value = SEARCH
+        elif command == ("jira", "workitem", "view"):  # search lists the keys; view reads each one's `updated`
+            value = next(item for item in SEARCH if item["key"] == args[3])
         elif command == ("confluence", "page", "view"):
             value = PAGE
         else:

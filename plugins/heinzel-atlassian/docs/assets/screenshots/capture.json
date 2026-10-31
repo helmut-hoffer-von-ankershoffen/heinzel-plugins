@@ -2,7 +2,7 @@
   "format": 1,
   "plugin": "heinzel-atlassian",
   "core_version": "0.9.1",
-  "inputs_sha256": "134f73110d583659aadb55a3712bb1d8163d4024289726f83b4ac3b799a91f32",
+  "inputs_sha256": "7cf25dd48255e2ec927f3f34112143606e1905b7bce0584d3811310cec9fc53b",
   "images": {
     "docs/assets/screenshots/jira-issues.png": "edcd834303bc9710eabd29aa4d36307a373c548bbc2c078ae1c728416e780ce3",
     "docs/assets/screenshots/confluence-plan.png": "ad068ff0255ad82099ae0cc4315053bf257685c56c3e9b1430f42c3b09c2c282",
@@ -15,13 +15,13 @@
     "definition": {
       "format": 1,
       "reviewer": "Codex feature-story agent",
-      "source_sha256": "1c99ed6ab07b30866cbb8b66212453c7496e6e085451616f186789611ce4a9f3",
-      "plan_sha256": "6c6c98a077e98427865b507ff8c63f895d5bda0ba9026ef4d1820b9162387408",
-      "story_sha256": "bbf653cc93d007c1aa104c838cc9e2951c0f1b8102b8208a999b62e0a26fc65b"
+      "source_sha256": "a7d8b37c69e37979998007666959cb8ab45313da15a7ee1f0d341889d03f4f38",
+      "plan_sha256": "7e1c7742435d46224a10b620013b0451fec81d00c36caa51837b172d9bf7f6fe",
+      "story_sha256": "d25816765e6c57d8034bbd3bef629de56b278d453beb051ff38e940b5b6df846"
     },
     "plugin": "heinzel-atlassian",
     "core_version": "0.9.1",
-    "inputs_sha256": "134f73110d583659aadb55a3712bb1d8163d4024289726f83b4ac3b799a91f32",
+    "inputs_sha256": "7cf25dd48255e2ec927f3f34112143606e1905b7bce0584d3811310cec9fc53b",
     "screenshots": [
       {
         "path": "docs/assets/screenshots/jira-issues.png",
@@ -46,7 +46,7 @@
       {
         "path": "docs/assets/screenshots/workflow-context.png",
         "surface": "ui",
-        "caption": "Weekly work review combines the declared source inputs \u2014 local demonstration, no report generated"
+        "caption": "Demo data: Weekly work review declares Jira and Confluence inputs; this local workflow has not run and no report has been generated."
       }
     ],
     "images": {
@@ -63,11 +63,11 @@
       "confluence-cli.txt": "dbac0428b2123fd6cfb248be30010051986995ee83bfa9e33b4b1a272541b710",
       "workflow-context.txt": "d215aab387a1695e17b5a34e4667c65e0d76734e33f12eb4d3136bfea3a90b75"
     },
-    "bundle_sha256": "5592184e82469be2ce2be6a95423ed9ad84f774c95ca705ef2c2ed3c9ed5f9cc"
+    "bundle_sha256": "db14a7d8ef5da289eda68e6e8f923696040c5b9d6c8ab81e8ea2656a5b0ce385"
   },
   "privacy_review": {
     "format": 1,
-    "bundle_sha256": "5592184e82469be2ce2be6a95423ed9ad84f774c95ca705ef2c2ed3c9ed5f9cc",
+    "bundle_sha256": "db14a7d8ef5da289eda68e6e8f923696040c5b9d6c8ab81e8ea2656a5b0ce385",
     "reviewer": "Codex privacy agent",
     "decision": "approve",
     "checked_images": [

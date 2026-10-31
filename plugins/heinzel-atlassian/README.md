@@ -186,9 +186,9 @@ Demo data: fictional Jira changes, owners and states in the app terminal, using 
 
 Demo data: read the fictional Widget launch plan with its source and revision, using the real adapter and a fixture-only requester.
 
-<img src="docs/assets/screenshots/workflow-context.png" alt="Weekly work review combines the declared source inputs — local demonstration, no report generated" width="960">
+<img src="docs/assets/screenshots/workflow-context.png" alt="Demo data: Weekly work review declares Jira and Confluence inputs; this local workflow has not run and no report has been generated." width="960">
 
-Weekly work review combines the declared source inputs — local demonstration, no report generated
+Demo data: Weekly work review declares Jira and Confluence inputs; this local workflow has not run and no report has been generated.
 
 <details>
 <summary>Command line</summary>

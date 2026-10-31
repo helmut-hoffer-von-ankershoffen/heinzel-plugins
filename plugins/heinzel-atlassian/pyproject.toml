@@ -170,4 +170,4 @@ caption = "Demo data: the fictional Confluence plan, source and revision in the 
 [[tool.heinzel.catalog.screenshots]]
 path = "docs/assets/screenshots/workflow-context.png"
 surface = "ui"
-caption = "Weekly work review combines the declared source inputs — local demonstration, no report generated"
+caption = "Demo data: Weekly work review declares Jira and Confluence inputs; this local workflow has not run and no report has been generated."
