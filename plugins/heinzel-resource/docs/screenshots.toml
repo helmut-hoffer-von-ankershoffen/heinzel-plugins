@@ -27,6 +27,7 @@ action = "wait"
 text = "Host: demo-workstation"
 
 [scenes.focus]
+padding = 48
 role = "region"
 name_regex = "^Computer resources"
 

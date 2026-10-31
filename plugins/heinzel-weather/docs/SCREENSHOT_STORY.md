@@ -54,3 +54,6 @@ Stage images and transcripts privately. An agent must inspect every frame for re
 credentials, private locations, paths, browser/session tokens and accidental live-provider output before promotion.
 Do not display the fake API-key value either; it belongs only in the local fixture environment. Captions must say
 demonstration or fictional forecast so a public gallery cannot be mistaken for a live weather report.
+
+The expanded detail scene uses a native browser crop with 48 pixels of surrounding context. Keep the complete
+popover and its footer trigger visible; let its natural aspect ratio make the values readable on a phone.

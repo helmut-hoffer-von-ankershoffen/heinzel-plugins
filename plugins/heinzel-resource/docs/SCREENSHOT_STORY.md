@@ -47,3 +47,6 @@ Reject missing meters, real hostnames, changing native samples, **Unavailable** 
 states and unrelated error cards. Check desktop and phone geometry, and compare UI and CLI values. Stage drafts
 and transcripts privately; an agent must review every final image for personal names, machine identifiers, paths,
 tokens and account data before promoting the gallery. The approved hostname is exactly **demo-workstation**.
+
+The expanded detail scene uses a native browser crop with 48 pixels of surrounding context. Keep the complete
+popover and its footer trigger visible; let its natural aspect ratio make the values readable on a phone.

@@ -50,6 +50,7 @@ action = "wait"
 text = "Clear sky · Berlin, DE"
 
 [scenes.focus]
+padding = 48
 role = "region"
 name_regex = "Berlin"
 
