@@ -1,5 +1,8 @@
 # Heinzelmännchen plugins
 
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=helmut-hoffer-von-ankershoffen_heinzel-plugins&metric=alert_status)](https://sonarcloud.io/summary/overall?id=helmut-hoffer-von-ankershoffen_heinzel-plugins)
+[![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=helmut-hoffer-von-ankershoffen_heinzel-plugins&metric=security_rating)](https://sonarcloud.io/summary/overall?id=helmut-hoffer-von-ankershoffen_heinzel-plugins)
+
 Independent public plugins for [Heinzelmännchen](https://github.com/helmut-hoffer-von-ankershoffen/heinzel).
 Each project under `plugins/` owns its code, assets, dependency locks, tests, version and artifacts.
 Adding a project changes only its own directory. Core remains independently buildable and testable.
@@ -135,8 +138,7 @@ release profile consumed automatically by `uvx heinzel@latest`. Plugin releases 
 ## Migration provenance
 
 The initial migration moves Clock, Tailscale, Atlassian, GitHub, Google and Zoom from
-[heinzel](https://github.com/helmut-hoffer-von-ankershoffen/heinzel), and Weather and Example from
-[heinzel-contrib](https://github.com/helmut-hoffer-von-ankershoffen/heinzel-contrib).
+[heinzel](https://github.com/helmut-hoffer-von-ankershoffen/heinzel), and Weather and Example from the retired `heinzel-contrib` repository.
 Resource is the only built-in module extracted in this migration. Sound, Theme and the other core modules remain in core.
-Their earlier history and attribution remain in the original repositories. Existing public distribution names stay
+Earlier core history and attribution remain in the core repository; current plugin sources live here. Existing public distribution names stay
 stable; the migration versions advance independently before publishing the changed artifacts.
