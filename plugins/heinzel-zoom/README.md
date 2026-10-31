@@ -3,10 +3,12 @@
 Read the meetings you held on Zoom, and what was decided in them, from the meeting-summary emails Zoom sends: the
 `meetings` capability ([ADR 0028](https://github.com/helmut-hoffer-von-ankershoffen/heinzel/blob/main/docs/adr/0028-integrations-are-capability-adapters.md)), a first-party
 [Heinzelmännchen](https://github.com/helmut-hoffer-von-ankershoffen/heinzel) plugin. It reads those emails through whichever adapter serves `mail`, so it needs
-no Zoom API access and no Zoom credentials. It is independently released and installed explicitly:
+no Zoom API access and no Zoom credentials.
+
+Install it with:
 
 ```bash
-hz system plugin add zoom --confirm             # a compatible plugin release; run it again to upgrade
+hz system plugin add zoom --confirm
 hz system plugin remove heinzel-zoom
 ```
 
@@ -106,33 +108,36 @@ the mail adapter's own hosts for `mail`.
 
 Development and release commands: [repository guide](../../README.md).
 
-Migration provenance: heinzel, before the 0.9 plugin-boundary migration.
 
 <!-- screenshots:start -->
 ## Screenshots
 
-<img src="docs/assets/screenshots/meeting-decisions.png" alt="Decisions and next steps from a summary email — fixture-only requester, real Zoom parser" width="960">
+<img src="docs/assets/screenshots/meeting-decisions.png" alt="Fictional Weekly sync: a Thursday release decision and three named next steps, via the fixture-only requester and real Zoom parser." width="960">
 
-Decisions and next steps from a summary email — fixture-only requester, real Zoom parser
+Fictional Weekly sync: a Thursday release decision and three named next steps, via the fixture-only requester and real Zoom parser.
 
-<img src="docs/assets/screenshots/recent-meetings.png" alt="Find the recent summarized meetings — fixture-only requester and fictional mailbox" width="960">
+<img src="docs/assets/screenshots/recent-meetings.png" alt="Fictional October mailbox: find Weekly sync and Launch review through the fixture-only requester and real Zoom adapter." width="960">
 
-Find the recent summarized meetings — fixture-only requester and fictional mailbox
+Fictional October mailbox: find Weekly sync and Launch review through the fixture-only requester and real Zoom adapter.
 
-<img src="docs/assets/screenshots/workflow-context.png" alt="Meeting notes combines the declared source inputs — local demonstration, no report generated" width="960">
+<img src="docs/assets/screenshots/launch-decisions.png" alt="Fictional Launch review: a ten-percent rollout decision and two named owners, using a second meeting argument in the native terminal." width="960">
 
-Meeting notes combines the declared source inputs — local demonstration, no report generated
+Fictional Launch review: a ten-percent rollout decision and two named owners, using a second meeting argument in the native terminal.
+
+<img src="docs/assets/screenshots/workflow-context.png" alt="Fictional Meeting notes contract: declares a meeting-summary input and Markdown output; no report has been generated." width="960">
+
+Fictional Meeting notes contract: declares a meeting-summary input and Markdown output; no report has been generated.
 
 <details>
 <summary>Command line</summary>
 
-<img src="docs/assets/screenshots/summary-cli.png" alt="Read a meeting summary in the shell — fixture-only requester, real Zoom parser and fictional mailbox" width="960">
+<img src="docs/assets/screenshots/summary-cli.png" alt="Fictional Weekly sync in the CLI: parsed summary sections and a source link, through the fixture-only requester." width="960">
 
-Read a meeting summary in the shell — fixture-only requester, real Zoom parser and fictional mailbox
+Fictional Weekly sync in the CLI: parsed summary sections and a source link, through the fixture-only requester.
 
-<img src="docs/assets/screenshots/meeting-list-json.png" alt="Structured summarized-meeting results for workflows — fixture-only requester, no verbatim transcription" width="960">
+<img src="docs/assets/screenshots/meeting-list-json.png" alt="Fictional October meetings as JSON: typed meeting metadata through the fixture-only requester, not verbatim transcripts." width="960">
 
-Structured summarized-meeting results for workflows — fixture-only requester, no verbatim transcription
+Fictional October meetings as JSON: typed meeting metadata through the fixture-only requester, not verbatim transcripts.
 
 </details>
 

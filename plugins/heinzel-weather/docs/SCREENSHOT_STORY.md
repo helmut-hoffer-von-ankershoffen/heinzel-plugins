@@ -1,59 +1,33 @@
-# Know the weather before the next meeting or commute
+**Audience**
+People who want weather beside their daily work, with a fuller forecast available from the CLI.
 
-Show why Weather belongs on Today: current conditions, a useful multi-day outlook and a character that reflects
-the forecast. The primary image must contain populated weather cards. A provider/settings form or **Set a
-location** prompt is not a conversion image.
+**Outcome**
+See the weather now, notice tomorrow’s outlook, and inspect approaching rain without leaving Heinzelmännchen. The character’s umbrella adds a useful touch: clear skies now can still mean rain ahead.
 
-## Demonstration profile
+The default provider is keyless Open-Meteo. These screenshots use the existing local OpenWeather fake; its fictional thunderstorm warning does not demonstrate severe alerts from Open-Meteo, which supplies none.
 
-Use `docs/screenshot_fixture.py`, which starts this plugin's `heinzel_weather.fake.serve(0)` on loopback and launches
-the installed `hz` entry point. It sets provider `openweather`, metric units, location **Berlin, DE**, a loopback
-base URL and a deliberately fake credential. Keep the environment credential backend and isolated state; never
-use a real account or request a live forecast. Berlin is a fictional demo location, not inferred user location.
+**Scenes**
+1. **today-weather** — Establish the useful everyday view: current temperature, the character with an umbrella, and the coming days on Today. The fictional forecast combines clear skies now with an 80% rain chance today.
+2. **weather-detail** — Hover over the footer’s Berlin status to read conditions, feels-like temperature, today’s range and rain chance. Keep the detail crop from the existing plan.
+3. **phone-weather** — Show the same useful Today content at 390 × 844, checking that forecast text and attribution remain readable.
+4. **cli-weather** — Show the actual `hz weather show` result: current conditions, hourly rain probabilities, five days and a fictional warning from Example Weather Service.
+5. **cli-forecast** — Show `hz weather forecast --days 3` as the compact alternative for planning the next few days.
 
-The fixture currently serves **21.5°C** clear sky, feels like **21°C**, today's high **24°C**, low **11.5°C**, rain
-probability **80%**, and rain approaching in the next hour. The Today card rounds current temperature to **22°C**;
-the expected accessory is an umbrella even though it is clear right now. The near forecast includes changing
-conditions, not repeated empty rows. These are canned provider answers, not current Berlin weather.
+Preserve the existing five-scene sequence, names, routes, captions and commands. Correct the detail trigger from click to hover: the documented click action opens the forecast command. Remove the crop’s `padding` field to match the requested focus schema. No dedicated Weather page is inferred from the navigation entry.
 
-```sh
-python docs/screenshot_fixture.py weather show
-python docs/screenshot_fixture.py weather forecast --days 3
-python docs/screenshot_fixture.py ui --no-browser --port 0
-```
+**Fictional fixtures**
+Use only `docs/screenshot_fixture.py` during explicit capture in the documented temporary profile. It starts the plugin’s own loopback fake and selects Berlin, metric units and a dummy OpenWeather key. The fixture supplies 21.5 °C now, 21 °C feels-like, rain from the next hour, cooler conditions ahead and an example thunderstorm warning. Displayed temperatures are rounded by the actual renderers. Today’s rain probability should produce an umbrella, rather than sunglasses.
 
-Run from the owning plugin in its installed SDK environment and isolated profile. Normal public equivalents are
-`hz weather show`, `hz weather forecast --days 3`, and `hz weather ui --json`. For standalone provider debugging,
-`python -m heinzel_weather.fake --port 8787` exposes the same local fake. `serve(port, now=callable)` can anchor its
-dates; the weather service also has a clock. Align both if a capture requires fixed dates rather than relative days.
+The fake anchors dates and hours to capture time. Omit `browser_time`: freezing only the browser would not freeze this backend fixture. No new fixture files are needed.
 
-## Scenes to publish
+**Privacy pitfalls**
+Use an isolated profile without connected accounts, personal locations, credentials or terminal history. A stored credential takes precedence over the fixture’s fallback dummy key, so isolation matters. Keep provider attribution visible and label every caption as fictional. A forecast warning is not evidence that a notification was delivered; these scenes make no delivery claim.
 
-| Scene | Action and visible proof | Caption |
-| --- | --- | --- |
-| `today-weather` | At `/`, wait for **Weather in Berlin, DE** and **22°C**. Frame both the graphic current-weather card and the list forecast card: umbrella-bearing character, condition, several day rows with high/low temperatures and rain chances, and provider attribution. | “Current weather and the coming days on Today — fictional Berlin forecast.” |
-| `weather-detail` | Inspect the footer weather control and keep the entire expanded detail above its trigger. Show **Clear sky · Berlin, DE**, **Feels like 21°C**, today's low/high and 80% rain, plus attribution. Keep the populated Today cards behind it when space permits. | “Inspect conditions, feels-like temperature and rain chance from the weather status.” |
-| `phone-weather` | At 390×844, capture the populated current-weather and forecast cards at a useful scroll position. Text, character and day rows must remain readable, with no horizontal clipping. | “Plan the next few days from the phone-sized Today view.” |
-| `cli-weather` | Run `hz weather show` through the fixture. Show actual current conditions, the approaching rain, hourly outlook, daily forecast and the fixture's warning where rendered. Preserve attribution. | “Explore the detailed hourly and daily demonstration forecast in the CLI.” |
-| `cli-forecast` | Run `hz weather forecast --days 3` through the same fixture. Show three distinct days with low/high, sky and rain probability; avoid a long unreadable output strip. | “Get a concise three-day outlook in the CLI.” |
-
-The same weather status appears in both sidebar and footer. A global button match `22.*Berlin` is ambiguous:
-scope to the footer landmark, or hide only the sidebar status for the detail scene with
-`hz system ui hide weather:weather-now --slot sidebar`. A sidebar click runs `hz weather show`; a footer click pins
-the detail popover. If the footer overflowed, first open **More status items**. The popover is current-condition
-detail, not a custom right-side forecast panel. Never caption it as showing hourly data that is only in the CLI.
-
-## Acceptance and privacy
-
-Both Today widgets must be populated before capture; reject **Set a location**, **Loading…**, stale observations,
-failed refreshes, empty cards and unrelated settings screens. Confirm the umbrella is visible, current values agree
-with CLI rounding, future days have readable temperatures/rain chances, and provider attribution is retained.
-At desktop and phone widths, inspect both the card content and expanded-status geometry, not merely DOM presence.
-
-Stage images and transcripts privately. An agent must inspect every frame for real identity, account addresses,
-credentials, private locations, paths, browser/session tokens and accidental live-provider output before promotion.
-Do not display the fake API-key value either; it belongs only in the local fixture environment. Captions must say
-demonstration or fictional forecast so a public gallery cannot be mistaken for a live weather report.
-
-The expanded detail scene uses a native browser crop with 48 pixels of surrounding context. Keep the complete
-popover and its footer trigger visible; let its natural aspect ratio make the values readable on a phone.
+**Acceptance criteria**
+- All five scenes use actual app or CLI output and the existing bootstrap; at least two useful UI views and both CLI results are readable.
+- Today shows Berlin weather, the umbrella, the near forecast and OpenWeather attribution.
+- Hover reveals the status details without launching the terminal; the crop retains their meaning.
+- The phone capture preserves readable weather content without horizontal clipping.
+- CLI captures contain successful weather results, including the three-day parameter case, rather than help or setup output.
+- Every caption identifies demo data and stays below 180 characters. Routes, argument arrays, steps and focus fields follow the requested schema.
+- The plan was statically checked against the provided source and requested structure. Parser validation and live capture were not run; visual acceptance remains for explicit capture.

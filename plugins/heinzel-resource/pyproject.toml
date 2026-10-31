@@ -156,3 +156,13 @@ caption = "Read CPU, memory and queued load on a phone — fictional demo workst
 path = "docs/assets/screenshots/cli-resources.png"
 surface = "cli"
 caption = "The same fictional CPU, memory and raw load measurements in the CLI"
+
+[[tool.heinzel.catalog.screenshots]]
+path = "docs/assets/screenshots/terminal-resources.png"
+surface = "ui"
+caption = "Check CPU, memory, raw load and core count in the app terminal — fictional demo-workstation values"
+
+[[tool.heinzel.catalog.screenshots]]
+path = "docs/assets/screenshots/terminal-resources-json.png"
+surface = "ui"
+caption = "Inspect the structured resource sample for automation in the app terminal — fictional demo-workstation data"

@@ -1,0 +1,43 @@
+Skip to content
+Heinzelmännchen
+Heinzelmännchen
+Contracts
+Team graph
+Organisation
+Team roster
+M
+Mira
+· EM
+Home
+Today
+Doctor: 7 checks need attention
+
+ai.access ai access, system.credential backend, system.credential credential ai.access/api-key…
+
+Open
+Ask about it
+Computer resources
+
+CPU 36%
+
+Ask about it
+v0.9.1
+Updates, off
+Daemon not installed, off
+0
+System health, warning
+No calendar connected, error
+Chat
+Terminal
+Demo complete
+' hz resource; printf '\033]0;Demo complete\007
+┏━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━┓
+┃ Resource      ┃ Usage            ┃
+┡━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━┩
+│ Hostname      │ demo-workstation │
+│ CPU           │ 36%              │
+│ Memory        │ 62%              │
+│ Load (1 min)  │ 0.65             │
+│ Logical cores │ 8                │
+└───────────────┴──────────────────┘
+$

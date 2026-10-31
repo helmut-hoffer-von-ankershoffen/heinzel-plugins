@@ -1,10 +1,10 @@
 # heinzel-clock: the World Clock
 
-What time it is for everyone on the team — a first-party [Heinzelmännchen](https://github.com/helmut-hoffer-von-ankershoffen/heinzel) plugin, and the smallest
-plugin-owned feature: Python declarations, globe, assets and tests live in this project.
+What time it is for everyone on the team: a first-party [Heinzelmännchen](https://github.com/helmut-hoffer-von-ankershoffen/heinzel) plugin with a globe, a sidebar countdown and a footer clock.
+
+Included in the standard app.
 
 ```bash
-hz system plugin add clock --confirm
 hz setup clock                            # pick the team's time zones and the working hours in each
 hz clock                                  # the team's local times; --json for agents
 hz system config set clock.zones '[{ name = "Europe/Berlin", hours = [9, 18] }, "America/New_York"]'
@@ -24,7 +24,6 @@ off-duty icon; older hosts keep the primary designation as text.
 
 Development and release commands: [repository guide](../../README.md).
 
-Migration provenance: heinzel, before the 0.9 plugin-boundary migration.
 
 The fallback land outline is simplified [Natural Earth land](https://www.naturalearthdata.com/about/terms-of-use/)
 (public domain); representative zone points come from IANA's public-domain zone.tab. Bundled frontend dependency
@@ -48,6 +47,14 @@ Inspect every configured time zone from the primary footer clock — demonstrati
 <img src="docs/assets/screenshots/phone-world-clock.png" alt="The live globe and all three team clocks on a phone — fixed demonstration time" width="960">
 
 The live globe and all three team clocks on a phone — fixed demonstration time
+
+<img src="docs/assets/screenshots/terminal-current.png" alt="Fictional demo team at 15:30 UTC: Berlin and New York are within working hours; Los Angeles starts in 30 minutes." width="960">
+
+Fictional demo team at 15:30 UTC: Berlin and New York are within working hours; Los Angeles starts in 30 minutes.
+
+<img src="docs/assets/screenshots/terminal-overlap.png" alt="Preview 16:30 UTC with --at: all three fictional demo zones are within working hours; the app clock stays at 15:30 UTC." width="960">
+
+Preview 16:30 UTC with --at: all three fictional demo zones are within working hours; the app clock stays at 15:30 UTC.
 
 <details>
 <summary>Command line</summary>
