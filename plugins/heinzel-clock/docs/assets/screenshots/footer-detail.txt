@@ -1,0 +1,53 @@
+Skip to content
+Heinzelmännchen
+Heinzelmännchen
+Contracts
+Team graph
+Organisation
+Team roster
+World clock
+Berlin 16:30:00 · Ends in 1h 30m
+New York 11:30:00 · Ends in 6h 30m
+Los Angeles 08:30:00 · Starts in 30m
+M
+Mira
+· EM
+Home
+2
+Today
+Zones at work now
+
+2/3
+
+Ask about it
+
+Nothing needs you right now. Ask anything below.
+
+v0.9.8
+Updates, off
+0
+System health, warning
+No calendar connected, error
+Daemon not installed, off
+16:30:00
+Chat
+New chat
+Ask about your setup, your team's contracts or what to do next. The chat reads with hz and asks you before it changes anything.
+Your message
+Default
+
+Up to $0.25 per message · this chat $0.00
+Runs your agent runner and may cost money: at most $0.25 per message, $2.00 per chat; this chat has cost $0.00. It reads with hz and asks you before it changes anything.
+
+Berlin 16:30:00
+
+BerlinPrimary
+Ends in 1h 30m
+16:30:00
+New York
+Ends in 6h 30m
+11:30:00
+Los Angeles
+Starts in 30m
+08:30:00
+Open

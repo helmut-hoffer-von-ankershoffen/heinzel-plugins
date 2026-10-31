@@ -1,0 +1,125 @@
+format = 1
+bootstrap = "docs/screenshot_fixture.py"
+
+[[scenes]]
+name = "sharing-ready"
+surface = "ui"
+route = "/"
+caption = "Share the app privately with an explicit ready state — local Tailscale fixture; session hidden"
+timeout_ms = 30000
+
+[[scenes.steps]]
+action = "click"
+role = "button"
+name_regex = "^Dismiss Doctor"
+optional = true
+[[scenes.steps]]
+action = "click"
+role = "button"
+name_regex = "^Tailscale"
+within_role = "contentinfo"
+
+[[scenes.steps]]
+action = "wait"
+role = "region"
+name = "Tailscale"
+
+[[scenes.steps]]
+action = "click"
+role = "switch"
+name = "Share over Tailscale"
+
+[[scenes.steps]]
+action = "wait"
+role = "button"
+name = "Copy URL"
+
+[scenes.focus]
+role = "region"
+name = "Tailscale"
+
+[[scenes]]
+name = "phone-sharing-ready"
+surface = "ui"
+route = "/"
+caption = "Inspect and copy the private link on a phone — local Tailscale fixture; session hidden"
+timeout_ms = 30000
+
+[[scenes.steps]]
+action = "click"
+role = "button"
+name_regex = "^Dismiss Doctor"
+optional = true
+[[scenes.steps]]
+action = "click"
+role = "button"
+name = "More status items"
+optional = true
+
+[[scenes.steps]]
+action = "click"
+role = "button"
+name_regex = "^Tailscale"
+within_role = "contentinfo"
+
+[[scenes.steps]]
+action = "wait"
+role = "region"
+name = "Tailscale"
+
+[[scenes.steps]]
+action = "wait"
+role = "button"
+name = "Copy URL"
+
+[scenes.viewport]
+width = 390
+height = 844
+
+[[scenes]]
+name = "sharing-request-cli"
+surface = "cli"
+caption = "Inspect the saved sharing request from a separate CLI process — local fictional network"
+command = ["tailscale", "status", "--json"]
+
+[[scenes]]
+name = "sharing-off"
+surface = "ui"
+route = "/"
+caption = "Turn private sharing off explicitly — local Tailscale fixture"
+timeout_ms = 30000
+
+[[scenes.steps]]
+action = "click"
+role = "button"
+name_regex = "^Dismiss Doctor"
+optional = true
+[[scenes.steps]]
+action = "click"
+role = "button"
+name_regex = "^Tailscale"
+within_role = "contentinfo"
+
+[[scenes.steps]]
+action = "wait"
+role = "region"
+name = "Tailscale"
+
+[[scenes.steps]]
+action = "click"
+role = "switch"
+name = "Share over Tailscale"
+
+[[scenes.steps]]
+action = "wait"
+text = "Private web sharing is off."
+
+[scenes.focus]
+role = "region"
+name = "Tailscale"
+
+[[scenes]]
+name = "sharing-off-cli"
+surface = "cli"
+caption = "Verify private sharing is off from the shell — local fictional network"
+command = ["tailscale", "status", "--json"]

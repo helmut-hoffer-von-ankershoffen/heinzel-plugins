@@ -1,0 +1,89 @@
+{
+  "format": 1,
+  "plugin": "heinzel-clock",
+  "core_version": "0.9.8",
+  "inputs_sha256": "1f40c1b3b0f8af796894c94bcff559f94903e9b587e62a3e21438968e6c8e337",
+  "images": {
+    "docs/assets/screenshots/world-clock.png": "f6b8f5c577444f09e44880cf7e1f4c21943189acbaf797eb65df4aa3b8ee3c41",
+    "docs/assets/screenshots/team-overview.png": "194581b06ee26449e23102d594964eaa01260a289a825fce3a6dfbc2463d1554",
+    "docs/assets/screenshots/footer-detail.png": "40ef13347fb6e4f56d115c03809e8f448f2a47ecdc4526124d4cb2398a4c25dc",
+    "docs/assets/screenshots/phone-world-clock.png": "12177243b1f7bf698bd3c9ce7c8fe85241f830e2200ab05283d77c1112f3f1a9",
+    "docs/assets/screenshots/cli-times.png": "6b5424327b872c1494ba191a4c697b4bdde5f9ed461cc25150b14e5845205f52"
+  },
+  "review_bundle": {
+    "format": 1,
+    "definition": {
+      "format": 1,
+      "reviewer": "Codex Clock feature-story agent",
+      "source_sha256": "8d6645b219d90af2b5823d555a165c11d85801770702c936af3c7f69d3c0ec6a",
+      "plan_sha256": "84a84564afb9ea10e8af9d1170cc53bad3be2fdcb9564274ced112f864d7e914",
+      "story_sha256": "fee1075b98745189701d2859d927f69b0a4cc63e15acb226c95164bcd67d3b3d"
+    },
+    "plugin": "heinzel-clock",
+    "core_version": "0.9.8",
+    "inputs_sha256": "1f40c1b3b0f8af796894c94bcff559f94903e9b587e62a3e21438968e6c8e337",
+    "screenshots": [
+      {
+        "path": "docs/assets/screenshots/world-clock.png",
+        "surface": "ui",
+        "caption": "Find overlap across Berlin, New York and Los Angeles while staying on Today \u2014 demonstration time"
+      },
+      {
+        "path": "docs/assets/screenshots/team-overview.png",
+        "surface": "ui",
+        "caption": "Team working hours at a glance: Today, sidebar ticker and primary footer clock \u2014 demonstration time"
+      },
+      {
+        "path": "docs/assets/screenshots/footer-detail.png",
+        "surface": "ui",
+        "caption": "Inspect every configured time zone from the primary footer clock \u2014 demonstration time"
+      },
+      {
+        "path": "docs/assets/screenshots/phone-world-clock.png",
+        "surface": "ui",
+        "caption": "The live globe and all three team clocks on a phone \u2014 fixed demonstration time"
+      },
+      {
+        "path": "docs/assets/screenshots/cli-times.png",
+        "surface": "cli",
+        "caption": "The same team zones and working hours in the CLI \u2014 fixed fictional demonstration time"
+      }
+    ],
+    "images": {
+      "world-clock.png": "f6b8f5c577444f09e44880cf7e1f4c21943189acbaf797eb65df4aa3b8ee3c41",
+      "team-overview.png": "194581b06ee26449e23102d594964eaa01260a289a825fce3a6dfbc2463d1554",
+      "footer-detail.png": "40ef13347fb6e4f56d115c03809e8f448f2a47ecdc4526124d4cb2398a4c25dc",
+      "phone-world-clock.png": "12177243b1f7bf698bd3c9ce7c8fe85241f830e2200ab05283d77c1112f3f1a9",
+      "cli-times.png": "6b5424327b872c1494ba191a4c697b4bdde5f9ed461cc25150b14e5845205f52"
+    },
+    "transcripts": {
+      "world-clock.txt": "83cb5ca511bcbe454acfd492df66fb48bf1d21a46b90a7037562c34cc01667c7",
+      "team-overview.txt": "654f2c82e24f9a3a4aa2ef5ec19bc0a442cbacf0cca55f989e00dadc6ca61407",
+      "footer-detail.txt": "5562cc8675d7acc50c037a0d38271ea9587c879bb940a3e2885c37de651a6ae1",
+      "phone-world-clock.txt": "e50b6b2aaa330395a29327be58fa165c627b912921a70cdb969dcb9e809d1fa2",
+      "cli-times.txt": "05f1fa56e8a12d26bad2cf2635575d237d9ace564a919e04e76e0b75ed699843"
+    },
+    "bundle_sha256": "a4a75bb9327d764aa086b14401c97353370c68f864b0d4c6c80b0b19773ae3b8"
+  },
+  "privacy_review": {
+    "format": 1,
+    "bundle_sha256": "a4a75bb9327d764aa086b14401c97353370c68f864b0d4c6c80b0b19773ae3b8",
+    "reviewer": "Codex privacy agent",
+    "decision": "approve",
+    "checked_images": [
+      "world-clock.png",
+      "team-overview.png",
+      "footer-detail.png",
+      "phone-world-clock.png",
+      "cli-times.png"
+    ],
+    "checks": {
+      "tokens_absent": true,
+      "personal_data_absent": true,
+      "feature_relevant": true,
+      "multiple_ui_scenes": true,
+      "captions_accurate": true
+    },
+    "findings": []
+  }
+}

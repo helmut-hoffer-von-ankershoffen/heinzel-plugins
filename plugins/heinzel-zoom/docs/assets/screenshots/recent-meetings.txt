@@ -1,0 +1,36 @@
+Skip to content
+Heinzelmännchen
+Heinzelmännchen
+Contracts
+Team graph
+Meeting notes
+Organisation
+Team roster
+M
+Mira
+· EM
+Home
+Today
+Doctor: 7 checks need attention
+
+ai.access ai access, system.credential backend, system.credential credential ai.access/api-key…
+
+Open
+Ask about it
+v0.9.1
+Updates, off
+Daemon not installed, off
+0
+System health, warning
+No calendar connected, error
+Chat
+Terminal
+Demo complete
+$ hz showcase ended; printf '\033]0;Demo complete\007'
+┏━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃ Meeting       ┃ UTC start    ┃ People                                     ┃
+┡━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┩
+│ Weekly sync   │ 20 Oct 09:01 │ Mira Example, Jonas Example, Priya Example │
+│ Launch review │ 21 Oct 09:01 │ Mira Example, Jonas Example, Priya Example │
+└───────────────┴──────────────┴────────────────────────────────────────────┘
+$
