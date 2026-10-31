@@ -114,7 +114,8 @@ build, audit and installed acceptance. Toolkit tests do not run core's suite.
 Only locally reviewed metadata can enroll a plugin in the `standard` profile. Topic discovery never enrolls defaults.
 The composition workflow verifies an official core release and independently released plugin artifacts, runs
 installed acceptance on those exact wheels, and proves installation into a fresh environment before publishing a
-digest-pinned profile. It does not rebuild plugin releases. Every fifteen minutes it checks for a newly published
+digest-pinned profile. It does not rebuild plugin releases. Enable the scheduled workflow only after the matching
+SDK and default providers have been published and verified. When enabled, every fifteen minutes it checks for a newly published
 SDK without a complete standard app, verifies GitHub/PyPI artifact identity, and composes the missing release.
 The accepted SDK must first validate the current app lifecycle (`format=2`, independently of the plugin ABI `sdk=1`),
 before any provider acceptance work. Legacy compositions remain immutable and are never relabeled as compatible.

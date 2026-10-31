@@ -32,7 +32,19 @@ def local_profile(tmp_path):
 
 def test_isolation_removes_checkout_overrides_and_tool_authority_but_preserves_index_auth(tmp_path, monkeypatch):
     credential = str(tmp_path / "resolver-credential")
-    for key in ("PYTHONPATH", "PYTHONHOME", "VIRTUAL_ENV", "UV_OVERRIDE", "GH_TOKEN", "HZ_CONFIG_HOME"):
+    for key in (
+        "PYTHONPATH",
+        "PYTHONHOME",
+        "VIRTUAL_ENV",
+        "UV_OVERRIDE",
+        "GH_TOKEN",
+        "HZ_CONFIG_HOME",
+        "HOME",
+        "XDG_CONFIG_HOME",
+        "TMPDIR",
+        "AWS_SECRET_ACCESS_KEY",
+        "ACCEPTANCE_SENTINEL",
+    ):
         monkeypatch.setenv(key, "unrelated")
     monkeypatch.setenv("UV_INDEX_PRIVATE_PASSWORD", credential)
     env = installation.isolated_environment(tmp_path)
@@ -40,6 +52,20 @@ def test_isolation_removes_checkout_overrides_and_tool_authority_but_preserves_i
     assert env["HZ_CONFIG_HOME"] == str(tmp_path / "config_home")
     assert env["UV_TOOL_DIR"] == str(tmp_path / "tools")
     assert env["UV_INDEX_PRIVATE_PASSWORD"] == credential
+    assert env["HOME"] == str(tmp_path / "home")
+    assert env["XDG_CONFIG_HOME"] == str(tmp_path / "xdg/config")
+    assert env["TMPDIR"] == str(tmp_path / "tmp")
+    child = subprocess.run(
+        [sys.executable, "-I", "-c", "import json,os; print(json.dumps(dict(os.environ)))"],
+        env=env,
+        text=True,
+        capture_output=True,
+        check=True,
+    )
+    observed = json.loads(child.stdout)
+    assert observed["HOME"] == str(tmp_path / "home")
+    assert observed["XDG_CONFIG_HOME"] == str(tmp_path / "xdg/config")
+    assert not {"AWS_SECRET_ACCESS_KEY", "ACCEPTANCE_SENTINEL", "GH_TOKEN", "PYTHONPATH"} & observed.keys()
 
 
 @pytest.mark.parametrize("failure", [None, "missing-checkpoint", "stale-update", "changed-artifact"])

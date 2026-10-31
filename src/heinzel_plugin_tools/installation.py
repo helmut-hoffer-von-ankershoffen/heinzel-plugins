@@ -13,17 +13,27 @@ from pathlib import Path
 
 def isolated_environment(root: Path) -> dict:
     """Keep package resolution, application state and Python imports away from the caller's installation."""
+    # This controls inherited configuration, not filesystem or network access.
     result = {
         key: value
         for key, value in os.environ.items()
-        if not key.startswith("HZ_")
-        and (
-            not key.startswith("UV_")
-            or key.startswith("UV_INDEX")
-            or key in {"UV_DEFAULT_INDEX", "UV_KEYRING_PROVIDER"}
-        )
-        and key not in {"PYTHONPATH", "PYTHONHOME", "VIRTUAL_ENV", "GH_TOKEN", "GITHUB_TOKEN"}
+        if key in {"PATH", "SYSTEMROOT", "SSL_CERT_FILE", "SSL_CERT_DIR", "UV_DEFAULT_INDEX"}
+        or key.startswith("UV_INDEX")
     }
+    for key, relative in {
+        "HOME": "home",
+        "XDG_CONFIG_HOME": "xdg/config",
+        "XDG_DATA_HOME": "xdg/data",
+        "XDG_CACHE_HOME": "xdg/cache",
+        "XDG_STATE_HOME": "xdg/state",
+        "XDG_RUNTIME_DIR": "xdg/runtime",
+        "TMPDIR": "tmp",
+        "UV_CACHE_DIR": "uv-cache",
+    }.items():
+        directory = root / relative
+        directory.mkdir(parents=True, exist_ok=True, mode=0o700)
+        result[key] = str(directory)
+    result.update(TMP=result["TMPDIR"], TEMP=result["TMPDIR"], LANG="C.UTF-8")
     result.update(
         UV_NO_CONFIG="1",
         UV_TOOL_DIR=str(root / "tools"),
