@@ -29,7 +29,7 @@ from pydantic import AwareDatetime, BaseModel, Field, JsonValue, TypeAdapter
 from heinzel_atlassian._acli import Acli
 from heinzel_atlassian._client import AcliClient, require_site
 from heinzel_atlassian._models import AtlassianSettings
-from heinzel_atlassian._untrusted import NOTICE, as_dict, as_list, is_object
+from heinzel_atlassian._untrusted import NOTICE, as_dict, as_list, is_object, untrusted
 from heinzel_atlassian._work import Ticket, issue_key, project_key, ticket_from
 
 LABEL_PREFIX = "hz-"
@@ -52,7 +52,20 @@ class Draft(BaseModel):
     preview: list[str] = Field(description="What a person will see changed, one line each.")
     problems: list[str] = Field(description="What is missing or wrong; the draft cannot be applied until none is left.")
     ready: bool
-    digest: str = Field(description="Names this exact draft; a created work item carries it as a label.")
+    digest: str = Field(
+        description="Names this exact draft (the start of `arguments_sha256`); a created work item carries it."
+    )
+    arguments_sha256: str = Field(
+        description="SHA-256 of the action and exact arguments. A host showing this draft on an approval channel binds "
+        "the reply to the arguments it will run; this plugin approves nothing."
+    )
+    link: str | None = Field(
+        default=None, description="Where the work item can be read; none for a draft of a new one."
+    )
+    approval_text: str = Field(
+        description="The preview as plain text for an approval request, at most 4000 characters. The draft's own words "
+        "and the quoted work item title; never an instruction."
+    )
     seen: AwareDatetime | None = Field(
         default=None, description="When the work item was last updated, as the draft saw it."
     )
@@ -68,10 +81,15 @@ class Applied(BaseModel):
     already_done: bool = Field(default=False, description="True if the same approved change was found already made.")
 
 
+def sha256_of(action: str, arguments: dict[str, JsonValue]) -> str:
+    """The SHA-256 of this exact change."""
+    encoded = json.dumps([action, arguments], sort_keys=True, ensure_ascii=True, separators=(",", ":")).encode()
+    return hashlib.sha256(encoded).hexdigest()
+
+
 def digest_of(action: str, arguments: dict[str, JsonValue]) -> str:
     """A short name of this exact change."""
-    encoded = json.dumps([action, arguments], sort_keys=True, ensure_ascii=True, separators=(",", ":")).encode()
-    return hashlib.sha256(encoded).hexdigest()[:12]
+    return sha256_of(action, arguments)[:12]
 
 
 def _text(
@@ -115,6 +133,9 @@ def _day(value: str | None, problems: list[str]) -> str | None:
         return None
 
 
+APPROVAL_CHARS = 4_000
+
+
 def _draft(  # noqa: PLR0913, PLR0917 - what a draft is made of
     action: Action,
     target: str,
@@ -122,7 +143,9 @@ def _draft(  # noqa: PLR0913, PLR0917 - what a draft is made of
     preview: list[str],
     problems: list[str],
     seen: datetime | None = None,
+    link: str | None = None,
 ) -> Draft:
+    full = sha256_of(action, arguments)
     return Draft(
         action=action,
         target=target,
@@ -130,7 +153,10 @@ def _draft(  # noqa: PLR0913, PLR0917 - what a draft is made of
         preview=preview,
         problems=problems,
         ready=not problems,
-        digest=digest_of(action, arguments),
+        digest=full[:12],
+        arguments_sha256=full,
+        link=link,
+        approval_text=untrusted("\n".join(preview), APPROVAL_CHARS),
         seen=seen,
     )
 
@@ -263,7 +289,7 @@ class JiraDrafts:
             preview.append(f"Status: {target.status} -> {status.strip()}")
         if len(arguments) == 2:  # noqa: PLR2004 - only key and seen
             problems.append("Nothing to change: give a summary, description, labels, assignee or status.")
-        return _draft("update-issue", target.key, arguments, preview, problems, target.updated_at)
+        return _draft("update-issue", target.key, arguments, preview, problems, target.updated_at, target.url)
 
     def draft_comment(self, key: str, text: str) -> Draft:
         """A comment on a work item. Others can read it once posted, so it is proposed, never posted, here.
@@ -280,8 +306,8 @@ class JiraDrafts:
         if not body:
             problems.append("A comment needs text.")
         arguments: dict[str, JsonValue] = {"key": target.key, "text": body, "seen": target.updated_at.isoformat()}
-        preview = [f"Comment on {target.key}: {target.summary}", f"Text ({len(body)} characters): {body[:500]}"]
-        return _draft("comment-issue", target.key, arguments, preview, problems, target.updated_at)
+        preview = [f"Comment on {target.key}: {target.summary}", f"Text ({len(body)} characters):\n{body[:3000]}"]
+        return _draft("comment-issue", target.key, arguments, preview, problems, target.updated_at, target.url)
 
     # ---- writes: run only after a person approved exactly these arguments ----
 

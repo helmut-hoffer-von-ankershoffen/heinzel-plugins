@@ -5,6 +5,7 @@ Every read is a real acli call (`search` to find keys, `view` for the fields `se
 assignee id, comment times and authors), never from what a summary or comment says.
 """
 
+import hashlib
 import re
 from collections.abc import Sequence
 from concurrent.futures import ThreadPoolExecutor
@@ -134,6 +135,11 @@ class Attention(BaseModel):
     ticket: Ticket
     reasons: list[Reason]
     urgent: bool
+    notice_key: str = Field(
+        description="Stable for this work item, these reasons and this update, so a channel sends the notice once."
+    )
+    title: str = Field(description="One line for a notice: the key and the reasons. No ticket text.")
+    body: str = Field(description="The reasons' details in plain text, at most 500 characters. No ticket text.")
 
 
 class Watch(BaseModel):
@@ -477,7 +483,16 @@ def attention(
     urgent = any(r.code in pressing for r in reasons) or (
         any(r.code == "due_soon" for r in reasons) and ticket.category == "todo"
     )
-    return Attention(ticket=ticket, reasons=reasons, urgent=urgent)
+    codes = sorted({r.code for r in reasons})
+    stable = hashlib.sha256(f"{ticket.key}|{','.join(codes)}|{ticket.updated_at.isoformat()}".encode()).hexdigest()
+    return Attention(
+        ticket=ticket,
+        reasons=reasons,
+        urgent=urgent,
+        notice_key=f"jira-{stable[:32]}",
+        title=f"{ticket.key}: " + ", ".join(c.replace("_", " ") for c in codes),
+        body=" ".join(r.detail for r in reasons)[:500],
+    )
 
 
 __all__ = [

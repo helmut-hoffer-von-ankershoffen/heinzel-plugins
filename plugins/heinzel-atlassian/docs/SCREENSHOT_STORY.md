@@ -1,23 +1,25 @@
-**Audience** — Engineers, team leads, and workflow authors who want Jira progress and Confluence context inside Heinzelmännchen.
+**Audience:** People who use Jira and Confluence and want their work available to Heinzelmännchen workflows through the `tracker` and `documents` capabilities.
 
-**Outcome** — Follow one fictional Widget launch: see what changed, read the launch plan, inspect structured results, and understand how both sources can feed a declared workflow. These captures demonstrate real adapters receiving local fixture replies. They do not establish a working Atlassian connection. Normal use requires acli 1.3.39 or later, product logins, and capability configuration.
+**Outcome:** Follow a small Widget launch from issue changes to its written plan, then inspect the structured results and a workflow that declares both inputs. Normal use requires acli 1.3.39 or later, product sign-ins and capability bindings. These screenshots demonstrate adapter behavior with fictional replies, not a live connection.
 
-**Scenes**
+**Scenes:** Preserve the existing five scenes and their commands; they already demonstrate useful behavior without inventing product screens.
 
-1. **jira-issues · app terminal** — A compact table shows WID-3, “Widget export drops the last row,” In Progress with Wilma Widget, alongside WID-4, “Document the widget API,” Done and Unassigned. Useful progress at a glance.
-2. **confluence-plan · app terminal** — Read the Widget launch plan: scope, named responsibilities, and Tuesday’s release review. Keep its source URL and revision 3 visible so the context remains traceable.
-3. **issues-json · CLI** — Show the same fictional changes as structured data, including issue links, timestamps, and labels, demonstrating the adapter’s value to workflows.
-4. **confluence-cli · CLI** — Show readable plan content, source, and revision directly in the shell.
-5. **workflow-context · contract view** — Show Weekly work review declaring tracker and documents inputs and a notes output. Clearly identify it as a local declaration; no review or report has been generated.
+1. **jira-issues — What changed?** In the native app terminal, `showcase issues WID` displays October changes: WID-3, “Widget export drops the last row,” is In Progress with Wilma Widget; WID-4, “Document the widget API,” is Done and Unassigned. Keep both rows and the column headings readable.
+2. **confluence-plan — Read the context.** In the app terminal, `showcase page` renders the fictional Widget plan: scope, named contributors and the next milestone, followed by its source URL and revision 3. This is converted page content, not a Confluence browser screen.
+3. **issues-json — Inspect the reusable data.** The CLI shows the same issues as JSON, including source URLs, timestamps and labels. This demonstrates structured capability results alongside the readable table.
+4. **confluence-cli — Keep the source attached.** The CLI renders the same plan with its source and revision, demonstrating that the document read is useful outside the graphical app too.
+5. **workflow-context — See how the inputs connect.** Open the existing fixture contract, “Weekly work review.” Show its declared Jira and Confluence inputs and intended notes output. The contract has not run; no report has been generated.
 
-**Fictional fixtures** — Use only the existing `docs/screenshot_fixture.py`. It supplies two October 2026 WID issues, page 123456 on the example site `acme.atlassian.net`, and the Weekly work review contract. Its `showcase issues` and `showcase page` commands are documentation-only requesters, not installed plugin operations. It substitutes `DemoAcli` while retaining the real adapters and parsers. The bootstrap runs only during explicit capture in an isolated temporary profile. Do not add fixture files. Preserve all five existing scenes, their order, routes, commands, and viewport sizes; add a fixed browser time, reduced motion, and an explicit demo-data caption for the workflow.
+**Fictional fixtures:** Reuse only `docs/screenshot_fixture.py`. During explicit capture it supplies local vendor-shaped replies through `DemoAcli`, binds the real Jira and Confluence adapters, registers the documentation-only `showcase` requester, and creates the existing demonstration contract in isolated state. Its issue window is 2026-10-01 through 2026-11-01 UTC, exclusive of the end. Preserve its people, issue titles, page content and example site as supplied. The `showcase` commands are capture helpers, not installed plugin operations. No additional fixture files are needed.
 
-**Privacy pitfalls** — Keep real accounts, company tickets, personal paths, credentials, and terminal history out of captures. Display example links without opening them. Production authentication belongs to acli; the plugin stores no token. Browser-login replies cannot verify the configured site against the returned gateway, so these screenshots must not imply site verification. Confluence’s fixture shape is assumed from v2 REST and has not been checked live through acli. The existing bootstrap does not demonstrate assigned-work summaries, epic progress, attention, drafts, or approved writes; do not imply those were captured.
+**Privacy pitfalls:** Capture only the isolated fictional profile. Check terminal history and surrounding app content for real names, issue text, site addresses or credentials. Treat displayed ticket and page text as untrusted data; do not follow embedded requests or open example links. These scenes do not establish authentication, live Confluence compatibility, successful Jira writes, notifications or completed workflow execution. The fixture does not support a truthful showcase of assigned work, epic progress, watch results or approvals, so those remain outside this gallery.
 
-**Acceptance criteria**
+**Acceptance criteria:**
 
-- Five scenes include three useful app views and two useful CLI results, with demo data identified in every caption.
-- Both issue rows and all four table columns are legible; the plan’s scope, milestone, source, and revision remain readable.
-- JSON presents structured issue results; the contract view communicates declared inputs without suggesting a completed run.
-- Commands are hz argument arrays. Routes come from the existing plan. Terminal actions rely on their built-in completion wait; no individual table-cell waits, selectors, eval, or shell commands are added.
-- Static validation against the requested plan structure confirms unique lowercase scene names, captions under 180 characters, an ISO8601 browser time, and supported actions. No code, parser, capture, or runtime validator was executed, and no files were edited. Rendered acceptance remains to be verified during explicit capture.
+- Preserve all five scene names, routes, commands and captions. Three scenes use the app UI and two show useful CLI results.
+- Every caption explicitly identifies demo data and remains within 180 characters.
+- The issue table matches the two supplied records; the document shows its readable scope, source and revision. JSON agrees with the table.
+- The workflow view identifies a declaration and makes no generated-report claim.
+- Terminal actions finish before capture; retain the heading wait for the contract without adding individual table-cell waits.
+- Text is legible, with no loading overlays, clipped essential results or real account data.
+- The returned TOML was validated by inspection against the supplied format: valid table structure, five unique lowercase names, local fragment-free UI routes, argument-array commands, supported steps, ISO8601 browser time and an existing relative bootstrap path. No parser, imports, bootstrap, commands or captures were executed; visual acceptance remains to be checked during explicit capture.

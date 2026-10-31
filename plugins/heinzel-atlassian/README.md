@@ -153,6 +153,12 @@ authority by code):
 | `draft-create-issue`, `draft-update-issue`, `draft-comment-issue` | no | A draft with the exact arguments of the write below, a preview of what changes (before and after), `problems` for what is missing or wrong, and the `seen` time of the work item. |
 | `create-issue`, `update-issue`, `comment-issue` | **yes** | Carry out a draft. They are `read_only=False` operations: a chat holds them as proposals until you confirm exactly those arguments, and the CLI shows what they will do. |
 
+For notices and approvals on any channel a host offers (a native banner, a direct message): each `watch` item carries a
+stable `notice_key`, a `title` and a `body` made of the work item key, the reason codes and dates only, and each draft
+carries `arguments_sha256`, `link` and `approval_text`, so a host can post it as a notice or an approval request and
+bind a reply to the exact arguments it will run. The plugin imports no channel and approves nothing: a reply is a claim
+the host verifies, and the write still goes through the confirmed operation.
+
 Every reason in `watch` comes from dates, ids and status categories, never from ticket text. A write is never retried:
 a create labels the work item `hz-<digest>`, so the same approved create run twice finds the first; an update or a
 comment refuses if the work item changed after the draft saw it (draft again and approve what you then see), and a

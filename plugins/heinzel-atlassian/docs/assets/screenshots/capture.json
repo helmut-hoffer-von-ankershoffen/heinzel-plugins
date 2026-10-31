@@ -2,26 +2,26 @@
   "format": 1,
   "plugin": "heinzel-atlassian",
   "core_version": "0.9.1",
-  "inputs_sha256": "7cf25dd48255e2ec927f3f34112143606e1905b7bce0584d3811310cec9fc53b",
+  "inputs_sha256": "44ebaefafb1819759e41b4e49f5bf1f54777efa6676440b1901cc66a417ee49d",
   "images": {
     "docs/assets/screenshots/jira-issues.png": "edcd834303bc9710eabd29aa4d36307a373c548bbc2c078ae1c728416e780ce3",
     "docs/assets/screenshots/confluence-plan.png": "ad068ff0255ad82099ae0cc4315053bf257685c56c3e9b1430f42c3b09c2c282",
     "docs/assets/screenshots/issues-json.png": "474635006b6e7c0e82eed10f22d44338592fa3eb07cc1d3c7bb635bf050075b7",
     "docs/assets/screenshots/confluence-cli.png": "6ee48d63544e8aef45de102226a6af51904e5175304b473b65e49b1e6abef622",
-    "docs/assets/screenshots/workflow-context.png": "b38d9ec96278a9d1bd4cf764840cdcc40b9b49457a29a0bca6e04348fe3b558b"
+    "docs/assets/screenshots/workflow-context.png": "cff5523c0494bdb640c459588ec3d3d886f1e53d7cfb8b36ac260fcc046593a1"
   },
   "review_bundle": {
     "format": 1,
     "definition": {
       "format": 1,
       "reviewer": "Codex feature-story agent",
-      "source_sha256": "a7d8b37c69e37979998007666959cb8ab45313da15a7ee1f0d341889d03f4f38",
+      "source_sha256": "c18c3677e282f4bf51748531eba5ce879fb53e6b9f00ddc14a2e44c79e645aab",
       "plan_sha256": "7e1c7742435d46224a10b620013b0451fec81d00c36caa51837b172d9bf7f6fe",
-      "story_sha256": "d25816765e6c57d8034bbd3bef629de56b278d453beb051ff38e940b5b6df846"
+      "story_sha256": "c1d0e1e720b8d8108af61476b0b7e8f9cac85402954e9b04e6c602b5578583d6"
     },
     "plugin": "heinzel-atlassian",
     "core_version": "0.9.1",
-    "inputs_sha256": "7cf25dd48255e2ec927f3f34112143606e1905b7bce0584d3811310cec9fc53b",
+    "inputs_sha256": "44ebaefafb1819759e41b4e49f5bf1f54777efa6676440b1901cc66a417ee49d",
     "screenshots": [
       {
         "path": "docs/assets/screenshots/jira-issues.png",
@@ -54,7 +54,7 @@
       "confluence-plan.png": "ad068ff0255ad82099ae0cc4315053bf257685c56c3e9b1430f42c3b09c2c282",
       "issues-json.png": "474635006b6e7c0e82eed10f22d44338592fa3eb07cc1d3c7bb635bf050075b7",
       "confluence-cli.png": "6ee48d63544e8aef45de102226a6af51904e5175304b473b65e49b1e6abef622",
-      "workflow-context.png": "b38d9ec96278a9d1bd4cf764840cdcc40b9b49457a29a0bca6e04348fe3b558b"
+      "workflow-context.png": "cff5523c0494bdb640c459588ec3d3d886f1e53d7cfb8b36ac260fcc046593a1"
     },
     "transcripts": {
       "jira-issues.txt": "a17bfab9a9a0978f59926685df1648eedc3171e3b26db0f92063a650fe9d1059",
@@ -63,11 +63,11 @@
       "confluence-cli.txt": "dbac0428b2123fd6cfb248be30010051986995ee83bfa9e33b4b1a272541b710",
       "workflow-context.txt": "d215aab387a1695e17b5a34e4667c65e0d76734e33f12eb4d3136bfea3a90b75"
     },
-    "bundle_sha256": "db14a7d8ef5da289eda68e6e8f923696040c5b9d6c8ab81e8ea2656a5b0ce385"
+    "bundle_sha256": "6f10cf7b137c630d2606ce8e17985609a31d8ed3d1deb1d723fb48b8b60c7b7e"
   },
   "privacy_review": {
     "format": 1,
-    "bundle_sha256": "db14a7d8ef5da289eda68e6e8f923696040c5b9d6c8ab81e8ea2656a5b0ce385",
+    "bundle_sha256": "6f10cf7b137c630d2606ce8e17985609a31d8ed3d1deb1d723fb48b8b60c7b7e",
     "reviewer": "Codex privacy agent",
     "decision": "approve",
     "checked_images": [
