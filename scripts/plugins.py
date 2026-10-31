@@ -10,6 +10,7 @@ from pathlib import Path
 
 root = Path(__file__).resolve().parents[1]
 result = subprocess.run(
-    ["uv", "run", "--project", str(root), "--frozen", "--group", "tooling", "hz-plugin", *sys.argv[1:]], check=False
+    ["uv", "run", "--project", str(root), "--frozen", "--no-build", "--group", "tooling", "hz-plugin", *sys.argv[1:]],
+    check=False,
 )
 raise SystemExit(result.returncode)

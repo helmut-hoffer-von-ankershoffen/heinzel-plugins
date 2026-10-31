@@ -50,14 +50,14 @@ jobs:
           REF: ${{ github.ref }}
         run: |
           test "$REF" = refs/heads/main
-          uv run --frozen --group tooling python -m heinzel_plugin_tools.publishing --restore --name "$PLUGIN" --tag "$TAG" --directory release-dist
+          uv run --frozen --no-build --group tooling python -m heinzel_plugin_tools.publishing --restore --name "$PLUGIN" --tag "$TAG" --directory release-dist
       - id: core
         if: inputs.resume_tag == ''
         env:
           CORE_URL: ${{ vars.CORE_ARTIFACT }}
           CORE_RUN: ${{ vars.CORE_CANDIDATE_RUN }}
           GH_TOKEN: ${{ github.token }}
-        run: uv run --no-project --script scripts/core_artifact.py
+        run: uv run --frozen --no-build --group tooling python scripts/core_artifact.py
       - name: Check, build and test this exact owning release
         id: verify
         if: inputs.resume_tag == ''
@@ -74,7 +74,7 @@ jobs:
             echo "Private plugins publish to GitHub; PyPI is public." >&2
             exit 1
           fi
-          uv run --frozen --group tooling hz-plugin verify-release "$PLUGIN" --core "$CORE" --output release-dist
+          uv run --frozen --no-build --group tooling hz-plugin verify-release "$PLUGIN" --core "$CORE" --output release-dist
       - uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
         if: inputs.resume_tag == '' && (!github.event.repository.private || vars.PRIVATE_ATTESTATIONS == 'true')
         with:
@@ -106,7 +106,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
           REVISION: ${{ needs.build.outputs.revision }}
-        run: uv run --frozen --group tooling python -m heinzel_plugin_tools.publishing --tag "$RELEASE_TAG" --revision "$REVISION" --directory dist --pypi
+        run: uv run --frozen --no-build --group tooling python -m heinzel_plugin_tools.publishing --tag "$RELEASE_TAG" --revision "$REVISION" --directory dist --pypi
   github-publish:
     if: inputs.publish && inputs.registry == 'github'
     needs: build
@@ -128,4 +128,4 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
           REVISION: ${{ needs.build.outputs.revision }}
-        run: uv run --frozen --group tooling python -m heinzel_plugin_tools.publishing --tag "$RELEASE_TAG" --revision "$REVISION" --directory dist
+        run: uv run --frozen --no-build --group tooling python -m heinzel_plugin_tools.publishing --tag "$RELEASE_TAG" --revision "$REVISION" --directory dist

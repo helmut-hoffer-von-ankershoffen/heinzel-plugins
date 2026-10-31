@@ -16,6 +16,29 @@ concurrency:
   group: plugins-${{ github.ref }}
   cancel-in-progress: true
 jobs:
+  coverage:
+    name: Tooling coverage
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: write
+      pull-requests: write
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e # v10.3.2
+        with:
+          python-version: "3.14"
+      - name: Measure the shared developer toolkit
+        run: uv run --frozen --no-build --group tooling --extra checks coverage run --branch --source=heinzel_plugin_tools -m pytest tests -q
+      - name: Publish coverage badge and PR report
+        if: github.event_name == 'push' || (github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository && github.actor != 'dependabot[bot]')
+        uses: py-cov-action/python-coverage-comment-action@e5fb2218463c3377f3504b0c5b5646ed53da7a2f # v4.5
+        with:
+          GITHUB_TOKEN: ${{ github.token }}
+          MINIMUM_GREEN: 90
+          MINIMUM_ORANGE: 80
   policy:
     runs-on: ubuntu-latest
     permissions:
@@ -55,9 +78,9 @@ jobs:
           BASE: ${{ github.event.pull_request.base.sha || github.event.before }}
         run: |
           if [ -n "$BASE" ] && git cat-file -e "$BASE" 2>/dev/null; then
-            uv run --script scripts/plugins.py plan --base "$BASE" > plan.json
+            uv run --frozen --no-build --group tooling python scripts/plugins.py plan --base "$BASE" > plan.json
           else
-            uv run --script scripts/plugins.py plan --changed scripts/plugins.py > plan.json
+            uv run --frozen --no-build --group tooling python scripts/plugins.py plan --changed scripts/plugins.py > plan.json
           fi
           matrix="$(python -c 'import json; print(json.dumps({"include":json.load(open("plan.json"))["include"]}))')"
           echo "matrix=$matrix" >> "$GITHUB_OUTPUT"
@@ -92,7 +115,7 @@ jobs:
           CORE_URL: ${{ inputs.core_artifact || vars.CORE_ARTIFACT }}
           CORE_RUN: ${{ inputs.core_run || vars.CORE_CANDIDATE_RUN }}
           GH_TOKEN: ${{ github.token }}
-        run: uv run --no-project --script scripts/core_artifact.py
+        run: uv run --frozen --no-build --group tooling python scripts/core_artifact.py
       - name: Check only this plugin against the installed core artifact
         env:
           PLUGIN: ${{ matrix.name }}
@@ -121,11 +144,12 @@ jobs:
   ok:
     name: CI OK
     if: always()
-    needs: [policy, plan, plugin]
+    needs: [policy, plan, plugin, coverage]
     runs-on: ubuntu-latest
     steps:
       - env:
           POLICY: ${{ needs.policy.result }}
           PLAN: ${{ needs.plan.result }}
           PLUGIN: ${{ needs.plugin.result }}
-        run: test "$POLICY" = success && test "$PLAN" = success && { test "$PLUGIN" = success || test "$PLUGIN" = skipped; }
+          COVERAGE: ${{ needs.coverage.result }}
+        run: test "$POLICY" = success && test "$PLAN" = success && test "$COVERAGE" = success && { test "$PLUGIN" = success || test "$PLUGIN" = skipped; }
