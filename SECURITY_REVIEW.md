@@ -39,6 +39,10 @@ SDK-install findings above required code fixes; installation findings require a 
 | Google Docs HTTP strings | Preserved Markdown link text; the converter makes no HTTP request. |
 | Tailscale HTTP | Parsed loopback endpoint or Unix-domain socket, with no inherited proxy or redirects. The socket transport does not cross the network. |
 | Weather fake HTTP | Local test fixture bound to the constant `127.0.0.1`; the printed URL is not a production remote transport. |
+| Screenshot capture launcher | The plugin name is validated to start with a letter or digit before it becomes an argument. `--core`, `--python` and `--review-receipt` are developer-selected local paths, made absolute, and each follows its own flag as a separate argument. No shell is used. The plan and story files are data and never become command arguments. |
+| Review agent invocation | The `codex exec` vector is fixed. Image and schema paths come from the toolkit-written private draft folder, and a supplied receipt is only parsed, then accepted solely if it matches the exact bundle hashes. |
+| Capture bootstrap fixtures | Documentation-only fictional constants and loopback-only servers, executed only by an explicit capture inside a disposable profile. The Tailscale fixture's token-like constant is a fixed placeholder. |
+| Capture session link | The loopback application URL is matched with a fixed `127.0.0.1` pattern and redacted before any image or text is saved. |
 
 Revisit these conclusions if the toolkit is exposed through HTTP/MCP, consumes remote paths or runs with higher
 privileges. A passing new-code quality gate does not establish overall security A: verify `security_rating`, zero

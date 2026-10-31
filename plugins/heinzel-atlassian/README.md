@@ -140,3 +140,34 @@ not yet checked against a logged-in acli; the samples in `tests/fixtures` follow
 Development and release commands: [repository guide](../../README.md).
 
 Migration provenance: heinzel, before the 0.9 plugin-boundary migration.
+
+<!-- screenshots:start -->
+## Screenshots
+
+<img src="docs/assets/screenshots/jira-issues.png" alt="Demo data: fictional Jira changes, owners and states in the app terminal, using the real adapter and a fixture-only requester." width="960">
+
+Demo data: fictional Jira changes, owners and states in the app terminal, using the real adapter and a fixture-only requester.
+
+<img src="docs/assets/screenshots/confluence-plan.png" alt="Demo data: read the fictional Widget launch plan with its source and revision, using the real adapter and a fixture-only requester." width="960">
+
+Demo data: read the fictional Widget launch plan with its source and revision, using the real adapter and a fixture-only requester.
+
+<img src="docs/assets/screenshots/workflow-context.png" alt="Weekly work review combines the declared source inputs — local demonstration, no report generated" width="960">
+
+Weekly work review combines the declared source inputs — local demonstration, no report generated
+
+<details>
+<summary>Command line</summary>
+
+<img src="docs/assets/screenshots/issues-json.png" alt="Demo data: structured fictional Jira changes through the real adapter, using a fixture-only requester and local vendor replies." width="960">
+
+Demo data: structured fictional Jira changes through the real adapter, using a fixture-only requester and local vendor replies.
+
+<img src="docs/assets/screenshots/confluence-cli.png" alt="Demo data: the fictional Confluence plan, source and revision in the shell, using a fixture-only requester and local vendor replies." width="960">
+
+Demo data: the fictional Confluence plan, source and revision in the shell, using a fixture-only requester and local vendor replies.
+
+</details>
+
+[Open the screenshot gallery](docs/assets/screenshots/index.html).
+<!-- screenshots:end -->

@@ -1,0 +1,89 @@
+{
+  "format": 1,
+  "plugin": "heinzel-theme",
+  "core_version": "0.9.8",
+  "inputs_sha256": "a4e44459b551a5fed4a031d274ce5fa38bd8114265de188db1ee67ba3c154faa",
+  "images": {
+    "docs/assets/screenshots/theme-light.png": "605cbd7d5e7f313f492626c328e7ab314646be4bd1ba3d0322df6fdfa92e986a",
+    "docs/assets/screenshots/theme-dark.png": "7306fee19379e4d7aa4b57353ca475da188752fc4a2d1f73a08444443e85c81c",
+    "docs/assets/screenshots/theme-soundscapes.png": "1bdac8d5e25f2a7229cb1607360ab0c15db68be68d4aff55894e732726d65719",
+    "docs/assets/screenshots/theme-cli.png": "5329e83f404d69bdb29834d2d269b589dca223679e1708a5f69dd3048e35d99f",
+    "docs/assets/screenshots/soundscapes-cli.png": "1307852a559700adac312deaf632275461688a8136b7768777b141afe9a4df46"
+  },
+  "review_bundle": {
+    "format": 1,
+    "definition": {
+      "format": 1,
+      "reviewer": "Codex feature-story agent",
+      "source_sha256": "89855a17d1b4aedbad10caf6fe6b8396bf4ca1d203c53f032382d655196aef71",
+      "plan_sha256": "20321b39d3df301605fd0a717c26a2339ebe0b8d0efee2a9de2750c29da64a25",
+      "story_sha256": "df6f0bfa37145c34a104223629ff4b8fa93dbe39db2c5d1515a95e9160cb9569"
+    },
+    "plugin": "heinzel-theme",
+    "core_version": "0.9.8",
+    "inputs_sha256": "a4e44459b551a5fed4a031d274ce5fa38bd8114265de188db1ee67ba3c154faa",
+    "screenshots": [
+      {
+        "path": "docs/assets/screenshots/theme-light.png",
+        "surface": "ui",
+        "caption": "The installed Heinzelm\u00e4nnchen theme on a representative local contract \u2014 light appearance"
+      },
+      {
+        "path": "docs/assets/screenshots/theme-dark.png",
+        "surface": "ui",
+        "caption": "The installed Heinzelm\u00e4nnchen theme on a representative local contract \u2014 dark appearance"
+      },
+      {
+        "path": "docs/assets/screenshots/theme-soundscapes.png",
+        "surface": "ui",
+        "caption": "The theme supplies three optional YouTube soundscapes; playback starts only after Play"
+      },
+      {
+        "path": "docs/assets/screenshots/theme-cli.png",
+        "surface": "cli",
+        "caption": "Inspect the owning theme and its light/dark palette from the CLI"
+      },
+      {
+        "path": "docs/assets/screenshots/soundscapes-cli.png",
+        "surface": "cli",
+        "caption": "List the three theme-owned soundscapes without starting playback"
+      }
+    ],
+    "images": {
+      "theme-light.png": "605cbd7d5e7f313f492626c328e7ab314646be4bd1ba3d0322df6fdfa92e986a",
+      "theme-dark.png": "7306fee19379e4d7aa4b57353ca475da188752fc4a2d1f73a08444443e85c81c",
+      "theme-soundscapes.png": "1bdac8d5e25f2a7229cb1607360ab0c15db68be68d4aff55894e732726d65719",
+      "theme-cli.png": "5329e83f404d69bdb29834d2d269b589dca223679e1708a5f69dd3048e35d99f",
+      "soundscapes-cli.png": "1307852a559700adac312deaf632275461688a8136b7768777b141afe9a4df46"
+    },
+    "transcripts": {
+      "theme-light.txt": "4b83c7d6816e6bb7ea197eecd22da27dceac0b7846eb57ad7f303fe9a03ca9b9",
+      "theme-dark.txt": "4b83c7d6816e6bb7ea197eecd22da27dceac0b7846eb57ad7f303fe9a03ca9b9",
+      "theme-soundscapes.txt": "d6ba8f262375dccc55d378786055ed1ccc069c0f0fee277b75b14fc01d2c0cea",
+      "theme-cli.txt": "36d653efa87eeec3a67c92ac4c27069a4697714578a9cd172bda926c27fdfa1f",
+      "soundscapes-cli.txt": "2ca2445881fd6893242b1be527a70a7791f0f2edf486c7a51c893f2cb41f6369"
+    },
+    "bundle_sha256": "8b36ef7ab0b09db31791a47379a2a5737171ba008e70ff9b28a00e24e3064edc"
+  },
+  "privacy_review": {
+    "format": 1,
+    "bundle_sha256": "8b36ef7ab0b09db31791a47379a2a5737171ba008e70ff9b28a00e24e3064edc",
+    "reviewer": "Codex privacy agent",
+    "decision": "approve",
+    "checked_images": [
+      "theme-light.png",
+      "theme-dark.png",
+      "theme-soundscapes.png",
+      "theme-cli.png",
+      "soundscapes-cli.png"
+    ],
+    "checks": {
+      "tokens_absent": true,
+      "personal_data_absent": true,
+      "feature_relevant": true,
+      "multiple_ui_scenes": true,
+      "captions_accurate": true
+    },
+    "findings": []
+  }
+}

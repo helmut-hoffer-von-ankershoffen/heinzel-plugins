@@ -1,0 +1,138 @@
+format = 1
+bootstrap = "docs/screenshot_fixture.py"
+browser_time = "2026-10-26T15:30:00Z"
+
+[[scenes]]
+name = "world-clock"
+surface = "ui"
+route = "/?panel=clock:world-clock"
+caption = "Find overlap across Berlin, New York and Los Angeles while staying on Today — demonstration time"
+reduced_motion = "no-preference"
+
+[[scenes.steps]]
+action = "wait"
+text = "Zones at work now"
+
+[[scenes.steps]]
+action = "wait"
+text = "2/3"
+
+[[scenes.steps]]
+action = "click"
+role = "button"
+name_regex = "^Dismiss Doctor"
+optional = true
+
+[[scenes.steps]]
+action = "wait"
+role = "region"
+name = "World clock"
+
+[[scenes.steps]]
+action = "wait-webgl"
+
+[[scenes]]
+name = "team-overview"
+surface = "ui"
+route = "/"
+caption = "Team working hours at a glance: Today, sidebar ticker and primary footer clock — demonstration time"
+
+[[scenes.steps]]
+action = "wait"
+text = "2/3"
+
+[[scenes.steps]]
+action = "click"
+role = "button"
+name_regex = "^Dismiss Doctor"
+optional = true
+
+[[scenes.steps]]
+action = "click"
+role = "button"
+name = "Close the chat"
+within_role = "complementary"
+
+[[scenes.steps]]
+action = "hover"
+role = "button"
+name_regex = "^World clock: Berlin"
+
+[[scenes.steps]]
+action = "hover"
+role = "button"
+name_regex = "^Berlin"
+within_role = "contentinfo"
+
+[[scenes.steps]]
+action = "hover"
+role = "heading"
+name = "Today"
+
+[[scenes]]
+name = "footer-detail"
+surface = "ui"
+route = "/"
+caption = "Inspect every configured time zone from the primary footer clock — demonstration time"
+
+[[scenes.steps]]
+action = "wait"
+text = "2/3"
+
+[[scenes.steps]]
+action = "click"
+role = "button"
+name_regex = "^Dismiss Doctor"
+optional = true
+
+[[scenes.steps]]
+action = "click"
+role = "button"
+name_regex = "^Berlin"
+within_role = "contentinfo"
+
+[[scenes.steps]]
+action = "wait"
+text = "Ends in 1h 30m"
+[scenes.focus]
+role = "region"
+name_regex = "^Berlin"
+
+[[scenes]]
+name = "phone-world-clock"
+surface = "ui"
+route = "/?panel=clock:world-clock"
+caption = "The live globe and all three team clocks on a phone — fixed demonstration time"
+reduced_motion = "no-preference"
+
+[[scenes.steps]]
+action = "wait"
+text = "2/3"
+
+[[scenes.steps]]
+action = "click"
+role = "button"
+name_regex = "^Dismiss Doctor"
+optional = true
+
+[[scenes.steps]]
+action = "wait"
+role = "region"
+name = "World clock"
+
+[[scenes.steps]]
+action = "wait-webgl"
+
+[[scenes.steps]]
+action = "hover"
+role = "region"
+name = "World clock"
+[scenes.viewport]
+width = 390
+height = 844
+
+[[scenes]]
+name = "cli-times"
+surface = "cli"
+caption = "The same team zones and working hours in the CLI — fixed fictional demonstration time"
+command = ["clock", "--at", "2026-10-26T15:30:00Z"]

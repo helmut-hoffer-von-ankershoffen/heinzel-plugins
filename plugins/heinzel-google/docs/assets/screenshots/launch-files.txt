@@ -1,0 +1,38 @@
+Skip to content
+Heinzelmännchen
+Heinzelmännchen
+Contracts
+Team graph
+Organisation
+Team roster
+M
+Mira
+· EM
+Home
+Today
+Doctor: 7 checks need attention
+
+ai.access ai access, system.credential backend, system.credential credential ai.access/api-key…
+
+Open
+Ask about it
+v0.9.1
+Updates, off
+Daemon not installed, off
+0
+System health, warning
+Chat
+Terminal
+Demo complete
+$ hz google files --days 3 --name Launch; printf '\033]0;Demo complete\007'
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━┓
+┃ Ref                                      ┃ Name                       ┃ Kind        ┃ Modified at          ┃
+┡━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━┩
+│ https://docs.google.com/document/d/launc │ Launch plan                │ document    │ 2026-10-31T09:04:56Z │
+│ h-plan/edit                              │                            │             │                      │
+│ https://docs.google.com/spreadsheets/d/l │ Launch metrics             │ spreadsheet │ 2026-10-31T09:04:56Z │
+│ aunch-metrics/edit                       │                            │             │                      │
+│ https://docs.google.com/document/d/launc │ Launch readiness checklist │ document    │ 2026-10-31T09:04:56Z │
+│ h-readiness/edit                         │                            │             │                      │
+└──────────────────────────────────────────┴────────────────────────────┴─────────────┴──────────────────────┘
+$

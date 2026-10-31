@@ -37,3 +37,38 @@ The modules live in
 Development and release commands: [repository guide](../../README.md).
 
 Migration provenance: heinzel-contrib, before the 0.9 plugin-boundary migration.
+
+<!-- screenshots:start -->
+## Screenshots
+
+<img src="docs/assets/screenshots/widget-and-status.png" alt="One tiny plugin contributes a Today widget and sidebar status from the same value" width="960">
+
+One tiny plugin contributes a Today widget and sidebar status from the same value
+
+<img src="docs/assets/screenshots/inspector.png" alt="Open the plugin-owned inspector and read the same value 42" width="960">
+
+Open the plugin-owned inspector and read the same value 42
+
+<img src="docs/assets/screenshots/greeting-terminal.png" alt="The same typed greeting as structured output in the real app terminal" width="960">
+
+The same typed greeting as structured output in the real app terminal
+
+<img src="docs/assets/screenshots/plugin-notice.png" alt="A plugin notice in the shared in-app notification panel — isolated demonstration" width="960">
+
+A plugin notice in the shared in-app notification panel — isolated demonstration
+
+<details>
+<summary>Command line</summary>
+
+<img src="docs/assets/screenshots/greeting-cli.png" alt="A typed plugin operation greets Mira from the CLI" width="960">
+
+A typed plugin operation greets Mira from the CLI
+
+<img src="docs/assets/screenshots/sample-json.png" alt="The typed value behind the widget, status and inspector" width="960">
+
+The typed value behind the widget, status and inspector
+
+</details>
+
+[Open the screenshot gallery](docs/assets/screenshots/index.html).
+<!-- screenshots:end -->

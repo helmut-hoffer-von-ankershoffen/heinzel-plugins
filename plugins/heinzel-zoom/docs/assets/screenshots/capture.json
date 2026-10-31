@@ -1,0 +1,89 @@
+{
+  "format": 1,
+  "plugin": "heinzel-zoom",
+  "core_version": "0.9.1",
+  "inputs_sha256": "8d099ab7673ab824b167d108a3cedcf3432030ef4296060526dafe60bfa47562",
+  "images": {
+    "docs/assets/screenshots/meeting-decisions.png": "5b82ff48819168d3e1a9e7011be29825a34eea51261bf55a03d13170a92ffdbc",
+    "docs/assets/screenshots/recent-meetings.png": "758e24f9ce945c5b77823d27ab5d2952a63ff81c5624326d445300a789fcbe57",
+    "docs/assets/screenshots/summary-cli.png": "b6882ac1fc26da06900bfc063db82c5fae23809a5d909c73abdc9aa1d3e2afd6",
+    "docs/assets/screenshots/meeting-list-json.png": "4baccb4a6154df4a67ad97a1c24df2b1596ffb24b084aa045e6bc704c4a597c5",
+    "docs/assets/screenshots/workflow-context.png": "ec938fda25182d5f569e9075c238d0142090091e2818996c0799379979e0420d"
+  },
+  "review_bundle": {
+    "format": 1,
+    "definition": {
+      "format": 1,
+      "reviewer": "Codex feature-story agent",
+      "source_sha256": "8de8d8e11e095b543b6f57fcf7257c36a41852d0b2c87563cb22de72085e0465",
+      "plan_sha256": "70d3c51ce078f2a5e2933541fd3381a134b9642ca348815c8dcde55bf11483e5",
+      "story_sha256": "033a5739610d327f0b29fbebe91320f9d598a28a85144f54c04bf90f88b61c07"
+    },
+    "plugin": "heinzel-zoom",
+    "core_version": "0.9.1",
+    "inputs_sha256": "8d099ab7673ab824b167d108a3cedcf3432030ef4296060526dafe60bfa47562",
+    "screenshots": [
+      {
+        "path": "docs/assets/screenshots/meeting-decisions.png",
+        "surface": "ui",
+        "caption": "Decisions and next steps from a summary email \u2014 fixture-only requester, real Zoom parser"
+      },
+      {
+        "path": "docs/assets/screenshots/recent-meetings.png",
+        "surface": "ui",
+        "caption": "Find the recent summarized meetings \u2014 fixture-only requester and fictional mailbox"
+      },
+      {
+        "path": "docs/assets/screenshots/summary-cli.png",
+        "surface": "cli",
+        "caption": "Read a meeting summary in the shell \u2014 fixture-only requester, real Zoom parser and fictional mailbox"
+      },
+      {
+        "path": "docs/assets/screenshots/meeting-list-json.png",
+        "surface": "cli",
+        "caption": "Structured summarized-meeting results for workflows \u2014 fixture-only requester, no verbatim transcription"
+      },
+      {
+        "path": "docs/assets/screenshots/workflow-context.png",
+        "surface": "ui",
+        "caption": "Meeting notes combines the declared source inputs \u2014 local demonstration, no report generated"
+      }
+    ],
+    "images": {
+      "meeting-decisions.png": "5b82ff48819168d3e1a9e7011be29825a34eea51261bf55a03d13170a92ffdbc",
+      "recent-meetings.png": "758e24f9ce945c5b77823d27ab5d2952a63ff81c5624326d445300a789fcbe57",
+      "summary-cli.png": "b6882ac1fc26da06900bfc063db82c5fae23809a5d909c73abdc9aa1d3e2afd6",
+      "meeting-list-json.png": "4baccb4a6154df4a67ad97a1c24df2b1596ffb24b084aa045e6bc704c4a597c5",
+      "workflow-context.png": "ec938fda25182d5f569e9075c238d0142090091e2818996c0799379979e0420d"
+    },
+    "transcripts": {
+      "meeting-decisions.txt": "5fbe0290f62e975d19f11a737ebe1c98fbe4b5616bc920f97241ab94c79c23c4",
+      "recent-meetings.txt": "4c31c3fffed8431156d200b771acbe58f5de8c7adcc30c01898399a293b6143d",
+      "summary-cli.txt": "4be37a1c9908c8f4c8c3bad307e5dbaeb5578b4b71951327f1560dfd3c371c99",
+      "meeting-list-json.txt": "2762667503f795cc6f754156a447becaca466c238f3714d29fd2496c3486e210",
+      "workflow-context.txt": "aef4b18e3df9d4d6611c80b9abd1b1d6d4445bba3ad8840a7d618d40a808a571"
+    },
+    "bundle_sha256": "dac480952a9ba69f20f3cc81991412382fd33abbb3671f737c5e3bc475072d10"
+  },
+  "privacy_review": {
+    "format": 1,
+    "bundle_sha256": "dac480952a9ba69f20f3cc81991412382fd33abbb3671f737c5e3bc475072d10",
+    "reviewer": "Codex privacy agent",
+    "decision": "approve",
+    "checked_images": [
+      "meeting-decisions.png",
+      "recent-meetings.png",
+      "summary-cli.png",
+      "meeting-list-json.png",
+      "workflow-context.png"
+    ],
+    "checks": {
+      "tokens_absent": true,
+      "personal_data_absent": true,
+      "feature_relevant": true,
+      "multiple_ui_scenes": true,
+      "captions_accurate": true
+    },
+    "findings": []
+  }
+}
