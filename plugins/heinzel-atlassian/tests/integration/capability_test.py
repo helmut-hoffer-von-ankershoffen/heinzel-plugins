@@ -75,8 +75,12 @@ def test_a_requester_reads_issues_through_the_bound_adapter(atlassian_kernel, si
             "labels": [],
         },
     ]
-    (call,) = site.calls
-    assert call.args[:4] == ["jira", "workitem", "search", "--jql"]
+    search, *views = site.calls  # one search for the keys, then one real `view` per issue for `updated`
+    assert search.args[:4] == ["jira", "workitem", "search", "--jql"]
+    assert sorted(v.args[:4] for v in views) == [
+        ["jira", "workitem", "view", "WID-3"],
+        ["jira", "workitem", "view", "WID-4"],
+    ]  # run concurrently
 
 
 def test_a_requester_reads_a_page_through_the_bound_adapter(atlassian_kernel, site):
