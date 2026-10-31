@@ -85,4 +85,11 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
           REVISION: ${{ github.sha }}
-        run: uv run --frozen --no-build --group tooling python scripts/publish.py --tag "app-v$VERSION" --revision "$REVISION" --directory dist --make-latest true
+        run: |
+          case "$VERSION" in
+            *dev*) # an edge app is a pre-release: the default install paths can never select it
+              uv run --frozen --no-build --group tooling python scripts/publish.py --tag "app-v$VERSION" --revision "$REVISION" --directory dist --make-latest false
+              gh release edit "app-v$VERSION" --prerelease
+              ;;
+            *) uv run --frozen --no-build --group tooling python scripts/publish.py --tag "app-v$VERSION" --revision "$REVISION" --directory dist --make-latest true ;;
+          esac

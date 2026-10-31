@@ -4,7 +4,9 @@ import hashlib
 import json
 import os
 import re
+from http import HTTPStatus
 from pathlib import Path
+from urllib.error import HTTPError
 from urllib.parse import urlsplit
 from urllib.request import urlopen
 
@@ -14,6 +16,7 @@ from packaging.version import Version
 from heinzel_plugin_tools.publishing import api, find_release
 
 CORE_REPOSITORY = "helmut-hoffer-von-ankershoffen/heinzel"
+EDGE_POINTER = f"https://github.com/{CORE_REPOSITORY}/releases/download/edge-channel/edge.json"
 MAX_METADATA = 2 * 1024 * 1024
 
 
@@ -146,10 +149,38 @@ def select(repository, *, version="", core_wheel=""):
     return {"version": version, "core_wheel": expected}
 
 
-def main():
-    chosen = select(
-        os.environ["GH_REPO"], version=os.environ.get("VERSION", ""), core_wheel=os.environ.get("CORE_URL", "")
+def select_edge(repository):
+    """The newest edge SDK from its channel pointer, unless its composition exists (ADR 0114 in the core)."""
+    pointer = json.loads(download(EDGE_POINTER, 4096))
+    version = pointer["version"]
+    parsed = Version(version)
+    expected = (
+        f"https://github.com/{CORE_REPOSITORY}/releases/download/edge-v{version}/heinzel-{version}-py3-none-any.whl"
     )
+    if str(parsed) != version or not parsed.is_devrelease or pointer["wheel"] != expected:
+        raise ValueError("The edge pointer does not name an edge release")
+    if find_release(repository, f"app-v{version}"):
+        return None
+    return {"version": version, "core_wheel": expected}
+
+
+def selected(repository, version, core_wheel):
+    """An explicit release, else a missing stable composition, else a missing edge one."""
+    if version and Version(version).is_devrelease:
+        return select_edge(repository)
+    chosen = select(repository, version=version, core_wheel=core_wheel)
+    if chosen or version:
+        return chosen
+    try:
+        return select_edge(repository)
+    except HTTPError as error:
+        if error.code == HTTPStatus.NOT_FOUND:  # no edge channel yet
+            return None
+        raise
+
+
+def main():
+    chosen = selected(os.environ["GH_REPO"], os.environ.get("VERSION", ""), os.environ.get("CORE_URL", ""))
     if chosen:
         with Path(os.environ["GITHUB_OUTPUT"]).open("a") as output:
             for key, value in chosen.items():
