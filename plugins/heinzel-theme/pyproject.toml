@@ -1,12 +1,12 @@
 [project]
 name = "heinzel-theme"
-version = "0.1.1"
+version = "0.1.2"
 description = "The Heinzelmännchen theme and its soundscapes."
 license = "MIT"
 license-files = ["LICENSE"]
 readme = "README.md"
 requires-python = ">=3.12"
-dependencies = ["heinzel>=0.9.1,<0.10"]
+dependencies = ["heinzel>=0.9.8,<0.10"]
 
 [project.entry-points."heinzel.modules"]
 theme = "heinzel_theme"

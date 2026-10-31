@@ -1,5 +1,6 @@
 name = "heinzelmaennchen"
 title = "Heinzelmännchen"
+default_priority = 100
 font_sans = "ui-sans-serif, system-ui, -apple-system, \"Segoe UI\", sans-serif"
 font_mono = "ui-monospace, \"SF Mono\", Menlo, monospace"
 radius = "0.75rem"
