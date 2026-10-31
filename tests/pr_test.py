@@ -48,7 +48,8 @@ def test_pr_preserves_pushed_ancestry_and_a_resolved_main_merge(
                 else f'exec "{make}" -f "{makefile}" -f "{overrides}" "$@"\n'
                 if name == "make"
                 else (
-                    'if [ "$5" = hz-plugin ] && [ "$6" = preflight ]; then\n'
+                    'while [ "$#" -gt 0 ] && [ "$1" != hz-plugin ]; do shift; done\n'
+                    'if [ "${1:-}" = hz-plugin ] && [ "${2:-}" = preflight ]; then\n'
                     'printf "%s\n%s\n" "$PLUGIN_NAME" "$PLUGIN_CORE" > "$PROBE"\nfi\n'
                 )
             )

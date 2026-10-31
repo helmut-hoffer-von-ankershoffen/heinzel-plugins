@@ -374,3 +374,24 @@ def test_release_refuses_wrong_identity_or_changed_sdist_even_without_acceptance
     with pytest.raises(ValueError, match="metadata differs|artifact changed"):
         cli.verify_release(project, "candidate.whl", destination)
     assert not destination.exists()
+
+
+@pytest.mark.parametrize("operation", ["prepare", "acceptance"])
+def test_candidate_wheel_path_cannot_become_an_install_option(project, tmp_path, monkeypatch, operation):
+    monkeypatch.chdir(tmp_path)
+    candidate = Path("--target=unexpected") / "heinzel-0.9.1-py3-none-any.whl"
+    candidate.parent.mkdir()
+    wheel(candidate, name="heinzel", version="0.9.1")
+    artifact = wheel(tmp_path / "heinzel_unforeseen-1.0.0-py3-none-any.whl")
+    (project.directory / "tests/acceptance").mkdir(parents=True)
+    monkeypatch.setattr(cli, "validate_lock", lambda *_: {"core": {"version": "0.9.1"}})
+    calls = []
+    monkeypatch.setattr(cli, "run", lambda command, **_: calls.append(command))
+    if operation == "prepare":
+        cli.prepare_environment(project, str(candidate))
+    else:
+        cli.acceptance(project, str(candidate), wheel=artifact)
+    installations = [command for command in calls if command[:3] == ["uv", "pip", "install"]]
+    assert any(str(candidate.resolve()) in command for command in installations)
+    assert all(str(candidate) not in command for command in installations)
+    assert all(not argument.startswith("--target=") for command in installations for argument in command)

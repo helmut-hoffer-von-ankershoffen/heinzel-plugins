@@ -37,7 +37,7 @@ jobs:
           GH_REPO: ${{ github.repository }}
           CORE_URL: ${{ inputs.core_wheel }}
           VERSION: ${{ inputs.version }}
-        run: uv run --frozen --group tooling python scripts/next_app.py
+        run: uv run --frozen --no-build --group tooling python scripts/next_app.py
   compose:
     needs: select
     if: needs.select.outputs.version != ''
@@ -59,7 +59,7 @@ jobs:
           REF: ${{ github.ref }}
         run: |
           test "$REF" = refs/heads/main
-          uv run --frozen --group tooling python scripts/compose.py --core-url "$CORE_URL" --version "$VERSION"
+          uv run --frozen --no-build --group tooling python scripts/compose.py --core-url "$CORE_URL" --version "$VERSION"
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: standard-app
@@ -85,4 +85,4 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
           REVISION: ${{ github.sha }}
-        run: uv run --no-project --script scripts/publish.py --tag "app-v$VERSION" --revision "$REVISION" --directory dist --make-latest true
+        run: uv run --frozen --no-build --group tooling python scripts/publish.py --tag "app-v$VERSION" --revision "$REVISION" --directory dist --make-latest true

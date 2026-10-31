@@ -265,6 +265,15 @@ def validate_installed_core(project: Project) -> None:
         )
 
 
+def core_install_spec(core: str | None, version: str) -> str:
+    """Keep a selected local wheel an absolute operand, even when its filename starts with an option."""
+    if not core:
+        return f"heinzel=={version}"
+    if core.startswith("https://"):
+        return core
+    return str(Path(core).resolve())
+
+
 def prepare_environment(project: Project, core: str | None) -> Path:
     """Authenticate the owning lock before installing core and this plugin without resolving new dependencies."""
     record = validate_lock(project, core)
@@ -280,11 +289,12 @@ def prepare_environment(project: Project, core: str | None) -> Path:
             "--python",
             str(interpreter),
             "--require-hashes",
+            "--no-build",
             str(project.directory / "requirements.lock"),
         ]
     )
-    selected = core or f"heinzel=={record['core']['version']}"
-    run(["uv", "pip", "install", "--python", str(interpreter), "--no-deps", selected])
+    selected = core_install_spec(core, record["core"]["version"])
+    run(["uv", "pip", "install", "--python", str(interpreter), "--no-deps", "--no-build", selected])
     run(
         [
             "uv",
@@ -453,7 +463,7 @@ def acceptance(project: Project, core: str | None, *, wheel: Path | None = None)
     record = validate_lock(project, core)
     if wheel is None:
         build(project)
-    selected = core or f"heinzel=={record['core']['version']}"
+    selected = core_install_spec(core, record["core"]["version"])
     environment = project.directory / ".acceptance"
     interpreter = environment / "bin/python"
     if not interpreter.is_file():
@@ -466,6 +476,7 @@ def acceptance(project: Project, core: str | None, *, wheel: Path | None = None)
             "--python",
             str(interpreter),
             "--require-hashes",
+            "--no-build",
             str(project.directory / "requirements.lock"),
         ]
     )
@@ -484,7 +495,7 @@ def acceptance(project: Project, core: str | None, *, wheel: Path | None = None)
     if artifact_identity(wheels[0]) != (project.name, project.version):
         raise ValueError("Acceptance wheel metadata differs from the selected plugin")
     digest = hashlib.sha256(wheels[0].read_bytes()).hexdigest()
-    run(["uv", "pip", "install", "--python", str(interpreter), "--no-deps", selected, str(wheels[0])])
+    run(["uv", "pip", "install", "--python", str(interpreter), "--no-deps", "--no-build", selected, str(wheels[0])])
     run(["uv", "pip", "check", "--python", str(interpreter)])
     suites = [
         f"tests/{name}" for name in ("acceptance", "browser", "e2e") if (project.directory / "tests" / name).is_dir()
@@ -909,6 +920,8 @@ def main() -> int:
     parser.add_argument("--base-url")
     parser.add_argument("--publish", action="store_true", help=argparse.SUPPRESS)
     args = parser.parse_args()
+    if args.base and args.base.startswith("-"):
+        parser.error("--base must be a revision, not a Git option")
     if args.publish:
         parser.error("Local release previews artifacts only. Publish through the protected release workflow.")
     inventory = projects()
@@ -938,9 +951,12 @@ def main() -> int:
         changed = args.changed
         if args.base:
             changed += subprocess.check_output(
-                ["git", "diff", "--name-only", f"{args.base}...HEAD"], cwd=ROOT, text=True, timeout=30
+                ["git", "diff", "--name-only", "--end-of-options", f"{args.base}...HEAD", "--"],
+                cwd=ROOT,
+                text=True,
+                timeout=30,
             ).splitlines()
-        print(json.dumps(plan(changed, inventory, contracts=args.contract, core=args.core)))
+        print(json.dumps(plan(changed, inventory, ROOT, contracts=args.contract, core=args.core)))
         return 0
     if args.command == "profile":
         from heinzel_plugin_tools.installation import verify_profile

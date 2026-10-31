@@ -32,9 +32,9 @@ if git remote | grep -qx upstream; then
   repo="$(slug upstream)"
 fi
 
-uv run --quiet --group tooling cz check --message "$title" >/dev/null
-uv run --quiet --script scripts/check_confidentiality.py --text "$title"
-uv run --quiet --script scripts/check_confidentiality.py --branch
+uv run --quiet --frozen --no-build --group tooling cz check --message "$title" >/dev/null
+uv run --quiet --frozen --no-build --group tooling python scripts/check_confidentiality.py --text "$title"
+uv run --quiet --frozen --no-build --group tooling python scripts/check_confidentiality.py --branch
 git fetch --quiet "$base" main
 git merge-base --is-ancestor "$base/main" HEAD || { echo "Behind $base/main; run git merge $base/main first." >&2; exit 2; }
 
@@ -77,7 +77,7 @@ fi
 
 if [ -n "${BODY_FILE:-}" ]; then body="$(cat "$BODY_FILE")"; else body="${BODY:-}"; fi
 [ -n "$body" ] || body="$(git log --reverse --format='- %s' "$base/main..HEAD")"
-uv run --quiet --script scripts/check_confidentiality.py --text "$body"
+uv run --quiet --frozen --no-build --group tooling python scripts/check_confidentiality.py --text "$body"
 
 if [ -n "$remote_branch" ] && ! git merge-base --is-ancestor "$remote_branch" HEAD; then
   git rebase --quiet "$remote_branch"

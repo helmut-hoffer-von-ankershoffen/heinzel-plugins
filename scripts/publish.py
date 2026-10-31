@@ -16,6 +16,7 @@ result = subprocess.run(
         "--project",
         str(root),
         "--frozen",
+        "--no-build",
         "--group",
         "tooling",
         "python",

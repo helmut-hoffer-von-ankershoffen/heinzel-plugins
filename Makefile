@@ -1,5 +1,5 @@
 .DEFAULT_GOAL := help
-PLUGIN := uv run --frozen --group tooling hz-plugin
+PLUGIN := uv run --frozen --no-build --group tooling hz-plugin
 ifneq ($(origin TOOLING),undefined)
 export HZ_PLUGIN_TOOLING := $(value TOOLING)
 PLUGIN := uv run --quiet --no-project --with "$$HZ_PLUGIN_TOOLING" hz-plugin
@@ -49,21 +49,21 @@ publish:
 audit:
 	@$(PLUGIN) audit
 tooling-check:
-	@uv run --group tooling ruff check scripts tests src/heinzel_plugin_tools
-	@uv run --group tooling ruff format --check scripts tests src/heinzel_plugin_tools
-	@uv run --group tooling pytest tests -q
-	@uv run --group tooling actionlint
-	@uv run --group tooling zizmor --offline --quiet .github
+	@uv run --frozen --no-build --group tooling ruff check scripts tests src/heinzel_plugin_tools
+	@uv run --frozen --no-build --group tooling ruff format --check scripts tests src/heinzel_plugin_tools
+	@uv run --frozen --no-build --group tooling pytest tests -q
+	@uv run --frozen --no-build --group tooling python scripts/tools.py run actionlint
+	@uv run --frozen --no-build --group tooling zizmor --offline --quiet .github
 
 install:
-	@uv sync --all-groups --quiet
+	@uv sync --frozen --no-build --all-groups --quiet
 	@uv run --no-project --script scripts/tools.py install
 setup: install
-	@uv run --group tooling prek install --hook-type pre-commit --hook-type commit-msg --hook-type pre-push
+	@uv run --frozen --no-build --group tooling prek install --hook-type pre-commit --hook-type commit-msg --hook-type pre-push
 check-fast:
 	@if [ -n "$$PLUGIN_NAME" ]; then $(PLUGIN) check-fast; else make --no-print-directory tooling-check; fi
 policies:
-	@uv run --group tooling python scripts/check_policy.py
+	@uv run --frozen --no-build --group tooling python scripts/check_policy.py
 secrets:
 	@uv run --no-project --script scripts/tools.py run gitleaks git --redact --no-banner
 preflight: tooling-check policies secrets
