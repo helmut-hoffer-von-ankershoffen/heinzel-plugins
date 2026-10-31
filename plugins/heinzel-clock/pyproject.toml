@@ -142,11 +142,26 @@ highlights = [
 ]
 
 [[tool.heinzel.catalog.screenshots]]
-path = "docs/assets/cli.png"
-surface = "cli"
-caption = "hz clock — isolated demonstration profile"
+path = "docs/assets/screenshots/world-clock.png"
+surface = "ui"
+caption = "Find overlap across Berlin, New York and Los Angeles while staying on Today — demonstration time"
 
 [[tool.heinzel.catalog.screenshots]]
-path = "docs/assets/ui.png"
+path = "docs/assets/screenshots/team-overview.png"
 surface = "ui"
-caption = "World Clock panel with the plugin-owned globe"
+caption = "Team working hours at a glance: Today, sidebar ticker and primary footer clock — demonstration time"
+
+[[tool.heinzel.catalog.screenshots]]
+path = "docs/assets/screenshots/footer-detail.png"
+surface = "ui"
+caption = "Inspect every configured time zone from the primary footer clock — demonstration time"
+
+[[tool.heinzel.catalog.screenshots]]
+path = "docs/assets/screenshots/phone-world-clock.png"
+surface = "ui"
+caption = "Team local times in the phone workspace — demonstration time"
+
+[[tool.heinzel.catalog.screenshots]]
+path = "docs/assets/screenshots/cli-times.png"
+surface = "cli"
+caption = "The same team zones and working hours in the CLI — fixed fictional demonstration time"

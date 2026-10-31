@@ -140,11 +140,26 @@ highlights = [
 ]
 
 [[tool.heinzel.catalog.screenshots]]
-path = "docs/assets/cli.png"
-surface = "cli"
-caption = "hz github --help — isolated demonstration profile"
+path = "docs/assets/screenshots/merged-work.png"
+surface = "ui"
+caption = "Merged pull requests in the app terminal — fixture-only requester, real GitHub adapter"
 
 [[tool.heinzel.catalog.screenshots]]
-path = "docs/assets/ui.png"
+path = "docs/assets/screenshots/issue-changes.png"
 surface = "ui"
-caption = "Plugin settings in the app; no external account connected"
+caption = "Issue changes, owners and states in the app terminal — fictional GitHub repository"
+
+[[tool.heinzel.catalog.screenshots]]
+path = "docs/assets/screenshots/merged-cli.png"
+surface = "cli"
+caption = "Read merged work in the shell — fixture-only requester, real GitHub adapter"
+
+[[tool.heinzel.catalog.screenshots]]
+path = "docs/assets/screenshots/issues-json.png"
+surface = "cli"
+caption = "Typed issue results for scripts and agents — fixture-only requester, fictional GitHub data"
+
+[[tool.heinzel.catalog.screenshots]]
+path = "docs/assets/screenshots/workflow-context.png"
+surface = "ui"
+caption = "Weekly code review combines the declared source inputs — local demonstration, no report generated"
