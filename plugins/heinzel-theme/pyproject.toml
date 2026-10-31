@@ -139,16 +139,26 @@ highlights = [
 themes = ["src/heinzel_theme/themes/heinzelmaennchen.toml"]
 
 [[tool.heinzel.catalog.screenshots]]
-path = "docs/assets/cli.png"
+path = "docs/assets/screenshots/theme-light.png"
+surface = "ui"
+caption = "The installed Heinzelmännchen theme on a representative local contract — light appearance"
+
+[[tool.heinzel.catalog.screenshots]]
+path = "docs/assets/screenshots/theme-dark.png"
+surface = "ui"
+caption = "The installed Heinzelmännchen theme on a representative local contract — dark appearance"
+
+[[tool.heinzel.catalog.screenshots]]
+path = "docs/assets/screenshots/theme-soundscapes.png"
+surface = "ui"
+caption = "The theme supplies three optional YouTube soundscapes; playback starts only after Play"
+
+[[tool.heinzel.catalog.screenshots]]
+path = "docs/assets/screenshots/theme-cli.png"
 surface = "cli"
-caption = "hz system theme list — isolated demonstration profile"
+caption = "Inspect the owning theme and its light/dark palette from the CLI"
 
 [[tool.heinzel.catalog.screenshots]]
-path = "docs/assets/ui.png"
-surface = "ui"
-caption = "Installed Heinzelmännchen theme in the app"
-
-[[tool.heinzel.catalog.screenshots]]
-path = "docs/assets/ui-dark.png"
-surface = "ui"
-caption = "Installed Heinzelmännchen theme in the app — dark appearance"
+path = "docs/assets/screenshots/soundscapes-cli.png"
+surface = "cli"
+caption = "List the three theme-owned soundscapes without starting playback"

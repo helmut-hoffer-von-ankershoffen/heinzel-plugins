@@ -140,11 +140,26 @@ highlights = [
 ]
 
 [[tool.heinzel.catalog.screenshots]]
-path = "docs/assets/cli.png"
-surface = "cli"
-caption = "hz tailscale --help — isolated demonstration profile"
+path = "docs/assets/screenshots/sharing-ready.png"
+surface = "ui"
+caption = "Share the app privately with an explicit ready state — local Tailscale fixture; session hidden"
 
 [[tool.heinzel.catalog.screenshots]]
-path = "docs/assets/ui.png"
+path = "docs/assets/screenshots/phone-sharing-ready.png"
 surface = "ui"
-caption = "Plugin settings in the app; no external account connected"
+caption = "Inspect and copy the private link on a phone — local Tailscale fixture; session hidden"
+
+[[tool.heinzel.catalog.screenshots]]
+path = "docs/assets/screenshots/sharing-request-cli.png"
+surface = "cli"
+caption = "Inspect the saved sharing request from a separate CLI process — local fictional network"
+
+[[tool.heinzel.catalog.screenshots]]
+path = "docs/assets/screenshots/sharing-off.png"
+surface = "ui"
+caption = "Turn private sharing off explicitly — local Tailscale fixture"
+
+[[tool.heinzel.catalog.screenshots]]
+path = "docs/assets/screenshots/sharing-off-cli.png"
+surface = "cli"
+caption = "Verify private sharing is off from the shell — local fictional network"

@@ -152,11 +152,31 @@ highlights = [
 ]
 
 [[tool.heinzel.catalog.screenshots]]
-path = "docs/assets/cli.png"
-surface = "cli"
-caption = "hz example --help — isolated demonstration profile"
+path = "docs/assets/screenshots/widget-and-status.png"
+surface = "ui"
+caption = "One tiny plugin contributes a Today widget and sidebar status from the same value"
 
 [[tool.heinzel.catalog.screenshots]]
-path = "docs/assets/ui.png"
+path = "docs/assets/screenshots/inspector.png"
 surface = "ui"
-caption = "Example plugin inspector panel in the app"
+caption = "Open the plugin-owned inspector and read the same value 42"
+
+[[tool.heinzel.catalog.screenshots]]
+path = "docs/assets/screenshots/greeting-terminal.png"
+surface = "ui"
+caption = "The same typed greeting as structured output in the real app terminal"
+
+[[tool.heinzel.catalog.screenshots]]
+path = "docs/assets/screenshots/plugin-notice.png"
+surface = "ui"
+caption = "A plugin notice in the shared in-app notification panel — isolated demonstration"
+
+[[tool.heinzel.catalog.screenshots]]
+path = "docs/assets/screenshots/greeting-cli.png"
+surface = "cli"
+caption = "A typed plugin operation greets Mira from the CLI"
+
+[[tool.heinzel.catalog.screenshots]]
+path = "docs/assets/screenshots/sample-json.png"
+surface = "cli"
+caption = "The typed value behind the widget, status and inspector"
