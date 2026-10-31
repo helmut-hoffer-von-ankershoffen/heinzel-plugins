@@ -1,0 +1,89 @@
+{
+  "format": 1,
+  "plugin": "heinzel-weather",
+  "core_version": "0.9.1",
+  "inputs_sha256": "8ae1fe17ee9871ef6bdf33bd632c6b3ce05d75b5865abae4693b84180bf03d54",
+  "images": {
+    "docs/assets/screenshots/today-weather.png": "0a7697f4aafec2e7c1aef5d315d67a7145533e303a12321107fbd684e6b5a2b8",
+    "docs/assets/screenshots/weather-detail.png": "80665b8b1e120d2198586798d8b2976f12cfe1496056fce16f442698bb268368",
+    "docs/assets/screenshots/phone-weather.png": "603a0f6aac2dda864b6d5c78473ac79f6b9b5991e74e03ffafcd28ca4a43ec4f",
+    "docs/assets/screenshots/cli-weather.png": "91e4e1096e2a5d23431a2829744a79dbca57ec6e5a0acf720129953faaccbe4d",
+    "docs/assets/screenshots/cli-forecast.png": "9edb7cbc87009b6ec269df848e43cc95cefba0049ddf3c6476e3818a72648d96"
+  },
+  "review_bundle": {
+    "format": 1,
+    "definition": {
+      "format": 1,
+      "reviewer": "Codex feature-story agent",
+      "source_sha256": "f24847aebe1314b8937b4e075f00c0c7a3d1e67b2f7c0e094d1324465fc8730a",
+      "plan_sha256": "102d1e73ea57ee5d7b0699e641f6c7f8dbe7b71b16c9323468550202516ae7d7",
+      "story_sha256": "373a21f28d64850cdc3ff3ee3a95d9b029a482e3adbb9a6a281a7c2c1da0d5f6"
+    },
+    "plugin": "heinzel-weather",
+    "core_version": "0.9.1",
+    "inputs_sha256": "8ae1fe17ee9871ef6bdf33bd632c6b3ce05d75b5865abae4693b84180bf03d54",
+    "screenshots": [
+      {
+        "path": "docs/assets/screenshots/today-weather.png",
+        "surface": "ui",
+        "caption": "Current weather and the coming days on Today \u2014 fictional Berlin forecast"
+      },
+      {
+        "path": "docs/assets/screenshots/weather-detail.png",
+        "surface": "ui",
+        "caption": "Inspect conditions, feels-like temperature and rain chance \u2014 fictional local forecast"
+      },
+      {
+        "path": "docs/assets/screenshots/phone-weather.png",
+        "surface": "ui",
+        "caption": "Weather and near forecast in the phone-sized Today view \u2014 fictional local forecast"
+      },
+      {
+        "path": "docs/assets/screenshots/cli-weather.png",
+        "surface": "cli",
+        "caption": "Hourly conditions and approaching rain through the real CLI \u2014 local fictional forecast"
+      },
+      {
+        "path": "docs/assets/screenshots/cli-forecast.png",
+        "surface": "cli",
+        "caption": "A concise three-day outlook through the real CLI \u2014 local fictional forecast"
+      }
+    ],
+    "images": {
+      "today-weather.png": "0a7697f4aafec2e7c1aef5d315d67a7145533e303a12321107fbd684e6b5a2b8",
+      "weather-detail.png": "80665b8b1e120d2198586798d8b2976f12cfe1496056fce16f442698bb268368",
+      "phone-weather.png": "603a0f6aac2dda864b6d5c78473ac79f6b9b5991e74e03ffafcd28ca4a43ec4f",
+      "cli-weather.png": "91e4e1096e2a5d23431a2829744a79dbca57ec6e5a0acf720129953faaccbe4d",
+      "cli-forecast.png": "9edb7cbc87009b6ec269df848e43cc95cefba0049ddf3c6476e3818a72648d96"
+    },
+    "transcripts": {
+      "today-weather.txt": "b4f76414743ca4be5542c4968517ea88fe972b0a11b31491298d98253b43e29c",
+      "weather-detail.txt": "86961187b19cd9b677dae887ee58ce163d9509bb8fac3df235c4a5e947047bb6",
+      "phone-weather.txt": "230c1f739417013c8cf3bc8eeb636a9eb079e90bc8af37882c4104753d8019a5",
+      "cli-weather.txt": "437a54207b23cb5ae3d39594e6337b5b0d6b347a6b6f44b84cb3c19c34ebdca4",
+      "cli-forecast.txt": "7a9905801d18aaf0f702870e85dbe4a198b31e89d89ff21aaac164c6238414f8"
+    },
+    "bundle_sha256": "cdce40a50affa133af58a6c1ff689c4c86b59cd0edeb2226fe38bc91744d9430"
+  },
+  "privacy_review": {
+    "format": 1,
+    "bundle_sha256": "cdce40a50affa133af58a6c1ff689c4c86b59cd0edeb2226fe38bc91744d9430",
+    "reviewer": "Codex privacy agent",
+    "decision": "approve",
+    "checked_images": [
+      "today-weather.png",
+      "weather-detail.png",
+      "phone-weather.png",
+      "cli-weather.png",
+      "cli-forecast.png"
+    ],
+    "checks": {
+      "tokens_absent": true,
+      "personal_data_absent": true,
+      "feature_relevant": true,
+      "multiple_ui_scenes": true,
+      "captions_accurate": true
+    },
+    "findings": []
+  }
+}

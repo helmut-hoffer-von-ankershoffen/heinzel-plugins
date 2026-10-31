@@ -1,0 +1,88 @@
+format = 1
+bootstrap = "docs/screenshot_fixture.py"
+
+[[scenes]]
+name = "resources-pane"
+surface = "ui"
+route = "/"
+caption = "CPU, memory and scaled load in the expanded monitor — fictional demo workstation"
+
+[[scenes.steps]]
+action = "wait"
+text = "Computer resources"
+
+[[scenes.steps]]
+action = "click"
+role = "button"
+name_regex = "^Dismiss Doctor"
+optional = true
+
+[[scenes.steps]]
+action = "click"
+role = "button"
+name_regex = "CPU.*Memory.*Load"
+
+[[scenes.steps]]
+action = "wait"
+text = "Host: demo-workstation"
+
+[scenes.focus]
+role = "region"
+name_regex = "^Computer resources"
+
+[[scenes]]
+name = "today-resources"
+surface = "ui"
+route = "/"
+caption = "A quick CPU summary on Today, with three compact footer meters — demonstration values"
+
+[[scenes.steps]]
+action = "wait"
+text = "CPU 36%"
+
+[[scenes.steps]]
+action = "click"
+role = "button"
+name_regex = "^Dismiss Doctor"
+optional = true
+
+[[scenes]]
+name = "phone-resources"
+surface = "ui"
+route = "/"
+caption = "Read CPU, memory and queued load on a phone — fictional demo workstation"
+
+[[scenes.steps]]
+action = "wait"
+text = "CPU 36%"
+
+[[scenes.steps]]
+action = "click"
+role = "button"
+name_regex = "^Dismiss Doctor"
+optional = true
+
+[[scenes.steps]]
+action = "click"
+role = "button"
+name = "More status items"
+optional = true
+
+[[scenes.steps]]
+action = "click"
+role = "button"
+name_regex = "CPU.*Memory.*Load"
+
+[[scenes.steps]]
+action = "wait"
+text = "Host: demo-workstation"
+
+[scenes.viewport]
+width = 390
+height = 844
+
+[[scenes]]
+name = "cli-resources"
+surface = "cli"
+caption = "The same fictional CPU, memory and raw load measurements in the CLI"
+command = ["resource"]

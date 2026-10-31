@@ -1,0 +1,92 @@
+format = 1
+bootstrap = "docs/screenshot_fixture.py"
+
+[[scenes]]
+name = "today-weather"
+surface = "ui"
+route = "/"
+caption = "Current weather and the coming days on Today — fictional Berlin forecast"
+
+[[scenes.steps]]
+action = "wait"
+text = "Weather in Berlin, DE"
+
+[[scenes.steps]]
+action = "click"
+role = "button"
+name_regex = "^Dismiss Doctor"
+optional = true
+
+[[scenes.steps]]
+action = "click"
+role = "button"
+name_regex = "^Dismiss Doctor"
+optional = true
+
+[[scenes]]
+name = "weather-detail"
+surface = "ui"
+route = "/"
+caption = "Inspect conditions, feels-like temperature and rain chance — fictional local forecast"
+
+[[scenes.steps]]
+action = "wait"
+text = "Weather in Berlin, DE"
+
+[[scenes.steps]]
+action = "click"
+role = "button"
+name_regex = "^Dismiss Doctor"
+optional = true
+
+[[scenes.steps]]
+action = "click"
+role = "button"
+name_regex = "Berlin"
+within_role = "contentinfo"
+
+[[scenes.steps]]
+action = "wait"
+text = "Clear sky · Berlin, DE"
+
+[scenes.focus]
+role = "region"
+name_regex = "Berlin"
+
+[[scenes]]
+name = "phone-weather"
+surface = "ui"
+route = "/"
+caption = "Weather and near forecast in the phone-sized Today view — fictional local forecast"
+
+[[scenes.steps]]
+action = "wait"
+text = "Weather in Berlin, DE"
+
+[[scenes.steps]]
+action = "click"
+role = "button"
+name_regex = "^Dismiss Doctor"
+optional = true
+
+[[scenes.steps]]
+action = "click"
+role = "button"
+name_regex = "^Dismiss Doctor"
+optional = true
+
+[scenes.viewport]
+width = 390
+height = 844
+
+[[scenes]]
+name = "cli-weather"
+surface = "cli"
+caption = "Hourly conditions and approaching rain through the real CLI — local fictional forecast"
+command = ["weather", "show"]
+
+[[scenes]]
+name = "cli-forecast"
+surface = "cli"
+caption = "A concise three-day outlook through the real CLI — local fictional forecast"
+command = ["weather", "forecast", "--days", "3"]
