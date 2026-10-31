@@ -11,7 +11,8 @@ tests against v0.7.13; older releases do not provide the UI data types used here
 
 ```bash
 hz system plugin add "heinzel-weather @ git+https://github.com/helmut-hoffer-von-ankershoffen/heinzel-plugins#subdirectory=plugins/heinzel-weather"
-hz setup weather    # your places and the units (and the provider; Open-Meteo needs no key)
+hz setup weather    # your places and the units (and the provider; Open-Meteo needs no key); the app: Settings > Weather
+# With no place set, the city of your time zone is used until you set one.
 ```
 
 Open-Meteo needs no account and no key. Its data is licensed [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/)
