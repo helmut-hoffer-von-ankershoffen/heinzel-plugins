@@ -1,6 +1,7 @@
 """Planner revisions remain operands while real revisions still select changed plugins."""
 
 import json
+import os
 import shutil
 import subprocess
 import sys
@@ -23,9 +24,17 @@ def test_planner_rejects_git_output_option(tmp_path, monkeypatch):
 
 
 def test_planner_accepts_real_revision(tmp_path, monkeypatch, capsys):
+    for key in list(os.environ):
+        if key.startswith("GIT_"):
+            monkeypatch.delenv(key)
+
     def git(*arguments):
         return subprocess.check_output(  # noqa: S603 - fixed commands in an isolated fixture repository
-            [str(shutil.which("git")), *arguments], cwd=tmp_path, text=True, timeout=10
+            [str(shutil.which("git")), *arguments],
+            cwd=tmp_path,
+            env={key: value for key, value in os.environ.items() if not key.startswith("GIT_")},
+            text=True,
+            timeout=10,
         ).strip()
 
     git("init", "--quiet", "--initial-branch=main")

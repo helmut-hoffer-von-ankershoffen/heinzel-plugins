@@ -17,7 +17,10 @@ def test_revision_option_cannot_write_a_file(tmp_path):
     result = subprocess.run(  # noqa: S603 - fixed fixture commands in a temporary repository
         [sys.executable, str(SCRIPT), f"--messages=--output={destination}"],
         cwd=tmp_path,
-        env={**os.environ, "CONFIDENTIAL_TERMS": "fictional-sensitive-marker"},
+        env={
+            **{key: value for key, value in os.environ.items() if not key.startswith("GIT_")},
+            "CONFIDENTIAL_TERMS": "fictional-sensitive-marker",
+        },
         capture_output=True,
         text=True,
         check=False,
@@ -33,6 +36,7 @@ def test_commit_range_still_scans_messages(tmp_path):
         return subprocess.run(  # noqa: S603 - fixed fixture commands in a temporary repository
             [str(shutil.which("git")), *arguments],
             cwd=tmp_path,
+            env={key: value for key, value in os.environ.items() if not key.startswith("GIT_")},
             capture_output=True,
             text=True,
             check=True,
@@ -48,7 +52,10 @@ def test_commit_range_still_scans_messages(tmp_path):
     result = subprocess.run(  # noqa: S603 - fixed fixture commands in a temporary repository
         [sys.executable, str(SCRIPT), "--messages", f"{previous}..HEAD"],
         cwd=tmp_path,
-        env={**os.environ, "CONFIDENTIAL_TERMS": "fictional-sensitive-marker"},
+        env={
+            **{key: value for key, value in os.environ.items() if not key.startswith("GIT_")},
+            "CONFIDENTIAL_TERMS": "fictional-sensitive-marker",
+        },
         capture_output=True,
         text=True,
         check=False,
