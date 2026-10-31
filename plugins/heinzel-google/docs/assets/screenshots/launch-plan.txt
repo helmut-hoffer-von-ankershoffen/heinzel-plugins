@@ -16,7 +16,7 @@ ai.access ai access, system.credential backend, system.credential credential ai.
 
 Open
 Ask about it
-v0.9.1
+v0.9.5
 Updates, off
 Daemon not installed, off
 0
@@ -26,7 +26,7 @@ Terminal
 Demo complete
 $ hz showcase notes launch-plan; printf '\033]0;Demo complete\007'
 Launch plan
-                                                 Launch plan
+                                                          Launch plan
 Goal
 Ship reliable widgets with a measured rollout.
 Owners and next checks

@@ -45,7 +45,8 @@ class GoogleSettings(ModuleSettings):
         default=None,
         title="Google Workspace CLI",
         description="The full path to the Google Workspace CLI; the one on your PATH when not "
-        "set. Only your own settings can set it, never a project's.",
+        "set. Only your own settings can set it, never a project's. Connected reads require an explicit path; "
+        "review it in Google source review before connecting.",
         json_schema_extra={"x-expert": True, "format": "path"},
     )
     timeout: float = Field(
@@ -70,3 +71,15 @@ class GoogleSettings(ModuleSettings):
             )
             raise ValueError(msg)
         return value.strip()
+
+
+class GoogleSourceReview(BaseModel):
+    """Owner-selected executable continuity; no publisher or account verification."""
+
+    configured: bool = Field(description="Whether an explicit owner path is configured.")
+    command: str | None = Field(description="Resolved selected command path, if configured.")
+    binary: str | None = Field(description="Resolved native executable path, if configured.")
+    binary_sha256: str | None = Field(
+        description="Digest of current native bytes for continuity, not publisher authentication."
+    )
+    wrapper: bool | None = Field(description="Whether the selected command is the supported npm launcher.")

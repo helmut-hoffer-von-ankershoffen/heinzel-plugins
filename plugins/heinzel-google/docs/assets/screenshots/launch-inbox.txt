@@ -16,7 +16,7 @@ ai.access ai access, system.credential backend, system.credential credential ai.
 
 Open
 Ask about it
-v0.9.1
+v0.9.5
 Updates, off
 Daemon not installed, off
 0

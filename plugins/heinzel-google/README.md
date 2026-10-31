@@ -166,10 +166,19 @@ Token-shaped strings in anything `gws` says are redacted before it is shortened.
 
 Development and release commands: [repository guide](../../README.md).
 
+Installed browser acceptance requires npm and preinstalled Playwright Chromium and WebKit browsers. The tests install
+their own pinned Playwright and axe dependencies from `tests/browser/package-lock.json`, with package scripts disabled.
+The captured-read acceptance tests also require a core SDK with source-capture support, supplied as `CORE=<wheel>`;
+ordinary Google capabilities remain available on the declared older supported cores.
+
 Migration provenance: heinzel, before the 0.9 plugin-boundary migration.
 
 <!-- screenshots:start -->
 ## Screenshots
+
+<img src="docs/assets/screenshots/recent-files.png" alt="Start with a seven-day file scan — fictional Docs and Sheets, real Google files operation in the app terminal" width="960">
+
+Start with a seven-day file scan — fictional Docs and Sheets, real Google files operation in the app terminal
 
 <img src="docs/assets/screenshots/launch-files.png" alt="Recently changed launch files in the app terminal — fictional Workspace replies, real Google operation" width="960">
 
@@ -179,9 +188,9 @@ Recently changed launch files in the app terminal — fictional Workspace replie
 
 Read a Google Doc as workflow-ready text — fixture-only requester and fictional plan
 
-<img src="docs/assets/screenshots/launch-week.png" alt="The launch week and its meeting owners — fixture-only requester, real Google Calendar adapter" width="960">
+<img src="docs/assets/screenshots/launch-week.png" alt="The launch week and its attendees — fixture-only requester, real Google Calendar adapter over fictional events" width="960">
 
-The launch week and its meeting owners — fixture-only requester, real Google Calendar adapter
+The launch week and its attendees — fixture-only requester, real Google Calendar adapter over fictional events
 
 <img src="docs/assets/screenshots/launch-inbox.png" alt="A focused launch-mail query — fixture-only requester, real Gmail adapter over fictional messages" width="960">
 

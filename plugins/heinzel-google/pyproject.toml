@@ -16,6 +16,9 @@ Issues = "https://github.com/helmut-hoffer-von-ankershoffen/heinzel-plugins/issu
 [project.entry-points."heinzel.modules"]
 google = "heinzel_google"
 
+[project.entry-points."heinzel.connected_sources"]
+google = "heinzel_google"
+
 [build-system]
 requires = ["hatchling>=1.29.0"]
 build-backend = "hatchling.build"
@@ -140,6 +143,11 @@ highlights = [
 ]
 
 [[tool.heinzel.catalog.screenshots]]
+path = "docs/assets/screenshots/recent-files.png"
+surface = "ui"
+caption = "Start with a seven-day file scan — fictional Docs and Sheets, real Google files operation in the app terminal"
+
+[[tool.heinzel.catalog.screenshots]]
 path = "docs/assets/screenshots/launch-files.png"
 surface = "ui"
 caption = "Recently changed launch files in the app terminal — fictional Workspace replies, real Google operation"
@@ -152,7 +160,7 @@ caption = "Read a Google Doc as workflow-ready text — fixture-only requester a
 [[tool.heinzel.catalog.screenshots]]
 path = "docs/assets/screenshots/launch-week.png"
 surface = "ui"
-caption = "The launch week and its meeting owners — fixture-only requester, real Google Calendar adapter"
+caption = "The launch week and its attendees — fixture-only requester, real Google Calendar adapter over fictional events"
 
 [[tool.heinzel.catalog.screenshots]]
 path = "docs/assets/screenshots/launch-inbox.png"

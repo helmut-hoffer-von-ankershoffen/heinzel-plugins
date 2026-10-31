@@ -27,16 +27,42 @@ SHEETS_GET = ("sheets", "spreadsheets", "get")
 DOCUMENT = "application/vnd.google-apps.document"
 SPREADSHEET = "application/vnd.google-apps.spreadsheet"
 SHORTCUT = "application/vnd.google-apps.shortcut"
-KINDS = {DOCUMENT: "document", SPREADSHEET: "spreadsheet"}
-EDITORS = {"document": "https://docs.google.com/document/d/", "spreadsheet": "https://docs.google.com/spreadsheets/d/"}
+PRESENTATION = "application/vnd.google-apps.presentation"
+KINDS = {DOCUMENT: "document", SPREADSHEET: "spreadsheet", PRESENTATION: "presentation"}
+EDITORS = {
+    "document": "https://docs.google.com/document/d/",
+    "presentation": "https://docs.google.com/presentation/d/",
+    "spreadsheet": "https://docs.google.com/spreadsheets/d/",
+}
 _ID = re.compile(r"^[A-Za-z0-9_-]{10,200}$")
-_EDITOR_PATH = re.compile(r"^/(?:document|spreadsheets)(?:/u/[0-9]{1,3})?/d/([A-Za-z0-9_-]{10,200})(?:/.*)?$")
+_EDITOR_PATH = re.compile(
+    r"^/(?:document|spreadsheets|presentation)(?:/u/[0-9]{1,3})?/d/([A-Za-z0-9_-]{10,200})(?:/.*)?$"
+)
 _FILE_PATH = re.compile(r"^/file(?:/u/[0-9]{1,3})?/d/([A-Za-z0-9_-]{10,200})(?:/.*)?$")
 MAX_NAME = 100
 """Characters of a name filter for `hz google files`."""
 EXAMPLE = "https://docs.google.com/document/d/1AbC.../edit"
 MAX_REF = 200
 """Characters of a refused reference repeated in its error."""
+
+
+SLIDES_GET = ("slides", "presentations", "get")
+
+
+def _slides_text(data: dict[str, Any]) -> str:
+    """Each slide's text under a heading; pictures and layouts are not read."""
+    parts: list[str] = []
+    for number, slide in enumerate(cast("list[dict[str, Any]]", data.get("slides") or []), start=1):
+        lines = [
+            str(run["textRun"].get("content", ""))
+            for element in cast("list[dict[str, Any]]", slide.get("pageElements") or [])
+            for run in cast(
+                "list[dict[str, Any]]", ((element.get("shape") or {}).get("text") or {}).get("textElements") or []
+            )
+            if "textRun" in run
+        ]
+        parts.append(f"## Slide {number}\n{''.join(lines).strip()}")
+    return "\n\n".join(parts)
 
 
 def _line(value: object) -> str:
@@ -78,7 +104,7 @@ class GoogleDocuments:
         self._session = session
 
     def read(self, ref: str) -> Document:
-        """The text of the Google Doc or Sheet `ref`: its URL, or its Drive file id.
+        """The text of the Google Doc, Sheet or Slides `ref`: its URL, or its Drive file id.
 
         Raises:
             HeinzelError: If `ref` is neither, the file is something else, the sign-in is missing, or Google fails.
@@ -107,6 +133,13 @@ class GoogleDocuments:
             title = _line(data.get("title") or name)
             revision = data.get("revisionId")
             text = document_to_text(data, size)
+        elif kind == "presentation":
+            data, _size = self._session.get(
+                "Google Slides", SLIDES_GET, {"presentationId": file_id}, f"slides {file_id}"
+            )
+            title = _line(data.get("title") or name)
+            revision = data.get("revisionId")
+            text = _slides_text(data)
         else:
             fields = "properties.title,sheets(properties(title,sheetType),data(rowData(values(formattedValue))))"
             data, size = self._session.get(

@@ -1,5 +1,21 @@
 format = 1
 bootstrap = "docs/screenshot_fixture.py"
+browser_time = "2026-10-22T12:00:00Z"
+
+[[scenes]]
+name = "recent-files"
+surface = "ui"
+route = "/"
+caption = "Start with a seven-day file scan — fictional Docs and Sheets, real Google files operation in the app terminal"
+timeout_ms = 30000
+
+[[scenes.steps]]
+action = "terminal"
+command = ["google", "files", "--days", "7"]
+
+[scenes.viewport]
+width = 1280
+height = 650
 
 [[scenes]]
 name = "launch-files"
@@ -35,7 +51,7 @@ height = 650
 name = "launch-week"
 surface = "ui"
 route = "/"
-caption = "The launch week and its meeting owners — fixture-only requester, real Google Calendar adapter"
+caption = "The launch week and its attendees — fixture-only requester, real Google Calendar adapter over fictional events"
 timeout_ms = 30000
 
 [[scenes.steps]]

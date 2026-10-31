@@ -147,7 +147,8 @@ def test_recent_files_are_listed_with_a_safe_query(session, fake_gws):
     ]
     query = fake_gws.api_runs[0].params["q"]
     assert query == (
-        "(mimeType = 'application/vnd.google-apps.document' or mimeType = 'application/vnd.google-apps.spreadsheet') "
+        "(mimeType = 'application/vnd.google-apps.document' or mimeType = 'application/vnd.google-apps.spreadsheet' or "
+        "mimeType = 'application/vnd.google-apps.presentation') "
         "and trashed = false and modifiedTime > '2026-10-17T12:00:00Z' and name contains 'it\\'s a \\\\ plan'"
     )
 
