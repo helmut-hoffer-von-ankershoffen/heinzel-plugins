@@ -1,0 +1,20 @@
+[
+  {
+    "ref": "https://docs.google.com/document/d/launch-plan/edit",
+    "name": "Launch plan",
+    "kind": "document",
+    "modified_at": "2026-10-31T09:05:02Z"
+  },
+  {
+    "ref": "https://docs.google.com/spreadsheets/d/launch-metrics/edit",
+    "name": "Launch metrics",
+    "kind": "spreadsheet",
+    "modified_at": "2026-10-31T09:05:02Z"
+  },
+  {
+    "ref": "https://docs.google.com/document/d/launch-readiness/edit",
+    "name": "Launch readiness checklist",
+    "kind": "document",
+    "modified_at": "2026-10-31T09:05:02Z"
+  }
+]

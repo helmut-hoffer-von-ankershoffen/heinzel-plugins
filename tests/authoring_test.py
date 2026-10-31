@@ -12,7 +12,7 @@ from pathlib import Path
 
 import pytest
 
-from heinzel_plugin_tools import cli, publishing
+from heinzel_plugin_tools import capture, cli, publishing
 
 pytestmark = pytest.mark.unit
 
@@ -135,6 +135,8 @@ def test_scaffold_prints_the_portable_owning_directory_next_step(tmp_path, monke
     monkeypatch.setattr(cli, "projects", lambda *_: [project])
     monkeypatch.setattr(cli, "lock", lambda *_: None)
     monkeypatch.setattr(cli, "fix", lambda *_: None)
+    monkeypatch.setattr(cli, "capture_plugin", lambda *_: 0)
+    monkeypatch.setattr(capture, "write_default_plan", lambda *_, **__: None)
     cli.scaffold("harbor", "candidate.whl", "candidate-template", "HEAD", "minimal")
     output = capsys.readouterr().out
     assert f"cd '{destination}' && make check-fast\n" in output

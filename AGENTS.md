@@ -16,3 +16,8 @@ reviewed merge. Publish exactly the accepted wheel; never rebuild an existing ve
 projects use the same toolkit and need no parent edits; see the
 [custom plugin author guide](https://github.com/helmut-hoffer-von-ankershoffen/heinzel/blob/main/docs/PLUGIN_AUTHORING.md).
 Private plugins use private GitHub releases and authenticated HTTPS installation, never public PyPI.
+
+After an interface change, run `make screenshots NAME=<owner> OPEN=1`. An agent defines a source-bound feature
+story before capture; an independent agent inspects every image and transcript before gallery/README publication.
+Use `hz-plugin screenshots <owner> --plan` for the editable definition and `--check --json` for offline freshness.
+See [the capture guide](docs/SCREENSHOT_AUTHORING.md). Never manufacture an approval receipt to bypass either review.

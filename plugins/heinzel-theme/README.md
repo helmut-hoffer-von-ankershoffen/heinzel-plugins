@@ -16,3 +16,34 @@ or removing it restores core's fallback appearance and leaves unavailable sound 
 From the repository root, run `make lock`, `make check`, `make build` and `make acceptance` with `NAME=heinzel-theme`
 and `CORE=<compatible-core-wheel>`. Only this plugin's environment and tests are used. New content requires no core
 or parent registry change.
+
+<!-- screenshots:start -->
+## Screenshots
+
+<img src="docs/assets/screenshots/theme-light.png" alt="The installed Heinzelmännchen theme on a representative local contract — light appearance" width="960">
+
+The installed Heinzelmännchen theme on a representative local contract — light appearance
+
+<img src="docs/assets/screenshots/theme-dark.png" alt="The installed Heinzelmännchen theme on a representative local contract — dark appearance" width="960">
+
+The installed Heinzelmännchen theme on a representative local contract — dark appearance
+
+<img src="docs/assets/screenshots/theme-soundscapes.png" alt="The theme supplies three optional YouTube soundscapes; playback starts only after Play" width="960">
+
+The theme supplies three optional YouTube soundscapes; playback starts only after Play
+
+<details>
+<summary>Command line</summary>
+
+<img src="docs/assets/screenshots/theme-cli.png" alt="Inspect the owning theme and its light/dark palette from the CLI" width="960">
+
+Inspect the owning theme and its light/dark palette from the CLI
+
+<img src="docs/assets/screenshots/soundscapes-cli.png" alt="List the three theme-owned soundscapes without starting playback" width="960">
+
+List the three theme-owned soundscapes without starting playback
+
+</details>
+
+[Open the screenshot gallery](docs/assets/screenshots/index.html).
+<!-- screenshots:end -->

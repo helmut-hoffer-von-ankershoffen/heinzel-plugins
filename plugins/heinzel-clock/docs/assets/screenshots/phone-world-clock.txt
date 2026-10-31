@@ -1,0 +1,37 @@
+Skip to content
+M
+Home
+2
+Today
+Zones at work now
+
+2/3
+
+Ask about it
+
+Nothing needs you right now. Ask anything below.
+
+Page
+Chat
+World clock
+World clock
+
+Drag to turn · Approximate daylight. Markers locate time-zone names, not people. Orange is your primary zone.
+
+Berlin
+Primary
+Working · 7h 30m since start · 1h 30m left
+16:30:00
+New York
+Working · 2h 30m since start · 6h 30m left
+11:30:00
+Los Angeles
+Starts in 30m · 2d 14h 30m since end
+08:30:00
+v0.9.8
+Updates, off
+0
+System health, warning
+No calendar connected, error
+Daemon not installed, off
+16:30:00

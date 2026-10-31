@@ -167,3 +167,42 @@ Token-shaped strings in anything `gws` says are redacted before it is shortened.
 Development and release commands: [repository guide](../../README.md).
 
 Migration provenance: heinzel, before the 0.9 plugin-boundary migration.
+
+<!-- screenshots:start -->
+## Screenshots
+
+<img src="docs/assets/screenshots/launch-files.png" alt="Recently changed launch files in the app terminal — fictional Workspace replies, real Google operation" width="960">
+
+Recently changed launch files in the app terminal — fictional Workspace replies, real Google operation
+
+<img src="docs/assets/screenshots/launch-plan.png" alt="Read a Google Doc as workflow-ready text — fixture-only requester and fictional plan" width="960">
+
+Read a Google Doc as workflow-ready text — fixture-only requester and fictional plan
+
+<img src="docs/assets/screenshots/launch-week.png" alt="The launch week and its meeting owners — fixture-only requester, real Google Calendar adapter" width="960">
+
+The launch week and its meeting owners — fixture-only requester, real Google Calendar adapter
+
+<img src="docs/assets/screenshots/launch-inbox.png" alt="A focused launch-mail query — fixture-only requester, real Gmail adapter over fictional messages" width="960">
+
+A focused launch-mail query — fixture-only requester, real Gmail adapter over fictional messages
+
+<details>
+<summary>Command line</summary>
+
+<img src="docs/assets/screenshots/launch-files-json.png" alt="Changed Docs and Sheets as structured data — real Google operation, fictional files" width="960">
+
+Changed Docs and Sheets as structured data — real Google operation, fictional files
+
+<img src="docs/assets/screenshots/launch-metrics.png" alt="A Sheet becomes a readable table — fixture-only requester, real documents adapter and local replies" width="960">
+
+A Sheet becomes a readable table — fixture-only requester, real documents adapter and local replies
+
+<img src="docs/assets/screenshots/mail-content.png" alt="Read the next actions in a launch message — fixture-only requester, real Gmail adapter and local replies" width="960">
+
+Read the next actions in a launch message — fixture-only requester, real Gmail adapter and local replies
+
+</details>
+
+[Open the screenshot gallery](docs/assets/screenshots/index.html).
+<!-- screenshots:end -->

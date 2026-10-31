@@ -122,3 +122,34 @@ returns is cleaned too.
 Development and release commands: [repository guide](../../README.md).
 
 Migration provenance: heinzel, before the 0.9 plugin-boundary migration.
+
+<!-- screenshots:start -->
+## Screenshots
+
+<img src="docs/assets/screenshots/merged-work.png" alt="Merged pull requests in the app terminal — fixture-only requester, real GitHub adapter" width="960">
+
+Merged pull requests in the app terminal — fixture-only requester, real GitHub adapter
+
+<img src="docs/assets/screenshots/issue-changes.png" alt="Issue changes, owners and states in the app terminal — fictional GitHub repository" width="960">
+
+Issue changes, owners and states in the app terminal — fictional GitHub repository
+
+<img src="docs/assets/screenshots/workflow-context.png" alt="Weekly code review combines the declared source inputs — local demonstration, no report generated" width="960">
+
+Weekly code review combines the declared source inputs — local demonstration, no report generated
+
+<details>
+<summary>Command line</summary>
+
+<img src="docs/assets/screenshots/merged-cli.png" alt="Read merged work in the shell — fixture-only requester, real GitHub adapter" width="960">
+
+Read merged work in the shell — fixture-only requester, real GitHub adapter
+
+<img src="docs/assets/screenshots/issues-json.png" alt="Typed issue results for scripts and agents — fixture-only requester, fictional GitHub data" width="960">
+
+Typed issue results for scripts and agents — fixture-only requester, fictional GitHub data
+
+</details>
+
+[Open the screenshot gallery](docs/assets/screenshots/index.html).
+<!-- screenshots:end -->

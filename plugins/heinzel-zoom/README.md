@@ -107,3 +107,34 @@ the mail adapter's own hosts for `mail`.
 Development and release commands: [repository guide](../../README.md).
 
 Migration provenance: heinzel, before the 0.9 plugin-boundary migration.
+
+<!-- screenshots:start -->
+## Screenshots
+
+<img src="docs/assets/screenshots/meeting-decisions.png" alt="Decisions and next steps from a summary email — fixture-only requester, real Zoom parser" width="960">
+
+Decisions and next steps from a summary email — fixture-only requester, real Zoom parser
+
+<img src="docs/assets/screenshots/recent-meetings.png" alt="Find the recent summarized meetings — fixture-only requester and fictional mailbox" width="960">
+
+Find the recent summarized meetings — fixture-only requester and fictional mailbox
+
+<img src="docs/assets/screenshots/workflow-context.png" alt="Meeting notes combines the declared source inputs — local demonstration, no report generated" width="960">
+
+Meeting notes combines the declared source inputs — local demonstration, no report generated
+
+<details>
+<summary>Command line</summary>
+
+<img src="docs/assets/screenshots/summary-cli.png" alt="Read a meeting summary in the shell — fixture-only requester, real Zoom parser and fictional mailbox" width="960">
+
+Read a meeting summary in the shell — fixture-only requester, real Zoom parser and fictional mailbox
+
+<img src="docs/assets/screenshots/meeting-list-json.png" alt="Structured summarized-meeting results for workflows — fixture-only requester, no verbatim transcription" width="960">
+
+Structured summarized-meeting results for workflows — fixture-only requester, no verbatim transcription
+
+</details>
+
+[Open the screenshot gallery](docs/assets/screenshots/index.html).
+<!-- screenshots:end -->
