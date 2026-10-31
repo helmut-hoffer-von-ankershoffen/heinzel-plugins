@@ -1,0 +1,59 @@
+name: Release bumped plugins
+
+# After a green main, release every plugin whose version has no tag yet, so app composition never finds a version that
+# was never released (ADR 0114). Dark until the repository variable RELEASE_CHANNELS is set; until then it only lists
+# what it would release. Each release goes through the reviewed Release one plugin workflow.
+
+on:
+  workflow_run: # zizmor: ignore[dangerous-triggers] the job admits only a green push to this repository's main
+    workflows: [Plugin CI]
+    types: [completed]
+    branches: [main]
+
+permissions: {}
+
+concurrency:
+  group: auto-release
+  cancel-in-progress: false
+
+jobs:
+  release:
+    if: >-
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.event == 'push' &&
+      github.event.workflow_run.head_repository.full_name == github.repository
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      actions: write # dispatch the reviewed release workflow
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+          fetch-depth: 0
+          persist-credentials: false
+      - name: Dispatch a release for each version without a tag
+        env:
+          CHANNELS: ${{ vars.RELEASE_CHANNELS }}
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+        run: |
+          plugins="$(python3 scripts/plugin_versions.py unreleased)"
+          if [ -z "$plugins" ]; then
+            echo "Every plugin version is released."
+            exit 0
+          fi
+          if [ "$CHANNELS" != edge ] && [ "$CHANNELS" != stable ]; then
+            echo "::warning::Not activated: app composition fails until these versions are released: ${plugins//$'\n'/ }"
+            exit 0
+          fi
+          active="$(gh run list --workflow release.yml --json status \
+            --jq 'map(select(.status != "completed")) | length')"
+          if [ "$active" != 0 ]; then
+            echo "A plugin release is running; the next green main picks up the rest."
+            exit 0
+          fi
+          while read -r plugin; do
+            gh workflow run release.yml --ref main -f plugin="$plugin" -f publish=true
+          done <<< "$plugins"
