@@ -3,8 +3,7 @@
 A first-party adapter for the installed Tailscale client. It keeps the web app's bearer/device authentication and
 loopback listener; tailnet membership does not grant access to the backend owner's operations or terminal.
 
-Install the released plugin from Discover Plugins, or run `hz system plugin add tailscale --confirm`. The core PyPI
-package does not bundle this separate plugin distribution, so add it explicitly after installing Heinzel. Tailscale
+Included in the standard app; sharing stays off until you turn it on. Tailscale
 itself must already be installed and signed in; hz does not install it, log in, grant HTTPS consent or change OS
 permissions for you.
 On macOS it also detects the CLI bundled in `/Applications/Tailscale.app` and explicitly selects CLI mode, as
@@ -51,33 +50,32 @@ network policy and the remote browser's credential.
 
 Development and release commands: [repository guide](../../README.md).
 
-Migration provenance: heinzel, before the 0.9 plugin-boundary migration.
 
 <!-- screenshots:start -->
 ## Screenshots
 
-<img src="docs/assets/screenshots/sharing-ready.png" alt="Share the app privately with an explicit ready state — local Tailscale fixture; session hidden" width="960">
+<img src="docs/assets/screenshots/sharing-ready.png" alt="Enable private sharing and see verified readiness — fictional local Tailscale demo" width="960">
 
-Share the app privately with an explicit ready state — local Tailscale fixture; session hidden
+Enable private sharing and see verified readiness — fictional local Tailscale demo
 
-<img src="docs/assets/screenshots/phone-sharing-ready.png" alt="Inspect and copy the private link on a phone — local Tailscale fixture; session hidden" width="960">
+<img src="docs/assets/screenshots/phone-sharing-ready.png" alt="Inspect the private link at phone width — fictional local Tailscale demo; no remote connection tested" width="960">
 
-Inspect and copy the private link on a phone — local Tailscale fixture; session hidden
+Inspect the private link at phone width — fictional local Tailscale demo; no remote connection tested
 
-<img src="docs/assets/screenshots/sharing-off.png" alt="Turn private sharing off explicitly — local Tailscale fixture" width="960">
+<img src="docs/assets/screenshots/sharing-off.png" alt="Turn private sharing off explicitly — fictional local Tailscale demo" width="960">
 
-Turn private sharing off explicitly — local Tailscale fixture
+Turn private sharing off explicitly — fictional local Tailscale demo
 
 <details>
 <summary>Command line</summary>
 
-<img src="docs/assets/screenshots/sharing-request-cli.png" alt="Inspect the saved sharing request from a separate CLI process — local fictional network" width="960">
+<img src="docs/assets/screenshots/sharing-request-cli.png" alt="Inspect saved intent and mapping, with web verification pending — fictional local Tailscale demo in a separate CLI process" width="960">
 
-Inspect the saved sharing request from a separate CLI process — local fictional network
+Inspect saved intent and mapping, with web verification pending — fictional local Tailscale demo in a separate CLI process
 
-<img src="docs/assets/screenshots/sharing-off-cli.png" alt="Verify private sharing is off from the shell — local fictional network" width="960">
+<img src="docs/assets/screenshots/sharing-off-cli.png" alt="Confirm the owned mapping is gone and the request is off — fictional local Tailscale demo" width="960">
 
-Verify private sharing is off from the shell — local fictional network
+Confirm the owned mapping is gone and the request is off — fictional local Tailscale demo
 
 </details>
 

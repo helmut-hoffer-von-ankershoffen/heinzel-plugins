@@ -145,6 +145,11 @@ surface = "ui"
 caption = "Recently changed launch files in the app terminal — fictional Workspace replies, real Google operation"
 
 [[tool.heinzel.catalog.screenshots]]
+path = "docs/assets/screenshots/launch-files-week.png"
+surface = "ui"
+caption = "Explore seven days without a name filter — real Google operation over the fixture's same fictional files"
+
+[[tool.heinzel.catalog.screenshots]]
 path = "docs/assets/screenshots/launch-plan.png"
 surface = "ui"
 caption = "Read a Google Doc as workflow-ready text — fixture-only requester and fictional plan"
@@ -152,7 +157,7 @@ caption = "Read a Google Doc as workflow-ready text — fixture-only requester a
 [[tool.heinzel.catalog.screenshots]]
 path = "docs/assets/screenshots/launch-week.png"
 surface = "ui"
-caption = "The launch week and its meeting owners — fixture-only requester, real Google Calendar adapter"
+caption = "The launch week's meetings and attendees — fixture-only requester, real Calendar adapter over fictional events"
 
 [[tool.heinzel.catalog.screenshots]]
 path = "docs/assets/screenshots/launch-inbox.png"

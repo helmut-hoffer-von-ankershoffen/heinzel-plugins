@@ -141,24 +141,29 @@ highlights = [
 [[tool.heinzel.catalog.screenshots]]
 path = "docs/assets/screenshots/meeting-decisions.png"
 surface = "ui"
-caption = "Decisions and next steps from a summary email — fixture-only requester, real Zoom parser"
+caption = "Fictional Weekly sync: a Thursday release decision and three named next steps, via the fixture-only requester and real Zoom parser."
 
 [[tool.heinzel.catalog.screenshots]]
 path = "docs/assets/screenshots/recent-meetings.png"
 surface = "ui"
-caption = "Find the recent summarized meetings — fixture-only requester and fictional mailbox"
+caption = "Fictional October mailbox: find Weekly sync and Launch review through the fixture-only requester and real Zoom adapter."
+
+[[tool.heinzel.catalog.screenshots]]
+path = "docs/assets/screenshots/launch-decisions.png"
+surface = "ui"
+caption = "Fictional Launch review: a ten-percent rollout decision and two named owners, using a second meeting argument in the native terminal."
 
 [[tool.heinzel.catalog.screenshots]]
 path = "docs/assets/screenshots/summary-cli.png"
 surface = "cli"
-caption = "Read a meeting summary in the shell — fixture-only requester, real Zoom parser and fictional mailbox"
+caption = "Fictional Weekly sync in the CLI: parsed summary sections and a source link, through the fixture-only requester."
 
 [[tool.heinzel.catalog.screenshots]]
 path = "docs/assets/screenshots/meeting-list-json.png"
 surface = "cli"
-caption = "Structured summarized-meeting results for workflows — fixture-only requester, no verbatim transcription"
+caption = "Fictional October meetings as JSON: typed meeting metadata through the fixture-only requester, not verbatim transcripts."
 
 [[tool.heinzel.catalog.screenshots]]
 path = "docs/assets/screenshots/workflow-context.png"
 surface = "ui"
-caption = "Meeting notes combines the declared source inputs — local demonstration, no report generated"
+caption = "Fictional Meeting notes contract: declares a meeting-summary input and Markdown output; no report has been generated."

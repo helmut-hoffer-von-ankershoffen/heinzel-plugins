@@ -40,7 +40,7 @@ name_regex = "^Dismiss Doctor"
 optional = true
 
 [[scenes.steps]]
-action = "click"
+action = "hover"
 role = "button"
 name_regex = "Berlin"
 within_role = "contentinfo"
@@ -50,7 +50,6 @@ action = "wait"
 text = "Clear sky · Berlin, DE"
 
 [scenes.focus]
-padding = 48
 role = "region"
 name_regex = "Berlin"
 

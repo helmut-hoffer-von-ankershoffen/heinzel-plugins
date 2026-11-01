@@ -94,6 +94,7 @@ within_role = "contentinfo"
 [[scenes.steps]]
 action = "wait"
 text = "Ends in 1h 30m"
+
 [scenes.focus]
 role = "region"
 name_regex = "^Berlin"
@@ -127,6 +128,7 @@ action = "wait-webgl"
 action = "hover"
 role = "region"
 name = "World clock"
+
 [scenes.viewport]
 width = 390
 height = 844
@@ -136,3 +138,48 @@ name = "cli-times"
 surface = "cli"
 caption = "The same team zones and working hours in the CLI — fixed fictional demonstration time"
 command = ["clock", "--at", "2026-10-26T15:30:00Z"]
+
+# Two parameter cases for the same operation in the native app terminal.
+[[scenes]]
+name = "terminal-current"
+surface = "ui"
+route = "/"
+caption = "Fictional demo team at 15:30 UTC: Berlin and New York are within working hours; Los Angeles starts in 30 minutes."
+viewport = { width = 1280, height = 900 }
+timeout_ms = 30000
+
+[[scenes.steps]]
+action = "wait"
+text = "Zones at work now"
+
+[[scenes.steps]]
+action = "click"
+role = "button"
+name_regex = "^Dismiss Doctor"
+optional = true
+
+[[scenes.steps]]
+action = "terminal"
+command = ["clock", "--at", "2026-10-26T15:30:00Z"]
+
+[[scenes]]
+name = "terminal-overlap"
+surface = "ui"
+route = "/"
+caption = "Preview 16:30 UTC with --at: all three fictional demo zones are within working hours; the app clock stays at 15:30 UTC."
+viewport = { width = 1280, height = 900 }
+timeout_ms = 30000
+
+[[scenes.steps]]
+action = "wait"
+text = "Zones at work now"
+
+[[scenes.steps]]
+action = "click"
+role = "button"
+name_regex = "^Dismiss Doctor"
+optional = true
+
+[[scenes.steps]]
+action = "terminal"
+command = ["clock", "--at", "2026-10-26T16:30:00Z"]

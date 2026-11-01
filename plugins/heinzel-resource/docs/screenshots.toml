@@ -1,5 +1,6 @@
 format = 1
 bootstrap = "docs/screenshot_fixture.py"
+browser_time = "2026-10-31T10:00:00Z"
 
 [[scenes]]
 name = "resources-pane"
@@ -27,7 +28,6 @@ action = "wait"
 text = "Host: demo-workstation"
 
 [scenes.focus]
-padding = 48
 role = "region"
 name_regex = "^Computer resources"
 
@@ -87,3 +87,26 @@ name = "cli-resources"
 surface = "cli"
 caption = "The same fictional CPU, memory and raw load measurements in the CLI"
 command = ["resource"]
+
+# Native-terminal cases for the plugin's single operation.
+[[scenes]]
+name = "terminal-resources"
+surface = "ui"
+route = "/"
+caption = "Check CPU, memory, raw load and core count in the app terminal — fictional demo-workstation values"
+viewport = { width = 1280, height = 900 }
+
+[[scenes.steps]]
+action = "terminal"
+command = ["resource"]
+
+[[scenes]]
+name = "terminal-resources-json"
+surface = "ui"
+route = "/"
+caption = "Inspect the structured resource sample for automation in the app terminal — fictional demo-workstation data"
+viewport = { width = 1280, height = 900 }
+
+[[scenes.steps]]
+action = "terminal"
+command = ["resource", "--json"]

@@ -1,8 +1,10 @@
 format = 1
 bootstrap = "docs/screenshot_fixture.py"
+browser_time = "2026-11-01T00:00:00Z"
 
-# Preserved behavior and scene order; captions and completion waits clarified.
-# The bootstrap supplies documentation-only showcase commands with demo data.
+# Preserve the existing five scenes and their commands.
+# showcase is supplied only by the existing documentation fixture.
+# Append a second native-terminal argument case for the issue requester.
 
 [[scenes]]
 name = "jira-issues"
@@ -11,12 +13,14 @@ route = "/"
 caption = "Demo data: fictional Jira changes, owners and states in the app terminal, using the real adapter and a fixture-only requester."
 timeout_ms = 30000
 
-[[scenes.steps]]
-action = "terminal"
-command = ["showcase", "issues", "WID"]
 [scenes.viewport]
 width = 1280
 height = 650
+
+[[scenes.steps]]
+action = "terminal"
+command = ["showcase", "issues", "WID"]
+
 [[scenes]]
 name = "confluence-plan"
 surface = "ui"
@@ -24,12 +28,14 @@ route = "/"
 caption = "Demo data: read the fictional Widget launch plan with its source and revision, using the real adapter and a fixture-only requester."
 timeout_ms = 30000
 
-[[scenes.steps]]
-action = "terminal"
-command = ["showcase", "page"]
 [scenes.viewport]
 width = 1280
 height = 650
+
+[[scenes.steps]]
+action = "terminal"
+command = ["showcase", "page"]
+
 [[scenes]]
 name = "issues-json"
 surface = "cli"
@@ -41,14 +47,30 @@ name = "confluence-cli"
 surface = "cli"
 caption = "Demo data: the fictional Confluence plan, source and revision in the shell, using a fixture-only requester and local vendor replies."
 command = ["showcase", "page"]
+
 [[scenes]]
 name = "workflow-context"
 surface = "ui"
 route = "/contracts/weekly-work-review"
-caption = "Weekly work review combines the declared source inputs — local demonstration, no report generated"
+caption = "Demo data: the local Weekly work review contract declares Jira and Confluence inputs; no report has been generated."
 timeout_ms = 30000
 
 [[scenes.steps]]
 action = "wait"
 role = "heading"
 name = "Weekly work review"
+
+[[scenes]]
+name = "jira-parameters"
+surface = "ui"
+route = "/"
+caption = "Demo data: lowercase wid resolves to WID; the fixture requester returns structured Jira changes with --json in the app terminal."
+timeout_ms = 30000
+
+[scenes.viewport]
+width = 1280
+height = 900
+
+[[scenes.steps]]
+action = "terminal"
+command = ["showcase", "issues", "wid", "--json"]
