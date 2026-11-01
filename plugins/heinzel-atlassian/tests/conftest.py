@@ -44,7 +44,8 @@ with open({log!r}, "a", encoding="utf-8") as log:
     record["stdin"] = sys.stdin.read() if sys.stdin is not None else None
     log.write(json.dumps(record) + "\\n")
 with open({spec!r}, encoding="utf-8") as spec:
-    answer = json.load(spec).get(" ".join(args[:3]))
+    answers = json.load(spec)
+    answer = answers.get(" ".join(args[:4])) or answers.get(" ".join(args[:3]))
 if answer is None:
     sys.stderr.write("✗ Error: unknown command " + " ".join(args[:3]) + "\\n")
     sys.exit(2)
@@ -64,6 +65,11 @@ sys.exit(answer["exit"])
 def sample(name: str) -> Any:
     """A sample answer from tests/fixtures, in the shape the adapter assumes."""
     return json.loads((FIXTURES / name).read_text(encoding="utf-8"))
+
+
+def live(name: str) -> Any:
+    """An answer recorded from the real acli 1.3.39 on a Jira Cloud test project, with the people made fictional."""
+    return json.loads((FIXTURES / "live" / name).read_text(encoding="utf-8"))
 
 
 @dataclass
@@ -90,6 +96,7 @@ class FakeAcli(Acli):
     PAGE = PAGE
     UNAUTHORIZED = UNAUTHORIZED
     sample = staticmethod(sample)
+    live = staticmethod(live)
 
     answers: dict[str, dict[str, Any]] = field(default_factory=dict)
     memory_calls: list[Call] = field(default_factory=list)
@@ -97,6 +104,8 @@ class FakeAcli(Acli):
     location: str | None = "/opt/acli/bin/acli"
     reported: tuple[int, int, int] | None = (1, 3, 39)
     version_error: Exception | None = None
+    handler: Callable[[list[str]], tuple[int, str, str] | None] | None = None
+    """In memory only: answers a run by its arguments as (exit status, stdout, stderr), or None to fall through."""
     spec: Path | None = None
     log: Path | None = None
 
@@ -112,7 +121,9 @@ class FakeAcli(Acli):
         self.memory_calls.append(Call(list(args), timeout))
         if self.error is not None:
             raise self.error
-        answer = self.answers.get(" ".join(args[:3]))
+        if self.handler is not None and (routed := self.handler(list(args))) is not None:
+            return Completed(routed[0], routed[1].encode(), routed[2].encode(), overflow=False)
+        answer = self.answers.get(" ".join(args[:4])) or self.answers.get(" ".join(args[:3]))
         assert answer is not None, f"unexpected acli {' '.join(args)}"
         stdout = (answer["stdout"] * answer["repeat"]).encode()
         return Completed(answer["exit"], stdout, answer["stderr"].encode(), overflow=False)
@@ -150,8 +161,12 @@ class FakeAcli(Acli):
         self._save()
 
     def search(self, issues: object) -> None:
-        """Answer Jira searches with `issues`."""
+        """Answer Jira searches with `issues`, and a `view` of each with the issue itself (as acli does)."""
         self.answer(SEARCH, issues)
+        listed = issues.get("issues", []) if isinstance(issues, dict) else issues
+        for issue in listed if isinstance(listed, list) else []:
+            if isinstance(issue, dict) and isinstance(issue.get("key"), str):
+                self.answer(f"jira workitem view {issue['key']}", issue)
 
     def page(self, page_id: str, title: str = "Plan", storage: str = "<p>Hello</p>", version: int = 7) -> None:
         """Answer a Confluence page view, shaped like the fixture."""

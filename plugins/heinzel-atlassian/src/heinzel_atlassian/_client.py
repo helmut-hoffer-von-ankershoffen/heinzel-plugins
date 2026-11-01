@@ -27,6 +27,10 @@ SWITCH: dict[Product, str] = {"Jira": "acli jira auth switch", "Confluence": "ac
 GATEWAY = "https://api.atlassian.com/ex/"
 NOT_LOGGED_IN = "acli is not logged in to"
 _SITE_HOST = re.compile(r"[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.atlassian\.net")
+_GATEWAY_HOST = re.compile(r"[a-z0-9-]+\.prod\.atl-paas\.net")
+"""The host a browser-login answer names its links on (`jira-prod-eu-32-5.prod.atl-paas.net`): a shard of Atlassian's
+gateway, which names no site, seen in acli 1.3.39 answers."""
+_BAD_TYPE = re.compile(r"(?i)valid issue type.*allowed issue types[^:]*:\s*(?P<types>[A-Za-z0-9 ,-]{1,200})")
 MESSAGE_CHARS = 300
 """Characters of acli's own error text logged, cut after redaction."""
 DEBUG_HINT = "acli's own message is in the debug log: rerun with HZ_LOG_LEVEL=DEBUG"
@@ -54,6 +58,8 @@ _UNAUTHORIZED = re.compile(rf"(?i)\bunauthori[sz]ed\b|\bnot (?:logged in|authent
 _RATE_LIMITED = re.compile(rf"(?i)\brate.?limit|\btoo many requests\b|{_STATUS.format(429)}")
 _FORBIDDEN = re.compile(rf"(?i)\bforbidden\b|\b(?:do|does) not have permission\b|{_STATUS.format(403)}")
 _NOT_FOUND = re.compile(rf"(?i)\bnot found\b|\bdoes(?:n't| not) exist\b|{_STATUS.format(404)}")
+_NOT_VISIBLE = re.compile(r"(?i)does(?:n't| not) exist or you do not have permission")
+"""Jira's own wording for a work item that is missing or hidden, which it never tells apart (acli 1.3.39)."""
 
 
 class AcliLoginError(HeinzelError):
@@ -83,7 +89,7 @@ def same_site(product: Product, site: str, reported: object, path: str) -> None:
     `reported` is the answer's own link: a Jira issue's `self` (`path="/rest"`) or a Confluence page's `_links.base`
     (`path="/wiki"`). acli reads whichever site it is logged in to, so a mismatch means it is logged in elsewhere. An
     answer through Atlassian's gateway (`https://api.atlassian.com/ex/<product>/<cloud id>/...`, after a browser login)
-    names no site and is accepted, as is an answer without the field.
+    or on one of its `*.prod.atl-paas.net` shards names no site and is accepted, as is an answer without the field.
 
     Raises:
         HeinzelError: If `reported` names another site; it names both fixes.
@@ -93,6 +99,8 @@ def same_site(product: Product, site: str, reported: object, path: str) -> None:
     if reported == f"{site}{path}" or reported.startswith((f"{site}{path}/", f"{GATEWAY}{product.lower()}/")):
         return
     host = urlsplit(reported).hostname or ""
+    if _GATEWAY_HOST.fullmatch(host):
+        return
     if _SITE_HOST.fullmatch(host):  # only a host the setting would accept is suggested
         msg = (
             f"acli answered from {host}, not {site}: it is logged in to another site. Switch it with "
@@ -123,13 +131,15 @@ class AcliClient:
         self._acli = acli
         self._timeout = timeout
 
-    def json(self, product: Product, args: Sequence[str], subject: str) -> list[Any]:
+    def json(self, product: Product, args: Sequence[str], subject: str, *, write: str | None = None) -> list[Any]:
         """Run `acli <args>` and parse its standard output as one or more JSON documents, in order.
 
         Args:
             product: `Jira` or `Confluence`, for messages and the login command they name.
             args: The acli subcommand and its flags, ending in `--json`.
             subject: What was asked for, for messages, e.g. `project WID` or `page 123`.
+            write: For a command that changes Jira, the permission it needs (`Create issues`). Messages then say
+                whether the change may have happened, and nothing is ever retried here.
 
         Raises:
             HeinzelError: If acli is missing, logged out, refuses, takes too long or prints something unexpected.
@@ -148,9 +158,10 @@ class AcliClient:
             msg = f"acli, Atlassian's CLI, is not on PATH. Install it ({INSTALL}), then log in: {login}"
             raise HeinzelError(msg) from None
         except AcliTimeoutError:
-            msg = (
-                f"acli did not answer for {subject} within {self._timeout:g} seconds and was stopped; check the "
-                "network, ask for a shorter window, or raise atlassian.timeout."
+            msg = f"acli did not answer for {subject} within {self._timeout:g} seconds and was stopped; " + (
+                f"the change may or may not have happened, so look at {subject} before trying again."
+                if write
+                else "check the network, ask for a shorter window, or raise atlassian.timeout."
             )
             raise HeinzelError(msg) from None
         except (OSError, RuntimeError) as exc:  # RuntimeError: no home directory to run acli in
@@ -160,7 +171,7 @@ class AcliClient:
             msg = f"acli printed more than {MAX_BYTES} bytes for {subject}; ask for a shorter window."
             raise HeinzelError(msg)
         if done.returncode != 0:
-            problem = _problem(product, subject, done)
+            problem = _problem(product, subject, done, write)
             raise (AcliLoginError if problem.startswith(NOT_LOGGED_IN) else HeinzelError)(problem)
         try:
             return documents(done.stdout.decode("utf-8"))
@@ -198,16 +209,25 @@ def documents(text: str) -> list[Any]:
     return found
 
 
-def _problem(product: Product, subject: str, done: Completed) -> str:
+def _problem(product: Product, subject: str, done: Completed, write: str | None = None) -> str:  # noqa: PLR0911
     """What went wrong, for a person, in the adapter's own words; acli's words only choose them and go to the log."""
     words = said(done.stderr or done.stdout)
     _LOG.debug("acli failed for %s with exit status %s: %s", subject, done.returncode, words)
     if _UNAUTHORIZED.search(words):
         return f"{NOT_LOGGED_IN} {product}, or its login expired. Log in: {LOGIN[product]}"
     if _RATE_LIMITED.search(words):
-        return f"Atlassian's rate limit is reached for {subject}; retry in a minute."
+        refused = " Jira refused the change, so nothing was changed." if write else ""
+        return f"Atlassian's rate limit is reached for {subject}; retry in a minute.{refused}"
+    if _NOT_VISIBLE.search(words):
+        return (
+            f"{product} has no {subject}, or the account acli is logged in as can't see it: check the spelling, or "
+            "ask for access."
+        )
+    if bad := _BAD_TYPE.search(words):
+        allowed = ", ".join(t.strip() for t in bad["types"].split(",") if t.strip())
+        return f"Jira does not accept that work item type for {subject}; it allows: {allowed}."
     if _FORBIDDEN.search(words):
-        need = "Browse projects on it" if product == "Jira" else "View on its space"
+        need = write or ("Browse projects on it" if product == "Jira" else "View on its space")
         return f"{product} refused {subject}; the account acli is logged in as needs the permission {need}."
     if _NOT_FOUND.search(words):
         return (

@@ -2,9 +2,9 @@ format = 1
 bootstrap = "docs/screenshot_fixture.py"
 browser_time = "2026-11-01T00:00:00Z"
 
-# Preserve the existing five scenes and their commands.
-# showcase is supplied only by the existing documentation fixture.
-# Append a second native-terminal argument case for the issue requester.
+# Six existing scenes retained.
+# showcase is supplied only by docs/screenshot_fixture.py.
+# The native terminal includes uppercase/table and lowercase/JSON issue cases.
 
 [[scenes]]
 name = "jira-issues"

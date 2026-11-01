@@ -1,0 +1,101 @@
+[
+ {
+  "changelog": null,
+  "editmeta": null,
+  "expand": "renderedFields,names,schema,operations,editmeta,changelog,versionedRepresentations",
+  "fields": {
+   "status": {
+    "description": "This work item is being actively worked on at the moment by the assignee.",
+    "iconUrl": "https://jira-prod-eu-32-5.prod.atl-paas.net/images/icons/statuses/inprogress.png",
+    "id": "3",
+    "name": "In Progress",
+    "self": "https://jira-prod-eu-32-5.prod.atl-paas.net/rest/api/3/status/3",
+    "statusCategory": {
+     "colorName": "yellow",
+     "id": 4,
+     "key": "indeterminate",
+     "name": "In Progress",
+     "self": "https://jira-prod-eu-32-5.prod.atl-paas.net/rest/api/3/statuscategory/4"
+    }
+   },
+   "summary": "Import tide tables for the northern coast"
+  },
+  "fieldsToInclude": null,
+  "id": "10017",
+  "key": "KAN-8",
+  "names": null,
+  "operations": null,
+  "properties": null,
+  "renderedFields": null,
+  "schema": null,
+  "self": "https://jira-prod-eu-32-5.prod.atl-paas.net/rest/api/3/issue/10017",
+  "transitions": null,
+  "versionedRepresentations": null
+ },
+ {
+  "changelog": null,
+  "editmeta": null,
+  "expand": "renderedFields,names,schema,operations,editmeta,changelog,versionedRepresentations",
+  "fields": {
+   "status": {
+    "description": "",
+    "iconUrl": "https://jira-prod-eu-32-5.prod.atl-paas.net/images/icons/statuses/generic.png",
+    "id": "10003",
+    "name": "To Do",
+    "self": "https://jira-prod-eu-32-5.prod.atl-paas.net/rest/api/3/status/10003",
+    "statusCategory": {
+     "colorName": "blue-gray",
+     "id": 2,
+     "key": "new",
+     "name": "To Do",
+     "self": "https://jira-prod-eu-32-5.prod.atl-paas.net/rest/api/3/statuscategory/2"
+    }
+   },
+   "summary": "Design the low-tide alert sheet"
+  },
+  "fieldsToInclude": null,
+  "id": "10018",
+  "key": "KAN-9",
+  "names": null,
+  "operations": null,
+  "properties": null,
+  "renderedFields": null,
+  "schema": null,
+  "self": "https://jira-prod-eu-32-5.prod.atl-paas.net/rest/api/3/issue/10018",
+  "transitions": null,
+  "versionedRepresentations": null
+ },
+ {
+  "changelog": null,
+  "editmeta": null,
+  "expand": "renderedFields,names,schema,operations,editmeta,changelog,versionedRepresentations",
+  "fields": {
+   "status": {
+    "description": "",
+    "iconUrl": "https://jira-prod-eu-32-5.prod.atl-paas.net/images/icons/statuses/generic.png",
+    "id": "10003",
+    "name": "To Do",
+    "self": "https://jira-prod-eu-32-5.prod.atl-paas.net/rest/api/3/status/10003",
+    "statusCategory": {
+     "colorName": "blue-gray",
+     "id": 2,
+     "key": "new",
+     "name": "To Do",
+     "self": "https://jira-prod-eu-32-5.prod.atl-paas.net/rest/api/3/statuscategory/2"
+    }
+   },
+   "summary": "Set up crash reporting"
+  },
+  "fieldsToInclude": null,
+  "id": "10021",
+  "key": "KAN-12",
+  "names": null,
+  "operations": null,
+  "properties": null,
+  "renderedFields": null,
+  "schema": null,
+  "self": "https://jira-prod-eu-32-5.prod.atl-paas.net/rest/api/3/issue/10021",
+  "transitions": null,
+  "versionedRepresentations": null
+ }
+]

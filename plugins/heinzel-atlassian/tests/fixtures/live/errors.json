@@ -1,0 +1,8 @@
+{
+ "bad_jql": "\u2717 Error: failed to parse JQL query: error in the jql query: expecting operator but got '('. the valid operators are '=', '!=', '<', '>', '<=', '>=', '~', '!~', 'in', 'not in', 'is' and 'is not'. (line 1, character 5)",
+ "bad_type": "\u2717 Error: Please provide valid issue type . Allowed issue types for project are : Epic, Subtask, Task, Story",
+ "field_not_allowed": "\u2717 Error: field 'updated' is not allowed",
+ "missing_item": "\u2717 Error: Issue does not exist or you do not have permission to see it.",
+ "missing_summary": "\u2717 Error: if any flags in the group [summary project type] are set they must all be set; missing [summary]",
+ "signed_out": "\u2717 Error: unauthorized: use 'acli [product] auth login' to authenticate"
+}

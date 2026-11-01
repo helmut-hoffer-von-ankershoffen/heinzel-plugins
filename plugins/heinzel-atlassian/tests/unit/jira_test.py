@@ -40,7 +40,7 @@ def test_acli_is_asked_with_an_argument_list_epoch_jql_and_the_timeout(fake_acli
         "--jql",
         OCTOBER_JQL,
         "--fields",
-        "key,summary,status,updated,assignee,labels",
+        "key,summary,status,assignee,labels",
         "--paginate",
         "--json",
     ]
@@ -85,6 +85,8 @@ def test_pages_printed_back_to_back_are_read_as_one_answer(fake_acli):
     first = [fake_acli.issue(1, updated="2026-10-02T00:00:00.000+0000")]
     second = {"issues": [fake_acli.issue(2, updated="2026-10-03T00:00:00.000+0000")]}
     fake_acli.answer(fake_acli.SEARCH, f"{json.dumps(first)}\n{json.dumps(second)}\n")
+    fake_acli.answer("jira workitem view WID-1", first[0])
+    fake_acli.answer("jira workitem view WID-2", second["issues"][0])
     assert [i.key for i in adapter(fake_acli).issues_updated("WID", OCTOBER)] == ["WID-1", "WID-2"]
 
 
@@ -189,18 +191,19 @@ def test_the_window_stays_exact_inside_the_widened_minutes(fake_acli):
     assert "updated >= 1790812800000 AND updated < 1790813160000" in fake_acli.calls[0].args[4]
 
 
-def test_an_issue_listed_twice_is_kept_once_in_its_latest_state(fake_acli):
+def test_an_issue_listed_twice_is_read_once_in_its_current_state(fake_acli):
     issue = fake_acli.issue
     fake_acli.search(
         [
             issue(1, updated="2026-10-02T00:00:00.000+0000", status="To Do"),
             issue(2, updated="2026-10-03T00:00:00.000+0000"),
-            issue(1, updated="2026-10-04T00:00:00.000+0000", status="Done"),
             issue(1, updated="2026-10-03T12:00:00.000+0000", status="Stale"),
         ]
     )
+    fake_acli.answer("jira workitem view WID-1", issue(1, updated="2026-10-04T00:00:00.000+0000", status="Done"))
     issues = adapter(fake_acli).issues_updated("WID", OCTOBER)
     assert [(i.key, i.state) for i in issues] == [("WID-2", "To Do"), ("WID-1", "Done")]
+    assert [c.args[2] for c in fake_acli.calls].count("view") == 2
 
 
 def test_an_empty_window_asks_nothing(fake_acli):
