@@ -70,6 +70,32 @@ def unjustified_bumps(base: str, head: str = "HEAD") -> list[str]:
     return bumps
 
 
+def unbumped_changes(base: str, head: str = "HEAD") -> list[str]:
+    """Plugins whose shipped files or metadata changed in `base..head` although their version did not.
+
+    Without a bump the change never becomes a release, so users of the published plugin never get it.
+
+    Raises:
+        ValueError: If a revision could be read as a git option.
+    """
+    if not (REVISION.fullmatch(base) and REVISION.fullmatch(head)):
+        msg = "A revision must be a plain commit or ref name."
+        raise ValueError(msg)
+    changed: dict[str, list[str]] = {}
+    for path in _git("diff", "--name-only", f"{base}...{head}").splitlines():
+        parts = PurePosixPath(path).parts
+        if len(parts) > 2 and parts[0] == PLUGINS:  # noqa: PLR2004 - plugins/<name>/<path>
+            changed.setdefault(parts[1], []).append(path)
+    stale = []
+    for plugin, paths in sorted(changed.items()):
+        before, after = _pyproject(base, plugin), _pyproject(head, plugin)
+        if not before or not after or _version(before) != _version(after):
+            continue  # a new or removed plugin, or a bump: `unjustified_bumps` judges those
+        if _shipped_metadata(before) != _shipped_metadata(after) or any(_shipped(path, plugin) for path in paths):
+            stale.append(plugin)
+    return stale
+
+
 def unreleased(root: Path, tags: set[str]) -> list[str]:
     """Plugins in `root` whose current version has no release tag yet."""
     names = []
@@ -81,16 +107,23 @@ def unreleased(root: Path, tags: set[str]) -> list[str]:
 
 
 def main(arguments: list[str]) -> int:
-    """`check <base>` refuses a bump that ships nothing; `unreleased` lists what needs a release."""
+    """`check <base>` refuses a bump that ships nothing or a shipped change without a bump; `unreleased` lists the rest."""
     if arguments[:1] == ["check"] and len(arguments) == 2:  # noqa: PLR2004
         bumps = unjustified_bumps(arguments[1])
+        stale = unbumped_changes(arguments[1])
+        for plugin in stale:
+            print(
+                f"{plugin}: what it ships changed but its version did not; bump `project.version` and add a changelog "
+                "line, or the change never reaches a release.",
+                file=sys.stderr,
+            )
         for plugin in bumps:
             print(
                 f"{plugin}: the version changed but nothing it ships did; revert the bump, because every new version "
                 "must become a release.",
                 file=sys.stderr,
             )
-        return 1 if bumps else 0
+        return 1 if bumps or stale else 0
     if arguments == ["unreleased"]:
         print("\n".join(unreleased(Path(), set(_git("tag", "--list").splitlines()))))
         return 0
