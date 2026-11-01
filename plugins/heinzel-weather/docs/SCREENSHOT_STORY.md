@@ -1,31 +1,26 @@
-# Clear now. Bring an umbrella for later.
+**Audience**
+Heinzelmännchen users who want weather beside their daily work, with a fuller forecast available from the CLI.
 
-## Audience
-People who want a quick weather check in Heinzelmännchen, with enough detail to plan an outing, plus command-line users who want hourly and daily forecasts.
+**Outcome**
+Answer “What’s it like now, and should I bring an umbrella?” from Today, then inspect the next hours or choose a shorter outlook. The plugin defaults to keyless Open-Meteo; these screenshots demonstrate its existing local OpenWeather fixture. The fictional warning shown by that fixture does not demonstrate notification delivery or Open-Meteo alerts.
 
-## Outcome
-Show how Weather connects current conditions, an umbrella accessory and the coming days. The product supports keyless Open-Meteo by default; these screenshots use the existing local fake OpenWeather provider. They demonstrate the interface, not live weather or keyless-provider setup.
+**Scenes**
+1. **today-weather:** Open Today with fictional Berlin weather: 22°C displayed, clear sky, an umbrella accessory because today’s rain chance is 80%, and the coming days. The character makes the forecast memorable without replacing the numbers.
+2. **weather-detail:** Hover the footer’s Berlin status and crop its existing detail region. Show clear sky, feels like 21°C, today’s rounded 12–24°C range, 80% rain chance and provider attribution.
+3. **phone-weather:** Show the same useful Today content at 390 × 844. Check that temperature, forecast and attribution remain readable.
+4. **cli-weather:** Run `hz weather show`. Show hourly rain probabilities, cooling conditions, the five-day outlook and the clearly fictional thunderstorm warning from Example Weather Service.
+5. **cli-forecast:** Run `hz weather forecast --days 3`. Show a compact three-day result with lows, highs, rain chances, sky descriptions and attribution.
 
-## Scenes
-Preserve the existing five-scene plan: it already demonstrates useful behavior without inventing a Weather page.
+**Fictional fixtures**
+Reuse only `docs/screenshot_fixture.py` and its existing `heinzel_weather.fake` implementation. During explicit capture, the bootstrap starts a loopback server on an available port and selects fictional Berlin weather, metric units and a dummy credential. The fixture supplies 21.5°C now, rain beginning next hour, cooling toward 12°C and a sample warning. Retain the documented temporary fictional profile. The added browser clock fixes browser time only: the existing fixture still anchors forecast timestamps to the server’s capture hour.
 
-1. **today-weather — the glance:** Today shows fictional Berlin weather, approximately 22 °C, the character carrying an umbrella and the near forecast. Clear skies now and an 80% daily rain chance explain the umbrella.
-2. **weather-detail — the decision:** Hover over the footer weather status to inspect feels-like temperature, today's range and rain chance. Preserve the existing focused detail capture.
-3. **phone-weather — the pocket check:** Show Today at 390 × 844, with the same fictional conditions and coming days readable on a narrow screen.
-4. **cli-weather — when will it change?** `hz weather show` renders current conditions, 12 hourly rows, five days and a fictional thunderstorm warning from Example Weather Service. The approaching rain makes the detailed report useful.
-5. **cli-forecast — just the days:** `hz weather forecast --days 3` produces a compact three-day table, including today, with lows, highs, rain chances and sky conditions.
+**Privacy pitfalls**
+Keep personal accounts, actual locations, credentials, notifications and terminal history outside the capture profile. Label every image as fictional demo data and retain the provider attribution, including in the detail crop. Describe the warning as a fixture result, never as a real public warning or proof that a notice was delivered.
 
-## Fictional fixtures
-Use only the existing `docs/screenshot_fixture.py`, which serves `src/heinzel_weather/fake.py` on loopback during explicit capture. It configures Berlin, metric units, the OpenWeather adapter and a dummy key. Its canned weather includes 21.5 °C now, feels like 21 °C, rain from the next hour and cooling later. Dates and warning windows follow the server's current hour; they are not frozen historical observations. No additional fixture files are needed.
-
-## Privacy pitfalls
-Use the documented temporary fictional profile without connected accounts or real credentials. The bootstrap overrides weather settings but does not itself isolate the entire app. Check Today, sidebar, footer and terminal output for personal names, places, paths or unrelated notices. Keep provider attribution visible and label every image as fictional. The example warning does not demonstrate notice delivery; Open-Meteo does not provide severe-weather alerts.
-
-## Acceptance criteria
-- Keep all five existing scenes, routes, captions, commands and interaction targets.
-- Today shows matching temperature, umbrella accessory, forecast and provider attribution; the phone view remains readable.
-- The detail capture actually includes the hovered status details, with feels-like temperature, daily range and rain chance visible.
-- CLI captures show successful rendered results: the detailed report and exactly three forecast days respectively.
-- Every caption identifies demo data and stays within 180 characters.
-- Use only the existing local bootstrap and supported semantic steps; no external provider requests or invented screens are needed.
-- The returned TOML was checked by inspection against the supplied format-1 rules. No imports, fixture execution, captures or runtime locator validation were performed.
+**Acceptance criteria**
+- Preserve the existing five scenes, captions, commands, interactions and phone viewport; add only the requested browser time and its clock limitation comment.
+- Today shows both current weather and the near forecast; the hover scene exposes useful detail; the phone view has readable content without clipping essential information.
+- CLI captures contain completed real command results. The three-day command produces three day rows. Do not add individual table-cell waits.
+- Optional Doctor dismissals may clear overlays; the detail hover and crop must resolve to the intended existing UI.
+- Static review checks TOML structure, five unique lowercase names, three UI scenes, two CLI scenes, captions under 180 characters, local routes, accessible locators, the existing relative bootstrap and argument-array commands.
+- No source was changed, imported or run, and no network calls or captures were made. Runtime rendering and locator success remain acceptance checks for explicit capture.
