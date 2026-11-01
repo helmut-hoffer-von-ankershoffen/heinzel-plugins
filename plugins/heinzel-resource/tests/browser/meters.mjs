@@ -9,8 +9,8 @@ try {
   await page.addInitScript(() => localStorage.setItem("hz.onboarding", JSON.stringify({step:"you", visited:[], closed:true})));
   await page.goto(url);
   await page.locator("#splash").waitFor({state:"hidden"});
-  const footer = page.getByRole("contentinfo");
-  const control = footer.locator('[data-footer-content="resource:machine"] button').first();
+  // Not scoped to the footer: when the meter doesn't fit, "More status items" shows it in a popover outside it.
+  const control = page.locator('[data-footer-content="resource:machine"] button').first();
   for (const width of [1280,360,390]) {
     await page.setViewportSize({width,height:900});
     await page.evaluate(async () => {await document.fonts.ready; await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));});
