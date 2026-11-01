@@ -82,6 +82,12 @@ print(json.dumps({{'type':'result','subtype':'success','is_error':False,'permiss
     path.chmod(0o700)
 
 
+def _require_rendered(report):
+    if not any(item.disposition == "rendered" for item in report.runs):
+        msg = "The helper did not render a run"
+        raise RuntimeError(msg)
+
+
 def _daemon_probe(kernel, boot, directory, notices, helper):
     result = {"failure": None, "deduplicated": False}
 
@@ -95,7 +101,7 @@ def _daemon_probe(kernel, boot, directory, notices, helper):
                 waiter.wait(0.05)
             json.loads(signal.read_text())
             report = helper(kernel)
-            assert any(item.disposition == "rendered" for item in report.runs)
+            _require_rendered(report)
             previous = (directory / "model-calls").read_text()
             restarted = boot()
             restarted.bind(Notifications, notices)
