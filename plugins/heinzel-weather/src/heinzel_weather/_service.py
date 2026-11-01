@@ -46,12 +46,23 @@ MAX_DAYS = 8
 UI_REFRESH = timedelta(minutes=15)
 """The one refresh interval for every weather value shown in the app."""
 NO_LOCATION = (
-    "No location is set. Set yours with `hz setup weather`, or "
+    "No location is set and none could be guessed from your time zone. Set yours in Settings > Weather, or with "
     "`hz system config set weather.locations '[\"Berlin, DE\"]'`."
 )
 NOTICE_KIND: NoticeKind = NoticeKind.PLUGIN
 """The kind of the module's notices: the core's kind for plugins once it has one; until then doctor's, whose switch
 in `[system.notify]` they follow."""
+
+
+def local_city() -> str | None:
+    """The city of this machine's IANA time zone (`Europe/Berlin` is `Berlin`), or None when it can't be told."""
+    try:
+        target = Path("/etc/localtime").readlink()
+    except OSError:
+        return None
+    _, _, zone = str(target).partition("zoneinfo/")
+    area, _, city = zone.rpartition("/")
+    return city.replace("_", " ") if area and city else None
 
 
 class _Watch(BaseModel):
@@ -85,6 +96,8 @@ class WeatherService:
         self._places_file = hz.state_dir / "weather" / "places.json"
         self.clock: Callable[[], datetime] = lambda: datetime.now(UTC)
         """What time it is; a fixed one in tests."""
+        self.zone_city: Callable[[], str | None] = local_city
+        """The city of the machine's time zone, used while no place is configured; a fixed one in tests."""
         self.monotonic: Callable[[], float] = monotonic
         """Elapsed time for cache age; immune to wall-clock corrections."""
         self._ui_cache: Observation | None = None
@@ -92,6 +105,19 @@ class WeatherService:
         self._ui_attempted_at: datetime | None = None
         self._ui_error: str | None = None
         self._ui_lock = Lock()
+
+    @property
+    def places(self) -> list[str]:
+        """Where the weather is for: the configured places, else the city of this machine's time zone."""
+        if self._settings.locations:
+            return list(self._settings.locations)
+        guess = self.zone_city()
+        return [guess] if guess else []
+
+    @property
+    def guessed(self) -> bool:
+        """Whether `places` is a guess from the time zone because none is configured."""
+        return not self._settings.locations and bool(self.places)
 
     @property
     def units(self) -> Units:
@@ -131,7 +157,7 @@ class WeatherService:
 
     def conditions(self) -> Conditions:
         """The weather now, the next days and what to wear, or that a place is still to be set (no error)."""
-        if not self._settings.locations:
+        if not self.places:
             return Conditions(
                 needs_location=True,
                 now=None,
@@ -148,6 +174,7 @@ class WeatherService:
             accessories=accessories(report.now, units=report.now.units, rain=self._settings.rain_chance),
             provider=self.provider,
             attribution=self.attribution(),
+            guessed=self.guessed,
         )
 
     def primary(self) -> str:
@@ -156,9 +183,9 @@ class WeatherService:
         Raises:
             HeinzelError: If none is configured.
         """
-        if not self._settings.locations:
+        if not self.places:
             raise HeinzelError(NO_LOCATION)
-        return self._settings.locations[0]
+        return self.places[0]
 
     def now(self) -> Now:
         """The weather now at the primary location."""
@@ -218,9 +245,9 @@ class WeatherService:
             self._ui_attempted_monotonic = elapsed
             self._ui_attempted_at = now
             try:
-                report = self.report() if self._settings.locations else None
+                report = self.report() if self.places else None
                 result = Observation(
-                    needs_location=not self._settings.locations,
+                    needs_location=not self.places,
                     report=report,
                     provider=self.provider,
                     attribution=self.attribution(),
@@ -297,7 +324,7 @@ class WeatherService:
         now = self.clock()
         state = _read(_Watch, self._watch_file)
         recent = state.checked_at and now - state.checked_at < timedelta(minutes=self._settings.refresh_minutes)
-        if recent or not self._settings.locations or not self.ready():
+        if recent or not self.places or not self.ready():
             return Watched(checked=False, checked_at=state.checked_at, changes=[], noticed=0)
         state.checked_at = now
         try:
@@ -330,7 +357,7 @@ class WeatherService:
     def _place(self, client: OpenWeather | OpenMeteo, query: str) -> Place:
         if (found := coordinates(query)) is not None:
             return Place(name=f"{found[0]:g},{found[1]:g}", lat=found[0], lon=found[1])
-        if query not in self._settings.locations:
+        if query not in self.places:
             return client.geocode(query)  # asked for once, e.g. by an agent: not worth remembering
         key = f"{self.provider.value}:{' '.join(query.lower().split())}"
         cache = _read(_Places, self._places_file)

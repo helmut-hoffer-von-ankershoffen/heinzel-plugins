@@ -21,6 +21,12 @@ NOW = datetime(2026, 10, 23, 10, 0, tzinfo=UTC)
 """A Friday morning: noon in Berlin."""
 
 
+@pytest.fixture(autouse=True)
+def _no_machine_time_zone(monkeypatch: pytest.MonkeyPatch) -> None:
+    """No test guesses a place from the developer's time zone; one that wants the guess sets `zone_city`."""
+    monkeypatch.setattr("heinzel_weather._service.local_city", lambda: None)
+
+
 @pytest.fixture
 def credentials() -> Credentials:
     """Credentials in memory, with an API key."""

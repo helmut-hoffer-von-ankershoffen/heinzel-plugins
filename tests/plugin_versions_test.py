@@ -1,4 +1,5 @@
-"""A version bump that ships nothing broke app-v0.9.9's composition; it must fail at merge time instead."""
+"""A version bump that ships nothing broke app-v0.9.9's composition, and a shipped change without a bump never
+reached a release; both must fail at merge time instead."""
 
 import importlib.util
 import os
@@ -90,3 +91,36 @@ def test_unreleased_lists_versions_without_a_tag(tmp_path, monkeypatch):
 def test_a_revision_cannot_be_read_as_a_git_option():
     with pytest.raises(ValueError, match="plain commit"):
         versions.unjustified_bumps("--output=/tmp/x")
+
+
+def test_a_source_change_without_a_bump_fails(tmp_path, monkeypatch):
+    plugin = repository(tmp_path, monkeypatch)
+    (plugin / "src/a.py").write_text("a = 2\n")
+    commit(tmp_path)
+    assert versions.unbumped_changes("base") == ["heinzel-a"]
+    assert versions.main(["check", "base"]) == 1
+
+
+def test_a_shipped_metadata_change_without_a_bump_fails(tmp_path, monkeypatch):
+    plugin = repository(tmp_path, monkeypatch)
+    (plugin / "pyproject.toml").write_text(PROJECT.format(version="0.1.0", extra='description = "new"\n'))
+    commit(tmp_path)
+    assert versions.unbumped_changes("base") == ["heinzel-a"]
+
+
+def test_a_source_change_with_a_bump_passes(tmp_path, monkeypatch):
+    plugin = repository(tmp_path, monkeypatch)
+    (plugin / "src/a.py").write_text("a = 2\n")
+    (plugin / "pyproject.toml").write_text(PROJECT.format(version="0.1.1", extra=""))
+    commit(tmp_path)
+    assert versions.unbumped_changes("base") == []
+    assert versions.main(["check", "base"]) == 0
+
+
+def test_docs_and_tests_never_need_a_bump(tmp_path, monkeypatch):
+    plugin = repository(tmp_path, monkeypatch)
+    (plugin / "docs/a.md").write_text("two\n")
+    (plugin / "tests").mkdir()
+    (plugin / "tests/a_test.py").write_text("pass\n")
+    commit(tmp_path)
+    assert versions.unbumped_changes("base") == []
