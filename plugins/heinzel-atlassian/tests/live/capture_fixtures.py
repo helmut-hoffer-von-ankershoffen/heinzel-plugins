@@ -70,7 +70,7 @@ def main() -> None:
         if code != 0:
             sys.exit(f"{name}: {err}")
         (OUT / name).write_text(json.dumps(anonymous(json.loads(out), real), indent=1, sort_keys=True) + "\n")
-        sys.stdout.write("wrote", name + "\n")
+        sys.stdout.write(f"wrote {name}\n")
     errors = {}
     for name, probe in {
         "missing_item": ("jira", "workitem", "view", "KAN-999", "--json"),

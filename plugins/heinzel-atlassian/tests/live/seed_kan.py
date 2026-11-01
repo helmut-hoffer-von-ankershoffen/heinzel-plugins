@@ -232,7 +232,7 @@ def main() -> None:
                 "--json",
             )
             keys[summary] = made["key"]  # type: ignore[index]
-            sys.stdout.write("created", keys[summary], summary + "\n")
+            sys.stdout.write(f"created {keys[summary]} {summary}\n")
     for summary, kind, parent, labels, assignee, status, due, text in ITEMS:
         if summary in keys:
             continue
@@ -261,14 +261,14 @@ def main() -> None:
         keys[summary] = key
         if status != "To Do":
             acli("jira", "workitem", "transition", "--key", key, "--status", status, "--yes", "--json")
-        sys.stdout.write("created", key, summary + "\n")
+        sys.stdout.write(f"created {key} {summary}\n")
     for summary, body in COMMENTS:
         key = keys[summary]
         listed = acli("jira", "workitem", "comment", "list", "--key", key, "--json")
         if not (listed or {}).get("comments"):  # type: ignore[union-attr]
             acli("jira", "workitem", "comment", "create", "--key", key, "--body", body, "--json")
-            sys.stdout.write("commented", key + "\n")
-    sys.stdout.write(f"{len(keys)} items in {PROJECT}" + "\n")
+            sys.stdout.write(f"commented {key}\n")
+    sys.stdout.write(f"{len(keys)} items in {PROJECT}\n")
 
 
 if __name__ == "__main__":
