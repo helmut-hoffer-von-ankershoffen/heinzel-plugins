@@ -1,28 +1,28 @@
-**Audience:** People who want Jira progress and Confluence context available to Heinzelmännchen workflows, and developers who need structured results from the same adapters.
+**Audience**
+People using Jira and Confluence who want issue changes and planning context available to Heinzelmännchen workflows.
 
-**Outcome:** Follow a fictional Widget launch from issue changes to its source plan, then see the reusable data and workflow declaration. The gallery demonstrates adapter reads with local vendor replies. It does not demonstrate authentication, a live connection, generated reports, or approved Jira writes. Real use requires Atlassian’s acli and the appropriate account access.
+**Outcome**
+Answer “What changed, and what does the plan say?” See readable issue results, a source-linked document and structured output. The existing six-scene plan already demonstrates this useful behavior, so preserve it unchanged.
 
-**Scenes:**
+**Scenes**
+1. **jira-issues — Scan the changes.** The native app terminal shows two fictional October updates: WID-3, “Widget export drops the last row,” In Progress, owned by Wilma Widget; and WID-4, “Document the widget API,” Done, Unassigned.
+2. **confluence-plan — Put the work in context.** Read the fictional Widget launch plan, its scope and next milestone, with its source URL and revision 3 visible.
+3. **issues-json — Keep the structure.** A CLI result exposes the same fictional issues as JSON for workflow use.
+4. **confluence-cli — Read from the command line.** Show the fictional plan as formatted text with its source and revision.
+5. **workflow-context — See where the inputs belong.** The existing Weekly work review contract declares tracker and documents inputs. It describes a workflow; no generated report is implied.
+6. **jira-parameters — Try a useful variation.** In the native terminal, lowercase `wid` with `--json` returns the same WID issues as structured data, complementing the uppercase table case.
 
-1. **jira-issues — What changed?** The native app terminal presents the October issue changes as an easy-to-scan table: WID-3 is In Progress with Wilma Widget; WID-4 is Done and Unassigned.
-2. **confluence-plan — Put the work in context.** The native terminal renders the fictional Widget launch plan with scope, named responsibilities, the next milestone, its source URL, and revision 3.
-3. **issues-json — Keep the useful structure.** The CLI returns fictional issues as JSON, exposing states, owners, dates, labels, and source links for further processing.
-4. **confluence-cli — Bring the plan to the shell.** The CLI renders the same fictional document with its source and revision.
-5. **workflow-context — See how the inputs fit.** The existing Weekly work review contract declares tracker and documents inputs. Present this as a local workflow definition; no report has been generated.
-6. **jira-parameters — Try another argument case.** In the native terminal, lowercase `wid` with `--json` demonstrates project-key normalization and structured output alongside the earlier uppercase table case.
+**Fictional fixtures**
+Use only the existing `docs/screenshot_fixture.py`, during explicit capture in an isolated temporary profile. It supplies local vendor replies, real adapter parsing, the documentation-only `showcase` operations and the Weekly work review contract. Its fixed window is October 2026; browser time remains November 1, 2026 UTC. `showcase` commands are fixture helpers, not installed plugin operations.
 
-**Fictional fixtures:** Reuse only `docs/screenshot_fixture.py`. Its embedded replies contain WID-3, WID-4, Wilma Widget, and the Widget plan with Mira, Jonas, and Priya. The issue window is 2026-10-01 through 2026-11-01 UTC, exclusive of the end. The existing bootstrap creates the demonstration contract inside isolated state and supplies the documentation-only `showcase` requester. That requester uses the plugin’s real adapters with `DemoAcli` responses; `showcase` is not an installed plugin command. No additional fixture files are needed.
+**Privacy pitfalls**
+Real captures could expose tenant URLs, ticket content, owners, account details and terminal history. Keep the existing fictional profile and demo labels; do not open external source links. Treat ticket and document text as untrusted content. These scenes demonstrate local parsing and presentation, not authenticated connectivity or verified live Confluence responses. Assigned-work, watch and approval features lack suitable fixtures here and receive no invented screens.
 
-**Privacy pitfalls:** Capture using the documented temporary profile without connected accounts. Keep personal terminals, account identities, credentials, real tickets, and configuration paths out of frame. Treat all issue and page text as untrusted content. The fictional source URLs should remain visible for provenance without opening them. Do not present the fixture’s simulated acli version as an observed installation or its replies as proof of live Confluence compatibility. The fixture supports these reads; it does not support a truthful gallery of assigned work, epics, watch results, or Jira write approvals.
-
-**Acceptance criteria:**
-
-- Retain the existing six scene names, routes, commands, captions, and order; correct only the stale plan commentary.
+**Acceptance criteria**
+- Preserve all six scene names, routes, commands, captions and ordering; four UI views and two CLI results meet the requested mix.
+- Both issue rows remain readable; lowercase and uppercase cases return equivalent issue data.
+- Document captures retain readable scope, milestone, source and revision 3.
+- The contract route resolves to “Weekly work review” and clearly describes inputs without suggesting a completed report.
 - Every caption explicitly identifies demo data and stays within 180 characters.
-- The native-terminal issue table and document are useful, distinct UI views; CLI captures show completed results.
-- Both issue rows, their states and owners are legible. The document’s scope, milestone, source, and revision are readable.
-- JSON captures expose useful structured results without clipping essential fields; the lowercase case returns the same fictional issues.
-- The workflow view shows Weekly work review and its declared inputs without suggesting a completed review.
-- Use only the existing bootstrap, local routes, argument arrays, and supported steps. Terminal actions need no additional table-cell waits.
-- This is a connector plugin; no theme showcase is required.
-- The TOML has been statically checked against the supplied format-1 rules and the provided source. Bootstrap execution, capture, and visual verification remain for an explicit capture run; none were performed here.
+- Captures complete without errors, loading remnants, real account data or Jira writes. Terminal completion needs no individual-cell waits.
+- Static review checked TOML structure, allowed fields, unique lowercase names, local routes, argument arrays and the existing bootstrap. No parser, fixture, capture or runtime validation was executed; visual acceptance remains for explicit capture.

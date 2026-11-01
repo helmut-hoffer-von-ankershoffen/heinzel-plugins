@@ -2,7 +2,7 @@
   "format": 1,
   "plugin": "heinzel-atlassian",
   "core_version": "0.9.1",
-  "inputs_sha256": "9158f7fb3de88cc9e52dab359d0762e8c124b071421475be1651838a47b5d91c",
+  "inputs_sha256": "a860aa3e595e8ca41b79a2e1ab2ba0ee09cfe61e7fa8b859803b1146902c15eb",
   "images": {
     "docs/assets/screenshots/jira-issues.png": "edcd834303bc9710eabd29aa4d36307a373c548bbc2c078ae1c728416e780ce3",
     "docs/assets/screenshots/confluence-plan.png": "ad068ff0255ad82099ae0cc4315053bf257685c56c3e9b1430f42c3b09c2c282",
@@ -16,13 +16,13 @@
     "definition": {
       "format": 1,
       "reviewer": "Codex feature-story agent",
-      "source_sha256": "bf437e1844c4d7bb26677a0dbe18eada71c428755f30b172c9c1be4ecd876e5e",
+      "source_sha256": "9ad08d61cfed67c1c6d3c8ed286a4080db3d978d2a4807fea022dcbaf1fb4b4d",
       "plan_sha256": "f59690101925633a3cce229c23e46e4178a013f5691e5c7d2e74b7a73120f75f",
-      "story_sha256": "a3c302e9c888e38229e62645eff5ca827012f2102eaab74a2c8309d03ec66759"
+      "story_sha256": "07e30672a5d507c8affa584f6552a01490432f42825325702292712b4df3bfae"
     },
     "plugin": "heinzel-atlassian",
     "core_version": "0.9.1",
-    "inputs_sha256": "9158f7fb3de88cc9e52dab359d0762e8c124b071421475be1651838a47b5d91c",
+    "inputs_sha256": "a860aa3e595e8ca41b79a2e1ab2ba0ee09cfe61e7fa8b859803b1146902c15eb",
     "screenshots": [
       {
         "path": "docs/assets/screenshots/jira-issues.png",
@@ -71,11 +71,11 @@
       "workflow-context.txt": "d215aab387a1695e17b5a34e4667c65e0d76734e33f12eb4d3136bfea3a90b75",
       "jira-parameters.txt": "4af63b654fbdcc82373ec5990f114a3036835a8db589faaedd909b7b02b9417c"
     },
-    "bundle_sha256": "77fb4226c1015f5936ac58a2e3e5752232de663740805f288d01af20d87bbc7a"
+    "bundle_sha256": "1f76506c85db0f2b3d545c25992fe11f5e2c75fe72dc81501355fb6b4e9ae893"
   },
   "privacy_review": {
     "format": 1,
-    "bundle_sha256": "77fb4226c1015f5936ac58a2e3e5752232de663740805f288d01af20d87bbc7a",
+    "bundle_sha256": "1f76506c85db0f2b3d545c25992fe11f5e2c75fe72dc81501355fb6b4e9ae893",
     "reviewer": "Codex privacy agent",
     "decision": "approve",
     "checked_images": [

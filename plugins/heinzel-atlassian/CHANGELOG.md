@@ -12,6 +12,11 @@
   site. A missing or hidden work item and a rejected work item type get messages of their own.
 - Live checks and fixtures recorded from a real Jira Cloud site (`tests/live`).
 
+## 0.9.2
+
+Add assigned work, epics and attention views, and Jira changes the owner approves.
+Hand hosts notices and drafts shaped for notification and approval channels.
+
 ## 0.9.1
 
 Move this plugin to its independent repository project for the Heinzel 0.9.1 plugin contract.
