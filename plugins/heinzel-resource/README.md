@@ -1,8 +1,12 @@
 # heinzel-resource
 
-Independently built and released Heinzelmännchen plugin.
+Shows CPU, memory and load for the machine your helper runs on, on Today and in the footer.
 
-Extracted from `system/resource` in core at b2243258; it now uses the top-level `resource` namespace. The 0.9 migration requires fresh configuration.
+Included in the standard app.
+
+```bash
+hz resource                # CPU, memory and load now; --json for agents
+```
 
 <!-- screenshots:start -->
 ## Screenshots
@@ -18,6 +22,14 @@ A quick CPU summary on Today, with three compact footer meters — demonstration
 <img src="docs/assets/screenshots/phone-resources.png" alt="Read CPU, memory and queued load on a phone — fictional demo workstation" width="960">
 
 Read CPU, memory and queued load on a phone — fictional demo workstation
+
+<img src="docs/assets/screenshots/terminal-resources.png" alt="Check CPU, memory, raw load and core count in the app terminal — fictional demo-workstation values" width="960">
+
+Check CPU, memory, raw load and core count in the app terminal — fictional demo-workstation values
+
+<img src="docs/assets/screenshots/terminal-resources-json.png" alt="Inspect the structured resource sample for automation in the app terminal — fictional demo-workstation data" width="960">
+
+Inspect the structured resource sample for automation in the app terminal — fictional demo-workstation data
 
 <details>
 <summary>Command line</summary>

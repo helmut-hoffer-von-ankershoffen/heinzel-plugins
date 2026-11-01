@@ -162,4 +162,9 @@ caption = "Demo data: the fictional Confluence plan, source and revision in the 
 [[tool.heinzel.catalog.screenshots]]
 path = "docs/assets/screenshots/workflow-context.png"
 surface = "ui"
-caption = "Weekly work review combines the declared source inputs — local demonstration, no report generated"
+caption = "Demo data: the local Weekly work review contract declares Jira and Confluence inputs; no report has been generated."
+
+[[tool.heinzel.catalog.screenshots]]
+path = "docs/assets/screenshots/jira-parameters.png"
+surface = "ui"
+caption = "Demo data: lowercase wid resolves to WID; the fixture requester returns structured Jira changes with --json in the app terminal."

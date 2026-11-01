@@ -1,7 +1,8 @@
 # Heinzelmännchen theme
 
 The standard Heinzelmännchen appearance and its three soundscapes: Claude FM, Die Heinzelmännchen and Hyper Focus.
-The standard app installs and enables this plugin automatically. It recommends its appearance when no available
+
+Included in the standard app. It recommends its appearance when no available
 theme has been selected. An explicit available theme choice is preserved, and the inactive built-in fallback is hidden
 to avoid duplicate previews. Sound starts only after the person presses Play.
 
@@ -20,28 +21,28 @@ or parent registry change.
 <!-- screenshots:start -->
 ## Screenshots
 
-<img src="docs/assets/screenshots/theme-light.png" alt="The installed Heinzelmännchen theme on a representative local contract — light appearance" width="960">
+<img src="docs/assets/screenshots/theme-light.png" alt="A fictional Launch review contract, its configuration and run commands, in the applied Heinzelmännchen light theme." width="960">
 
-The installed Heinzelmännchen theme on a representative local contract — light appearance
+A fictional Launch review contract, its configuration and run commands, in the applied Heinzelmännchen light theme.
 
-<img src="docs/assets/screenshots/theme-dark.png" alt="The installed Heinzelmännchen theme on a representative local contract — dark appearance" width="960">
+<img src="docs/assets/screenshots/theme-dark.png" alt="The same fictional Launch review contract in the applied Heinzelmännchen dark theme." width="960">
 
-The installed Heinzelmännchen theme on a representative local contract — dark appearance
+The same fictional Launch review contract in the applied Heinzelmännchen dark theme.
 
-<img src="docs/assets/screenshots/theme-soundscapes.png" alt="The theme supplies three optional YouTube soundscapes; playback starts only after Play" width="960">
+<img src="docs/assets/screenshots/theme-soundscapes.png" alt="Demo profile: browse three optional YouTube soundscapes; playback starts only after Play." width="960">
 
-The theme supplies three optional YouTube soundscapes; playback starts only after Play
+Demo profile: browse three optional YouTube soundscapes; playback starts only after Play.
 
 <details>
 <summary>Command line</summary>
 
-<img src="docs/assets/screenshots/theme-cli.png" alt="Inspect the owning theme and its light/dark palette from the CLI" width="960">
+<img src="docs/assets/screenshots/theme-cli.png" alt="Demo profile: list available themes and identify Heinzelmännchen from the CLI." width="960">
 
-Inspect the owning theme and its light/dark palette from the CLI
+Demo profile: list available themes and identify Heinzelmännchen from the CLI.
 
-<img src="docs/assets/screenshots/soundscapes-cli.png" alt="List the three theme-owned soundscapes without starting playback" width="960">
+<img src="docs/assets/screenshots/soundscapes-cli.png" alt="Demo profile: list Claude FM, Die Heinzelmännchen and Hyper Focus without starting playback." width="960">
 
-List the three theme-owned soundscapes without starting playback
+Demo profile: list Claude FM, Die Heinzelmännchen and Hyper Focus without starting playback.
 
 </details>
 

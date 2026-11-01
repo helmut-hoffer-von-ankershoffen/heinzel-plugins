@@ -1,52 +1,23 @@
-# Understand what is slowing this computer down
+Audience: People who want to check the machine running their helper from Today, a phone, or the terminal. This plugin is already included in the standard app.
 
-The installation story is a compact resource monitor that stays available while working: CPU, memory and queued
-load in the footer, a readable detail pane, and a quick Today summary. A CPU-only Today card does not demonstrate
-the full plugin; the expanded pane is the primary catalog image.
+Outcome: Move from a quick CPU glance to the underlying CPU, memory, load and core-count measurements. Make clear that these describe the host running hz, which may differ from the viewing device.
 
-## Demonstration profile
+Scenes:
+1. **The numbers behind the meters.** Preserve the expanded resource monitor, including its hostname and explanation of scaled load.
+2. **A glance during everyday work.** Preserve Today’s CPU summary and compact footer meters.
+3. **The same host on a phone.** Preserve the narrow viewport and expanded resource details.
+4. **A readable CLI result.** Preserve the table showing hostname, CPU, memory, raw one-minute load and logical cores.
+5. **Check from the app terminal.** Run `hz resource` in the native terminal to show the readable result in context.
+6. **Numbers for automation.** Run `hz resource --json` in the native terminal to expose the structured sample, including its timestamp and problems list.
 
-Use the owning `docs/screenshot_fixture.py` bootstrap before starting the installed application or CLI. It supplies
-one internally consistent fictional `Resources` sample: host **demo-workstation**, CPU **36%**, memory **62%**,
-one-minute load **0.65**, **8** logical cores, no problems, sampled at **2026-10-31 10:00 UTC**. Never sample the
-operator's machine for publishable images. The fixture replaces this plugin's sampler only; it does not change
-production behavior or substitute a hand-drawn interface.
+Fictional fixtures: Reuse only `docs/screenshot_fixture.py`. It supplies `demo-workstation`, CPU 36%, memory 62%, raw one-minute load 0.65, eight logical cores, no problems, and sampling time `2026-10-31T10:00:00Z`. Set the browser clock to that same instant. The load bar scales against twice the logical core count; it is not another CPU percentage. The existing fixture supports a healthy sample only, so do not stage warnings, history, or additional machines.
 
-The current fixture runs the real command after installing the sample:
+Privacy pitfalls: Real samples reveal the host’s name and resource measurements; JSON also reveals sampling time. Use the documented temporary profile without connected accounts and the existing bootstrap during explicit capture. Review surrounding Today content and terminal output for personal information. A phone capture must not imply that the phone itself is being measured.
 
-```sh
-python docs/screenshot_fixture.py resource
-python docs/screenshot_fixture.py resource --json
-python docs/screenshot_fixture.py ui --no-browser --port 0
-```
-
-Run these from the owning plugin in its installed SDK environment and isolated profile. The capture runner should
-use the bootstrap for both UI and CLI scenes. Normal public commands remain `hz resource` and `hz resource --json`.
-
-## Scenes to publish
-
-| Scene | Action and visible proof | Caption |
-| --- | --- | --- |
-| `resources-pane` | At `/`, click the footer button whose accessible name contains **CPU**, **Memory**, **Load**. Wait for region **Computer resources…** and **Host: demo-workstation**. Keep all three compact meters and the whole expanded pane visible: CPU 36%, Memory 62%, Load (1 min) 0.65, 8 logical cores, and the explanation that load measures queued work. | “Inspect CPU, memory and queued load from the compact resource monitor — demonstration workstation.” |
-| `today-resources` | At `/`, wait for **Computer resources** and **CPU 36%**. Frame the Today card and the compact footer meters together, without the detail pane obscuring either. | “Keep a quick CPU summary on Today and all three resource meters in the footer.” |
-| `phone-resources` | At 390×844, open **More status items** if the meters moved there; then open the same resource control. Show the complete detail pane above its trigger, inside the phone viewport. | “Read the same resource detail on a narrow screen.” |
-| `cli-resources` | Execute `hz resource` through the fixture and capture its real Rich table. It must show the fictional hostname, CPU, memory, raw load and logical core count, matching the UI. | “Read the same demonstration measurements in the CLI.” |
-
-Accessible actions and phone behavior are exercised in `tests/browser/meters.mjs`: locate the footer landmark,
-the **More status items** button, the control matching `CPU.*Memory.*Load`, and the **Computer resources** region.
-Use Escape to dismiss the pane. Do not invent a right-side resource workspace panel; the implemented detail is a
-footer popover. Resource has no sidebar placement by default.
-
-## Acceptance and privacy
-
-All three measurements must be legible in the main image. The load meter is normalized to twice the logical-core
-count: this fixture's **Load (scaled)** display value is about **4.06%**, while the detail and CLI show raw load **0.65**. Do not call
-load a CPU percentage or label the normalized meter as raw load. The Today card intentionally shows CPU only.
-
-Reject missing meters, real hostnames, changing native samples, **Unavailable** values, clipped popovers, loading
-states and unrelated error cards. Check desktop and phone geometry, and compare UI and CLI values. Stage drafts
-and transcripts privately; an agent must review every final image for personal names, machine identifiers, paths,
-tokens and account data before promoting the gallery. The approved hostname is exactly **demo-workstation**.
-
-The expanded detail scene uses a native browser crop with 48 pixels of surrounding context. Keep the complete
-popover and its footer trigger visible; let its natural aspect ratio make the values readable on a phone.
+Acceptance criteria:
+- Retain the four existing useful scenes and their names; add only the two required native-terminal parameter cases.
+- All six captions explicitly identify fictional or demonstration data. The expanded monitor, Today overview and mobile details must be readable.
+- Both terminal cases and the standalone CLI capture must use the fixture. Reject captures containing live host values.
+- Human-readable output shows the five documented table rows; JSON reflects the fixture’s fields. Terminal actions need no additional cell-text waits.
+- Use only the existing `/` route, accessible interactions, and supported terminal actions. Do not invent a plugin panel or installation screen.
+- The returned TOML was checked statically against the requested structure. Capture and executable validation were not run. The unsupported focus padding field was removed; the remaining existing interactions were preserved.

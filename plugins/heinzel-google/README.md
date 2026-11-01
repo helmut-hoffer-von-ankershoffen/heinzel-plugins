@@ -2,10 +2,12 @@
 
 Google Docs, Sheets, Drive, Calendar and Gmail: the `documents` (read), `calendar` and `mail` (read and write)
 capabilities ([ADR 0028](https://github.com/helmut-hoffer-von-ankershoffen/heinzel/blob/main/docs/adr/0028-integrations-are-capability-adapters.md)): a first-party
-[Heinzelmännchen](https://github.com/helmut-hoffer-von-ankershoffen/heinzel) plugin. It is independently released and installed explicitly:
+[Heinzelmännchen](https://github.com/helmut-hoffer-von-ankershoffen/heinzel) plugin.
+
+Install it with:
 
 ```bash
-hz system plugin add google --confirm             # a compatible plugin release; run it again to upgrade
+hz system plugin add google --confirm
 hz system plugin remove heinzel-google
 ```
 
@@ -57,7 +59,7 @@ Mail is opt-in: setup asks, defaulting to no, and then signs in again with Gmail
 Writes are opt-in too. Setup asks whether hz may change your calendar and your mail, defaulting to no; only then does
 the sign-in ask for `https://www.googleapis.com/auth/calendar.events` (create, move, cancel and answer events) and
 `https://www.googleapis.com/auth/gmail.modify` (keep drafts, send them, file conversations; it reads too, so it
-replaces `gmail.readonly`, and it can't delete mail for good). Heinzelmännchen writes only from publish operations
+replaces `gmail.readonly`, and it can't delete mail for good). Heinzelmännchen writes only from confirmed write operations
 that show you what they will do and run after you confirm; a chat's agent only proposes them
 ([ADR 0059](https://github.com/helmut-hoffer-von-ankershoffen/heinzel/blob/main/docs/adr/0059-the-calendar-and-the-mail-write-through-hz-after-a-confirmation.md)). Without the
 scope, a write fails with the `gws auth login` that adds it.
@@ -143,7 +145,7 @@ def notes(documents: Documents) -> Document:
   builder drops the addresses before anything reaches an agent's prompt. A message longer than 2 million characters,
   or with more than 500 MIME parts or 2 million characters of HTML, is refused, not cut; Spam and Trash are not
   read; reading one window's messages may take at most five minutes.
-- **Writes** change only what the person confirmed, through publish operations. Ids are checked before they reach
+- **Writes** change only what the person confirmed, through confirmed write operations. Ids are checked before they reach
   `gws`; a write that times out or fails without Google refusing it is not retried and says to look in Google first;
   a rate-limited one is retried. A recurring series' own id is refused: one occurrence changes at a time. Drafts are built with
   Python's `email` package from plain addresses and one-line subjects, so nothing can add a header.
@@ -166,31 +168,25 @@ Token-shaped strings in anything `gws` says are redacted before it is shortened.
 
 Development and release commands: [repository guide](../../README.md).
 
-Installed browser acceptance requires npm and preinstalled Playwright Chromium and WebKit browsers. The tests install
-their own pinned Playwright and axe dependencies from `tests/browser/package-lock.json`, with package scripts disabled.
-The captured-read acceptance tests also require a core SDK with source-capture support, supplied as `CORE=<wheel>`;
-ordinary Google capabilities remain available on the declared older supported cores.
-
-Migration provenance: heinzel, before the 0.9 plugin-boundary migration.
 
 <!-- screenshots:start -->
 ## Screenshots
-
-<img src="docs/assets/screenshots/recent-files.png" alt="Start with a seven-day file scan — fictional Docs and Sheets, real Google files operation in the app terminal" width="960">
-
-Start with a seven-day file scan — fictional Docs and Sheets, real Google files operation in the app terminal
 
 <img src="docs/assets/screenshots/launch-files.png" alt="Recently changed launch files in the app terminal — fictional Workspace replies, real Google operation" width="960">
 
 Recently changed launch files in the app terminal — fictional Workspace replies, real Google operation
 
+<img src="docs/assets/screenshots/launch-files-week.png" alt="Explore seven days without a name filter — real Google operation over the fixture&#x27;s same fictional files" width="960">
+
+Explore seven days without a name filter — real Google operation over the fixture&#x27;s same fictional files
+
 <img src="docs/assets/screenshots/launch-plan.png" alt="Read a Google Doc as workflow-ready text — fixture-only requester and fictional plan" width="960">
 
 Read a Google Doc as workflow-ready text — fixture-only requester and fictional plan
 
-<img src="docs/assets/screenshots/launch-week.png" alt="The launch week and its attendees — fixture-only requester, real Google Calendar adapter over fictional events" width="960">
+<img src="docs/assets/screenshots/launch-week.png" alt="The launch week&#x27;s meetings and attendees — fixture-only requester, real Calendar adapter over fictional events" width="960">
 
-The launch week and its attendees — fixture-only requester, real Google Calendar adapter over fictional events
+The launch week&#x27;s meetings and attendees — fixture-only requester, real Calendar adapter over fictional events
 
 <img src="docs/assets/screenshots/launch-inbox.png" alt="A focused launch-mail query — fixture-only requester, real Gmail adapter over fictional messages" width="960">
 
@@ -203,13 +199,13 @@ A focused launch-mail query — fixture-only requester, real Gmail adapter over 
 
 Changed Docs and Sheets as structured data — real Google operation, fictional files
 
-<img src="docs/assets/screenshots/launch-metrics.png" alt="A Sheet becomes a readable table — fixture-only requester, real documents adapter and local replies" width="960">
+<img src="docs/assets/screenshots/launch-metrics.png" alt="A Sheet becomes a readable table — fixture-only requester, real documents adapter and fictional replies" width="960">
 
-A Sheet becomes a readable table — fixture-only requester, real documents adapter and local replies
+A Sheet becomes a readable table — fixture-only requester, real documents adapter and fictional replies
 
-<img src="docs/assets/screenshots/mail-content.png" alt="Read the next actions in a launch message — fixture-only requester, real Gmail adapter and local replies" width="960">
+<img src="docs/assets/screenshots/mail-content.png" alt="Read the next actions in a launch message — fixture-only requester, real Gmail adapter and fictional replies" width="960">
 
-Read the next actions in a launch message — fixture-only requester, real Gmail adapter and local replies
+Read the next actions in a launch message — fixture-only requester, real Gmail adapter and fictional replies
 
 </details>
 

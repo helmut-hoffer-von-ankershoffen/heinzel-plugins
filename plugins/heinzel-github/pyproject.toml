@@ -142,7 +142,7 @@ highlights = [
 [[tool.heinzel.catalog.screenshots]]
 path = "docs/assets/screenshots/merged-work.png"
 surface = "ui"
-caption = "Merged pull requests in the app terminal — fixture-only requester, real GitHub adapter"
+caption = "Merged pull requests in the app terminal — fictional data, fixture-only requester, real GitHub adapter"
 
 [[tool.heinzel.catalog.screenshots]]
 path = "docs/assets/screenshots/issue-changes.png"
@@ -152,7 +152,7 @@ caption = "Issue changes, owners and states in the app terminal — fictional Gi
 [[tool.heinzel.catalog.screenshots]]
 path = "docs/assets/screenshots/merged-cli.png"
 surface = "cli"
-caption = "Read merged work in the shell — fixture-only requester, real GitHub adapter"
+caption = "Read merged work in the shell — fictional data, fixture-only requester, real GitHub adapter"
 
 [[tool.heinzel.catalog.screenshots]]
 path = "docs/assets/screenshots/issues-json.png"
@@ -162,4 +162,4 @@ caption = "Typed issue results for scripts and agents — fixture-only requester
 [[tool.heinzel.catalog.screenshots]]
 path = "docs/assets/screenshots/workflow-context.png"
 surface = "ui"
-caption = "Weekly code review combines the declared source inputs — local demonstration, no report generated"
+caption = "Weekly code review declares merged-work and issue inputs — fictional local example, no report generated"

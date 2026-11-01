@@ -3,21 +3,6 @@ bootstrap = "docs/screenshot_fixture.py"
 browser_time = "2026-10-22T12:00:00Z"
 
 [[scenes]]
-name = "recent-files"
-surface = "ui"
-route = "/"
-caption = "Start with a seven-day file scan — fictional Docs and Sheets, real Google files operation in the app terminal"
-timeout_ms = 30000
-
-[[scenes.steps]]
-action = "terminal"
-command = ["google", "files", "--days", "7"]
-
-[scenes.viewport]
-width = 1280
-height = 650
-
-[[scenes]]
 name = "launch-files"
 surface = "ui"
 route = "/"
@@ -27,6 +12,21 @@ timeout_ms = 30000
 [[scenes.steps]]
 action = "terminal"
 command = ["google", "files", "--days", "3", "--name", "Launch"]
+
+[scenes.viewport]
+width = 1280
+height = 650
+
+[[scenes]]
+name = "launch-files-week"
+surface = "ui"
+route = "/"
+caption = "Explore seven days without a name filter — real Google operation over the fixture's same fictional files"
+timeout_ms = 30000
+
+[[scenes.steps]]
+action = "terminal"
+command = ["google", "files", "--days", "7"]
 
 [scenes.viewport]
 width = 1280
@@ -51,7 +51,7 @@ height = 650
 name = "launch-week"
 surface = "ui"
 route = "/"
-caption = "The launch week and its attendees — fixture-only requester, real Google Calendar adapter over fictional events"
+caption = "The launch week's meetings and attendees — fixture-only requester, real Calendar adapter over fictional events"
 timeout_ms = 30000
 
 [[scenes.steps]]
@@ -86,11 +86,11 @@ command = ["google", "files", "--days", "3", "--name", "Launch", "--json"]
 [[scenes]]
 name = "launch-metrics"
 surface = "cli"
-caption = "A Sheet becomes a readable table — fixture-only requester, real documents adapter and local replies"
+caption = "A Sheet becomes a readable table — fixture-only requester, real documents adapter and fictional replies"
 command = ["showcase", "notes", "launch-metrics"]
 
 [[scenes]]
 name = "mail-content"
 surface = "cli"
-caption = "Read the next actions in a launch message — fixture-only requester, real Gmail adapter and local replies"
+caption = "Read the next actions in a launch message — fixture-only requester, real Gmail adapter and fictional replies"
 command = ["showcase", "message-content"]

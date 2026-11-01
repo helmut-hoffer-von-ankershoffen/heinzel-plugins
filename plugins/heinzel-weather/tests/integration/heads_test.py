@@ -93,7 +93,10 @@ def test_app_weather_items_are_discoverable_with_readable_status_and_controls(hz
     assert status["refresh"] == widget["refresh"] == forecast["refresh"] == 900
     assert status["item"]["icon"] == "sun"
     assert status["item"]["text"].startswith("22°C Berlin, DE")
-    assert status["item"]["effect"] == {"kind": "command", "command": "hz weather show", "runs": True}
+    assert status["item"].get("effect") is None
+    assert [(a["label"], a["effect"]) for a in status["item"]["actions"]] == [
+        ("Change place", {"kind": "navigate", "path": "/?settings=weather"})
+    ]
     assert widget["widget"]["label"] == "Weather in Berlin, DE"
     assert widget["widget"]["value"] == "22°C"
     assert "Weather data by OpenWeather" in widget["widget"]["caption"]

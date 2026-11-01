@@ -1,30 +1,30 @@
 ☀  22°C clear sky in Berlin, DE (feels like 21°C; today 12 to 24°C, 80% rain)
 Weather data by OpenWeather, openweathermap.org
-⚠ Thunderstorm warning, Sat 13:00 to Sat 16:00 (Example Weather Service)
+⚠ Thunderstorm warning, Sun 09:00 to Sun 12:00 (Example Weather Service)
 Next hours
 ┏━━━━━━━┳━━━┳━━━━━━┳━━━━━━┳━━━━━━━━━━━━━━━┓
 ┃ Time  ┃   ┃ Temp ┃ Rain ┃ Sky           ┃
 ┡━━━━━━━╇━━━╇━━━━━━╇━━━━━━╇━━━━━━━━━━━━━━━┩
-│ 10:00 │ ☁ │ 22°C │ 10%  │ broken clouds │
-│ 11:00 │ 🌧 │ 20°C │ 80%  │ moderate rain │
-│ 12:00 │ 🌧 │ 18°C │ 80%  │ moderate rain │
-│ 13:00 │ 🌧 │ 17°C │ 80%  │ moderate rain │
-│ 14:00 │ 🌧 │ 15°C │ 80%  │ moderate rain │
-│ 15:00 │ ☁ │ 14°C │ 10%  │ broken clouds │
+│ 06:00 │ ☁ │ 22°C │ 10%  │ broken clouds │
+│ 07:00 │ 🌧 │ 20°C │ 80%  │ moderate rain │
+│ 08:00 │ 🌧 │ 18°C │ 80%  │ moderate rain │
+│ 09:00 │ 🌧 │ 17°C │ 80%  │ moderate rain │
+│ 10:00 │ 🌧 │ 15°C │ 80%  │ moderate rain │
+│ 11:00 │ ☁ │ 14°C │ 10%  │ broken clouds │
+│ 12:00 │ ☁ │ 12°C │ 10%  │ broken clouds │
+│ 13:00 │ ☁ │ 14°C │ 10%  │ broken clouds │
+│ 14:00 │ ☁ │ 15°C │ 10%  │ broken clouds │
+│ 15:00 │ ☁ │ 16°C │ 10%  │ broken clouds │
 │ 16:00 │ ☁ │ 12°C │ 10%  │ broken clouds │
-│ 17:00 │ ☁ │ 14°C │ 10%  │ broken clouds │
-│ 18:00 │ ☁ │ 15°C │ 10%  │ broken clouds │
-│ 19:00 │ ☁ │ 16°C │ 10%  │ broken clouds │
-│ 20:00 │ ☁ │ 12°C │ 10%  │ broken clouds │
-│ 21:00 │ ☀ │ 13°C │ 10%  │ clear sky     │
+│ 17:00 │ ☀ │ 13°C │ 10%  │ clear sky     │
 └───────┴───┴──────┴──────┴───────────────┘
 Days
 ┏━━━━━━━━━━━━┳━━━┳━━━━━━┳━━━━━━┳━━━━━━┳━━━━━━━━━━━━━━━┓
 ┃ Day        ┃   ┃ Low  ┃ High ┃ Rain ┃ Sky           ┃
 ┡━━━━━━━━━━━━╇━━━╇━━━━━━╇━━━━━━╇━━━━━━╇━━━━━━━━━━━━━━━┩
-│ Sat 31 Oct │ 🌧 │ 12°C │ 24°C │ 80%  │ moderate rain │
-│ Sun 01 Nov │ ☁ │ 10°C │ 19°C │ 10%  │ broken clouds │
-│ Mon 02 Nov │ 🌧 │ 9°C  │ 18°C │ 80%  │ moderate rain │
-│ Tue 03 Nov │ ☀ │ 12°C │ 21°C │ 10%  │ clear sky     │
-│ Wed 04 Nov │ ☀ │ 13°C │ 24°C │ 10%  │ clear sky     │
+│ Sun 01 Nov │ 🌧 │ 12°C │ 24°C │ 80%  │ moderate rain │
+│ Mon 02 Nov │ ☁ │ 10°C │ 19°C │ 10%  │ broken clouds │
+│ Tue 03 Nov │ 🌧 │ 9°C  │ 18°C │ 80%  │ moderate rain │
+│ Wed 04 Nov │ ☀ │ 12°C │ 21°C │ 10%  │ clear sky     │
+│ Thu 05 Nov │ ☀ │ 13°C │ 24°C │ 10%  │ clear sky     │
 └────────────┴───┴──────┴──────┴──────┴───────────────┘

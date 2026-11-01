@@ -1,74 +1,31 @@
-# Share the running app privately, then stop sharing it.
+**Audience**
+People who already use Tailscale and want private access to their authenticated Heinzelmännchen workspace. The adapter is included in the standard app; Tailscale must already be installed and signed in, with the required HTTPS consent.
 
-Show the actual sharing state machine: enable a private link, inspect/copy its address, use the control on a phone,
-and turn it off. The point is convenient private access with clear ownership, not a settings field for a port.
-This plugin contributes a real footer popover and toggle through the host's UI contracts; use those controls.
+**Outcome**
+A private link, with a clear off switch. Show the explicit enable action, verified readiness in the owning web app, a compact view of the link, useful CLI diagnostics, and confirmed shutdown. Authentication remains required.
 
-## Runtime and command boundary
+**Scenes**
+Preserve the existing five-scene sequence, names, routes, bootstrap, and CLI commands. The footer control is the plugin's useful interface; the source declares no dedicated plugin panel route.
 
-The actual operations are `hz tailscale status`, `hz tailscale enable` and `hz tailscale disable`. They are declared
-private API operations and are used by the footer control. `enable` and `disable` change state; capture them only
-against a local fixture. The private/read-only declarations do not add a generic CLI `--confirm` flag. Never run the developer's Tailscale client, Serve configuration or network.
+1. **sharing-ready:** Open the footer's Tailscale region, enable sharing, and capture the ready message and Copy URL control. Crop to the region so the state and action are legible.
+2. **phone-sharing-ready:** Inspect the same ready state at 390 × 844. This demonstrates the compact layout; it does not demonstrate a connection from another device. Leave Copy URL unclicked.
+3. **sharing-request-cli:** Run `hz tailscale status --json` in a separate process. Expect saved intent and a matching mapping, with `state: apply-required`, `desired_enabled: true`, and `mapped: true`. Only the authenticated owning web instance can verify its live readiness.
+4. **sharing-off:** Switch sharing off and capture “Private web sharing is off.”
+5. **sharing-off-cli:** Repeat the status command and show `state: off`, `desired_enabled: false`, and `mapped: false`.
 
-## Required scenes, in gallery order
+The changes address gaps in deterministic capture and truthful captions: add a fixed browser time, explicitly wait for readiness, identify fictional demo data, and clarify the narrow viewport and separate-process CLI result.
 
-| Scene | Surface and actual action | Visible result and caption | Why it matters |
-| --- | --- | --- | --- |
-| Private sharing ready | UI: open the footer Tailscale popover; enable switch “Share over Tailscale”; wait for ready | Actual checked switch, ready state, fictional HTTPS host and “Copy URL” control. Redact the session fragment before saving. Caption: “Share the running app privately — local Tailscale fixture; session token hidden.” | Shows the feature's central benefit in one image. |
-| Useful on the phone | UI: at 390 × 844, open the same sharing popover in its measured location | The same ready switch and copy action fully inside the viewport. Caption: “Inspect and copy the private link on a phone — local simulated network.” | Shows the control remains practical on the second device. |
-| Saved request in a shell | CLI: `hz tailscale status --json` against the same fixture | Actual separate-process status with desired_enabled true and a safe fictional origin; it may correctly be apply-required because only the authenticated web owner can prove readiness. Caption: “Inspect the saved sharing request from the CLI — fictional local network.” | Shows observability for power users and automation. |
-| Stop explicitly | UI: disable the same switch and wait for final off state | Unchecked switch, off message, no Copy URL action. Caption: “Stop the app's sharing while preserving unrelated services — local fixture.” | Shows clear control over the lifecycle. |
-| Confirm the final state | CLI: `hz tailscale status --json` after disabling | Actual off state with `desired_enabled` false and no usable session URL. Caption: “Verify sharing is off from the shell — local fixture.” | Makes the visible switch change verifiable. |
+**Fictional fixtures**
+Reuse the existing `docs/screenshot_fixture.py` during explicit capture only, in a fresh isolated temporary profile. It supplies `workstation.tail-example.ts.net`, fictional client discovery, and a loopback LocalAPI server. The real plugin performs its sharing transactions against that server. The fixture also retains an unrelated `svc:notes` service on port 8443 and checks its preservation. Start with sharing off and retain the same isolated state throughout the ordered scenes. No additional fixture files are required.
 
-The checked-state and off-state screenshots must represent actual successful local fixture operations, not seeded
-JSON pasted into the browser. At least one UI scene shows the complete compact footer/popover context, not just an
-isolated switch. If the current runner restarts the bootstrap for each CLI command, persist only its local fixture
-state within the capture session so CLI and UI phases agree; otherwise use explicitly separate ready/off fixtures
-and label them as such.
+**Privacy pitfalls**
+Copy URL may include a password-equivalent `#token=...` session fragment. Do not activate copying or sign-in-link actions during capture. Keep real hostnames, peer information, credentials, session fragments, and unrelated personal content out of every frame, including the full mobile-width view. Use only the isolated fictional profile. A ready local deployment does not establish actual remote reachability or grant a paired browser owner operations or terminal access.
 
-## Fixture entry points
-
-[tests/fixtures/tailscale_web.py](../tests/fixtures/tailscale_web.py) already runs the real host with fake vendor
-reads, an authenticated loopback LocalAPI, conditional ServeStore writes and restart handling. Its vendor identity
-is `workstation.tail-example.ts.net`. Adapt that fixture into an owning documentation bootstrap; retain actual
-`Sharing`, `SharingActions`, `SharingReadiness`, `ServeStore`, lock and host policy. Keep an unrelated existing
-service in the fixture and assert it survives both transitions. The sample's local API password must never appear
-in output or images.
-
-The [mounted browser test](../tests/browser/web_test.py) and
-[actual browser driver](../web/e2e/tailscale.mjs) verify enable, copy, phone layouts and disable without OS changes.
-Reuse their readiness and geometry assertions, not their use of a live visible session fragment in a screenshot.
-
-## Accessible actions
-
-- On desktop, open the footer control named **Tailscale**; if it is in the compact overflow, first use `button`
-  **More status items**. Confirm `region` **Tailscale** is visible. If the footer trigger's name differs in the
-  installed host, inspect its computed accessible name and use that actual name in the plan.
-- Toggle `switch` **Share over Tailscale**, wait for the final checked state with no busy indicator, then wait for
-  `button` **Copy URL**. An enabled setting by itself is not proof of readiness.
-- At phone width the switch and Copy URL button must remain visible, keyboard-reachable and inside the viewport.
-  Do not capture before font/layout measurement finishes.
-- Disable and wait for the switch to be unchecked and settled and Copy URL to disappear; verify API state is off.
-
-## Privacy and acceptance
-
-The real host deliberately displays and copies an authenticated URL containing `#token=...`. **Never publish that
-fragment**, even for a temporary capture server. Replace the visible fragment with an explicit `[session token
-hidden]` presentation redaction before every screenshot, including diagnostic captures, and record that redaction
-in provenance. Do not alter the underlying host operation or pretend the redacted URL is directly usable. Never
-serialize clipboard content, announced session addresses, local API passwords or browser storage into metadata.
-Stop the capture server before staging artifacts; review OCR/plaintext and images for tokens as well as paths.
-
-All traffic stays on loopback and all vendor operations hit the fake LocalAPI. Assert exactly the expected enable
-and disable writes, unrelated service preservation, actual ready/off responses, and no real vendor executable.
-Use the fictional hostname only; reject real tailnet names, device names, account names, IPs and absolute paths.
-The complete gallery includes desktop ready, phone ready, off, and CLI evidence; settings and help do not count.
-
-## Implemented fixture boundary
-
-The documentation bootstrap binds `DemoCli` for vendor discovery only. The production `ServeStore` still performs
-authenticated conditional HTTP transactions against a loopback LocalAPI, and production sharing actions persist
-the actual requested state and update the live host origin policy. An unrelated fictional service is asserted
-unchanged after each write and at shutdown. State is shared only within this temporary capture profile.
-The standalone CLI correctly cannot claim authenticated web readiness; the ready UI frame is the evidence for that
-state. No vendor executable, OS network setting or real tailnet is used.
+**Acceptance criteria**
+- All five scenes complete in order; the three UI views show working sharing controls and meaningful states.
+- Both ready views contain the exact ready message and Copy URL control; the off view contains the explicit off message.
+- CLI results show the expected pending-verification and off states without credentials.
+- The existing fixture's unrelated-service preservation checks pass during capture.
+- Every caption identifies fictional demo data and stays within 180 characters.
+- The plan uses the existing bootstrap, supported local route, accessible targets, and shell-free argument arrays.
+- Static validation against the supplied contract covers TOML table structure, unique lowercase scene names, allowed surfaces/actions, ISO8601 browser time, and scene count. No imports, product execution, network requests, or captures were performed; runtime acceptance remains to be verified during explicit capture.

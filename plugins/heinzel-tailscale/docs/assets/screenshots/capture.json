@@ -2,12 +2,12 @@
   "format": 1,
   "plugin": "heinzel-tailscale",
   "core_version": "0.9.1",
-  "inputs_sha256": "82b378b7751a6952957d95d803a4735473e3a428484c3692999c989c2b742241",
+  "inputs_sha256": "3f46cfa97729cae557fa8a96ec3674e3e7f6a1d6cb14106b9da57f85a1ff8f3c",
   "images": {
-    "docs/assets/screenshots/sharing-ready.png": "aa7eef4b1aab78b786ef526886359976f1ce7d42dd2a2f79032a69f6125c34d0",
+    "docs/assets/screenshots/sharing-ready.png": "ffef3fcbe76424d5e5c84f54a75dcdd287c18c2c2b13fde0d27542a53130b8e0",
     "docs/assets/screenshots/phone-sharing-ready.png": "4cc7f3f73511134760c4a1ea43fd91cc95ea32c1070cd80f60c07a1fbf277f5a",
-    "docs/assets/screenshots/sharing-request-cli.png": "3637b57e42fe70617665121009f5a31b6308f200cad01185f582847fece38c79",
-    "docs/assets/screenshots/sharing-off.png": "da65c400932287e70314d9f4d13ad33ae321daf11cece0f9e1a7b578a12992f7",
+    "docs/assets/screenshots/sharing-request-cli.png": "a8d6b5b8e2cfced85f87fb150836efe139315ed5f7b058c1ee4b8cebf811e2e5",
+    "docs/assets/screenshots/sharing-off.png": "25cd3e6644031e2b07f4ea39a15c9c0e3c38b27227d3309e4edf9181ef81ec30",
     "docs/assets/screenshots/sharing-off-cli.png": "258d18283c592905ed4faac4dcb3dd47ab1930071da6db5e1aac866b1c2f4250"
   },
   "review_bundle": {
@@ -15,59 +15,59 @@
     "definition": {
       "format": 1,
       "reviewer": "Codex feature-story agent",
-      "source_sha256": "9f2b7c048cc2c76a5a87a35c62ff97f2bca00677b36fe313d8a754c3db1331c0",
-      "plan_sha256": "8f20e85e3eed0cc3b60bd0de380c43832b0c190fa825a5c6fe7d1f53aafa7e19",
-      "story_sha256": "ccaa627bf994e8a6c462827a2b98e45b1697c130314671f1dfcc92ceefd9c1a0"
+      "source_sha256": "c0175c8b1896086012a0e2b5e4aca21bb4ce22b5e6ab38afa086a2e648e08042",
+      "plan_sha256": "c747f3e93001c3137d6b966ae7cb36ff2b32142a047f32dbfd1ed694a33c1151",
+      "story_sha256": "cb9f2592e525f1bd7bfd4767f164ed183d332ee5c739b726d0dfd71cb146fc37"
     },
     "plugin": "heinzel-tailscale",
     "core_version": "0.9.1",
-    "inputs_sha256": "82b378b7751a6952957d95d803a4735473e3a428484c3692999c989c2b742241",
+    "inputs_sha256": "3f46cfa97729cae557fa8a96ec3674e3e7f6a1d6cb14106b9da57f85a1ff8f3c",
     "screenshots": [
       {
         "path": "docs/assets/screenshots/sharing-ready.png",
         "surface": "ui",
-        "caption": "Share the app privately with an explicit ready state \u2014 local Tailscale fixture; session hidden"
+        "caption": "Enable private sharing and see verified readiness \u2014 fictional local Tailscale demo"
       },
       {
         "path": "docs/assets/screenshots/phone-sharing-ready.png",
         "surface": "ui",
-        "caption": "Inspect and copy the private link on a phone \u2014 local Tailscale fixture; session hidden"
+        "caption": "Inspect the private link at phone width \u2014 fictional local Tailscale demo; no remote connection tested"
       },
       {
         "path": "docs/assets/screenshots/sharing-request-cli.png",
         "surface": "cli",
-        "caption": "Inspect the saved sharing request from a separate CLI process \u2014 local fictional network"
+        "caption": "Inspect saved intent and mapping, with web verification pending \u2014 fictional local Tailscale demo in a separate CLI process"
       },
       {
         "path": "docs/assets/screenshots/sharing-off.png",
         "surface": "ui",
-        "caption": "Turn private sharing off explicitly \u2014 local Tailscale fixture"
+        "caption": "Turn private sharing off explicitly \u2014 fictional local Tailscale demo"
       },
       {
         "path": "docs/assets/screenshots/sharing-off-cli.png",
         "surface": "cli",
-        "caption": "Verify private sharing is off from the shell \u2014 local fictional network"
+        "caption": "Confirm the owned mapping is gone and the request is off \u2014 fictional local Tailscale demo"
       }
     ],
     "images": {
-      "sharing-ready.png": "aa7eef4b1aab78b786ef526886359976f1ce7d42dd2a2f79032a69f6125c34d0",
+      "sharing-ready.png": "ffef3fcbe76424d5e5c84f54a75dcdd287c18c2c2b13fde0d27542a53130b8e0",
       "phone-sharing-ready.png": "4cc7f3f73511134760c4a1ea43fd91cc95ea32c1070cd80f60c07a1fbf277f5a",
-      "sharing-request-cli.png": "3637b57e42fe70617665121009f5a31b6308f200cad01185f582847fece38c79",
-      "sharing-off.png": "da65c400932287e70314d9f4d13ad33ae321daf11cece0f9e1a7b578a12992f7",
+      "sharing-request-cli.png": "a8d6b5b8e2cfced85f87fb150836efe139315ed5f7b058c1ee4b8cebf811e2e5",
+      "sharing-off.png": "25cd3e6644031e2b07f4ea39a15c9c0e3c38b27227d3309e4edf9181ef81ec30",
       "sharing-off-cli.png": "258d18283c592905ed4faac4dcb3dd47ab1930071da6db5e1aac866b1c2f4250"
     },
     "transcripts": {
       "sharing-ready.txt": "a0e4e6cb0748ff0300e1cacbc774b884550075bed29ab662216f01de3162fc57",
       "phone-sharing-ready.txt": "0a56b0e9e56dfadfeaf1d8ab9f28a527706a96f3adb36d820b3daf246a4940a4",
-      "sharing-request-cli.txt": "2dd0ceec77cc55353d25ca7ad4cad87fb0149addeecd44785b7ef4c6b588c9f0",
+      "sharing-request-cli.txt": "df6d62a5b06499ea336d644bd8fbeb7e17e767e7d529dafc835f79a540f5ad62",
       "sharing-off.txt": "4e4d90e850a5eebb50d7860c0113d94816bf431eb390eff2f1cd7a3eb18732a1",
       "sharing-off-cli.txt": "4d0c6d11c3a596857032c07677d48bb49d42f898f73f9e031a4388d922710890"
     },
-    "bundle_sha256": "6d5ba26caf0d3c581ef58451730f49673332ade688e24ae8730f61d3920ebfb7"
+    "bundle_sha256": "a10346a91773b902f616395f9d4958919da0076de0d72e53616b6caac06a3aac"
   },
   "privacy_review": {
     "format": 1,
-    "bundle_sha256": "6d5ba26caf0d3c581ef58451730f49673332ade688e24ae8730f61d3920ebfb7",
+    "bundle_sha256": "a10346a91773b902f616395f9d4958919da0076de0d72e53616b6caac06a3aac",
     "reviewer": "Codex privacy agent",
     "decision": "approve",
     "checked_images": [

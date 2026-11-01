@@ -1,11 +1,15 @@
 format = 1
 bootstrap = "docs/screenshot_fixture.py"
+browser_time = "2026-11-01T12:00:00Z"
+
+# showcase is supplied only by the existing documentation fixture.
+# Its operations exercise the real Zoom adapter against fictional mail.
 
 [[scenes]]
 name = "meeting-decisions"
 surface = "ui"
 route = "/"
-caption = "Decisions and next steps from a summary email — fixture-only requester, real Zoom parser"
+caption = "Fictional Weekly sync: a Thursday release decision and three named next steps, via the fixture-only requester and real Zoom parser."
 timeout_ms = 30000
 
 [[scenes.steps]]
@@ -20,7 +24,7 @@ height = 650
 name = "recent-meetings"
 surface = "ui"
 route = "/"
-caption = "Find the recent summarized meetings — fixture-only requester and fictional mailbox"
+caption = "Fictional October mailbox: find Weekly sync and Launch review through the fixture-only requester and real Zoom adapter."
 timeout_ms = 30000
 
 [[scenes.steps]]
@@ -32,21 +36,37 @@ width = 1280
 height = 650
 
 [[scenes]]
+name = "launch-decisions"
+surface = "ui"
+route = "/"
+caption = "Fictional Launch review: a ten-percent rollout decision and two named owners, using a second meeting argument in the native terminal."
+timeout_ms = 30000
+
+[[scenes.steps]]
+action = "terminal"
+command = ["showcase", "one", "launch"]
+
+[scenes.viewport]
+width = 1280
+height = 650
+
+[[scenes]]
 name = "summary-cli"
 surface = "cli"
-caption = "Read a meeting summary in the shell — fixture-only requester, real Zoom parser and fictional mailbox"
+caption = "Fictional Weekly sync in the CLI: parsed summary sections and a source link, through the fixture-only requester."
 command = ["showcase", "one", "sync"]
 
 [[scenes]]
 name = "meeting-list-json"
 surface = "cli"
-caption = "Structured summarized-meeting results for workflows — fixture-only requester, no verbatim transcription"
+caption = "Fictional October meetings as JSON: typed meeting metadata through the fixture-only requester, not verbatim transcripts."
 command = ["showcase", "ended", "--json"]
+
 [[scenes]]
 name = "workflow-context"
 surface = "ui"
 route = "/contracts/meeting-notes"
-caption = "Meeting notes combines the declared source inputs — local demonstration, no report generated"
+caption = "Fictional Meeting notes contract: declares a meeting-summary input and Markdown output; no report has been generated."
 timeout_ms = 30000
 
 [[scenes.steps]]

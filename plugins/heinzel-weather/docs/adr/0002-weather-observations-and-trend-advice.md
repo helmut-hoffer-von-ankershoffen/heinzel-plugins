@@ -1,7 +1,6 @@
 ---
-status: proposed
+status: accepted
 date: 2026-10-28
-related: 0001
 ---
 
 # 0002: Weather observations and trend advice are read-only plugin inputs
