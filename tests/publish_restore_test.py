@@ -411,8 +411,9 @@ def test_an_oversized_release_artifact_is_never_downloaded(release):
 def test_an_asset_name_containing_a_path_is_refused(release):
     state, destination = release
     state["release"]["assets"][0]["name"] = "../heinzel_harbor-1.2.0-py3-none-any.whl"
-    with pytest.raises(ValueError):
+    with pytest.raises(ValueError, match="wheel does not match|bounded canonical filenames"):
         publisher.restore(REPOSITORY, TAG, "heinzel-harbor", destination)
+    assert not any(c[:3] == ["gh", "release", "download"] for c in state["commands"])
 
 
 def test_an_artifact_that_changes_during_attestation_is_refused(release, monkeypatch):

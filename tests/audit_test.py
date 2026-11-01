@@ -1,7 +1,7 @@
 """The runtime-closure audit inspects the owning interpreter and honours a project allowlist."""
 
 import json
-import runpy
+import os
 import subprocess
 import sys
 from pathlib import Path
@@ -68,18 +68,37 @@ def test_an_unknown_distribution_stops_the_audit_before_any_license_check(audite
         audited("heinzel-no-such-distribution")
 
 
-def test_module_execution_reports_command_failure_without_a_traceback(monkeypatch, capsys):
-    monkeypatch.setattr(sys, "argv", ["heinzel_plugin_tools", "list", "--unknown-option"])
-    with pytest.raises(SystemExit) as stopped:
-        runpy.run_module("heinzel_plugin_tools", run_name="__main__")
-    assert stopped.value.code == 2
-    assert "unrecognized arguments" in capsys.readouterr().err
+def run_module(directory, *arguments):
+    """Execute the toolkit as a user would, in a fresh interpreter rooted at a disposable collection."""
+    environment = {key: value for key, value in os.environ.items() if not key.startswith("PLUGIN_")}
+    environment["PLUGIN_SOURCE_ROOT"] = str(directory)
+    return subprocess.run(  # noqa: S603 - the running interpreter with fixed module and arguments
+        [sys.executable, "-m", "heinzel_plugin_tools", *arguments],
+        cwd=directory,
+        env=environment,
+        text=True,
+        capture_output=True,
+        timeout=60,
+        check=False,
+    )
 
 
-def test_module_execution_lists_the_collection_as_json(monkeypatch, capsys):
-    monkeypatch.setattr(sys, "argv", ["heinzel_plugin_tools", "list"])
-    with pytest.raises(SystemExit) as stopped:
-        runpy.run_module("heinzel_plugin_tools", run_name="__main__")
-    assert stopped.value.code == 0
-    listed = json.loads(capsys.readouterr().out)
-    assert listed and all({"name", "version", "path"} == set(item) for item in listed)
+def test_module_execution_rejects_unknown_options_with_usage_and_no_traceback(tmp_path):
+    result = run_module(tmp_path, "list", "--unknown-option")
+    assert result.returncode == 2
+    assert "unrecognized arguments: --unknown-option" in result.stderr
+    assert "Traceback" not in result.stderr
+
+
+def test_module_execution_lists_only_the_plugins_of_its_own_collection(tmp_path):
+    directory = tmp_path / "plugins/heinzel-harbor"
+    directory.mkdir(parents=True)
+    (directory / "pyproject.toml").write_text(
+        '[project]\nname = "heinzel-harbor"\nversion = "0.3.0"\n'
+        '[project.entry-points."heinzel.modules"]\nharbor = "heinzel_harbor"\n'
+    )
+    result = run_module(tmp_path, "list")
+    assert result.returncode == 0
+    assert json.loads(result.stdout) == [
+        {"name": "heinzel-harbor", "version": "0.3.0", "path": "plugins/heinzel-harbor"}
+    ]

@@ -140,18 +140,20 @@ def test_bundle_must_be_a_mapping():
         privacy.validate_bundle(["not", "a", "bundle"])  # type: ignore[arg-type]
 
 
-@pytest.mark.parametrize("filename", ["Upper.png", "../escape.png", "has space.png", "a" * 61 + ".png"])
+@pytest.mark.parametrize(
+    "filename", ["Upper.png", "../escape.png", "has space.png", "a" * 61 + ".png", "9starts-with-digit.png"]
+)
 def test_unbounded_artifact_filenames_are_refused(draft, filename):
     _, _, bundle = draft
+    stem = filename.removesuffix(".png")
     images = {filename if key == "overview.png" else key: value for key, value in bundle["images"].items()}
     shots = copy.deepcopy(bundle["screenshots"])
     shots[0]["path"] = "docs/assets/screenshots/" + Path(filename).name
     transcripts = {
-        (Path(filename).stem + ".txt") if key == "overview.txt" else key: value
-        for key, value in bundle["transcripts"].items()
+        (stem + ".txt") if key == "overview.txt" else key: value for key, value in bundle["transcripts"].items()
     }
     broken = resealed(bundle, images=images, screenshots=shots, transcripts=transcripts)
-    with pytest.raises(privacy.CaptureError):
+    with pytest.raises(privacy.CaptureError, match="bounded filenames and SHA-256|Review captions do not match"):
         privacy.validate_bundle(broken)
 
 
