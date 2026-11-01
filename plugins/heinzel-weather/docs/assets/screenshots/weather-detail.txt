@@ -15,11 +15,11 @@ Today
 Weather in Berlin, DE
 ☀ 22°C clear sky
 feels like 21°C, wearing umbrella
-Sun ☁ 10 to 19°C
+Mon ☁ 10 to 19°C
 broken clouds, 10% rain
-Mon 🌧 9 to 18°C
+Tue 🌧 9 to 18°C
 moderate rain, 80% rain
-Tue ☀ 12 to 21°C
+Wed ☀ 12 to 21°C
 clear sky, 10% rain
 Weather data by OpenWeather, openweathermap.org
 Ask about it
@@ -55,4 +55,4 @@ Clear sky · Berlin, DE
 Feels like 21°C
 Today 12 to 24°C · 80% rain
 Weather data by OpenWeather, openweathermap.org
-Run
+Change place

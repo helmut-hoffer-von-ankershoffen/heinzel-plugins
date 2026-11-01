@@ -8,7 +8,8 @@ Install it with:
 
 ```bash
 hz system plugin add weather --confirm
-hz setup weather    # your places and the units (and the provider; Open-Meteo needs no key)
+hz setup weather    # your places and the units (and the provider; Open-Meteo needs no key); the app: Settings > Weather
+# With no place set, the city of your time zone is used until you set one.
 ```
 
 Open-Meteo needs no account and no key. Its data is licensed [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/)
@@ -27,7 +28,7 @@ at openweathermap.org; it also brings severe weather alerts.
 Contributed as data (ADR 0056), nothing to install on the app's side:
 
 - A status item in the footer and the sidebar: the temperature and sky, with the place, feels-like, what the
-  Heinzelmännchen wears and the attribution on hover; a click opens `hz weather show` in the terminal.
+  Heinzelmännchen wears and the attribution on hover; "Change place" opens Settings > Weather; nothing is typed into a terminal.
 - Today: a graphic with the temperature beside the Heinzelmännchen dressed for the weather (an umbrella in or near rain,
   sunglasses in clear daylight, a scarf in the cold), and a list of the next days with the attribution.
 - Notices (the daemon's `weather.watch` job) when rain starts within the hour, the temperature swings or, with
