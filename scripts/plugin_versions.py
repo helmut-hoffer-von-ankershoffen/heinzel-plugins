@@ -107,7 +107,7 @@ def unreleased(root: Path, tags: set[str]) -> list[str]:
 
 
 def main(arguments: list[str]) -> int:
-    """`check <base>` refuses a bump that ships nothing or a shipped change without a bump; `unreleased` lists the rest."""
+    """`check <base>` refuses a bump that ships nothing or a shipped change without one; `unreleased` lists the rest."""
     if arguments[:1] == ["check"] and len(arguments) == 2:  # noqa: PLR2004
         bumps = unjustified_bumps(arguments[1])
         stale = unbumped_changes(arguments[1])
