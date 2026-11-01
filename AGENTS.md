@@ -1,23 +1,31 @@
 # AGENTS.md
 
-Plugins use only the public `heinzel` / `heinzel.kernel` API. Each directory in `plugins/` is an independent project.
-Keep changes inside the owning plugin; improve shared tooling only for a generic capability. Never import another
-plugin implementation or core internals. Versions, tests and releases are per plugin. Every pytest file has exactly
-one level marker. Core contract changes are tested against a candidate core artifact, never by running all core tests.
-Use conventional commits and pull requests. Review nontrivial changes. Public sources contain only fictional names.
+Each directory in `plugins/` is an independent project. Read README.md for owning commands.
 
-Read README.md for owning commands. Use `make new NAME=harbor` to create only the new plugin directory and lock.
-While editing run `make check-fast NAME=<owner>`; before release run `make check NAME=<owner>`, `make build NAME=<owner>`
-and `make acceptance NAME=<owner>`. `make lock NAME=<owner>` refreshes ordinary dependencies. `CORE=<wheel>` selects
-an explicit candidate SDK. `make tooling-check` checks shared tooling only. Never run core's suite for a plugin change.
+## Commands
 
-`make release NAME=<owner>` previews; `make publish NAME=<owner>` dispatches the owning protected workflow after a
-reviewed merge. Publish exactly the accepted wheel; never rebuild an existing version. Standalone public/private
-projects use the same toolkit and need no parent edits; see the
-[custom plugin author guide](https://github.com/helmut-hoffer-von-ankershoffen/heinzel/blob/main/docs/PLUGIN_AUTHORING.md).
-Private plugins use private GitHub releases and authenticated HTTPS installation, never public PyPI.
+- Create: `make new NAME=harbor` (creates only the plugin directory and lock).
+- Edit loop: `make check-fast NAME=<owner>`.
+- Before release: `make check NAME=<owner>`, `make build NAME=<owner>`, `make acceptance NAME=<owner>`.
+- `make lock NAME=<owner>` refreshes ordinary dependencies. `CORE=<wheel>` selects a candidate SDK.
+  `make tooling-check` checks shared tooling only.
+- Release: `make release NAME=<owner>` previews; after a reviewed merge, `make publish NAME=<owner>` dispatches the
+  owning protected workflow.
+- After an interface change: `make screenshots NAME=<owner> OPEN=1`. Define a source-bound feature story before
+  capture (`hz-plugin screenshots <owner> --plan`; offline freshness: `--check --json`). An independent agent
+  inspects every image and transcript before gallery/README publication ([guide](docs/SCREENSHOT_AUTHORING.md)).
 
-After an interface change, run `make screenshots NAME=<owner> OPEN=1`. An agent defines a source-bound feature
-story before capture; an independent agent inspects every image and transcript before gallery/README publication.
-Use `hz-plugin screenshots <owner> --plan` for the editable definition and `--check --json` for offline freshness.
-See [the capture guide](docs/SCREENSHOT_AUTHORING.md). Never manufacture an approval receipt to bypass either review.
+## Rules
+
+- Use only the public `heinzel` / `heinzel.kernel` API. Never import another plugin's implementation or core
+  internals.
+- Keep changes inside the owning plugin; change shared tooling only for a generic capability.
+- Never run core's suite for a plugin change. Test core contract changes against a candidate core artifact.
+- Versions, tests and releases are per plugin. Publish exactly the accepted wheel; never rebuild an existing version.
+- Private plugins use private GitHub releases and authenticated HTTPS installation, never public PyPI. Standalone
+  projects use the same toolkit and need no parent edits
+  ([author guide](https://github.com/helmut-hoffer-von-ankershoffen/heinzel/blob/main/docs/PLUGIN_AUTHORING.md)).
+- Set exactly one level marker per pytest file.
+- Use conventional commits and pull requests. Review nontrivial changes.
+- Public sources contain only fictional names.
+- Never manufacture an approval receipt to bypass a screenshot review.
