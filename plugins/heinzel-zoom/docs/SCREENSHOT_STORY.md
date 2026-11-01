@@ -1,59 +1,24 @@
-# Recover decisions and next steps from meeting summaries.
+**Audience.** People who receive Zoom summary emails and want meeting decisions and next actions available to Heinzelmännchen workflows.
 
-The useful story is “a meeting ended; its decisions and owners are ready for the next workflow.” The plugin reads
-Zoom summary emails through the bound `Mail` capability. It does not use Zoom's API, draw a video-call UI, record a
-meeting, or retrieve a verbatim transcript. Its `Transcript` values are parsed summary sections and must be labeled
-as summaries throughout the gallery.
+**Outcome.** Answer “What did we decide, and who acts next?” using parsed summary emails. Installation requires a bound mail adapter and Zoom sending summaries to that mailbox; this plugin needs no Zoom credentials. These are summaries, not verbatim transcripts.
 
-## Runtime and command boundary
+**Scenes.** Preserve the existing five scenes and add one supported parameter case:
 
-The released owning command is `hz zoom info`; useful reads are the public `Meetings.ended`, `transcripts` and
-`transcript` methods consumed by a workflow. There is no released `hz zoom meetings` or `hz zoom transcript` command.
-Register a **fixture-only** `showcase` requester in the documentation bootstrap using the public capability API,
-based on `prep()` in [the integration tests](../tests/integration/capability_test.py). Proposed `showcase ended`,
-`showcase said` and `showcase one` commands below exist only in that isolated demonstration.
+1. **meeting-decisions:** In the native app terminal, read the fictional Weekly sync: ship Thursday after phone checks, with next steps for Jonas, Priya and Mira.
+2. **recent-meetings:** Show the fictional October meeting table with Weekly sync and Launch review, UTC start times and participant names.
+3. **launch-decisions:** Read Launch review using the second meeting argument. Show its ten-percent rollout decision and two named owners.
+4. **summary-cli:** Retain the shell result showing Weekly sync’s parsed sections and source link.
+5. **meeting-list-json:** Retain structured meeting metadata for workflow authors. Do not describe this output as transcript text.
+6. **workflow-context:** Retain the existing Meeting notes contract view. It declares a summary input and Markdown output; it has not generated a report.
 
-Use the window `2026-10-01T00:00:00+00:00` to `2026-11-01T00:00:00+00:00`, with one summary titled “Weekly sync” and
-another “Launch review”. Keep each summary concise enough that recap and next steps fit on screen.
+**Fictional fixtures.** Reuse only `docs/screenshot_fixture.py`. During explicit capture it supplies the local mailbox, `showcase` requester and demonstration contract. Its existing `sync`, `launch` and newsletter messages use fictional people and decisions. The requester calls the real installed Zoom adapter. `showcase` commands are documentation fixtures; the plugin’s own CLI operation is `hz zoom info`. Freeze browser time after the fixture meetings; the requester’s October window is already fixed.
 
-## Required scenes, in gallery order
+**Privacy pitfalls.** Capture only the temporary fictional profile without connected accounts. Names, meeting identifiers, decisions and source URLs can remain visible, so real mailbox data must never replace these fixtures. Leave source links unopened. The supplied messages do not exercise address redaction or token removal, so screenshots cannot establish those protections. Treat the rollout and readiness statements as fictional meeting content.
 
-| Scene | Surface and actual action | Visible result and caption | Why it matters |
-| --- | --- | --- | --- |
-| Decisions at a glance | UI terminal: `hz showcase one sync` | Real parsed summary sections: Quick recap, Next steps, named owners and a source link. Caption: “Decisions and next steps from a Zoom summary email — fictional mailbox in the app terminal.” | Shows the outcome users want after a meeting. |
-| Meetings available | UI terminal: `hz showcase ended` | Two actual `Meeting` results with titles, start/end and participant names. Caption: “Find recent summarized meetings through the meetings capability — fictional data.” | Shows how workflows find the right meeting. |
-| Summary in the shell | CLI: `hz showcase one sync` | Readable summary and next-action list, with command and title visible. Caption: “Read a meeting summary in the shell — fixture-only requester, real Zoom parser.” | Demonstrates utility outside the graphical app. |
-| Structured sections | CLI: `hz showcase ended --json` | One concise summary's actual segments and source identity. Caption: “Parsed summary sections for workflows and agents — not a verbatim transcript.” | Makes the typed automation interface concrete without overstating it. |
-| Follow-up workflow | UI: seeded `/contracts/meeting-notes` | Actual shared contract page showing meeting-summary input and the meeting-notes output. Caption: “A local meeting-notes contract reads the summaries and tracks its output.” | Connects meeting context to a persistent team task. |
+**Acceptance criteria.**
 
-The workflow scene requires a real seeded contract. Verify `hz heinzel wake meeting-notes --dry-run` produces a
-packet containing the fictional recap and next steps without running an agent or contacting Zoom. A contract page
-is not proof of an AI-generated final document; do not label it that way.
-
-## Fixture entry points
-
-[conftest.py](../tests/conftest.py) already defines `Mailbox`, `email`, `SUMMARY` and the fictional “Weekly sync”.
-Use the same public in-memory `Mail` adapter and bind `mail = "inbox"`, `meetings = "zoom"` only in this profile.
-Retain the actual installed Zoom service and parser. Add the second summary via the same helper. Include one
-ordinary newsletter or forwarded summary in the source mailbox and assert the real adapter excludes it.
-The [integration contract](../tests/integration/capability_test.py) already demonstrates the complete dry-run packet.
-Do not install or contact a real Google mailbox merely to demonstrate Zoom's mail dependency.
-
-## Accessible capture and acceptance
-
-- Open `button` **Open a terminal**, then **Full screen**. Wait for “Weekly sync” and “Next steps” after the real
-  command finishes. The source link, recap and all selected next steps must be readable.
-- On the shared contract page wait for `heading` **Meeting notes**. Verify its declared meetings input is present.
-- Both the single-summary and windowed methods run through the actual Zoom adapter; two useful UI and CLI scenes
-  are populated. Non-summary messages are absent and addresses in body text become the parser's `[address]`.
-- Use fictional people only; no account emails, passcodes, session tokens, private meeting links, local hostnames
-  or absolute machine paths reach any artifact. Keep only fixture source links without query or fragment.
-- Captions always say “summary” where appropriate. Reject any “transcription”, “recording” or “live meeting” claim,
-  empty lists, help screens or settings-only scenes as evidence of the plugin's useful behavior.
-
-## Current captured scope
-
-The window is fixed inside the documentation requester. The structured CLI scene uses `showcase ended --json`
-for two concise typed meeting records; `showcase one sync` shows the actual parsed summary sections. A deliberately
-ordinary newsletter is excluded by the real mail-query/summary path. The local meeting-notes contract is seeded
-as a real, valid contract; its page declares source inputs and does not claim a generated final document.
+- Six scenes retain all five existing subjects, with four useful app views and two CLI results. The native terminal demonstrates `one sync` and `one launch`.
+- Weekly sync shows its decision and three owners; Launch review shows its different decision and two owners. The meeting table and JSON contain the two matching summaries and exclude the newsletter.
+- Summary headings, actions and table columns are readable without clipping. The contract heading is visible, with no claim of generated notes.
+- Every caption explicitly identifies fictional data and stays below 180 characters. Commands use argument arrays; terminal actions have no redundant cell waits.
+- The plan was statically checked by inspection against the requested structure and supplied fixture. No code, imports, captures or runtime validator were executed; visual capture verification remains pending.

@@ -6,6 +6,6 @@
   "apply_settings": {},
   "mapped": true,
   "origin": "https://workstation.tail-example.ts.net",
-  "target": "http://127.0.0.1:60903",
+  "target": "http://127.0.0.1:60734",
   "message": "The request is saved; restart/apply and verify it from the owning web app."
 }

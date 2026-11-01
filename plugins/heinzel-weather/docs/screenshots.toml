@@ -1,5 +1,7 @@
 format = 1
 bootstrap = "docs/screenshot_fixture.py"
+# Browser clock only; the existing fixture anchors server data to the capture hour.
+browser_time = "2026-11-01T12:00:00+01:00"
 
 [[scenes]]
 name = "today-weather"
@@ -40,7 +42,7 @@ name_regex = "^Dismiss Doctor"
 optional = true
 
 [[scenes.steps]]
-action = "click"
+action = "hover"
 role = "button"
 name_regex = "Berlin"
 within_role = "contentinfo"
@@ -50,7 +52,6 @@ action = "wait"
 text = "Clear sky · Berlin, DE"
 
 [scenes.focus]
-padding = 48
 role = "region"
 name_regex = "Berlin"
 

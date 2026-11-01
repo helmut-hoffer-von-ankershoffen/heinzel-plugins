@@ -61,12 +61,6 @@ ignore = [
 "fuzz/*.py" = [
     "INP001",  # fuzz targets are scripts, not a package
 ]
-"tests/live/*.py" = [
-    "T201",    # the seed and capture scripts report on stdout
-    "PLR1704", # scripts reuse short loop names
-    "E501",    # long literal data
-    "PLR0913", # scripts pass what they build
-]
 "hatch_build.py" = [
     "INP001",  # the build hook hatch loads by path, not a package
 ]
@@ -141,8 +135,6 @@ title = "Atlassian"
 category = "connectors"
 highlights = [
     "Jira issues and Confluence pages",
-    "Assigned work, epics and what needs attention",
-    "Drafts of Jira changes you approve",
     "Implements tracker and documents contracts",
     "Configure your own Atlassian access",
 ]
@@ -170,4 +162,9 @@ caption = "Demo data: the fictional Confluence plan, source and revision in the 
 [[tool.heinzel.catalog.screenshots]]
 path = "docs/assets/screenshots/workflow-context.png"
 surface = "ui"
-caption = "Demo data: Weekly work review declares Jira and Confluence inputs; this local workflow has not run and no report has been generated."
+caption = "Demo data: the local Weekly work review contract declares Jira and Confluence inputs; no report has been generated."
+
+[[tool.heinzel.catalog.screenshots]]
+path = "docs/assets/screenshots/jira-parameters.png"
+surface = "ui"
+caption = "Demo data: lowercase wid resolves to WID; the fixture requester returns structured Jira changes with --json in the app terminal."

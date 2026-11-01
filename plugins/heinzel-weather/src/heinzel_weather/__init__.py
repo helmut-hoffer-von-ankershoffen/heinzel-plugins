@@ -25,13 +25,14 @@ from heinzel import (
     Kernel,
     ListEntry,
     ListWidget,
+    Navigate,
     NavSettings,
     Notifications,
     OpenUrl,
     Prompter,
-    RunCommand,
     Status,
     StatusItem,
+    WidgetAction,
 )
 from heinzel import __version__ as heinzel_version
 from pydantic import Field, JsonValue
@@ -61,6 +62,8 @@ from heinzel_weather._models import (
 from heinzel_weather._module import API_KEY, FALLBACK_VARIABLE, module
 from heinzel_weather._service import MAX_DAYS, WeatherService
 
+SETTINGS = Navigate(path="/?settings=weather")
+"""Where a person sets the place: this plugin's section of Settings, never a command typed into a terminal."""
 module.settings(WeatherSettings)
 module.service(WeatherService)
 module.skill(Path(__file__).parent / "skills")
@@ -69,7 +72,7 @@ module.nav(
     title="Weather",
     icon="cloud-sun",
     settings=NavSettings(sections=("weather",), group="preferences"),
-    sidebar=RunCommand(command="hz weather show"),
+    sidebar=SETTINGS,
 )
 MAX_TEXT = 80
 """The longest text of a status item or a widget title (ADR 0056)."""
@@ -143,9 +146,7 @@ def _weather_status(value: UiWeather) -> StatusItem:
     conditions = value.conditions
     now = conditions.now
     if now is None:
-        return StatusItem(
-            text="Set a location", icon="cloud", tone="warn", effect=RunCommand(command="hz setup weather")
-        )
+        return StatusItem(text="Set a location", icon="cloud", tone="warn", effect=SETTINGS)
     detail = [
         DetailLine(text=f"{now.description.capitalize()} · {now.location}"),
         DetailLine(text=f"Feels like {now.feels_like:.0f}{now.units.degree}"),
@@ -153,6 +154,8 @@ def _weather_status(value: UiWeather) -> StatusItem:
             text=f"Today {now.low:.0f} to {now.high:.0f}{now.units.degree} · {round(now.rain_chance * 100)}% rain"
         ),
     ]
+    if conditions.guessed:
+        detail.append(DetailLine(text="Place guessed from your time zone; set yours in Settings", tone="warn"))
     if value.stale:
         detail.append(DetailLine(text="Showing the last observation; refresh failed", tone="warn"))
     else:
@@ -162,7 +165,7 @@ def _weather_status(value: UiWeather) -> StatusItem:
         tone="warn" if value.stale else "neutral",
         icon=ui_icon(now.condition),
         detail=detail,
-        effect=RunCommand(command="hz weather show"),
+        actions=[WidgetAction(label="Change place", icon="cloud", effect=SETTINGS)],
     )
 
 
@@ -193,7 +196,6 @@ def _forecast_card(value: UiWeather) -> ListWidget | None:
         ListEntry(
             text=f"{now.icon} {round(now.temperature) + 0}{degree} {now.description}",
             detail=f"{feels}{worn}",
-            effect=RunCommand(command="hz weather show"),
         ),
         *(
             ListEntry(
@@ -286,7 +288,7 @@ def signals(service: WeatherService) -> Signals:
 
 def _conditions_line(result: Conditions) -> Text:
     if result.now is None:
-        return Text("No place is set: `hz setup weather`.")
+        return Text("No place is set: choose one in Settings > Weather.")
     worn = f" Wearing: {', '.join(result.accessories)}." if result.accessories else ""
     return Text(f"{_now_line(result.now)}{worn}")
 
@@ -324,6 +326,9 @@ def ready(service: WeatherService, settings: WeatherSettings, credentials: Crede
     checks: list[Check] = []
     if settings.locations:
         detail = f"{', '.join(settings.locations)} in {service.units.value} units"
+        checks.append(Check(name="locations", status=Status.UP, detail=detail))
+    elif service.guessed:
+        detail = f"{service.places[0]}, guessed from your time zone; set yours in Settings > Weather"
         checks.append(Check(name="locations", status=Status.UP, detail=detail))
     else:
         checks.append(Check(name="locations", status=Status.DEGRADED, detail="none set", fix="hz setup weather"))

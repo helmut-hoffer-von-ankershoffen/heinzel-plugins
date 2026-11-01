@@ -9,6 +9,9 @@ import pytest
 
 pytestmark = pytest.mark.integration
 
+PR_SETTINGS = {"BODY", "BODY_FILE", "DRAFT", "NO_PREFLIGHT", "PLUGIN_CORE", "PLUGIN_NAME"}
+"""What scripts/pr.sh reads from its environment; a developer's own NO_PREFLIGHT=1 must not change what is tested."""
+
 
 @pytest.mark.parametrize("selected", [False, True])
 @pytest.mark.parametrize("conflict", [False, True])
@@ -56,7 +59,7 @@ def test_pr_preserves_pushed_ancestry_and_a_resolved_main_merge(
         )
         stub.chmod(0o755)
     environment = {
-        **{key: value for key, value in os.environ.items() if not key.startswith("GIT_")},
+        **{key: value for key, value in os.environ.items() if not key.startswith("GIT_") and key not in PR_SETTINGS},
         "PATH": str(binaries) + os.pathsep + os.environ["PATH"],
         "GIT_CONFIG_GLOBAL": os.devnull,
         "GIT_CONFIG_NOSYSTEM": "1",

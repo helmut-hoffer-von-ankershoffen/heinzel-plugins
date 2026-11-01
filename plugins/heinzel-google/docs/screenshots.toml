@@ -17,6 +17,21 @@ width = 1280
 height = 650
 
 [[scenes]]
+name = "launch-files-week"
+surface = "ui"
+route = "/"
+caption = "Explore seven days without a name filter — real Google operation over the fixture's same fictional files"
+timeout_ms = 30000
+
+[[scenes.steps]]
+action = "terminal"
+command = ["google", "files", "--days", "7"]
+
+[scenes.viewport]
+width = 1280
+height = 650
+
+[[scenes]]
 name = "launch-plan"
 surface = "ui"
 route = "/"
@@ -35,7 +50,7 @@ height = 650
 name = "launch-week"
 surface = "ui"
 route = "/"
-caption = "The launch week and its meeting owners — fixture-only requester, real Google Calendar adapter"
+caption = "The launch week's meetings and attendees — fixture-only requester, real Calendar adapter over fictional events"
 timeout_ms = 30000
 
 [[scenes.steps]]

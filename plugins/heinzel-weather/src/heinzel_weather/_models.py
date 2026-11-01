@@ -70,7 +70,7 @@ class WeatherSettings(ModuleSettings):
     locations: list[str] = Field(
         default=[],
         description='Where you want the weather for, yours first (the primary one): a place such as "Berlin, DE" '
-        'or coordinates such as "52.52,13.405".',
+        'or coordinates such as "52.52,13.405". Left empty, the city of your time zone is used.',
     )
     units: Units | None = Field(
         default=None,
@@ -228,6 +228,9 @@ class Conditions(_Strict):
     )
     provider: Provider = Field(description="Who the weather comes from.")
     attribution: str = Field(description="Where the data comes from, and under which licence if it asks one.")
+    guessed: bool = Field(
+        default=False, description="Whether the place is a guess from the machine's time zone, as none is set."
+    )
 
 
 class UiWeather(_Strict):

@@ -1,11 +1,14 @@
 format = 1
 bootstrap = "docs/screenshot_fixture.py"
+browser_time = "2026-11-01T00:00:00Z"
+
+# The existing bootstrap provides the documentation-only showcase commands.
 
 [[scenes]]
 name = "merged-work"
 surface = "ui"
 route = "/"
-caption = "Merged pull requests in the app terminal — fixture-only requester, real GitHub adapter"
+caption = "Merged pull requests in the app terminal — fictional data, fixture-only requester, real GitHub adapter"
 timeout_ms = 30000
 
 [[scenes.steps]]
@@ -15,6 +18,7 @@ command = ["showcase", "merged", "acme/widgets"]
 [scenes.viewport]
 width = 1280
 height = 650
+
 [[scenes]]
 name = "issue-changes"
 surface = "ui"
@@ -29,10 +33,11 @@ command = ["showcase", "issues", "acme/widgets"]
 [scenes.viewport]
 width = 1280
 height = 650
+
 [[scenes]]
 name = "merged-cli"
 surface = "cli"
-caption = "Read merged work in the shell — fixture-only requester, real GitHub adapter"
+caption = "Read merged work in the shell — fictional data, fixture-only requester, real GitHub adapter"
 command = ["showcase", "merged", "acme/widgets"]
 
 [[scenes]]
@@ -40,11 +45,12 @@ name = "issues-json"
 surface = "cli"
 caption = "Typed issue results for scripts and agents — fixture-only requester, fictional GitHub data"
 command = ["showcase", "issues", "acme/widgets", "--json"]
+
 [[scenes]]
 name = "workflow-context"
 surface = "ui"
 route = "/contracts/weekly-code-review"
-caption = "Weekly code review combines the declared source inputs — local demonstration, no report generated"
+caption = "Weekly code review declares merged-work and issue inputs — fictional local example, no report generated"
 timeout_ms = 30000
 
 [[scenes.steps]]

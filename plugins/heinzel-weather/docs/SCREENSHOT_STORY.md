@@ -1,59 +1,26 @@
-# Know the weather before the next meeting or commute
+**Audience**
+Heinzelmännchen users who want weather beside their daily work, with a fuller forecast available from the CLI.
 
-Show why Weather belongs on Today: current conditions, a useful multi-day outlook and a character that reflects
-the forecast. The primary image must contain populated weather cards. A provider/settings form or **Set a
-location** prompt is not a conversion image.
+**Outcome**
+Answer “What’s it like now, and should I bring an umbrella?” from Today, then inspect the next hours or choose a shorter outlook. The plugin defaults to keyless Open-Meteo; these screenshots demonstrate its existing local OpenWeather fixture. The fictional warning shown by that fixture does not demonstrate notification delivery or Open-Meteo alerts.
 
-## Demonstration profile
+**Scenes**
+1. **today-weather:** Open Today with fictional Berlin weather: 22°C displayed, clear sky, an umbrella accessory because today’s rain chance is 80%, and the coming days. The character makes the forecast memorable without replacing the numbers.
+2. **weather-detail:** Hover the footer’s Berlin status and crop its existing detail region. Show clear sky, feels like 21°C, today’s rounded 12–24°C range, 80% rain chance and provider attribution.
+3. **phone-weather:** Show the same useful Today content at 390 × 844. Check that temperature, forecast and attribution remain readable.
+4. **cli-weather:** Run `hz weather show`. Show hourly rain probabilities, cooling conditions, the five-day outlook and the clearly fictional thunderstorm warning from Example Weather Service.
+5. **cli-forecast:** Run `hz weather forecast --days 3`. Show a compact three-day result with lows, highs, rain chances, sky descriptions and attribution.
 
-Use `docs/screenshot_fixture.py`, which starts this plugin's `heinzel_weather.fake.serve(0)` on loopback and launches
-the installed `hz` entry point. It sets provider `openweather`, metric units, location **Berlin, DE**, a loopback
-base URL and a deliberately fake credential. Keep the environment credential backend and isolated state; never
-use a real account or request a live forecast. Berlin is a fictional demo location, not inferred user location.
+**Fictional fixtures**
+Reuse only `docs/screenshot_fixture.py` and its existing `heinzel_weather.fake` implementation. During explicit capture, the bootstrap starts a loopback server on an available port and selects fictional Berlin weather, metric units and a dummy credential. The fixture supplies 21.5°C now, rain beginning next hour, cooling toward 12°C and a sample warning. Retain the documented temporary fictional profile. The added browser clock fixes browser time only: the existing fixture still anchors forecast timestamps to the server’s capture hour.
 
-The fixture currently serves **21.5°C** clear sky, feels like **21°C**, today's high **24°C**, low **11.5°C**, rain
-probability **80%**, and rain approaching in the next hour. The Today card rounds current temperature to **22°C**;
-the expected accessory is an umbrella even though it is clear right now. The near forecast includes changing
-conditions, not repeated empty rows. These are canned provider answers, not current Berlin weather.
+**Privacy pitfalls**
+Keep personal accounts, actual locations, credentials, notifications and terminal history outside the capture profile. Label every image as fictional demo data and retain the provider attribution, including in the detail crop. Describe the warning as a fixture result, never as a real public warning or proof that a notice was delivered.
 
-```sh
-python docs/screenshot_fixture.py weather show
-python docs/screenshot_fixture.py weather forecast --days 3
-python docs/screenshot_fixture.py ui --no-browser --port 0
-```
-
-Run from the owning plugin in its installed SDK environment and isolated profile. Normal public equivalents are
-`hz weather show`, `hz weather forecast --days 3`, and `hz weather ui --json`. For standalone provider debugging,
-`python -m heinzel_weather.fake --port 8787` exposes the same local fake. `serve(port, now=callable)` can anchor its
-dates; the weather service also has a clock. Align both if a capture requires fixed dates rather than relative days.
-
-## Scenes to publish
-
-| Scene | Action and visible proof | Caption |
-| --- | --- | --- |
-| `today-weather` | At `/`, wait for **Weather in Berlin, DE** and **22°C**. Frame both the graphic current-weather card and the list forecast card: umbrella-bearing character, condition, several day rows with high/low temperatures and rain chances, and provider attribution. | “Current weather and the coming days on Today — fictional Berlin forecast.” |
-| `weather-detail` | Inspect the footer weather control and keep the entire expanded detail above its trigger. Show **Clear sky · Berlin, DE**, **Feels like 21°C**, today's low/high and 80% rain, plus attribution. Keep the populated Today cards behind it when space permits. | “Inspect conditions, feels-like temperature and rain chance from the weather status.” |
-| `phone-weather` | At 390×844, capture the populated current-weather and forecast cards at a useful scroll position. Text, character and day rows must remain readable, with no horizontal clipping. | “Plan the next few days from the phone-sized Today view.” |
-| `cli-weather` | Run `hz weather show` through the fixture. Show actual current conditions, the approaching rain, hourly outlook, daily forecast and the fixture's warning where rendered. Preserve attribution. | “Explore the detailed hourly and daily demonstration forecast in the CLI.” |
-| `cli-forecast` | Run `hz weather forecast --days 3` through the same fixture. Show three distinct days with low/high, sky and rain probability; avoid a long unreadable output strip. | “Get a concise three-day outlook in the CLI.” |
-
-The same weather status appears in both sidebar and footer. A global button match `22.*Berlin` is ambiguous:
-scope to the footer landmark, or hide only the sidebar status for the detail scene with
-`hz system ui hide weather:weather-now --slot sidebar`. A sidebar click runs `hz weather show`; a footer click pins
-the detail popover. If the footer overflowed, first open **More status items**. The popover is current-condition
-detail, not a custom right-side forecast panel. Never caption it as showing hourly data that is only in the CLI.
-
-## Acceptance and privacy
-
-Both Today widgets must be populated before capture; reject **Set a location**, **Loading…**, stale observations,
-failed refreshes, empty cards and unrelated settings screens. Confirm the umbrella is visible, current values agree
-with CLI rounding, future days have readable temperatures/rain chances, and provider attribution is retained.
-At desktop and phone widths, inspect both the card content and expanded-status geometry, not merely DOM presence.
-
-Stage images and transcripts privately. An agent must inspect every frame for real identity, account addresses,
-credentials, private locations, paths, browser/session tokens and accidental live-provider output before promotion.
-Do not display the fake API-key value either; it belongs only in the local fixture environment. Captions must say
-demonstration or fictional forecast so a public gallery cannot be mistaken for a live weather report.
-
-The expanded detail scene uses a native browser crop with 48 pixels of surrounding context. Keep the complete
-popover and its footer trigger visible; let its natural aspect ratio make the values readable on a phone.
+**Acceptance criteria**
+- Preserve the existing five scenes, captions, commands, interactions and phone viewport; add only the requested browser time and its clock limitation comment.
+- Today shows both current weather and the near forecast; the hover scene exposes useful detail; the phone view has readable content without clipping essential information.
+- CLI captures contain completed real command results. The three-day command produces three day rows. Do not add individual table-cell waits.
+- Optional Doctor dismissals may clear overlays; the detail hover and crop must resolve to the intended existing UI.
+- Static review checks TOML structure, five unique lowercase names, three UI scenes, two CLI scenes, captions under 180 characters, local routes, accessible locators, the existing relative bootstrap and argument-array commands.
+- No source was changed, imported or run, and no network calls or captures were made. Runtime rendering and locator success remain acceptance checks for explicit capture.

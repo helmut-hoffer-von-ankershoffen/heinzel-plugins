@@ -1,17 +1,16 @@
 format = 1
 bootstrap = "docs/screenshot_fixture.py"
-browser_time = "2026-10-31T12:00:00+01:00"
+browser_time = "2026-11-01T00:00:00Z"
 
-# Preserve the existing five scenes and their behavior.
-# showcase commands are documentation-only requesters using fictional local replies.
-# The bootstrap runs only during explicit capture in an isolated profile.
+# Six existing scenes retained.
+# showcase is supplied only by docs/screenshot_fixture.py.
+# The native terminal includes uppercase/table and lowercase/JSON issue cases.
 
 [[scenes]]
 name = "jira-issues"
 surface = "ui"
 route = "/"
 caption = "Demo data: fictional Jira changes, owners and states in the app terminal, using the real adapter and a fixture-only requester."
-reduced_motion = "reduce"
 timeout_ms = 30000
 
 [scenes.viewport]
@@ -27,7 +26,6 @@ name = "confluence-plan"
 surface = "ui"
 route = "/"
 caption = "Demo data: read the fictional Widget launch plan with its source and revision, using the real adapter and a fixture-only requester."
-reduced_motion = "reduce"
 timeout_ms = 30000
 
 [scenes.viewport]
@@ -54,11 +52,25 @@ command = ["showcase", "page"]
 name = "workflow-context"
 surface = "ui"
 route = "/contracts/weekly-work-review"
-caption = "Demo data: Weekly work review declares Jira and Confluence inputs; this local workflow has not run and no report has been generated."
-reduced_motion = "reduce"
+caption = "Demo data: the local Weekly work review contract declares Jira and Confluence inputs; no report has been generated."
 timeout_ms = 30000
 
 [[scenes.steps]]
 action = "wait"
 role = "heading"
 name = "Weekly work review"
+
+[[scenes]]
+name = "jira-parameters"
+surface = "ui"
+route = "/"
+caption = "Demo data: lowercase wid resolves to WID; the fixture requester returns structured Jira changes with --json in the app terminal."
+timeout_ms = 30000
+
+[scenes.viewport]
+width = 1280
+height = 900
+
+[[scenes.steps]]
+action = "terminal"
+command = ["showcase", "issues", "wid", "--json"]

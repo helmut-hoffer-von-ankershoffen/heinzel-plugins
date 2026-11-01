@@ -154,29 +154,29 @@ highlights = [
 [[tool.heinzel.catalog.screenshots]]
 path = "docs/assets/screenshots/widget-and-status.png"
 surface = "ui"
-caption = "One tiny plugin contributes a Today widget and sidebar status from the same value"
+caption = "Demo data: the constant 42 appears in both the Today widget and sidebar status."
 
 [[tool.heinzel.catalog.screenshots]]
 path = "docs/assets/screenshots/inspector.png"
 surface = "ui"
-caption = "Open the plugin-owned inspector and read the same value 42"
+caption = "Demo data: open the plugin-owned inspector to see the same constant value, 42."
 
 [[tool.heinzel.catalog.screenshots]]
 path = "docs/assets/screenshots/greeting-terminal.png"
 surface = "ui"
-caption = "The same typed greeting as structured output in the real app terminal"
+caption = "Demo data: greet fictional Mira with structured JSON in the app's native terminal."
 
 [[tool.heinzel.catalog.screenshots]]
 path = "docs/assets/screenshots/plugin-notice.png"
 surface = "ui"
-caption = "A plugin notice in the shared in-app notification panel — isolated demonstration"
+caption = "Demo data: a seeded Example is ready notice appears in the shared in-app notification panel."
 
 [[tool.heinzel.catalog.screenshots]]
 path = "docs/assets/screenshots/greeting-cli.png"
 surface = "cli"
-caption = "A typed plugin operation greets Mira from the CLI"
+caption = "Demo data: the typed hello operation greets fictional Mira from the CLI."
 
 [[tool.heinzel.catalog.screenshots]]
 path = "docs/assets/screenshots/sample-json.png"
 surface = "cli"
-caption = "The typed value behind the widget, status and inspector"
+caption = "Demo data: sample returns 42 as JSON, the same constant used by the widget, status and inspector."

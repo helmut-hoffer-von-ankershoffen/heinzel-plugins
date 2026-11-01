@@ -1,7 +1,7 @@
 {
   "format": 1,
-  "reviewer": "Codex Clock feature-story agent",
-  "source_sha256": "8d6645b219d90af2b5823d555a165c11d85801770702c936af3c7f69d3c0ec6a",
-  "plan_sha256": "84a84564afb9ea10e8af9d1170cc53bad3be2fdcb9564274ced112f864d7e914",
-  "story_sha256": "fee1075b98745189701d2859d927f69b0a4cc63e15acb226c95164bcd67d3b3d"
+  "reviewer": "Codex feature-story agent",
+  "source_sha256": "04a9866dd0125c11c80be19aece65a2e6c995d742582212a972a47f75387f85f",
+  "plan_sha256": "27d94c2ba408739014e81f097c1aeb8541273f634dbfacf023d62a0e48c5acfe",
+  "story_sha256": "cef70e88ab6f5eb38f3da1b5c79829960df79b16a3f742ecc964485e0b404606"
 }

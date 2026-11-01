@@ -70,7 +70,7 @@ def main() -> None:
         if code != 0:
             sys.exit(f"{name}: {err}")
         (OUT / name).write_text(json.dumps(anonymous(json.loads(out), real), indent=1, sort_keys=True) + "\n")
-        print("wrote", name)
+        sys.stdout.write("wrote", name + "\n")
     errors = {}
     for name, probe in {
         "missing_item": ("jira", "workitem", "view", "KAN-999", "--json"),
@@ -106,7 +106,7 @@ def main() -> None:
     )
     errors["signed_out"] = (code.stderr or code.stdout).strip()
     (OUT / "errors.json").write_text(json.dumps(errors, indent=1, sort_keys=True) + "\n")
-    print(json.dumps(errors, indent=1))
+    sys.stdout.write(f"{json.dumps(errors, indent=1)}\n")
 
 
 if __name__ == "__main__":

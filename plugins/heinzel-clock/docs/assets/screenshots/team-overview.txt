@@ -23,10 +23,12 @@ Ask about it
 
 Nothing needs you right now. Ask anything below.
 
-v0.9.8
+v0.9.1
 Updates, off
+Daemon not installed, off
+16:30:00
 0
 System health, warning
 No calendar connected, error
-Daemon not installed, off
-16:30:00
+
+Open

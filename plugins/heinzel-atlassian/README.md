@@ -2,18 +2,19 @@
 
 Read Jira issues and Confluence pages, and draft Jira changes a person approves, through Atlassian's CLI `acli`: the `tracker` and `documents` capabilities
 ([ADR 0028](https://github.com/helmut-hoffer-von-ankershoffen/heinzel/blob/main/docs/adr/0028-integrations-are-capability-adapters.md)): a first-party
-[Heinzelmännchen](https://github.com/helmut-hoffer-von-ankershoffen/heinzel) plugin. It is independently released and installed explicitly:
+[Heinzelmännchen](https://github.com/helmut-hoffer-von-ankershoffen/heinzel) plugin.
+
+Install it with:
 
 ```bash
-hz system plugin add atlassian --confirm             # a compatible plugin release; run it again to upgrade
+hz system plugin add atlassian --confirm
 hz system plugin remove heinzel-atlassian
 ```
 
 ## Set up
 
 The plugin does only what you could do yourself: every read runs [acli](https://developer.atlassian.com/cloud/acli/),
-logged in as you ([ADR 0035](https://github.com/helmut-hoffer-von-ankershoffen/heinzel/blob/main/docs/adr/0035-integrations-go-through-vendor-clis-as-an-ordinary-employee.md),
-proposed). It stores no token and needs no app an administrator registers. Install acli 1.3.39 or later
+logged in as you ([ADR 0035](https://github.com/helmut-hoffer-von-ankershoffen/heinzel/blob/main/docs/adr/0035-integrations-go-through-vendor-clis-as-an-ordinary-employee.md)). It stores no token and needs no app an administrator registers. Install acli 1.3.39 or later
 ([guide](https://developer.atlassian.com/cloud/acli/guides/install-acli/)) and log in to both products, in the
 browser or with an API token without scopes:
 
@@ -179,7 +180,10 @@ work items; `HZ_ATLASSIAN_LIVE_SITE=https://<site>.atlassian.net pytest tests/li
 
 Development and release commands: [repository guide](../../README.md).
 
-Migration provenance: heinzel, before the 0.9 plugin-boundary migration.
+
+## Known gaps
+
+The `--json` shapes from acli are assumed from Atlassian's REST APIs and not yet verified against a signed-in acli.
 
 <!-- screenshots:start -->
 ## Screenshots
@@ -192,9 +196,13 @@ Demo data: fictional Jira changes, owners and states in the app terminal, using 
 
 Demo data: read the fictional Widget launch plan with its source and revision, using the real adapter and a fixture-only requester.
 
-<img src="docs/assets/screenshots/workflow-context.png" alt="Demo data: Weekly work review declares Jira and Confluence inputs; this local workflow has not run and no report has been generated." width="960">
+<img src="docs/assets/screenshots/workflow-context.png" alt="Demo data: the local Weekly work review contract declares Jira and Confluence inputs; no report has been generated." width="960">
 
-Demo data: Weekly work review declares Jira and Confluence inputs; this local workflow has not run and no report has been generated.
+Demo data: the local Weekly work review contract declares Jira and Confluence inputs; no report has been generated.
+
+<img src="docs/assets/screenshots/jira-parameters.png" alt="Demo data: lowercase wid resolves to WID; the fixture requester returns structured Jira changes with --json in the app terminal." width="960">
+
+Demo data: lowercase wid resolves to WID; the fixture requester returns structured Jira changes with --json in the app terminal.
 
 <details>
 <summary>Command line</summary>

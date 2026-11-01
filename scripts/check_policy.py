@@ -18,6 +18,7 @@ def main() -> None:
     ).stdout
     if commits.strip():
         run("-m", "commitizen", "check", "--rev-range", revision_range)
+    run(str(Path(__file__).with_name("plugin_versions.py")), "check", base)
     scanner = str(Path(__file__).with_name("check_confidentiality.py"))
     run(scanner, *([] if os.environ.get("CONFIDENTIALITY_REQUIRED") == "false" else ["--require"]))
     run(scanner, "--messages", revision_range)
