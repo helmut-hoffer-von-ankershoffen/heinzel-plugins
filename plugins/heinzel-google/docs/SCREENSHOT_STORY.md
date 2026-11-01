@@ -1,46 +1,28 @@
-**Audience**
+**Audience.** People building Heinzelmännchen workflows that need Google Workspace context: recently changed files, document text, meeting schedules and relevant mail.
 
-People who want their Heinzel workflows to read Google Workspace information: project leads preparing reviews, developers building workflows, and anyone gathering context from Docs, Sheets, Calendar and Gmail.
+**Outcome.** Follow a fictional launch from “what changed?” to the plan, meetings, readiness figures and next actions. Show useful results inside the existing app terminal and CLI. Real use requires Google Workspace CLI (`gws`) and authorization; Gmail is opt-in. These screenshots demonstrate read behavior with fictional replies, not a connected account or completed launch.
 
-**Outcome**
+**Scenes.** Preserve the existing eight-scene plan and captions unchanged:
 
-“Ready for Thursday”: follow a fictional launch from its files to its plan, meetings, metrics and remaining actions. Help viewers decide whether these Google capability adapters fit their workflows.
+1. **launch-files — UI:** Find launch-related files with `--days 3 --name Launch`. Show the fictional plan, metrics and readiness checklist.
+2. **launch-files-week — UI:** Try `--days 7` without a name filter. The fixture returns the same three files; demonstrate another parameter case without claiming additional matches.
+3. **launch-plan — UI:** Read the plan as formatted text, including its goal, owners, next milestone, source URL and revision.
+4. **launch-week — UI:** See three fictional meetings with UTC start times and attendee names, including the readiness review and rollout checkpoint.
+5. **launch-inbox — UI:** Show two launch-related messages with received dates, subjects and the fictional sender name.
+6. **launch-files-json — CLI:** Show the file results as structured records suitable for further processing.
+7. **launch-metrics — CLI:** Turn the fictional Sheet into a readable readiness table: export retention, screenshot checks and crash-free sessions.
+8. **mail-content — CLI:** Finish with the message assigning Mira, Jonas and Priya their next checks.
 
-`google files` is a shipped plugin operation. The `showcase` commands are documentation-only requesters supplied by the existing fixture; installing the plugin does not add them. Their output exercises the real adapters against fictional vendor replies.
+**Fictional fixtures.** Reuse only the existing `docs/screenshot_fixture.py`, during explicit capture in an isolated profile. It supplies `DemoGws` replies and registers documentation-only `showcase` requesters that call the real adapters. The launch documents, metrics, messages, people and `example.com` addresses are fictional. `google files` is a product command; `showcase` commands are fixture-only demonstrations, not installed plugin features. The fixture returns a fixed file list rather than evaluating the Drive query.
 
-**Scenes**
+**Privacy pitfalls.** Real file titles, document text, source URLs, meeting details and mail can disclose private information. The fixture's name-only meeting and inbox renderers do not establish general anonymization. Keep real account state, credentials and personal terminal history out of captures. Fixture sign-in markers do not prove authentication. `browser_time` fixes browser time; the fixture still uses Python's current time for file modification timestamps.
 
-Preserve the existing eight scenes, their order, commands, routes and viewports. Add a fixed browser time and explicitly identify fictional replies in the final two captions.
+**Acceptance criteria.**
 
-1. **launch-files · UI:** In the native app terminal, list three days of files with `--name Launch`. Show Launch plan, Launch metrics and Launch readiness checklist.
-2. **launch-files-week · UI:** Run the seven-day case without a name filter. Show the alternative parameters clearly. The fixture returns the same three files for both queries; this does not demonstrate different filtering results.
-3. **launch-plan · UI:** Read the fictional Doc as formatted text, with its goal, owners, next milestone, source URL and revision. Make the preparation task feel concrete.
-4. **launch-week · UI:** Show three meetings with UTC start times and attendee names, making the launch review and follow-up checkpoints easy to scan.
-5. **launch-inbox · UI:** Show two launch-related messages with received dates, subjects and sender names through the fixture's focused mail query.
-6. **launch-files-json · CLI:** Show the shipped file-list operation as structured data, including file references, names, kinds and modification times.
-7. **launch-metrics · CLI:** Read the fictional Sheet as a table of release checks, targets and observations. Its percentages are example values, not product performance claims.
-8. **mail-content · CLI:** End with the fictional readiness message's concrete assignments: export boundary, API notes and phone screenshots.
+- Retain eight scenes: five useful app-terminal views and three CLI results, including both file-search parameter cases.
+- Keep every caption explicit about fictional or fixture content. Show no invented Google editor, calendar grid, inbox panel or write-confirmation screen.
+- Results must be readable at the declared viewport: document sections and revision, meeting columns, message subjects, readiness values and actionable mail text. CLI JSON must expose `ref`, `name`, `kind` and `modified_at`.
+- Capture only through the isolated existing fixture. Do not interpret demo metrics as measured product performance or identical file lists as proof of filtering.
+- Static validation by inspection: existing bootstrap path, ISO8601 browser time, unique lowercase scene names, captions under 180 characters, local `/` routes, positive dimensions/timeouts and argument-array commands all match the requested format. Terminal steps need no additional cell-text waits.
 
-All UI scenes use the existing `/` route and native terminal. These are terminal result views, not dedicated Google document, calendar or inbox screens.
-
-**Fictional fixtures**
-
-Use only `docs/screenshot_fixture.py`, during an explicit capture in an isolated temporary profile. Its `DemoGws` supplies local replies while the installed adapters perform their normal conversions. It also registers the fixture-only `showcase` requester.
-
-Retain the existing Launch documents, Readiness sheet, October 19–26, 2026 event/mail window, Mira/Jonas/Priya Example identities, and `example.com` addresses. Do not create fixture files or substitute connected accounts. Displayed source URLs identify fictional files; opening them is not part of the story.
-
-**Privacy pitfalls**
-
-A real account could expose document titles, file IDs, source URLs, event participants, subjects and message bodies. Keep capture state isolated, including terminal history and account settings. Do not run authentication, live connector tests, writes or external links for this story.
-
-The fixture explicitly binds mail for demonstration; that does not mean Gmail access is enabled automatically after installation. These captures also do not establish live connectivity or demonstrate confirmed writes.
-
-**Acceptance criteria**
-
-- Eight scenes: five useful app-terminal views and three CLI results, with both file-query parameter cases visible.
-- Every caption identifies fictional or fixture data and stays within 180 characters.
-- Commands match the shipped operations or existing fixture requesters; no invented screens, shell commands, selectors or extra waits.
-- Terminal actions finish successfully before capture; content, columns and source/revision details remain legible at the preserved viewport.
-- Expected results match the fixture: three files, three meetings, two messages, the plan, three metric rows and the readiness assignments.
-- `browser_time` fixes the browser clock only. The fixture uses Python's current time for file modification timestamps, so those values must not be asserted as fixed or used to claim reproducible freshness.
-- TOML syntax and fields were statically reviewed against the requested contract and supplied definitions. No parser, bootstrap, plugin code, commands or captures were run; rendered results remain unverified.
+The plan is preserved unchanged. No bootstrap, imports, parser, product commands, network calls or captures were run; rendered acceptance remains to be checked during explicit capture.

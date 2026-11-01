@@ -124,6 +124,7 @@ class CapturedArtifact(SelectedCapturedGwsRead):
         return result
 
     def _content(self, args: list[str], params: dict[str, object], timeout: float) -> Process:
+        expected: dict[str, object]
         if self._kind == "presentation":
             expected = {"presentationId": self._file_id}
             fields, id_field = _SLIDE_FIELDS, "presentationId"

@@ -28,11 +28,11 @@ $ hz google files --days 7; printf '\033]0;Demo complete\007'
 ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━┓
 ┃ Ref                                      ┃ Name                       ┃ Kind        ┃ Modified at          ┃
 ┡━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━┩
-│ https://docs.google.com/document/d/launc │ Launch plan                │ document    │ 2026-11-01T08:56:56Z │
+│ https://docs.google.com/document/d/launc │ Launch plan                │ document    │ 2026-11-01T09:49:33Z │
 │ h-plan/edit                              │                            │             │                      │
-│ https://docs.google.com/spreadsheets/d/l │ Launch metrics             │ spreadsheet │ 2026-11-01T08:56:56Z │
+│ https://docs.google.com/spreadsheets/d/l │ Launch metrics             │ spreadsheet │ 2026-11-01T09:49:33Z │
 │ aunch-metrics/edit                       │                            │             │                      │
-│ https://docs.google.com/document/d/launc │ Launch readiness checklist │ document    │ 2026-11-01T08:56:56Z │
+│ https://docs.google.com/document/d/launc │ Launch readiness checklist │ document    │ 2026-11-01T09:49:33Z │
 │ h-readiness/edit                         │                            │             │                      │
 └──────────────────────────────────────────┴────────────────────────────┴─────────────┴──────────────────────┘
 $

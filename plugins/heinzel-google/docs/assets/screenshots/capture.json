@@ -2,14 +2,14 @@
   "format": 1,
   "plugin": "heinzel-google",
   "core_version": "0.9.5",
-  "inputs_sha256": "10d2571467d27b9e0f294d590040d73dc8cba758e94b5a70bf0fd52f8aff7d69",
+  "inputs_sha256": "d65306d509eda4cea60023af68381c3f003681f3448da0c6816d46b9a53d4a89",
   "images": {
-    "docs/assets/screenshots/launch-files.png": "eda77a7d487abd9e89533107340d39b2674bdd16e03e2a44def67da934f4afa9",
-    "docs/assets/screenshots/launch-files-week.png": "b69c727f33361327294357bfd53ca8a1d42b55745030c436127b0ca1762057f2",
+    "docs/assets/screenshots/launch-files.png": "778d7bc4a182a226bbfa39fef3c7804aa28fc46facf091c26f0e2bf8cf798bf1",
+    "docs/assets/screenshots/launch-files-week.png": "ab51c517faa3ddd0f9ac27535deec2f15aa32e73dc84b77e5ea5497575f231ce",
     "docs/assets/screenshots/launch-plan.png": "ed452c77479551245e723019b24d0bdf025bbc9b58e12d89d6c8fd80f7c6af18",
     "docs/assets/screenshots/launch-week.png": "881d27e00a41f97d2f3711659bfc7f85e287a3731d241b337bb4cd421d6782ba",
     "docs/assets/screenshots/launch-inbox.png": "91fc815c3a55f8eb1c66b0411e1cbef37869c7714e12de1b6353922ad98eed3d",
-    "docs/assets/screenshots/launch-files-json.png": "131176a1cb0e54adad85479c81b0cf41ec02339d9da725080659f1b278718289",
+    "docs/assets/screenshots/launch-files-json.png": "410936960c8d8a98f7e912ac7d30145e595a274043f889cba7ceeca79308453b",
     "docs/assets/screenshots/launch-metrics.png": "694361694713cb2bb4b3e9a89ec50004ab36120233ed8dbe615466cd5ae09a62",
     "docs/assets/screenshots/mail-content.png": "ceef4e8ed3b08a9d3b787467049c7e8e45effbbdfcaacee0508b023d51691cd4"
   },
@@ -18,13 +18,13 @@
     "definition": {
       "format": 1,
       "reviewer": "Codex feature-story agent",
-      "source_sha256": "9f257002fe3088ae27612bb107c44a95a0ed6feeb9d48ae06dc346e84a10ec8a",
+      "source_sha256": "5ddab07d0f1a0dca5336ec298cd553f55a62f5fc951a43e49b001e1d7ea95052",
       "plan_sha256": "9ecd36b0ac52a88f228f5a685f77f56c6e694c7c426b40124fb643edf6d5f9c3",
-      "story_sha256": "c331cb55b143174bfb3353fe1ad03dc9cf3ffa7a41260c4488f82c4df8c9ba08"
+      "story_sha256": "c6f7598c02de9d069d6f728544faeb4fb64d14b7b9150eece3f2938cb15918f5"
     },
     "plugin": "heinzel-google",
     "core_version": "0.9.5",
-    "inputs_sha256": "10d2571467d27b9e0f294d590040d73dc8cba758e94b5a70bf0fd52f8aff7d69",
+    "inputs_sha256": "d65306d509eda4cea60023af68381c3f003681f3448da0c6816d46b9a53d4a89",
     "screenshots": [
       {
         "path": "docs/assets/screenshots/launch-files.png",
@@ -68,30 +68,30 @@
       }
     ],
     "images": {
-      "launch-files.png": "eda77a7d487abd9e89533107340d39b2674bdd16e03e2a44def67da934f4afa9",
-      "launch-files-week.png": "b69c727f33361327294357bfd53ca8a1d42b55745030c436127b0ca1762057f2",
+      "launch-files.png": "778d7bc4a182a226bbfa39fef3c7804aa28fc46facf091c26f0e2bf8cf798bf1",
+      "launch-files-week.png": "ab51c517faa3ddd0f9ac27535deec2f15aa32e73dc84b77e5ea5497575f231ce",
       "launch-plan.png": "ed452c77479551245e723019b24d0bdf025bbc9b58e12d89d6c8fd80f7c6af18",
       "launch-week.png": "881d27e00a41f97d2f3711659bfc7f85e287a3731d241b337bb4cd421d6782ba",
       "launch-inbox.png": "91fc815c3a55f8eb1c66b0411e1cbef37869c7714e12de1b6353922ad98eed3d",
-      "launch-files-json.png": "131176a1cb0e54adad85479c81b0cf41ec02339d9da725080659f1b278718289",
+      "launch-files-json.png": "410936960c8d8a98f7e912ac7d30145e595a274043f889cba7ceeca79308453b",
       "launch-metrics.png": "694361694713cb2bb4b3e9a89ec50004ab36120233ed8dbe615466cd5ae09a62",
       "mail-content.png": "ceef4e8ed3b08a9d3b787467049c7e8e45effbbdfcaacee0508b023d51691cd4"
     },
     "transcripts": {
-      "launch-files.txt": "612504c81c72ec45d299b84d72972928e04f470674f5e4b2ca6d8e99d4298eef",
-      "launch-files-week.txt": "d4c41dc1d8f8efe24df09fbe0c0c02b564f2b97089769db4966870a087e53c29",
+      "launch-files.txt": "f9847153c4a014597d1bfbaf2f59a6a7910c206e3bdbbd8c20025e376e1fd45e",
+      "launch-files-week.txt": "e20fa3f91f3ec13b4973371e72a931c846c0c9999fa786f6c6fd9a680ec78349",
       "launch-plan.txt": "2cb55322441778a8797cb842e822db915a0c070ba61275678e5fb4fe9fbad28a",
       "launch-week.txt": "6802a9ff84e33d1f373fbc57b4eae1db2730229fb88739708da0b558634dbccb",
       "launch-inbox.txt": "0d426ac4646a13d8efd8affa76cbd1b39af69ec13fa2dec11ed7a52795f0ca08",
-      "launch-files-json.txt": "15d7325b635cccee76b47e1e80f33f282e810523b22fb8e838e8a7e5b8dd34dd",
+      "launch-files-json.txt": "fcc9e4cad1d095a378c3b6bdbf4c953852b048722f56aa178efc3c405dd234f7",
       "launch-metrics.txt": "d3f2f19f3a5f470e2c567dd65d8333fdba8fb653a2346a31cfa8b9c008545a04",
       "mail-content.txt": "57cda012c3d61d21aa3e387c296ebce6483c114b169bb416d5296d4af344a813"
     },
-    "bundle_sha256": "d475137184e8a5a64d317797ef003dadcc89b0c26eb6506a9d657a2166c90e11"
+    "bundle_sha256": "96bd62755562ffd248cb053eb22400363bdace4a0351b72482d12b0a83fb8df6"
   },
   "privacy_review": {
     "format": 1,
-    "bundle_sha256": "d475137184e8a5a64d317797ef003dadcc89b0c26eb6506a9d657a2166c90e11",
+    "bundle_sha256": "96bd62755562ffd248cb053eb22400363bdace4a0351b72482d12b0a83fb8df6",
     "reviewer": "Codex privacy agent",
     "decision": "approve",
     "checked_images": [

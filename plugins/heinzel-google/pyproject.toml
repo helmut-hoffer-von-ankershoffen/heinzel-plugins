@@ -1,6 +1,6 @@
 [project]
 name = "heinzel-google"
-version = "0.9.1"
+version = "0.9.2"
 description = "Google Docs, Sheets, Drive, Calendar and Gmail: the documents, calendar and mail capabilities."
 readme = "README.md"
 license = "MIT"

@@ -127,7 +127,7 @@ def _write_document(writer: _Writer, file_id: str, section: str, text: str, revi
 
 def _write_rows(writer: _Writer, file_id: str, section: str, text: str) -> None:
     rows = [line.split("\t") for line in text.splitlines()]
-    params = {
+    params: dict[str, object] = {
         "spreadsheetId": file_id,
         "range": "A1" if section == _END else f"'{section}'!A1",
         "valueInputOption": "RAW",
