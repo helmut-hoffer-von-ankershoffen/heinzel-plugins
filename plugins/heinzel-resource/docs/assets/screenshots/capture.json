@@ -2,25 +2,27 @@
   "format": 1,
   "plugin": "heinzel-resource",
   "core_version": "0.9.1",
-  "inputs_sha256": "cb49df3b77c37c7eb3245763cdd49036f904e00d9b21a1f71a515ed07c7a7bf8",
+  "inputs_sha256": "a7a1dce9657ca7f7c230974cf97856f5bc94227638498299e705159d1784b00c",
   "images": {
-    "docs/assets/screenshots/resources-pane.png": "eac60903c51182a7280bbc8669f28398b3f74493bf6cc17730fc5a1f7d014ed6",
+    "docs/assets/screenshots/resources-pane.png": "15b11268ea60790534c0d191a4ad2195a2ef1af991e9fd0166ad9359270fe1df",
     "docs/assets/screenshots/today-resources.png": "9cf5c41c8d1056d7d02dd76e1d6f2fc1a7d06bd5decabe19d828097c8c5b26f3",
     "docs/assets/screenshots/phone-resources.png": "3f8c480bd268edb80d63225d999df393abaa44168de882583265ffa9104d2c61",
-    "docs/assets/screenshots/cli-resources.png": "3d8012cf0ff56ee191ad3c8616855bc514e3a6692621c7248f8a72b554a96073"
+    "docs/assets/screenshots/cli-resources.png": "3d8012cf0ff56ee191ad3c8616855bc514e3a6692621c7248f8a72b554a96073",
+    "docs/assets/screenshots/terminal-resources.png": "44d466b39ba71af0fbfd8f71b883293a6e1a0b0ae8ca9425ae749ed34deb3949",
+    "docs/assets/screenshots/terminal-resources-json.png": "1b7cfb326023d98e9fa195c69953202089e1b929b1d249016b1f2ecf5a9d75bf"
   },
   "review_bundle": {
     "format": 1,
     "definition": {
       "format": 1,
-      "reviewer": "Codex source and framing review agent",
-      "source_sha256": "e4bbd772774b3b8e532fffd75b8aae827013ca7a4f6f3e059ac6b0e0be267c58",
-      "plan_sha256": "3f1f230f30e2b6f33e819cdf4d6fa4f4c3fa4968c4809ffdcc5158cc7a953e35",
-      "story_sha256": "672f6a8cc32e05ed5b9a3f9f63603d04a1fd2f34afb1f7c9286f5c99fe8a13e3"
+      "reviewer": "Codex feature-story agent",
+      "source_sha256": "a5ce3657e56517e9ebc14d927a3fdddb81c2e5c6e8490a5398fb8e215bf9873b",
+      "plan_sha256": "f5e5ffdd88e299bf8ba07ea8605e818b9aedc5e0385ffd76ba11b5999c4f5cfb",
+      "story_sha256": "4608ea8e6cc234c8e63b026c9fe04bf2268665468f58107c0b8851bffa19885f"
     },
     "plugin": "heinzel-resource",
     "core_version": "0.9.1",
-    "inputs_sha256": "cb49df3b77c37c7eb3245763cdd49036f904e00d9b21a1f71a515ed07c7a7bf8",
+    "inputs_sha256": "a7a1dce9657ca7f7c230974cf97856f5bc94227638498299e705159d1784b00c",
     "screenshots": [
       {
         "path": "docs/assets/screenshots/resources-pane.png",
@@ -41,32 +43,48 @@
         "path": "docs/assets/screenshots/cli-resources.png",
         "surface": "cli",
         "caption": "The same fictional CPU, memory and raw load measurements in the CLI"
+      },
+      {
+        "path": "docs/assets/screenshots/terminal-resources.png",
+        "surface": "ui",
+        "caption": "Check CPU, memory, raw load and core count in the app terminal \u2014 fictional demo-workstation values"
+      },
+      {
+        "path": "docs/assets/screenshots/terminal-resources-json.png",
+        "surface": "ui",
+        "caption": "Inspect the structured resource sample for automation in the app terminal \u2014 fictional demo-workstation data"
       }
     ],
     "images": {
-      "resources-pane.png": "eac60903c51182a7280bbc8669f28398b3f74493bf6cc17730fc5a1f7d014ed6",
+      "resources-pane.png": "15b11268ea60790534c0d191a4ad2195a2ef1af991e9fd0166ad9359270fe1df",
       "today-resources.png": "9cf5c41c8d1056d7d02dd76e1d6f2fc1a7d06bd5decabe19d828097c8c5b26f3",
       "phone-resources.png": "3f8c480bd268edb80d63225d999df393abaa44168de882583265ffa9104d2c61",
-      "cli-resources.png": "3d8012cf0ff56ee191ad3c8616855bc514e3a6692621c7248f8a72b554a96073"
+      "cli-resources.png": "3d8012cf0ff56ee191ad3c8616855bc514e3a6692621c7248f8a72b554a96073",
+      "terminal-resources.png": "44d466b39ba71af0fbfd8f71b883293a6e1a0b0ae8ca9425ae749ed34deb3949",
+      "terminal-resources-json.png": "1b7cfb326023d98e9fa195c69953202089e1b929b1d249016b1f2ecf5a9d75bf"
     },
     "transcripts": {
       "resources-pane.txt": "f8754ab93f65e0c2ced4135a948402a47e2bb9027a940f48bc26590c629a73f5",
       "today-resources.txt": "eacb6e26ee80e2451473f5e079fbd6ab46ad324152fbc65e71df82209b040408",
       "phone-resources.txt": "702f1d96e760cbe0a57719f7eadcd7ff244d336926be2e92bd842a10017ffbf2",
-      "cli-resources.txt": "ddef8a589eb34e18d3fd06ab545c884ebcc82923f5270bb88a6fcfc2ae8272a7"
+      "cli-resources.txt": "ddef8a589eb34e18d3fd06ab545c884ebcc82923f5270bb88a6fcfc2ae8272a7",
+      "terminal-resources.txt": "65a8aa4775e56d401ccabf5f45b838053a2347a25af0df1c559fa967f0b6e40b",
+      "terminal-resources-json.txt": "7f6aa32246f92520563db09ca52b5ea7a785dc90a42322bcdb2f84bd0977bce6"
     },
-    "bundle_sha256": "f1c20d39846d725f65a310544a4aa33f0ab43eb0f58dead5e61b3d2afadec0a9"
+    "bundle_sha256": "a998ddb8f2cd24859d672b2e7ad810cec120e83f50c68adfdfaa3c47567789c1"
   },
   "privacy_review": {
     "format": 1,
-    "bundle_sha256": "f1c20d39846d725f65a310544a4aa33f0ab43eb0f58dead5e61b3d2afadec0a9",
+    "bundle_sha256": "a998ddb8f2cd24859d672b2e7ad810cec120e83f50c68adfdfaa3c47567789c1",
     "reviewer": "Codex privacy agent",
     "decision": "approve",
     "checked_images": [
       "resources-pane.png",
       "today-resources.png",
       "phone-resources.png",
-      "cli-resources.png"
+      "cli-resources.png",
+      "terminal-resources.png",
+      "terminal-resources-json.png"
     ],
     "checks": {
       "tokens_absent": true,

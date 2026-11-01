@@ -142,24 +142,24 @@ highlights = [
 [[tool.heinzel.catalog.screenshots]]
 path = "docs/assets/screenshots/sharing-ready.png"
 surface = "ui"
-caption = "Share the app privately with an explicit ready state — local Tailscale fixture; session hidden"
+caption = "Enable private sharing and see verified readiness — fictional local Tailscale demo"
 
 [[tool.heinzel.catalog.screenshots]]
 path = "docs/assets/screenshots/phone-sharing-ready.png"
 surface = "ui"
-caption = "Inspect and copy the private link on a phone — local Tailscale fixture; session hidden"
+caption = "Inspect the private link at phone width — fictional local Tailscale demo; no remote connection tested"
 
 [[tool.heinzel.catalog.screenshots]]
 path = "docs/assets/screenshots/sharing-request-cli.png"
 surface = "cli"
-caption = "Inspect the saved sharing request from a separate CLI process — local fictional network"
+caption = "Inspect saved intent and mapping, with web verification pending — fictional local Tailscale demo in a separate CLI process"
 
 [[tool.heinzel.catalog.screenshots]]
 path = "docs/assets/screenshots/sharing-off.png"
 surface = "ui"
-caption = "Turn private sharing off explicitly — local Tailscale fixture"
+caption = "Turn private sharing off explicitly — fictional local Tailscale demo"
 
 [[tool.heinzel.catalog.screenshots]]
 path = "docs/assets/screenshots/sharing-off-cli.png"
 surface = "cli"
-caption = "Verify private sharing is off from the shell — local fictional network"
+caption = "Confirm the owned mapping is gone and the request is off — fictional local Tailscale demo"

@@ -10,13 +10,16 @@ Mira
 · EM
 Home
 Today
+Doctor: 7 checks need attention
 
-Loading…
+ai.access ai access, system.credential backend, system.credential credential ai.access/api-key…
 
+Open
+Ask about it
 v0.9.8
 Updates, off
 0
-System health, off
+System health, warning
 No calendar connected, error
 Daemon not installed, off
 Chat

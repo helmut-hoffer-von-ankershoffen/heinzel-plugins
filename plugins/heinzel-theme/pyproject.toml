@@ -141,24 +141,24 @@ themes = ["src/heinzel_theme/themes/heinzelmaennchen.toml"]
 [[tool.heinzel.catalog.screenshots]]
 path = "docs/assets/screenshots/theme-light.png"
 surface = "ui"
-caption = "Demo Launch review in the applied Heinzelmännchen light theme: demo contract status, requirements and launch commands."
+caption = "A fictional Launch review contract, its configuration and run commands, in the applied Heinzelmännchen light theme."
 
 [[tool.heinzel.catalog.screenshots]]
 path = "docs/assets/screenshots/theme-dark.png"
 surface = "ui"
-caption = "The same demo Launch review in the applied Heinzelmännchen dark theme: demo contract status, requirements and launch commands."
+caption = "The same fictional Launch review contract in the applied Heinzelmännchen dark theme."
 
 [[tool.heinzel.catalog.screenshots]]
 path = "docs/assets/screenshots/theme-soundscapes.png"
 surface = "ui"
-caption = "Isolated demo profile: Claude FM, Die Heinzelmännchen and Hyper Focus are optional; playback waits for Play."
+caption = "Demo profile: browse three optional YouTube soundscapes; playback starts only after Play."
 
 [[tool.heinzel.catalog.screenshots]]
 path = "docs/assets/screenshots/theme-cli.png"
 surface = "cli"
-caption = "Isolated demo profile: list available themes to locate Heinzelmännchen before choosing an appearance."
+caption = "Demo profile: list available themes and identify Heinzelmännchen from the CLI."
 
 [[tool.heinzel.catalog.screenshots]]
 path = "docs/assets/screenshots/soundscapes-cli.png"
 surface = "cli"
-caption = "Isolated demo profile: list available soundscapes and find this plugin's three choices without starting playback."
+caption = "Demo profile: list Claude FM, Die Heinzelmännchen and Hyper Focus without starting playback."

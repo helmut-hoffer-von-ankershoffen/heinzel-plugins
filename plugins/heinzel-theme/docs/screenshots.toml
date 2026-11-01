@@ -1,12 +1,11 @@
 format = 1
 bootstrap = "docs/screenshot_fixture.py"
-browser_time = "2026-10-31T11:00:00Z"
 
 [[scenes]]
 name = "theme-light"
 surface = "ui"
 route = "/contracts/launch-review"
-caption = "Demo Launch review in the applied Heinzelmännchen light theme: demo contract status, requirements and launch commands."
+caption = "A fictional Launch review contract, its configuration and run commands, in the applied Heinzelmännchen light theme."
 theme = "heinzelmaennchen"
 appearance = "light"
 viewport = { width = 1440, height = 1000 }
@@ -21,7 +20,7 @@ name = "Launch review"
 name = "theme-dark"
 surface = "ui"
 route = "/contracts/launch-review"
-caption = "The same demo Launch review in the applied Heinzelmännchen dark theme: demo contract status, requirements and launch commands."
+caption = "The same fictional Launch review contract in the applied Heinzelmännchen dark theme."
 theme = "heinzelmaennchen"
 appearance = "dark"
 viewport = { width = 1440, height = 1000 }
@@ -36,7 +35,7 @@ name = "Launch review"
 name = "theme-soundscapes"
 surface = "ui"
 route = "/?settings=appearance"
-caption = "Isolated demo profile: Claude FM, Die Heinzelmännchen and Hyper Focus are optional; playback waits for Play."
+caption = "Demo profile: browse three optional YouTube soundscapes; playback starts only after Play."
 theme = "heinzelmaennchen"
 appearance = "light"
 viewport = { width = 1440, height = 1000 }
@@ -48,20 +47,20 @@ text = "Claude FM"
 
 [[scenes.steps]]
 action = "wait"
-text = "Die Heinzelmännchen"
+text = "Hyper Focus"
 
 [[scenes.steps]]
 action = "wait"
-text = "Hyper Focus"
+text = "Die Heinzelmännchen"
 
 [[scenes]]
 name = "theme-cli"
 surface = "cli"
-caption = "Isolated demo profile: list available themes to locate Heinzelmännchen before choosing an appearance."
+caption = "Demo profile: list available themes and identify Heinzelmännchen from the CLI."
 command = ["system", "theme", "list"]
 
 [[scenes]]
 name = "soundscapes-cli"
 surface = "cli"
-caption = "Isolated demo profile: list available soundscapes and find this plugin's three choices without starting playback."
+caption = "Demo profile: list Claude FM, Die Heinzelmännchen and Hyper Focus without starting playback."
 command = ["system", "sound", "list"]

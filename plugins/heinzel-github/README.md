@@ -1,10 +1,12 @@
 # heinzel-github
 
 Read pull requests and issues from GitHub, the `code-host` and `tracker` capabilities ([ADR 0028](https://github.com/helmut-hoffer-von-ankershoffen/heinzel/blob/main/docs/adr/0028-integrations-are-capability-adapters.md)): a first-party
-[Heinzelmännchen](https://github.com/helmut-hoffer-von-ankershoffen/heinzel) plugin. It is independently released and installed explicitly:
+[Heinzelmännchen](https://github.com/helmut-hoffer-von-ankershoffen/heinzel) plugin.
+
+Install it with:
 
 ```bash
-hz system plugin add github --confirm             # a compatible plugin release; run it again to upgrade
+hz system plugin add github --confirm
 hz system plugin remove heinzel-github
 ```
 
@@ -121,29 +123,28 @@ returns is cleaned too.
 
 Development and release commands: [repository guide](../../README.md).
 
-Migration provenance: heinzel, before the 0.9 plugin-boundary migration.
 
 <!-- screenshots:start -->
 ## Screenshots
 
-<img src="docs/assets/screenshots/merged-work.png" alt="Merged pull requests in the app terminal — fixture-only requester, real GitHub adapter" width="960">
+<img src="docs/assets/screenshots/merged-work.png" alt="Merged pull requests in the app terminal — fictional data, fixture-only requester, real GitHub adapter" width="960">
 
-Merged pull requests in the app terminal — fixture-only requester, real GitHub adapter
+Merged pull requests in the app terminal — fictional data, fixture-only requester, real GitHub adapter
 
 <img src="docs/assets/screenshots/issue-changes.png" alt="Issue changes, owners and states in the app terminal — fictional GitHub repository" width="960">
 
 Issue changes, owners and states in the app terminal — fictional GitHub repository
 
-<img src="docs/assets/screenshots/workflow-context.png" alt="Weekly code review combines the declared source inputs — local demonstration, no report generated" width="960">
+<img src="docs/assets/screenshots/workflow-context.png" alt="Weekly code review declares merged-work and issue inputs — fictional local example, no report generated" width="960">
 
-Weekly code review combines the declared source inputs — local demonstration, no report generated
+Weekly code review declares merged-work and issue inputs — fictional local example, no report generated
 
 <details>
 <summary>Command line</summary>
 
-<img src="docs/assets/screenshots/merged-cli.png" alt="Read merged work in the shell — fixture-only requester, real GitHub adapter" width="960">
+<img src="docs/assets/screenshots/merged-cli.png" alt="Read merged work in the shell — fictional data, fixture-only requester, real GitHub adapter" width="960">
 
-Read merged work in the shell — fixture-only requester, real GitHub adapter
+Read merged work in the shell — fictional data, fixture-only requester, real GitHub adapter
 
 <img src="docs/assets/screenshots/issues-json.png" alt="Typed issue results for scripts and agents — fixture-only requester, fictional GitHub data" width="960">
 

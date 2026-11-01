@@ -1,7 +1,8 @@
 # Heinzelmännchen theme
 
 The standard Heinzelmännchen appearance and its three soundscapes: Claude FM, Die Heinzelmännchen and Hyper Focus.
-The standard app installs and enables this plugin automatically. It recommends its appearance when no available
+
+Included in the standard app. It recommends its appearance when no available
 theme has been selected. An explicit available theme choice is preserved, and the inactive built-in fallback is hidden
 to avoid duplicate previews. Sound starts only after the person presses Play.
 
@@ -20,28 +21,28 @@ or parent registry change.
 <!-- screenshots:start -->
 ## Screenshots
 
-<img src="docs/assets/screenshots/theme-light.png" alt="Demo Launch review in the applied Heinzelmännchen light theme: demo contract status, requirements and launch commands." width="960">
+<img src="docs/assets/screenshots/theme-light.png" alt="A fictional Launch review contract, its configuration and run commands, in the applied Heinzelmännchen light theme." width="960">
 
-Demo Launch review in the applied Heinzelmännchen light theme: demo contract status, requirements and launch commands.
+A fictional Launch review contract, its configuration and run commands, in the applied Heinzelmännchen light theme.
 
-<img src="docs/assets/screenshots/theme-dark.png" alt="The same demo Launch review in the applied Heinzelmännchen dark theme: demo contract status, requirements and launch commands." width="960">
+<img src="docs/assets/screenshots/theme-dark.png" alt="The same fictional Launch review contract in the applied Heinzelmännchen dark theme." width="960">
 
-The same demo Launch review in the applied Heinzelmännchen dark theme: demo contract status, requirements and launch commands.
+The same fictional Launch review contract in the applied Heinzelmännchen dark theme.
 
-<img src="docs/assets/screenshots/theme-soundscapes.png" alt="Isolated demo profile: Claude FM, Die Heinzelmännchen and Hyper Focus are optional; playback waits for Play." width="960">
+<img src="docs/assets/screenshots/theme-soundscapes.png" alt="Demo profile: browse three optional YouTube soundscapes; playback starts only after Play." width="960">
 
-Isolated demo profile: Claude FM, Die Heinzelmännchen and Hyper Focus are optional; playback waits for Play.
+Demo profile: browse three optional YouTube soundscapes; playback starts only after Play.
 
 <details>
 <summary>Command line</summary>
 
-<img src="docs/assets/screenshots/theme-cli.png" alt="Isolated demo profile: list available themes to locate Heinzelmännchen before choosing an appearance." width="960">
+<img src="docs/assets/screenshots/theme-cli.png" alt="Demo profile: list available themes and identify Heinzelmännchen from the CLI." width="960">
 
-Isolated demo profile: list available themes to locate Heinzelmännchen before choosing an appearance.
+Demo profile: list available themes and identify Heinzelmännchen from the CLI.
 
-<img src="docs/assets/screenshots/soundscapes-cli.png" alt="Isolated demo profile: list available soundscapes and find this plugin&#x27;s three choices without starting playback." width="960">
+<img src="docs/assets/screenshots/soundscapes-cli.png" alt="Demo profile: list Claude FM, Die Heinzelmännchen and Hyper Focus without starting playback." width="960">
 
-Isolated demo profile: list available soundscapes and find this plugin&#x27;s three choices without starting playback.
+Demo profile: list Claude FM, Die Heinzelmännchen and Hyper Focus without starting playback.
 
 </details>
 
