@@ -1,0 +1,46 @@
+format = 1
+bootstrap = "docs/screenshot_fixture.py"
+browser_time = "2026-11-02T09:00:00Z"
+
+# Use fresh isolated state for each complete capture.
+# Share that state across these scenes and capture them in order.
+# The UI previews below are native app-terminal output, not Slack screens.
+
+[[scenes]]
+name = "draft-in-slack"
+surface = "ui"
+route = "/"
+caption = "Demo data: Lotte's fictional weekly report, rendered from Slack message blocks in the app terminal; printed approval buttons, no Slack connection."
+timeout_ms = 30000
+
+[[scenes.steps]]
+action = "terminal"
+command = ["showcase", "share"]
+
+[scenes.viewport]
+width = 1280
+height = 760
+
+[[scenes]]
+name = "who-can-approve"
+surface = "ui"
+route = "/"
+caption = "Demo data: Mira's synthetic click records one approval; non-owner, mismatched-fingerprint, typed-reply, replay and late attempts are refused by real decision code."
+timeout_ms = 30000
+
+[[scenes.steps]]
+action = "terminal"
+command = ["showcase", "answers"]
+
+[scenes.viewport]
+width = 1280
+height = 650
+
+# Intentionally rerun answers after the UI decision scene.
+# Expect already-approved and already-expired refusals on this pass.
+# Do not rerun share: it expects a newly recorded demonstration post.
+[[scenes]]
+name = "answers-cli"
+surface = "cli"
+caption = "Demo data: replaying the fictional clicks keeps one host approval reply; Mira's approval and the late request's expiry are already recorded."
+command = ["showcase", "answers"]

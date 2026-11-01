@@ -1,0 +1,40 @@
+{
+  "format": 1,
+  "sdk": 1,
+  "inputs": [
+    "coverage>=7.12",
+    "editables>=0.5",
+    "hatchling>=1.29.0",
+    "heinzel>=0.9.8,<0.10",
+    "mypy>=1.19.0,<3",
+    "pyright[nodejs]==1.1.414",
+    "pytest-timeout>=2.4.0,<3",
+    "pytest>=9.0.3,<10",
+    "ruff==0.17.2",
+    "slack-sdk>=3.33,<4"
+  ],
+  "core": {
+    "version": "0.9.9",
+    "dependencies": [
+      "croniter>=6.2.4",
+      "fastapi>=0.161",
+      "keyring>=25.6",
+      "mcp>=2.3",
+      "packaging>=25.0",
+      "platformdirs>=4.5",
+      "pluggy<2,>=1.6.0",
+      "psutil==7.2.2",
+      "pydantic-ai-slim==2.61.0",
+      "pydantic-ai-slim[anthropic]==2.61.0; extra == \"anthropic\"",
+      "pydantic-ai-slim[openai]==2.61.0; extra == \"openai\"",
+      "pydantic-settings<3,>=2.11.0",
+      "pydantic<3,>=2.12.0",
+      "pyyaml<7,>=6.0.2",
+      "rich>=14.2.0",
+      "tomlkit>=0.13",
+      "typer>=0.23.0",
+      "uvicorn>=0.54",
+      "wsproto>=1.3"
+    ]
+  }
+}
