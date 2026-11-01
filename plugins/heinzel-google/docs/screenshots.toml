@@ -1,5 +1,6 @@
 format = 1
 bootstrap = "docs/screenshot_fixture.py"
+browser_time = "2026-10-22T12:00:00Z"
 
 [[scenes]]
 name = "launch-files"
@@ -85,11 +86,11 @@ command = ["google", "files", "--days", "3", "--name", "Launch", "--json"]
 [[scenes]]
 name = "launch-metrics"
 surface = "cli"
-caption = "A Sheet becomes a readable table — fixture-only requester, real documents adapter and local replies"
+caption = "A Sheet becomes a readable table — fixture-only requester, real documents adapter and fictional replies"
 command = ["showcase", "notes", "launch-metrics"]
 
 [[scenes]]
 name = "mail-content"
 surface = "cli"
-caption = "Read the next actions in a launch message — fixture-only requester, real Gmail adapter and local replies"
+caption = "Read the next actions in a launch message — fixture-only requester, real Gmail adapter and fictional replies"
 command = ["showcase", "message-content"]

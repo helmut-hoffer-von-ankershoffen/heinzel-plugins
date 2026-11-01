@@ -199,13 +199,13 @@ A focused launch-mail query — fixture-only requester, real Gmail adapter over 
 
 Changed Docs and Sheets as structured data — real Google operation, fictional files
 
-<img src="docs/assets/screenshots/launch-metrics.png" alt="A Sheet becomes a readable table — fixture-only requester, real documents adapter and local replies" width="960">
+<img src="docs/assets/screenshots/launch-metrics.png" alt="A Sheet becomes a readable table — fixture-only requester, real documents adapter and fictional replies" width="960">
 
-A Sheet becomes a readable table — fixture-only requester, real documents adapter and local replies
+A Sheet becomes a readable table — fixture-only requester, real documents adapter and fictional replies
 
-<img src="docs/assets/screenshots/mail-content.png" alt="Read the next actions in a launch message — fixture-only requester, real Gmail adapter and local replies" width="960">
+<img src="docs/assets/screenshots/mail-content.png" alt="Read the next actions in a launch message — fixture-only requester, real Gmail adapter and fictional replies" width="960">
 
-Read the next actions in a launch message — fixture-only requester, real Gmail adapter and local replies
+Read the next actions in a launch message — fixture-only requester, real Gmail adapter and fictional replies
 
 </details>
 
