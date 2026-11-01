@@ -4,13 +4,10 @@ Weather where you are, keyless by default from [Open-Meteo](https://open-meteo.c
 a heads-up when it changes. Bring an [OpenWeather](https://openweathermap.org) key instead if you prefer it. A plugin
 for [Heinzelmännchen](https://github.com/helmut-hoffer-von-ankershoffen/heinzel).
 
-Requires Heinzelmännchen v0.7.13 or newer for semantic weather icons and plugin-provided app surfaces. This repository
-tests against v0.7.13; older releases do not provide the UI data types used here.
-
-## Install
+Install it with:
 
 ```bash
-hz system plugin add "heinzel-weather @ git+https://github.com/helmut-hoffer-von-ankershoffen/heinzel-plugins#subdirectory=plugins/heinzel-weather"
+hz system plugin add weather --confirm
 hz setup weather    # your places and the units (and the provider; Open-Meteo needs no key)
 ```
 
@@ -67,7 +64,6 @@ full forecast command.
 | `weather.locations` | none | Your places, yours first |
 | `weather.units` | by locale | `metric` or `imperial` |
 | `weather.refresh_minutes` | 15 | How often the job checks the forecast |
-| app weather refresh | 15 minutes | One shared observation for the footer, sidebar and Today card |
 | `weather.rain_chance` | 0.5 | From which chance rain within the hour is news |
 | `weather.temperature_swing` | 8 | Degrees within 12 hours that are news |
 | `weather.base_url` | `https://api.openweathermap.org` | OpenWeather only: https, or http on 127.0.0.1 for the fake below |
@@ -86,27 +82,10 @@ The tests and the docs' recordings use the same fake (`heinzel_weather.fake`).
 
 Development and release commands: [repository guide](../../README.md).
 
-Migration provenance: heinzel-contrib, before the 0.9 plugin-boundary migration.
-## Weather workflow evidence
+## Observations and trend advice
 
-`hz weather observe --json` reads the same in-process 15-minute observation as the app and includes the full
-report, provider attribution, original fetch timestamp and candidate rain, temperature-swing and alert signals.
-Reading these candidates does not emit a notice or consume the watch job's deduplication state. On refresh failure,
-the last report remains visible with `stale: true` and no actionable changes. Without an initial observation, a
-provider failure remains an error; an unconfigured location is explicit.
-Candidate windows are evaluated against the current clock on every read, including cache hits: expired alerts and
-forecast windows stop being actionable, and entering windows appear without another provider fetch. The cached
-report and its original `fetched_at` stay unchanged.
-The cache refreshes when either elapsed time or forward wall time reaches 15 minutes. This prevents a backward
-clock correction from extending freshness and refreshes after system sleep even on clocks that pause during
-suspend. Failed refreshes remain throttled from their attempt time and never restore actionable stale signals.
-
-The wheel ships the checked `weather-trend` skill. Inspect it with `hz system skill show weather-trend`. It advises
-how to interpret evidence and propose bounded Sheets/Docs drafts and an exact email preview for human approval.
-A skill grants no operation, target, recipient or approval. The scheduled durable workflow, document writers and
-mail approval are separate integration work; installing this plugin does not activate them. Candidate change keys
-are not durable delivery receipts, and a new process has its own cache. The independent watch job keeps its
-existing schedule and notice policy.
+`hz weather observe --json` is a read-only report for workflows; it does not send notices. The plugin also ships the
+`weather-trend` skill: `hz system skill show weather-trend`. Details: [ADR 0002](docs/adr/0002-weather-observations-and-trend-advice.md).
 
 <!-- screenshots:start -->
 ## Screenshots

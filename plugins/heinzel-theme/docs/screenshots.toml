@@ -5,32 +5,41 @@ bootstrap = "docs/screenshot_fixture.py"
 name = "theme-light"
 surface = "ui"
 route = "/contracts/launch-review"
-caption = "The installed Heinzelmännchen theme on a representative local contract — light appearance"
+caption = "A fictional Launch review contract, its configuration and run commands, in the applied Heinzelmännchen light theme."
 theme = "heinzelmaennchen"
 appearance = "light"
+viewport = { width = 1440, height = 1000 }
+reduced_motion = "reduce"
 
 [[scenes.steps]]
 action = "wait"
 role = "heading"
 name = "Launch review"
+
 [[scenes]]
 name = "theme-dark"
 surface = "ui"
 route = "/contracts/launch-review"
-caption = "The installed Heinzelmännchen theme on a representative local contract — dark appearance"
+caption = "The same fictional Launch review contract in the applied Heinzelmännchen dark theme."
 theme = "heinzelmaennchen"
 appearance = "dark"
+viewport = { width = 1440, height = 1000 }
+reduced_motion = "reduce"
 
 [[scenes.steps]]
 action = "wait"
 role = "heading"
 name = "Launch review"
+
 [[scenes]]
 name = "theme-soundscapes"
 surface = "ui"
 route = "/?settings=appearance"
-caption = "The theme supplies three optional YouTube soundscapes; playback starts only after Play"
+caption = "Demo profile: browse three optional YouTube soundscapes; playback starts only after Play."
 theme = "heinzelmaennchen"
+appearance = "light"
+viewport = { width = 1440, height = 1000 }
+reduced_motion = "reduce"
 
 [[scenes.steps]]
 action = "wait"
@@ -40,14 +49,18 @@ text = "Claude FM"
 action = "wait"
 text = "Hyper Focus"
 
+[[scenes.steps]]
+action = "wait"
+text = "Die Heinzelmännchen"
+
 [[scenes]]
 name = "theme-cli"
 surface = "cli"
-caption = "Inspect the owning theme and its light/dark palette from the CLI"
+caption = "Demo profile: list available themes and identify Heinzelmännchen from the CLI."
 command = ["system", "theme", "list"]
 
 [[scenes]]
 name = "soundscapes-cli"
 surface = "cli"
-caption = "List the three theme-owned soundscapes without starting playback"
+caption = "Demo profile: list Claude FM, Die Heinzelmännchen and Hyper Focus without starting playback."
 command = ["system", "sound", "list"]

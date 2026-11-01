@@ -1,63 +1,33 @@
-# Show what changed without opening every pull request.
+**Audience**
+Developers and team leads who want GitHub changes available to Heinzelmännchen workflows through the `code-host:read` and `tracker:read` capabilities.
 
-The gallery should sell the useful result: a readable account of merged work and issue changes, usable in the app,
-a shell, and a workflow. GitHub supplies `code-host:read` and `tracker:read`; it has no bespoke pull-request screen.
-Keep the real host UI and real adapter results. A settings dialog, installed-plugin card or help page is not a hero.
+**Outcome**
+“What shipped, and what needs attention?” Follow a fictional widget team through three merged changes, two issue updates, and a contract declaring both inputs. Show readable results and structured JSON so viewers can judge whether this adapter fits their workflows.
 
-## Runtime and command boundary
+Production reads use GitHub CLI 2.40.0 or later and its authentication. The adapter sends GET requests; the account used by `gh` may have broader permissions. The useful reading commands shown here belong to the existing documentation fixture, not the installed plugin’s public CLI. The plugin’s own operation is `hz github info`.
 
-The owning public command is `hz github info`. There are no built-in `hz github pulls` or `hz github issues`
-commands. `hz system capability list` describes bindings; it does not execute a capability method.
-For useful result captures, the documentation bootstrap must register a **fixture-only** `showcase` requester using
-public `Module`, `CodeHost`, `Tracker` and `Window` APIs. Adapt `digest()` from
-[the integration tests](../tests/integration/capability_test.py), retaining the real GitHub adapter. Proposed
-`hz showcase merged` and `hz showcase issues` commands below belong only to that demonstration profile, not to the
-released GitHub CLI. The contact sheet and captions must say so.
+**Scenes**
+1. **merged-work — useful app view.** At `/`, run the existing fixture requester in the native terminal. Show October’s three merged pull requests with dates and authors: a small, readable account of what shipped.
+2. **issue-changes — useful app view.** At `/`, show the two issue updates with state and owner. The wobbling widgets issue remains open with Grace; the API documentation issue is closed with Ada. Pull request #7 must be excluded from these issue results.
+3. **merged-cli — shell result.** Show the same merged work outside the app, demonstrating the existing requester’s table rendering.
+4. **issues-json — structured shell result.** Show the issue records as JSON, including source URLs, timestamps, owners, states and labels.
+5. **workflow-context — declared workflow.** Preserve the existing `/contracts/weekly-code-review` scene. Show the local “Weekly code review” contract declaring both capabilities and inputs. It is an example declaration; no review or report has been generated.
 
-Use repository `acme/widgets` and the fixed half-open UTC window `2026-10-01T00:00:00+00:00` to
-`2026-11-01T00:00:00+00:00`. Keep two or three concise rows per result.
+Preserve all five existing scenes, their commands, routes and order. The plan changes only clarify fictional data and declaration wording, and add a fixed browser clock. This connector supplies no theme, so theme demonstration scenes are unnecessary.
 
-## Required scenes, in gallery order
+**Fictional fixtures**
+Use only `docs/screenshot_fixture.py`, during explicit capture. It binds `DemoGh` while retaining the real adapter and its conversions, and supplies documentation-only `showcase merged` and `showcase issues` operations. Both use the fixed UTC interval `[2026-10-01, 2026-11-01)`.
 
-| Scene | Surface and actual action | Visible result and caption | Why it matters |
-| --- | --- | --- | --- |
-| Merged work | UI: open the real in-app terminal, then `hz showcase merged acme/widgets` | Render actual `CodeHost.merged_pull_requests` results with number, title, author and merge date. Caption: “Merged pull requests through the GitHub adapter — fictional repository in the app terminal.” | A manager can see what shipped without opening each PR. |
-| Issue changes | UI: app terminal running `hz showcase issues acme/widgets` | Actual issue key, title, state, owner and labels; no pull requests mixed into issues. Caption: “Changes and owners from the tracker adapter — fictional issue data.” | Shows the second capability and actionable ownership. |
-| Shell result | CLI: run the same merged command through the installed CLI head | A readable, complete terminal result, with command visible. Caption: “Read merged work from the shell — fixture-only requester, real GitHub adapter.” | Demonstrates scripting and the same data outside the app. |
-| Structured tracker | CLI: issue command with `--json` | Two complete objects with stable keys, without an enormous packet. Caption: “Typed issue results for scripts and agents — fictional data.” | Shows that automation gets structured data, not scraped prose. |
-| Workflow context | UI: open a seeded read-only `weekly-code-review` contract at `/contracts/weekly-code-review` | Actual contract goal, `code-host:read` and `tracker:read` inputs, named weekly output. Caption: “Use GitHub reads in a weekly-review contract — local demonstration.” | Connects raw adapter data to a useful recurring task. |
+The fixture contains `acme/widgets` pull requests #7 “Render widgets in dark mode” by Ada, #8 “Keep the last row when exporting widgets” by Mira, and #9 “Add release readiness checks” by Jonas. Its issue results are #3 “Widgets wobble at high speed” and #4 “Document the widget API.” It also creates the existing demonstration contract beneath the isolated state directory. No additional fixture files or repository variants are needed.
 
-The workflow scene is included only after the bootstrap creates a real local contract and verifies it loads.
-A contract page alone is not evidence that a report was generated; do not caption it as a completed digest.
+**Privacy pitfalls**
+Capture in the documented temporary profile without connected accounts. Keep real repositories, credentials, account names, paths and terminal history out of frame. Treat `acme/widgets`, the named contributors, and the simulated login and CLI version as demonstration values; matching public identities or URLs do not establish real activity. Do not open external source links or present fixture results as live GitHub access. The bootstrap writes local demonstration state only when capture is explicitly run.
 
-## Fixture entry points
-
-Reuse [fake_gh.py](../tests/fake_gh.py) and the `fake_gh_cli` installation pattern from
-[conftest.py](../tests/conftest.py). Route only `repos/acme/widgets/pulls` and `repos/acme/widgets/issues` to the
-existing fictional [pulls](../tests/fixtures/pulls.json) and [issues](../tests/fixtures/issues.json) shapes.
-Add more fictional rows only when needed to make different states readable. Bind `code_host = "github"` and
-`tracker = "github"` in the isolated user configuration. Resolve only the fake executable; never fall back to `gh`
-on the developer's PATH. A missing fixture route must fail the capture.
-
-A compact Rich table supplied by the demonstration requester is acceptable; it formats values returned by the
-real adapter and must not invent a GitHub-specific product screen. Keep source references and the fixture-only
-command distinction in `docs/SCREENSHOTS.md` beside the resulting images.
-
-## Accessible capture and acceptance
-
-- Open `button` **Open a terminal**, then `button` **Full screen**. Wait for the actual command to finish and the
-  expected PR title or issue key before capture; the command and every row must fit.
-- Wait for `heading` **Weekly code review** on the shared contract page; use the actual seeded title consistently.
-- Every required scene returns nonempty results from the real adapter. Tests assert the fake vendor was called,
-  window filtering works, and issue results exclude PRs. Both UI and CLI captures are present.
-- No network request leaves loopback. Only fictional names, `acme/widgets`, and fixture URLs may appear; no real
-  account, local path, hostname, credential, browser token or call-log environment reaches an image or transcript.
-- Review the contact sheet at actual catalog thumbnail size, then open full images. Reject help-only, loading,
-  error, clipped or mostly empty terminal captures. The first two scenes must explain the plugin without prose.
-
-## Current captured scope
-
-The documentation bootstrap uses the test suites' in-memory vendor-runner pattern: it binds only `DemoGh` at `Gh`
-while retaining the actual installed capability adapters and conversions. It never executes a vendor client.
-The fixed October window lives inside the fixture requester, so the displayed commands stay concise.
-The workflow scene is a real seeded, valid local contract. It declares inputs; no agent or report generation runs.
+**Acceptance criteria**
+- Five scenes: three useful UI views and two CLI results; both data-reading cases appear in the native app terminal.
+- Merged results contain #7, #8 and #9 in merge-date order. Issue results contain #3 open/Grace and #4 closed/Ada, excluding the pull request mixed into the vendor response.
+- JSON exposes the same two issues with their typed fields and source URLs.
+- The contract view shows “Weekly code review” and remains clearly a local declaration with no generated report.
+- Every caption identifies fictional, fixture or demonstration content and stays within 180 characters. Tables, commands and relevant output remain readable without clipping or unrelated history.
+- Terminal actions rely on their built-in completion handling; there are no individual-cell text waits, selectors, evaluation scripts or invented panels.
+- The TOML below was manually checked for syntax, table scope and the requested field constraints. Runtime parsing and screenshot capture remain unverified: no imports, plugin execution, bootstrap execution or network calls were performed.

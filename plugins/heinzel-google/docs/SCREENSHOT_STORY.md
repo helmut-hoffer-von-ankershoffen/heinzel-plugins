@@ -1,67 +1,30 @@
-# Bring the files, schedule and mail you need into one workflow.
+**Audience.** People building Heinzelmännchen workflows that need Google Docs and Sheets content, calendar context, and optional Gmail access.
 
-Lead with useful Workspace content: recently changed files, readable notes, upcoming meetings and a focused mail
-query. Show actual installed adapter results in the real app terminal and CLI. This plugin has no standalone
-Google Drive, Gmail or calendar product screen; do not draw one for a screenshot.
+**Outcome.** Follow one fictional launch from its files to its plan, meetings, metrics, and next actions. Show the installed adapter processing local Workspace replies through real operations and capability methods. The plugin declares no dedicated panel; use the existing app terminal at `/`. The `showcase` commands and their renderers belong only to the documentation fixture. Production use requires gws and Google authorization; Gmail and calendar/mail writes are opt-in.
 
-## Runtime and command boundary
+**Scenes.** Preserve the seven existing scenes, correct the calendar caption to describe attendees, and insert one additional native-terminal parameter case.
 
-`hz google files --days 3 --name Launch` is a real released operation: it lists recently changed Google Docs and
-Sheets. `hz google info` is metadata. There are no released `hz google calendar`, `hz google read` or `hz google mail`
-commands. For capability demonstrations the bootstrap must register a **fixture-only** `showcase` requester using
-public `Documents`, `Calendar` and `Mail` APIs. Adapt `prep()` in
-[the capability tests](../tests/integration/capability_test.py). Label every `hz showcase ...` command as a local
-demonstration, not a command added by the Google distribution.
+1. **launch-files — Find the launch material.** In the app terminal, run `hz google files --days 3 --name Launch`. Show the fictional Launch plan, Launch metrics, and Launch readiness checklist with their document types and references.
+2. **launch-files-week — Explore a broader window.** Run `hz google files --days 7` in the app terminal. This demonstrates a second useful parameter case without a name filter. The fixture returns the same three canned files; these captures do not verify Google's server-side filtering.
+3. **launch-plan — Understand the next milestone.** The fixture-only `showcase notes launch-plan` requester displays converted document headings, assigned checks, the Thursday review, source URL, and revision.
+4. **launch-week — See who is involved.** The fixture-only calendar requester displays three meetings with UTC start times and attendees. These people are attendees, not verified meeting owners.
+5. **launch-inbox — Find relevant updates.** The fixture-only mail requester shows two launch messages, received dates, subjects, and the fictional sender.
+6. **launch-files-json — Inspect structured results.** Show the real file-listing operation's JSON output with fictional names, kinds, references, and modification timestamps.
+7. **launch-metrics — Read a Sheet as a table.** The fixture-only documents requester displays the Readiness sheet's targets and observed values, including the fictional 99.95% crash-free figure.
+8. **mail-content — Turn context into next actions.** The fixture-only mail requester reads the message assigning export-boundary, API-note, and phone-screenshot checks.
 
-## Required scenes, in gallery order
+**Fictional fixtures.** Reuse only `docs/screenshot_fixture.py`, already referenced by the plan. During explicit capture it binds `DemoGws`, supplies local vendor replies, registers the documentation-only `showcase` module, and creates dummy sign-in files under the isolated `HZ_STATE_DIR`. Reuse its Mira, Jonas, and Priya Example characters, `example.com` addresses, document IDs, two messages, and calendar window of 19–26 October 2026. Calendar and mail dates are fixed; file modification timestamps come from Python's capture-time clock. No additional fixture files are proposed.
 
-| Scene | Surface and actual action | Visible result and caption | Why it matters |
-| --- | --- | --- | --- |
-| Find the relevant work | UI terminal: `hz google files --days 3 --name Launch` | Three fictional Docs/Sheets with descriptive titles, changed times and types; render the actual Drive listing. Caption: “Recently changed launch files in the app terminal — fictional Workspace fixture.” | Gives an immediate answer to “what changed?” |
-| Read the plan | UI terminal: proposed fixture command `hz showcase notes launch-plan` | Actual `Documents.read` Markdown: title, short checklist, owner names and revision. Caption: “Google Doc content ready for a workflow — local fictional plan.” | Shows the adapter reads useful content, not just links. |
-| Prepare for the week | UI terminal: fixture command `hz showcase week` | Actual `Calendar.events` output with a launch review and two one-on-ones, local times and named attendees. Caption: “Upcoming meetings and their context — fictional calendar through the Google adapter.” | Explains the calendar capability with recognizable work. |
-| Read structured files | CLI: `hz google files --days 3 --name Launch --json` | Compact complete Docs and Sheets metadata, with useful titles. Caption: “Changed Docs and Sheets as structured data for scripts — fictional files.” | Shows useful production CLI behavior beyond help. |
-| Read the sheet | CLI: fixture command `hz showcase notes launch-metrics` | Actual `Documents.read` conversion of a Google Sheet into a small table of release metrics. Caption: “A Sheet becomes a readable table through the documents capability — local fixture.” | Shows that spreadsheets are supported, not just Docs. |
-| Focus the inbox | UI terminal: fixture command `hz showcase inbox` | Two messages returned by the real Gmail adapter and one opened body with next action. Caption: “A focused mail query and its message content — fictional inbox, mail explicitly bound.” | Explains opt-in mail access through useful results. |
-| Optional writes | CLI: fixture-only `hz showcase draft-mail` and `hz showcase create-event` in one narrowly rendered local demonstration command | Real `Mail.create_draft` and `Calendar.create_event` results against fake gws only, with draft subject and event time. Caption: “Optional draft and calendar write adapters against a local fixture; no mail sent or live event created.” | Covers optional write capabilities honestly. |
+**Privacy pitfalls.** Capture only the isolated fictional profile. Real document URLs, file IDs, message bodies, addresses, meeting titles, terminal history, and local paths can expose private information. Sanitized text is not anonymized text. Keep fixture-only commands visibly identified in captions and accompanying prose. Dummy sign-in files do not establish a working Google connection, canned replies do not establish live query behavior, and fictional readiness metrics do not describe plugin quality. The fixture does not demonstrate confirmed writes or production authorization.
 
-Keep at most eight captures. The optional write scene is required before claiming the gallery covers the whole
-read/write plugin; omit that claim if the demonstration is not implemented. Do not represent a direct adapter
-invocation as a confirmed production publish flow. Production writes are opt-in and performed through the host's
-confirmation/publish operations; no capture should request real OAuth scopes, send mail or change a real calendar.
-A local contract dry-run can support a later workflow scene but must not imply a report was generated.
+**Acceptance criteria.**
 
-## Fixture entry points
-
-[conftest.py](../tests/conftest.py) provides `FakeGws`, `file`, `doc`, `json` and `output` helpers. Bind its behavior
-at the gws runner boundary, retaining `GoogleDocuments`, `GoogleCalendar`, Gmail and all conversion code.
-[The document tests](../tests/unit/docs_test.py), [sheet tests](../tests/unit/sheets_test.py),
-[calendar tests](../tests/unit/calendar_test.py) and [mail tests](../tests/unit/mail_test.py) supply exact response
-shapes. Use fictional file IDs `launch-plan` and `launch-metrics` where supported by the parser, or valid synthetic
-alphanumeric IDs where it requires them; requester aliases can map the readable names to those fixture IDs.
-
-Required vendor routes include `drive files list/get`, `docs documents get`, `sheets spreadsheets get`,
-`calendar events list`, `gmail users messages list/get` and, only for the write scene, draft create/get and event
-insert. Use `primary` only in the fixture. Populate `modifiedTime` from the capture's injected fixed clock or from
-its isolated fixture clock so the three-day query actually matches. Do not hardcode old timestamps and silently
-bypass filtering. User configuration binds documents/calendar to Google; mail is bound explicitly only for its
-scenes. Fake sign-in files contain no usable credentials and exist only in the temporary profile.
-
-## Accessible capture and acceptance
-
-- Every UI scene opens `button` **Open a terminal**, then **Full screen**, and waits for the expected file title,
-  document heading, calendar title or message subject after the actual command finishes.
-- Assert each screenshot's data comes through the real adapter and the expected fake gws routes. The complete
-  gallery covers Docs, Sheets, Drive metadata, calendar and mail; optional writes require local fixture evidence.
-- All people and addresses are fictional `example.com` identities. Strip real environment credentials and never
-  use the developer's gws config/keychain. No browser token, hostname, absolute path or live conference passcode
-  enters the image, transcript or metadata. Unexpected requests fail; all network is loopback-only.
-- Results fit the terminal without clipping; the first capture has three meaningful rows, not “No files”. Keep
-  captions explicit about fictional fixtures. Review thumbnails and full images, not just successful exit codes.
-
-## Current captured scope
-
-The fixture-only requester fixes the demonstration week and mail query internally. Its `message-content` operation
-reads the first matching mail body. The seven-scene gallery covers Drive metadata, Docs, Sheets, Calendar and
-Gmail reads through the actual installed adapters. Optional write demonstrations are deferred: no captured scene
-claims to demonstrate sending mail, calendar mutation or the entire read/write feature set.
+- Eight scenes retain every existing scene name and useful result; five show useful app-terminal views and three show CLI results.
+- Both file-listing parameter cases appear in the native terminal. Their identical canned results are disclosed.
+- Every caption explicitly identifies fictional content or replies and stays below 180 characters.
+- Commands, fixture references, and `/` are supported by the provided source and existing plan. No dedicated Google screen is implied.
+- Captures show completed, legible results at the existing UI viewport. Terminal actions supply completion synchronization; no individual-cell text waits are added.
+- Expected fixture content includes three files, three calendar meetings, two mail summaries, document headings and revision, the three-row metrics table, and the message's next actions.
+- No real account data or credentials appear. All demonstrated operations read data.
+- This is a connector, so applied theme demonstrations are not applicable.
+- Validation is by static inspection of TOML syntax, the requested schema, source declarations, and fixture behavior. No parser, bootstrap, application, or capture was executed; runtime layout and capture success remain to be verified during explicit capture.

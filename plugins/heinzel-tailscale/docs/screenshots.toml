@@ -1,11 +1,12 @@
 format = 1
 bootstrap = "docs/screenshot_fixture.py"
+browser_time = "2026-10-31T12:00:00Z"
 
 [[scenes]]
 name = "sharing-ready"
 surface = "ui"
 route = "/"
-caption = "Share the app privately with an explicit ready state — local Tailscale fixture; session hidden"
+caption = "Enable private sharing and see verified readiness — fictional local Tailscale demo"
 timeout_ms = 30000
 
 [[scenes.steps]]
@@ -13,6 +14,7 @@ action = "click"
 role = "button"
 name_regex = "^Dismiss Doctor"
 optional = true
+
 [[scenes.steps]]
 action = "click"
 role = "button"
@@ -31,6 +33,10 @@ name = "Share over Tailscale"
 
 [[scenes.steps]]
 action = "wait"
+text = "Private sharing is ready for an authenticated browser."
+
+[[scenes.steps]]
+action = "wait"
 role = "button"
 name = "Copy URL"
 
@@ -42,7 +48,7 @@ name = "Tailscale"
 name = "phone-sharing-ready"
 surface = "ui"
 route = "/"
-caption = "Inspect and copy the private link on a phone — local Tailscale fixture; session hidden"
+caption = "Inspect the private link at phone width — fictional local Tailscale demo; no remote connection tested"
 timeout_ms = 30000
 
 [[scenes.steps]]
@@ -50,6 +56,7 @@ action = "click"
 role = "button"
 name_regex = "^Dismiss Doctor"
 optional = true
+
 [[scenes.steps]]
 action = "click"
 role = "button"
@@ -69,6 +76,10 @@ name = "Tailscale"
 
 [[scenes.steps]]
 action = "wait"
+text = "Private sharing is ready for an authenticated browser."
+
+[[scenes.steps]]
+action = "wait"
 role = "button"
 name = "Copy URL"
 
@@ -79,14 +90,14 @@ height = 844
 [[scenes]]
 name = "sharing-request-cli"
 surface = "cli"
-caption = "Inspect the saved sharing request from a separate CLI process — local fictional network"
+caption = "Inspect saved intent and mapping, with web verification pending — fictional local Tailscale demo in a separate CLI process"
 command = ["tailscale", "status", "--json"]
 
 [[scenes]]
 name = "sharing-off"
 surface = "ui"
 route = "/"
-caption = "Turn private sharing off explicitly — local Tailscale fixture"
+caption = "Turn private sharing off explicitly — fictional local Tailscale demo"
 timeout_ms = 30000
 
 [[scenes.steps]]
@@ -94,6 +105,7 @@ action = "click"
 role = "button"
 name_regex = "^Dismiss Doctor"
 optional = true
+
 [[scenes.steps]]
 action = "click"
 role = "button"
@@ -121,5 +133,5 @@ name = "Tailscale"
 [[scenes]]
 name = "sharing-off-cli"
 surface = "cli"
-caption = "Verify private sharing is off from the shell — local fictional network"
+caption = "Confirm the owned mapping is gone and the request is off — fictional local Tailscale demo"
 command = ["tailscale", "status", "--json"]

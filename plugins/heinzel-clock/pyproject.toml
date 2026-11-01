@@ -165,3 +165,13 @@ caption = "The live globe and all three team clocks on a phone — fixed demonst
 path = "docs/assets/screenshots/cli-times.png"
 surface = "cli"
 caption = "The same team zones and working hours in the CLI — fixed fictional demonstration time"
+
+[[tool.heinzel.catalog.screenshots]]
+path = "docs/assets/screenshots/terminal-current.png"
+surface = "ui"
+caption = "Fictional demo team at 15:30 UTC: Berlin and New York are within working hours; Los Angeles starts in 30 minutes."
+
+[[tool.heinzel.catalog.screenshots]]
+path = "docs/assets/screenshots/terminal-overlap.png"
+surface = "ui"
+caption = "Preview 16:30 UTC with --at: all three fictional demo zones are within working hours; the app clock stays at 15:30 UTC."

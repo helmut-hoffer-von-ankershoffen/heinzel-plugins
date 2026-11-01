@@ -1,22 +1,22 @@
 ☀  22°C clear sky in Berlin, DE (feels like 21°C; today 12 to 24°C, 80% rain)
 Weather data by OpenWeather, openweathermap.org
-⚠ Thunderstorm warning, Sat 13:00 to Sat 16:00 (Example Weather Service)
+⚠ Thunderstorm warning, Sun 02:00 to Sun 05:00 (Example Weather Service)
 Next hours
 ┏━━━━━━━┳━━━┳━━━━━━┳━━━━━━┳━━━━━━━━━━━━━━━┓
 ┃ Time  ┃   ┃ Temp ┃ Rain ┃ Sky           ┃
 ┡━━━━━━━╇━━━╇━━━━━━╇━━━━━━╇━━━━━━━━━━━━━━━┩
-│ 10:00 │ ☁ │ 22°C │ 10%  │ broken clouds │
-│ 11:00 │ 🌧 │ 20°C │ 80%  │ moderate rain │
-│ 12:00 │ 🌧 │ 18°C │ 80%  │ moderate rain │
-│ 13:00 │ 🌧 │ 17°C │ 80%  │ moderate rain │
-│ 14:00 │ 🌧 │ 15°C │ 80%  │ moderate rain │
-│ 15:00 │ ☁ │ 14°C │ 10%  │ broken clouds │
-│ 16:00 │ ☁ │ 12°C │ 10%  │ broken clouds │
-│ 17:00 │ ☁ │ 14°C │ 10%  │ broken clouds │
-│ 18:00 │ ☁ │ 15°C │ 10%  │ broken clouds │
-│ 19:00 │ ☁ │ 16°C │ 10%  │ broken clouds │
-│ 20:00 │ ☁ │ 12°C │ 10%  │ broken clouds │
-│ 21:00 │ ☀ │ 13°C │ 10%  │ clear sky     │
+│ 23:00 │ ☁ │ 22°C │ 10%  │ broken clouds │
+│ 00:00 │ 🌧 │ 20°C │ 80%  │ moderate rain │
+│ 01:00 │ 🌧 │ 18°C │ 80%  │ moderate rain │
+│ 02:00 │ 🌧 │ 17°C │ 80%  │ moderate rain │
+│ 03:00 │ 🌧 │ 15°C │ 80%  │ moderate rain │
+│ 04:00 │ ☁ │ 14°C │ 10%  │ broken clouds │
+│ 05:00 │ ☁ │ 12°C │ 10%  │ broken clouds │
+│ 06:00 │ ☁ │ 14°C │ 10%  │ broken clouds │
+│ 07:00 │ ☁ │ 15°C │ 10%  │ broken clouds │
+│ 08:00 │ ☁ │ 16°C │ 10%  │ broken clouds │
+│ 09:00 │ ☁ │ 12°C │ 10%  │ broken clouds │
+│ 10:00 │ ☀ │ 13°C │ 10%  │ clear sky     │
 └───────┴───┴──────┴──────┴───────────────┘
 Days
 ┏━━━━━━━━━━━━┳━━━┳━━━━━━┳━━━━━━┳━━━━━━┳━━━━━━━━━━━━━━━┓
