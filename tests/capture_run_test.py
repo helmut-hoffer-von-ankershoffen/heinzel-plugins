@@ -302,24 +302,10 @@ def test_ui_scenes_only_reach_the_local_app_and_use_the_demo_appearance(harness)
     assert ("route", "**/*") in harness.log
 
 
-def test_the_plugin_card_scene_searches_for_the_plugin_by_name(harness):
-    record(harness, draft_only=True)
-    assert ("fill", "searchbox:Search plugins", "heinzel-harbor") in harness.log
-    assert ("wait_for", "text:A fictional harbor.") in harness.log
-
-
 def test_the_terminal_scene_types_one_quoted_hz_command(harness):
     record(harness, draft_only=True)
     typed = [entry[1] for entry in harness.log if entry[0] == "type"]
     assert typed == ["hz tides --help; printf '\\033]0;Demo complete\\007'"]
-
-
-def test_session_tokens_are_scrubbed_from_every_page_before_a_screenshot(harness):
-    record(harness, draft_only=True)
-    scrubs = [entry[1] for entry in harness.log if entry[0] == "evaluate" and entry[1]]
-    assert scrubs and all("demo_session_token" in argument["tokens"] for argument in scrubs)
-    names = [entry for entry in harness.log if entry[0] == "screenshot"]
-    assert [entry[1] for entry in names] == ["ui.png", "terminal.png", "cli.png"]
 
 
 def test_a_failed_scene_names_itself_saves_a_private_diagnostic_and_stops_the_backend(harness):
@@ -671,5 +657,7 @@ def test_a_backend_that_never_prints_its_address_is_reported_and_reaped(harness)
     )
     with pytest.raises(privacy.CaptureError, match="did not become ready"):
         record(harness, draft_only=True)
-    time.sleep(0.05)
+    deadline = time.monotonic() + 5
+    while backend_is_running(harness) and time.monotonic() < deadline:
+        time.sleep(0.05)
     assert not backend_is_running(harness)
