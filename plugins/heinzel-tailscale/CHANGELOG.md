@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.9.2
 
 Rewrite the sharing messages in plain words: what Tailscale already does, what hz left alone and what you can do,
 with the exact command. The footer popup now shows one bullet per sentence instead of cutting a sentence at 80
