@@ -47,8 +47,8 @@ class Mapping:
 
     @property
     def clear_command(self) -> str:
-        """The exact Tailscale command that removes whatever is served on this HTTPS port."""
-        return f"tailscale serve --https={self.port} off"
+        """The Tailscale command that removes only this root mapping, never other paths on the same port."""
+        return f"tailscale serve --https={self.port} --set-path=/ off"
 
     @property
     def target(self) -> str:

@@ -1,41 +1,26 @@
 **Audience**
-
-Owners who already use Tailscale and want explicit private sharing of their authenticated Heinzelmännchen app. The adapter is included in the standard app; Tailscale installation, login and HTTPS consent remain prerequisites.
+Heinzelmännchen users who already use Tailscale and want private access to their authenticated workspace. This adapter is included in the standard app; Tailscale must already be installed and signed in.
 
 **Outcome**
-
-“Share deliberately, see what is ready, switch off cleanly.” Show the real footer sharing control producing a verified local readiness result, a usable compact layout and an honest CLI inspection. Readiness confirms the local setup; it does not prove that a remote phone can connect.
+“Ready at your desk, readable in your pocket, easy to switch off.” Show an explicit sharing action, verified local readiness, and a clear return to OFF. Preserve the existing five-scene plan unchanged: it already demonstrates useful behavior through the operational footer control and real CLI results.
 
 **Scenes**
-
-1. **sharing-ready:** Open the Tailscale footer region on `/`, explicitly enable sharing, and capture the readiness message, enabled control and Copy URL action. Crop to the region so the result is easy to read.
-2. **phone-sharing-ready:** Show that same ready state at 390 × 844. This is a responsive local browser preview, clearly captioned as fictional and without a remote connection test.
-3. **sharing-request-cli:** Run `hz tailscale status --json` in a separate CLI process. Show the saved request and matching mapping with web verification pending. The distinction between requested and verified state is useful product behavior.
-4. **sharing-off:** Explicitly turn sharing off through the same footer control and capture the off message.
-5. **sharing-off-cli:** Inspect JSON status again to confirm that the request is off and the matching mapping is absent.
-
-Preserve the existing five-scene plan unchanged: it already demonstrates useful behavior through two ready UI views, an explicit off result and two meaningful CLI results. The supplied navigation declaration exposes settings; the story uses the existing `/` footer control rather than assuming a dedicated plugin panel route.
+1. **sharing-ready:** Open the Tailscale footer control and enable sharing. Frame the ready message, enabled switch, fictional HTTPS address, and Copy URL action together.
+2. **phone-sharing-ready:** Show the same ready state at 390 × 844. Demonstrate a readable mobile layout; this is a local browser viewport, not evidence of a remote phone connection.
+3. **sharing-request-cli:** Run `hz tailscale status --json` in a separate CLI process. Show saved intent and the matching mapping while web verification remains pending in that process. Expected fields include `state: apply-required`, `desired_enabled: true`, and `mapped: true`.
+4. **sharing-off:** Explicitly switch sharing off and capture the resulting OFF message in the same control.
+5. **sharing-off-cli:** Repeat the status command after disabling. Show `state: off`, `desired_enabled: false`, and `mapped: false` as evidence that the owned mapping was removed.
 
 **Fictional fixtures**
-
-Use the existing `docs/screenshot_fixture.py` only during explicit capture, in the temporary isolated profile described by the supplied docs. It supplies `workstation.tail-example.ts.net`, emulates Tailscale discovery, and exercises the real sharing transactions against an authenticated loopback-only fictional LocalAPI. Its existing unrelated `svc:notes` service must remain intact; the fixture checks that preservation. Do not present that check as information visible in the status screenshots.
-
-Keep the existing frozen browser time and scene order. The ready views and first CLI result depend on enabling first; the final CLI result depends on the preceding disable action. No additional fixture files are needed.
+Use only the existing `docs/screenshot_fixture.py`, during explicit capture, with one temporary isolated profile shared across the ordered scenes. It supplies `workstation.tail-example.ts.net`, fictional signed-in node facts, and a loopback LocalAPI fixture. Real plugin transactions operate against that fixture. Its existing unrelated `svc:notes` service must remain intact. Keep the existing frozen browser time. No additional fixture files are needed.
 
 **Privacy pitfalls**
-
-- Every caption identifies the fictional local demo. Keep real hostnames, accounts, peer information and personal workspace content out of the capture profile.
-- Copy URL can include a session-bearing `#token=...` fragment. Show the action without clicking it, exposing clipboard contents or publishing a sign-in link.
-- Tailnet membership does not replace app authentication or grant backend-owner operations and terminal authority.
-- A phone-width preview must not imply device pairing, completed HTTPS consent or successful remote access.
+Do not copy or expose a session-bearing URL: its token grants session access. Keep real hostnames, credentials, account details, and clipboard contents out of captures. Tailnet membership alone does not authenticate a browser. The mobile scene proves layout only; local readiness does not prove remote connectivity, network policy, or browser pairing.
 
 **Acceptance criteria**
-
-- Preserve all five scene names, captions, commands and ordering.
-- The ready UI displays the exact readiness message and Copy URL action after explicit enabling.
-- The phone view keeps the readiness information and sharing controls readable without clipping.
-- The first CLI result reports `state = apply-required`, `desired_enabled = true` and `mapped = true`; it does not claim web readiness from a separate process.
-- The off UI displays the exact off message. The final CLI result reports `state = off`, `desired_enabled = false` and `mapped = false`.
-- The unrelated fictional service survives both transactions.
-- Captures show actual rendered UI and completed CLI output, with no invented screens, external navigation or secret-bearing links.
-- Static review confirms the supplied TOML structure, allowed fields, unique lowercase scene names, caption lengths, local routes and existing relative bootstrap path. Parser validation and capture verification were not run under the no-code-execution constraint.
+- Capture all five scenes in order, retaining the three useful UI views and two CLI results.
+- Ready views show the authenticated-browser readiness message and Copy URL action; the OFF view shows the explicit off message.
+- Separate CLI status must not claim web readiness. Status reads must not enable sharing.
+- All captions identify fictional demo data, and the phone caption discloses that no remote connection was tested.
+- Keep only the supplied local route, accessible interactions, existing bootstrap, and argument-array CLI commands.
+- The returned TOML was manually checked against the supplied contract: valid table structure, five unique lowercase scene names, captions under 180 characters, and an ISO8601 browser time. Parser validation and capture verification were not run because execution was prohibited.

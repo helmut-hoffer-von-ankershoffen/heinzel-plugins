@@ -128,7 +128,7 @@ class Sharing:
                 message=(
                     "Sharing is off, but an earlier change did not finish.\n"
                     "To see what is left, run:\ntailscale serve status\n"
-                    f"To clear it, run:\n{mapping.clear_command}"
+                    f"To delete what is left of the mapping, run:\n{mapping.clear_command}"
                 )
                 if incomplete
                 else "Private web sharing is off.",
@@ -146,7 +146,7 @@ class Sharing:
                 message=(
                     "Tailscale already shares this app, and hz did not set that up.\n"
                     "So hz left it alone. You can keep it as it is.\n"
-                    f"To let hz manage sharing, remove it with this command:\n{mapping.clear_command}\n"
+                    f"To let hz manage sharing, delete that mapping with this command:\n{mapping.clear_command}\n"
                     "Then switch sharing on here."
                 ),
             )
@@ -200,7 +200,8 @@ class SharingActions:
             if not owned and mapping.has_handler(planned):
                 msg = (
                     f"Tailscale already shares this app at {mapping.origin}, and hz did not set that up, "
-                    f"so hz did not change it. To let hz manage sharing instead, run: {mapping.clear_command}"
+                    "so hz did not change it. To let hz manage sharing instead, "
+                    f"delete that mapping with: {mapping.clear_command}"
                 )
                 raise HeinzelError(msg)
             planned = mapping.enable(planned)
