@@ -17,7 +17,7 @@ clock, resource meters, weather, a theme with soundscapes, and adapters for GitH
 and Zoom. Each one is its own project in [`plugins/`](plugins/).
 
 ```sh
-uvx heinzel@latest
+uvx heinzel
 ```
 
 [**Explore the plugin catalog**](https://heinzel.team/CATALOG/) · [Install guide](https://heinzel.team/guides/install/) · [Add a plugin](#install) · [Build your own](#add-a-plugin)
@@ -119,7 +119,7 @@ what is missing and the command that fixes it.
 Plugins need Heinzelmännchen. One command installs the app with its default plugins (the first four above) and opens it:
 
 ```sh
-uvx heinzel@latest
+uvx heinzel
 ```
 
 No uv yet? The guided installer sets it up first:
@@ -267,7 +267,7 @@ SDK and default providers have been published and verified. When enabled, every 
 SDK without a complete standard app, verifies GitHub/PyPI artifact identity, and composes the missing release.
 The accepted SDK must first validate the current app lifecycle (`format=2`, independently of the plugin ABI `sdk=1`),
 before any provider acceptance work. Legacy compositions remain immutable and are never relabeled as compatible.
-An existing complete composition is a no-op. The public quick start is always `uvx heinzel@latest`; versions stay in
+An existing complete composition is a no-op. The public quick start is plain `uvx heinzel`; versions stay in
 machine-readable release metadata and locks.
 Clock, Resource, Tailscale and the Heinzelmännchen theme are included and active by default. Sharing stays off until
 explicitly enabled. An unconfigured app uses its theme recommendation; saved theme choices stay authoritative and installation starts no playback.
@@ -278,7 +278,7 @@ make profile CORE=<built-core-wheel>
 ```
 
 This writes a local profile from already-built owning artifacts. The approved composition workflow produces the
-release profile consumed automatically by `uvx heinzel@latest`. Plugin releases remain independent of app composition.
+release profile consumed automatically by `uvx heinzel`. Plugin releases remain independent of app composition.
 
 ## Where the plugins came from
 
