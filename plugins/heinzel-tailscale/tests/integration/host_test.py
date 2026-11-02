@@ -344,7 +344,7 @@ def test_enable_does_not_adopt_a_preexisting_matching_manual_handler(setup):
     before = copy.deepcopy(store.config)
     result = CliRunner().invoke(build(fresh()), ["tailscale", "enable", "--json"])
     assert result.exit_code == 1
-    assert "not owned" in result.output
+    assert "did not set that up" in result.output
     assert store.config == before
     assert store.writes == 0
     assert not (Path(os.environ["HZ_CONFIG_HOME"]) / "config.toml").exists()
@@ -442,7 +442,7 @@ def test_uncertain_create_reports_observed_state_without_guessing_mapping_owners
     before = copy.deepcopy(store.config)
     off = CliRunner().invoke(build(fresh()), ["tailscale", "disable", "--json"])
     assert off.exit_code == 1
-    assert "ownership is unverified" in off.output
+    assert "cannot tell whether it owns" in off.output
     assert not saved()["tailscale"]["intent"]["enabled"]
     assert store.config == before
     assert store.writes == 1
@@ -457,7 +457,7 @@ def test_successful_vendor_acknowledgment_does_not_replace_fresh_mapping_verific
     store.discard = True
     result = CliRunner().invoke(build(fresh()), ["tailscale", operation, "--json"])
     assert result.exit_code == 1
-    assert "not verified" in result.output or "not confirmed off" in result.output
+    assert "could not confirm" in result.output or "cannot say it is off" in result.output
     assert store.config == before
     result = client(fresh()).get("/api/tailscale/status", headers=AUTH)
     assert result.json()["state"] == ("blocked" if operation == "disable" else "off")
@@ -485,13 +485,13 @@ def test_disable_does_not_release_ownership_when_only_the_https_listener_disappe
     store.dormant = True
     result = CliRunner().invoke(build(fresh()), ["tailscale", "disable", "--json"])
     assert result.exit_code == 1
-    assert "not confirmed off" in result.output
+    assert "cannot say it is off" in result.output
     assert saved()["tailscale"]["intent"]["phase"] == "disabling"
     assert saved()["hz"]["ui_allowed_origins"] == [ORIGIN]
     status = command(fresh(), "status")
     assert status["state"] == "blocked"
     assert not status["mapped"]
-    assert "incomplete" in status["message"]
+    assert "did not finish" in status["message"]
 
 
 def test_unapproved_or_unauthenticated_heads_cannot_change_vendor_state(setup):
@@ -523,7 +523,7 @@ def test_changed_target_is_never_removed_by_disable(setup):
     mapping = Mapping.for_node(DNS, 8737)
     store.config["Web"][mapping.authority]["Handlers"]["/"] = {"Proxy": "http://127.0.0.1:3000"}
     before = copy.deepcopy(store.config)
-    with pytest.raises(HeinzelError, match="target changed"):
+    with pytest.raises(HeinzelError, match="points somewhere else"):
         fresh().resolve(SharingActions).disable()
     assert store.config == before
     assert store.writes == 1

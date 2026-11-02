@@ -100,7 +100,7 @@ def test_redirect_is_not_followed_with_the_local_credential():
         requests.append(request)
         return httpx.Response(302, headers={"Location": "https://evil.example/"})
 
-    with pytest.raises(HeinzelError, match="refused the action"):
+    with pytest.raises(HeinzelError, match="Tailscale refused the change"):
         ServeStore(TailscaleCli()).read(CONNECTION, httpx.MockTransport(handle))
     assert len(requests) == 1
 
@@ -113,7 +113,7 @@ def test_unknown_write_outcome_is_not_automatically_retried():
         msg = "response lost after acceptance"
         raise httpx.ReadTimeout(msg)
 
-    with pytest.raises(HeinzelError, match="outcome is unknown"):
+    with pytest.raises(HeinzelError, match="could not tell whether"):
         ServeStore(TailscaleCli()).write(CONNECTION, Snapshot({}, "one"), {}, httpx.MockTransport(handle))
     assert len(requests) == 1
 

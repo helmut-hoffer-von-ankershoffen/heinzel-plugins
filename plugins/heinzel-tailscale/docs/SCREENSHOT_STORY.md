@@ -1,31 +1,25 @@
-**Audience**
-People who already use Tailscale and want private access to their authenticated Heinzelmännchen workspace. The adapter is included in the standard app; Tailscale must already be installed and signed in, with the required HTTPS consent.
+**Audience.** Heinzelmännchen users who already use Tailscale and want private access from another authenticated browser. This adapter is included in the standard app; Tailscale itself must already be installed and signed in.
 
-**Outcome**
-A private link, with a clear off switch. Show the explicit enable action, verified readiness in the owning web app, a compact view of the link, useful CLI diagnostics, and confirmed shutdown. Authentication remains required.
+**Outcome.** Turn sharing on, see a locally verified private address, inspect it at phone width, then turn sharing off. The story makes the distinction between requested sharing and verified readiness visible. It demonstrates the existing footer control on `/`.
 
-**Scenes**
-Preserve the existing five-scene sequence, names, routes, bootstrap, and CLI commands. The footer control is the plugin's useful interface; the source declares no dedicated plugin panel route.
+**Scenes.** Preserve the existing five-scene sequence and captions:
 
-1. **sharing-ready:** Open the footer's Tailscale region, enable sharing, and capture the ready message and Copy URL control. Crop to the region so the state and action are legible.
-2. **phone-sharing-ready:** Inspect the same ready state at 390 × 844. This demonstrates the compact layout; it does not demonstrate a connection from another device. Leave Copy URL unclicked.
-3. **sharing-request-cli:** Run `hz tailscale status --json` in a separate process. Expect saved intent and a matching mapping, with `state: apply-required`, `desired_enabled: true`, and `mapped: true`. Only the authenticated owning web instance can verify its live readiness.
-4. **sharing-off:** Switch sharing off and capture “Private web sharing is off.”
-5. **sharing-off-cli:** Repeat the status command and show `state: off`, `desired_enabled: false`, and `mapped: false`.
+1. **sharing-ready:** Open the Tailscale footer control and explicitly enable sharing. Frame the switch, readiness explanation and Copy URL button together: a clear reward for one deliberate action.
+2. **phone-sharing-ready:** Show the same ready state at 390 × 844. This demonstrates a usable control at phone width; it does not demonstrate a remote phone connection.
+3. **sharing-request-cli:** Show `hz tailscale status --json`. The separate CLI reports `apply-required`, with `desired_enabled=true` and `mapped=true`. Explain that this process cannot verify the owning web app's live listener and authentication context, even when the browser view reports ready.
+4. **sharing-off:** Explicitly disable sharing and capture “Private web sharing is off.” The user can see how to end sharing as readily as they started it.
+5. **sharing-off-cli:** Repeat the status command after disabling. Show `state=off`, `desired_enabled=false` and `mapped=false` as the resulting state.
 
-The changes address gaps in deterministic capture and truthful captions: add a fixed browser time, explicitly wait for readiness, identify fictional demo data, and clarify the narrow viewport and separate-process CLI result.
+**Fictional fixtures.** Use only the existing `docs/screenshot_fixture.py` bootstrap during explicit capture. It supplies the fictional node `workstation.tail-example.ts.net`, emulates vendor discovery and runs an authenticated loopback LocalAPI for the real sharing transactions. Its existing unrelated `svc:notes` service must remain unchanged. Keep one isolated profile and shared fixture state across the ordered scenes; start with sharing off. Freeze browser time at the plan's existing timestamp.
 
-**Fictional fixtures**
-Reuse the existing `docs/screenshot_fixture.py` during explicit capture only, in a fresh isolated temporary profile. It supplies `workstation.tail-example.ts.net`, fictional client discovery, and a loopback LocalAPI server. The real plugin performs its sharing transactions against that server. The fixture also retains an unrelated `svc:notes` service on port 8443 and checks its preservation. Start with sharing off and retain the same isolated state throughout the ordered scenes. No additional fixture files are required.
+**Privacy pitfalls.** Keep Copy URL visible but unclicked: a copied URL can contain the current session token. Exclude session fragments, sign-in links, pairing credentials, LocalAPI credentials and real account or machine information from every image. Tailnet membership does not replace browser authentication or grant owner authority. Fixture readiness proves local configuration behavior; it does not prove real certificates, remote connectivity or successful phone authentication.
 
-**Privacy pitfalls**
-Copy URL may include a password-equivalent `#token=...` session fragment. Do not activate copying or sign-in-link actions during capture. Keep real hostnames, peer information, credentials, session fragments, and unrelated personal content out of every frame, including the full mobile-width view. Use only the isolated fictional profile. A ready local deployment does not establish actual remote reachability or grant a paired browser owner operations or terminal access.
+**Acceptance criteria.**
 
-**Acceptance criteria**
-- All five scenes complete in order; the three UI views show working sharing controls and meaningful states.
-- Both ready views contain the exact ready message and Copy URL control; the off view contains the explicit off message.
-- CLI results show the expected pending-verification and off states without credentials.
-- The existing fixture's unrelated-service preservation checks pass during capture.
-- Every caption identifies fictional demo data and stays within 180 characters.
-- The plan uses the existing bootstrap, supported local route, accessible targets, and shell-free argument arrays.
-- Static validation against the supplied contract covers TOML table structure, unique lowercase scene names, allowed surfaces/actions, ISO8601 browser time, and scene count. No imports, product execution, network requests, or captures were performed; runtime acceptance remains to be verified during explicit capture.
+- Preserve all five existing scenes, their order, routes, actions, captions and bootstrap.
+- The ready UI must show the exact readiness message and Copy URL; the off UI must show the exact off message.
+- At phone width, the sharing control and private address remain legible without horizontal clipping.
+- Both CLI images show completed status results with the state distinctions above and fictional values only.
+- The fixture's existing unrelated-service preservation checks must pass during capture.
+- Static review confirms format 1, an existing relative bootstrap, ISO8601 browser time, unique lowercase scene names, permitted action shapes, fragment-free local UI routes and demo-labelled captions under 180 characters.
+- Validation here is static. No code, bootstrap, capture or network operation was executed; rendered-image acceptance remains for explicit capture.

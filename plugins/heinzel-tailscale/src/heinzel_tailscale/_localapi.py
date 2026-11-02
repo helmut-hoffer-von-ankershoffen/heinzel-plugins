@@ -160,7 +160,10 @@ class ServeStore:
                     msg = "Tailscale Serve changed while this action was planned; nothing was overwritten. Try again."
                     raise HeinzelError(msg)
                 if response.status_code != HTTPStatus.OK:
-                    msg = "The local Tailscale API refused the action; inspect its current state before trying again."
+                    msg = (
+                        "Tailscale refused the change. "
+                        "To see its current state, run: tailscale serve status. Then try again."
+                    )
                     raise HeinzelError(msg)
                 data = bytearray()
                 for chunk in response.iter_bytes(CHUNK):
@@ -170,7 +173,10 @@ class ServeStore:
                         raise HeinzelError(msg)
                 return bytes(data), response.headers
         except httpx.HTTPError as error:
-            msg = "The Tailscale action's outcome is unknown; inspect current Serve state before trying again."
+            msg = (
+                "hz could not tell whether Tailscale made the change. "
+                "To see its current state, run: tailscale serve status. Then try again."
+            )
             raise HeinzelError(msg) from error
 
 

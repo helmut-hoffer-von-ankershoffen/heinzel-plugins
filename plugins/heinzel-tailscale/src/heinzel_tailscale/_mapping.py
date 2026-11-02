@@ -46,6 +46,11 @@ class Mapping:
         return f"https://{self.hostname}" + ("" if self.port == _PORT else f":{self.port}")
 
     @property
+    def clear_command(self) -> str:
+        """The Tailscale command that removes only this root mapping, never other paths on the same port."""
+        return f"tailscale serve --https={self.port} --set-path=/ off"
+
+    @property
     def target(self) -> str:
         """The sole permitted target is the current app's loopback listener."""
         return f"http://127.0.0.1:{self.backend_port}"
@@ -76,7 +81,9 @@ class Mapping:
         """
         handler = self._check(config)
         if handler and handler != {"Proxy": self.target}:
-            msg = "This HTTPS root already serves another target; choose a different sharing port in Settings."
+            msg = (
+                "Another service already uses this Tailscale web address. Choose a different sharing port in Settings."
+            )
             raise HeinzelError(msg)
         result = copy.deepcopy(config)
         tcp = _table(result, "TCP")
@@ -94,7 +101,10 @@ class Mapping:
         if not handler:
             return copy.deepcopy(config)
         if handler != {"Proxy": self.target}:
-            msg = "The sharing target changed; leave it untouched and inspect Tailscale Serve before trying again."
+            msg = (
+                "The address hz shared now points somewhere else, so hz left it alone. "
+                "To see it, run: tailscale serve status."
+            )
             raise HeinzelError(msg)
         result = copy.deepcopy(config)
         web = _table(result, "Web")
@@ -111,14 +121,14 @@ class Mapping:
     def _check(self, config: dict[str, object]) -> dict[str, object]:
         funnel = _read_table(config, "AllowFunnel")
         if funnel.get(self.authority):
-            msg = "This HTTPS port already allows public Funnel traffic; hz will not use or change it."
+            msg = "Tailscale already shares this port with the whole internet (Funnel). hz did not use or change it."
             raise HeinzelError(msg)
         tcp = _read_table(config, "TCP").get(str(self.port))
         if tcp is not None and tcp != {"HTTPS": True}:
-            msg = "This port has another listener configuration; hz will leave it untouched."
+            msg = "Tailscale uses this port for something else. hz left it alone."
             raise HeinzelError(msg)
         if config.get("Foreground"):
-            msg = "A foreground Serve session is active; hz will leave it untouched."
+            msg = "A tailscale serve command is running in a terminal. hz left it alone."
             raise HeinzelError(msg)
         handlers = _read_table(_read_table(_read_table(config, "Web"), self.authority), "Handlers")
         return _read_table(handlers, "/")

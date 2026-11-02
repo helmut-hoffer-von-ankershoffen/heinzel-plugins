@@ -36,7 +36,10 @@ class SharingLock:
                 _private(os.fstat(descriptor), directory=False)
                 fcntl.flock(descriptor, fcntl.LOCK_EX)
             except OSError as error:
-                msg = "The sharing action lock could not be opened safely; inspect the private state folder."
+                msg = (
+                    "hz could not safely open its sharing lock file. "
+                    "Make sure its folder belongs only to you, then try again."
+                )
                 raise HeinzelError(msg) from error
             yield
         finally:

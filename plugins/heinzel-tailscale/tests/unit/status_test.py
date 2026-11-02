@@ -1,12 +1,13 @@
 """Sharing status reads no peer roster and never changes OS networking or user configuration."""
 
+import re
 from collections.abc import Sequence
 from dataclasses import dataclass, field
 
 import pytest
 from heinzel import HeinzelError, LocalWebRuntime, Settings
 
-from heinzel_tailscale import sharing
+from heinzel_tailscale import sentences, sharing
 from heinzel_tailscale._cli import TailscaleCli
 from heinzel_tailscale._mapping import Mapping
 from heinzel_tailscale._models import SharingIntent, SharingState, TailscaleSettings
@@ -123,7 +124,37 @@ def test_preexisting_matching_manual_mapping_is_reported_as_unowned():
     result = service(Settings(ui_allowed_origins={MAPPING.origin}), FakeCli(serve=MAPPING.enable({}))).status()
     assert result.state == "blocked"
     assert result.mapped
-    assert "not verified as owned" in result.message
+    assert result.message == (
+        "Tailscale already shares this app, and hz did not set that up.\n"
+        "So hz left it alone. You can keep it as it is.\n"
+        "To let hz manage sharing, delete that mapping with this command:\n"
+        "tailscale serve --https=443 --set-path=/ off\n"
+        "Then switch sharing on here."
+    )
+    for jargon in ("Inspect", "inspect", "not verified", "owned"):
+        assert jargon not in result.message
+
+
+def test_popup_shows_the_foreign_mapping_explanation_as_whole_bullets():
+    state = service(Settings(ui_allowed_origins={MAPPING.origin}), FakeCli(serve=MAPPING.enable({}))).status()
+    assert [line.text for line in sharing(state).detail] == [
+        "Tailscale already shares this app, and hz did not set that up.",
+        "So hz left it alone.",
+        "You can keep it as it is.",
+        "To let hz manage sharing, delete that mapping with this command:",
+        "tailscale serve --https=443 --set-path=/ off",
+        "Then switch sharing on here.",
+    ]
+
+
+def test_sentences_never_cut_inside_a_sentence_at_a_semicolon_or_width():
+    assert sentences("Keep this; it has a semicolon, and ends here. Second one.") == [
+        "Keep this; it has a semicolon, and ends here.",
+        "Second one.",
+    ]
+    wrapped = sentences("word " * 30)
+    assert len(wrapped) > 1
+    assert all(len(line) <= 80 for line in wrapped)
 
 
 @pytest.mark.parametrize(
@@ -183,3 +214,26 @@ def test_pending_control_exposes_the_request_without_claiming_on_or_exposing_a_u
     assert item.toggle.checked is False
     assert item.toggle.url is None
     assert item.toggle.disable.operation == "disable"
+
+
+def test_no_message_offers_a_port_wide_off_command():
+    """A bare `--https=<port> off` also removes mappings that are not hz's; only the root path may be named."""
+    incomplete = SharingIntent(
+        enabled=True, origin=MAPPING.origin, backend_port=8737, https_port=443, added_origin=False, phase="enabling"
+    )
+    cli = FakeCli(serve=MAPPING.enable({}))
+    texts = [
+        service(Settings(ui_allowed_origins={MAPPING.origin}), cli).status().message,
+        Sharing(
+            Settings(),
+            cli,
+            MemoryConfig(Settings(), incomplete),
+            SharingReadiness(LocalWebRuntime(), NoWebUser()),
+        )
+        .status()
+        .message,
+        MAPPING.clear_command,
+    ]
+    for text in texts:
+        assert not re.search(r"--https=\d+ off", text)
+    assert "--set-path=/ off" in texts[0]

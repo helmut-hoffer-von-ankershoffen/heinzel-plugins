@@ -1,5 +1,6 @@
 """Private web sharing through the installed Tailscale client, with the existing hz authentication boundary."""
 
+import re
 from textwrap import wrap
 
 from heinzel import DetailLine, Module, NavSettings, RunOperation, StatusItem, ToggleControl
@@ -48,6 +49,17 @@ def disable(service: SharingActions) -> SharingState:
     return service.disable()
 
 
+_WIDTH = 80
+
+
+def sentences(message: str) -> list[str]:
+    """Split a message into popup bullets: one per line break or sentence, wrapped only when a line is too long."""
+    parts = [
+        part for line in message.splitlines() for part in re.split(r"(?<=[.!?])\s+(?=[A-Z])", line.strip()) if part
+    ]
+    return [piece for part in parts for piece in (wrap(part, width=_WIDTH) if len(part) > _WIDTH else [part])]
+
+
 @module.status(source="status", slots={"footer": True, "sidebar": False})
 def sharing(state: SharingState) -> StatusItem:
     """A compact provider-owned status icon with the same explicit control as Settings."""
@@ -56,7 +68,7 @@ def sharing(state: SharingState) -> StatusItem:
         text="Tailscale",
         icon="link",
         tone="ok" if ready else "warn" if state.state in {"error", "blocked"} else "neutral",
-        detail=[DetailLine(text=line) for line in wrap(state.message, width=80)],
+        detail=[DetailLine(text=line) for line in sentences(state.message)],
         toggle=ToggleControl(
             label="Share over Tailscale",
             checked=ready,

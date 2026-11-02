@@ -125,7 +125,11 @@ class Sharing:
                 origin=mapping.origin,
                 target=mapping.target,
                 apply_settings=apply,
-                message="Sharing is inactive, but its prior change is incomplete. Inspect Tailscale Serve."
+                message=(
+                    "Sharing is off, but an earlier change did not finish.\n"
+                    "To see what is left, run:\ntailscale serve status\n"
+                    f"To delete what is left of the mapping, run:\n{mapping.clear_command}"
+                )
                 if incomplete
                 else "Private web sharing is off.",
             )
@@ -139,7 +143,12 @@ class Sharing:
                 origin=mapping.origin,
                 target=mapping.target,
                 apply_settings=apply,
-                message="This mapping is not verified as owned by hz. Inspect Tailscale Serve; it was left untouched.",
+                message=(
+                    "Tailscale already shares this app, and hz did not set that up.\n"
+                    "So hz left it alone. You can keep it as it is.\n"
+                    f"To let hz manage sharing, delete that mapping with this command:\n{mapping.clear_command}\n"
+                    "Then switch sharing on here."
+                ),
             )
         ready = self.readiness.verifies(mapping) and mapping.origin in configured
         return SharingState(
@@ -189,7 +198,11 @@ class SharingActions:
                 if previous.backend_port != mapping.backend_port:
                     planned = previous.disable(planned)
             if not owned and mapping.has_handler(planned):
-                msg = "This root mapping is not owned by hz; inspect Tailscale Serve before changing it."
+                msg = (
+                    f"Tailscale already shares this app at {mapping.origin}, and hz did not set that up, "
+                    "so hz did not change it. To let hz manage sharing instead, "
+                    f"delete that mapping with: {mapping.clear_command}"
+                )
                 raise HeinzelError(msg)
             planned = mapping.enable(planned)
             added = bool(
@@ -216,7 +229,10 @@ class SharingActions:
             if planned != snapshot.config:
                 self.store.write(connection, snapshot, planned)
             if not mapping.matches(self.store.read(connection).config):
-                msg = "The exact sharing mapping is not verified; inspect Tailscale before trying again."
+                msg = (
+                    "hz could not confirm that sharing is set up in Tailscale. "
+                    "To see the current state, run: tailscale serve status. Then try again."
+                )
                 raise HeinzelError(msg)
             self.editor.write("tailscale.intent", intent.model_copy(update={"phase": "owned"}))
             self.sharing.readiness.apply_origins(self.sharing.origins())
@@ -237,7 +253,10 @@ class SharingActions:
             snapshot = self.store.read(connection)
             if old.phase == "enabling" and mapping.has_handler(snapshot.config):
                 self.editor.write("tailscale.intent", old.model_copy(update={"enabled": False}))
-                msg = "The prior enable outcome is uncertain; ownership is unverified. Inspect Tailscale Serve."
+                msg = (
+                    "An earlier attempt to turn sharing on may or may not have finished, so hz cannot tell "
+                    "whether it owns the setup. To see the current state, run: tailscale serve status."
+                )
                 raise HeinzelError(msg)
             planned = mapping.disable(snapshot.config)
             intent = SharingIntent(
@@ -252,7 +271,10 @@ class SharingActions:
             if planned != snapshot.config:
                 self.store.write(connection, snapshot, planned)
             if mapping.has_handler(self.store.read(connection).config):
-                msg = "The mapping still exists; sharing is not confirmed off. Inspect Tailscale before trying again."
+                msg = (
+                    "Sharing is still set up in Tailscale, so hz cannot say it is off. "
+                    "To see the current state, run: tailscale serve status. Then try again."
+                )
                 raise HeinzelError(msg)
             intent = intent.model_copy(update={"phase": "released"})
             self.editor.write("tailscale.intent", intent)
@@ -273,11 +295,11 @@ def intent_mapping(intent: SharingIntent) -> Mapping:
     try:
         parsed = urlsplit(intent.origin)
     except ValueError as error:
-        msg = "The saved sharing origin is invalid; inspect the sharing configuration before changing network settings."
+        msg = "The saved sharing address is not valid, so hz changed nothing in Tailscale."
         raise HeinzelError(msg) from error
     mapping = Mapping.for_node(parsed.hostname or "", intent.backend_port, intent.https_port)
     if mapping.origin != intent.origin:
-        msg = "The saved sharing origin is invalid; inspect the sharing configuration before changing network settings."
+        msg = "The saved sharing address is not valid, so hz changed nothing in Tailscale."
         raise HeinzelError(msg)
     return mapping
 

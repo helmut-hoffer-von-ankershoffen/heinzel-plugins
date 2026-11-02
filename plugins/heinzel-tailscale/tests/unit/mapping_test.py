@@ -66,9 +66,9 @@ def test_disable_preserves_unrecognized_authority_fields_and_their_listener(mapp
 def test_conflicting_root_cannot_be_enabled_or_disabled(mapping, unrelated):
     unrelated["Web"][mapping.authority]["Handlers"]["/"] = {"Proxy": "http://127.0.0.1:9000"}
     original = copy.deepcopy(unrelated)
-    with pytest.raises(HeinzelError, match="another target"):
+    with pytest.raises(HeinzelError, match="Another service already uses"):
         mapping.enable(unrelated)
-    with pytest.raises(HeinzelError, match="target changed"):
+    with pytest.raises(HeinzelError, match="points somewhere else"):
         mapping.disable(unrelated)
     assert unrelated == original
     assert not mapping.matches(unrelated)
