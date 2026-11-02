@@ -119,7 +119,7 @@ def _read(process: subprocess.Popen[bytes]) -> Result:
         while watcher.get_map():
             remaining = until - time.monotonic()
             if remaining <= 0:
-                msg = "Tailscale did not answer within five seconds; inspect its connection and try again."
+                msg = "Tailscale did not answer within five seconds; check that Tailscale is connected, then try again."
                 raise HeinzelError(msg)
             for key, _ in watcher.select(remaining):
                 chunk = os.read(key.fd, CHUNK)

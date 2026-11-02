@@ -6,7 +6,7 @@ from dataclasses import dataclass, field
 import pytest
 from heinzel import HeinzelError, LocalWebRuntime, Settings
 
-from heinzel_tailscale import sharing
+from heinzel_tailscale import sentences, sharing
 from heinzel_tailscale._cli import TailscaleCli
 from heinzel_tailscale._mapping import Mapping
 from heinzel_tailscale._models import SharingIntent, SharingState, TailscaleSettings
@@ -123,7 +123,36 @@ def test_preexisting_matching_manual_mapping_is_reported_as_unowned():
     result = service(Settings(ui_allowed_origins={MAPPING.origin}), FakeCli(serve=MAPPING.enable({}))).status()
     assert result.state == "blocked"
     assert result.mapped
-    assert "not verified as owned" in result.message
+    assert result.message == (
+        "Tailscale already shares this app, and hz did not set that up.\n"
+        "So hz left it alone. You can keep it as it is.\n"
+        "To let hz manage sharing, remove it with this command:\ntailscale serve --https=443 off\n"
+        "Then switch sharing on here."
+    )
+    for jargon in ("Inspect", "inspect", "not verified", "mapping", "owned"):
+        assert jargon not in result.message
+
+
+def test_popup_shows_the_foreign_mapping_explanation_as_whole_bullets():
+    state = service(Settings(ui_allowed_origins={MAPPING.origin}), FakeCli(serve=MAPPING.enable({}))).status()
+    assert [line.text for line in sharing(state).detail] == [
+        "Tailscale already shares this app, and hz did not set that up.",
+        "So hz left it alone.",
+        "You can keep it as it is.",
+        "To let hz manage sharing, remove it with this command:",
+        "tailscale serve --https=443 off",
+        "Then switch sharing on here.",
+    ]
+
+
+def test_sentences_never_cut_inside_a_sentence_at_a_semicolon_or_width():
+    assert sentences("Keep this; it has a semicolon, and ends here. Second one.") == [
+        "Keep this; it has a semicolon, and ends here.",
+        "Second one.",
+    ]
+    wrapped = sentences("word " * 30)
+    assert len(wrapped) > 1
+    assert all(len(line) <= 80 for line in wrapped)
 
 
 @pytest.mark.parametrize(
