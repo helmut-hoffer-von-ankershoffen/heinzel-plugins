@@ -32,8 +32,8 @@ hz heinzel wake me:launch-review
 draft it now, at most 0.5 USD; the draft is saved under /demo-profile/data_dir/workflow/drafts/me-launch-review
 v0.9.8
 Updates, off
-…
-System health, off
+0
+System health, warning
 No calendar connected, error
 Daemon not installed, off
 Chat
