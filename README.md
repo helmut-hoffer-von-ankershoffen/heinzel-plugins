@@ -4,12 +4,23 @@
 [![CI](https://img.shields.io/github/actions/workflow/status/helmut-hoffer-von-ankershoffen/heinzel-plugins/ci.yml?branch=main&label=CI)](https://github.com/helmut-hoffer-von-ankershoffen/heinzel-plugins/actions/workflows/ci.yml) [![Tooling coverage](https://img.shields.io/endpoint?url=https://raw.githubusercontent.com/helmut-hoffer-von-ankershoffen/heinzel-plugins/python-coverage-comment-action-data/endpoint.json)](https://github.com/helmut-hoffer-von-ankershoffen/heinzel-plugins/tree/python-coverage-comment-action-data) [![CodeQL](https://img.shields.io/github/actions/workflow/status/helmut-hoffer-von-ankershoffen/heinzel-plugins/codeql.yml?branch=main&label=CodeQL)](https://github.com/helmut-hoffer-von-ankershoffen/heinzel-plugins/actions/workflows/codeql.yml) [![Python](https://img.shields.io/badge/python-3.12%2B-blue)](pyproject.toml) [![Quality Gate Status](https://img.shields.io/sonar/quality_gate/helmut-hoffer-von-ankershoffen_heinzel-plugins?server=https://sonarcloud.io&label=Quality%20Gate%20Status)](https://sonarcloud.io/summary/overall?id=helmut-hoffer-von-ankershoffen_heinzel-plugins) [![Security Rating](https://sonarcloud.io/api/project_badges/measure?project=helmut-hoffer-von-ankershoffen_heinzel-plugins&metric=security_rating)](https://sonarcloud.io/summary/overall?id=helmut-hoffer-von-ankershoffen_heinzel-plugins) [![License: MIT](https://img.shields.io/badge/license-MIT-brightgreen)](LICENSE)
 <!-- badges:end -->
 
-**More to see and more to read from: a world clock, resource meters, weather, themes with soundscapes, and adapters
-for GitHub, Jira and Confluence, Google Workspace and Zoom.** Ten independent plugins for
-[Heinzelmännchen](https://github.com/helmut-hoffer-von-ankershoffen/heinzel), the open-source crew of AI helpers that drafts your team's busywork and asks before anything
-leaves your machine. Real screens from the running app, with fictional data, are below; every plugin has a full gallery in the catalog.
+<p align="center">
+  <picture>
+    <source media="(prefers-color-scheme: dark)" srcset="https://raw.githubusercontent.com/helmut-hoffer-von-ankershoffen/heinzel/main/docs/assets/hero-dark.svg">
+    <img src="https://raw.githubusercontent.com/helmut-hoffer-von-ankershoffen/heinzel/main/docs/assets/hero-light.svg" alt="A small crowd of Heinzelmännchen helpers walking together" width="860">
+  </picture>
+</p>
 
-[**Explore the plugin catalog →**](https://heinzel.team/CATALOG/) · [Install the app](#install) · [Build your own plugin](#add-a-plugin)
+**Less busywork. More good work.** Ten plugins for [Heinzelmännchen](https://github.com/helmut-hoffer-von-ankershoffen/heinzel),
+the open-source crew of AI helpers that drafts your team's busywork and asks before anything leaves your machine: a world
+clock, resource meters, weather, a theme with soundscapes, and adapters for GitHub, Jira and Confluence, Google Workspace
+and Zoom. Each one is its own project in [`plugins/`](plugins/).
+
+```sh
+uvx heinzel@latest
+```
+
+[**Explore the plugin catalog**](https://heinzel.team/CATALOG/) · [Install guide](https://heinzel.team/guides/install/) · [Add a plugin](#install) · [Build your own](#add-a-plugin)
 
 <table><tr><td width="96"><img src="https://raw.githubusercontent.com/helmut-hoffer-von-ankershoffen/heinzel/e6c2e707726741e28ecc9360a3683fc00e968dfb/docs/assets/website/helper-timekeeper.svg" width="72" alt="Pip, a young Heinzelmännchen with a blue hat and a question mark"></td><td>
 
@@ -269,13 +280,13 @@ make profile CORE=<built-core-wheel>
 This writes a local profile from already-built owning artifacts. The approved composition workflow produces the
 release profile consumed automatically by `uvx heinzel@latest`. Plugin releases remain independent of app composition.
 
-## Migration provenance
+## Where the plugins came from
 
-The initial migration moves Clock, Tailscale, Atlassian, GitHub, Google and Zoom from
-[heinzel](https://github.com/helmut-hoffer-von-ankershoffen/heinzel), and Weather and Example from the retired `heinzel-contrib` repository.
-Resource is the only built-in module extracted in this migration. Sound, Theme and the other core modules remain in core.
+Clock, Tailscale, Atlassian, GitHub, Google and Zoom came from
+[heinzel](https://github.com/helmut-hoffer-von-ankershoffen/heinzel), and Weather and Example from `heinzel-contrib`, which is retired.
+Resource is the only built-in module that moved out of core; Sound, Theme and the other core modules remain there.
 Earlier core history and attribution remain in the core repository; current plugin sources live here. Existing public distribution names stay
-stable; the migration versions advance independently before publishing the changed artifacts.
+stable, and each plugin's version advances independently.
 
 ## Standard app discovery authority
 
