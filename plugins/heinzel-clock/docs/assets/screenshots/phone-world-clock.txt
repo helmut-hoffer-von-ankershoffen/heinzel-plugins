@@ -1,6 +1,6 @@
 Skip to content
 M
-Home
+Today
 2
 Today
 Zones at work now
@@ -28,10 +28,10 @@ Working · 2h 30m since start · 6h 30m left
 Los Angeles
 Starts in 30m · 2d 14h 30m since end
 08:30:00
-v0.9.1
+v0.9.15
 Updates, off
+0
+System health, error
+No calendar connected, error
 Daemon not installed, off
 16:30:00
-0
-System health, warning
-No calendar connected, error

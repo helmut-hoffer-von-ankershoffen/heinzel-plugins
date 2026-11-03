@@ -12,7 +12,7 @@ Los Angeles 08:30:00 · Starts in 30m
 M
 Mira
 · EM
-Home
+Today
 2
 Today
 Zones at work now
@@ -23,12 +23,11 @@ Ask about it
 
 Nothing needs you right now. Ask anything below.
 
-v0.9.1
+v0.9.15
 Updates, off
+0
+System health, error
+No calendar connected, error
 Daemon not installed, off
 16:30:00
-0
-System health, warning
-No calendar connected, error
-
 Open
