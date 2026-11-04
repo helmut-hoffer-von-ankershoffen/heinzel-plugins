@@ -15,6 +15,8 @@ ADAPTER = "atlassian"
 CAPABILITIES = ("tracker", "documents")
 COMMANDS = [
     "acli jira workitem search --jql <jql> --fields <fields> --paginate --json",
+    "acli jira workitem view <key> --fields <fields> --json",
+    "acli jira workitem create|edit|transition|assign|comment create ... (only after a person approved a draft)",
     "acli confluence page view --id <id> --body-format storage --json",
 ]
 LOGINS = f"{LOGIN['Jira']}; {LOGIN['Confluence']}"

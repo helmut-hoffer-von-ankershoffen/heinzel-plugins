@@ -1,6 +1,6 @@
 # heinzel-atlassian
 
-Read Jira issues and Confluence pages through Atlassian's CLI `acli`, the `tracker` and `documents` capabilities
+Read Jira issues and Confluence pages, and draft Jira changes a person approves, through Atlassian's CLI `acli`: the `tracker` and `documents` capabilities
 ([ADR 0028](https://github.com/helmut-hoffer-von-ankershoffen/heinzel/blob/main/docs/adr/0028-integrations-are-capability-adapters.md)): a first-party
 [Heinzelmännchen](https://github.com/helmut-hoffer-von-ankershoffen/heinzel) plugin.
 
@@ -94,13 +94,13 @@ def plan(documents: Documents) -> Document:
 
 | Method | Capability | acli command |
 | --- | --- | --- |
-| `issues_updated(project, window)` | `tracker:read` | `acli jira workitem search --jql 'project = "WID" AND updated >= <ms> AND updated < <ms> ORDER BY updated ASC, key ASC' --fields key,summary,status,updated,assignee,labels --paginate --json` |
+| `issues_updated(project, window)` | `tracker:read` | `acli jira workitem search --jql 'project = "WID" AND updated >= <ms> AND updated < <ms> ORDER BY updated ASC, key ASC' --fields key,summary,status,assignee,labels --paginate --json`, then `acli jira workitem view <key> --fields summary,status,assignee,labels,updated --json` for each issue (search refuses `updated` as a field) |
 | `read(ref)` | `documents:read` | `acli confluence page view --id <id> --body-format storage --json` |
 
 - **Projects** are Jira project keys such as `WID` (lower case is upper-cased); anything else is refused before acli
   runs, so no input reaches JQL unchecked. Windows are half-open `[since, until)` with timezone-aware times, sent as
   epoch milliseconds widened to whole minutes, which Jira compares as instants whatever your profile's time zone;
-  the exact window is applied to the results, which come oldest first, each issue once. More than 1,000 issues in
+  the exact window is applied to the results, which come oldest first, each issue once. More than 200 issues in
   one window is refused with a request for a shorter one. `state` is the status name, `assignee` the display name,
   `labels` the issue's labels.
 - **Documents** are a page id (`123456`) or a page URL on your site: `/wiki/spaces/<space>/pages/<id>/...` or
@@ -134,6 +134,49 @@ controls, redacted of anything shaped like a token and only then shortened.
 The hosts `hz system capability list` shows are your site and `api.atlassian.com`, the gateway acli uses after a
 browser login. acli is Atlassian's program with its own settings; what it sends besides the reads is Atlassian's
 to document, not this plugin's.
+
+The Jira shapes were checked against acli 1.3.39 on a live Jira Cloud site (answers recorded in
+`tests/fixtures/live`, people made fictional); that check found that `search` accepts only a fixed set of `--fields`
+(no `updated`, `parent` or comments) and that a browser login answers with links on a `*.prod.atl-paas.net` gateway
+shard. The Confluence samples in `tests/fixtures` are still assumed from the v2 REST page, not yet checked live.
+
+## Durable agents and Jira: assigned work, epics, attention and approved changes
+
+On top of the `tracker` adapter, the plugin's own operations let an agent (or you) work with Jira without ever
+changing it unasked (drafts over surprises, done over reminded, content by the model and
+authority by code):
+
+| Operation | Changes Jira? | What it does |
+| --- | --- | --- |
+| `hz atlassian assigned [--project KAN]` | no | Open work assigned to you, most pressing first: status, due date, epic, labels, newest comments. |
+| `hz atlassian epics [--project KAN]` | no | Epics that are not done, with children done, doing, to do, overdue, and percent done. |
+| `hz atlassian watch --since <time> [--previous <snapshots>]` | no | What in your own work deserves a look since a time: overdue, due soon, new comments by others, moved, newly assigned or assigned away, a blocked label, new items. Returns `snapshots` to pass as `--previous` next time. |
+| `draft-create-issue`, `draft-update-issue`, `draft-comment-issue` | no | A draft with the exact arguments of the write below, a preview of what changes (before and after), `problems` for what is missing or wrong, and the `seen` time of the work item. |
+| `create-issue`, `update-issue`, `comment-issue` | **yes** | Carry out a draft. They are `read_only=False` operations: a chat holds them as proposals until you confirm exactly those arguments, and the CLI shows what they will do. |
+
+For notices and approvals on any channel a host offers (a native banner, a direct message): each `watch` item carries a
+stable `notice_key`, a `title` and a `body` made of the work item key, the reason codes and dates only, and each draft
+carries `arguments_sha256`, `link` and `approval_text`, so a host can post it as a notice or an approval request and
+bind a reply to the exact arguments it will run. The plugin imports no channel and approves nothing: a reply is a claim
+the host verifies, and the write still goes through the confirmed operation.
+
+Every reason in `watch` comes from dates, ids and status categories, never from ticket text. A write is never retried:
+a create labels the work item `hz-<digest>`, so the same approved create run twice finds the first; an update or a
+comment refuses if the work item changed after the draft saw it (draft again and approve what you then see), and a
+comment that already got through is not posted twice. Rate limits, a signed-out acli, a missing work item, a work item
+type the project does not have (the message lists the ones it has), missing fields and permission refusals each say
+what happened and whether anything changed.
+
+**Ticket text is data.** Summaries, descriptions, comments, labels, status and people's names are written by other
+people. They are cleaned of control, invisible and bidirectional characters, cut to a bound, returned in fields
+documented as untrusted, and every result carries a notice saying so. No command, query, approval or `watch` reason is
+ever built from them: keys are validated by pattern, and acli gets arguments as a list in `--flag=value` form, so a
+summary that looks like options is stored as text. What this cannot do is stop a model from being persuaded by a ticket
+to *propose* something; that is why every write is a separate confirmed operation.
+
+Seeding and trying it against a real site: `tests/live/seed_kan.py` fills a personal test project with fictional epics and
+work items; `HZ_ATLASSIAN_LIVE_SITE=https://<site>.atlassian.net pytest tests/live -m e2e` runs the real-acli checks
+(sign-in expired, missing item, rejected type, create/comment/update round trip, stale approval, hostile ticket).
 
 Development and release commands: [repository guide](../../README.md).
 

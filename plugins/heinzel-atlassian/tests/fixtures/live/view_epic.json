@@ -1,0 +1,65 @@
+{
+ "changelog": null,
+ "editmeta": null,
+ "expand": "renderedFields,names,schema,operations,editmeta,changelog,versionedRepresentations",
+ "fields": {
+  "assignee": null,
+  "comment": {
+   "comments": [],
+   "maxResults": 0,
+   "self": "https://jira-prod-eu-32-5.prod.atl-paas.net/rest/api/3/issue/10013/comment",
+   "startAt": 0,
+   "total": 0
+  },
+  "created": "2026-10-31T12:56:50.552+0100",
+  "description": null,
+  "duedate": null,
+  "issuetype": {
+   "avatarId": 10307,
+   "description": "Epics track collections of related bugs, stories, and tasks.",
+   "entityId": "45fc0f9a-3a9a-46cc-a38a-f9393617cd20",
+   "hierarchyLevel": 1,
+   "iconUrl": "https://jira-prod-eu-32-5.prod.atl-paas.net/rest/api/2/universal_avatar/view/type/issuetype/avatar/10307?size=medium",
+   "id": "10003",
+   "name": "Epic",
+   "self": "https://jira-prod-eu-32-5.prod.atl-paas.net/rest/api/3/issuetype/10003",
+   "subtask": false
+  },
+  "labels": [
+   "harbor"
+  ],
+  "priority": {
+   "iconUrl": "https://jira-prod-eu-32-5.prod.atl-paas.net/images/icons/priorities/medium_new.svg",
+   "id": "3",
+   "name": "Medium",
+   "self": "https://jira-prod-eu-32-5.prod.atl-paas.net/rest/api/3/priority/3"
+  },
+  "status": {
+   "description": "",
+   "iconUrl": "https://jira-prod-eu-32-5.prod.atl-paas.net/images/icons/statuses/generic.png",
+   "id": "10003",
+   "name": "To Do",
+   "self": "https://jira-prod-eu-32-5.prod.atl-paas.net/rest/api/3/status/10003",
+   "statusCategory": {
+    "colorName": "blue-gray",
+    "id": 2,
+    "key": "new",
+    "name": "To Do",
+    "self": "https://jira-prod-eu-32-5.prod.atl-paas.net/rest/api/3/statuscategory/2"
+   }
+  },
+  "summary": "Harbor Lights: tide-table app launch",
+  "updated": "2026-10-31T12:56:50.743+0100"
+ },
+ "fieldsToInclude": null,
+ "id": "10013",
+ "key": "KAN-4",
+ "names": null,
+ "operations": null,
+ "properties": null,
+ "renderedFields": null,
+ "schema": null,
+ "self": "https://jira-prod-eu-32-5.prod.atl-paas.net/rest/api/3/issue/10013",
+ "transitions": null,
+ "versionedRepresentations": null
+}

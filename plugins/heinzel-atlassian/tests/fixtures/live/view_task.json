@@ -1,0 +1,168 @@
+{
+ "changelog": null,
+ "editmeta": null,
+ "expand": "renderedFields,names,schema,operations,editmeta,changelog,versionedRepresentations",
+ "fields": {
+  "assignee": {
+   "accountId": "acct-wren",
+   "accountType": "atlassian",
+   "active": true,
+   "displayName": "Wren Calder",
+   "emailAddress": "wren@example.com",
+   "self": "https://jira-prod-eu-32-5.prod.atl-paas.net/rest/api/3/user?accountId=acct-wren",
+   "timeZone": "Europe/Berlin"
+  },
+  "comment": {
+   "comments": [
+    {
+     "author": {
+      "accountId": "acct-wren",
+      "accountType": "atlassian",
+      "active": true,
+      "displayName": "Wren Calder",
+      "emailAddress": "wren@example.com",
+      "self": "https://jira-prod-eu-32-5.prod.atl-paas.net/rest/api/3/user?accountId=acct-wren",
+      "timeZone": "Europe/Berlin"
+     },
+     "body": {
+      "content": [
+       {
+        "content": [
+         {
+          "text": "Northern coast CSVs imported; the Dunmore rows still have the wrong offset.",
+          "type": "text"
+         }
+        ],
+        "type": "paragraph"
+       }
+      ],
+      "type": "doc",
+      "version": 1
+     },
+     "created": "2026-10-31T13:00:07.376+0100",
+     "id": "10000",
+     "jsdPublic": true,
+     "self": "https://jira-prod-eu-32-5.prod.atl-paas.net/rest/api/3/issue/10017/comment/10000",
+     "updateAuthor": {
+      "accountId": "acct-wren",
+      "accountType": "atlassian",
+      "active": true,
+      "displayName": "Wren Calder",
+      "emailAddress": "wren@example.com",
+      "self": "https://jira-prod-eu-32-5.prod.atl-paas.net/rest/api/3/user?accountId=acct-wren",
+      "timeZone": "Europe/Berlin"
+     },
+     "updated": "2026-10-31T13:00:07.376+0100"
+    }
+   ],
+   "maxResults": 1,
+   "self": "https://jira-prod-eu-32-5.prod.atl-paas.net/rest/api/3/issue/10017/comment",
+   "startAt": 0,
+   "total": 1
+  },
+  "created": "2026-10-31T12:57:23.045+0100",
+  "description": {
+   "content": [
+    {
+     "content": [
+      {
+       "text": "Parse the CSV exports and check the high/low times against the printed almanac.",
+       "type": "text"
+      }
+     ],
+     "type": "paragraph"
+    }
+   ],
+   "type": "doc",
+   "version": 1
+  },
+  "duedate": null,
+  "issuetype": {
+   "avatarId": 10318,
+   "description": "Tasks track small, distinct pieces of work.",
+   "entityId": "fde73f53-3454-4607-8969-89f0c275ea73",
+   "hierarchyLevel": 0,
+   "iconUrl": "https://jira-prod-eu-32-5.prod.atl-paas.net/rest/api/2/universal_avatar/view/type/issuetype/avatar/10318?size=medium",
+   "id": "10007",
+   "name": "Task",
+   "self": "https://jira-prod-eu-32-5.prod.atl-paas.net/rest/api/3/issuetype/10007",
+   "subtask": false
+  },
+  "labels": [
+   "data",
+   "harbor"
+  ],
+  "parent": {
+   "fields": {
+    "issuetype": {
+     "avatarId": 10307,
+     "description": "Epics track collections of related bugs, stories, and tasks.",
+     "entityId": "45fc0f9a-3a9a-46cc-a38a-f9393617cd20",
+     "hierarchyLevel": 1,
+     "iconUrl": "https://jira-prod-eu-32-5.prod.atl-paas.net/rest/api/2/universal_avatar/view/type/issuetype/avatar/10307?size=medium",
+     "id": "10003",
+     "name": "Epic",
+     "self": "https://jira-prod-eu-32-5.prod.atl-paas.net/rest/api/3/issuetype/10003",
+     "subtask": false
+    },
+    "priority": {
+     "iconUrl": "https://jira-prod-eu-32-5.prod.atl-paas.net/images/icons/priorities/medium_new.svg",
+     "id": "3",
+     "name": "Medium",
+     "self": "https://jira-prod-eu-32-5.prod.atl-paas.net/rest/api/3/priority/3"
+    },
+    "status": {
+     "description": "",
+     "iconUrl": "https://jira-prod-eu-32-5.prod.atl-paas.net/images/icons/statuses/generic.png",
+     "id": "10003",
+     "name": "To Do",
+     "self": "https://jira-prod-eu-32-5.prod.atl-paas.net/rest/api/3/status/10003",
+     "statusCategory": {
+      "colorName": "blue-gray",
+      "id": 2,
+      "key": "new",
+      "name": "To Do",
+      "self": "https://jira-prod-eu-32-5.prod.atl-paas.net/rest/api/3/statuscategory/2"
+     }
+    },
+    "summary": "Harbor Lights: tide-table app launch"
+   },
+   "id": "10013",
+   "key": "KAN-4",
+   "self": "https://jira-prod-eu-32-5.prod.atl-paas.net/rest/api/3/issue/10013"
+  },
+  "priority": {
+   "iconUrl": "https://jira-prod-eu-32-5.prod.atl-paas.net/images/icons/priorities/medium_new.svg",
+   "id": "3",
+   "name": "Medium",
+   "self": "https://jira-prod-eu-32-5.prod.atl-paas.net/rest/api/3/priority/3"
+  },
+  "status": {
+   "description": "This work item is being actively worked on at the moment by the assignee.",
+   "iconUrl": "https://jira-prod-eu-32-5.prod.atl-paas.net/images/icons/statuses/inprogress.png",
+   "id": "3",
+   "name": "In Progress",
+   "self": "https://jira-prod-eu-32-5.prod.atl-paas.net/rest/api/3/status/3",
+   "statusCategory": {
+    "colorName": "yellow",
+    "id": 4,
+    "key": "indeterminate",
+    "name": "In Progress",
+    "self": "https://jira-prod-eu-32-5.prod.atl-paas.net/rest/api/3/statuscategory/4"
+   }
+  },
+  "summary": "Import tide tables for the northern coast",
+  "updated": "2026-10-31T13:00:07.376+0100"
+ },
+ "fieldsToInclude": null,
+ "id": "10017",
+ "key": "KAN-8",
+ "names": null,
+ "operations": null,
+ "properties": null,
+ "renderedFields": null,
+ "schema": null,
+ "self": "https://jira-prod-eu-32-5.prod.atl-paas.net/rest/api/3/issue/10017",
+ "transitions": null,
+ "versionedRepresentations": null
+}

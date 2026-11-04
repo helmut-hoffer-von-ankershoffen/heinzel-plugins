@@ -1,13 +1,15 @@
 """The Jira adapter of the `tracker` capability (ADR 0028), read mode only, through acli.
 
-Issues come from `acli jira workitem search --jql <jql> --fields <fields> --paginate --json`; acli owns
-authentication and paging. The JQL compares `updated` with epoch milliseconds, which Jira reads as instants, so the
-account's time zone doesn't shift the window; each issue's `updated` is checked against the window again before it
-is kept.
+Issues come from two real acli calls (checked against acli 1.3.39 on a live site): `acli jira workitem search --jql
+<jql> --fields key,summary,status,assignee,labels --paginate --json` finds them, and `acli jira workitem view <key>
+--fields ... --json` per issue reads `updated`, which `search` refuses as a field. acli owns authentication and
+paging. The JQL compares `updated` with epoch milliseconds, which Jira reads as instants, so the account's time zone
+doesn't shift the window; each issue's `updated` is checked against the window again before it is kept.
 """
 
 import math
 import re
+from concurrent.futures import ThreadPoolExecutor
 from datetime import UTC, datetime
 from typing import Any, cast
 
@@ -17,13 +19,16 @@ from heinzel_atlassian._acli import Acli
 from heinzel_atlassian._client import AcliClient, require_site, same_site
 from heinzel_atlassian._models import AtlassianSettings
 
-FIELDS = "key,summary,status,updated,assignee,labels"
-MAX_ISSUES = 1000
-"""Issues one call returns at most before asking for a narrower window."""
+FIELDS = "key,summary,status,assignee,labels"
+VIEW_FIELDS = "summary,status,assignee,labels,updated"
+MAX_ISSUES = 200
+VIEWERS = 4
+"""Concurrent `view` runs."""
+"""Issues one call returns at most before asking for a narrower window; each costs one `view` run."""
 MINUTE_MS = 60_000
 _PROJECT = re.compile(r"^[A-Z][A-Z0-9_]{1,254}$")
 _ISSUE = re.compile(r"^[A-Z][A-Z0-9_]{1,254}-[0-9]{1,18}$")
-_UNEXPECTED = "acli's search answer is not a list of Jira issues; is acli up to date?"
+_UNEXPECTED = "acli's answer is not Jira issues as expected; is acli up to date?"
 
 
 def jql_string(text: str) -> str:
@@ -69,12 +74,21 @@ class Jira:
         args = ["jira", "workitem", "search", "--jql", search_jql(key, since, until), "--fields", FIELDS]
         args += ["--paginate", "--json"]
         subject = f"project {key}"
-        items = [
-            i for d in AcliClient(self._acli, self._settings.timeout).json("Jira", args, subject) for i in _issues(d)
-        ]
-        if len(items) > MAX_ISSUES:
+        client = AcliClient(self._acli, self._settings.timeout)
+        found_keys = {_listed_key(key, item) for d in client.json("Jira", args, subject) for item in _issues(d)}
+        if len(found_keys) > MAX_ISSUES:
             msg = f"More than {MAX_ISSUES} issues of {subject} were updated in the window; ask for a shorter window."
             raise HeinzelError(msg)
+
+        def view(issue_key: str) -> dict[str, Any]:
+            command = ["jira", "workitem", "view", issue_key, "--fields", VIEW_FIELDS, "--json"]
+            answer = client.json("Jira", command, issue_key)
+            if len(answer) != 1 or not isinstance(answer[0], dict):
+                raise HeinzelError(_UNEXPECTED)
+            return cast("dict[str, Any]", answer[0])
+
+        with ThreadPoolExecutor(max_workers=VIEWERS) as pool:
+            items = list(pool.map(view, sorted(found_keys)))
         found: dict[str, Issue] = {}
         for item in items:
             same_site("Jira", site, item.get("self"), "/rest")
@@ -82,6 +96,18 @@ class Jira:
             if since <= issue.updated_at < until:
                 _keep_latest(found, issue)
         return _oldest_first(found)
+
+
+def _listed_key(project: str, item: dict[str, Any]) -> str:
+    """The key of one issue in a search answer, which must be of `project`.
+
+    Raises:
+        HeinzelError: If the key is missing, malformed or of another project.
+    """
+    name = item.get("key")
+    if isinstance(name, str) and _ISSUE.fullmatch(name) and name.startswith(f"{project}-"):
+        return name
+    raise HeinzelError(_UNEXPECTED)
 
 
 def _keep_latest(found: dict[str, Issue], issue: Issue) -> None:
