@@ -479,6 +479,10 @@ def test_capture_runs_the_pinned_tool_with_only_the_requested_options(collection
     assert status == 4 and options["cwd"] == collection / "plugins/heinzel-harbor"
     assert {"--headed", "--open", "--draft", "--core", "--python", "--review-receipt"} <= set(command)
     assert "--json" not in command
+    script = command.index("--script")
+    assert command[:script] == ["uv", "run", "--quiet", "--no-project", "--no-cache"]
+    assert command[script + 2 : script + 4] == ["--project", str(collection / "plugins/heinzel-harbor")]
+    assert command[command.index("--core") + 1] == "candidate.whl"
     assert Path(command[command.index("--review-receipt") + 1]).is_absolute()
 
 
