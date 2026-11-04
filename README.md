@@ -252,6 +252,11 @@ It has no plugin entry point and needs no additional PyPI publisher. Root `make 
 toolkit; use `NAME=<owner>` for plugin commands. `make preflight NAME=<owner>` includes that plugin's full checks,
 build, audit and installed acceptance. Toolkit tests do not run core's suite.
 
+Toolkit 0.3.1 adds the [verified upstream implementation policy](docs/VERIFIED_VENDOR_POLICY.md), including
+exact upstream wheel provenance, closed namespace projection and owning-wheel verification. The toolkit has no
+core runtime dependency; plugins still declare and validate their own compatible core SDK and dependency locks.
+An updated toolkit does not make an unreleased provider or SDK available.
+
 ## For maintainers
 
 <details>

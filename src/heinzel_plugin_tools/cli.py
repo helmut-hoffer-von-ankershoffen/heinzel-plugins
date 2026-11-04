@@ -28,6 +28,13 @@ from packaging.requirements import Requirement
 from packaging.utils import canonicalize_name
 from packaging.version import Version
 
+if __package__:
+    from heinzel_plugin_tools import vendor
+else:
+    # Boundary checks also execute this trusted file with the owning interpreter,
+    # which need not have the developer toolkit installed as a distribution.
+    import vendor
+
 TOOLING_SCRIPT = Path(__file__).resolve()
 ROOT = Path(os.environ.get("PLUGIN_SOURCE_ROOT") or Path.cwd()).resolve()
 
@@ -378,6 +385,7 @@ def ruff_configuration(project: Project) -> list[str]:
 
 def fix(project: Project, core: str | None) -> None:
     """Format and fix only the owning plugin, refreshing its lock when dependency inputs changed."""
+    verified = vendor.project(project.directory)
     path = project.directory / "plugin-lock.json"
     if not path.is_file() or json.loads(path.read_text())["inputs"] != dependency_inputs(project):
         lock(project, core)
@@ -387,7 +395,10 @@ def fix(project: Project, core: str | None) -> None:
         ["ruff", "check", "--fix", "src", "tests"],
         ["ruff", "format", "src", "tests"],
     ):
-        run(python_command(project, core, [*command, *ruff_configuration(project)]), cwd=project.directory)
+        with vendor.quality_command(
+            project.directory, [*command, *ruff_configuration(project)], verified
+        ) as configured:
+            run(python_command(project, core, configured), cwd=project.directory)
 
 
 def build_view_assets(project: Project) -> None:
@@ -407,6 +418,7 @@ def check_screenshots(project: Project) -> dict:
 
 def check(project: Project, core: str | None, *, tests_only: bool = False, fast: bool = False) -> None:
     """Run only the owning package's checks against an installed core/SDK artifact."""
+    verified = vendor.project(project.directory)
     if (project.directory / "docs/screenshots.toml").exists() or (
         project.directory / "docs/assets/screenshots/capture.json"
     ).exists():
@@ -439,12 +451,15 @@ def check(project: Project, core: str | None, *, tests_only: bool = False, fast:
     if not tests_only and not fast:
         steps.append(["coverage", "report"])
     for command in steps:
-        run(python_command(project, core, command), cwd=project.directory)
+        with vendor.quality_command(project.directory, command, verified) as configured:
+            run(
+                python_command(project, core, configured),
+                cwd=project.directory,
+                **({"env": {**os.environ, "PYTHONDONTWRITEBYTECODE": "1"}} if verified.files else {}),
+            )
     if not tests_only and not fast:
-        run(
-            ["typos", str(project.directory)],
-            cwd=project.directory,
-        )
+        with vendor.quality_command(project.directory, ["typos", str(project.directory)], verified) as configured:
+            run(configured, cwd=project.directory)
     frontend = project.directory / "web/package.json"
     if frontend.is_file():
         scripts = json.loads(frontend.read_text()).get("scripts", {})
@@ -478,6 +493,7 @@ def preview(project: Project, core: str | None) -> None:
 
 def acceptance(project: Project, core: str | None, *, wheel: Path | None = None) -> None:
     """Install core and this plugin's wheel, then run only its mounted browser contract tests."""
+    vendor.project(project.directory)
     record = validate_lock(project, core)
     if wheel is None:
         build(project)
@@ -512,6 +528,7 @@ def acceptance(project: Project, core: str | None, *, wheel: Path | None = None)
 
     if artifact_identity(wheels[0]) != (project.name, project.version):
         raise ValueError("Acceptance wheel metadata differs from the selected plugin")
+    vendor.verify_wheel(project.directory, wheels[0])
     digest = hashlib.sha256(wheels[0].read_bytes()).hexdigest()
     run(["uv", "pip", "install", "--python", str(interpreter), "--no-deps", "--no-build", selected, str(wheels[0])])
     run(["uv", "pip", "check", "--python", str(interpreter)])
@@ -532,6 +549,7 @@ def acceptance(project: Project, core: str | None, *, wheel: Path | None = None)
 
 def build(project: Project) -> None:
     """Build exactly one project's self-contained artifacts."""
+    vendor.project(project.directory)
     validate_lock(project, None)
     run(
         [
@@ -545,6 +563,10 @@ def build(project: Project) -> None:
             str(project.directory / "dist"),
         ]
     )
+    wheels = list((project.directory / "dist").glob(f"{project.name.replace('-', '_')}-{project.version}-*.whl"))
+    if len(wheels) != 1:
+        raise ValueError("Vendor build verification requires one exact owning wheel")
+    vendor.verify_wheel(project.directory, wheels[0])
 
 
 def profile(
@@ -657,6 +679,7 @@ def repository_private() -> bool:
 
 def audit(project: Project, core: str | None) -> None:
     """Audit only the installed runtime closure of the owning plugin."""
+    vendor.project(project.directory)
     interpreter = prepare_environment(project, core)
     custom = project.options.get("audit_command")
     if custom:
@@ -682,7 +705,8 @@ def audit(project: Project, core: str | None) -> None:
             str(TOOLING_SCRIPT.with_name("audit.py")),
             str(interpreter),
             project.name,
-        ]
+        ],
+        cwd=project.directory,
     )
 
 

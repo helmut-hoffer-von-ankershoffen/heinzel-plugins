@@ -6,6 +6,11 @@ import sys
 import tempfile
 from pathlib import Path
 
+if __package__:
+    from heinzel_plugin_tools import vendor
+else:
+    import vendor
+
 # Execute dependency inspection with the owning interpreter, never the tooling environment's distributions.
 INSPECT = """
 import json, sys
@@ -37,14 +42,18 @@ print(json.dumps(versions))
 
 def main() -> None:
     interpreter, name = sys.argv[1:]
+    vendored = vendor.project(Path.cwd())
     result = subprocess.run([interpreter, "-c", INSPECT, name], check=True, text=True, capture_output=True, timeout=60)
     versions = json.loads(result.stdout)
     allowlist = Path(".license-allowlist")
     if not allowlist.is_file():
         allowlist = Path(__file__).with_name("defaults") / "license-allowlist"
-    allowed = ";".join(
+    allowed_expressions = [
         line.strip() for line in allowlist.read_text().splitlines() if line.strip() and not line.startswith("#")
-    )
+    ]
+    allowed = ";".join(allowed_expressions)
+    if vendored.files and vendored.license_expression not in allowed_expressions:
+        raise ValueError("Vendored upstream license is outside the owning allowlist")
     subprocess.run(
         [
             sys.executable,
@@ -65,14 +74,24 @@ def main() -> None:
         requirements = Path(temporary) / "runtime.txt"
         # Own source and candidate core are checked by their respective pipelines. Their transitive runtime
         # packages are checked here; unpublished local distribution versions cannot be looked up on PyPI.
-        requirements.write_text(
-            "\n".join(
-                f"{package}=={version}"
-                for package, version in sorted(versions.items())
-                if package not in {name, "heinzel"}
+        runtime = {
+            f"{package}=={version}" for package, version in sorted(versions.items()) if package not in {name, "heinzel"}
+        }
+        if vendored.files:
+            # Keep the exact upstream version visible even when the external
+            # distribution is absent, or a different version is installed.
+            runtime.add(f"{vendored.distribution}=={vendored.version}")
+            print(
+                json.dumps(
+                    {
+                        "vendored": vendored.distribution,
+                        "version": vendored.version,
+                        "license": vendored.license_expression,
+                        "files": list(vendored.files),
+                    }
+                )
             )
-            + "\n"
-        )
+        requirements.write_text("\n".join(sorted(runtime)) + "\n")
         subprocess.run(
             [sys.executable, "-m", "pip_audit", "--strict", "--disable-pip", "--no-deps", "-r", str(requirements)],
             check=True,

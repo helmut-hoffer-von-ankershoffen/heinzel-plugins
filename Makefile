@@ -55,7 +55,7 @@ audit:
 tooling-check:
 	@uv run --frozen --no-build --group tooling ruff check scripts tests src/heinzel_plugin_tools
 	@uv run --frozen --no-build --group tooling ruff format --check scripts tests src/heinzel_plugin_tools
-	@uv run --frozen --no-build --group tooling pytest tests -q
+	@uv run --frozen --no-build --group tooling --extra checks pytest tests -q
 	@uv run --frozen --no-build --group tooling python scripts/tools.py run actionlint
 	@uv run --frozen --no-build --group tooling zizmor --offline --quiet .github
 

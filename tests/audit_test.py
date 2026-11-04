@@ -102,3 +102,38 @@ def test_module_execution_lists_only_the_plugins_of_its_own_collection(tmp_path)
     assert json.loads(result.stdout) == [
         {"name": "heinzel-harbor", "version": "0.3.0", "path": "plugins/heinzel-harbor"}
     ]
+
+
+@pytest.mark.parametrize(
+    "expression,allowed,accepted",
+    [
+        ("MIT", "MIT", True),
+        ("Apache-2.0", "Apache-2.0", True),
+        ("MIT AND Apache-2.0", "MIT AND Apache-2.0", True),
+        ("MIT OR Apache-2.0", "MIT OR Apache-2.0", True),
+        ("MIT AND GPL-3.0-only", "MIT", False),
+        ("MIT OR GPL-3.0-only", "MIT", False),
+        ("MIT AND Apache-2.0", "MIT\nApache-2.0", False),
+        ("MIT OR Apache-2.0", "MIT\nApache-2.0", False),
+        ("MIT-0", "MIT", False),
+        ("Apache-2.0", "Apache", False),
+        ("MIT", "mit", False),
+        ("mit", "MIT", False),
+    ],
+)
+def test_vendored_license_requires_exact_case_sensitive_allowlist_expression(
+    audited, tmp_path, monkeypatch, expression, allowed, accepted
+):
+    from heinzel_plugin_tools.vendor import VerifiedInventory
+
+    # Only the audit policy is under test; the manifest verifier supplies this inventory in production.
+    inventory = VerifiedInventory(("verified.py",), "example-sdk", "1.2.3", expression)
+    monkeypatch.setattr(audit.vendor, "project", lambda _root: inventory)
+    (tmp_path / ".license-allowlist").write_text(allowed + "\n")
+    if accepted:
+        licenses, vulnerabilities = audited("pytest")
+        assert f"--allow-only={';'.join(allowed.splitlines())}" in licenses["command"]
+        assert "example-sdk==1.2.3" in vulnerabilities["requirements"]
+    else:
+        with pytest.raises(ValueError, match="Vendored upstream license"):
+            audited("pytest")
