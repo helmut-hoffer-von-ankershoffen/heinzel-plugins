@@ -419,10 +419,12 @@ def test_hash_verification_rejects_tampering_and_neutral_contract_works_in_fresh
     )
     script = (
         "import importlib.util,sys,pathlib; "
+        f"sys.path.insert(0, {str(Path(plugins.__file__).parent)!r}); "
         f"spec=importlib.util.spec_from_file_location('plugins', {str(Path(plugins.__file__))!r}); "
         "module=importlib.util.module_from_spec(spec); sys.modules['plugins']=module; spec.loader.exec_module(module); "
         f"module.boundaries(module.projects(pathlib.Path({str(tmp_path)!r}))[0])"
     )
+    # Match direct script execution: its exact trusted directory supplies the sibling vendor verifier.
     # The tooling itself has one neutral dependency; it is independent of every provider and core.
     import packaging
 

@@ -1,5 +1,8 @@
 # Verified upstream implementation policy
 
+This policy requires developer toolkit 0.3.1 or later. Toolkit checks validate an owning plugin against its
+declared SDK and lock; this toolkit version does not establish compatibility with a newer core SDK.
+
 An owning project may carry a closed, pure Python upstream subset when it needs
 an isolated namespace. This changes development diagnostics for verified upstream
 implementation files only. It grants no runtime capability, origin, transport,
