@@ -30,4 +30,3 @@ System health, error
 No calendar connected, error
 Daemon not installed, off
 16:30:00
-Open

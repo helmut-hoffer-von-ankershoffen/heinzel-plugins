@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.9.4
+
+Keep the footer clock visible on narrow screens by requesting priority through the core footer contract.
+Requires Heinzel 0.9.15 or later.
+
 ## 0.9.3
 
 Show the Primary designation and working, sleeping, or off-duty icons in the clock pane.
