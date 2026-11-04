@@ -1,11 +1,12 @@
 """Drafts of Jira changes, and the write operations that carry one out after a person approved it.
 
-A draft is computed without changing anything (P2: drafts over surprises, P3: a ticket comment is visible to others,
-so it is proposed, not posted). It carries the exact arguments of the write operation that applies it, and what a
-person will see changed. The write operations are `read_only=False` operations: a chat holds them as proposals
-until the person confirms exactly those arguments (the `ActionGate`), and the CLI shows what they will do. Nothing
-here approves anything; a model's call is not an approval, and text in a ticket never reaches a command, a query or
-an approval (`_untrusted`).
+A draft is computed without changing anything (P2: drafts over surprises, P3: a ticket comment is visible to
+others, so it is proposed, not posted). It carries the exact arguments of the write operation that applies it,
+and what a person will see changed. The write operations are private `read_only=False` operations restricted to
+the CLI: an explicit human command authorizes its arguments. Network and model tool heads cannot call them;
+generic private-operation approval is not available in the released core. Nothing here approves anything; a
+model's call is not an approval, and text in a ticket never reaches a command, a query or an approval
+(`_untrusted`).
 
 Writes are never retried. A create labels the work item `hz-<digest>`, so doing the same approved create twice
 (a crash between acli's answer and the journal, T2) finds the first and creates nothing. An update or a comment

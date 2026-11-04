@@ -152,13 +152,15 @@ authority by code):
 | `hz atlassian epics [--project KAN]` | no | Epics that are not done, with children done, doing, to do, overdue, and percent done. |
 | `hz atlassian watch --since <time> [--previous <snapshots>]` | no | What in your own work deserves a look since a time: overdue, due soon, new comments by others, moved, newly assigned or assigned away, a blocked label, new items. Returns `snapshots` to pass as `--previous` next time. |
 | `draft-create-issue`, `draft-update-issue`, `draft-comment-issue` | no | A draft with the exact arguments of the write below, a preview of what changes (before and after), `problems` for what is missing or wrong, and the `seen` time of the work item. |
-| `create-issue`, `update-issue`, `comment-issue` | **yes** | Carry out a draft. They are `read_only=False` operations: a chat holds them as proposals until you confirm exactly those arguments, and the CLI shows what they will do. |
+| `create-issue`, `update-issue`, `comment-issue` | **yes** | Carry out a draft. They are private `read_only=False` operations restricted to the CLI. Typing the command authorizes those arguments; draft and inspect them first. |
+
+The six reading and drafting operations are private: unauthenticated API and HTTP MCP callers cannot access them, and private API callers need `private:read`. Writes require `private:write` as well as the CLI head. The plugin does not obtain or store Atlassian credentials; acli retains that responsibility. Current core chat tools exclude private operations.
 
 For notices and approvals on any channel a host offers (a native banner, a direct message): each `watch` item carries a
 stable `notice_key`, a `title` and a `body` made of the work item key, the reason codes and dates only, and each draft
 carries `arguments_sha256`, `link` and `approval_text`, so a host can post it as a notice or an approval request and
 bind a reply to the exact arguments it will run. The plugin imports no channel and approves nothing: a reply is a claim
-the host verifies, and the write still goes through the confirmed operation.
+the host verifies. Applying it currently requires the person to run the CLI command. The released core has no generic approval contract for private plugin operations, so these writes are absent from chat, MCP, API and web heads. A scoped private API bearer authenticates access; it does not approve a Jira change.
 
 Every reason in `watch` comes from dates, ids and status categories, never from ticket text. A write is never retried:
 a create labels the work item `hz-<digest>`, so the same approved create run twice finds the first; an update or a

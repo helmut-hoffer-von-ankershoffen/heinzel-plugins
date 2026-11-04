@@ -48,7 +48,7 @@ def test_a_comment_is_drafted_and_nothing_is_written(jira):
     assert not [c for c in fake.calls if c.args[:3] == ["jira", "workitem", "comment"]]
 
 
-def test_the_write_operations_are_held_for_confirmation_by_their_declaration(jira):
+def test_everyday_work_operations_are_listed_in_cli_help(jira):
     _, kernel = jira
     help_text = CliRunner().invoke(build(kernel), ["atlassian", "--help"]).output
     for name in ("assigned", "epics", "watch", "create-issue", "update-issue", "comment-issue"):
