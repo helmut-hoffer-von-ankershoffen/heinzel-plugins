@@ -1,23 +1,28 @@
 Skip to content
 M
-Home
+Today
 Today
 
 Nothing needs you right now. Ask anything below.
 
 Page
 Chat
-v0.9.1
+v0.9.15
+System health, error
+Calendar unavailable
+Updates
 Updates, off
-Tailscale, OK
-Daemon not installed, off
+Heinzelmännchen
 0
-System health, warning
-No calendar connected, error
+Tailscale
+Tailscale, OK
+Daemon not installed
+Daemon not installed, off
 
 Tailscale
 
 Share over Tailscale
+On
 
 [authentication link hidden]
 

@@ -1,23 +1,32 @@
-Audience: People who want to check the machine running their helper from Today, a phone, or the terminal. This plugin is already included in the standard app.
+## Audience
 
-Outcome: Move from a quick CPU glance to the underlying CPU, memory, load and core-count measurements. Make clear that these describe the host running hz, which may differ from the viewing device.
+People deciding whether they want a quick view of the machine running their Heinzel helper, plus people who may use the same measurements in automation. The plugin is included in the standard app.
 
-Scenes:
-1. **The numbers behind the meters.** Preserve the expanded resource monitor, including its hostname and explanation of scaled load.
-2. **A glance during everyday work.** Preserve Today’s CPU summary and compact footer meters.
-3. **The same host on a phone.** Preserve the narrow viewport and expanded resource details.
-4. **A readable CLI result.** Preserve the table showing hostname, CPU, memory, raw one-minute load and logical cores.
-5. **Check from the app terminal.** Run `hz resource` in the native terminal to show the readable result in context.
-6. **Numbers for automation.** Run `hz resource --json` in the native terminal to expose the structured sample, including its timestamp and problems list.
+## Outcome
 
-Fictional fixtures: Reuse only `docs/screenshot_fixture.py`. It supplies `demo-workstation`, CPU 36%, memory 62%, raw one-minute load 0.65, eight logical cores, no problems, and sampling time `2026-10-31T10:00:00Z`. Set the browser clock to that same instant. The load bar scales against twice the logical core count; it is not another CPU percentage. The existing fixture supports a healthy sample only, so do not stage warnings, history, or additional machines.
+Show how CPU, memory and load are available at a glance, how to inspect their meaning, and how to retrieve the same sample as readable output or JSON. The measurements describe the helper's host, which may differ from the device viewing the app.
 
-Privacy pitfalls: Real samples reveal the host’s name and resource measurements; JSON also reveals sampling time. Use the documented temporary profile without connected accounts and the existing bootstrap during explicit capture. Review surrounding Today content and terminal output for personal information. A phone capture must not imply that the phone itself is being measured.
+## Scenes
 
-Acceptance criteria:
-- Retain the four existing useful scenes and their names; add only the two required native-terminal parameter cases.
-- All six captions explicitly identify fictional or demonstration data. The expanded monitor, Today overview and mobile details must be readable.
-- Both terminal cases and the standalone CLI capture must use the fixture. Reject captures containing live host values.
-- Human-readable output shows the five documented table rows; JSON reflects the fixture’s fields. Terminal actions need no additional cell-text waits.
-- Use only the existing `/` route, accessible interactions, and supported terminal actions. Do not invent a plugin panel or installation screen.
-- The returned TOML was checked statically against the requested structure. Capture and executable validation were not run. The unsupported focus padding field was removed; the remaining existing interactions were preserved.
+1. **Expanded monitor:** A focused view of the fictional workstation's CPU, memory, one-minute load and logical cores, including the explanation of the scaled load bar.
+2. **Today:** The CPU summary in context, with the resource status control in the footer.
+3. **Phone:** The expanded resource details at a narrow viewport.
+4. **CLI:** The readable resource table with the same fictional measurements.
+5. **App terminal:** The readable resource result in the native terminal.
+6. **App terminal JSON:** The structured result for someone considering automation.
+
+## Fictional fixtures
+
+The existing `docs/screenshot_fixture.py` supplies `demo-workstation`, CPU 36%, memory 62%, one-minute load 0.65, eight logical cores and a fixed sample time. The plan uses that existing bootstrap and a matching browser time. No additional fixture files are needed.
+
+## Privacy pitfalls
+
+Real samples expose the helper host's hostname and resource usage. Capture only with the fictional bootstrap and temporary profile, and inspect every image and terminal result for real hostnames, account details or other unrelated private data before publication.
+
+## Acceptance criteria
+
+- All six scenes show the intended view or completed result, with readable demo data and no unrelated private information.
+- The expanded monitor identifies raw one-minute load separately from the scaled footer bar; captions do not imply the expanded panel contains scaled-load bars.
+- Today, phone and terminal scenes communicate useful behavior without relying on settings or plugin cards.
+- The two native-terminal cases show the readable and JSON forms of the single resource operation.
+- The plan preserves the existing routes, actions and fixture. Its TOML and requested fields have been checked by inspection; capture and runtime validation were not performed.

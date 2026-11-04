@@ -1,24 +1,26 @@
-**Audience.** People who receive Zoom summary emails and want meeting decisions and next actions available to Heinzelmännchen workflows.
+## Audience
+People deciding whether to bring Zoom meeting decisions and next steps into Heinzelmännchen workflows, especially those who already receive Zoom AI Companion summaries by email.
 
-**Outcome.** Answer “What did we decide, and who acts next?” using parsed summary emails. Installation requires a bound mail adapter and Zoom sending summaries to that mailbox; this plugin needs no Zoom credentials. These are summaries, not verbatim transcripts.
+## Outcome
+Show how a fictional mailbox becomes a browsable list of meetings and structured summaries with decisions and owners. Make clear that the plugin reads summary emails through a bound mail adapter; it does not need Zoom credentials, and the summaries are not verbatim transcripts.
 
-**Scenes.** Preserve the existing five scenes and add one supported parameter case:
+## Scenes
+1. **Weekly sync:** Open with a concrete decision and three next steps in the app’s native terminal.
+2. **Recent meetings:** Show the two fictional October meetings and their participants, making the discovery step clear.
+3. **Launch review:** Run the same single-summary operation with a second meeting argument to show a different decision and owners.
+4. **Summary CLI:** Show the parsed Weekly sync sections and source link as a command-line result.
+5. **Meeting list JSON:** Show typed meeting metadata for workflows that consume structured output.
+6. **Workflow context:** Show the fictional Meeting notes contract as an example of a declared input and output, explicitly without implying that a report has run.
 
-1. **meeting-decisions:** In the native app terminal, read the fictional Weekly sync: ship Thursday after phone checks, with next steps for Jonas, Priya and Mira.
-2. **recent-meetings:** Show the fictional October meeting table with Weekly sync and Launch review, UTC start times and participant names.
-3. **launch-decisions:** Read Launch review using the second meeting argument. Show its ten-percent rollout decision and two named owners.
-4. **summary-cli:** Retain the shell result showing Weekly sync’s parsed sections and source link.
-5. **meeting-list-json:** Retain structured meeting metadata for workflow authors. Do not describe this output as transcript text.
-6. **workflow-context:** Retain the existing Meeting notes contract view. It declares a summary input and Markdown output; it has not generated a report.
+## Fictional fixtures
+Use the existing documentation bootstrap and its isolated mailbox, requester and contract. Weekly sync and Launch review are fictional Zoom summary emails; the requester exercises the real Zoom adapter. The newsletter is ordinary fixture mail, not a meeting. The showcase commands and contract are documentation fixtures, not plugin features installed for users.
 
-**Fictional fixtures.** Reuse only `docs/screenshot_fixture.py`. During explicit capture it supplies the local mailbox, `showcase` requester and demonstration contract. Its existing `sync`, `launch` and newsletter messages use fictional people and decisions. The requester calls the real installed Zoom adapter. `showcase` commands are documentation fixtures; the plugin’s own CLI operation is `hz zoom info`. Freeze browser time after the fixture meetings; the requester’s October window is already fixed.
+## Privacy pitfalls
+Capture only the isolated fixture profile, never a connected mailbox. Avoid real names, addresses, meeting links, tokens and message content. The fixture uses example identities and a demo source link. The parser removes addresses from summary text, drops address-only names and strips link queries and fragments, but meeting titles, names and summary content can still be sensitive. Review each image and JSON output before publication.
 
-**Privacy pitfalls.** Capture only the temporary fictional profile without connected accounts. Names, meeting identifiers, decisions and source URLs can remain visible, so real mailbox data must never replace these fixtures. Leave source links unopened. The supplied messages do not exercise address redaction or token removal, so screenshots cannot establish those protections. Treat the rollout and readiness statements as fictional meeting content.
-
-**Acceptance criteria.**
-
-- Six scenes retain all five existing subjects, with four useful app views and two CLI results. The native terminal demonstrates `one sync` and `one launch`.
-- Weekly sync shows its decision and three owners; Launch review shows its different decision and two owners. The meeting table and JSON contain the two matching summaries and exclude the newsletter.
-- Summary headings, actions and table columns are readable without clipping. The contract heading is visible, with no claim of generated notes.
-- Every caption explicitly identifies fictional data and stays below 180 characters. Commands use argument arrays; terminal actions have no redundant cell waits.
-- The plan was statically checked by inspection against the requested structure and supplied fixture. No code, imports, captures or runtime validator were executed; visual capture verification remains pending.
+## Acceptance criteria
+- The app views visibly show both fictional meetings and the two distinct summary results; captions identify the fixture-only requester.
+- The CLI captures show useful parsed content and typed metadata, with no claim of a verbatim transcript.
+- The contract view is clearly a declaration, not a generated report.
+- All captures use the existing bootstrap and local routes; no real account or external service is needed.
+- The plan retains the existing six scenes. It has been reviewed for the requested structure and TOML syntax; capture behavior was not executed or verified.

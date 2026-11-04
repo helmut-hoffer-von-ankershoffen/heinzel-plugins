@@ -1,12 +1,12 @@
 {
   "format": 1,
   "plugin": "heinzel-theme",
-  "core_version": "0.9.8",
-  "inputs_sha256": "beea02fff851660e65b0002a59a470883265a138a7432ea364bcef36f11c4584",
+  "core_version": "0.9.15",
+  "inputs_sha256": "00d2eccb213f3c5d43bf26365f6fd20bea918570b8bd341cb258e0e63d4ab49d",
   "images": {
-    "docs/assets/screenshots/theme-light.png": "f61f88dd8243134723be64307d9f46a27251945bbd977b08180a19684d38e30d",
-    "docs/assets/screenshots/theme-dark.png": "4482c6273af5c362474b9b1ae2dc1aae37e0735b6bfe4009574fac6efa296875",
-    "docs/assets/screenshots/theme-soundscapes.png": "914c9dd304698da034f5e6954079849e1575951414a2f40d9c490f9d08369f4c",
+    "docs/assets/screenshots/theme-light.png": "86a5d6f47124d49e7559687607a0c5d2c0d27b48d8250ce51d689d84277efbd2",
+    "docs/assets/screenshots/theme-dark.png": "1ccb8fb81c2ddb0e6c81af7c11a7992970475535063d004ca9ed536156a1be96",
+    "docs/assets/screenshots/theme-soundscapes.png": "093672c65f36cc6d3fad3a0145853d74d6e042c658b946db7919d9220dd1e504",
     "docs/assets/screenshots/theme-cli.png": "2ebc7271bafa972d57b82a6278d25aee8901031963a3342297a50658f653e015",
     "docs/assets/screenshots/soundscapes-cli.png": "1307852a559700adac312deaf632275461688a8136b7768777b141afe9a4df46"
   },
@@ -15,13 +15,13 @@
     "definition": {
       "format": 1,
       "reviewer": "Codex feature-story agent",
-      "source_sha256": "c853f323fe150b846d9bbfeb2b525da59acb5fcee2881775efd2f4287cc76bb7",
-      "plan_sha256": "1ef98fc02c6f93f507152d127ce22e54c1885b5cddb7c293c8339b39ca5b5a84",
-      "story_sha256": "5b6d54ed54275542d344734fcf8be5961bd7ebe2ae4665638e4d6ee467e2fc3e"
+      "source_sha256": "1368fd477f13ba78c7d1daceaa77fcac8553fe55b8b3b7a09f2d266ad3f08a24",
+      "plan_sha256": "1b258aa7bc78674d2237109fdde1f37a00eb478621ffeea449d8b293f5c4a16b",
+      "story_sha256": "d3b3a6d156aa77b20213500219ea871990ed6240766d42cc90ea26b8b1da3d22"
     },
     "plugin": "heinzel-theme",
-    "core_version": "0.9.8",
-    "inputs_sha256": "beea02fff851660e65b0002a59a470883265a138a7432ea364bcef36f11c4584",
+    "core_version": "0.9.15",
+    "inputs_sha256": "00d2eccb213f3c5d43bf26365f6fd20bea918570b8bd341cb258e0e63d4ab49d",
     "screenshots": [
       {
         "path": "docs/assets/screenshots/theme-light.png",
@@ -36,7 +36,7 @@
       {
         "path": "docs/assets/screenshots/theme-soundscapes.png",
         "surface": "ui",
-        "caption": "Demo profile: browse three optional YouTube soundscapes; playback starts only after Play."
+        "caption": "Demo profile: browse the three optional YouTube soundscapes in appearance settings."
       },
       {
         "path": "docs/assets/screenshots/theme-cli.png",
@@ -50,24 +50,24 @@
       }
     ],
     "images": {
-      "theme-light.png": "f61f88dd8243134723be64307d9f46a27251945bbd977b08180a19684d38e30d",
-      "theme-dark.png": "4482c6273af5c362474b9b1ae2dc1aae37e0735b6bfe4009574fac6efa296875",
-      "theme-soundscapes.png": "914c9dd304698da034f5e6954079849e1575951414a2f40d9c490f9d08369f4c",
+      "theme-light.png": "86a5d6f47124d49e7559687607a0c5d2c0d27b48d8250ce51d689d84277efbd2",
+      "theme-dark.png": "1ccb8fb81c2ddb0e6c81af7c11a7992970475535063d004ca9ed536156a1be96",
+      "theme-soundscapes.png": "093672c65f36cc6d3fad3a0145853d74d6e042c658b946db7919d9220dd1e504",
       "theme-cli.png": "2ebc7271bafa972d57b82a6278d25aee8901031963a3342297a50658f653e015",
       "soundscapes-cli.png": "1307852a559700adac312deaf632275461688a8136b7768777b141afe9a4df46"
     },
     "transcripts": {
-      "theme-light.txt": "4b83c7d6816e6bb7ea197eecd22da27dceac0b7846eb57ad7f303fe9a03ca9b9",
-      "theme-dark.txt": "4b83c7d6816e6bb7ea197eecd22da27dceac0b7846eb57ad7f303fe9a03ca9b9",
-      "theme-soundscapes.txt": "d6ba8f262375dccc55d378786055ed1ccc069c0f0fee277b75b14fc01d2c0cea",
+      "theme-light.txt": "2b979ec39b83619e7a86bcb26396fbda049db857d02fbf125fcd5781d71634f5",
+      "theme-dark.txt": "2b979ec39b83619e7a86bcb26396fbda049db857d02fbf125fcd5781d71634f5",
+      "theme-soundscapes.txt": "d4dccce9adef11985fbafbdeaa5d41e8f64fa48f33e6d97fac288ec047d28119",
       "theme-cli.txt": "36d653efa87eeec3a67c92ac4c27069a4697714578a9cd172bda926c27fdfa1f",
       "soundscapes-cli.txt": "2ca2445881fd6893242b1be527a70a7791f0f2edf486c7a51c893f2cb41f6369"
     },
-    "bundle_sha256": "a8d56797853ca061451da2c0b136f6f489a524178f34ab7b48b22b8adc405bac"
+    "bundle_sha256": "3d69cdfe3739ad228829d80453b165754900fa1c29073665a99e9b2883b066ba"
   },
   "privacy_review": {
     "format": 1,
-    "bundle_sha256": "a8d56797853ca061451da2c0b136f6f489a524178f34ab7b48b22b8adc405bac",
+    "bundle_sha256": "3d69cdfe3739ad228829d80453b165754900fa1c29073665a99e9b2883b066ba",
     "reviewer": "Codex privacy agent",
     "decision": "approve",
     "checked_images": [

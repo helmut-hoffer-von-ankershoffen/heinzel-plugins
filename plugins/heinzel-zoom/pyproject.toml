@@ -141,12 +141,12 @@ highlights = [
 [[tool.heinzel.catalog.screenshots]]
 path = "docs/assets/screenshots/meeting-decisions.png"
 surface = "ui"
-caption = "Fictional Weekly sync: a Thursday release decision and three named next steps, via the fixture-only requester and real Zoom parser."
+caption = "Fictional Weekly sync: a Thursday release decision and three named next steps, using the fixture-only requester."
 
 [[tool.heinzel.catalog.screenshots]]
 path = "docs/assets/screenshots/recent-meetings.png"
 surface = "ui"
-caption = "Fictional October mailbox: find Weekly sync and Launch review through the fixture-only requester and real Zoom adapter."
+caption = "Fictional October meeting list: find Weekly sync and Launch review using the fixture-only requester."
 
 [[tool.heinzel.catalog.screenshots]]
 path = "docs/assets/screenshots/launch-decisions.png"

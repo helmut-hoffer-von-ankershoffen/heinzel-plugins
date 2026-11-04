@@ -35,7 +35,7 @@ name = "Launch review"
 name = "theme-soundscapes"
 surface = "ui"
 route = "/?settings=appearance"
-caption = "Demo profile: browse three optional YouTube soundscapes; playback starts only after Play."
+caption = "Demo profile: browse the three optional YouTube soundscapes in appearance settings."
 theme = "heinzelmaennchen"
 appearance = "light"
 viewport = { width = 1440, height = 1000 }

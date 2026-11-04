@@ -9,7 +9,7 @@ browser_time = "2026-11-01T12:00:00Z"
 name = "meeting-decisions"
 surface = "ui"
 route = "/"
-caption = "Fictional Weekly sync: a Thursday release decision and three named next steps, via the fixture-only requester and real Zoom parser."
+caption = "Fictional Weekly sync: a Thursday release decision and three named next steps, using the fixture-only requester."
 timeout_ms = 30000
 
 [[scenes.steps]]
@@ -24,7 +24,7 @@ height = 650
 name = "recent-meetings"
 surface = "ui"
 route = "/"
-caption = "Fictional October mailbox: find Weekly sync and Launch review through the fixture-only requester and real Zoom adapter."
+caption = "Fictional October meeting list: find Weekly sync and Launch review using the fixture-only requester."
 timeout_ms = 30000
 
 [[scenes.steps]]

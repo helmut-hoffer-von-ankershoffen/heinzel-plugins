@@ -1,38 +1,38 @@
 {
   "format": 1,
   "plugin": "heinzel-resource",
-  "core_version": "0.9.1",
-  "inputs_sha256": "a7a1dce9657ca7f7c230974cf97856f5bc94227638498299e705159d1784b00c",
+  "core_version": "0.9.15",
+  "inputs_sha256": "add2a464b1f9e5883361374ae14b21c4937dd01c5cb0d8e8927e8668d7654dd7",
   "images": {
-    "docs/assets/screenshots/resources-pane.png": "15b11268ea60790534c0d191a4ad2195a2ef1af991e9fd0166ad9359270fe1df",
-    "docs/assets/screenshots/today-resources.png": "9cf5c41c8d1056d7d02dd76e1d6f2fc1a7d06bd5decabe19d828097c8c5b26f3",
-    "docs/assets/screenshots/phone-resources.png": "3f8c480bd268edb80d63225d999df393abaa44168de882583265ffa9104d2c61",
+    "docs/assets/screenshots/resources-pane.png": "75a2ae9568fa6bbc48d60c9bd50f911287f3c780ef464174e7846ecb52f5e665",
+    "docs/assets/screenshots/today-resources.png": "206af22912aa2ae987589e8bfc5ca067d5f48299412c7b823af9bd4a6e161fa9",
+    "docs/assets/screenshots/phone-resources.png": "4f462dbe6ecba005a65eefc3a444bc6741feb2c2442ffe1b9aa065703784370c",
     "docs/assets/screenshots/cli-resources.png": "3d8012cf0ff56ee191ad3c8616855bc514e3a6692621c7248f8a72b554a96073",
-    "docs/assets/screenshots/terminal-resources.png": "44d466b39ba71af0fbfd8f71b883293a6e1a0b0ae8ca9425ae749ed34deb3949",
-    "docs/assets/screenshots/terminal-resources-json.png": "1b7cfb326023d98e9fa195c69953202089e1b929b1d249016b1f2ecf5a9d75bf"
+    "docs/assets/screenshots/terminal-resources.png": "eb9be4a0f4407111eb02c848a00d048be5f99a7ed9442e740cef7f9e5728b0ec",
+    "docs/assets/screenshots/terminal-resources-json.png": "22742147d3a2d3914a440e04297ddb4f184f6c5a2cda6aa738e9c4baab4c3d7c"
   },
   "review_bundle": {
     "format": 1,
     "definition": {
       "format": 1,
       "reviewer": "Codex feature-story agent",
-      "source_sha256": "a5ce3657e56517e9ebc14d927a3fdddb81c2e5c6e8490a5398fb8e215bf9873b",
-      "plan_sha256": "f5e5ffdd88e299bf8ba07ea8605e818b9aedc5e0385ffd76ba11b5999c4f5cfb",
-      "story_sha256": "4608ea8e6cc234c8e63b026c9fe04bf2268665468f58107c0b8851bffa19885f"
+      "source_sha256": "7c365378f1611e7f94a958673e4f224bb30a3f01c5c9da8209fabb634b2af3c8",
+      "plan_sha256": "61c4c0856870866101fbbc2786fa8e59c44cf8083fe51699c16c05389996f20e",
+      "story_sha256": "f1200d48a6ace3967b54dbfada61e574301601c045df5d25c5b67c0595977886"
     },
     "plugin": "heinzel-resource",
-    "core_version": "0.9.1",
-    "inputs_sha256": "a7a1dce9657ca7f7c230974cf97856f5bc94227638498299e705159d1784b00c",
+    "core_version": "0.9.15",
+    "inputs_sha256": "add2a464b1f9e5883361374ae14b21c4937dd01c5cb0d8e8927e8668d7654dd7",
     "screenshots": [
       {
         "path": "docs/assets/screenshots/resources-pane.png",
         "surface": "ui",
-        "caption": "CPU, memory and scaled load in the expanded monitor \u2014 fictional demo workstation"
+        "caption": "Inspect fictional demo-workstation: CPU 36%, memory 62%, one-minute load 0.65 and 8 logical cores."
       },
       {
         "path": "docs/assets/screenshots/today-resources.png",
         "surface": "ui",
-        "caption": "A quick CPU summary on Today, with three compact footer meters \u2014 demonstration values"
+        "caption": "A quick CPU summary on Today, with the resource status control in the footer \u2014 demonstration values"
       },
       {
         "path": "docs/assets/screenshots/phone-resources.png",
@@ -56,26 +56,26 @@
       }
     ],
     "images": {
-      "resources-pane.png": "15b11268ea60790534c0d191a4ad2195a2ef1af991e9fd0166ad9359270fe1df",
-      "today-resources.png": "9cf5c41c8d1056d7d02dd76e1d6f2fc1a7d06bd5decabe19d828097c8c5b26f3",
-      "phone-resources.png": "3f8c480bd268edb80d63225d999df393abaa44168de882583265ffa9104d2c61",
+      "resources-pane.png": "75a2ae9568fa6bbc48d60c9bd50f911287f3c780ef464174e7846ecb52f5e665",
+      "today-resources.png": "206af22912aa2ae987589e8bfc5ca067d5f48299412c7b823af9bd4a6e161fa9",
+      "phone-resources.png": "4f462dbe6ecba005a65eefc3a444bc6741feb2c2442ffe1b9aa065703784370c",
       "cli-resources.png": "3d8012cf0ff56ee191ad3c8616855bc514e3a6692621c7248f8a72b554a96073",
-      "terminal-resources.png": "44d466b39ba71af0fbfd8f71b883293a6e1a0b0ae8ca9425ae749ed34deb3949",
-      "terminal-resources-json.png": "1b7cfb326023d98e9fa195c69953202089e1b929b1d249016b1f2ecf5a9d75bf"
+      "terminal-resources.png": "eb9be4a0f4407111eb02c848a00d048be5f99a7ed9442e740cef7f9e5728b0ec",
+      "terminal-resources-json.png": "22742147d3a2d3914a440e04297ddb4f184f6c5a2cda6aa738e9c4baab4c3d7c"
     },
     "transcripts": {
-      "resources-pane.txt": "f8754ab93f65e0c2ced4135a948402a47e2bb9027a940f48bc26590c629a73f5",
-      "today-resources.txt": "eacb6e26ee80e2451473f5e079fbd6ab46ad324152fbc65e71df82209b040408",
-      "phone-resources.txt": "702f1d96e760cbe0a57719f7eadcd7ff244d336926be2e92bd842a10017ffbf2",
+      "resources-pane.txt": "64d63ae6bbfb95102472f4fbb859368e7c1212273182b7bccb1b74467ddac980",
+      "today-resources.txt": "3e0371cb4c4e67fd0054be0127909d97903c1dffa9bef728b007b60acb1edb01",
+      "phone-resources.txt": "6d7ae97dd4498af04942ff5149ee56a315b0b9e9c47e37a6728e9ca48bc3271b",
       "cli-resources.txt": "ddef8a589eb34e18d3fd06ab545c884ebcc82923f5270bb88a6fcfc2ae8272a7",
-      "terminal-resources.txt": "65a8aa4775e56d401ccabf5f45b838053a2347a25af0df1c559fa967f0b6e40b",
-      "terminal-resources-json.txt": "7f6aa32246f92520563db09ca52b5ea7a785dc90a42322bcdb2f84bd0977bce6"
+      "terminal-resources.txt": "550c85252177f92cabfece26db3fd5c0c130f758ce21566da736c156fa9e62ed",
+      "terminal-resources-json.txt": "4a64e8d025b0233afc6d562e578c49139ef21aaa8b01010eea9c42d95138005f"
     },
-    "bundle_sha256": "a998ddb8f2cd24859d672b2e7ad810cec120e83f50c68adfdfaa3c47567789c1"
+    "bundle_sha256": "4c29656d98022f1eb682797750c02b45184268e5b5498ef819b69b9c38fc57ee"
   },
   "privacy_review": {
     "format": 1,
-    "bundle_sha256": "a998ddb8f2cd24859d672b2e7ad810cec120e83f50c68adfdfaa3c47567789c1",
+    "bundle_sha256": "4c29656d98022f1eb682797750c02b45184268e5b5498ef819b69b9c38fc57ee",
     "reviewer": "Codex privacy agent",
     "decision": "approve",
     "checked_images": [

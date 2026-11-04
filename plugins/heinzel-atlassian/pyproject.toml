@@ -142,7 +142,7 @@ highlights = [
 [[tool.heinzel.catalog.screenshots]]
 path = "docs/assets/screenshots/jira-issues.png"
 surface = "ui"
-caption = "Demo data: fictional Jira changes, owners and states in the app terminal, using the real adapter and a fixture-only requester."
+caption = "Demo data: fictional Jira issue records, owners and states in the app terminal, using the real adapter and a fixture-only requester."
 
 [[tool.heinzel.catalog.screenshots]]
 path = "docs/assets/screenshots/confluence-plan.png"
@@ -152,7 +152,7 @@ caption = "Demo data: read the fictional Widget launch plan with its source and 
 [[tool.heinzel.catalog.screenshots]]
 path = "docs/assets/screenshots/issues-json.png"
 surface = "cli"
-caption = "Demo data: structured fictional Jira changes through the real adapter, using a fixture-only requester and local vendor replies."
+caption = "Demo data: structured fictional Jira issue records through the real adapter, using a fixture-only requester and local vendor replies."
 
 [[tool.heinzel.catalog.screenshots]]
 path = "docs/assets/screenshots/confluence-cli.png"
@@ -167,4 +167,4 @@ caption = "Demo data: the local Weekly work review contract declares Jira and Co
 [[tool.heinzel.catalog.screenshots]]
 path = "docs/assets/screenshots/jira-parameters.png"
 surface = "ui"
-caption = "Demo data: lowercase wid resolves to WID; the fixture requester returns structured Jira changes with --json in the app terminal."
+caption = "Demo data: lowercase wid resolves to WID; the fixture requester returns structured Jira issue records with --json in the app terminal."

@@ -151,7 +151,7 @@ caption = "The same fictional Launch review contract in the applied Heinzelmänn
 [[tool.heinzel.catalog.screenshots]]
 path = "docs/assets/screenshots/theme-soundscapes.png"
 surface = "ui"
-caption = "Demo profile: browse three optional YouTube soundscapes; playback starts only after Play."
+caption = "Demo profile: browse the three optional YouTube soundscapes in appearance settings."
 
 [[tool.heinzel.catalog.screenshots]]
 path = "docs/assets/screenshots/theme-cli.png"

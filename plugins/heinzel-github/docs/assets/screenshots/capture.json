@@ -1,27 +1,27 @@
 {
   "format": 1,
   "plugin": "heinzel-github",
-  "core_version": "0.9.1",
-  "inputs_sha256": "8c0bf37168b9bebf6c2504eddf2b8b91da715ad438068843d4bbec411879f72f",
+  "core_version": "0.9.15",
+  "inputs_sha256": "5f52e55a8a9e3071b208b004154e09921bca72085397db5049696f6d0b8f8889",
   "images": {
-    "docs/assets/screenshots/merged-work.png": "5962b069ad52f471ea4f72182ee050b641bd23d6b8030056aa95c63391b46b10",
-    "docs/assets/screenshots/issue-changes.png": "d3bb56f3024fbd8bbd1a246f7227e7b5a78dc8aaab6c81ada182d6e136376ca1",
+    "docs/assets/screenshots/merged-work.png": "8ff2207ebeaaae52e02d3718867d056fa8b2de5410e3ca885598c568ab0af79e",
+    "docs/assets/screenshots/issue-changes.png": "5e5cd61862c5982db2102d6d691e80161462915ff0d985438bb8b2550ee286e0",
     "docs/assets/screenshots/merged-cli.png": "787d4a4a73a860dbf4b33fd849f9737e0a58e5495e3e94ea1104a0e60bdf7233",
     "docs/assets/screenshots/issues-json.png": "ba32601ae9d5cbf3c0925b64388c8786141602e603d5343e8e03efd6365d52bd",
-    "docs/assets/screenshots/workflow-context.png": "ab7edae1d67c33ae548a5df2c4dea1bd5828fd72f2a9469f20014bd3b9a8fb80"
+    "docs/assets/screenshots/workflow-context.png": "6b792b21352eacd2a8214db1ce575e1055eda98574141c2c9ea35212b99ec0eb"
   },
   "review_bundle": {
     "format": 1,
     "definition": {
       "format": 1,
       "reviewer": "Codex feature-story agent",
-      "source_sha256": "c05f8ee6717f99995c08de3191f9c1e761226889addd490f5fd1f76420883b8e",
-      "plan_sha256": "b31060a1ca9089579bccd42749d3d34d61b7ef00b2191c30181f116b342ef1e8",
-      "story_sha256": "df34bbc1142881bcd269218b2b0b0edf4e25a4eac7fbb3d9bf23109f8e67ddf0"
+      "source_sha256": "1e95e33c709064e3c0dd93209349894b7bf79e43e9bb7677cb691a4c36b24b7c",
+      "plan_sha256": "144b396fd10f2351e4442293b6354ce0aa9caabd9fc02aca9e31e4bb5ead5ba8",
+      "story_sha256": "da3c669494a0dcacdeefa9786c51a49e11d278c0fe166f595ca065fd55c0dd5c"
     },
     "plugin": "heinzel-github",
-    "core_version": "0.9.1",
-    "inputs_sha256": "8c0bf37168b9bebf6c2504eddf2b8b91da715ad438068843d4bbec411879f72f",
+    "core_version": "0.9.15",
+    "inputs_sha256": "5f52e55a8a9e3071b208b004154e09921bca72085397db5049696f6d0b8f8889",
     "screenshots": [
       {
         "path": "docs/assets/screenshots/merged-work.png",
@@ -50,24 +50,24 @@
       }
     ],
     "images": {
-      "merged-work.png": "5962b069ad52f471ea4f72182ee050b641bd23d6b8030056aa95c63391b46b10",
-      "issue-changes.png": "d3bb56f3024fbd8bbd1a246f7227e7b5a78dc8aaab6c81ada182d6e136376ca1",
+      "merged-work.png": "8ff2207ebeaaae52e02d3718867d056fa8b2de5410e3ca885598c568ab0af79e",
+      "issue-changes.png": "5e5cd61862c5982db2102d6d691e80161462915ff0d985438bb8b2550ee286e0",
       "merged-cli.png": "787d4a4a73a860dbf4b33fd849f9737e0a58e5495e3e94ea1104a0e60bdf7233",
       "issues-json.png": "ba32601ae9d5cbf3c0925b64388c8786141602e603d5343e8e03efd6365d52bd",
-      "workflow-context.png": "ab7edae1d67c33ae548a5df2c4dea1bd5828fd72f2a9469f20014bd3b9a8fb80"
+      "workflow-context.png": "6b792b21352eacd2a8214db1ce575e1055eda98574141c2c9ea35212b99ec0eb"
     },
     "transcripts": {
-      "merged-work.txt": "b9d85845e44284b50b1f57f1ec17c0b65e8dc9d9dbbcd7aee8228d84d78f6fcc",
-      "issue-changes.txt": "451aa1dd967f8e71e5785b16e16061cef577df2ea682bb780d4a053395b85f20",
+      "merged-work.txt": "9f92afb970babf05fb610ee7063ec26fb480925b61bcc03b341382531e484c1e",
+      "issue-changes.txt": "c1e98a5630525704c31c7a6ffe9962108c8645d5dbb90617b1c9ba2629da9b3b",
       "merged-cli.txt": "e4df52085e704c49ba37bd75f62656de48cd879405856220a53bcebb7efdebb4",
       "issues-json.txt": "0478f05c2513c3aec957a26c792f41ff2893fb1eddea11b4f9b472e93b9ac0a4",
-      "workflow-context.txt": "c689fe4c7f5fb5b76f8d552736108b1f68674bcb892b93a4cc8186010867feba"
+      "workflow-context.txt": "cfa30fae22ab77fce2e4ec3876fbf6100b3e0ee916b28b4c4c4b51cbc4f07db2"
     },
-    "bundle_sha256": "e27f50bb265586890adafa406f0a696db09916606c9b74d404d620b0358fdb84"
+    "bundle_sha256": "164578169939801b9134805c785bef15add3e6ee67efd0cd64daac2dc6e66681"
   },
   "privacy_review": {
     "format": 1,
-    "bundle_sha256": "e27f50bb265586890adafa406f0a696db09916606c9b74d404d620b0358fdb84",
+    "bundle_sha256": "164578169939801b9134805c785bef15add3e6ee67efd0cd64daac2dc6e66681",
     "reviewer": "Codex privacy agent",
     "decision": "approve",
     "checked_images": [

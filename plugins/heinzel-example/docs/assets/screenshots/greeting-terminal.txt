@@ -11,19 +11,19 @@ Example: 42
 M
 Mira
 · EM
-Home
+Today
 Today
 Notifications
 1 unread
 Example is ready
-00:03
+17:46
 All notifications
 Example is ready
 Open
 Ask about it
-Doctor: 7 checks need attention
+Doctor: 4 checks need attention
 
-ai.access ai access, system.credential backend, system.credential credential ai.access/api-key…
+ai.access ai access, system.doctor installation, system.notify notification store…
 
 Open
 Ask about it
@@ -32,12 +32,12 @@ Example value
 42
 
 Ask about it
-v0.9.1
+v0.9.15
 Updates, off
-Daemon not installed, off
 0
-System health, warning
-No calendar connected, error
+System health, error
+Calendar unavailable
+Daemon not installed, off
 Chat
 Terminal
 Demo complete

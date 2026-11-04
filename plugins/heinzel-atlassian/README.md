@@ -145,9 +145,9 @@ The `--json` shapes from acli are assumed from Atlassian's REST APIs and not yet
 <!-- screenshots:start -->
 ## Screenshots
 
-<img src="docs/assets/screenshots/jira-issues.png" alt="Demo data: fictional Jira changes, owners and states in the app terminal, using the real adapter and a fixture-only requester." width="960">
+<img src="docs/assets/screenshots/jira-issues.png" alt="Demo data: fictional Jira issue records, owners and states in the app terminal, using the real adapter and a fixture-only requester." width="960">
 
-Demo data: fictional Jira changes, owners and states in the app terminal, using the real adapter and a fixture-only requester.
+Demo data: fictional Jira issue records, owners and states in the app terminal, using the real adapter and a fixture-only requester.
 
 <img src="docs/assets/screenshots/confluence-plan.png" alt="Demo data: read the fictional Widget launch plan with its source and revision, using the real adapter and a fixture-only requester." width="960">
 
@@ -157,16 +157,16 @@ Demo data: read the fictional Widget launch plan with its source and revision, u
 
 Demo data: the local Weekly work review contract declares Jira and Confluence inputs; no report has been generated.
 
-<img src="docs/assets/screenshots/jira-parameters.png" alt="Demo data: lowercase wid resolves to WID; the fixture requester returns structured Jira changes with --json in the app terminal." width="960">
+<img src="docs/assets/screenshots/jira-parameters.png" alt="Demo data: lowercase wid resolves to WID; the fixture requester returns structured Jira issue records with --json in the app terminal." width="960">
 
-Demo data: lowercase wid resolves to WID; the fixture requester returns structured Jira changes with --json in the app terminal.
+Demo data: lowercase wid resolves to WID; the fixture requester returns structured Jira issue records with --json in the app terminal.
 
 <details>
 <summary>Command line</summary>
 
-<img src="docs/assets/screenshots/issues-json.png" alt="Demo data: structured fictional Jira changes through the real adapter, using a fixture-only requester and local vendor replies." width="960">
+<img src="docs/assets/screenshots/issues-json.png" alt="Demo data: structured fictional Jira issue records through the real adapter, using a fixture-only requester and local vendor replies." width="960">
 
-Demo data: structured fictional Jira changes through the real adapter, using a fixture-only requester and local vendor replies.
+Demo data: structured fictional Jira issue records through the real adapter, using a fixture-only requester and local vendor replies.
 
 <img src="docs/assets/screenshots/confluence-cli.png" alt="Demo data: the fictional Confluence plan, source and revision in the shell, using a fixture-only requester and local vendor replies." width="960">
 

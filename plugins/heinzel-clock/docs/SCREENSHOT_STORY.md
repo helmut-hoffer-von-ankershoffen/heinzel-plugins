@@ -1,34 +1,33 @@
 ## Audience
 
-A distributed team deciding whether World Clock will make it easier to see colleagues’ local times and working hours without leaving Heinzelmännchen. The plugin is included in the standard app.
+Distributed teams considering a quick way to see colleagues’ local times and find working-hour overlap.
 
 ## Outcome
 
-A viewer can see the team’s current coverage, inspect individual workday countdowns, and compare a future moment using the command line.
+Show how World Clock makes a three-city team’s availability visible in the app and lets someone preview another moment from the terminal. The plugin is included in the standard app.
 
 ## Scenes
 
-1. **World clock:** Show the globe and three local clocks alongside Today’s 2/3 working-hours metric.
-2. **Team overview:** Show the Today metric, sidebar ticker, and primary footer clock in their everyday context.
-3. **Footer detail:** Open the primary clock to inspect all configured zones and their countdowns.
-4. **Phone world clock:** Show the same globe and team clocks at a phone viewport.
-5. **CLI times:** Show the table of zones, local times, working hours, and working status.
-6. **Terminal current:** Run the operation in the app terminal at 15:30 UTC, when two zones are working.
-7. **Terminal overlap:** Preview 16:30 UTC in the terminal, when all three zones are working, while the app clock remains fixed at 15:30 UTC.
+1. **World clock:** The globe and team clocks put Berlin, New York, and Los Angeles in context alongside Today’s 2/3 working indicator.
+2. **Team overview:** The Today widget, sidebar ticker, and primary footer clock show how the information fits into the rest of the app.
+3. **Footer detail:** Open the primary clock to inspect all configured zones and their workday countdowns.
+4. **Phone view:** Show the globe and team clocks at a narrow viewport.
+5. **CLI result:** Show the zone names, local times, working hours, and working status for the fixed moment.
+6. **Terminal, current example:** At 15:30 UTC, Berlin and New York are working and Los Angeles starts in 30 minutes.
+7. **Terminal, overlap preview:** At 16:30 UTC, all three zones are within working hours; the app clock remains at the fixture’s 15:30 UTC.
 
 ## Fictional fixtures
 
-Use the existing `docs/screenshot_fixture.py` bootstrap and the fixed Monday, 26 October 2026 at 15:30 UTC. The fictional team uses Berlin, New York, and Los Angeles, each with local working hours of 09:00–18:00. Berlin is primary. At 15:30 UTC, Berlin and New York are working and Los Angeles starts in 30 minutes; at 16:30 UTC, all three are within working hours.
+Use the existing `docs/screenshot_fixture.py`: it sets Berlin, New York, and Los Angeles to 09:00–18:00 working hours, enables the sidebar and footer contributions, and fixes the plugin clock at 2026-10-26 15:30 UTC. The browser uses the same fixed time. These are example team settings, not real people or accounts.
 
 ## Privacy pitfalls
 
-Capture only in the temporary fictional profile described by the screenshot documentation. Check the whole app frame and terminal for real account names, messages, project data, machine paths, credentials, and other personal information before sharing. The fixture configures clock data and contributions; it does not by itself prove that every surrounding app surface is free of private data.
+Capture only in the isolated fictional profile described in the screenshot documentation. Check the app, terminal, and surrounding chrome for real names, messages, paths, account details, or other unrelated data before publishing. Captions should retain the demonstration-data context.
 
 ## Acceptance criteria
 
-- The declared plugin route opens the real World Clock panel; the globe renders and the three demo zones are legible.
-- Today shows 2/3 at the fixed moment, and the footer detail shows the configured zones and a Berlin countdown.
-- The phone capture remains readable at 390 × 844.
-- The CLI result shows all three zones, their local times, 09–18 working hours, and working status. The two native-terminal cases visibly demonstrate the change from two working zones to three.
-- Captions identify the data or time as demonstration material. Inspect the resulting captures for privacy and visual accuracy.
-- The plan has been checked against the supplied format and source declarations by inspection; capture and runtime behavior have not been executed or verified.
+- The globe, Today metric, sidebar ticker, footer detail, and phone view render as actual app views; the globe finishes loading.
+- The fixed-time views show 2/3 zones working, and the footer detail shows Berlin’s 1h 30m countdown.
+- Both terminal commands complete and show the expected change in working status without suggesting that `--at` changes the app clock.
+- Captions identify the demonstration data, and no private information appears.
+- Review the generated gallery before publication. The plan below preserves the existing seven scenes; its TOML structure was reviewed against the requested format, but capture and runtime validation were not performed.

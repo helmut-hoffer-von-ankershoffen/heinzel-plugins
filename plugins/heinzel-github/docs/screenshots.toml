@@ -2,12 +2,13 @@ format = 1
 bootstrap = "docs/screenshot_fixture.py"
 browser_time = "2026-11-01T00:00:00Z"
 
-# The existing bootstrap provides the documentation-only showcase commands.
+# Documentation-only showcase commands use fictional GitHub responses.
 
 [[scenes]]
 name = "merged-work"
 surface = "ui"
 route = "/"
+appearance = "light"
 caption = "Merged pull requests in the app terminal — fictional data, fixture-only requester, real GitHub adapter"
 timeout_ms = 30000
 
@@ -23,6 +24,7 @@ height = 650
 name = "issue-changes"
 surface = "ui"
 route = "/"
+appearance = "dark"
 caption = "Issue changes, owners and states in the app terminal — fictional GitHub repository"
 timeout_ms = 30000
 

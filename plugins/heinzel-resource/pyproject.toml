@@ -140,12 +140,12 @@ highlights = [
 [[tool.heinzel.catalog.screenshots]]
 path = "docs/assets/screenshots/resources-pane.png"
 surface = "ui"
-caption = "CPU, memory and scaled load in the expanded monitor — fictional demo workstation"
+caption = "Inspect fictional demo-workstation: CPU 36%, memory 62%, one-minute load 0.65 and 8 logical cores."
 
 [[tool.heinzel.catalog.screenshots]]
 path = "docs/assets/screenshots/today-resources.png"
 surface = "ui"
-caption = "A quick CPU summary on Today, with three compact footer meters — demonstration values"
+caption = "A quick CPU summary on Today, with the resource status control in the footer — demonstration values"
 
 [[tool.heinzel.catalog.screenshots]]
 path = "docs/assets/screenshots/phone-resources.png"

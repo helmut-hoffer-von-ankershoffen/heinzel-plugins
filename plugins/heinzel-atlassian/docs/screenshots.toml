@@ -2,15 +2,11 @@ format = 1
 bootstrap = "docs/screenshot_fixture.py"
 browser_time = "2026-11-01T00:00:00Z"
 
-# Preserve the existing five scenes and their commands.
-# showcase is supplied only by the existing documentation fixture.
-# Append a second native-terminal argument case for the issue requester.
-
 [[scenes]]
 name = "jira-issues"
 surface = "ui"
 route = "/"
-caption = "Demo data: fictional Jira changes, owners and states in the app terminal, using the real adapter and a fixture-only requester."
+caption = "Demo data: fictional Jira issue records, owners and states in the app terminal, using the real adapter and a fixture-only requester."
 timeout_ms = 30000
 
 [scenes.viewport]
@@ -39,7 +35,7 @@ command = ["showcase", "page"]
 [[scenes]]
 name = "issues-json"
 surface = "cli"
-caption = "Demo data: structured fictional Jira changes through the real adapter, using a fixture-only requester and local vendor replies."
+caption = "Demo data: structured fictional Jira issue records through the real adapter, using a fixture-only requester and local vendor replies."
 command = ["showcase", "issues", "WID", "--json"]
 
 [[scenes]]
@@ -64,7 +60,7 @@ name = "Weekly work review"
 name = "jira-parameters"
 surface = "ui"
 route = "/"
-caption = "Demo data: lowercase wid resolves to WID; the fixture requester returns structured Jira changes with --json in the app terminal."
+caption = "Demo data: lowercase wid resolves to WID; the fixture requester returns structured Jira issue records with --json in the app terminal."
 timeout_ms = 30000
 
 [scenes.viewport]

@@ -142,39 +142,39 @@ highlights = [
 [[tool.heinzel.catalog.screenshots]]
 path = "docs/assets/screenshots/launch-files.png"
 surface = "ui"
-caption = "Recently changed launch files in the app terminal — fictional Workspace replies, real Google operation"
+caption = "Find fictional launch files from the last three days in the app terminal; replies come from the local fixture."
 
 [[tool.heinzel.catalog.screenshots]]
 path = "docs/assets/screenshots/launch-files-week.png"
 surface = "ui"
-caption = "Explore seven days without a name filter — real Google operation over the fixture's same fictional files"
+caption = "Try seven days without a name filter; the local fixture returns the same fictional files for both searches."
 
 [[tool.heinzel.catalog.screenshots]]
 path = "docs/assets/screenshots/launch-plan.png"
 surface = "ui"
-caption = "Read a Google Doc as workflow-ready text — fixture-only requester and fictional plan"
+caption = "Read a fictional launch plan through the documents adapter using the fixture-only requester."
 
 [[tool.heinzel.catalog.screenshots]]
 path = "docs/assets/screenshots/launch-week.png"
 surface = "ui"
-caption = "The launch week's meetings and attendees — fixture-only requester, real Calendar adapter over fictional events"
+caption = "Review fictional launch meetings and attendees through the Calendar adapter and fixture-only requester."
 
 [[tool.heinzel.catalog.screenshots]]
 path = "docs/assets/screenshots/launch-inbox.png"
 surface = "ui"
-caption = "A focused launch-mail query — fixture-only requester, real Gmail adapter over fictional messages"
+caption = "Scan fictional launch messages through the Gmail adapter and fixture-only requester."
 
 [[tool.heinzel.catalog.screenshots]]
 path = "docs/assets/screenshots/launch-files-json.png"
 surface = "cli"
-caption = "Changed Docs and Sheets as structured data — real Google operation, fictional files"
+caption = "Use the Google files operation's structured output with fictional files from the local fixture."
 
 [[tool.heinzel.catalog.screenshots]]
 path = "docs/assets/screenshots/launch-metrics.png"
 surface = "cli"
-caption = "A Sheet becomes a readable table — fixture-only requester, real documents adapter and local replies"
+caption = "Read fictional launch metrics as a table through the documents adapter and fixture-only requester."
 
 [[tool.heinzel.catalog.screenshots]]
 path = "docs/assets/screenshots/mail-content.png"
 surface = "cli"
-caption = "Read the next actions in a launch message — fixture-only requester, real Gmail adapter and local replies"
+caption = "Read a fictional launch message through the Gmail adapter and fixture-only requester."

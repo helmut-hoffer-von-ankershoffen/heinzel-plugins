@@ -6,7 +6,8 @@ browser_time = "2026-10-31T12:00:00Z"
 name = "sharing-ready"
 surface = "ui"
 route = "/"
-caption = "Enable private sharing and see verified readiness — fictional local Tailscale demo"
+appearance = "light"
+caption = "Enable private sharing and see its local readiness message — fictional Tailscale demo; no remote connection tested"
 timeout_ms = 30000
 
 [[scenes.steps]]
@@ -48,7 +49,8 @@ name = "Tailscale"
 name = "phone-sharing-ready"
 surface = "ui"
 route = "/"
-caption = "Inspect the private link at phone width — fictional local Tailscale demo; no remote connection tested"
+appearance = "dark"
+caption = "Inspect private sharing controls at phone width — fictional local Tailscale demo; no remote connection tested"
 timeout_ms = 30000
 
 [[scenes.steps]]
@@ -67,7 +69,6 @@ optional = true
 action = "click"
 role = "button"
 name_regex = "^Tailscale"
-within_role = "contentinfo"
 
 [[scenes.steps]]
 action = "wait"

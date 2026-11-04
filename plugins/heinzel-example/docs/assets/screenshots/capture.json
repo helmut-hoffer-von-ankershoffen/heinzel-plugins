@@ -1,13 +1,13 @@
 {
   "format": 1,
   "plugin": "heinzel-example",
-  "core_version": "0.9.1",
-  "inputs_sha256": "8b97f22b64b7150f4935c63380bb8efa77f6580f659517f007c45c959fc18c14",
+  "core_version": "0.9.15",
+  "inputs_sha256": "2fcda2cd774016fe0cb8a11c6efda2ed10fa3fc5f271a67398459933035ddd8e",
   "images": {
-    "docs/assets/screenshots/widget-and-status.png": "2c64bb11eaa95d6df6a9d497bd793d3deeda47184aab1e90fb0ae27cbbb4c44d",
-    "docs/assets/screenshots/inspector.png": "8467e7f7d7c479046c1cc78adf42c18feaebcb2b8c9127d150e485628b8bb502",
-    "docs/assets/screenshots/greeting-terminal.png": "e84b1526ed6df588a60eb2366e1c529a8436738fc86a8cf5f94b5a414ce1a576",
-    "docs/assets/screenshots/plugin-notice.png": "5423386f2c56d2f529a23093162492b91ff841f66eb4742d467ce5d7403e549f",
+    "docs/assets/screenshots/widget-and-status.png": "9a1f6f87904377a4eb58a74ed53eac796f39cb35571770d0a4bb67bbfacd0a9a",
+    "docs/assets/screenshots/inspector.png": "616d49cef140c9653f1fe93af0ea91ec6214b4ee1a228077d8103e3299e202b9",
+    "docs/assets/screenshots/greeting-terminal.png": "41d59c1a1d372fc665ae3ecf1298a32879b55f58865ef71c5cd9d48eda242bb1",
+    "docs/assets/screenshots/plugin-notice.png": "c7c4ad4a9a1ff7ae6772964493b98e48f67364be7892b8b9ba5e05de3327531d",
     "docs/assets/screenshots/greeting-cli.png": "375b8962cc5c7c30ab9c63248ea2ac468f325afc3bc53932dd70c9c5da5478fd",
     "docs/assets/screenshots/sample-json.png": "fcebdd36aba06edc9113cb2009094d20c07f83342ffec053e78d5e47d715e1f5"
   },
@@ -16,13 +16,13 @@
     "definition": {
       "format": 1,
       "reviewer": "Codex feature-story agent",
-      "source_sha256": "6c0069d3cc9a595269b9f57a0e507574fed3f79400bf8c6c1b2c4e94380e2c36",
+      "source_sha256": "6319b067c1b39aadd378efd03fc5d0be1e98e5931846509442faac228c156aae",
       "plan_sha256": "619f8beda68547c008f10a6b5864ea7386f0c8bb7fa34d79dac6edfd3e794a7c",
-      "story_sha256": "1155d1ba69f19a7df9ed3f6a18343888ac000096d9f725948dc164548b49c9c6"
+      "story_sha256": "009fde2a8ab34d5c9e1c7661d7319172324c03fc02ffbc71646c19914dfa1580"
     },
     "plugin": "heinzel-example",
-    "core_version": "0.9.1",
-    "inputs_sha256": "8b97f22b64b7150f4935c63380bb8efa77f6580f659517f007c45c959fc18c14",
+    "core_version": "0.9.15",
+    "inputs_sha256": "2fcda2cd774016fe0cb8a11c6efda2ed10fa3fc5f271a67398459933035ddd8e",
     "screenshots": [
       {
         "path": "docs/assets/screenshots/widget-and-status.png",
@@ -56,26 +56,26 @@
       }
     ],
     "images": {
-      "widget-and-status.png": "2c64bb11eaa95d6df6a9d497bd793d3deeda47184aab1e90fb0ae27cbbb4c44d",
-      "inspector.png": "8467e7f7d7c479046c1cc78adf42c18feaebcb2b8c9127d150e485628b8bb502",
-      "greeting-terminal.png": "e84b1526ed6df588a60eb2366e1c529a8436738fc86a8cf5f94b5a414ce1a576",
-      "plugin-notice.png": "5423386f2c56d2f529a23093162492b91ff841f66eb4742d467ce5d7403e549f",
+      "widget-and-status.png": "9a1f6f87904377a4eb58a74ed53eac796f39cb35571770d0a4bb67bbfacd0a9a",
+      "inspector.png": "616d49cef140c9653f1fe93af0ea91ec6214b4ee1a228077d8103e3299e202b9",
+      "greeting-terminal.png": "41d59c1a1d372fc665ae3ecf1298a32879b55f58865ef71c5cd9d48eda242bb1",
+      "plugin-notice.png": "c7c4ad4a9a1ff7ae6772964493b98e48f67364be7892b8b9ba5e05de3327531d",
       "greeting-cli.png": "375b8962cc5c7c30ab9c63248ea2ac468f325afc3bc53932dd70c9c5da5478fd",
       "sample-json.png": "fcebdd36aba06edc9113cb2009094d20c07f83342ffec053e78d5e47d715e1f5"
     },
     "transcripts": {
-      "widget-and-status.txt": "64cf7e21c62b442b760c2d5402f37eafa96bb184b4277afbae49e035a989b8dd",
-      "inspector.txt": "bef7a3e06573ae520aa4f700ba296deaa6c8635efb73e9e7e232ea248e03c6d8",
-      "greeting-terminal.txt": "e55df4196ae966d724212a21c14b826f12e9dc2f937b92744d31d2cd5d2c8de6",
-      "plugin-notice.txt": "ddfb6201a8270c3abf06f8e93ae713f9e7017e36274fbd59332d7db96f262985",
+      "widget-and-status.txt": "31b15070a5096f6db3f040e269b61273270ba976a6804558920fe696884aa765",
+      "inspector.txt": "2de5719d4115877ebde819fea0b21493f16925496f38cc39c4d1f4552c9e32f7",
+      "greeting-terminal.txt": "3f40bfb5e98dd21377bc6848593f57a1c6c7abdeb42b67795b0430e0101ca7b5",
+      "plugin-notice.txt": "56d12810af073ca3e66d30ee16fee36e0057a1a02b1ed061bb8c514305b8b3e4",
       "greeting-cli.txt": "0a315745bb1e963bf40b1ccfdc9a822532fa703f2c1b5013c8fe303b8cf0f59f",
       "sample-json.txt": "084c799cd551dd1d8d5c5f9a5d593b2e931f5e36122ee5c793c1d08a19839cc0"
     },
-    "bundle_sha256": "a8f8e90fb7bffe9825c7e0973a1e455a825b0b854aa39269aafa04a7d07ea04a"
+    "bundle_sha256": "e034d2c6eed692ef574b14284ec26aa828f1f39d1a992601c6ba93185c49cfb8"
   },
   "privacy_review": {
     "format": 1,
-    "bundle_sha256": "a8f8e90fb7bffe9825c7e0973a1e455a825b0b854aa39269aafa04a7d07ea04a",
+    "bundle_sha256": "e034d2c6eed692ef574b14284ec26aa828f1f39d1a992601c6ba93185c49cfb8",
     "reviewer": "Codex privacy agent",
     "decision": "approve",
     "checked_images": [

@@ -1,33 +1,33 @@
 {
   "format": 1,
   "plugin": "heinzel-atlassian",
-  "core_version": "0.9.1",
-  "inputs_sha256": "ad7d804b3c70cbd04dab8136351b6ea1f26abb5773c7a11294773284991502a0",
+  "core_version": "0.9.15",
+  "inputs_sha256": "8207b6149f87f053200f41e1d3f136f0d04befb57288ca6c248130f69e067c56",
   "images": {
-    "docs/assets/screenshots/jira-issues.png": "edcd834303bc9710eabd29aa4d36307a373c548bbc2c078ae1c728416e780ce3",
-    "docs/assets/screenshots/confluence-plan.png": "ad068ff0255ad82099ae0cc4315053bf257685c56c3e9b1430f42c3b09c2c282",
+    "docs/assets/screenshots/jira-issues.png": "43a10a540178e46c2f49991d292a18113ab896ecf51ef3cf35e63181f6af54ce",
+    "docs/assets/screenshots/confluence-plan.png": "513e7ddbff612073cb52903883249e59f55e64ea5ac61dd8c88ea546455079cb",
     "docs/assets/screenshots/issues-json.png": "474635006b6e7c0e82eed10f22d44338592fa3eb07cc1d3c7bb635bf050075b7",
     "docs/assets/screenshots/confluence-cli.png": "6ee48d63544e8aef45de102226a6af51904e5175304b473b65e49b1e6abef622",
-    "docs/assets/screenshots/workflow-context.png": "b38d9ec96278a9d1bd4cf764840cdcc40b9b49457a29a0bca6e04348fe3b558b",
-    "docs/assets/screenshots/jira-parameters.png": "2c280dd060390951cd7f5eb36c7e9c1e974f55dfffa8a9fbfe78a20f7f3b104b"
+    "docs/assets/screenshots/workflow-context.png": "e3f9fd94f131e9c949d0fc6664fcd602564d107cf96778558e25d2ba36bdabc2",
+    "docs/assets/screenshots/jira-parameters.png": "72b81bdb216c1446323e16b36341cf2bb009ece962115bd8b773cec4b5a6bf23"
   },
   "review_bundle": {
     "format": 1,
     "definition": {
       "format": 1,
       "reviewer": "Codex feature-story agent",
-      "source_sha256": "e789d316925f422a43f7b444fa0b22a4b3d4e58a3d73106ffef76bea8650b3d3",
-      "plan_sha256": "f59690101925633a3cce229c23e46e4178a013f5691e5c7d2e74b7a73120f75f",
-      "story_sha256": "d5d4778e66b8fbbf095f114fffdd0b27ec4ef59421073e8b33116048c4ac9f6f"
+      "source_sha256": "4f6baef68d19c22ad75e19bdb26b302bb0fa4b2ab8ae82c7d89ff17cba8a4bd3",
+      "plan_sha256": "ce3563e39a5ecabacdc1332209612e0c48cec0e1a25eab3a78af9dd2b79025f6",
+      "story_sha256": "b02acecccb820608cfe468197a004724bc5b49fe4df8caea4a7c328c6b2f67c0"
     },
     "plugin": "heinzel-atlassian",
-    "core_version": "0.9.1",
-    "inputs_sha256": "ad7d804b3c70cbd04dab8136351b6ea1f26abb5773c7a11294773284991502a0",
+    "core_version": "0.9.15",
+    "inputs_sha256": "8207b6149f87f053200f41e1d3f136f0d04befb57288ca6c248130f69e067c56",
     "screenshots": [
       {
         "path": "docs/assets/screenshots/jira-issues.png",
         "surface": "ui",
-        "caption": "Demo data: fictional Jira changes, owners and states in the app terminal, using the real adapter and a fixture-only requester."
+        "caption": "Demo data: fictional Jira issue records, owners and states in the app terminal, using the real adapter and a fixture-only requester."
       },
       {
         "path": "docs/assets/screenshots/confluence-plan.png",
@@ -37,7 +37,7 @@
       {
         "path": "docs/assets/screenshots/issues-json.png",
         "surface": "cli",
-        "caption": "Demo data: structured fictional Jira changes through the real adapter, using a fixture-only requester and local vendor replies."
+        "caption": "Demo data: structured fictional Jira issue records through the real adapter, using a fixture-only requester and local vendor replies."
       },
       {
         "path": "docs/assets/screenshots/confluence-cli.png",
@@ -52,30 +52,30 @@
       {
         "path": "docs/assets/screenshots/jira-parameters.png",
         "surface": "ui",
-        "caption": "Demo data: lowercase wid resolves to WID; the fixture requester returns structured Jira changes with --json in the app terminal."
+        "caption": "Demo data: lowercase wid resolves to WID; the fixture requester returns structured Jira issue records with --json in the app terminal."
       }
     ],
     "images": {
-      "jira-issues.png": "edcd834303bc9710eabd29aa4d36307a373c548bbc2c078ae1c728416e780ce3",
-      "confluence-plan.png": "ad068ff0255ad82099ae0cc4315053bf257685c56c3e9b1430f42c3b09c2c282",
+      "jira-issues.png": "43a10a540178e46c2f49991d292a18113ab896ecf51ef3cf35e63181f6af54ce",
+      "confluence-plan.png": "513e7ddbff612073cb52903883249e59f55e64ea5ac61dd8c88ea546455079cb",
       "issues-json.png": "474635006b6e7c0e82eed10f22d44338592fa3eb07cc1d3c7bb635bf050075b7",
       "confluence-cli.png": "6ee48d63544e8aef45de102226a6af51904e5175304b473b65e49b1e6abef622",
-      "workflow-context.png": "b38d9ec96278a9d1bd4cf764840cdcc40b9b49457a29a0bca6e04348fe3b558b",
-      "jira-parameters.png": "2c280dd060390951cd7f5eb36c7e9c1e974f55dfffa8a9fbfe78a20f7f3b104b"
+      "workflow-context.png": "e3f9fd94f131e9c949d0fc6664fcd602564d107cf96778558e25d2ba36bdabc2",
+      "jira-parameters.png": "72b81bdb216c1446323e16b36341cf2bb009ece962115bd8b773cec4b5a6bf23"
     },
     "transcripts": {
-      "jira-issues.txt": "a17bfab9a9a0978f59926685df1648eedc3171e3b26db0f92063a650fe9d1059",
-      "confluence-plan.txt": "798c34045b13e0dadfcbe15bad08a6e53d5b47692d5afb6c86072f268e94dfa8",
+      "jira-issues.txt": "de10d1024914a3fb934e15a9d5b1951fa0ec03f7d47ad7491d915c2150a812be",
+      "confluence-plan.txt": "9fed8c0d51e2de20f5714b46914a30b075468d2931bf667c3e1a0a65d50d36d0",
       "issues-json.txt": "6a377c231e0b39b0e7e90037a5637c0a49cc11ba5f3da74bfeb6ed4fec6d5ee9",
       "confluence-cli.txt": "dbac0428b2123fd6cfb248be30010051986995ee83bfa9e33b4b1a272541b710",
-      "workflow-context.txt": "d215aab387a1695e17b5a34e4667c65e0d76734e33f12eb4d3136bfea3a90b75",
-      "jira-parameters.txt": "4af63b654fbdcc82373ec5990f114a3036835a8db589faaedd909b7b02b9417c"
+      "workflow-context.txt": "fbea061d588470e21ef9c48c8144f8fd72f40cadc39f9960aae5dfba589f210b",
+      "jira-parameters.txt": "5b5ec4173b76983035fb0e6206a24cdf1d8f831dff284435672177e45495e838"
     },
-    "bundle_sha256": "64ae1fa3175118bcffecaeef30956f66e3ad5b0c7603e4850acfb2dcf33157a7"
+    "bundle_sha256": "42970f99dba6a65277f1b0687638536da54116bd8134ed956a7c9580e354eead"
   },
   "privacy_review": {
     "format": 1,
-    "bundle_sha256": "64ae1fa3175118bcffecaeef30956f66e3ad5b0c7603e4850acfb2dcf33157a7",
+    "bundle_sha256": "42970f99dba6a65277f1b0687638536da54116bd8134ed956a7c9580e354eead",
     "reviewer": "Codex privacy agent",
     "decision": "approve",
     "checked_images": [

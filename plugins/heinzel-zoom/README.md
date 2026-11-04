@@ -112,13 +112,13 @@ Development and release commands: [repository guide](../../README.md).
 <!-- screenshots:start -->
 ## Screenshots
 
-<img src="docs/assets/screenshots/meeting-decisions.png" alt="Fictional Weekly sync: a Thursday release decision and three named next steps, via the fixture-only requester and real Zoom parser." width="960">
+<img src="docs/assets/screenshots/meeting-decisions.png" alt="Fictional Weekly sync: a Thursday release decision and three named next steps, using the fixture-only requester." width="960">
 
-Fictional Weekly sync: a Thursday release decision and three named next steps, via the fixture-only requester and real Zoom parser.
+Fictional Weekly sync: a Thursday release decision and three named next steps, using the fixture-only requester.
 
-<img src="docs/assets/screenshots/recent-meetings.png" alt="Fictional October mailbox: find Weekly sync and Launch review through the fixture-only requester and real Zoom adapter." width="960">
+<img src="docs/assets/screenshots/recent-meetings.png" alt="Fictional October meeting list: find Weekly sync and Launch review using the fixture-only requester." width="960">
 
-Fictional October mailbox: find Weekly sync and Launch review through the fixture-only requester and real Zoom adapter.
+Fictional October meeting list: find Weekly sync and Launch review using the fixture-only requester.
 
 <img src="docs/assets/screenshots/launch-decisions.png" alt="Fictional Launch review: a ten-percent rollout decision and two named owners, using a second meeting argument in the native terminal." width="960">
 

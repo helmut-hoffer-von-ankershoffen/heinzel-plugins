@@ -1,27 +1,31 @@
-**Audience**
-People choosing a warm everyday workspace with light and dark appearances and optional background sound. This theme is already included in the standard Heinzelmännchen app.
+## Audience
 
-**Outcome**
-Compare the same useful workspace in cream, green and rust light colors, then forest and peach dark colors. Discover the three soundscapes and their CLI listings without starting playback. The existing five-scene plan already demonstrates these benefits and is preserved unchanged.
+Someone deciding whether the standard Heinzelmännchen appearance suits their everyday work and whether its optional soundscapes are useful to them.
 
-**Scenes**
-1. **A warm launch-review desk:** show the fictional Launch review contract in the applied light theme, with its configuration and run commands visible.
-2. **The same desk after dark:** retain the contract and viewport while applying the dark theme, making the palette comparison straightforward.
-3. **Choose the atmosphere:** show Claude FM, Die Heinzelmännchen and Hyper Focus in Appearance settings. Explain that sound starts only after Play; Die Heinzelmännchen pairs with this theme when Follow my theme is enabled.
-4. **Find the theme from the CLI:** capture the real theme-list result from the isolated demo profile.
-5. **Find the sound choices from the CLI:** capture the real sound-list result without playback. Do not fabricate rows or output.
+## Outcome
 
-**Fictional fixtures**
-Use only the existing `docs/screenshot_fixture.py` bootstrap during explicit capture. It supplies the local Launch review contract with fictional owners Mira, Jonas and Priya and three unchecked readiness tasks. No report has been generated. The contract is representative host-app content used to demonstrate this plugin’s appearance.
+Show the theme applied to a real working view in both appearances, then show the available soundscapes and how to discover both themes and sounds from the CLI. The plugin is included in the standard app; the gallery should not imply it must be installed separately.
 
-**Privacy pitfalls**
-Capture in the documented temporary profile without connected accounts or personal workspace data. Keep Play untouched: the soundscape definitions describe YouTube streams that load only after Play. Do not imply that a still image verifies playback, connectivity or audio quality.
+## Scenes
 
-**Acceptance criteria**
-- Both applied palettes show the same fictional contract with readable text and controls; the Launch review heading is present.
-- All three soundscape titles are visible, and playback remains stopped.
-- Both CLI scenes contain completed, actual list results from the demo profile.
-- Every caption explicitly identifies fictional content or the demo profile.
-- No generated-report, completed-task or successful-playback claim appears.
-- Static review confirms five unique lowercase scene names, supported fields and actions, captions under 180 characters, local fragment-free UI routes, and CLI argument arrays without shell syntax. The contract route is supported by the existing plan and bootstrap content.
-- Capture and runtime verification remain acceptance work; no code was executed to validate or capture the plan.
+1. **Warm light:** The fictional Launch review contract shows the light palette on a useful contract view, including its configuration and run commands.
+2. **Comfortable dark:** The same contract in dark appearance makes the palette comparison direct.
+3. **Optional soundscapes:** Appearance settings show Claude FM, Die Heinzelmännchen and Hyper Focus without starting playback.
+4. **Themes in the CLI:** List available themes in the demo profile and identify Heinzelmännchen.
+5. **Sounds in the CLI:** List the available soundscapes without starting playback.
+
+## Fictional fixtures
+
+The existing `docs/screenshot_fixture.py` creates an isolated Launch review contract with fictional owners and readiness checks. It explicitly says no report has been generated. Use the existing bootstrap and temporary demo profile; do not substitute real contracts or connected accounts.
+
+## Privacy pitfalls
+
+Keep personal names, paths, credentials, account details and real work out of captures. The soundscapes use YouTube; the source says nothing from YouTube loads until Play is pressed. Leave playback stopped and do not imply that a screenshot demonstrates audio playback.
+
+## Acceptance criteria
+
+- Both contract views visibly apply Heinzelmännchen, with light and dark appearances and the fictional Launch review heading visible.
+- The soundscape view shows all three named options without suggesting playback has started.
+- Both CLI captures show completed, useful list results from the demo profile.
+- Captions identify fictional or demo content and do not claim a report was generated.
+- Review the captures for legibility and accidental private data. The plan below preserves the existing scenes and was checked against the supplied format constraints by inspection; no capture or executable validation was run.

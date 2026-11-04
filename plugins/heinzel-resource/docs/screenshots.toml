@@ -4,9 +4,10 @@ browser_time = "2026-10-31T10:00:00Z"
 
 [[scenes]]
 name = "resources-pane"
+# The expanded panel shows raw load; scaled-load bars appear only in the footer.
 surface = "ui"
 route = "/"
-caption = "CPU, memory and scaled load in the expanded monitor — fictional demo workstation"
+caption = "Inspect fictional demo-workstation: CPU 36%, memory 62%, one-minute load 0.65 and 8 logical cores."
 
 [[scenes.steps]]
 action = "wait"
@@ -35,7 +36,7 @@ name_regex = "^Computer resources"
 name = "today-resources"
 surface = "ui"
 route = "/"
-caption = "A quick CPU summary on Today, with three compact footer meters — demonstration values"
+caption = "A quick CPU summary on Today, with the resource status control in the footer — demonstration values"
 
 [[scenes.steps]]
 action = "wait"
@@ -88,7 +89,6 @@ surface = "cli"
 caption = "The same fictional CPU, memory and raw load measurements in the CLI"
 command = ["resource"]
 
-# Native-terminal cases for the plugin's single operation.
 [[scenes]]
 name = "terminal-resources"
 surface = "ui"

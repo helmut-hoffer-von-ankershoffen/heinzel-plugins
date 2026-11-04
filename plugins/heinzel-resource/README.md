@@ -11,13 +11,13 @@ hz resource                # CPU, memory and load now; --json for agents
 <!-- screenshots:start -->
 ## Screenshots
 
-<img src="docs/assets/screenshots/resources-pane.png" alt="CPU, memory and scaled load in the expanded monitor — fictional demo workstation" width="960">
+<img src="docs/assets/screenshots/resources-pane.png" alt="Inspect fictional demo-workstation: CPU 36%, memory 62%, one-minute load 0.65 and 8 logical cores." width="960">
 
-CPU, memory and scaled load in the expanded monitor — fictional demo workstation
+Inspect fictional demo-workstation: CPU 36%, memory 62%, one-minute load 0.65 and 8 logical cores.
 
-<img src="docs/assets/screenshots/today-resources.png" alt="A quick CPU summary on Today, with three compact footer meters — demonstration values" width="960">
+<img src="docs/assets/screenshots/today-resources.png" alt="A quick CPU summary on Today, with the resource status control in the footer — demonstration values" width="960">
 
-A quick CPU summary on Today, with three compact footer meters — demonstration values
+A quick CPU summary on Today, with the resource status control in the footer — demonstration values
 
 <img src="docs/assets/screenshots/phone-resources.png" alt="Read CPU, memory and queued load on a phone — fictional demo workstation" width="960">
 

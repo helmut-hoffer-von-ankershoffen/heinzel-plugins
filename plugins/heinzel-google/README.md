@@ -172,40 +172,40 @@ Development and release commands: [repository guide](../../README.md).
 <!-- screenshots:start -->
 ## Screenshots
 
-<img src="docs/assets/screenshots/launch-files.png" alt="Recently changed launch files in the app terminal — fictional Workspace replies, real Google operation" width="960">
+<img src="docs/assets/screenshots/launch-files.png" alt="Find fictional launch files from the last three days in the app terminal; replies come from the local fixture." width="960">
 
-Recently changed launch files in the app terminal — fictional Workspace replies, real Google operation
+Find fictional launch files from the last three days in the app terminal; replies come from the local fixture.
 
-<img src="docs/assets/screenshots/launch-files-week.png" alt="Explore seven days without a name filter — real Google operation over the fixture&#x27;s same fictional files" width="960">
+<img src="docs/assets/screenshots/launch-files-week.png" alt="Try seven days without a name filter; the local fixture returns the same fictional files for both searches." width="960">
 
-Explore seven days without a name filter — real Google operation over the fixture&#x27;s same fictional files
+Try seven days without a name filter; the local fixture returns the same fictional files for both searches.
 
-<img src="docs/assets/screenshots/launch-plan.png" alt="Read a Google Doc as workflow-ready text — fixture-only requester and fictional plan" width="960">
+<img src="docs/assets/screenshots/launch-plan.png" alt="Read a fictional launch plan through the documents adapter using the fixture-only requester." width="960">
 
-Read a Google Doc as workflow-ready text — fixture-only requester and fictional plan
+Read a fictional launch plan through the documents adapter using the fixture-only requester.
 
-<img src="docs/assets/screenshots/launch-week.png" alt="The launch week&#x27;s meetings and attendees — fixture-only requester, real Calendar adapter over fictional events" width="960">
+<img src="docs/assets/screenshots/launch-week.png" alt="Review fictional launch meetings and attendees through the Calendar adapter and fixture-only requester." width="960">
 
-The launch week&#x27;s meetings and attendees — fixture-only requester, real Calendar adapter over fictional events
+Review fictional launch meetings and attendees through the Calendar adapter and fixture-only requester.
 
-<img src="docs/assets/screenshots/launch-inbox.png" alt="A focused launch-mail query — fixture-only requester, real Gmail adapter over fictional messages" width="960">
+<img src="docs/assets/screenshots/launch-inbox.png" alt="Scan fictional launch messages through the Gmail adapter and fixture-only requester." width="960">
 
-A focused launch-mail query — fixture-only requester, real Gmail adapter over fictional messages
+Scan fictional launch messages through the Gmail adapter and fixture-only requester.
 
 <details>
 <summary>Command line</summary>
 
-<img src="docs/assets/screenshots/launch-files-json.png" alt="Changed Docs and Sheets as structured data — real Google operation, fictional files" width="960">
+<img src="docs/assets/screenshots/launch-files-json.png" alt="Use the Google files operation&#x27;s structured output with fictional files from the local fixture." width="960">
 
-Changed Docs and Sheets as structured data — real Google operation, fictional files
+Use the Google files operation&#x27;s structured output with fictional files from the local fixture.
 
-<img src="docs/assets/screenshots/launch-metrics.png" alt="A Sheet becomes a readable table — fixture-only requester, real documents adapter and local replies" width="960">
+<img src="docs/assets/screenshots/launch-metrics.png" alt="Read fictional launch metrics as a table through the documents adapter and fixture-only requester." width="960">
 
-A Sheet becomes a readable table — fixture-only requester, real documents adapter and local replies
+Read fictional launch metrics as a table through the documents adapter and fixture-only requester.
 
-<img src="docs/assets/screenshots/mail-content.png" alt="Read the next actions in a launch message — fixture-only requester, real Gmail adapter and local replies" width="960">
+<img src="docs/assets/screenshots/mail-content.png" alt="Read a fictional launch message through the Gmail adapter and fixture-only requester." width="960">
 
-Read the next actions in a launch message — fixture-only requester, real Gmail adapter and local replies
+Read a fictional launch message through the Gmail adapter and fixture-only requester.
 
 </details>
 
