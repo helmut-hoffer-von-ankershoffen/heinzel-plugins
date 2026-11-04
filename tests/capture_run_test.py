@@ -663,3 +663,52 @@ def test_a_backend_that_never_prints_its_address_is_reported_and_reaped(harness)
     while backend_is_running(harness) and time.monotonic() < deadline:
         time.sleep(0.05)
     assert not backend_is_running(harness)
+
+
+def test_capture_uses_physical_owned_temp_paths_even_when_the_os_returns_an_alias(harness, tmp_path, monkeypatch):
+    physical = tmp_path / "physical-temp"
+    physical.mkdir(mode=0o700)
+    alias = tmp_path / "temporary-alias"
+    alias.symlink_to(physical, target_is_directory=True)
+    original_temporary = capture.tempfile.TemporaryDirectory
+    original_environment = capture.demo_environment
+    observed = []
+
+    class AliasedTemporary:
+        def __init__(self, **options):
+            self.owned = original_temporary(prefix=options["prefix"], dir=physical)
+
+        def __enter__(self):
+            return str(alias / Path(self.owned.__enter__()).name)
+
+        def __exit__(self, *args):
+            return self.owned.__exit__(*args)
+
+    def environment(home, interpreter):
+        assert home == home.resolve(strict=True)
+        assert home.parent == physical.resolve()
+        env = original_environment(home, interpreter)
+        for key in ("HOME", "HZ_CONFIG_HOME", "HZ_DATA_DIR", "HZ_CACHE_DIR", "HZ_STATE_DIR", "HZ_LOG_DIR"):
+            path = Path(env[key])
+            assert path.is_relative_to(home)
+            assert path == path.resolve()
+        observed.append(home)
+        return env
+
+    monkeypatch.setattr(capture.tempfile, "TemporaryDirectory", AliasedTemporary)
+    monkeypatch.setattr(capture, "demo_environment", environment)
+    assert record(harness, draft_only=True)["ok"] is True
+    assert len(observed) == 1
+    assert not observed[0].exists()
+    assert alias.is_symlink() and physical.is_dir()
+
+
+def test_environment_does_not_canonicalize_a_foreign_supplied_path(tmp_path):
+    physical = tmp_path / "foreign"
+    physical.mkdir()
+    alias = tmp_path / "foreign-alias"
+    alias.symlink_to(physical, target_is_directory=True)
+    env = capture.demo_environment(alias, tmp_path / "bin/python")
+    assert env["HOME"] == str(alias)
+    assert env["HZ_STATE_DIR"] == str(alias / "state_dir")
+    assert alias.is_symlink()

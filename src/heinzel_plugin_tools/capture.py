@@ -906,7 +906,7 @@ def capture(
     interpreter = prepared_python.absolute() if prepared_python else root / ".venv/bin/python"
     version = prepared_version(interpreter, metadata)
     with tempfile.TemporaryDirectory(prefix="hz-screenshots-") as temporary:
-        work = Path(temporary)
+        work = Path(temporary).resolve(strict=True)
         env = demo_environment(work, interpreter)
         if plan.get("bootstrap"):
             env["HZ_PLUGIN_CAPTURE_BOOTSTRAP"] = str(root / plan["bootstrap"])

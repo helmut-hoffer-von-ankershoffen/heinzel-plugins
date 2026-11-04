@@ -252,6 +252,10 @@ It has no plugin entry point and needs no additional PyPI publisher. Root `make 
 toolkit; use `NAME=<owner>` for plugin commands. `make preflight NAME=<owner>` includes that plugin's full checks,
 build, audit and installed acceptance. Toolkit tests do not run core's suite.
 
+Toolkit 0.3.3 canonicalizes only its newly created private capture temporary directory before deriving demo
+HOME and HZ paths. This avoids macOS temporary-directory aliases being rejected by physical, no-symlink approval
+storage checks. User-supplied paths and plugin storage security checks remain unchanged.
+
 Toolkit 0.3.2 runs the packaged PEP 723 capture and owning-setup scripts with `uv --no-project --no-cache`.
 The script stays in its authenticated toolkit installation. Its pinned script dependencies use a fresh temporary
 cache, independently of the consumer project; this avoids uv rejecting scripts installed inside its normal cache.
