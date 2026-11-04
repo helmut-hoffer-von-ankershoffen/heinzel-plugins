@@ -876,7 +876,17 @@ def capture(
     if not (root / PLAN).exists():
         write_default_plan(root)
     print(f"Preparing {name}; your normal app and credentials stay separate.", file=sys.stderr, flush=True)
-    prepare = ["uv", "run", "--quiet", "--script", str(Path(__file__).with_name("cli.py")), "setup", name]
+    prepare = [
+        "uv",
+        "run",
+        "--quiet",
+        "--no-project",
+        "--no-cache",
+        "--script",
+        str(Path(__file__).with_name("cli.py")),
+        "setup",
+        name,
+    ]
     if core:
         prepare += ["--core", core]
     if prepared_python is None:

@@ -252,6 +252,12 @@ It has no plugin entry point and needs no additional PyPI publisher. Root `make 
 toolkit; use `NAME=<owner>` for plugin commands. `make preflight NAME=<owner>` includes that plugin's full checks,
 build, audit and installed acceptance. Toolkit tests do not run core's suite.
 
+Toolkit 0.3.2 runs the packaged PEP 723 capture and owning-setup scripts with `uv --no-project --no-cache`.
+The script stays in its authenticated toolkit installation. Its pinned script dependencies use a fresh temporary
+cache, independently of the consumer project; this avoids uv rejecting scripts installed inside its normal cache.
+The owning `--project`, candidate `CORE`, dependency hashes, isolated demo profile and independent review gates are
+unchanged. Capture dependencies may download again on each invocation. Toolkit regressions pin uv 0.13.7.
+
 Toolkit 0.3.1 adds the [verified upstream implementation policy](docs/VERIFIED_VENDOR_POLICY.md), including
 exact upstream wheel provenance, closed namespace projection and owning-wheel verification. The toolkit has no
 core runtime dependency; plugins still declare and validate their own compatible core SDK and dependency locks.

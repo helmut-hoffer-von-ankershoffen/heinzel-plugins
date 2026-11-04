@@ -1,6 +1,6 @@
 [project]
 name = "heinzel-plugin-tools"
-version = "0.3.1"
+version = "0.3.2"
 requires-python = ">=3.12"
 description = "Independent development tools for Heinzelmännchen plugins."
 readme = "README.md"
@@ -25,7 +25,7 @@ packages = ["src/heinzel_plugin_tools"]
 include = ["src/heinzel_plugin_tools", "pyproject.toml", "README.md", "LICENSE"]
 
 [dependency-groups]
-tooling = ["pytest>=9.0.3,<10", "ruff==0.17.2", "packaging==26.3", "zizmor==1.31.1", "typos==1.51.1", "pyyaml==6.0.3", "commitizen>=4.10.0,<5", "prek>=0.2"]
+tooling = ["uv==0.13.7", "pytest>=9.0.3,<10", "ruff==0.17.2", "packaging==26.3", "zizmor==1.31.1", "typos==1.51.1", "pyyaml==6.0.3", "commitizen>=4.10.0,<5", "prek>=0.2"]
 audit = ["pip-audit==2.10.1", "pip-licenses==5.5.5"]
 
 [tool.ruff]

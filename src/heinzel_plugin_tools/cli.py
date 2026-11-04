@@ -759,6 +759,8 @@ def capture_plugin(
         "uv",
         "run",
         "--quiet",
+        "--no-project",
+        "--no-cache",
         "--script",
         str(TOOLING_SCRIPT.with_name("capture.py")),
         "--project",

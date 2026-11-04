@@ -557,6 +557,8 @@ def test_the_owning_setup_is_prepared_with_the_selected_core_before_capture(harn
     with pytest.raises(privacy.CaptureError):
         capture.capture(harness.owner, core="candidate.whl", headed=False, draft_only=True)
     assert seen[0][-4:] == ["setup", "heinzel-harbor", "--core", "candidate.whl"]
+    assert seen[0][:5] == ["uv", "run", "--quiet", "--no-project", "--no-cache"]
+    assert seen[0][5] == "--script"
 
 
 @pytest.mark.parametrize("name", ["--option-like", "-x", "has space", ""])
