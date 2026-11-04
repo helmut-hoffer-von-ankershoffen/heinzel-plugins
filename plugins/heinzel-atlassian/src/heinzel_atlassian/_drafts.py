@@ -183,11 +183,15 @@ def _duplicate_keys(documents: list[Any], project: str) -> list[str]:
     problem = "Jira duplicate search was malformed or ambiguous; inspect Jira before trying to create again."
     found: list[str] = []
     for document in documents:
-        rows = document.get("issues") if isinstance(document, dict) else document
+        rows: object = cast("dict[object, object]", document).get("issues") if isinstance(document, dict) else document
         if not isinstance(rows, list):
             raise HeinzelError(problem)
-        for row in rows:
-            key = _project_issue_key(row.get("key"), project) if isinstance(row, dict) else None
+        for row in cast("list[object]", rows):
+            key = (
+                _project_issue_key(cast("dict[object, object]", row).get("key"), project)
+                if isinstance(row, dict)
+                else None
+            )
             if key is None:
                 raise HeinzelError(problem)
             found.append(key)
