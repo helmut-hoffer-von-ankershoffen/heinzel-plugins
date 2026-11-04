@@ -736,10 +736,47 @@ def test_real_wheel_license_copies_require_own_metadata_declaration_and_exact_pi
     with zipfile.ZipFile(wheel) as archive:
         original = {name: archive.read(name) for name in archive.namelist()}
     metadata = "owner_package-1.0.0.dist-info/METADATA"
+    wheel_metadata = "owner_package-1.0.0.dist-info/WHEEL"
     copy = "owner_package-1.0.0.dist-info/licenses/" + source
     declaration = b"License-File: " + source.encode() + b"\n"
     assert original[copy] == (vendored / source).read_bytes()
     assert declaration in original[metadata]
+    generator = next(
+        line for line in original[wheel_metadata].splitlines(keepends=True) if line.startswith(b"Generator:")
+    )
+    metadata_version = next(
+        line for line in original[metadata].splitlines(keepends=True) if line.startswith(b"Metadata-Version:")
+    )
+    tag_lines = [line for line in original[wheel_metadata].splitlines(keepends=True) if line.startswith(b"Tag:")]
+    all_tags = b"".join(tag_lines)
+    identities = {
+        "duplicate-name": (metadata, b"Name: owner-package\n", b"Name: owner-package\nName: foreign-owner\n"),
+        "repeated-name": (metadata, b"Name: owner-package\n", b"Name: owner-package\nName: owner-package\n"),
+        "duplicate-version": (metadata, b"Version: 1.0.0\n", b"Version: 1.0.0\nVersion: 9.9\n"),
+        "duplicate-metadata-version": (
+            metadata,
+            metadata_version,
+            metadata_version + b"Metadata-Version: 1.0\n",
+        ),
+        "invalid-metadata-version": (metadata, metadata_version, b"Metadata-Version: invalid\n"),
+        "duplicate-wheel-version": (
+            wheel_metadata,
+            b"Wheel-Version: 1.0\n",
+            b"Wheel-Version: 1.0\nWheel-Version: 9.9\n",
+        ),
+        "invalid-wheel-version": (wheel_metadata, b"Wheel-Version: 1.0\n", b"Wheel-Version: 2.0\n"),
+        "duplicate-generator": (wheel_metadata, generator, generator + generator),
+        "missing-generator": (wheel_metadata, generator, b""),
+        "invalid-purelib": (wheel_metadata, b"Root-Is-Purelib: true\n", b"Root-Is-Purelib: maybe\n"),
+        "duplicate-purelib": (
+            wheel_metadata,
+            b"Root-Is-Purelib: true\n",
+            b"Root-Is-Purelib: true\nRoot-Is-Purelib: false\n",
+        ),
+        "missing-tag": (wheel_metadata, all_tags, b""),
+        "invalid-tag": (wheel_metadata, all_tags, b"Tag: garbage\n"),
+        "duplicate-tag": (wheel_metadata, all_tags, all_tags + tag_lines[0]),
+    }
     for mutation in [
         "tampered",
         "missing-declaration",
@@ -749,9 +786,37 @@ def test_real_wheel_license_copies_require_own_metadata_declaration_and_exact_pi
         "missing-metadata",
         "dangerous-path",
         "extra-vendor-metadata",
+        "foreign-authority",
+        "foreign-case-authority",
+        "case-import-namespace",
+        "nested-authority",
+        "missing-wheel",
+        "invalid-build",
+        "duplicate-build",
+        *identities,
     ]:
         altered = dict(original)
-        if mutation == "tampered":
+        if mutation in identities:
+            member, old, new = identities[mutation]
+            assert old in altered[member]
+            altered[member] = altered[member].replace(old, new)
+        elif mutation == "foreign-authority":
+            altered["foreign-9.9.dist-info/METADATA"] = b"Name: foreign\nVersion: 9.9\n"
+            altered["foreign-9.9.dist-info/WHEEL"] = original[wheel_metadata]
+        elif mutation == "foreign-case-authority":
+            altered["FOREIGN-9.9.DIST-INFO/METADATA"] = b"Name: foreign\nVersion: 9.9\n"
+            altered["FOREIGN-9.9.DIST-INFO/WHEEL"] = original[wheel_metadata]
+        elif mutation == "case-import-namespace":
+            altered["OWNER/_VENDOR/example_sdk/extra.py"] = b"unverified = True\n"
+        elif mutation == "nested-authority":
+            altered["owner_package-1.0.0.dist-info/owner_package-1.0.0.dist-info/WHEEL"] = original[wheel_metadata]
+        elif mutation == "missing-wheel":
+            del altered[wheel_metadata]
+        elif mutation == "invalid-build":
+            altered[wheel_metadata] = b"Build: invalid\n" + original[wheel_metadata]
+        elif mutation == "duplicate-build":
+            altered[wheel_metadata] = b"Build: 1\nBuild: 2\n" + original[wheel_metadata]
+        elif mutation == "tampered":
             altered[copy] = b"different license bytes"
         elif mutation == "missing-declaration":
             altered[metadata] = altered[metadata].replace(declaration, b"")
@@ -774,5 +839,8 @@ def test_real_wheel_license_copies_require_own_metadata_declaration_and_exact_pi
         with zipfile.ZipFile(candidate, "w") as archive:
             for name, data in altered.items():
                 archive.writestr(name, data)
-        with pytest.raises(ValueError):
+        try:
             vendor.verify_wheel(vendored, candidate)
+        except ValueError:
+            continue
+        pytest.fail(f"Accepted invalid wheel mutation: {mutation}")

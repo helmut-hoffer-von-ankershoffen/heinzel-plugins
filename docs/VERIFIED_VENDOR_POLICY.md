@@ -89,6 +89,13 @@ canonical `.dist-info/licenses/<source-target>` path only when its own matching
 METADATA declares that exact `License-File` and the copy equals the pinned source
 bytes. This allowance grants no additional import namespace or source exemption;
 undeclared, altered, missing or foreign metadata copies fail.
+The owning canonical dist-info directory must be the only metadata authority and
+contain both METADATA and WHEEL. Required identity and WHEEL singleton headers
+must appear exactly once, and the WHEEL version, pure-library flag, tags and
+optional build field must satisfy the supported format. Conflicting or repeated
+identity headers, nested/foreign authorities and an incomplete pair fail closed.
+Case aliases cannot introduce a second metadata authority or an unverified vendor
+namespace on a filesystem that ignores filename case.
 
 `quality_command(root, command, verified_inventory)` derives temporary settings:
 

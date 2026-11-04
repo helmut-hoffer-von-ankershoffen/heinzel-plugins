@@ -493,7 +493,7 @@ def verify_wheel(root: Path, wheel: Path) -> VerifiedInventory:
             relative(info.filename.rstrip("/"))
             archive_regular(info)
         if not inventory.files:
-            if any("_vendor" in PurePosixPath(name).parts for name in names):
+            if any("_vendor" in {part.casefold() for part in PurePosixPath(name).parts} for name in names):
                 raise ValueError("Built wheel vendor namespace requires a verified manifest")
             return inventory
         prefix = "/".join(next(iter(packed)).split("/")[:3]) + "/"
@@ -503,7 +503,7 @@ def verify_wheel(root: Path, wheel: Path) -> VerifiedInventory:
         license_copies = verified_license_copies(root, archive, inventory, expected)
         parent = prefix.rsplit("/", 2)[0] + "/"
         if any(
-            "_vendor" in PurePosixPath(name).parts
+            "_vendor" in {part.casefold() for part in PurePosixPath(name).parts}
             and not name.startswith(prefix)
             and name not in {parent, parent + "__init__.py"}
             and name not in license_copies
@@ -523,6 +523,13 @@ def verify_wheel(root: Path, wheel: Path) -> VerifiedInventory:
     return inventory
 
 
+def singleton_header(values: list[str], name: str) -> str:
+    """Require one nonempty, unfolded authority header; repeated values are ambiguous."""
+    if len(values) != 1 or not values[0].strip() or any(char in values[0] for char in "\r\n"):
+        raise ValueError(f"Built wheel requires one unambiguous {name} header")
+    return values[0]
+
+
 def verified_license_copies(
     root: Path, archive: zipfile.ZipFile, inventory: VerifiedInventory, expected: dict[str, bytes]
 ) -> set[str]:
@@ -532,14 +539,44 @@ def verified_license_copies(
     prefix = f"{canonicalize_name(name).replace('-', '_')}-{version}.dist-info/"
     names = set(archive.namelist())
     metadata_path = prefix + "METADATA"
-    possible = {prefix + "licenses/" + path for path in inventory.license_files}
-    if metadata_path not in names:
-        if possible & names:
-            raise ValueError("Built wheel license copy lacks owning canonical metadata")
-        return set()
+    wheel_path = prefix + "WHEEL"
+    authorities = {
+        part for path in names for part in PurePosixPath(path).parts if part.casefold().endswith(".dist-info")
+    }
+    if authorities != {prefix.rstrip("/")} or not {metadata_path, wheel_path} <= names:
+        raise ValueError("Built wheel license copy requires one canonical METADATA/WHEEL authority")
+    if any(part.casefold().endswith(".dist-info") for path in names for part in PurePosixPath(path).parts[1:]):
+        raise ValueError("Built wheel contains a nested dist-info authority")
     metadata = BytesParser().parsebytes(archive.read(metadata_path))
-    if canonicalize_name(metadata.get("Name", "")) != canonicalize_name(name) or metadata["Version"] != version:
+    metadata_version = singleton_header(metadata.get_all("Metadata-Version", []), "Metadata-Version")
+    actual_name = singleton_header(metadata.get_all("Name", []), "Name")
+    actual_version = singleton_header(metadata.get_all("Version", []), "Version")
+    if (
+        not re.fullmatch(r"[12]\.[0-9]+", metadata_version)
+        or canonicalize_name(actual_name) != canonicalize_name(name)
+        or actual_version != version
+    ):
         raise ValueError("Built wheel license metadata identity mismatch")
+    wheel_metadata = BytesParser().parsebytes(archive.read(wheel_path))
+    wheel_version = singleton_header(wheel_metadata.get_all("Wheel-Version", []), "Wheel-Version")
+    singleton_header(wheel_metadata.get_all("Generator", []), "Generator")
+    pure = singleton_header(wheel_metadata.get_all("Root-Is-Purelib", []), "Root-Is-Purelib")
+    tags = wheel_metadata.get_all("Tag", [])
+    tag_pattern = (
+        r"[a-zA-Z0-9_]+(?:\.[a-zA-Z0-9_]+)*-"
+        r"[a-zA-Z0-9_]+(?:\.[a-zA-Z0-9_]+)*-[a-zA-Z0-9_]+(?:\.[a-zA-Z0-9_]+)*"
+    )
+    if (
+        wheel_version != "1.0"
+        or pure not in {"true", "false"}
+        or not tags
+        or len(tags) != len(set(tags))
+        or any(not re.fullmatch(tag_pattern, tag) for tag in tags)
+    ):
+        raise ValueError("Built wheel has invalid WHEEL authority fields")
+    build = wheel_metadata.get_all("Build", [])
+    if build and not re.fullmatch(r"[0-9][a-zA-Z0-9_.]*", singleton_header(build, "Build")):
+        raise ValueError("Built wheel has an invalid Build header")
     declared = {relative(path) for path in metadata.get_all("License-File", [])}
     verified = set()
     for path in inventory.license_files:
