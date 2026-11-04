@@ -28,6 +28,7 @@ for argument in "$@"; do
     exec sleep 120
   fi
 done
+exec "$(dirname "$0")/hz" "$@"
 """
 HZ = '#!/bin/sh\necho "Hello, Mira!"\n'
 
@@ -712,3 +713,83 @@ def test_environment_does_not_canonicalize_a_foreign_supplied_path(tmp_path):
     assert env["HOME"] == str(alias)
     assert env["HZ_STATE_DIR"] == str(alias / "state_dir")
     assert alias.is_symlink()
+
+
+def test_normal_capture_imports_leave_owned_vendor_source_inventory_unchanged(harness, tmp_path, monkeypatch):
+    vendor = harness.owner / "src/fictional_vendor"
+    vendor.mkdir()
+    (vendor / "__init__.py").write_text("VALUE = 'Fictional harbor'\n")
+    before = {path.relative_to(vendor): path.read_bytes() for path in vendor.rglob("*") if path.is_file()}
+    audit = tmp_path / "capture-child-audit.jsonl"
+    bootstrap = harness.owner / "docs/fixture.py"
+    bootstrap.parent.mkdir(exist_ok=True)
+    bootstrap.write_text(
+        "import json,sys,time\nfrom pathlib import Path\n"
+        f"sys.path.insert(0, {str(vendor.parent)!r})\n"
+        "import fictional_vendor\n"
+        f"audit = Path({str(audit)!r})\n"
+        "with audit.open('a') as stream:\n"
+        " stream.write(json.dumps({'args':sys.argv[1:], 'isolated':sys.flags.isolated, "
+        "'no_bytecode':sys.dont_write_bytecode}) + '\\n')\n"
+        "if 'ui' in sys.argv:\n"
+        " print('Serving on http://127.0.0.1:8123/#token=demo_session_token', flush=True)\n"
+        " time.sleep(120)\n"
+        "else:\n print(fictional_vendor.VALUE)\n"
+    )
+    plan = harness.owner / capture.PLAN
+    capture.write_default_plan(harness.owner)
+    plan.write_text(plan.read_text().replace("format = 1", 'format = 1\nbootstrap = "docs/fixture.py"', 1))
+    harness.interpreter = Path(sys.executable)
+    monkeypatch.setattr(capture, "prepared_version", lambda *_args: "0.9.16")
+    original_environment = capture.demo_environment
+    environment = {}
+
+    def demo(home, interpreter):
+        environment.update(original_environment(home, interpreter))
+        return environment
+
+    monkeypatch.setattr(capture, "demo_environment", demo)
+    original_page = FakePage.__init__
+
+    def page(self, browser):
+        original_page(self, browser)
+
+        def terminal(command):
+            assert command == "hz tides --help; printf '\\033]0;Demo complete\\007'"
+            executable = Path(environment["PATH"].split(os.pathsep)[0]) / "hz"
+            subprocess.run(  # noqa: S603 - only the test-owned capture wrapper and fixed fictional command
+                [str(executable), "tides", "--help"], env=environment, check=True, capture_output=True, timeout=10
+            )
+
+        self.keyboard.type = terminal
+
+    monkeypatch.setattr(FakePage, "__init__", page)
+    assert record(harness, draft_only=True)["ok"] is True
+    children = [json.loads(line) for line in audit.read_text().splitlines()]
+    assert len(children) == 3  # backend, native terminal command, CLI scene
+    assert all(child["isolated"] == 1 and child["no_bytecode"] for child in children)
+    assert {tuple(child["args"]) for child in children} == {("ui", "--no-browser", "--port", "0"), ("tides", "--help")}
+    assert {path.relative_to(vendor): path.read_bytes() for path in vendor.rglob("*") if path.is_file()} == before
+    assert not list(vendor.rglob("__pycache__"))
+
+
+def test_installed_cli_capture_uses_owning_isolated_python_without_writing_bytecode(tmp_path):
+    vendor = tmp_path / "owned_vendor"
+    vendor.mkdir()
+    (vendor / "__init__.py").write_text("VALUE = 'Fictional result'\n")
+    binary = tmp_path / "bin"
+    binary.mkdir()
+    interpreter = binary / "python"
+    interpreter.symlink_to(sys.executable)
+    (binary / "hz").write_text(
+        "import sys\n"
+        f"sys.path.insert(0, {str(tmp_path)!r})\n"
+        "import owned_vendor\n"
+        "assert sys.flags.isolated and sys.dont_write_bytecode\n"
+        "assert sys.argv[1:] == ['fictional', '--json']\n"
+        "print(owned_vendor.VALUE)\n"
+    )
+    before = sorted(path.relative_to(vendor) for path in vendor.rglob("*"))
+    env = capture.demo_environment(tmp_path / "demo", interpreter)
+    assert capture.hz(interpreter, ["fictional", "--json"], env, tmp_path) == "Fictional result\n"
+    assert sorted(path.relative_to(vendor) for path in vendor.rglob("*")) == before

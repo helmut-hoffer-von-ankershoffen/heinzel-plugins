@@ -506,9 +506,9 @@ def hz(interpreter: Path, args: list[str], env: dict, cwd: Path) -> str:
     """Run the reviewed scene's hz argument list without a shell."""
     args = args[1:] if args[:1] == ["hz"] else args
     command = (
-        [str(interpreter), "-I", env["HZ_PLUGIN_CAPTURE_BOOTSTRAP"], *args]
+        [str(interpreter), "-I", "-B", env["HZ_PLUGIN_CAPTURE_BOOTSTRAP"], *args]
         if env.get("HZ_PLUGIN_CAPTURE_BOOTSTRAP")
-        else [str(interpreter.parent / "hz"), *args]
+        else [str(interpreter), "-I", "-B", str(interpreter.parent / "hz"), *args]
     )
     result = subprocess.run(command, cwd=cwd, env=env, capture_output=True, text=True, timeout=60)
     if result.returncode:
@@ -521,9 +521,9 @@ def hz(interpreter: Path, args: list[str], env: dict, cwd: Path) -> str:
 def backend(interpreter: Path, env: dict, home: Path) -> tuple[subprocess.Popen, str]:
     """Start the owning installed app and keep its authentication token only in memory."""
     prefix = (
-        [str(interpreter), "-I", "-u", env["HZ_PLUGIN_CAPTURE_BOOTSTRAP"]]
+        [str(interpreter), "-I", "-B", "-u", env["HZ_PLUGIN_CAPTURE_BOOTSTRAP"]]
         if env.get("HZ_PLUGIN_CAPTURE_BOOTSTRAP")
-        else [str(interpreter), "-I", "-u", "-m", "heinzel"]
+        else [str(interpreter), "-I", "-B", "-u", "-m", "heinzel"]
     )
     process = subprocess.Popen(
         [*prefix, "ui", "--no-browser", "--port", "0"],
@@ -835,6 +835,7 @@ def prepared_version(interpreter: Path, metadata: dict) -> str:
         [
             str(interpreter),
             "-I",
+            "-B",
             "-c",
             script,
             metadata["project"]["name"],
@@ -913,9 +914,9 @@ def capture(
         terminal_bin = work / "bin"
         terminal_bin.mkdir()
         prefix = (
-            [str(interpreter), "-I", env["HZ_PLUGIN_CAPTURE_BOOTSTRAP"]]
+            [str(interpreter), "-I", "-B", env["HZ_PLUGIN_CAPTURE_BOOTSTRAP"]]
             if env.get("HZ_PLUGIN_CAPTURE_BOOTSTRAP")
-            else [str(interpreter.parent / "hz")]
+            else [str(interpreter), "-I", "-B", str(interpreter.parent / "hz")]
         )
         (terminal_bin / "hz").write_text("#!/bin/sh\nexec " + shlex.join(prefix) + ' "$@"\n')
         (terminal_bin / "hz").chmod(0o755)
