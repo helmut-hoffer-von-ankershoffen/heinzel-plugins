@@ -1,29 +1,29 @@
 {
   "format": 1,
   "plugin": "heinzel-clock",
-  "core_version": "0.9.1",
-  "inputs_sha256": "61c97541d25241639373927189bfd47d658e373b3deb69ec89dda58e64b46db1",
+  "core_version": "0.9.15",
+  "inputs_sha256": "db0f421dea2c0122a8f10e14f6bf893ed2571c0ea985934887cb485ec319e0bc",
   "images": {
-    "docs/assets/screenshots/world-clock.png": "f11dabd46d8d870929dfe114e0607d291415a10ca54e1fe2745e7c53da0bc0da",
-    "docs/assets/screenshots/team-overview.png": "3c76ff8f1baa72d116ff52d81ba6cb0a36e6bac8ab2b7b0747f7ac866de5fb62",
-    "docs/assets/screenshots/footer-detail.png": "f07af6d9c12420d9a596bba5dfe58cca06bafa62091687e371615171256a98e1",
-    "docs/assets/screenshots/phone-world-clock.png": "37398454a1bf478242de7147e25c8990d2c2d8d3ad275e2dba085fb241d02677",
+    "docs/assets/screenshots/world-clock.png": "9cf5caf68fdd11c3dacda7d268e6bf8d374a76b7000c3906aaf92fe8084e558a",
+    "docs/assets/screenshots/team-overview.png": "fc78d24ac546ed236600834472dd2cbf08fb2bab981fa9f3975b6fa7e60f8ddc",
+    "docs/assets/screenshots/footer-detail.png": "6cde48b608701d41646efc2cf423e7853baaae0632612801252da842039f28fb",
+    "docs/assets/screenshots/phone-world-clock.png": "c212c3d204e72c56625620c916365f9658646d44f5e687ea664cb5b1ffa21acc",
     "docs/assets/screenshots/cli-times.png": "6b5424327b872c1494ba191a4c697b4bdde5f9ed461cc25150b14e5845205f52",
-    "docs/assets/screenshots/terminal-current.png": "0e10b8715f9fc4a6723fff8759a9771923b2ab662427bed152cf43ecd9bcaa93",
-    "docs/assets/screenshots/terminal-overlap.png": "fc334a24261f1a8748a34eb8b7d0a661aa22d461d72026f94ea87a63977f6d5b"
+    "docs/assets/screenshots/terminal-current.png": "f507febd21ee027588331c4c553bc176c2d1a387e2f9c0c99aec08fb33f9d2b1",
+    "docs/assets/screenshots/terminal-overlap.png": "ebfe7299ecf527dafa98bb6c71d48a5be41313163a78a525142865ff2e411564"
   },
   "review_bundle": {
     "format": 1,
     "definition": {
       "format": 1,
       "reviewer": "Codex feature-story agent",
-      "source_sha256": "04a9866dd0125c11c80be19aece65a2e6c995d742582212a972a47f75387f85f",
+      "source_sha256": "9332fb8aac4c4b88aa9600e722e2789fd1692e9d1a399b0a9353299dc043d374",
       "plan_sha256": "27d94c2ba408739014e81f097c1aeb8541273f634dbfacf023d62a0e48c5acfe",
-      "story_sha256": "cef70e88ab6f5eb38f3da1b5c79829960df79b16a3f742ecc964485e0b404606"
+      "story_sha256": "e8a119c1d1e0d3d2194e4fac4fc6ff436a9ab09f6c5ca14f53486369cf09d390"
     },
     "plugin": "heinzel-clock",
-    "core_version": "0.9.1",
-    "inputs_sha256": "61c97541d25241639373927189bfd47d658e373b3deb69ec89dda58e64b46db1",
+    "core_version": "0.9.15",
+    "inputs_sha256": "db0f421dea2c0122a8f10e14f6bf893ed2571c0ea985934887cb485ec319e0bc",
     "screenshots": [
       {
         "path": "docs/assets/screenshots/world-clock.png",
@@ -62,28 +62,28 @@
       }
     ],
     "images": {
-      "world-clock.png": "f11dabd46d8d870929dfe114e0607d291415a10ca54e1fe2745e7c53da0bc0da",
-      "team-overview.png": "3c76ff8f1baa72d116ff52d81ba6cb0a36e6bac8ab2b7b0747f7ac866de5fb62",
-      "footer-detail.png": "f07af6d9c12420d9a596bba5dfe58cca06bafa62091687e371615171256a98e1",
-      "phone-world-clock.png": "37398454a1bf478242de7147e25c8990d2c2d8d3ad275e2dba085fb241d02677",
+      "world-clock.png": "9cf5caf68fdd11c3dacda7d268e6bf8d374a76b7000c3906aaf92fe8084e558a",
+      "team-overview.png": "fc78d24ac546ed236600834472dd2cbf08fb2bab981fa9f3975b6fa7e60f8ddc",
+      "footer-detail.png": "6cde48b608701d41646efc2cf423e7853baaae0632612801252da842039f28fb",
+      "phone-world-clock.png": "c212c3d204e72c56625620c916365f9658646d44f5e687ea664cb5b1ffa21acc",
       "cli-times.png": "6b5424327b872c1494ba191a4c697b4bdde5f9ed461cc25150b14e5845205f52",
-      "terminal-current.png": "0e10b8715f9fc4a6723fff8759a9771923b2ab662427bed152cf43ecd9bcaa93",
-      "terminal-overlap.png": "fc334a24261f1a8748a34eb8b7d0a661aa22d461d72026f94ea87a63977f6d5b"
+      "terminal-current.png": "f507febd21ee027588331c4c553bc176c2d1a387e2f9c0c99aec08fb33f9d2b1",
+      "terminal-overlap.png": "ebfe7299ecf527dafa98bb6c71d48a5be41313163a78a525142865ff2e411564"
     },
     "transcripts": {
-      "world-clock.txt": "862a7012babe628e21c45b546e7f7a0374f8ff6644232edf95ae5abb6f0c4e55",
-      "team-overview.txt": "c67634e355df9bbbeb25abbfc917206cbe2a7d0d290b480654964bca6a4f5142",
-      "footer-detail.txt": "6e1b48d04e354756e6dfdf9f86bd776aa277cf13befaca26d1e457a9a7f37354",
-      "phone-world-clock.txt": "a240ac5fc019cb378d080c176c18b9a8300de017b9ad9fac5709eaf0f3317abd",
+      "world-clock.txt": "06822d6b0f5d65c7272d2754314028a9aa3dc58f19471bf937604c376b11744b",
+      "team-overview.txt": "3a26477023687da55ffae0a975bc453e70a331933c1c76ed6bf3ef6e8097e142",
+      "footer-detail.txt": "38a6df152e2774a6de0a961055d9a13ce0c913665f47be61164dd79f82d51ce1",
+      "phone-world-clock.txt": "0bdd5f50b0368d881409863f83c70c33d9b5099d8ab71317f1b66da9ab5767d6",
       "cli-times.txt": "05f1fa56e8a12d26bad2cf2635575d237d9ace564a919e04e76e0b75ed699843",
-      "terminal-current.txt": "8a6ee02555d60ac8e2c87149ee79f83e4879ac2fba8188f20106de76219797b2",
-      "terminal-overlap.txt": "0039624b86e8af648ff25291aa39fd326eb3ea427524804b94dfe0c27eb0ad9a"
+      "terminal-current.txt": "7ab17ecf443464cb8d12c0a63456e9b2a91a2cfd96383712e002831458ef5e84",
+      "terminal-overlap.txt": "1f38c27310135a4b21848fe6a014e1aa030e284672ff67147564993f9e5c893f"
     },
-    "bundle_sha256": "e0d2fd1558f2ceefdf203baad3fbf320ae960e91c1d200c58e893f64ad099f17"
+    "bundle_sha256": "1cd8d57f69c7fee975494db10e62644453fee3ef80b765b3ffb10750011eedee"
   },
   "privacy_review": {
     "format": 1,
-    "bundle_sha256": "e0d2fd1558f2ceefdf203baad3fbf320ae960e91c1d200c58e893f64ad099f17",
+    "bundle_sha256": "1cd8d57f69c7fee975494db10e62644453fee3ef80b765b3ffb10750011eedee",
     "reviewer": "Codex privacy agent",
     "decision": "approve",
     "checked_images": [

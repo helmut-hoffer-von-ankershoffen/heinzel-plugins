@@ -1,36 +1,34 @@
 ## Audience
 
-Distributed teams deciding whether World Clock belongs in their Heinzelmännchen workspace. The README says it is included in the standard app.
+A distributed team deciding whether World Clock will make it easier to see colleagues’ local times and working hours without leaving Heinzelmännchen. The plugin is included in the standard app.
 
 ## Outcome
 
-Answer a small, useful question: “When do our three cities overlap?” See configured working hours beside Today, inspect the footer clock, and preview an hour ahead in the native terminal. Working hours indicate configured schedules, not detected attendance.
+A viewer can see the team’s current coverage, inspect individual workday countdowns, and compare a future moment using the command line.
 
 ## Scenes
 
-Preserve the existing five scenes and append two terminal cases to cover the single clock operation:
-
-1. **world-clock** — The globe and city clocks explain the fictional team's current overlap without leaving Today. Daylight is approximate; markers represent time zones.
-2. **team-overview** — Show the Today metric, sidebar ticker and primary footer clock together: useful context while doing other work.
-3. **footer-detail** — Expand the compact clock to inspect all three zones and Berlin's remaining workday.
-4. **phone-world-clock** — Keep the existing 390 × 844 view to demonstrate the globe and readable city list on a narrow screen.
-5. **cli-times** — Preserve the standalone CLI table for the same fixed demonstration moment.
-6. **terminal-current** — Run the clock operation in the app terminal at 15:30 UTC: Berlin and New York are within working hours; Los Angeles starts in 30 minutes.
-7. **terminal-overlap** — Query 16:30 UTC with the same operation. All three zones are now within their configured hours. This previews another moment; it does not advance the app clock.
+1. **World clock:** Show the globe and three local clocks alongside Today’s 2/3 working-hours metric.
+2. **Team overview:** Show the Today metric, sidebar ticker, and primary footer clock in their everyday context.
+3. **Footer detail:** Open the primary clock to inspect all configured zones and their countdowns.
+4. **Phone world clock:** Show the same globe and team clocks at a phone viewport.
+5. **CLI times:** Show the table of zones, local times, working hours, and working status.
+6. **Terminal current:** Run the operation in the app terminal at 15:30 UTC, when two zones are working.
+7. **Terminal overlap:** Preview 16:30 UTC in the terminal, when all three zones are working, while the app clock remains fixed at 15:30 UTC.
 
 ## Fictional fixtures
 
-Use only the existing `docs/screenshot_fixture.py`, unchanged, during explicit capture in the documented temporary profile without connected accounts. It configures Europe/Berlin, America/New_York and America/Los_Angeles with 09–18 working hours, Berlin first, and enables the sidebar/footer contributions. It fixes the source clock at `2026-10-26T15:30:00Z`; `browser_time` fixes the browser to match. No fixture files or product screens are invented.
+Use the existing `docs/screenshot_fixture.py` bootstrap and the fixed Monday, 26 October 2026 at 15:30 UTC. The fictional team uses Berlin, New York, and Los Angeles, each with local working hours of 09:00–18:00. Berlin is primary. At 15:30 UTC, Berlin and New York are working and Los Angeles starts in 30 minutes; at 16:30 UTC, all three are within working hours.
 
 ## Privacy pitfalls
 
-Configured cities and hours can reveal team routines. Keep the fictional profile and inspect Today, chat, notifications and terminal prompts for personal information before publishing. The bootstrap sets clock data and contributions; it is not a general redaction tool. Do not imply person tracking, actual availability or precise astronomical daylight. Footer badges and work-state icons depend on host support; older hosts retain the primary designation as text.
+Capture only in the temporary fictional profile described by the screenshot documentation. Check the whole app frame and terminal for real account names, messages, project data, machine paths, credentials, and other personal information before sharing. The fixture configures clock data and contributions; it does not by itself prove that every surrounding app surface is free of private data.
 
 ## Acceptance criteria
 
-- Seven scenes preserve the existing useful views and CLI capture, adding two parameter cases in the native terminal.
-- At the fixed moment, clocks read approximately 16:30 in Berlin, 11:30 in New York and 08:30 in Los Angeles; Today shows 2/3. Berlin's footer detail says “Ends in 1h 30m”.
-- The 16:30 UTC terminal query returns 17:30, 12:30 and 09:30 respectively, with all three Working values set to yes. The app remains frozen at its original moment.
-- Desktop and phone captures show legible clocks and workday information. Globe captures wait for WebGL; the footer crop includes every configured zone.
-- Every caption identifies demonstration data or time. No screenshot claims attendance or displays private host data.
-- Manual static validation checks TOML structure, permitted fields/actions, seven unique lowercase names, captions under 180 characters, local routes, argument arrays and existing fixture references. No parser, imports, bootstrap, application, tests, network calls or captures were run; runtime capture validation remains outstanding.
+- The declared plugin route opens the real World Clock panel; the globe renders and the three demo zones are legible.
+- Today shows 2/3 at the fixed moment, and the footer detail shows the configured zones and a Berlin countdown.
+- The phone capture remains readable at 390 × 844.
+- The CLI result shows all three zones, their local times, 09–18 working hours, and working status. The two native-terminal cases visibly demonstrate the change from two working zones to three.
+- Captions identify the data or time as demonstration material. Inspect the resulting captures for privacy and visual accuracy.
+- The plan has been checked against the supplied format and source declarations by inspection; capture and runtime behavior have not been executed or verified.
