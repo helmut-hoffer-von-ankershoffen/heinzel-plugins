@@ -48,12 +48,11 @@ def main() -> None:
     allowlist = Path(".license-allowlist")
     if not allowlist.is_file():
         allowlist = Path(__file__).with_name("defaults") / "license-allowlist"
-    allowed = ";".join(
+    allowed_expressions = [
         line.strip() for line in allowlist.read_text().splitlines() if line.strip() and not line.startswith("#")
-    )
-    if vendored.files and not any(
-        license_name and license_name in vendored.license_expression for license_name in allowed.split(";")
-    ):
+    ]
+    allowed = ";".join(allowed_expressions)
+    if vendored.files and vendored.license_expression not in allowed_expressions:
         raise ValueError("Vendored upstream license is outside the owning allowlist")
     subprocess.run(
         [

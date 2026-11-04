@@ -102,7 +102,8 @@ namespace on a filesystem that ignores filename case.
 Both original and built archives reject path collisions after Unicode canonical
 normalization and case folding, including METADATA/WHEEL basename aliases.
 
-`quality_command(root, command, verified_inventory)` derives temporary settings:
+`quality_command(root, command, verified_inventory)` derives temporary settings. These are intentional, narrow
+diagnostic and coverage policy exceptions for verified upstream files:
 
 * Ruff and spelling omit the exact verified files only.
 * Mypy suppresses errors for exact verified modules and omits those exact files
@@ -126,8 +127,10 @@ The ordinary dependency license/vulnerability audit still runs. In addition,
 audit reads the successfully verified manifest: its exact upstream version is
 always sent to vulnerability auditing, even if the original distribution is
 absent or another version is installed. Its upstream license must satisfy the
-same owning license allowlist. The audit prints the upstream version, license
-and complete file inventory. Ordinary security and secret scanners retain the
+same owning license allowlist through an exact, case-sensitive whole-expression match. A compound `AND` or `OR`
+expression needs its own explicitly reviewed entry; an allowed component or substring does not approve it.
+The installed dependency classifier audit retains its existing partial-match behavior. The audit prints the
+upstream version, license and complete file inventory. Ordinary security and secret scanners retain the
 source; there is no vendor security-scanning exclusion.
 
 Keeping the original dependency installed is permitted and its lock must match
