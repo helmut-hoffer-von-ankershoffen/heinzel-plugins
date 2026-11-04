@@ -50,7 +50,7 @@ an answer that names another site (an issue's `self`, a page's `_links.base`) is
 and the setting to change. **After a browser login the check can't work**: answers come through Atlassian's gateway
 (`api.atlassian.com/ex/<product>/<cloud id>`), name no site, and are taken as they are, so keep acli on the site you
 configured (`acli jira auth switch`, `acli confluence auth switch`), or links point at the wrong site. Matching the
-cloud id would need a request of the plugin's own; doctor says so. Optionally,
+cloud id would need a request of the plugin's own; doctor says so. The configured site is not a binding to an account identity; acli chooses the signed-in account. Optionally,
 `atlassian.timeout` sets the seconds each acli command may take (default 60), and `atlassian.acli` the program (a name
 looked up on absolute `PATH` entries, or an absolute path; default `acli`). A project `hz.toml` can set none of the
 three.
@@ -162,19 +162,23 @@ carries `arguments_sha256`, `link` and `approval_text`, so a host can post it as
 bind a reply to the exact arguments it will run. The plugin imports no channel and approves nothing: a reply is a claim
 the host verifies. Applying it currently requires the person to run the CLI command. The released core has no generic approval contract for private plugin operations, so these writes are absent from chat, MCP, API and web heads. A scoped private API bearer authenticates access; it does not approve a Jira change.
 
-Every reason in `watch` comes from dates, ids and status categories, never from ticket text. A write is never retried:
-a create labels the work item `hz-<digest>`, so the same approved create run twice finds the first; an update or a
-comment refuses if the work item changed after the draft saw it (draft again and approve what you then see), and a
-comment that already got through is not posted twice. Rate limits, a signed-out acli, a missing work item, a work item
-type the project does not have (the message lists the ones it has), missing fields and permission refusals each say
-what happened and whether anything changed.
+Every reason in `watch` comes from dates, ids and status categories, never from ticket text. Writes are not
+automatically retried. A create searches for the `hz-<digest>` label first and accepts only a known empty result or
+one valid matching key in the requested project. Malformed or ambiguous results stop the operation. This hash search
+reduces accidental duplicates; it is not an exactly-once guarantee, and concurrent calls can both create an item.
+An update or comment compares the latest timestamp read with the draft's `seen` time. This detects observed changes,
+but is not an atomic compare-and-set: Jira can change between the read and the write. A matching existing comment
+can suppress a repeat; its presence does not prove this invocation posted it. The plugin checks returned keys against
+the requested key before using a work item or parent. Rate limits, a signed-out acli, a missing work item, unsupported
+types, missing fields and permission refusals each report what happened. Generic approved private writes from a
+model/chat/MCP/network remain unavailable; CLI-only support does not complete that original agent capability.
 
 **Ticket text is data.** Summaries, descriptions, comments, labels, status and people's names are written by other
 people. They are cleaned of control, invisible and bidirectional characters, cut to a bound, returned in fields
 documented as untrusted, and every result carries a notice saying so. No command, query, approval or `watch` reason is
 ever built from them: keys are validated by pattern, and acli gets arguments as a list in `--flag=value` form, so a
 summary that looks like options is stored as text. What this cannot do is stop a model from being persuaded by a ticket
-to *propose* something; that is why every write is a separate confirmed operation.
+to *propose* something; that is why these writes remain restricted to explicit CLI commands.
 
 Seeding and trying it against a real site: `tests/live/seed_kan.py` fills a personal test project with fictional epics and
 work items; `HZ_ATLASSIAN_LIVE_SITE=https://<site>.atlassian.net pytest tests/live -m e2e` runs the real-acli checks

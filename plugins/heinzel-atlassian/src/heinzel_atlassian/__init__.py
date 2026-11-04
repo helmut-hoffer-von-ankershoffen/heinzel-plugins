@@ -168,7 +168,7 @@ def create_issue(  # noqa: PLR0913, PLR0917 - the fields of a new work item
     assign_to_me: bool = False,
     due: Annotated[str | None, Field(description="Due date, e.g. 2026-11-05.")] = None,
 ) -> Applied:
-    """Create the Jira work item a person approved. Run twice with the same arguments, it creates one."""
+    """Create the Jira work item a person requested, checking for an existing hash-label match first."""
     return drafts.create_issue(project, kind, summary, description, parent, labels, assign_to_me, due)
 
 

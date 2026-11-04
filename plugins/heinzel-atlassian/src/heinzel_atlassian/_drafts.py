@@ -8,10 +8,9 @@ generic private-operation approval is not available in the released core. Nothin
 model's call is not an approval, and text in a ticket never reaches a command, a query or an approval
 (`_untrusted`).
 
-Writes are never retried. A create labels the work item `hz-<digest>`, so doing the same approved create twice
-(a crash between acli's answer and the journal, T2) finds the first and creates nothing. An update or a comment
-carries the time the draft saw the work item and refuses if it changed since: the person approved a state, not a
-guess.
+Writes are not automatically retried. Create searches a hash label to reduce duplicates, without an exactly-once
+guarantee. Updates and comments compare a timestamp read with the draft, without an atomic compare-and-set.
+An existing matching comment can suppress a repeat; it does not establish who posted it.
 """
 
 import hashlib
@@ -30,7 +29,7 @@ from pydantic import AwareDatetime, BaseModel, Field, JsonValue, TypeAdapter
 from heinzel_atlassian._acli import Acli
 from heinzel_atlassian._client import AcliClient, require_site
 from heinzel_atlassian._models import AtlassianSettings
-from heinzel_atlassian._untrusted import NOTICE, as_dict, as_list, is_object, untrusted
+from heinzel_atlassian._untrusted import NOTICE, as_dict, untrusted
 from heinzel_atlassian._work import Ticket, issue_key, project_key, ticket_from
 
 LABEL_PREFIX = "hz-"
@@ -162,6 +161,41 @@ def _draft(  # noqa: PLR0913, PLR0917 - what a draft is made of
     )
 
 
+def _project_issue_key(raw: object, project: str) -> str | None:
+    """One canonical positive key in the expected project, never a CLI key list."""
+    if not isinstance(raw, str):
+        return None
+    try:
+        key = issue_key(raw)
+    except HeinzelError:
+        return None
+    if key != raw or key.rsplit("-", 1)[0] != project or int(key.rsplit("-", 1)[1]) == 0:
+        return None
+    return key
+
+
+def _duplicate_keys(documents: list[Any], project: str) -> list[str]:
+    """Accept only known search containers and at most one valid in-project match.
+
+    Raises:
+        HeinzelError: If the answer cannot establish an unambiguous duplicate-search result.
+    """
+    problem = "Jira duplicate search was malformed or ambiguous; inspect Jira before trying to create again."
+    found: list[str] = []
+    for document in documents:
+        rows = document.get("issues") if isinstance(document, dict) else document
+        if not isinstance(rows, list):
+            raise HeinzelError(problem)
+        for row in rows:
+            key = _project_issue_key(row.get("key"), project) if isinstance(row, dict) else None
+            if key is None:
+                raise HeinzelError(problem)
+            found.append(key)
+            if len(found) > 1:
+                raise HeinzelError(problem)
+    return found
+
+
 class JiraDrafts:
     """Drafts and applies Jira changes through acli, as the person acli is signed in as."""
 
@@ -171,12 +205,17 @@ class JiraDrafts:
         self._client = AcliClient(acli, settings.timeout)
 
     def _target(self, key: str) -> Ticket:
+        key = issue_key(key)
         site = require_site(self._settings)
         answer = self._client.json("Jira", ["jira", "workitem", "view", key, "--fields", VIEW, "--json"], key)
         if len(answer) != 1 or not isinstance(answer[0], dict):
             msg = f"acli's view answer for {key} is not a Jira work item; is acli up to date?"
             raise HeinzelError(msg)
-        return ticket_from(site, cast("dict[str, Any]", answer[0]))
+        target = ticket_from(site, cast("dict[str, Any]", answer[0]))
+        if target.key != key:
+            msg = f"acli did not return the requested work item {key}; nothing was changed."
+            raise HeinzelError(msg)
+        return target
 
     # ---- drafts: they read, they change nothing ----
 
@@ -323,7 +362,7 @@ class JiraDrafts:
         assign_to_me: bool = False,
         due: str | None = None,
     ) -> Applied:
-        """Create the work item; run again with the same arguments it finds the first and creates nothing.
+        """Create the work item unless one unambiguous hash-label match is already visible.
 
         Raises:
             HeinzelError: If the arguments are not a ready draft, or Jira or acli refuses.
@@ -347,12 +386,7 @@ class JiraDrafts:
             ],
             "the earlier attempt",
         )
-        found = [
-            name
-            for d in earlier
-            for i in as_list(as_dict(d).get("issues") if is_object(d) else d)
-            if isinstance(name := as_dict(i).get("key"), str)
-        ]
+        found = _duplicate_keys(earlier, key)
         if found:
             return Applied(
                 action="create-issue",
@@ -377,8 +411,8 @@ class JiraDrafts:
         if attributes:
             definition["additionalAttributes"] = attributes
         answer = self._run_with_file(definition, ["jira", "workitem", "create", "--from-json"], key, "Create issues")
-        made = as_dict(answer).get("key")
-        if not isinstance(made, str) or not made.startswith(f"{key}-"):
+        made = _project_issue_key(as_dict(answer).get("key"), key)
+        if made is None:
             msg = f"acli created a work item in {key} but did not say which; look for the label {marker}."
             raise HeinzelError(msg)
         done = [f"Created {made}."]
@@ -453,7 +487,7 @@ class JiraDrafts:
         return Applied(action="update-issue", key=target.key, url=f"{site}/browse/{target.key}", done=done)
 
     def comment_issue(self, key: str, text: str, seen: AwareDatetime | str) -> Applied:
-        """Post the comment unless the work item changed since the draft saw it; never twice.
+        """Post the comment after a timestamp check, suppressing a matching comment when observed.
 
         Raises:
             HeinzelError: If the arguments are not a ready draft, the work item changed, or Jira or acli refuses.
@@ -464,12 +498,13 @@ class JiraDrafts:
         _ready(draft)
         body = cast("str", draft.arguments["text"])
         if target.updated_at != seen:
-            if any(c.text == body for c in target.comments):  # the first attempt got through
+            # A matching comment is visible; its author is not established.
+            if any(c.text == body for c in target.comments):
                 return Applied(
                     action="comment-issue",
                     key=target.key,
                     url=f"{site}/browse/{target.key}",
-                    done=["Already posted."],
+                    done=["Matching comment already present; nothing posted by this call."],
                     already_done=True,
                 )
             _unchanged(target, seen)

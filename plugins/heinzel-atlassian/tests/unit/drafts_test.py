@@ -272,3 +272,83 @@ def test_a_work_item_that_does_not_exist_is_named(fake_acli):
     Jira(fake_acli)
     with pytest.raises(HeinzelError, match="no KAN-99"):
         drafts(fake_acli).draft_comment("KAN-99", "hi")
+
+
+@pytest.mark.parametrize("operation", ["draft-update", "update", "draft-comment", "comment", "draft-parent", "parent"])
+def test_a_view_of_another_key_never_redirects_a_draft_or_write(fake_acli, operation):
+    jira = Jira(fake_acli)
+    jira.items["KAN-8"]["key"] = "KAN-9"
+    jira.items["KAN-4"]["key"] = "KAN-9"
+    service = drafts(fake_acli)
+    calls = {
+        "draft-update": lambda: service.draft_update("kan-8", summary="Changed"),
+        "update": lambda: service.update_issue("kan-8", "2026-11-01T00:00:00Z", summary="Changed"),
+        "draft-comment": lambda: service.draft_comment("kan-8", "Hi"),
+        "comment": lambda: service.comment_issue("kan-8", "Hi", "2026-11-01T00:00:00Z"),
+        "draft-parent": lambda: service.draft_create(**CREATE),
+        "parent": lambda: service.create_issue(**CREATE),
+    }
+    with pytest.raises(HeinzelError, match="requested work item"):
+        calls[operation]()
+    assert jira.writes == []
+
+
+@pytest.mark.parametrize(
+    "answer",
+    [
+        None,
+        {},
+        {"values": []},
+        {"issues": None},
+        {"issues": {}},
+        "unknown",
+        1,
+        [None],
+        [{}],
+        [{"key": None}],
+        [{"key": "bad"}],
+        [{"key": "OTHER-1"}],
+        [{"key": "KAN-0"}],
+        [{"key": "KAN-1"}, {}],
+        [{"key": "KAN-1"}, {"key": "KAN-2"}],
+        {"issues": [{"key": "KAN-1"}, {"key": "KAN-1"}]},
+    ],
+)
+def test_ambiguous_duplicate_search_never_creates_or_claims_success(fake_acli, answer):
+    jira = Jira(fake_acli)
+    normal = jira.handle
+    fake_acli.handler = lambda args: (
+        (0, json.dumps(answer), "") if args[:3] == ["jira", "workitem", "search"] else normal(args)
+    )
+    with pytest.raises(HeinzelError, match="duplicate search"):
+        drafts(fake_acli).create_issue(**CREATE)
+    assert jira.writes == []
+
+
+@pytest.mark.parametrize("answer", [[], {"issues": []}])
+def test_known_empty_duplicate_search_allows_one_create(fake_acli, answer):
+    jira = Jira(fake_acli)
+    normal = jira.handle
+    fake_acli.handler = lambda args: (
+        (0, json.dumps(answer), "") if args[:3] == ["jira", "workitem", "search"] else normal(args)
+    )
+    assert drafts(fake_acli).create_issue(**CREATE).key == "KAN-30"
+    assert len(jira.written("jira workitem create")) == 1
+
+
+@pytest.mark.parametrize("key", ["KAN-30,KAN-9", "KAN-x", "KAN-0", "KAN-00", "KAN-30 ", "kan-30", "OTHER-30", None])
+def test_malformed_create_response_never_broadens_followup_assignment(fake_acli, key):
+    jira = Jira(fake_acli)
+    normal = jira.handle
+
+    def answer(args):
+        if args[:3] == ["jira", "workitem", "create"]:
+            jira.writes.append(args)
+            return 0, json.dumps({"key": key}), ""
+        return normal(args)
+
+    fake_acli.handler = answer
+    with pytest.raises(HeinzelError, match="did not say which"):
+        drafts(fake_acli).create_issue(**CREATE, assign_to_me=True)
+    assert len(jira.written("jira workitem create")) == 1
+    assert not jira.written("jira workitem assign")
