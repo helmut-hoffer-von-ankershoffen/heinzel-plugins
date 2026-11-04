@@ -84,6 +84,11 @@ of its RECORD. A wheel introducing a vendor namespace without a verified source
 manifest fails even when the source project contains no vendor code. Upstream
 and built archives reject every explicitly nonregular file mode; unspecified ZIP
 modes remain compatible. Parent package initializers remain first-party code.
+An owning wheel may additionally carry a manifest-approved license at its
+canonical `.dist-info/licenses/<source-target>` path only when its own matching
+METADATA declares that exact `License-File` and the copy equals the pinned source
+bytes. This allowance grants no additional import namespace or source exemption;
+undeclared, altered, missing or foreign metadata copies fail.
 
 `quality_command(root, command, verified_inventory)` derives temporary settings:
 

@@ -716,3 +716,63 @@ def test_build_checks_for_injected_vendor_code_without_a_source_manifest(tmp_pat
             cli.build(selected)
     else:
         cli.build(selected)
+
+
+def test_real_wheel_license_copies_require_own_metadata_declaration_and_exact_pinned_bytes(vendored):
+    source = "src/owner/_vendor/example_sdk/LICENSE"
+    pyproject = vendored / "pyproject.toml"
+    pyproject.write_text(
+        pyproject.read_text().replace('version="1.0.0"', f'version="1.0.0"\nlicense-files=["{source}"]')
+    )
+    subprocess.run(  # noqa: S603 - actual local fixture wheel build
+        [sys.executable, "-m", "hatchling", "build", "-t", "wheel"],
+        cwd=vendored,
+        check=True,
+        capture_output=True,
+        timeout=60,
+    )
+    wheel = next((vendored / "dist").glob("*.whl"))
+    vendor.verify_wheel(vendored, wheel)
+    with zipfile.ZipFile(wheel) as archive:
+        original = {name: archive.read(name) for name in archive.namelist()}
+    metadata = "owner_package-1.0.0.dist-info/METADATA"
+    copy = "owner_package-1.0.0.dist-info/licenses/" + source
+    declaration = b"License-File: " + source.encode() + b"\n"
+    assert original[copy] == (vendored / source).read_bytes()
+    assert declaration in original[metadata]
+    for mutation in [
+        "tampered",
+        "missing-declaration",
+        "missing-copy",
+        "foreign-copy",
+        "foreign-identity",
+        "missing-metadata",
+        "dangerous-path",
+        "extra-vendor-metadata",
+    ]:
+        altered = dict(original)
+        if mutation == "tampered":
+            altered[copy] = b"different license bytes"
+        elif mutation == "missing-declaration":
+            altered[metadata] = altered[metadata].replace(declaration, b"")
+        elif mutation == "missing-copy":
+            del altered[copy]
+        elif mutation == "foreign-copy":
+            altered["foreign-9.9.dist-info/licenses/" + source] = altered[copy]
+        elif mutation == "foreign-identity":
+            altered[metadata] = altered[metadata].replace(b"Name: owner-package", b"Name: foreign")
+        elif mutation == "missing-metadata":
+            del altered[metadata]
+        elif mutation == "dangerous-path":
+            altered[copy + "/../escape"] = b"escape"
+        else:
+            altered[copy.removesuffix("LICENSE") + "extra.py"] = altered[copy]
+            altered[metadata] = altered[metadata].replace(
+                declaration, declaration + b"License-File: " + source.removesuffix("LICENSE").encode() + b"extra.py\n"
+            )
+        candidate = vendored / f"{mutation}-license.whl"
+        with zipfile.ZipFile(candidate, "w") as archive:
+            for name, data in altered.items():
+                archive.writestr(name, data)
+        with pytest.raises(ValueError):
+            vendor.verify_wheel(vendored, candidate)

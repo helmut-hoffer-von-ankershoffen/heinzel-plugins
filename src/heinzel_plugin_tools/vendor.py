@@ -19,6 +19,7 @@ from pathlib import Path, PurePosixPath
 
 from packaging.requirements import Requirement
 from packaging.utils import canonicalize_name
+from packaging.version import Version
 
 TRANSFORM_VERSION = "namespace-relocation-v1"
 MANIFEST = "vendor-manifest.json"
@@ -192,6 +193,7 @@ class VerifiedInventory:
     distribution: str = ""
     version: str = ""
     license_expression: str = ""
+    license_files: tuple[str, ...] = ()
 
     @property
     def python_files(self) -> tuple[str, ...]:
@@ -330,7 +332,8 @@ def projection(root: Path) -> tuple[VerifiedInventory, dict[str, bytes]]:
             expected[entry.target] = projected
             originals[entry.source] = original
         retained_typing(source, set(names), originals)
-    return VerifiedInventory(tuple(sorted(expected)), distribution, version, license_expression), expected
+    licenses = tuple(sorted(entry.target for entry in entries if entry.source in license_paths))
+    return VerifiedInventory(tuple(sorted(expected)), distribution, version, license_expression, licenses), expected
 
 
 def locked_upstream(root: Path, dependencies: list[str], distribution: str, version: str, sha256: str) -> None:
@@ -497,11 +500,13 @@ def verify_wheel(root: Path, wheel: Path) -> VerifiedInventory:
         actual = {name for name in names if name.startswith(prefix) and not name.endswith("/")}
         if actual != set(packed):
             raise ValueError("Built wheel vendor inventory mismatch")
+        license_copies = verified_license_copies(root, archive, inventory, expected)
         parent = prefix.rsplit("/", 2)[0] + "/"
         if any(
             "_vendor" in PurePosixPath(name).parts
             and not name.startswith(prefix)
             and name not in {parent, parent + "__init__.py"}
+            and name not in license_copies
             for name in names
         ):
             raise ValueError("Built wheel has an unverified vendor namespace")
@@ -516,6 +521,35 @@ def verify_wheel(root: Path, wheel: Path) -> VerifiedInventory:
             if stat.S_ISLNK(archive.getinfo(name).external_attr >> 16) or archive.read(name) != data:
                 raise ValueError("Built wheel vendor byte/type mismatch")
     return inventory
+
+
+def verified_license_copies(
+    root: Path, archive: zipfile.ZipFile, inventory: VerifiedInventory, expected: dict[str, bytes]
+) -> set[str]:
+    """Permit only declared owning metadata copies of exact manifest-approved licenses."""
+    project_metadata = tomllib.loads(regular(root, "pyproject.toml").read_text())["project"]
+    name, version = str(project_metadata["name"]), str(Version(project_metadata["version"]))
+    prefix = f"{canonicalize_name(name).replace('-', '_')}-{version}.dist-info/"
+    names = set(archive.namelist())
+    metadata_path = prefix + "METADATA"
+    possible = {prefix + "licenses/" + path for path in inventory.license_files}
+    if metadata_path not in names:
+        if possible & names:
+            raise ValueError("Built wheel license copy lacks owning canonical metadata")
+        return set()
+    metadata = BytesParser().parsebytes(archive.read(metadata_path))
+    if canonicalize_name(metadata.get("Name", "")) != canonicalize_name(name) or metadata["Version"] != version:
+        raise ValueError("Built wheel license metadata identity mismatch")
+    declared = {relative(path) for path in metadata.get_all("License-File", [])}
+    verified = set()
+    for path in inventory.license_files:
+        copy = prefix + "licenses/" + path
+        if copy not in names and path not in declared:
+            continue
+        if copy not in names or path not in declared or archive.read(copy) != expected[path]:
+            raise ValueError("Built wheel license copy declaration/bytes mismatch")
+        verified.add(copy)
+    return verified
 
 
 def generate_manifest(
