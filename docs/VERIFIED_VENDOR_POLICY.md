@@ -46,7 +46,9 @@ The exact schema has these keys; unknown keys fail:
 
 The illustrative inventory is incomplete: production inventories must also name
 every selected module, upstream typing marker when present, and each pinned
-license file. License files project unchanged to the package root. Distribution,
+license file. Available companion `.pyi` files for selected implementation files
+and internal modules referenced by selected stubs must also be retained.
+License files project unchanged to the package root. Distribution,
 version and license must match upstream METADATA. The target must belong to an
 owning public entry-point namespace, never a first-party adapter location.
 
@@ -78,7 +80,10 @@ fails. Exemptions are ephemeral verified file lists, never `_vendor/**` patterns
 The toolkit runs verification before fix, check, build and installed acceptance,
 and re-verifies before applying each diagnostic policy. Build and acceptance also
 verify the exact vendor inventory and bytes in the owning wheel, independently
-of its RECORD. Parent package initializers remain first-party code.
+of its RECORD. A wheel introducing a vendor namespace without a verified source
+manifest fails even when the source project contains no vendor code. Upstream
+and built archives reject every explicitly nonregular file mode; unspecified ZIP
+modes remain compatible. Parent package initializers remain first-party code.
 
 `quality_command(root, command, verified_inventory)` derives temporary settings:
 

@@ -568,3 +568,151 @@ def test_generation_rechecks_explicit_sha_and_existing_pin(vendored):
         vendor.generate_manifest(vendored, wheel, sha256="0" * 64, **arguments)
     vendor.generate_manifest(vendored, wheel, sha256=value["upstream"]["sha256"], **arguments)
     assert vendor.project(vendored).version == "1.2.3"
+
+
+def test_repository_root_cli_audit_executes_scanner_in_the_owning_project(vendored, monkeypatch, tmp_path):
+    from heinzel_plugin_tools import audit
+
+    selected = cli.projects(vendored)[0]
+    repository = tmp_path / "collection"
+    repository.mkdir()
+    scanners = tmp_path / "scanner-fixtures"
+    scanners.mkdir()
+    (scanners / "piplicenses.py").write_text("")
+    (scanners / "pip_audit.py").write_text(
+        "import os,sys\nfrom pathlib import Path\n"
+        "Path(os.environ['AUDIT_RESULT']).write_text(Path(sys.argv[sys.argv.index('-r')+1]).read_text())\n"
+    )
+    interpreter = tmp_path / "owning-python"
+    interpreter.write_text(f'#!{sys.executable}\nprint(\'{{"owner-package":"1.0.0"}}\')\n')
+    interpreter.chmod(0o755)
+    result_file = tmp_path / "audited-requirements.txt"
+    environment = {**os.environ, "PYTHONPATH": str(scanners), "AUDIT_RESULT": str(result_file)}
+    monkeypatch.chdir(repository)
+    monkeypatch.setattr(cli, "ROOT", repository)
+    monkeypatch.setattr(cli, "projects", lambda: [selected])
+    monkeypatch.setattr(cli, "prepare_environment", lambda *args: interpreter)
+    monkeypatch.setattr(cli, "repository_private", lambda: False)
+    monkeypatch.setattr(sys, "argv", ["hz-plugin", "audit", selected.name])
+    reports = []
+
+    def dispatch(command, **options):
+        assert str(Path(audit.__file__)) in command
+        completed = subprocess.run(  # noqa: S603 - actual trusted audit script with isolated scanner fixtures
+            [sys.executable, str(Path(audit.__file__)), str(interpreter), selected.name],
+            cwd=options.get("cwd", repository),
+            env=environment,
+            check=True,
+            capture_output=True,
+            text=True,
+            timeout=60,
+        )
+        reports.append(json.loads(completed.stdout))
+
+    monkeypatch.setattr(cli, "run", dispatch)
+    assert cli.main() == 0
+    assert result_file.read_text() == "example_sdk==1.2.3\n"
+    assert reports[0]["license"] == "MIT"
+    assert set(reports[0]["files"]) == set(vendor.project(vendored).files)
+
+
+@pytest.mark.parametrize("mode", [0o010644, 0o020644, 0o060644, 0o140644, 0o040755])
+@pytest.mark.parametrize("artifact", ["upstream", "built"])
+def test_all_declared_nonregular_archive_file_types_are_rejected(vendored, mode, artifact):
+    value = manifest(vendored)
+    if artifact == "upstream":
+        path = vendored / "vendor-provenance" / value["upstream"]["wheel"]
+        with zipfile.ZipFile(path) as archive:
+            files = {name: archive.read(name) for name in archive.namelist()}
+        key = "example_sdk/api.py"
+    else:
+        path = vendored / "special-file.whl"
+        files = {
+            entry["target"].removeprefix("src/"): (vendored / entry["target"]).read_bytes() for entry in value["files"]
+        }
+        key = "owner/_vendor/example_sdk/api.py"
+    with zipfile.ZipFile(path, "w") as archive:
+        for name, data in files.items():
+            info = zipfile.ZipInfo(name)
+            if name == key:
+                info.create_system = 3
+                info.external_attr = mode << 16
+            archive.writestr(info, data)
+    if artifact == "upstream":
+        value["upstream"]["sha256"] = vendor.digest(path.read_bytes())
+        save_manifest(vendored, value)
+    with pytest.raises(ValueError, match="nonregular"):
+        vendor.project(vendored) if artifact == "upstream" else vendor.verify_wheel(vendored, path)
+
+
+@pytest.mark.parametrize("checker", ["mypy", "pyright"])
+def test_companion_stubs_are_mandatory_and_retain_precise_consumer_types(vendored, checker):
+    value = manifest(vendored)
+    wheel = vendored / "vendor-provenance" / value["upstream"]["wheel"]
+    with zipfile.ZipFile(wheel) as archive:
+        files = {name: archive.read(name) for name in archive.namelist()}
+    files["example_sdk/api.py"] = b"def greet(value):\n    return value\n"
+    files["example_sdk/api.pyi"] = b"from .types import Label\ndef greet(value: str) -> Label: ...\n"
+    files["example_sdk/types.pyi"] = b"from typing import TypeAlias\nLabel: TypeAlias = str\n"
+    with zipfile.ZipFile(wheel, "w") as archive:
+        for name, data in files.items():
+            archive.writestr(name, data)
+    value["upstream"]["sha256"] = vendor.digest(wheel.read_bytes())
+    for entry in value["files"]:
+        original = files[entry["source"]]
+        entry["original_sha256"] = vendor.digest(original)
+        entry["projected_sha256"] = vendor.digest(
+            vendor.relocate(original, "example_sdk", "owner._vendor.example_sdk")
+            if entry["source"].endswith(".py")
+            else original
+        )
+    save_manifest(vendored, value)
+    with pytest.raises(ValueError, match="companion"):
+        vendor.project(vendored)
+    for source in ["example_sdk/api.pyi", "example_sdk/types.pyi"]:
+        original = files[source]
+        value["files"].append(
+            {
+                "source": source,
+                "target": "src/owner/_vendor/" + source,
+                "original_sha256": vendor.digest(original),
+                "projected_sha256": vendor.digest(
+                    vendor.relocate(original, "example_sdk", "owner._vendor.example_sdk")
+                ),
+            }
+        )
+        save_manifest(vendored, value)
+        if source.endswith("api.pyi"):
+            with pytest.raises(ValueError, match="typing import"):
+                vendor.projection(vendored)
+    vendor.regenerate(vendored)
+    consumer = vendored / "src/owner/typed_consumer.py"
+    for argument, expected in [("'valid'", 0), ("123", 1)]:
+        consumer.write_text(f"from owner._vendor.example_sdk import greet\nvalue: str = greet({argument})\n")
+        command = [
+            checker,
+            *(["--strict", "--no-incremental"] if checker == "mypy" else []),
+            "src/owner/typed_consumer.py",
+        ]
+        with vendor.quality_command(vendored, command, vendor.project(vendored)) as configured:
+            result = subprocess.run(configured, cwd=vendored, check=False, capture_output=True, text=True, timeout=60)  # noqa: S603 - installed checkers with isolated typed fixtures
+        assert result.returncode == expected, result.stdout + result.stderr
+
+
+@pytest.mark.parametrize("vendored_output", [False, True])
+def test_build_checks_for_injected_vendor_code_without_a_source_manifest(tmp_path, monkeypatch, vendored_output):
+    (tmp_path / "pyproject.toml").write_text('[project]\nname="owner"\nversion="1.0.0"\n')
+    selected = cli.Project(tmp_path, "owner", "1.0.0", {})
+    monkeypatch.setattr(cli, "validate_lock", lambda *args: {})
+
+    def build(*args, **kwargs):
+        (tmp_path / "dist").mkdir()
+        with zipfile.ZipFile(tmp_path / "dist/owner-1.0.0-py3-none-any.whl", "w") as archive:
+            archive.writestr("owner/_vendor/unknown.py" if vendored_output else "owner/__init__.py", "")
+
+    monkeypatch.setattr(cli, "run", build)
+    if vendored_output:
+        with pytest.raises(ValueError, match="manifest"):
+            cli.build(selected)
+    else:
+        cli.build(selected)

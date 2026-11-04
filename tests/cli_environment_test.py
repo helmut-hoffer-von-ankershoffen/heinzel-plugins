@@ -357,6 +357,10 @@ def test_a_recorded_gallery_is_checked_before_the_environment_is_prepared(projec
 def test_building_uses_the_lock_as_the_only_build_constraint(project, tmp_path, commands):
     wheel = core_wheel(tmp_path / "heinzel-0.9.4-py3-none-any.whl")
     write_lock(project, wheel)
+    (project.directory / "dist").mkdir()
+    core_wheel(
+        project.directory / "dist/heinzel_harbor-0.2.0-py3-none-any.whl", name=project.name, version=project.version
+    )
     cli.build(project)
     ((command, _),) = commands
     assert command[:2] == ["uv", "build"]

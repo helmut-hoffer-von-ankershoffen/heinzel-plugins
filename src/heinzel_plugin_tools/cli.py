@@ -549,7 +549,7 @@ def acceptance(project: Project, core: str | None, *, wheel: Path | None = None)
 
 def build(project: Project) -> None:
     """Build exactly one project's self-contained artifacts."""
-    verified = vendor.project(project.directory)
+    vendor.project(project.directory)
     validate_lock(project, None)
     run(
         [
@@ -563,11 +563,10 @@ def build(project: Project) -> None:
             str(project.directory / "dist"),
         ]
     )
-    if verified.files:
-        wheels = list((project.directory / "dist").glob(f"{project.name.replace('-', '_')}-{project.version}-*.whl"))
-        if len(wheels) != 1:
-            raise ValueError("Vendor build verification requires one exact owning wheel")
-        vendor.verify_wheel(project.directory, wheels[0])
+    wheels = list((project.directory / "dist").glob(f"{project.name.replace('-', '_')}-{project.version}-*.whl"))
+    if len(wheels) != 1:
+        raise ValueError("Vendor build verification requires one exact owning wheel")
+    vendor.verify_wheel(project.directory, wheels[0])
 
 
 def profile(
@@ -706,7 +705,8 @@ def audit(project: Project, core: str | None) -> None:
             str(TOOLING_SCRIPT.with_name("audit.py")),
             str(interpreter),
             project.name,
-        ]
+        ],
+        cwd=project.directory,
     )
 
 

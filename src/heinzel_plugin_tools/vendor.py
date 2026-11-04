@@ -31,6 +31,50 @@ def digest(data: bytes) -> str:
     return hashlib.sha256(data).hexdigest()
 
 
+def archive_regular(info: zipfile.ZipInfo) -> None:
+    """Accept ordinary or unspecified ZIP modes, rejecting special file types."""
+    mode = stat.S_IFMT(info.external_attr >> 16)
+    allowed = {0, stat.S_IFDIR} if info.is_dir() else {0, stat.S_IFREG}
+    if mode not in allowed:
+        raise ValueError("Vendor wheel archive contains a nonregular file")
+
+
+def retained_typing(source: str, available: set[str], originals: dict[str, bytes]) -> None:
+    """Require companion stubs and every internal module referenced by a selected stub."""
+    selected = set(originals)
+    for path in selected:
+        if path.endswith(".py") and path + "i" in available and path + "i" not in selected:
+            raise ValueError("Upstream companion typing stub must be retained")
+    for path, data in originals.items():
+        if not path.endswith(".pyi"):
+            continue
+        package = list(PurePosixPath(path).parts[:-1])
+        requested: set[str] = set()
+        for node in ast.walk(ast.parse(data)):
+            if isinstance(node, ast.Import):
+                requested.update(alias.name for alias in node.names)
+            elif isinstance(node, ast.ImportFrom):
+                if node.level:
+                    if node.level > len(package):
+                        raise ValueError("Typing import escapes the upstream namespace")
+                    base = package[: len(package) - node.level + 1]
+                    module = ".".join([*base, *node.module.split(".")]) if node.module else ".".join(base)
+                else:
+                    module = node.module or ""
+                requested.add(module)
+                requested.update(module + "." + alias.name for alias in node.names if alias.name != "*")
+        for module in requested:
+            if module == source or module.startswith(source + "."):
+                parts = module.split(".")
+                for length in range(1, len(parts) + 1):
+                    prefix = "/".join(parts[:length])
+                    candidates = {
+                        prefix + suffix for suffix in (".py", ".pyi", "/__init__.py", "/__init__.pyi")
+                    } & available
+                    if not candidates <= selected:
+                        raise ValueError("Upstream typing import requires omitted module files")
+
+
 def relative(value: str) -> str:
     """Require a canonical relative POSIX file path without traversal."""
     path = PurePosixPath(value)
@@ -227,14 +271,14 @@ def projection(root: Path) -> tuple[VerifiedInventory, dict[str, bytes]]:
     ):
         raise ValueError("Duplicate vendor inventory entry")
     expected: dict[str, bytes] = {}
+    originals: dict[str, bytes] = {}
     with zipfile.ZipFile(io.BytesIO(wheel)) as archive:
         names = archive.namelist()
         if len(names) != len(set(names)):
             raise ValueError("Duplicate upstream archive member")
         for info in archive.infolist():
             relative(info.filename.rstrip("/"))
-            if stat.S_ISLNK(info.external_attr >> 16):
-                raise ValueError("Upstream archive symlink")
+            archive_regular(info)
         metadata_paths = [name for name in names if name.endswith(".dist-info/METADATA")]
         if len(metadata_paths) != 1:
             raise ValueError("Upstream wheel needs one distribution identity")
@@ -284,6 +328,8 @@ def projection(root: Path) -> tuple[VerifiedInventory, dict[str, bytes]]:
             if not SHA256.fullmatch(entry.projected_sha256) or digest(projected) != entry.projected_sha256:
                 raise ValueError("Projected vendor file hash/transform mismatch")
             expected[entry.target] = projected
+            originals[entry.source] = original
+        retained_typing(source, set(names), originals)
     return VerifiedInventory(tuple(sorted(expected)), distribution, version, license_expression), expected
 
 
@@ -434,15 +480,20 @@ def regenerate(root: Path) -> None:
 def verify_wheel(root: Path, wheel: Path) -> VerifiedInventory:
     """Verify source first, then the exact projected inventory in the built wheel."""
     inventory = project(root)
-    if not inventory.files:
-        return inventory
-    _, expected = projection(root)
+    expected = projection(root)[1] if inventory.files else {}
     packed = {name.removeprefix("src/"): data for name, data in expected.items()}
-    prefix = "/".join(next(iter(packed)).split("/")[:3]) + "/"
     with zipfile.ZipFile(wheel) as archive:
         names = archive.namelist()
         if len(names) != len(set(names)):
             raise ValueError("Built wheel has duplicate files")
+        for info in archive.infolist():
+            relative(info.filename.rstrip("/"))
+            archive_regular(info)
+        if not inventory.files:
+            if any("_vendor" in PurePosixPath(name).parts for name in names):
+                raise ValueError("Built wheel vendor namespace requires a verified manifest")
+            return inventory
+        prefix = "/".join(next(iter(packed)).split("/")[:3]) + "/"
         actual = {name for name in names if name.startswith(prefix) and not name.endswith("/")}
         if actual != set(packed):
             raise ValueError("Built wheel vendor inventory mismatch")
