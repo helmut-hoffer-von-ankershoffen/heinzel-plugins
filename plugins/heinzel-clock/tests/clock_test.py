@@ -206,6 +206,7 @@ def test_the_status_item_ticks_in_the_primary_zone_and_lists_the_others():
     assert [line.text for line in item.detail] == [first, "New York", "Tokyo"]
     assert [line.live.zone for line in item.detail] == [zone.zone for zone in TIMES]
     assert item.presentation == "value"
+    assert item.footer_priority == 1000
     assert item.effect == Navigate(path="/?panel=clock:world-clock")
     assert primary_zone([]) is None
 
@@ -293,12 +294,7 @@ def test_detail_matches_panel_designation_and_activity(moment, icon, label, monk
 
     import heinzel_clock
 
-    class FixedDateTime(datetime):
-        @classmethod
-        def now(cls, tz=None):
-            return datetime.fromisoformat(moment)
-
-    monkeypatch.setattr(heinzel_clock, "datetime", FixedDateTime)
+    monkeypatch.setattr(heinzel_clock, "_now", lambda: datetime.fromisoformat(moment))
     zone = ZoneTime(zone="UTC", time="", hours=(9, 18), working=False)
     item = primary_zone([zone, zone.model_copy(update={"zone": "Europe/London"})])
     assert item is not None

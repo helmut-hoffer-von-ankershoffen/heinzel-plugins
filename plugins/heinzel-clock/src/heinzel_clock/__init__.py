@@ -51,6 +51,11 @@ Hour = Annotated[int, Field(ge=0, le=24)]
 """An hour of the day; 24 ends a working day at midnight."""
 
 
+def _now() -> datetime:
+    """Return the current UTC moment."""
+    return datetime.now(UTC)
+
+
 class Zone(BaseModel):
     """A time zone the team works in and the working hours there; a plain name gets the default hours."""
 
@@ -151,7 +156,7 @@ def clock(
     if unknown := _unknown(settings):
         msg = f"Unknown time zones: {', '.join(unknown)}. Run `hz system doctor` for the fix."
         raise HeinzelError(msg)
-    moment = at.astimezone(UTC) if at else datetime.now(UTC)
+    moment = at.astimezone(UTC) if at else _now()
     return [
         ZoneTime(
             zone=zone.name,
@@ -192,7 +197,7 @@ def _work_status(zone: ZoneTime, moment: datetime) -> str:
 
 
 def _detail(zone: ZoneTime, *, primary: bool = False) -> DetailLine:
-    moment = datetime.now(UTC)
+    moment = _now()
     local = moment.astimezone(ZoneInfo(zone.zone))
     working_now = local.weekday() < SATURDAY and zone.hours[0] <= local.hour < zone.hours[1]
     icon = (
@@ -233,6 +238,7 @@ def primary_zone(times: list[ZoneTime]) -> StatusItem | None:
         icon="globe",
         live=LiveClock(zone=first.zone),
         presentation="value",
+        footer_priority=1000,
         detail=[_detail(zone, primary=index == 0) for index, zone in enumerate(times)],
         effect=Navigate(path="/?panel=clock:world-clock"),
     )
