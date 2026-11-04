@@ -254,7 +254,8 @@ build, audit and installed acceptance. Toolkit tests do not run core's suite.
 
 Toolkit 0.3.4 runs its isolated capture children with Python `-I -B`, including the backend, fixture and installed
 CLI entry points, and terminal wrapper. Imports cannot add bytecode files to the verified source inventory.
-Vendor inventory checks, foreign commands and caller environments remain unchanged.
+Spelling scans run relative to the owning project so exact verified vendor exclusions match; first-party files
+remain checked. Vendor inventory checks, foreign commands and caller environments remain unchanged.
 
 Toolkit 0.3.3 canonicalizes only its newly created private capture temporary directory before deriving demo
 HOME and HZ paths. This avoids macOS temporary-directory aliases being rejected by physical, no-symlink approval

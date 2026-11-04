@@ -16,7 +16,7 @@ pytestmark = pytest.mark.integration
 
 
 @pytest.fixture
-def vendored(tmp_path):
+def vendored(tmp_path, request):
     (tmp_path / "pyproject.toml").write_text(
         '[project]\nname="owner-package"\nversion="1.0.0"\n'
         '[project.entry-points."heinzel.modules"]\nexample="owner"\n'
@@ -33,7 +33,11 @@ def vendored(tmp_path):
     wheel = tmp_path / "example_sdk-1.2.3-py3-none-any.whl"
     with zipfile.ZipFile(wheel, "w") as archive:
         archive.writestr("example_sdk/__init__.py", "from example_sdk.api import greet as greet\n")
-        archive.writestr("example_sdk/api.py", "def greet(value: str) -> str:\n    return 3\n")
+        archive.writestr(
+            "example_sdk/api.py",
+            "def greet(value: str) -> str:\n    return 3\n"
+            + ("# A privte upstream channel.\n" if getattr(request, "param", None) == "upstream-typo" else ""),
+        )
         archive.writestr("example_sdk/py.typed", "")
         archive.writestr(
             "example_sdk-1.2.3.dist-info/METADATA",
@@ -878,3 +882,39 @@ def test_real_wheel_license_copies_require_own_metadata_declaration_and_exact_pi
         except ValueError:
             continue
         pytest.fail(f"Accepted invalid wheel mutation: {mutation}")
+
+
+@pytest.mark.parametrize("vendored", ["upstream-typo"], indirect=True)
+def test_normal_spelling_check_uses_relative_verified_exclusions_and_still_checks_first_party(vendored, monkeypatch):
+    executable = shutil.which("typos")
+    assert executable is not None, "The pinned tooling typos binary is required"
+    project = cli.projects(vendored)[0]
+    calls = []
+    monkeypatch.setattr(cli, "prepare_environment", lambda *_args: None)
+
+    def run(command, **options):
+        if command[0] != "typos":
+            return
+        calls.append((command, options["cwd"]))
+        result = subprocess.run(  # noqa: S603 - pinned checker against an isolated authenticated synthetic wheel
+            [executable, *command[1:]], cwd=options["cwd"], capture_output=True, text=True, timeout=30, check=False
+        )
+        if result.returncode:
+            print(result.stdout + result.stderr)
+            raise SystemExit(result.returncode)
+
+    monkeypatch.setattr(cli, "run", run)
+    upstream = vendored / "src/owner/_vendor/example_sdk/api.py"
+    original = upstream.read_bytes()
+    cli.check(project, None)
+    assert calls[0][0][:2] == ["typos", "."]
+    assert calls[0][1] == vendored
+    assert upstream.read_bytes() == original
+    (vendored / "src/owner/__init__.py").write_text("# A privte first-party channel.\n")
+    with pytest.raises(SystemExit):
+        cli.check(project, None)
+    calls.clear()
+    upstream.write_bytes(original + b"# changed\n")
+    with pytest.raises(ValueError):
+        cli.check(project, None)
+    assert calls == []  # no spelling exemption is used after provenance changes

@@ -458,7 +458,8 @@ def check(project: Project, core: str | None, *, tests_only: bool = False, fast:
                 **({"env": {**os.environ, "PYTHONDONTWRITEBYTECODE": "1"}} if verified.files else {}),
             )
     if not tests_only and not fast:
-        with vendor.quality_command(project.directory, ["typos", str(project.directory)], verified) as configured:
+        # Match exact verified relative exclusions against a relative scan rooted at the owning cwd.
+        with vendor.quality_command(project.directory, ["typos", "."], verified) as configured:
             run(configured, cwd=project.directory)
     frontend = project.directory / "web/package.json"
     if frontend.is_file():
