@@ -1,29 +1,34 @@
-**Audience**
-People building Heinzel workflows that need Jira progress and Confluence context through their existing Atlassian access.
+## Audience
 
-**Outcome**
-Follow a small Widget launch: see what changed, read the plan, inspect structured issue data, and understand how a workflow declares both inputs. Production reads use the user's authenticated acli; these screenshots demonstrate real adapter parsing with fictional local replies.
+Someone considering Heinzelmännchen’s Atlassian plugin for workflows that need Jira issue changes and Confluence page content.
 
-**Scenes**
-1. **jira-issues** — The native app terminal shows October changes: WID-3 is In Progress with Wilma Widget; WID-4 is Done and Unassigned.
-2. **confluence-plan** — Read the fictional launch scope and next milestone, with the source URL and revision 3 visible.
-3. **issues-json** — Show structured issue results for workflow authors, including timestamps and labels.
-4. **confluence-cli** — Show the same readable document result through the CLI.
-5. **workflow-context** — Preserve the existing contract-detail scene. Its declared Jira and Confluence inputs explain the connection; no report has been generated.
-6. **jira-parameters** — Add a native-terminal case using lowercase `wid` and `--json`. Together with the first scene, this demonstrates project-key normalization and two useful argument combinations.
+## Outcome
 
-**Fictional fixtures**
-Use only the existing `docs/screenshot_fixture.py`. It supplies the WID issues, Widget plan, and local Weekly work review contract. Its documentation-only `showcase issues` and `showcase page` requesters call the real adapters through `DemoAcli`; the placeholder executable path is never run. The issue window is October 2026. Freeze browser time at its upper boundary.
+Show how a workflow can bring issue progress and its supporting plan together, while making clear that these are fictional, offline results. The plugin uses Atlassian’s `acli` for real reads; this demonstration substitutes local vendor replies.
 
-The installed Atlassian module exposes parameterless `atlassian info`; `showcase` commands belong to the capture fixture and must not be presented as installed product commands. Preserve the existing five scenes and append only the additional native-terminal parameter case.
+## Scenes
 
-**Privacy pitfalls**
-Capture only an isolated fictional profile through the existing bootstrap during explicit capture. Keep real accounts, tenant names, credentials, local paths, and unrelated terminal history out of frames. Treat the example source links as display data. Do not imply a successful login or live Atlassian verification: the README says signed-in acli response shapes remain unverified, and browser-login replies cannot confirm the configured tenant. Installation requires acli 1.3.39 or later, appropriate product logins, site configuration, and capability bindings.
+1. **Jira changes in the app** — A compact table shows two fictional WID issues, their states and owners.
+2. **The Confluence plan in the app** — Read the fictional launch plan alongside its source and revision.
+3. **Structured Jira output** — Show the same kind of issue data as JSON for a workflow or script.
+4. **Confluence output in the CLI** — Show the plan, source and revision in a shell capture.
+5. **Workflow context** — The local Weekly work review contract shows how Jira and Confluence inputs can be declared. It does not claim that a report was generated.
+6. **A second Jira parameter case** — In the app terminal, use lowercase `wid` and JSON output to demonstrate project-key normalization and structured results.
 
-**Acceptance criteria**
-- Six scenes retain the existing useful views and CLI results; both native-terminal parameter cases complete successfully.
-- Every caption explicitly identifies demo data and stays within 180 characters.
-- Issue states and owners, document content, source and revision, and structured issue fields remain readable.
-- The inherited contract route resolves to the fixture's Weekly work review heading and shows declaration context without implying an executed workflow.
-- Commands use argument arrays; terminal actions rely on their completion behavior without individual-cell waits.
-- TOML structure, allowed fields, unique names, captions, fixture commands, and bootstrap provenance were checked statically against the supplied files and requirements. No imports, runtime validation, captures, or network calls were performed; rendered behavior remains an explicit capture acceptance check.
+## Fictional fixtures
+
+The existing `docs/screenshot_fixture.py` supplies the `showcase` operations, a local demonstration contract, and fictional Jira and Confluence responses. It exercises the real adapters through a fixture-only requester; it does not execute `acli` or connect to an account. The fixed browser time and fixture window keep the story coherent.
+
+## Privacy pitfalls
+
+Capture only the isolated fictional profile. Do not expose real issue titles, names, page URLs, credentials, account details, terminal history, or logs. The example Atlassian URL and people are fictional; captions must keep that clear. Do not imply the fixture proves a live connection or that a review report exists.
+
+## Acceptance criteria
+
+- All six existing scenes remain, including two useful app-terminal views, the workflow contract, and CLI results.
+- Captions identify demo data and distinguish the fixture requester from a live Atlassian connection.
+- Jira output shows the fictional issue keys, titles, states and owners; the lowercase parameter case returns structured WID data.
+- The plan view shows the fictional content, source and revision; the contract view states that no report has been generated.
+- Captures contain no real account data or secrets, and use only the existing bootstrap.
+
+The existing plan already covers the useful behavior, so it is retained. Its TOML structure was inspected against the requested format; no parser or capture was run because code execution was excluded.
