@@ -485,6 +485,10 @@ def test_manifest_schema_and_closed_subset_rules_fail_closed(vendored, mutation)
         "no-license-metadata",
         "missing-license-file",
         "ambiguous-license-file",
+        "case-alias",
+        "metadata-alias",
+        "unicode-alias",
+        "directory-alias",
     ],
 )
 def test_even_pinned_malformed_upstream_archives_are_rejected(vendored, mutation):
@@ -503,6 +507,16 @@ def test_even_pinned_malformed_upstream_archives_are_rejected(vendored, mutation
         del files["example_sdk-1.2.3.dist-info/LICENSE"]
     elif mutation == "ambiguous-license-file":
         files["example_sdk-1.2.3.dist-info/licenses/LICENSE"] = b"ambiguous"
+    elif mutation == "case-alias":
+        files["example_sdk/API.PY"] = b"different = True\n"
+    elif mutation == "metadata-alias":
+        files["example_sdk-1.2.3.dist-info/metadata"] = b"Name: foreign\nVersion: 9.9\n"
+    elif mutation == "unicode-alias":
+        files["example_sdk/caf\u00e9.py"] = b"one = True\n"
+        files["example_sdk/cafe\u0301.py"] = b"two = True\n"
+    elif mutation == "directory-alias":
+        files["example_sdk/data"] = b"file"
+        files["example_sdk/data/"] = b""
     elif mutation == "traversal":
         files["../escape"] = b"escape"
     with zipfile.ZipFile(wheel, "w") as archive:
@@ -777,6 +791,12 @@ def test_real_wheel_license_copies_require_own_metadata_declaration_and_exact_pi
         "invalid-tag": (wheel_metadata, all_tags, b"Tag: garbage\n"),
         "duplicate-tag": (wheel_metadata, all_tags, all_tags + tag_lines[0]),
     }
+    aliases = {
+        "lowercase-metadata": metadata.removesuffix("METADATA") + "metadata",
+        "mixedcase-metadata": metadata.removesuffix("METADATA") + "mEtAdAtA",
+        "lowercase-wheel": wheel_metadata.removesuffix("WHEEL") + "wheel",
+        "mixedcase-wheel": wheel_metadata.removesuffix("WHEEL") + "wHeEl",
+    }
     for mutation in [
         "tampered",
         "missing-declaration",
@@ -793,6 +813,9 @@ def test_real_wheel_license_copies_require_own_metadata_declaration_and_exact_pi
         "missing-wheel",
         "invalid-build",
         "duplicate-build",
+        "first-party-case-alias",
+        "unicode-canonical-alias",
+        *aliases,
         *identities,
     ]:
         altered = dict(original)
@@ -800,6 +823,17 @@ def test_real_wheel_license_copies_require_own_metadata_declaration_and_exact_pi
             member, old, new = identities[mutation]
             assert old in altered[member]
             altered[member] = altered[member].replace(old, new)
+        elif mutation in aliases:
+            altered[aliases[mutation]] = (
+                b"Metadata-Version: 2.5\nName: foreign-owner\nVersion: 9.9\n"
+                if mutation.endswith("metadata")
+                else b"Wheel-Version: 1.0\nGenerator: foreign\nRoot-Is-Purelib: false\nTag: py3-none-other\n"
+            )
+        elif mutation == "first-party-case-alias":
+            altered["OWNER/__INIT__.PY"] = b"unverified = True\n"
+        elif mutation == "unicode-canonical-alias":
+            altered["owner/caf\u00e9.txt"] = b"one"
+            altered["owner/cafe\u0301.txt"] = b"two"
         elif mutation == "foreign-authority":
             altered["foreign-9.9.dist-info/METADATA"] = b"Name: foreign\nVersion: 9.9\n"
             altered["foreign-9.9.dist-info/WHEEL"] = original[wheel_metadata]

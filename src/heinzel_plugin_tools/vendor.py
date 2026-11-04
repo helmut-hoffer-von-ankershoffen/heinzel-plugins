@@ -10,6 +10,7 @@ import stat
 import tempfile
 import tokenize
 import tomllib
+import unicodedata
 import zipfile
 from collections.abc import Iterator
 from contextlib import contextmanager
@@ -38,6 +39,15 @@ def archive_regular(info: zipfile.ZipInfo) -> None:
     allowed = {0, stat.S_IFDIR} if info.is_dir() else {0, stat.S_IFREG}
     if mode not in allowed:
         raise ValueError("Vendor wheel archive contains a nonregular file")
+
+
+def unique_archive_paths(names: list[str]) -> None:
+    """Reject aliases that collide across case-sensitive and canonicalizing filesystems."""
+    canonical = [
+        unicodedata.normalize("NFC", unicodedata.normalize("NFC", name.rstrip("/")).casefold()) for name in names
+    ]
+    if len(canonical) != len(set(canonical)):
+        raise ValueError("Vendor wheel archive has colliding canonical paths")
 
 
 def retained_typing(source: str, available: set[str], originals: dict[str, bytes]) -> None:
@@ -276,8 +286,7 @@ def projection(root: Path) -> tuple[VerifiedInventory, dict[str, bytes]]:
     originals: dict[str, bytes] = {}
     with zipfile.ZipFile(io.BytesIO(wheel)) as archive:
         names = archive.namelist()
-        if len(names) != len(set(names)):
-            raise ValueError("Duplicate upstream archive member")
+        unique_archive_paths(names)
         for info in archive.infolist():
             relative(info.filename.rstrip("/"))
             archive_regular(info)
@@ -487,8 +496,7 @@ def verify_wheel(root: Path, wheel: Path) -> VerifiedInventory:
     packed = {name.removeprefix("src/"): data for name, data in expected.items()}
     with zipfile.ZipFile(wheel) as archive:
         names = archive.namelist()
-        if len(names) != len(set(names)):
-            raise ValueError("Built wheel has duplicate files")
+        unique_archive_paths(names)
         for info in archive.infolist():
             relative(info.filename.rstrip("/"))
             archive_regular(info)

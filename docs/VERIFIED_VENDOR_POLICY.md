@@ -96,6 +96,8 @@ optional build field must satisfy the supported format. Conflicting or repeated
 identity headers, nested/foreign authorities and an incomplete pair fail closed.
 Case aliases cannot introduce a second metadata authority or an unverified vendor
 namespace on a filesystem that ignores filename case.
+Both original and built archives reject path collisions after Unicode canonical
+normalization and case folding, including METADATA/WHEEL basename aliases.
 
 `quality_command(root, command, verified_inventory)` derives temporary settings:
 
