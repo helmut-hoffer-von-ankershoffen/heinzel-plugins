@@ -420,3 +420,6 @@ def _busy(who: Participant, calendar: Json, since: datetime, until: datetime) ->
         if start < end:
             spans.append(TimeSpan(start=start, end=end))
     return FreeBusy(who=who, busy=sorted(spans, key=lambda span: span.start))
+
+
+EVENT_ID_PATTERN = _EVENT_ID

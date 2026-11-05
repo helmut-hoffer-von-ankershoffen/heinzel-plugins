@@ -1,107 +1,111 @@
 {
   "format": 1,
   "plugin": "heinzel-google",
-  "core_version": "0.9.1",
-  "inputs_sha256": "c9e4eea7cbc2872125241e748bf5d6305de138c8c201908314d536f79106ed25",
+  "core_version": "0.9.16",
+  "inputs_sha256": "bdad50e42c3a75ca418e602a533d90f6eba2e13c5cf0478496cfa757251bf0e2",
   "images": {
-    "docs/assets/screenshots/launch-files.png": "349e7d63aae5267414541f6284e5dffef3683ffd96fd8792241a998d40e15702",
-    "docs/assets/screenshots/launch-files-week.png": "1bfbd0bbc51cc701fb22830599a05a031bbe5f0df2e58813ff6f27b87d8e061a",
-    "docs/assets/screenshots/launch-plan.png": "ed452c77479551245e723019b24d0bdf025bbc9b58e12d89d6c8fd80f7c6af18",
-    "docs/assets/screenshots/launch-week.png": "881d27e00a41f97d2f3711659bfc7f85e287a3731d241b337bb4cd421d6782ba",
-    "docs/assets/screenshots/launch-inbox.png": "91fc815c3a55f8eb1c66b0411e1cbef37869c7714e12de1b6353922ad98eed3d",
-    "docs/assets/screenshots/launch-files-json.png": "3c3cd70bb95af88e761a8471df896b3881be5415a03e8159cd17f2bc76048552",
+    "docs/assets/screenshots/google-calendar-week.png": "00bcfce7a8981f3d25d370a08604ca627fb20cc848a9a39523e7e4e6cd67df39",
+    "docs/assets/screenshots/google-source-review.png": "745027094bcb7a1e504a1c71865a058f2253b61e36fe1b8fb7327ab0e67abab1",
+    "docs/assets/screenshots/launch-files-json.png": "bc9dc4ad266954a631c3ffbac1a6c5b54c12e4479b689274a3415abe1b698124",
+    "docs/assets/screenshots/launch-files-week.png": "fa0c67acd6aa7049c33016979e46b836fe407b1fa70c4fc04e0a3e2c25d8509d",
+    "docs/assets/screenshots/launch-plan.png": "a8f723cff386597587a28aa1a76dc6e59b72b40665107629cda30dc1c060fe09",
     "docs/assets/screenshots/launch-metrics.png": "694361694713cb2bb4b3e9a89ec50004ab36120233ed8dbe615466cd5ae09a62",
+    "docs/assets/screenshots/launch-week.png": "fa33ea4784c5b144f5f389ae36ad498cbabe58fffff69ed5d6e10542ba4938ad",
     "docs/assets/screenshots/mail-content.png": "ceef4e8ed3b08a9d3b787467049c7e8e45effbbdfcaacee0508b023d51691cd4"
   },
   "review_bundle": {
-    "format": 1,
+    "format": 2,
+    "source_story": {
+      "path": "source-story.md",
+      "sha256": "d305b25c2dfc2ba5b3c7d8e091a4c21defc78adb4ecb0897a9ff6a8a425dfff0"
+    },
     "definition": {
       "format": 1,
       "reviewer": "Codex feature-story agent",
-      "source_sha256": "8f860dd5b867e70fdab206a71e6459cc4fa0266db6bbef680998fb437a9c7f4b",
-      "plan_sha256": "5a1d7f57bb44c1c6504e893db7269a290b0f0302628fb0432eeb58cc7f87fcc2",
-      "story_sha256": "6d6649bef4de790697e5fe1d02ca76b8b4a6ef5996ff63e785ebd458ab39e28b"
+      "source_sha256": "ca2f447b5f0a429e8a0cfe00208b39c6e939199062010c8e42dc0fe82cc8930f",
+      "plan_sha256": "a46ae49cc9b23acc79fd73e66c6a695450d0671a02c53b18d380e63c2dd5f74e",
+      "story_sha256": "d305b25c2dfc2ba5b3c7d8e091a4c21defc78adb4ecb0897a9ff6a8a425dfff0"
     },
     "plugin": "heinzel-google",
-    "core_version": "0.9.1",
-    "inputs_sha256": "c9e4eea7cbc2872125241e748bf5d6305de138c8c201908314d536f79106ed25",
+    "core_version": "0.9.16",
+    "inputs_sha256": "bdad50e42c3a75ca418e602a533d90f6eba2e13c5cf0478496cfa757251bf0e2",
     "screenshots": [
       {
-        "path": "docs/assets/screenshots/launch-files.png",
+        "path": "docs/assets/screenshots/google-calendar-week.png",
         "surface": "ui",
-        "caption": "Recently changed launch files in the app terminal \u2014 fictional Workspace replies, real Google operation"
+        "caption": "The real Core calendar reads a fictional launch week through the Google adapter; no Google account is contacted."
       },
       {
-        "path": "docs/assets/screenshots/launch-files-week.png",
+        "path": "docs/assets/screenshots/google-source-review.png",
         "surface": "ui",
-        "caption": "Explore seven days without a name filter \u2014 real Google operation over the fixture's same fictional files"
-      },
-      {
-        "path": "docs/assets/screenshots/launch-plan.png",
-        "surface": "ui",
-        "caption": "Read a Google Doc as workflow-ready text \u2014 fixture-only requester and fictional plan"
-      },
-      {
-        "path": "docs/assets/screenshots/launch-week.png",
-        "surface": "ui",
-        "caption": "The launch week's meetings and attendees \u2014 fixture-only requester, real Calendar adapter over fictional events"
-      },
-      {
-        "path": "docs/assets/screenshots/launch-inbox.png",
-        "surface": "ui",
-        "caption": "A focused launch-mail query \u2014 fixture-only requester, real Gmail adapter over fictional messages"
+        "caption": "Inspect a fictional selected-source identity on a phone; its real digest is continuity evidence, not a login or publisher check."
       },
       {
         "path": "docs/assets/screenshots/launch-files-json.png",
         "surface": "cli",
-        "caption": "Changed Docs and Sheets as structured data \u2014 real Google operation, fictional files"
+        "caption": "Inspect a three-day launch-file query as structured data \u2014 actual Google operation, fictional Workspace replies."
+      },
+      {
+        "path": "docs/assets/screenshots/launch-files-week.png",
+        "surface": "cli",
+        "caption": "Try a seven-day file query \u2014 fictional replies demonstrate invocation, not verified server-side filtering."
+      },
+      {
+        "path": "docs/assets/screenshots/launch-plan.png",
+        "surface": "cli",
+        "caption": "Read a fictional Google Doc as useful text through the real adapter and a fixture-only requester."
       },
       {
         "path": "docs/assets/screenshots/launch-metrics.png",
         "surface": "cli",
-        "caption": "A Sheet becomes a readable table \u2014 fixture-only requester, real documents adapter and local replies"
+        "caption": "Read a fictional Sheet as a table through the real adapter and a fixture-only requester."
+      },
+      {
+        "path": "docs/assets/screenshots/launch-week.png",
+        "surface": "cli",
+        "caption": "Read the fixed fictional October launch week; the separate current-window UI uses the same fixture provider."
       },
       {
         "path": "docs/assets/screenshots/mail-content.png",
         "surface": "cli",
-        "caption": "Read the next actions in a launch message \u2014 fixture-only requester, real Gmail adapter and local replies"
+        "caption": "Read a fictional launch message through the real Gmail adapter and a fixture-only requester."
       }
     ],
     "images": {
-      "launch-files.png": "349e7d63aae5267414541f6284e5dffef3683ffd96fd8792241a998d40e15702",
-      "launch-files-week.png": "1bfbd0bbc51cc701fb22830599a05a031bbe5f0df2e58813ff6f27b87d8e061a",
-      "launch-plan.png": "ed452c77479551245e723019b24d0bdf025bbc9b58e12d89d6c8fd80f7c6af18",
-      "launch-week.png": "881d27e00a41f97d2f3711659bfc7f85e287a3731d241b337bb4cd421d6782ba",
-      "launch-inbox.png": "91fc815c3a55f8eb1c66b0411e1cbef37869c7714e12de1b6353922ad98eed3d",
-      "launch-files-json.png": "3c3cd70bb95af88e761a8471df896b3881be5415a03e8159cd17f2bc76048552",
+      "google-calendar-week.png": "00bcfce7a8981f3d25d370a08604ca627fb20cc848a9a39523e7e4e6cd67df39",
+      "google-source-review.png": "745027094bcb7a1e504a1c71865a058f2253b61e36fe1b8fb7327ab0e67abab1",
+      "launch-files-json.png": "bc9dc4ad266954a631c3ffbac1a6c5b54c12e4479b689274a3415abe1b698124",
+      "launch-files-week.png": "fa0c67acd6aa7049c33016979e46b836fe407b1fa70c4fc04e0a3e2c25d8509d",
+      "launch-plan.png": "a8f723cff386597587a28aa1a76dc6e59b72b40665107629cda30dc1c060fe09",
       "launch-metrics.png": "694361694713cb2bb4b3e9a89ec50004ab36120233ed8dbe615466cd5ae09a62",
+      "launch-week.png": "fa33ea4784c5b144f5f389ae36ad498cbabe58fffff69ed5d6e10542ba4938ad",
       "mail-content.png": "ceef4e8ed3b08a9d3b787467049c7e8e45effbbdfcaacee0508b023d51691cd4"
     },
     "transcripts": {
-      "launch-files.txt": "a11fa503de4d81f1dba31e50d2991918b45868a8219ea709ac2c991a2566ad16",
-      "launch-files-week.txt": "06dfd470fe1b9081a120c2efc54740eaadf1acd8bbe5e14cec44ccb1c14fba2b",
-      "launch-plan.txt": "cd063b719ac141fc6732400989afda097f4ebef89115aa8dd5fab0bf7240c182",
-      "launch-week.txt": "d889d345ffbc9238eb93b41198073bb3d3f87bd9b140f094fdb5c17ec6c4d06d",
-      "launch-inbox.txt": "3f69021cb393675eb9e0c4e00e82a05f72b5186feb29a21f3f3188f7d9cbc048",
-      "launch-files-json.txt": "2b206e7dbb043f77489f683e135a80ff6beb9731cfc0cd5c50e0e3519a69f315",
+      "google-calendar-week.txt": "6e8a3d166e39c7d19a3e9727283336268df0358d2269b2e040d061b6102284a3",
+      "google-source-review.txt": "629fe163585d6169b111ce2967dc0240fc6ddb9779ba78370349ffb2a5c4647b",
+      "launch-files-json.txt": "56059973ef291fbb1248fc5416ab9170e636931bc34e95d693fc65e868f94c6b",
+      "launch-files-week.txt": "32710d327206b414725559745ad9fbf93a70fa352c8875244f520bde6e269ff2",
+      "launch-plan.txt": "a7ded47e8432d800d520488f35d85f613b09609b4041a074ae8a13aaa7c37d91",
       "launch-metrics.txt": "d3f2f19f3a5f470e2c567dd65d8333fdba8fb653a2346a31cfa8b9c008545a04",
+      "launch-week.txt": "454ff4cb462eba323ad6fd0e6ffb4da0ae59b2ffe17a86337fa260529977df83",
       "mail-content.txt": "57cda012c3d61d21aa3e387c296ebce6483c114b169bb416d5296d4af344a813"
     },
-    "bundle_sha256": "6ed7265dc45c7a003fc343894f41e338887abecde02cdb500e67793291714769"
+    "bundle_sha256": "bff680b5353c2fd63dc00cd7e08434e3c8f4cc6347cc228fcab7622e24c13d7f"
   },
   "privacy_review": {
     "format": 1,
-    "bundle_sha256": "6ed7265dc45c7a003fc343894f41e338887abecde02cdb500e67793291714769",
+    "bundle_sha256": "bff680b5353c2fd63dc00cd7e08434e3c8f4cc6347cc228fcab7622e24c13d7f",
     "reviewer": "Codex privacy agent",
     "decision": "approve",
     "checked_images": [
-      "launch-files.png",
+      "google-calendar-week.png",
+      "google-source-review.png",
+      "launch-files-json.png",
       "launch-files-week.png",
       "launch-plan.png",
-      "launch-week.png",
-      "launch-inbox.png",
-      "launch-files-json.png",
       "launch-metrics.png",
+      "launch-week.png",
       "mail-content.png"
     ],
     "checks": {

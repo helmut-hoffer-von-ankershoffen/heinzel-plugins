@@ -1,0 +1,12 @@
+Launch metrics
+Readiness
+
+
+ Release check        Target         Observed
+ ────────────────────────────────────────────
+ Export rows          100% retained  100%
+ Phone screenshots    6 layouts      6 passed
+ Crash-free sessions  99.9%          99.95%
+
+Source: https://docs.google.com/spreadsheets/d/launch-metrics/edit
+Revision: 42

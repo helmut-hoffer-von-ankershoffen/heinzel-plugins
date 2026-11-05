@@ -17,7 +17,9 @@ from heinzel_plugin_tools import cli as plugins
 pytestmark = pytest.mark.integration
 
 
-@pytest.mark.parametrize("plugin", ("heinzel-clock", "heinzel-resource", "heinzel-tailscale", "heinzel-theme"))
+@pytest.mark.parametrize(
+    "plugin", ("heinzel-clock", "heinzel-resource", "heinzel-tailscale", "heinzel-theme", "heinzel-google")
+)
 def test_recaptured_current_gallery_has_fresh_independent_format_two_review(tmp_path, plugin, monkeypatch):
     source = Path(__file__).resolve().parents[1] / "plugins" / plugin
 

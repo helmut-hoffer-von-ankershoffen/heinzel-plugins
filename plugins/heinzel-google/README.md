@@ -1,6 +1,6 @@
 # heinzel-google
 
-Google Docs, Sheets, Drive, Calendar and Gmail: the `documents` (read), `calendar` and `mail` (read and write)
+Google Docs, Sheets, Slides, Drive, Calendar and Gmail: the `documents` (read), `calendar` and `mail` (read and write)
 capabilities ([ADR 0028](https://github.com/helmut-hoffer-von-ankershoffen/heinzel/blob/main/docs/adr/0028-integrations-are-capability-adapters.md)): a first-party
 [Heinzelmännchen](https://github.com/helmut-hoffer-von-ankershoffen/heinzel) plugin.
 
@@ -18,7 +18,9 @@ It is the **default provider** for Google Workspace, not the only possible one: 
 
 Through the open-source [Google Workspace CLI](https://github.com/googleworkspace/cli), `gws` (0.22 or newer): it
 signs in with Google, keeps its own credentials (encrypted, with the key in the OS keychain, by default) and calls
-Google's APIs. This plugin never sees a token. It runs `gws <service> <resource> <method> --params <JSON> --format
+Google's APIs. Ordinary capability commands leave tokens to `gws`; source-bound leases obtain service-scoped
+OAuth credentials through an isolated helper, without including credentials in captured content or diagnostics.
+It runs `gws <service> <resource> <method> --params <JSON> --format
 json` as an argument list (never through a shell), with the executable resolved to an absolute path, from the root
 directory (so no project's `.env` reaches `gws`), with an allowlisted environment (never Heinzelmännchen's own
 credentials or other secrets; of gws's own variables only `GOOGLE_WORKSPACE_CLI_CONFIG_DIR`, `_KEYRING_BACKEND`,
@@ -29,7 +31,7 @@ timeout that stops `gws` and anything it started, and at most 10 MB of output re
 
 What leaves this machine, and where to: file ids, the Drive query (the modified-time window and the `--name` text)
 the calendar window and the mail search, to Google's API hosts (`www.googleapis.com` for Drive and Calendar,
-`docs.googleapis.com`, `sheets.googleapis.com`, `gmail.googleapis.com`); `gws` also fetches API descriptions from Google and refreshes its sign-in at
+`docs.googleapis.com`, `sheets.googleapis.com`, `slides.googleapis.com`, `gmail.googleapis.com`); `gws` also fetches API descriptions from Google and refreshes its sign-in at
 `oauth2.googleapis.com`. Nothing goes anywhere else: gws 0.22 documents no telemetry or update check, and none was
 found in it.
 
@@ -47,10 +49,18 @@ hz system doctor        # finds gws, checks its version and its stored sign-in, 
 By hand, setup is:
 
 ```bash
-gws auth login --scopes https://www.googleapis.com/auth/documents.readonly,https://www.googleapis.com/auth/spreadsheets.readonly,https://www.googleapis.com/auth/drive.metadata.readonly,https://www.googleapis.com/auth/calendar.readonly
+gws auth login --scopes https://www.googleapis.com/auth/documents.readonly,https://www.googleapis.com/auth/spreadsheets.readonly,https://www.googleapis.com/auth/presentations.readonly,https://www.googleapis.com/auth/drive.metadata.readonly,https://www.googleapis.com/auth/calendar.readonly
 hz system config set capabilities.documents google
 hz system config set capabilities.calendar google
 ```
+
+Version 0.9.2 adds the read-only Slides permission, `https://www.googleapis.com/auth/presentations.readonly`,
+for the existing presentation reader. It permits reading presentations the account can access, not just one
+selected deck ([Google API contract](https://developers.google.com/workspace/slides/api/reference/rest/v1/presentations/get)).
+An upgrade or a stored sign-in does not grant that permission. Existing users who choose Slides reads must
+explicitly consent with the login command above; `hz setup google` may return without signing in again when
+already configured. `gws auth login` replaces its scope list: include any existing opt-in Gmail, Calendar or
+write scopes you intend to retain. This plugin never silently signs in again to add Slides permission.
 
 Mail is opt-in: setup asks, defaulting to no, and then signs in again with Gmail's read-only scope added
 (`,https://www.googleapis.com/auth/gmail.readonly`), which lets the plugin read all of your mail; then
@@ -60,7 +70,7 @@ Writes are opt-in too. Setup asks whether hz may change your calendar and your m
 the sign-in ask for `https://www.googleapis.com/auth/calendar.events` (create, move, cancel and answer events) and
 `https://www.googleapis.com/auth/gmail.modify` (keep drafts, send them, file conversations; it reads too, so it
 replaces `gmail.readonly`, and it can't delete mail for good). Heinzelmännchen writes only from confirmed write operations
-that show you what they will do and run after you confirm; a chat's agent only proposes them
+that show you what they will do and run after you confirm; your Heinzel only proposes them
 ([ADR 0059](https://github.com/helmut-hoffer-von-ankershoffen/heinzel/blob/main/docs/adr/0059-the-calendar-and-the-mail-write-through-hz-after-a-confirmation.md)). Without the
 scope, a write fails with the `gws auth login` that adds it.
 
@@ -107,7 +117,7 @@ def notes(documents: Documents) -> Document:
 
 | Method | Capability | `gws` command |
 | --- | --- | --- |
-| `read(ref)` | `documents:read` | `drive files get` (metadata), then `docs documents get` with `includeTabsContent` or `sheets spreadsheets get` with `includeGridData` |
+| `read(ref)` | `documents:read` | `drive files get` (metadata), then `docs documents get` with `includeTabsContent`, `sheets spreadsheets get` with `includeGridData`, or `slides presentations get` |
 | `events(window)` | `calendar:read` | `calendar events list` on `primary`, `singleEvents`, `showDeleted`, paged by `pageToken` |
 | `messages(query, window)` | `mail:read` | `gmail users messages list` with Gmail's search, then `messages get` (metadata) for each |
 | `read(message)` | `mail:read` | `gmail users messages get` (full) |
@@ -172,42 +182,93 @@ Development and release commands: [repository guide](../../README.md).
 <!-- screenshots:start -->
 ## Screenshots
 
-<img src="docs/assets/screenshots/launch-files.png" alt="Recently changed launch files in the app terminal — fictional Workspace replies, real Google operation" width="960">
+<img src="docs/assets/screenshots/google-calendar-week.png" alt="The real Core calendar reads a fictional launch week through the Google adapter; no Google account is contacted." width="960">
 
-Recently changed launch files in the app terminal — fictional Workspace replies, real Google operation
+The real Core calendar reads a fictional launch week through the Google adapter; no Google account is contacted.
 
-<img src="docs/assets/screenshots/launch-files-week.png" alt="Explore seven days without a name filter — real Google operation over the fixture&#x27;s same fictional files" width="960">
+<img src="docs/assets/screenshots/google-source-review.png" alt="Inspect a fictional selected-source identity on a phone; its real digest is continuity evidence, not a login or publisher check." width="960">
 
-Explore seven days without a name filter — real Google operation over the fixture&#x27;s same fictional files
-
-<img src="docs/assets/screenshots/launch-plan.png" alt="Read a Google Doc as workflow-ready text — fixture-only requester and fictional plan" width="960">
-
-Read a Google Doc as workflow-ready text — fixture-only requester and fictional plan
-
-<img src="docs/assets/screenshots/launch-week.png" alt="The launch week&#x27;s meetings and attendees — fixture-only requester, real Calendar adapter over fictional events" width="960">
-
-The launch week&#x27;s meetings and attendees — fixture-only requester, real Calendar adapter over fictional events
-
-<img src="docs/assets/screenshots/launch-inbox.png" alt="A focused launch-mail query — fixture-only requester, real Gmail adapter over fictional messages" width="960">
-
-A focused launch-mail query — fixture-only requester, real Gmail adapter over fictional messages
+Inspect a fictional selected-source identity on a phone; its real digest is continuity evidence, not a login or publisher check.
 
 <details>
 <summary>Command line</summary>
 
-<img src="docs/assets/screenshots/launch-files-json.png" alt="Changed Docs and Sheets as structured data — real Google operation, fictional files" width="960">
+<img src="docs/assets/screenshots/launch-files-json.png" alt="Inspect a three-day launch-file query as structured data — actual Google operation, fictional Workspace replies." width="960">
 
-Changed Docs and Sheets as structured data — real Google operation, fictional files
+Inspect a three-day launch-file query as structured data — actual Google operation, fictional Workspace replies.
 
-<img src="docs/assets/screenshots/launch-metrics.png" alt="A Sheet becomes a readable table — fixture-only requester, real documents adapter and local replies" width="960">
+<img src="docs/assets/screenshots/launch-files-week.png" alt="Try a seven-day file query — fictional replies demonstrate invocation, not verified server-side filtering." width="960">
 
-A Sheet becomes a readable table — fixture-only requester, real documents adapter and local replies
+Try a seven-day file query — fictional replies demonstrate invocation, not verified server-side filtering.
 
-<img src="docs/assets/screenshots/mail-content.png" alt="Read the next actions in a launch message — fixture-only requester, real Gmail adapter and local replies" width="960">
+<img src="docs/assets/screenshots/launch-plan.png" alt="Read a fictional Google Doc as useful text through the real adapter and a fixture-only requester." width="960">
 
-Read the next actions in a launch message — fixture-only requester, real Gmail adapter and local replies
+Read a fictional Google Doc as useful text through the real adapter and a fixture-only requester.
+
+<img src="docs/assets/screenshots/launch-metrics.png" alt="Read a fictional Sheet as a table through the real adapter and a fixture-only requester." width="960">
+
+Read a fictional Sheet as a table through the real adapter and a fixture-only requester.
+
+<img src="docs/assets/screenshots/launch-week.png" alt="Read the fixed fictional October launch week; the separate current-window UI uses the same fixture provider." width="960">
+
+Read the fixed fictional October launch week; the separate current-window UI uses the same fixture provider.
+
+<img src="docs/assets/screenshots/mail-content.png" alt="Read a fictional launch message through the real Gmail adapter and a fixture-only requester." width="960">
+
+Read a fictional launch message through the real Gmail adapter and a fixture-only requester.
 
 </details>
 
 [Open the screenshot gallery](docs/assets/screenshots/index.html).
 <!-- screenshots:end -->
+
+### Captured reads and reviewed writes
+
+Version 0.9.2 requires published Heinzel 0.9.16 for source-bound reads, captured writes and marked draft appends.
+The provider source is being prepared against that published SDK; this is not real-account or workflow acceptance.
+The captured-write adapter implements existing Docs and Slides with Google's `requiredRevisionId` precondition.
+Sheets append and new-file creation are refused by this captured-write contract because they cannot enforce
+that revision atomically. Their implementation helpers remain pending a suitable host contract.
+A failed or uncertain mutation cannot be replayed through the same lease. An acknowledgement carries no
+revision inferred from a later read. No real Google account, sign-in, or provider write was used to validate
+this candidate, and the Turing rolling-document workflow remains unaccepted.
+
+For captured writes, `insert-draft` into a Doc appends at `section="end"` or inserts after the first paragraph
+matching the section text. A URL's `tab` query or fragment selects that exact tab, including nested tabs;
+the adapter reads with `includeTabsContent`, passes `tabId` inside the insertion location and uses the reviewed
+`requiredRevisionId`. It checks the same tab after mutation without treating that later read as an acknowledgement
+revision. A missing tab or heading is refused during draft review. Slides currently implements only
+`section="end"`, meaning a new slide with the draft text. Existing slide/shape sections are refused before
+credential capture and approval; editing those sections remains pending, alongside Sheets and new-file support.
+
+Subprocess deadlines still stop useful work at the original timeout. If killing, reaping, or confirming the
+owned process group is uncertain, cleanup retains the caller and credential lease lock until termination is
+confirmed. It does not return an ordinary read/write failure or release the credential while that work may run.
+The tab and process behavior is covered only with offline provider models and owned local test subprocesses.
+Provider reference: [Docs tab locations and defaults](https://developers.google.com/workspace/docs/api/reference/rest/v1/documents/request)
+and [reading tab content](https://developers.google.com/workspace/docs/api/how-tos/tabs).
+
+Installed registration keeps the legacy `documents` capability read-only: its public write contract requires
+`replace_section`, which this insert-draft adapter does not implement. The separate `CapturedWriteService` is
+registered and resolves through the real host source capture, with the private proposal/execution operations
+still requiring their existing approval and credential checks. `GoogleDocumentWrites` explicitly declares only
+`insert-draft` through `supported_operations`; it does not claim the legacy replacement protocol.
+
+The owning installed-wheel tests exercise the normal private proposal, staging and trusted confirmation path,
+with only the provider transport faked: zero unapproved mutations, one selected-tab conditional mutation,
+a host-generated acknowledgement and no replay. These tests must run against the actual published SDK 0.9.16.
+They do not establish live provider behavior, standing grants or the complete Turing rolling-document workflow.
+Sheets, new-file and existing-Slides-section support remain outside the captured-write contract.
+
+### Marked rolling drafts
+
+The source-only `GoogleDraftAppends` service implements the frozen draft-append port for an existing Google Doc.
+The logical `release-poems` section appends at the end of the exact URL-selected tab. It inserts only the host's
+marked draft, using Google's [requiredRevisionId precondition](https://developers.google.com/workspace/docs/api/reference/rest/v1/documents/batchUpdate#writecontrol); it neither creates a file nor changes sharing. Capture returns
+the complete marked section, including human edits, at the newly observed revision. An ambiguous append result is
+never converted into success by a later read.
+
+The owning lock, gallery and installed-wheel checks must use the published SDK 0.9.16. Fictional gallery fixtures and
+offline provider tests do not establish a successful Google account sign-in, real write or complete Turing workflow.
+Those acceptance steps require an isolated account journey and the owner's actual consent; a plugin release alone
+does not prove them.

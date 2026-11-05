@@ -162,7 +162,13 @@ CI can download a candidate wheel from an official Core Actions run with the `co
 
 `check-fast` runs owning lint and offline unit/integration tests. `check` runs the owning plugin's formatting, lint, spelling, strict mypy/Pyright, Python tests and coverage (at least
 90%), plus its declared frontend checks. `acceptance` installs built core/plugin wheels into a separate environment
-and runs the owning head and browser tests. `release` checks and builds one plugin and prints its independent tag/artifacts.
+and runs the owning head and browser tests. Browser projects keep exact Node dependencies in
+`tests/browser/package-lock.json`. Their explicit `browser:install` npm script installs all tested engines with the
+locked `playwright-core` CLI; `browser:install-deps` declares matching Linux runner libraries installed visibly
+in the owning CI job. Lifecycle scripts stay disabled. Local fixtures install browsers only, never OS packages,
+and honor `PLAYWRIGHT_BROWSERS_PATH` for isolated cold-cache validation. Installer and isolated child share
+one resolved cache, including Linux XDG and relative paths; `0` keeps browsers inside the owning locked package.
+`release` checks and builds one plugin and prints its independent tag/artifacts.
 It publishes nothing. The Release workflow previews by default; its explicit publish option creates that plugin's
 tag, GitHub release and optional PyPI artifacts with build provenance. `make publish NAME=<name>` dispatches that
 workflow from clean, current main. Public PyPI publication uses its protected environment and trusted publisher.

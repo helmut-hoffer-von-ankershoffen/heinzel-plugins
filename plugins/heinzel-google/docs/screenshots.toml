@@ -2,94 +2,88 @@ format = 1
 bootstrap = "docs/screenshot_fixture.py"
 
 [[scenes]]
-name = "launch-files"
+name = "google-calendar-week"
 surface = "ui"
 route = "/"
-caption = "Recently changed launch files in the app terminal — fictional Workspace replies, real Google operation"
+appearance = "light"
+caption = "The real Core calendar reads a fictional launch week through the Google adapter; no Google account is contacted."
 timeout_ms = 30000
+viewport = { width = 1280, height = 900 }
 
 [[scenes.steps]]
-action = "terminal"
-command = ["google", "files", "--days", "3", "--name", "Launch"]
+action = "wait"
+text = "Next: Launch readiness review"
 
-[scenes.viewport]
-width = 1280
-height = 650
+[[scenes.steps]]
+action = "click"
+role = "button"
+name_regex = "^Not in a meeting"
+within_role = "contentinfo"
+
+[[scenes.steps]]
+action = "wait"
+role = "button"
+name = "Previous week"
+
+[[scenes.steps]]
+action = "wait"
+text = "Launch readiness review"
 
 [[scenes]]
-name = "launch-files-week"
+name = "google-source-review"
 surface = "ui"
 route = "/"
-caption = "Explore seven days without a name filter — real Google operation over the fixture's same fictional files"
+appearance = "dark"
+caption = "Inspect a fictional selected-source identity on a phone; its real digest is continuity evidence, not a login or publisher check."
 timeout_ms = 30000
+viewport = { width = 390, height = 844 }
 
 [[scenes.steps]]
-action = "terminal"
-command = ["google", "files", "--days", "7"]
-
-[scenes.viewport]
-width = 1280
-height = 650
-
-[[scenes]]
-name = "launch-plan"
-surface = "ui"
-route = "/"
-caption = "Read a Google Doc as workflow-ready text — fixture-only requester and fictional plan"
-timeout_ms = 30000
+action = "click"
+role = "button"
+name = "Google source review"
 
 [[scenes.steps]]
-action = "terminal"
-command = ["showcase", "notes", "launch-plan"]
-
-[scenes.viewport]
-width = 1280
-height = 650
-
-[[scenes]]
-name = "launch-week"
-surface = "ui"
-route = "/"
-caption = "The launch week's meetings and attendees — fixture-only requester, real Calendar adapter over fictional events"
-timeout_ms = 30000
+action = "wait"
+role = "heading"
+name = "Google source review"
 
 [[scenes.steps]]
-action = "terminal"
-command = ["showcase", "week"]
-
-[scenes.viewport]
-width = 1280
-height = 650
-
-[[scenes]]
-name = "launch-inbox"
-surface = "ui"
-route = "/"
-caption = "A focused launch-mail query — fixture-only requester, real Gmail adapter over fictional messages"
-timeout_ms = 30000
-
-[[scenes.steps]]
-action = "terminal"
-command = ["showcase", "inbox"]
-
-[scenes.viewport]
-width = 1280
-height = 650
+action = "wait"
+text = "Direct native executable."
 
 [[scenes]]
 name = "launch-files-json"
 surface = "cli"
-caption = "Changed Docs and Sheets as structured data — real Google operation, fictional files"
+caption = "Inspect a three-day launch-file query as structured data — actual Google operation, fictional Workspace replies."
 command = ["google", "files", "--days", "3", "--name", "Launch", "--json"]
+
+[[scenes]]
+name = "launch-files-week"
+surface = "cli"
+caption = "Try a seven-day file query — fictional replies demonstrate invocation, not verified server-side filtering."
+command = ["google", "files", "--days", "7"]
+
+[[scenes]]
+name = "launch-plan"
+surface = "cli"
+caption = "Read a fictional Google Doc as useful text through the real adapter and a fixture-only requester."
+command = ["showcase", "notes", "launch-plan"]
 
 [[scenes]]
 name = "launch-metrics"
 surface = "cli"
-caption = "A Sheet becomes a readable table — fixture-only requester, real documents adapter and local replies"
+caption = "Read a fictional Sheet as a table through the real adapter and a fixture-only requester."
 command = ["showcase", "notes", "launch-metrics"]
+
+[[scenes]]
+name = "launch-week"
+surface = "cli"
+caption = "Read the fixed fictional October launch week; the separate current-window UI uses the same fixture provider."
+command = ["showcase", "week"]
 
 [[scenes]]
 name = "mail-content"
 surface = "cli"
-caption = "Read the next actions in a launch message — fixture-only requester, real Gmail adapter and local replies"
+caption = "Read a fictional launch message through the real Gmail adapter and a fixture-only requester."
 command = ["showcase", "message-content"]
