@@ -162,12 +162,8 @@ jobs:
         run: make build NAME="$PLUGIN"
       - name: Install declared browser runner libraries from the owning lock
         env:
-          DIRECTORY: ${{ matrix.path }}
-        run: |
-          if [ -f "$DIRECTORY/tests/browser/package-lock.json" ]; then
-            npm --prefix "$DIRECTORY/tests/browser" ci --ignore-scripts --no-audit --no-fund
-            npm --prefix "$DIRECTORY/tests/browser" run --ignore-scripts --if-present browser:install-deps
-          fi
+          PLUGIN: ${{ matrix.name }}
+        run: uv run --frozen --no-build --group tooling python scripts/browser_dependencies.py
       - name: Test the installed owning wheel in the browser when declared
         env:
           PLUGIN: ${{ matrix.name }}
