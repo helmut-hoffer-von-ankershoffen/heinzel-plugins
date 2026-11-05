@@ -252,6 +252,16 @@ It has no plugin entry point and needs no additional PyPI publisher. Root `make 
 toolkit; use `NAME=<owner>` for plugin commands. `make preflight NAME=<owner>` includes that plugin's full checks,
 build, audit and installed acceptance. Toolkit tests do not run core's suite.
 
+Toolkit 0.3.5 binds a fixed `source-story.md` evidence file to each new format-2 screenshot review bundle.
+The bounded UTF-8 story must match the source-analysis definition exactly before review and publication, and stays
+with the published evidence. Surface analysis covers every entry point and generic Core UI, including approvals;
+absence of a plugin Page does not establish terminal-only behavior. The story is untrusted evidence, never an
+approval or instructions. Every image, transcript and existing privacy check still needs independent approval.
+Read-only checks preserve ten exact pre-upgrade public galleries through closed whole-manifest pins, including their
+original receipts. This narrowly replaces the initial blanket rejection of older bundles; it grants no new review or
+publication permission and does not claim their source-story file was bundle-reviewed. Changed or unrecognized
+historical evidence needs fresh source analysis, capture and review. See the [compatibility boundary](docs/SCREENSHOT_AUTHORING.md#exact-historical-galleries-read-only).
+
 Toolkit 0.3.4 runs its isolated capture children with Python `-I -B`, including the backend, fixture and installed
 CLI entry points, and terminal wrapper. Imports cannot add bytecode files to the verified source inventory.
 Spelling scans run relative to the owning project so exact verified vendor exclusions match; first-party files

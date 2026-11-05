@@ -51,8 +51,10 @@ def recorded(owner):
         path = (owner / shot["path"]).with_suffix(".txt")
         path.write_text("Fictional screenshot test transcript\n")
         transcripts[path.name] = hashlib.sha256(path.read_bytes()).hexdigest()
+    (owner / capture.OUTPUT / privacy.SOURCE_STORY).write_bytes((owner / planning.STORY).read_bytes())
     bundle = {
-        "format": 1,
+        "format": 2,
+        "source_story": {"path": privacy.SOURCE_STORY, "sha256": definition["story_sha256"]},
         "plugin": "heinzel-harbor",
         "core_version": "0.9.8",
         "definition": definition,
@@ -316,7 +318,7 @@ def test_publication_rejects_linked_target_before_writing_any_gallery(owner, tmp
     folder = owner / privacy.DRAFT
     folder.mkdir(parents=True)
     for path in target.iterdir():
-        if path.suffix in {".png", ".txt"}:
+        if path.suffix in {".png", ".txt"} or path.name == privacy.SOURCE_STORY:
             (folder / path.name).write_bytes(path.read_bytes())
     privacy.prepare_review(folder, bundle)
     receipt = folder / "privacy-review.json"
@@ -410,7 +412,7 @@ def test_gallery_publication_rolls_back_without_deleting_the_previous_gallery(ow
     receipt = json.loads((owner / capture.MANIFEST).read_text())["privacy_review"]
     folder = owner / privacy.DRAFT
     folder.mkdir(parents=True)
-    for filename in [*bundle["images"], *bundle["transcripts"]]:
+    for filename in [*bundle["images"], *bundle["transcripts"], privacy.SOURCE_STORY]:
         (folder / filename).write_bytes((target / filename).read_bytes())
     privacy.prepare_review(folder, bundle)
     receipt_path = folder / "test-review.json"
@@ -445,6 +447,7 @@ def test_private_draft_canonicalization_preserves_images_and_requires_review_of_
     bundle = manifest["review_bundle"]
     folder = owner / privacy.DRAFT
     folder.mkdir(parents=True)
+    (folder / privacy.SOURCE_STORY).write_bytes((owner / capture.OUTPUT / privacy.SOURCE_STORY).read_bytes())
     original_images = {}
     for filename in bundle["images"]:
         data = (owner / capture.OUTPUT / filename).read_bytes()

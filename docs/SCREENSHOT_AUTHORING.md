@@ -157,7 +157,7 @@ approval switch.
 
 Generated transcripts use LF line endings, no trailing whitespace and exactly one final newline before hashes are
 computed. Contact sheets are canonical too. Commit whitespace hooks therefore leave the reviewed bytes unchanged.
-For an older private draft, `privacy.canonicalize_draft(folder)` preserves every PNG, canonicalizes text, rebuilds
+For a format-2 private draft, `privacy.canonicalize_draft(folder)` preserves every PNG, canonicalizes text, rebuilds
 its bundle hash and deletes stale review receipts. Any changed transcript requires a new independent review.
 Never normalize a public gallery and keep its old review hash.
 
@@ -179,3 +179,38 @@ The toolkit's dedicated CI journey creates a new unknown plugin, captures real T
 installed released SDK, verifies explicit review and README publication, detects staleness, fails a scene, and recovers.
 It also proves authentication presentation is removed before both success and failure image saves. Ordinary offline
 checks neither import a plugin nor start a browser.
+
+### Source evidence in the review bundle
+
+New captures use a format-2 review bundle with a fixed `source-story.md` file. It contains the normal source-analysis
+agent's exact story, bound by SHA-256 to both the definition and review bundle. The file must be regular, unlinked,
+bounded UTF-8; missing or changed evidence refuses review and publication. It is retained beside the published
+images and transcripts. A receipt for older bytes or a bundle without that evidence cannot approve a new capture.
+
+Source analysis inventories all declared entry points and actual declarations, including generic Core-rendered
+approvals and other feature surfaces. It distinguishes external provider UI, Core feature UI and terminal-only
+results. No Page declaration alone does not prove a plugin is terminal-only. The independent reviewer reads this
+untrusted evidence and every image/transcript; contradictory or insufficient evidence refuses publication. A plugin
+with feature UI still needs at least two genuine feature UI scenes plus a CLI scene. Terminal output cannot replace
+those views, and a story cannot override privacy checks or grant approval.
+
+
+### Exact historical galleries: read only
+
+The initial 0.3.5 policy rejected every older review bundle. Read-only gallery validation now makes one closed
+compatibility exception for the ten public manifests authenticated at
+[pre-upgrade commit `3be4b072`](https://github.com/helmut-hoffer-von-ankershoffen/heinzel-plugins/tree/3be4b072ca2c78c6558298434319e30550e91a23).
+The reviewed internal allowlist binds each plugin identity to the SHA-256 of its entire original capture manifest,
+including the independent privacy receipt. It has no caller-supplied pins, date cutoffs, wildcards or generic
+format-1 fallback. Rewriting even the manifest's whitespace changes that exact identity.
+
+All existing provenance, source-input, current definition, story, plan, image, transcript, independent approval,
+README and contact-sheet checks still apply. The normal owning check still builds missing generated view assets
+before checking source freshness. No gallery bytes or original receipts are rewritten. The JSON result identifies
+`review_bundle_format: 1` and `source_story_bundle_reviewed: false`: historical image/transcript review is not a claim
+that the new self-contained story evidence was reviewed.
+
+This exception admits no private draft, agent review, canonicalization or publication. Those paths require the
+strict format-2 story bundle, including when an authentic pinned historical manifest or receipt is supplied.
+Any changed or unrecognized historical evidence requires a fresh capture and genuine independent review; never
+copy a prior receipt into a new bundle or manufacture an approval to satisfy the check.

@@ -502,6 +502,9 @@ def test_a_complete_capture_publishes_only_after_an_exact_bundle_approval(harnes
     assert published["fresh"] is True and published["privacy_reviewed"] is True
     assert published["reviewed_by"] == "Synthetic privacy agent"
     assert capture.check_capture(harness.owner)["ok"] is True
+    assert (harness.owner / capture.OUTPUT / privacy.SOURCE_STORY).read_bytes() == (
+        harness.owner / capture.DRAFT / privacy.SOURCE_STORY
+    ).read_bytes()
     assert "<!-- screenshots:start -->" in (harness.owner / "README.md").read_text()
     catalog = capture.project_data(harness.owner)["tool"]["heinzel"]["catalog"]["screenshots"]
     assert [shot["path"] for shot in catalog] == [f"docs/assets/screenshots/{n}.png" for n in ("ui", "terminal", "cli")]
@@ -793,3 +796,41 @@ def test_installed_cli_capture_uses_owning_isolated_python_without_writing_bytec
     env = capture.demo_environment(tmp_path / "demo", interpreter)
     assert capture.hz(interpreter, ["fictional", "--json"], env, tmp_path) == "Fictional result\n"
     assert sorted(path.relative_to(vendor) for path in vendor.rglob("*")) == before
+
+
+def test_normal_capture_supplies_exact_analyzed_story_in_the_self_contained_review_bundle(harness):
+    from heinzel_plugin_tools import planning
+
+    record(harness, draft_only=True)
+    folder = harness.owner / capture.DRAFT
+    bundle = json.loads((folder / "review-input.json").read_text())
+    assert bundle["format"] == 2
+    assert bundle["source_story"] == {"path": privacy.SOURCE_STORY, "sha256": bundle["definition"]["story_sha256"]}
+    assert (folder / privacy.SOURCE_STORY).read_bytes() == (harness.owner / planning.STORY).read_bytes()
+    assert privacy.SOURCE_STORY in (folder / "REVIEW.md").read_text()
+
+
+def test_story_changed_by_agent_is_refused_again_before_publication(harness, monkeypatch):
+    record(harness, draft_only=True)
+    folder = harness.owner / capture.DRAFT
+    original_metadata = (harness.owner / "pyproject.toml").read_bytes()
+
+    def review(_root, bundle, _receipt):
+        (folder / privacy.SOURCE_STORY).write_text(
+            "Substituted evidence after independent review must never publish.\n"
+        )
+        return {
+            "format": 1,
+            "bundle_sha256": privacy.bundle_digest(bundle),
+            "reviewer": "Synthetic independent agent",
+            "decision": "approve",
+            "checked_images": list(bundle["images"]),
+            "checks": dict.fromkeys(privacy.CHECKS, True),
+            "findings": [],
+        }
+
+    monkeypatch.setattr(capture, "run_agent", review)
+    with pytest.raises(privacy.CaptureError, match="evidence changed"):
+        capture.publish_draft(harness.owner)
+    assert not (harness.owner / capture.OUTPUT).exists()
+    assert (harness.owner / "pyproject.toml").read_bytes() == original_metadata
