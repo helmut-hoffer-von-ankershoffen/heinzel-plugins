@@ -17,6 +17,7 @@ ABOUT = ("drive", "about", "get")
 APIS = [
     "Google Docs API v1 (documents.get)",
     "Google Sheets API v4 (spreadsheets.get)",
+    "Google Slides API v1 (presentations.get)",
     "Google Drive API v3 (files.get, files.list; metadata only)",
     "Google Calendar API v3 (events.list, freebusy.query; events.get, insert, patch, delete to write)",
     (

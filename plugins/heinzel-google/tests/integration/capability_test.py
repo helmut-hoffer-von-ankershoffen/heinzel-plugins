@@ -128,7 +128,13 @@ def test_capability_list_shows_the_adapter_and_its_hosts(google_kernel):
         (
             "documents",
             ["read"],
-            ["www.googleapis.com", "docs.googleapis.com", "sheets.googleapis.com", "oauth2.googleapis.com"],
+            [
+                "www.googleapis.com",
+                "docs.googleapis.com",
+                "sheets.googleapis.com",
+                "slides.googleapis.com",
+                "oauth2.googleapis.com",
+            ],
         ),
         ("mail", ["read", "write"], ["gmail.googleapis.com", "oauth2.googleapis.com"]),
     ]

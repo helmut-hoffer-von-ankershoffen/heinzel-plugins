@@ -1,17 +1,21 @@
-"""Google Docs, Sheets, Drive, Calendar and Gmail: the documents, calendar and mail capabilities.
+"""Google Docs, Sheets, Slides, Drive, Calendar and Gmail: the documents, calendar and mail capabilities.
 
 A Heinzelmännchen plugin, discovered through the `heinzel.modules` entry point in pyproject.toml. It is the default
-provider of the `documents` (Docs and Sheets, read), `calendar` (Google Calendar, read and write) and `mail` (Gmail,
-read and write) capabilities for Google Workspace (Heinzelmännchen ADR 0028), backed by the Google Workspace CLI
-(`gws`), which signs in and talks to Google (ADR 0035, ADR 0042). Bind it with `[capabilities] documents = "google"`,
+provider of the `documents` (Docs, Sheets and Slides, read), `calendar` (Google Calendar, read and write) and
+`mail` (Gmail, read and write) capabilities for Google Workspace (Heinzelmännchen ADR 0028), backed by the Google
+Workspace CLI (`gws`), which signs in and talks to Google (ADR 0035, ADR 0042). Bind it with
+`[capabilities] documents = "google"`,
 `calendar = "google"` and, if you want mail read, `mail = "google"` in your user configuration; another plugin
 providing the same capabilities can be bound instead. Writes (events, drafts, sending, filing) run only from publish
 operations, after the person confirmed them, and need the write scopes `hz setup google` offers.
 """
 
+from pathlib import Path
 from typing import Annotated
 
-from heinzel import Check, ConfigEditor, Prompter
+import heinzel
+import heinzel.kernel as kernel_contracts
+from heinzel import Check, ConfigEditor, CurrentUser, Navigate, Prompter
 from heinzel.kernel import CapabilityView
 from pydantic import Field
 
@@ -30,13 +34,20 @@ from heinzel_google._gws import (
     login_command,
 )
 from heinzel_google._mail import Gmail
-from heinzel_google._models import DriveFile, GoogleAbout, GoogleSettings
+from heinzel_google._models import DriveFile, GoogleAbout, GoogleSettings, GoogleSourceReview
 from heinzel_google._module import module
+from heinzel_google._selected_gws import describe_selection
 from heinzel_google._service import GoogleService
 from heinzel_google._setup import run_setup
 
-DOCUMENT_HOSTS = ["www.googleapis.com", "docs.googleapis.com", "sheets.googleapis.com", "oauth2.googleapis.com"]
-"""Where `documents` reads go, through `gws`: Drive v3 (on www.googleapis.com), Docs v1 and Sheets v4."""
+DOCUMENT_HOSTS = [
+    "www.googleapis.com",
+    "docs.googleapis.com",
+    "sheets.googleapis.com",
+    "slides.googleapis.com",
+    "oauth2.googleapis.com",
+]
+"""Where `documents` reads go, through `gws`: Drive v3, Docs v1, Sheets v4 and Slides v1."""
 MAIL_HOSTS = ["gmail.googleapis.com", "oauth2.googleapis.com"]
 """Where `mail` reads and writes go, through `gws`: Gmail v1."""
 CALENDAR_HOSTS = ["www.googleapis.com", "oauth2.googleapis.com"]
@@ -48,6 +59,36 @@ module.service(GoogleService)
 module.service(GoogleSession)
 module.service(Drive)
 module.service(Gws)
+# The captured adapter requires the host's source-only loader during this module's initialization.
+# Older cores and ordinary plugin loading retain the usual Google capabilities without this service.
+_captured_source_active = getattr(heinzel, "captured_source_active", None)
+_captured_source_enabled = callable(_captured_source_active) and _captured_source_active()
+captured_source_enabled = _captured_source_enabled
+if (
+    all(
+        hasattr(heinzel, name)
+        for name in (
+            "ConnectedReadLease",
+            "ConnectedReadMethod",
+            "ConnectedReadReview",
+            "ConnectedReadService",
+            "capability_read_schema",
+        )
+    )
+    and all(hasattr(heinzel.Kernel, name) for name in ("resolve_registered_service", "selected_capability_provider"))
+    and _captured_source_enabled
+):
+    from heinzel_google._connected_calendar import GoogleConnectedReadService
+
+    module.service(GoogleConnectedReadService)
+    if hasattr(kernel_contracts, "CapturedWriteService"):
+        from heinzel_google._document_write import GoogleDocumentWrites
+
+        module.service(GoogleDocumentWrites)
+        if hasattr(kernel_contracts, "DraftAppendService"):
+            from heinzel_google._draft_append import GoogleDraftAppends
+
+            module.service(GoogleDraftAppends)
 module.provides("documents", modes={"read"}, hosts=DOCUMENT_HOSTS)(GoogleDocuments)
 module.provides("calendar", modes={"read", "write"}, hosts=CALENDAR_HOSTS)(GoogleCalendar)
 module.provides("mail", modes={"read", "write"}, hosts=MAIL_HOSTS)(Gmail)
@@ -64,7 +105,38 @@ def info(service: GoogleService) -> GoogleAbout:
     return service.about()
 
 
-@module.operation
+@module.operation(heads={"cli", "web"}, private=True, read_only=True)
+def source_review(current: CurrentUser, session: GoogleSession) -> GoogleSourceReview:
+    """Review the owner-selected GWS source without starting it or accessing a Google account."""
+    selection = describe_selection(current, session)
+    if selection is None:
+        return GoogleSourceReview(configured=False, command=None, binary=None, binary_sha256=None, wrapper=None)
+    return GoogleSourceReview(
+        configured=True,
+        command=str(selection.command),
+        binary=str(selection.binary),
+        binary_sha256=selection.binary_sha256,
+        wrapper=selection.wrapper,
+    )
+
+
+module.action(
+    "source-review",
+    label="Google source review",
+    icon="info",
+    effect=Navigate(path="/?panel=google:source-review"),
+)
+module.view(
+    Path(__file__).parent / "views",
+    abi=1,
+    name="source-review",
+    source="source-review",
+    title="Google source review",
+    fallback="Run hz google source-review to inspect the selected source.",
+)
+
+
+@module.operation(private=True, read_only=True)
 def files(drive: Drive, days: Days = 7, name: Name = None) -> list[DriveFile]:
     """List the Google Docs and Sheets you can open that changed recently, newest first."""
     return drive.recent(days, name)

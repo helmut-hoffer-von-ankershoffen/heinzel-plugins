@@ -1,0 +1,29 @@
+Skip to content
+M
+Today
+Today
+Doctor: 3 checks need attention
+
+ai.access ai access, system.doctor installation, system.runner claude-code
+
+Open
+Ask about it
+Page
+Chat
+Google source review
+Google source review
+
+Selected command: /demo-profile/state_dir/fictional-gws/gws
+
+Native executable: /demo-profile/state_dir/fictional-gws/gws
+
+SHA-256: dfd144dacd68ad317917e280294d160bada46b434c363a98c611bb370b6bf594
+
+Direct native executable.
+
+The digest checks byte continuity; it does not authenticate the publisher. This review does not access your Google account or grant a read.
+
+v0.9.16
+Not in a meeting
+Next: Launch readiness review
+Thu 13:38

@@ -4,7 +4,7 @@ import base64
 import json
 import os
 import sys
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
 from heinzel import (
@@ -69,6 +69,9 @@ def message(identity):
 
 
 class DemoGws(Gws):
+    def login(self, executable, arguments, timeout):
+        raise RuntimeError("The fictional gallery never signs in or starts a Google process")
+
     def run(self, executable, arguments, timeout):
         command = tuple(arguments[: arguments.index("--params")]) if "--params" in arguments else tuple(arguments)
         params = json.loads(arguments[arguments.index("--params") + 1]) if "--params" in arguments else {}
@@ -158,6 +161,30 @@ class DemoGws(Gws):
                     },
                 ],
             }
+            # A stable fictional current-day dataset also exercises Core's real agenda and calendar-week UI.
+            anchor_path = state / "calendar-anchor.txt"
+            if not anchor_path.exists():
+                anchor_path.write_text((datetime.now(UTC) + timedelta(minutes=15)).isoformat())
+            anchor = datetime.fromisoformat(anchor_path.read_text())
+            current = []
+            for index, item in enumerate(value["items"]):
+                start = anchor + timedelta(minutes=index * 45)
+                current.append(
+                    dict(
+                        item,
+                        id="current-" + item["id"],
+                        start={"dateTime": start.isoformat()},
+                        end={"dateTime": (start + timedelta(minutes=30)).isoformat()},
+                    )
+                )
+            since = datetime.fromisoformat(params["timeMin"].replace("Z", "+00:00"))
+            until = datetime.fromisoformat(params["timeMax"].replace("Z", "+00:00"))
+            value["items"] = [
+                item
+                for item in [*value["items"], *current]
+                if datetime.fromisoformat(item["start"]["dateTime"].replace("Z", "+00:00")) < until
+                and datetime.fromisoformat(item["end"]["dateTime"].replace("Z", "+00:00")) > since
+            ]
         elif command == ("gmail", "users", "messages", "list"):
             value = {"messages": [{"id": "m1"}, {"id": "m2"}]}
         elif command == ("gmail", "users", "messages", "get"):
@@ -232,7 +259,8 @@ state.mkdir(parents=True, exist_ok=True)
 (state / "credentials.enc").write_bytes(b"documentation-only-no-credential")
 (state / "client_secret.json").write_text("{}")
 executable = state / "gws"
-executable.write_text("#!/bin/sh\nexit 99\n")
+# Inert, clearly fictional identity bytes: selection reads their real header/hash; DemoGws never executes them.
+executable.write_bytes(b"\xcf\xfa\xed\xfe" + b"fictional-google-gallery-not-a-runnable-vendor-binary")
 executable.chmod(0o700)
 os.environ.update(
     GOOGLE_WORKSPACE_CLI_CONFIG_DIR=str(state),
@@ -246,5 +274,6 @@ records, errors = discover()
 records.append(ModuleRecord("showcase", showcase, Origin("heinzel-documentation-fixture", "1.0.0", builtin=False)))
 kernel = Kernel(config.settings(Settings, "hz"), records, errors, config)
 kernel.bind(Gws, DemoGws())
-sys.argv = ["hz", *sys.argv[1:]]
-build(kernel)()
+if __name__ == "__main__":
+    sys.argv = ["hz", *sys.argv[1:]]
+    build(kernel)()

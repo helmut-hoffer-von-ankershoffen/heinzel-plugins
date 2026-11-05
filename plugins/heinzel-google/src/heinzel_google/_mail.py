@@ -647,3 +647,8 @@ class Gmail:
             labels=labels,
             url=f"https://mail.google.com/mail/#all/{message_id}",
         )
+
+
+mail_label_id = _label_id
+
+mail_metadata_line = _line

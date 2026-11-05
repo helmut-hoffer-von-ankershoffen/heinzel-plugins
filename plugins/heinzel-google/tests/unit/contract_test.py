@@ -1,6 +1,8 @@
 """Every capability the adapter declares is implemented with the protocol's methods and signatures (ADR 0028)."""
 
 import inspect
+import tomllib
+from pathlib import Path
 
 import pytest
 from heinzel import ProviderLet
@@ -29,6 +31,14 @@ def test_the_adapters_pass_the_shared_check():
     assert_adapter(GoogleDocuments, "documents")
     assert_adapter(GoogleCalendar, "calendar", modes=("read", "write"))
     assert_adapter(Gmail, "mail", modes=("read", "write"))
+
+
+def test_package_dependency_claims_include_every_declared_capability_mode():
+    metadata = tomllib.loads((Path(__file__).parents[2] / "pyproject.toml").read_text())
+    claims = metadata["tool"]["heinzel"]["plugin"]["provides"]
+    assert len(claims) == 5
+    assert set(claims) == {"documents:read", "calendar:read", "calendar:write", "mail:read", "mail:write"}
+    assert set(claims) == {f"{provider.capability}:{mode}" for provider in PROVIDERS for mode in provider.modes}
 
 
 @pytest.mark.parametrize("provider", PROVIDERS, ids=lambda p: p.name)
