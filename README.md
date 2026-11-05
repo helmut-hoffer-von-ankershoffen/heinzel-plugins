@@ -252,6 +252,11 @@ It has no plugin entry point and needs no additional PyPI publisher. Root `make 
 toolkit; use `NAME=<owner>` for plugin commands. `make preflight NAME=<owner>` includes that plugin's full checks,
 build, audit and installed acceptance. Toolkit tests do not run core's suite.
 
+Toolkit 0.3.4 runs its isolated capture children with Python `-I -B`, including the backend, fixture and installed
+CLI entry points, and terminal wrapper. Imports cannot add bytecode files to the verified source inventory.
+Spelling scans run relative to the owning project so exact verified vendor exclusions match; first-party files
+remain checked. Vendor inventory checks, foreign commands and caller environments remain unchanged.
+
 Toolkit 0.3.3 canonicalizes only its newly created private capture temporary directory before deriving demo
 HOME and HZ paths. This avoids macOS temporary-directory aliases being rejected by physical, no-symlink approval
 storage checks. User-supplied paths and plugin storage security checks remain unchanged.
