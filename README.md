@@ -165,7 +165,14 @@ CI can download a candidate wheel from an official Core Actions run with the `co
 and runs the owning head and browser tests. Browser projects keep exact Node dependencies in
 `tests/browser/package-lock.json`. Their explicit `browser:install` npm script installs all tested engines with the
 locked `playwright-core` CLI; `browser:install-deps` declares matching Linux runner libraries installed visibly
-in the owning CI job. Lifecycle scripts stay disabled. Local fixtures install browsers only, never OS packages,
+by the shared `scripts/browser_dependencies.py` hook in owning CI, the guarded release build, and the
+published standard-profile composition before their installed-wheel acceptance.
+
+Browser OS preparation inherits its owning workflow's existing job deadline
+(15 minutes in owning CI, 20 minutes in release verification and composition),
+as the original inline setup did. It adds no independent npm-process deadline;
+all commands remain synchronous and failures stop verification.
+Lifecycle scripts stay disabled. Local fixtures install browsers only, never OS packages,
 and honor `PLAYWRIGHT_BROWSERS_PATH` for isolated cold-cache validation. Installer and isolated child share
 one resolved cache, including Linux XDG and relative paths; `0` keeps browsers inside the owning locked package.
 `release` checks and builds one plugin and prints its independent tag/artifacts.

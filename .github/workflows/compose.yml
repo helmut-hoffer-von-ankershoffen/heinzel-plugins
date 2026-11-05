@@ -60,6 +60,7 @@ jobs:
           REF: ${{ github.ref }}
         run: |
           test "$REF" = refs/heads/main
+          BROWSER_PROFILE=standard uv run --frozen --no-build --group tooling python scripts/browser_dependencies.py
           uv run --frozen --no-build --group tooling python scripts/compose.py --core-url "$CORE_URL" --version "$VERSION"
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
