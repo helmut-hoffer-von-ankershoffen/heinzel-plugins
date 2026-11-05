@@ -252,6 +252,13 @@ It has no plugin entry point and needs no additional PyPI publisher. Root `make 
 toolkit; use `NAME=<owner>` for plugin commands. `make preflight NAME=<owner>` includes that plugin's full checks,
 build, audit and installed acceptance. Toolkit tests do not run core's suite.
 
+Toolkit 0.3.7 adds narrow presentation redaction for the normal tool-prepared owning interpreter. Its actual
+verified project `.venv` prefix is shown as `/demo-profile/.venv` in rendered text and matching UI transcripts.
+Every health row, status, error and remaining detail stays intact; SDK data and review gates are unchanged.
+Unknown paths, lookalikes and traversal remain privacy failures. Advanced external `--python` captures retain their
+prior scans without gaining this redaction authority. This does not promise that another private hostname or path
+will pass review.
+
 Toolkit 0.3.6 clarifies the existing scene policy consistently for source planning and independent privacy review:
 at least two genuine, useful feature UI scenes plus CLI. Different meaningful states of one actual view or flow
 qualify; separate routes are not required. Duplicate captures, caption-only changes, terminal substitutes and forged

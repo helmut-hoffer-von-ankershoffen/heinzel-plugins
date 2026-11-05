@@ -834,3 +834,49 @@ def test_story_changed_by_agent_is_refused_again_before_publication(harness, mon
         capture.publish_draft(harness.owner)
     assert not (harness.owner / capture.OUTPUT).exists()
     assert (harness.owner / "pyproject.toml").read_bytes() == original_metadata
+
+
+def test_external_prepared_python_keeps_existing_scans_without_owning_prefix_authority(harness, monkeypatch):
+    def forbidden(*_args):
+        pytest.fail("An external prepared environment must not gain owning-prefix redaction authority")
+
+    monkeypatch.setattr(capture, "owning_prefix", forbidden)
+    harness.settings["text"] = str(harness.interpreter.parent.parent)
+    with pytest.raises(privacy.CaptureError, match="private paths"):
+        record(harness, draft_only=True)
+
+
+def test_normal_setup_routes_its_derived_identity_to_every_presentation_save(harness, monkeypatch):
+    from heinzel_plugin_tools._presentation import OwningPrefix
+
+    owned_bin = harness.owner / ".venv/bin"
+    owned_bin.mkdir(parents=True)
+    for name in ("python", "hz"):
+        target = owned_bin / name
+        target.write_bytes((harness.interpreter.parent / name).read_bytes())
+        target.chmod(0o755)
+    identity = OwningPrefix(str(harness.owner / ".venv"), ())  # synthetic wiring fixture, not a verification receipt
+    observed = []
+    original_run = capture.subprocess.run
+    original_save = capture.safe_screenshot
+
+    def run(command, **options):
+        if command[:2] == ["uv", "run"]:
+            return subprocess.CompletedProcess(command, 0)
+        return original_run(command, **options)
+
+    def attest(root, interpreter):
+        assert root == harness.owner.resolve()
+        assert interpreter == owned_bin / "python"
+        return identity
+
+    def save(*args, **options):
+        observed.append(options["owning_interpreter_prefix"])
+        return original_save(*args, **options)
+
+    monkeypatch.setattr(capture.subprocess, "run", run)
+    monkeypatch.setattr(capture, "owning_prefix", attest)
+    monkeypatch.setattr(capture, "safe_screenshot", save)
+    assert capture.capture(harness.owner, core=None, headed=False, draft_only=True)["ok"]
+    assert observed
+    assert all(value is identity for value in observed)

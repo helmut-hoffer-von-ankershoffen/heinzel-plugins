@@ -216,3 +216,31 @@ This exception admits no private draft, agent review, canonicalization or public
 strict format-2 story bundle, including when an authentic pinned historical manifest or receipt is supplied.
 Any changed or unrecognized historical evidence requires a fresh capture and genuine independent review; never
 copy a prior receipt into a new bundle or manufacture an approval to satisfy the check.
+
+## Fictional owning-interpreter paths
+
+Normal setup attests the selected owning Python's actual prefix and executable against this project's real,
+owned, non-writable-by-others `.venv`. A virtual-environment root or bin-directory alias, foreign-environment
+interpreter alias, mismatched identity or changed filesystem evidence refuses capture. Verified Darwin system
+`/var` and `/tmp` aliases are accepted only for the same canonical environment; the resolved base Python never
+defines the redaction prefix.
+
+Before each image save, that verified prefix alone is replaced in rendered text by `/demo-profile/.venv`.
+The UI transcript uses the same rendered text. This is presentation redaction, not a changed SDK report: every
+Doctor row, status, error and remaining detail survives. Exact directory boundaries are required; lookalikes,
+dot segments, repeated separators, percent-encoded suffixes and unknown private paths are left unchanged for
+the ordinary scan. URL/email-bearing text nodes are also left unchanged, including whitespace in query values.
+This deliberately narrow matching rule does not normalize paths or establish a general privacy guarantee. Disclose the fictionalized paths in the source
+story and captions. Independent review must still inspect every image and transcript.
+
+External prepared `--python` mode keeps its prior behavior and receives no new owning-prefix redaction authority.
+No free-form prefix allowlist or fixture hook is available. Normal setup also compares the selected owning Python's reported hostname with the controller's hostname;
+changed evidence or an invalid/mismatched hostname refuses capture. On the genuine `/doctor` route only,
+presentation can replace the unique `system.doctor` / `hostname` row's whole sole detail text node with
+`demo-host`. The expected five-cell table structure must be unambiguous and the complete detail must exactly
+match that verified hostname. No labels, status cells, attributes, inputs, URLs, emails or paths are rewritten.
+A missing/duplicate/ambiguous row or mismatched detail refuses capture unchanged. Even a hostname such as `UP`
+can change only that detail, never a health status. The advanced external `--python` path gains no hostname
+redaction authority. Disclose both fictionalized paths and this hostname value in the source story and captions.
+
+Other private paths, hostnames, identities or tokens can still make a capture fail; do not treat this mapping as successful privacy acceptance.

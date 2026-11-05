@@ -44,6 +44,9 @@ def test_source_analysis_gets_only_regular_owned_sources_and_preserves_editable_
         assert "--sandbox" in command and "read-only" in command
         assert "--ephemeral" in command
         prompt = kwargs["input"]
+        assert "Explicitly disclose normal presentation fictionalization" in prompt
+        assert "genuine Doctor row becomes demo-host" in prompt
+        assert "change no SDK health status" in prompt
         assert "at least two genuine, useful feature UI scenes plus a CLI scene" in prompt
         assert "Different meaningful states of the same actual view or flow qualify" in prompt
         assert "distinct routes are not required" in prompt
