@@ -252,6 +252,13 @@ It has no plugin entry point and needs no additional PyPI publisher. Root `make 
 toolkit; use `NAME=<owner>` for plugin commands. `make preflight NAME=<owner>` includes that plugin's full checks,
 build, audit and installed acceptance. Toolkit tests do not run core's suite.
 
+Toolkit 0.3.6 clarifies the existing scene policy consistently for source planning and independent privacy review:
+at least two genuine, useful feature UI scenes plus CLI. Different meaningful states of one actual view or flow
+qualify; separate routes are not required. Duplicate captures, caption-only changes, terminal substitutes and forged
+HTML remain unacceptable. Source inventories, untrusted-story handling and every image/transcript/provenance/receipt
+gate remain required. Prompt-contract tests check the instructions supplied to agents; they do not prove model
+compliance or resistance to malicious artifact text.
+
 Toolkit 0.3.5 binds a fixed `source-story.md` evidence file to each new format-2 screenshot review bundle.
 The bounded UTF-8 story must match the source-analysis definition exactly before review and publication, and stays
 with the published evidence. Surface analysis covers every entry point and generic Core UI, including approvals;

@@ -52,8 +52,10 @@ Linux requires Chromium's system libraries; CI installs them in its dedicated sc
 
 ## Plan real UI and CLI scenes
 
-Keep three to eight scenes, with at least two different useful UI views and one CLI result. Use a feature's
-populated page, a detail or expanded pane, and its useful terminal output. A CLI-only plugin can show useful command
+Keep three to eight scenes, with at least two genuine, useful feature UI scenes and one CLI result. Use a feature's
+populated page, a detail or expanded pane, and its useful terminal output. Different meaningful states of the same
+actual view or flow qualify; distinct routes are not required. Duplicate captures, caption-only changes, terminal
+output presented as feature UI and forged HTML do not qualify. A CLI-only plugin can show useful command
 results in the native app terminal. A theme needs applied light and dark views. Settings and installed-plugin cards
 can supplement a story, but cannot replace a feature that the plugin actually provides.
 
