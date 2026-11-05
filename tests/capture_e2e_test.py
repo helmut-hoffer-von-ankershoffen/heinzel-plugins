@@ -6,6 +6,7 @@ import shutil
 import subprocess
 import sys
 from pathlib import Path
+from unittest.mock import patch
 
 import pytest
 
@@ -200,5 +201,82 @@ def test_auth_presentation_is_redacted_before_success_and_failure_images(tmp_pat
             with pytest.raises(ValueError, match="private paths"):
                 capture.safe_screenshot(page, tmp_path / "unsafe.png")
             assert not (tmp_path / "unsafe.png").exists()
+        finally:
+            browser.close()
+
+
+def test_doctor_hostname_presentation_uses_only_the_unique_exact_detail_in_real_dom(tmp_path):
+    """Synthetic DOM contract fixtures, not gallery images or claims of product acceptance."""
+    from playwright.sync_api import sync_playwright
+
+    from heinzel_plugin_tools._presentation import OwningPrefix, redact_doctor_hostname
+
+    def table(detail, *, module="system.doctor", name="hostname", duplicate=False):
+        row = (
+            f'<tr><td data-kept="hostname">{module}</td><td>{name}</td>'
+            f'<td><span aria-label="UP">UP</span></td><td title="UP">{detail}</td><td>DOWN</td></tr>'
+        )
+        return (
+            "<table><caption>System health</caption><thead><tr>"
+            + '<th scope="col">Column</th>' * 5
+            + "</tr></thead><tbody>"
+            + row * (2 if duplicate else 1)
+            + "</tbody></table>"
+        )
+
+    with sync_playwright() as playwright:
+        browser = playwright.chromium.launch()
+        try:
+            page = browser.new_page()
+            page.route("http://127.0.0.1:18976/**", lambda route: route.fulfill(body="<body></body>"))
+            page.goto("http://127.0.0.1:18976/doctor")
+            # Synthetic attestation tests only DOM selection; real interpreter attestation has unit coverage.
+            for hostname in ("UP", "DOWN", "doctor", "fictional-host"):
+                identity = OwningPrefix("/demo-profile/.venv", (), hostname)
+                # Keep the independently verified controller stable for this DOM-only fixture.
+                with patch("heinzel_plugin_tools._presentation.socket.gethostname", return_value=hostname):
+                    page.set_content(table(hostname) + '<p>UP DOWN doctor fictional-host</p><input value="UP">')
+                    before = page.locator("body").inner_html()
+                    redact_doctor_hostname(page, identity)
+                    assert page.locator("body").inner_html() == before.replace(
+                        f'<td title="UP">{hostname}</td>', '<td title="UP">demo-host</td>'
+                    )
+                    assert page.locator("input").input_value() == "UP"
+                    assert page.locator("td").nth(2).inner_text() == "UP"
+                    assert page.locator("td").nth(4).inner_text() == "DOWN"
+
+            identity = OwningPrefix("/demo-profile/.venv", (), "fictional-host")
+            with patch("heinzel_plugin_tools._presentation.socket.gethostname", return_value="fictional-host"):
+                invalid = [
+                    table("different-host"),
+                    table(" fictional-host"),
+                    table("fictional-host "),
+                    table("fictional-host", duplicate=True),
+                    table("<span>fictional-host</span>"),
+                    table("fictional-host<!-- split -->"),
+                    table("fictional-host", module="foreign.doctor"),
+                    table("fictional-host", name="hostname-other"),
+                    table("https://fictional-host.invalid"),
+                    table("demo@fictional-host.invalid"),
+                    table("/private/tmp/fictional-host"),
+                    table("fictional-host") + "<table></table>",
+                    table("fictional-host").replace('<th scope="col">', "<th>"),
+                ]
+                for html in invalid:
+                    page.set_content(html)
+                    before = page.locator("body").inner_html()
+                    with pytest.raises(privacy.CaptureError, match="ambiguous"):
+                        redact_doctor_hostname(page, identity)
+                    assert page.locator("body").inner_html() == before
+                    with pytest.raises(privacy.CaptureError, match="ambiguous"):
+                        capture.safe_screenshot(
+                            page, tmp_path / "refused-hostname.png", owning_interpreter_prefix=identity
+                        )
+                    assert not (tmp_path / "refused-hostname.png").exists()
+                page.goto("http://127.0.0.1:18976/other")
+                page.set_content(table("fictional-host"))
+                before = page.locator("body").inner_html()
+                redact_doctor_hostname(page, identity)
+                assert page.locator("body").inner_html() == before
         finally:
             browser.close()

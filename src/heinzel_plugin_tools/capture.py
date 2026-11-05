@@ -31,7 +31,7 @@ from urllib.parse import urlsplit
 if __package__ in {None, ""}:
     sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from heinzel_plugin_tools._presentation import OwningPrefix, owning_prefix, redact_owning_prefix
+from heinzel_plugin_tools._presentation import OwningPrefix, owning_prefix, redact_doctor_hostname, redact_owning_prefix
 from heinzel_plugin_tools.privacy import (
     DRAFT,
     SOURCE_STORY,
@@ -690,6 +690,7 @@ def safe_screenshot(
 ) -> str:
     """Redact authentication presentation and reject unsafe text before writing any PNG."""
     if owning_interpreter_prefix:
+        redact_doctor_hostname(page, owning_interpreter_prefix)
         redact_owning_prefix(page, owning_interpreter_prefix)
     redact_auth_presentation(page, tokens, private_paths)
     body = page.locator("body").inner_text()

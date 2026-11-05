@@ -2,6 +2,8 @@
 
 import json
 import os
+import re
+import socket
 import stat
 import subprocess
 import sys
@@ -23,9 +25,13 @@ class OwningPrefix:
     prefix: str
     evidence: tuple[tuple[Path, tuple[int, int, int, int, int, int, int]], ...]
 
+    hostname: str | None = None
+
     def verify(self) -> None:
         try:
-            changed = any(_identity(path) != expected for path, expected in self.evidence)
+            changed = (self.hostname is not None and socket.gethostname() != self.hostname) or any(
+                _identity(path) != expected for path, expected in self.evidence
+            )
         except OSError:
             changed = True
         if changed:
@@ -64,7 +70,13 @@ def owning_prefix(root: Path, interpreter: Path) -> OwningPrefix:
         raise CaptureError("The owning capture interpreter has too many aliases")
     evidence = tuple((path, _identity(path)) for path in paths)
     probe = subprocess.run(
-        [str(binary), "-I", "-B", "-c", "import json,sys;print(json.dumps([sys.prefix,sys.executable]))"],
+        [
+            str(binary),
+            "-I",
+            "-B",
+            "-c",
+            "import json,socket,sys;print(json.dumps([sys.prefix,sys.executable,socket.gethostname()]))",
+        ],
         capture_output=True,
         text=True,
         check=True,
@@ -79,7 +91,7 @@ def owning_prefix(root: Path, interpreter: Path) -> OwningPrefix:
                 aliases.add(str(expected).removeprefix("/private"))
     if (
         not isinstance(identity, list)
-        or len(identity) != 2
+        or len(identity) != 3
         or not all(isinstance(value, str) for value in identity)
         or identity[0] not in aliases
         or identity[1] not in {prefix + "/bin/python" for prefix in aliases}
@@ -87,7 +99,13 @@ def owning_prefix(root: Path, interpreter: Path) -> OwningPrefix:
         or Path(identity[1]).resolve(strict=True) != binary.resolve(strict=True)
     ):
         raise CaptureError("The selected Python did not attest the exact owning capture prefix")
-    result = OwningPrefix(identity[0], evidence)
+    if identity[2] != socket.gethostname() or not re.fullmatch(
+        r"(?=.{1,253}\Z)[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?"
+        r"(?:\.[A-Za-z0-9](?:[A-Za-z0-9-]{0,61}[A-Za-z0-9])?)*",
+        identity[2],
+    ):
+        raise CaptureError("The selected Python did not attest the same unambiguous controller hostname")
+    result = OwningPrefix(identity[0], evidence, identity[2])
     result.verify()
     return result
 
@@ -123,3 +141,32 @@ def redact_owning_prefix(page, identity: OwningPrefix) -> None:
         }""",
         identity.prefix,
     )
+
+
+def redact_doctor_hostname(page, identity: OwningPrefix) -> None:
+    """Fictionalize only Doctor's unique, whole hostname detail; never generic hostname tokens."""
+    identity.verify()
+    if identity.hostname is None:
+        return
+    outcome = page.evaluate(
+        r"""hostname => {
+          if (location.pathname !== '/doctor') return 'not-doctor';
+          const tables = [...document.querySelectorAll('table')];
+          const rows = tables.flatMap(table => [...table.querySelectorAll(':scope > tbody > tr')]);
+          const matches = rows.filter(row => row.cells[0]?.textContent === 'system.doctor' &&
+            row.cells[1]?.textContent === 'hostname');
+          if (tables.length !== 1 || matches.length !== 1) return 'refused';
+          const row = matches[0], cells = [...row.cells];
+          const headers = tables[0].querySelectorAll(':scope > thead > tr > th[scope="col"]');
+          if (cells.length !== 5 || cells.some(cell => cell.tagName !== 'TD') || headers.length !== 5 ||
+              tables[0].querySelectorAll(':scope > caption').length !== 1) return 'refused';
+          const detail = cells[3];
+          if (detail.childNodes.length !== 1 || detail.firstChild.nodeType !== Node.TEXT_NODE ||
+              detail.firstChild.textContent !== hostname) return 'refused';
+          detail.firstChild.textContent = 'demo-host';
+          return 'redacted';
+        }""",
+        identity.hostname,
+    )
+    if outcome not in {"not-doctor", "redacted"}:
+        raise CaptureError("Doctor hostname presentation is ambiguous; capture refused without changing its detail")

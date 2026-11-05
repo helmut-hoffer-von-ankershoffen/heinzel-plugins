@@ -234,5 +234,13 @@ This deliberately narrow matching rule does not normalize paths or establish a g
 story and captions. Independent review must still inspect every image and transcript.
 
 External prepared `--python` mode keeps its prior behavior and receives no new owning-prefix redaction authority.
-No free-form prefix allowlist or fixture hook is available. Other private paths, hostnames, identities or tokens
-can still make a capture fail; do not treat this mapping as successful privacy acceptance.
+No free-form prefix allowlist or fixture hook is available. Normal setup also compares the selected owning Python's reported hostname with the controller's hostname;
+changed evidence or an invalid/mismatched hostname refuses capture. On the genuine `/doctor` route only,
+presentation can replace the unique `system.doctor` / `hostname` row's whole sole detail text node with
+`demo-host`. The expected five-cell table structure must be unambiguous and the complete detail must exactly
+match that verified hostname. No labels, status cells, attributes, inputs, URLs, emails or paths are rewritten.
+A missing/duplicate/ambiguous row or mismatched detail refuses capture unchanged. Even a hostname such as `UP`
+can change only that detail, never a health status. The advanced external `--python` path gains no hostname
+redaction authority. Disclose both fictionalized paths and this hostname value in the source story and captions.
+
+Other private paths, hostnames, identities or tokens can still make a capture fail; do not treat this mapping as successful privacy acceptance.

@@ -2,6 +2,7 @@
 
 import json
 import shutil
+import socket
 import subprocess
 import sys
 from pathlib import Path
@@ -39,7 +40,9 @@ def test_reported_root_home_and_mismatched_prefixes_are_refused(environment, mon
     monkeypatch.setattr(
         presentation.subprocess,
         "run",
-        lambda *_args, **_kwargs: SimpleNamespace(stdout=json.dumps([reported, str(interpreter)])),
+        lambda *_args, **_kwargs: SimpleNamespace(
+            stdout=json.dumps([reported, str(interpreter), socket.gethostname()])
+        ),
     )
     with pytest.raises(CaptureError, match="exact owning"):
         presentation.owning_prefix(root, interpreter)
@@ -60,7 +63,7 @@ def test_foreign_alias_and_reported_executable_are_not_accepted_as_identity(envi
             presentation.subprocess,
             "run",
             lambda *_args, _prefix=prefix, _executable=executable, **_kwargs: SimpleNamespace(
-                stdout=json.dumps([_prefix, _executable])
+                stdout=json.dumps([_prefix, _executable, socket.gethostname()])
             ),
         )
         with pytest.raises(CaptureError, match="exact owning"):
@@ -75,7 +78,9 @@ def test_verified_darwin_system_alias_is_accepted_only_when_it_reaches_the_same_
     monkeypatch.setattr(
         presentation.subprocess,
         "run",
-        lambda *_args, **_kwargs: SimpleNamespace(stdout=json.dumps([prefix, prefix + "/bin/python"])),
+        lambda *_args, **_kwargs: SimpleNamespace(
+            stdout=json.dumps([prefix, prefix + "/bin/python", socket.gethostname()])
+        ),
     )
     assert presentation.owning_prefix(root, interpreter).prefix == prefix
 
@@ -115,13 +120,15 @@ class TextPage:
         program = (
             'const vm=require("node:vm");'
             f"const nodes={json.dumps(self.texts)}.map(textContent=>({{textContent,parentElement:{{tagName:'TD'}}}}));"
-            "const context={NodeFilter:{SHOW_TEXT:4},location:{hash:''},document:{body:{},"
+            "const context={NodeFilter:{SHOW_TEXT:4},location:{hash:'',pathname:'/'},document:{body:{},"
             "createTreeWalker:()=>{let i=0;return{nextNode:()=>nodes[i++]??null}},querySelectorAll:()=>[]}};"
-            f"vm.runInNewContext({json.dumps('(' + script + ')')},context)({json.dumps(argument)});"
-            "console.log(JSON.stringify(nodes.map(n=>n.textContent)));"
+            f"const outcome=vm.runInNewContext({json.dumps('(' + script + ')')},context)({json.dumps(argument)});"
+            "console.log(JSON.stringify({texts:nodes.map(n=>n.textContent),outcome}));"
         )
         result = subprocess.run([node, "-e", program], capture_output=True, text=True, check=True, timeout=5)  # noqa: S603 - fixed Node program exercises the actual renderer
-        self.texts = json.loads(result.stdout)
+        result = json.loads(result.stdout)
+        self.texts = result["texts"]
+        return result.get("outcome")
 
     def locator(self, _selector):
         return SimpleNamespace(inner_text=lambda: "\n".join(self.texts), evaluate_all=lambda _script: "")
@@ -211,3 +218,42 @@ def test_url_and_email_contexts_do_not_gain_path_redaction(environment, tmp_path
         capture.safe_screenshot(page, tmp_path / "refused.png", owning_interpreter_prefix=identity)
     assert page.texts == ["DOWN", value]
     assert not page.saved
+
+
+@pytest.mark.parametrize(
+    "hostname", ["foreign-host", "/private/tmp/host", "demo@example.invalid", "https://demo.invalid", "", "host name"]
+)
+def test_hostname_must_independently_match_controller_and_be_unambiguous(environment, monkeypatch, hostname):
+    root, interpreter = environment
+    monkeypatch.setattr(
+        presentation.subprocess,
+        "run",
+        lambda *_a, **_kw: SimpleNamespace(stdout=json.dumps([str(root / ".venv"), str(interpreter), hostname])),
+    )
+    with pytest.raises(CaptureError, match="hostname"):
+        presentation.owning_prefix(root, interpreter)
+    if hostname != "foreign-host":
+        monkeypatch.setattr(presentation.socket, "gethostname", lambda: hostname)
+        with pytest.raises(CaptureError, match="hostname"):
+            presentation.owning_prefix(root, interpreter)
+
+
+@pytest.mark.parametrize("hostname", ["UP", "DOWN", "doctor", "fictional-host.example"])
+def test_common_word_hostname_requires_the_same_independent_verification(environment, monkeypatch, hostname):
+    root, interpreter = environment
+    monkeypatch.setattr(presentation.socket, "gethostname", lambda: hostname)
+    monkeypatch.setattr(
+        presentation.subprocess,
+        "run",
+        lambda *_a, **_kw: SimpleNamespace(stdout=json.dumps([str(root / ".venv"), str(interpreter), hostname])),
+    )
+    assert presentation.owning_prefix(root, interpreter).hostname == hostname
+
+
+def test_verified_hostname_change_invalidates_environment_evidence(environment, monkeypatch):
+    root, interpreter = environment
+    identity = presentation.owning_prefix(root, interpreter)
+    assert identity.hostname == socket.gethostname()
+    monkeypatch.setattr(presentation.socket, "gethostname", lambda: "changed-host")
+    with pytest.raises(CaptureError, match="changed"):
+        identity.verify()
