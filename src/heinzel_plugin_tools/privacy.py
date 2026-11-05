@@ -10,6 +10,8 @@ import subprocess
 import sys
 from pathlib import Path
 
+from heinzel_plugin_tools._historical_galleries import MANIFESTS
+
 DRAFT = Path(".preview/screenshots/draft")
 SOURCE_STORY = "source-story.md"
 MAX_STORY_BYTES = 48 * 1024
@@ -117,15 +119,7 @@ def validate_bundle(bundle: dict, folder: Path | None = None, *, require_canonic
         or bundle["format"] != 2
     ):
         raise CaptureError("Capture review bundle format is invalid")
-    if (
-        not isinstance(bundle.get("plugin"), str)
-        or not re.fullmatch(r"heinzel-[a-z0-9]+(?:-[a-z0-9]+)*", bundle["plugin"])
-        or not isinstance(bundle.get("core_version"), str)
-        or not re.fullmatch(r"[A-Za-z0-9.+-]{1,80}", bundle["core_version"])
-        or not isinstance(bundle.get("inputs_sha256"), str)
-        or not re.fullmatch(r"[a-f0-9]{64}", bundle["inputs_sha256"])
-    ):
-        raise CaptureError("Capture review bundle provenance is invalid")
+    _validate_bundle_provenance(bundle)
     evidence, definition = bundle.get("source_story"), bundle.get("definition")
     if (
         not isinstance(evidence, dict)
@@ -139,6 +133,22 @@ def validate_bundle(bundle: dict, folder: Path | None = None, *, require_canonic
         raise CaptureError("Source story evidence differs from its source-analysis definition")
     if folder and hashlib.sha256(story_bytes(folder, SOURCE_STORY)).hexdigest() != evidence["sha256"]:
         raise CaptureError("Source story evidence changed; capture and review again")
+    _validate_bundle_artifacts(bundle, folder, require_canonical=require_canonical)
+
+
+def _validate_bundle_provenance(bundle: dict) -> None:
+    if (
+        not isinstance(bundle.get("plugin"), str)
+        or not re.fullmatch(r"heinzel-[a-z0-9]+(?:-[a-z0-9]+)*", bundle["plugin"])
+        or not isinstance(bundle.get("core_version"), str)
+        or not re.fullmatch(r"[A-Za-z0-9.+-]{1,80}", bundle["core_version"])
+        or not isinstance(bundle.get("inputs_sha256"), str)
+        or not re.fullmatch(r"[a-f0-9]{64}", bundle["inputs_sha256"])
+    ):
+        raise CaptureError("Capture review bundle provenance is invalid")
+
+
+def _validate_bundle_artifacts(bundle: dict, folder: Path | None, *, require_canonical: bool = True) -> None:
     images, transcripts, shots = bundle.get("images"), bundle.get("transcripts"), bundle.get("screenshots")
     if (
         not isinstance(images, dict)
@@ -247,6 +257,10 @@ def bundle_digest(bundle: dict) -> str:
 def validate_review(bundle: dict, review: dict) -> None:
     """Reject unreviewed, changed, incomplete, unsafe or uninformative galleries."""
     validate_bundle(bundle)
+    _validate_review_receipt(bundle, review)
+
+
+def _validate_review_receipt(bundle: dict, review: dict) -> None:
     if not isinstance(review, dict):
         raise CaptureError("Privacy review must be a JSON object")
     if (
@@ -275,6 +289,39 @@ def validate_review(bundle: dict, review: dict) -> None:
         )
     if set(review) != set(SCHEMA["required"]) or set(review["checks"]) != set(CHECKS):
         raise CaptureError("The privacy receipt must contain only the documented review fields")
+
+
+def validate_historical_gallery(manifest_bytes: bytes, folder: Path, plugin: str) -> None:
+    """Read only an exact authenticated historical manifest; never authorize new or changed v1 evidence."""
+    if hashlib.sha256(manifest_bytes).hexdigest() != MANIFESTS.get(plugin):
+        raise CaptureError(
+            "Historical gallery identity is not pinned; capture and independently review a format-2 bundle"
+        )
+    manifest = json.loads(manifest_bytes)
+    bundle, review = manifest.get("review_bundle"), manifest.get("privacy_review")
+    expected = {
+        "format",
+        "plugin",
+        "core_version",
+        "inputs_sha256",
+        "screenshots",
+        "images",
+        "transcripts",
+        "bundle_sha256",
+        "definition",
+    }
+    if (
+        not isinstance(bundle, dict)
+        or set(bundle) != expected
+        or type(bundle.get("format")) is not int
+        or bundle["format"] != 1
+        or bundle.get("plugin") != plugin
+        or manifest.get("plugin") != plugin
+    ):
+        raise CaptureError("Historical gallery identity differs from its owning plugin")
+    _validate_bundle_provenance(bundle)
+    _validate_bundle_artifacts(bundle, folder)
+    _validate_review_receipt(bundle, review)
 
 
 def review_prompt(bundle: dict) -> str:

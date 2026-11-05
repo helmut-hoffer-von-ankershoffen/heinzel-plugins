@@ -43,6 +43,7 @@ from heinzel_plugin_tools.privacy import (
     safe_path,
     story_bytes,
     validate_bundle,
+    validate_historical_gallery,
     validate_review,
 )
 
@@ -402,7 +403,8 @@ def check_capture(root: Path) -> dict:
             "No capture manifest yet. Run make screenshots (or hz-plugin screenshots <name>), then review it"
         )
     plan = read_plan(root)
-    manifest = json.loads(manifest_path.read_text())
+    manifest_bytes = manifest_path.read_bytes()
+    manifest = json.loads(manifest_bytes)
     if manifest.get("format") != 1 or manifest.get("inputs_sha256") != input_digest(root, plan):
         raise CaptureError(
             "Screenshots are stale. Run make screenshots, review the preview, and commit the updated gallery"
@@ -429,7 +431,11 @@ def check_capture(root: Path) -> dict:
 
     definition = validate_definition(root, plan)
     bundle = manifest.get("review_bundle", {})
-    validate_bundle(bundle, safe_path(root, OUTPUT))
+    historical = isinstance(bundle, dict) and bundle.get("format") == 1
+    if historical:
+        validate_historical_gallery(manifest_bytes, safe_path(root, OUTPUT), project_data(root)["project"]["name"])
+    else:
+        validate_bundle(bundle, safe_path(root, OUTPUT))
     if bundle.get("definition") != definition:
         raise CaptureError("Gallery source-analysis definition differs from the reviewed captures")
     if (
@@ -441,7 +447,8 @@ def check_capture(root: Path) -> dict:
         or bundle.get("images") != {Path(shot["path"]).name: manifest["images"][shot["path"]] for shot in expected}
     ):
         raise CaptureError("Gallery has no current exact-bundle privacy review. Run make screenshots")
-    validate_review(bundle, manifest.get("privacy_review", {}))
+    if not historical:
+        validate_review(bundle, manifest.get("privacy_review", {}))
     readme = safe_path(root, "README.md")
     if not readme.is_file():
         raise CaptureError("The generated README gallery is missing. Republish the approved capture draft")
@@ -462,6 +469,8 @@ def check_capture(root: Path) -> dict:
         "plan": str(root / PLAN),
         "fresh": True,
         "privacy_reviewed": True,
+        "review_bundle_format": bundle["format"],
+        "source_story_bundle_reviewed": not historical,
         "reviewed_by": manifest["privacy_review"]["reviewer"],
     }
 

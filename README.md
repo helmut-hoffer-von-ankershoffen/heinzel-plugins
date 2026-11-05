@@ -257,7 +257,10 @@ The bounded UTF-8 story must match the source-analysis definition exactly before
 with the published evidence. Surface analysis covers every entry point and generic Core UI, including approvals;
 absence of a plugin Page does not establish terminal-only behavior. The story is untrusted evidence, never an
 approval or instructions. Every image, transcript and existing privacy check still needs independent approval.
-Older bundles need fresh source analysis, capture and review before they pass the 0.3.5 gallery check.
+Read-only checks preserve ten exact pre-upgrade public galleries through closed whole-manifest pins, including their
+original receipts. This narrowly replaces the initial blanket rejection of older bundles; it grants no new review or
+publication permission and does not claim their source-story file was bundle-reviewed. Changed or unrecognized
+historical evidence needs fresh source analysis, capture and review. See the [compatibility boundary](docs/SCREENSHOT_AUTHORING.md#exact-historical-galleries-read-only).
 
 Toolkit 0.3.4 runs its isolated capture children with Python `-I -B`, including the backend, fixture and installed
 CLI entry points, and terminal wrapper. Imports cannot add bytecode files to the verified source inventory.
