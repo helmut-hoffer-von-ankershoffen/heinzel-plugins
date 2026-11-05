@@ -32,6 +32,15 @@ def browser_package() -> Path:
         timeout=120,
         check=True,
     )
+    subprocess.run(
+        [npm, "run", "--ignore-scripts", "browser:install"],
+        cwd=directory,
+        env=environment,
+        capture_output=True,
+        text=True,
+        timeout=120,
+        check=True,
+    )
     return directory / "package.json"
 
 
@@ -52,7 +61,11 @@ with MonkeyPatch.context() as patches:
 """
     home = root / "isolated-home"
     home.mkdir()
-    cache = Path.home() / ("Library/Caches/ms-playwright" if sys.platform == "darwin" else ".cache/ms-playwright")
+    cache = (
+        Path(os.environ["PLAYWRIGHT_BROWSERS_PATH"])
+        if "PLAYWRIGHT_BROWSERS_PATH" in os.environ
+        else (Path.home() / ("Library/Caches/ms-playwright" if sys.platform == "darwin" else ".cache/ms-playwright"))
+    )
     env = {
         "PATH": os.environ.get("PATH", "/usr/bin:/bin"),
         "HOME": str(home),
