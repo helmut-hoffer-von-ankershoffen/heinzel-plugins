@@ -31,6 +31,7 @@ from urllib.parse import urlsplit
 if __package__ in {None, ""}:
     sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
+from heinzel_plugin_tools._presentation import OwningPrefix, owning_prefix, redact_owning_prefix
 from heinzel_plugin_tools.privacy import (
     DRAFT,
     SOURCE_STORY,
@@ -679,9 +680,17 @@ def redact_auth_presentation(page, tokens: tuple[str, ...] = (), private_paths: 
 
 
 def safe_screenshot(
-    page, path: Path, *, tokens: tuple[str, ...] = (), private_paths: tuple[str, ...] = (), clip: dict | None = None
+    page,
+    path: Path,
+    *,
+    tokens: tuple[str, ...] = (),
+    private_paths: tuple[str, ...] = (),
+    owning_interpreter_prefix: OwningPrefix | None = None,
+    clip: dict | None = None,
 ) -> str:
     """Redact authentication presentation and reject unsafe text before writing any PNG."""
+    if owning_interpreter_prefix:
+        redact_owning_prefix(page, owning_interpreter_prefix)
     redact_auth_presentation(page, tokens, private_paths)
     body = page.locator("body").inner_text()
     forms = page.locator("input,textarea").evaluate_all("els => els.map(el => el.value).join('\\n')")
@@ -918,6 +927,8 @@ def capture(
         )
     interpreter = prepared_python.absolute() if prepared_python else root / ".venv/bin/python"
     version = prepared_version(interpreter, metadata)
+    # Explicit external prepared environments retain their existing scans, without new redaction authority.
+    owning_identity = owning_prefix(root, interpreter) if prepared_python is None else None
     with tempfile.TemporaryDirectory(prefix="hz-screenshots-") as temporary:
         work = Path(temporary).resolve(strict=True)
         env = demo_environment(work, interpreter)
@@ -1096,6 +1107,7 @@ def capture(
                                 work / f"{scene['name']}.png",
                                 tokens=(address.split("#token=", 1)[-1],),
                                 private_paths=(str(work), str(work.resolve())),
+                                owning_interpreter_prefix=owning_identity,
                                 clip=clip,
                             )
                             if scene["surface"] == "ui":
@@ -1111,6 +1123,7 @@ def capture(
                                     failure,
                                     tokens=(address.split("#token=", 1)[-1],),
                                     private_paths=(str(work), str(work.resolve())),
+                                    owning_interpreter_prefix=owning_identity,
                                 )
                             except Exception:
                                 failure.unlink(missing_ok=True)

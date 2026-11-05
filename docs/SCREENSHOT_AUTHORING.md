@@ -216,3 +216,21 @@ This exception admits no private draft, agent review, canonicalization or public
 strict format-2 story bundle, including when an authentic pinned historical manifest or receipt is supplied.
 Any changed or unrecognized historical evidence requires a fresh capture and genuine independent review; never
 copy a prior receipt into a new bundle or manufacture an approval to satisfy the check.
+
+## Fictional owning-interpreter paths
+
+Normal setup attests the selected owning Python's actual prefix and executable against this project's real,
+owned, non-writable-by-others `.venv`. A virtual-environment root or bin-directory alias, foreign-environment
+interpreter alias, mismatched identity or changed filesystem evidence refuses capture. Verified Darwin system
+`/var` and `/tmp` aliases are accepted only for the same canonical environment; the resolved base Python never
+defines the redaction prefix.
+
+Before each image save, that verified prefix alone is replaced in rendered text by `/demo-profile/.venv`.
+The UI transcript uses the same rendered text. This is presentation redaction, not a changed SDK report: every
+Doctor row, status, error and remaining detail survives. Exact directory boundaries are required; lookalikes,
+traversal and unknown private paths still fail the ordinary scan. Disclose the fictionalized paths in the source
+story and captions. Independent review must still inspect every image and transcript.
+
+External prepared `--python` mode keeps its prior behavior and receives no new owning-prefix redaction authority.
+No free-form prefix allowlist or fixture hook is available. Other private paths, hostnames, identities or tokens
+can still make a capture fail; do not treat this mapping as successful privacy acceptance.
