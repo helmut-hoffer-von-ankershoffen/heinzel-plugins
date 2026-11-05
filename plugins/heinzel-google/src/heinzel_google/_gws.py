@@ -44,6 +44,7 @@ GRACE = 2.0
 SCOPES = (
     "https://www.googleapis.com/auth/documents.readonly",
     "https://www.googleapis.com/auth/spreadsheets.readonly",
+    "https://www.googleapis.com/auth/presentations.readonly",
     "https://www.googleapis.com/auth/drive.metadata.readonly",
     "https://www.googleapis.com/auth/calendar.readonly",
 )
@@ -154,9 +155,51 @@ class _Capture:
         return self._thread.is_alive()
 
 
-def _signal_group(pid: int, signum: signal.Signals) -> None:
+def signal_group(pid: int, signum: signal.Signals) -> None:
     with contextlib.suppress(ProcessLookupError, PermissionError):  # the group may be gone already
         os.killpg(pid, signum)
+
+
+def _group_exists(pid: int) -> bool:
+    try:
+        os.killpg(pid, 0)
+    except ProcessLookupError:
+        return False
+    except PermissionError:
+        return True
+    return True
+
+
+def _stop_and_reap(process: "subprocess.Popen[bytes]") -> None:
+    """Fence cleanup until the owned child is confirmed reaped.
+
+    A deadline ends useful work, not ownership of a still-running child. If killing or waiting fails,
+    keep the caller (and its credential lease lock) inside this cleanup fence. Cancellation is delivered
+    only after reaping, so an uncertain process cannot escape as an ordinary adapter error.
+    """
+    interrupted: BaseException | None = None
+    while True:
+        try:
+            signal_group(process.pid, signal.SIGKILL)
+            process.wait(GRACE)
+            if not _group_exists(process.pid):
+                break
+        except subprocess.TimeoutExpired:
+            pass
+        except BaseException as exc:  # noqa: BLE001 - cancellation cannot release an unverified live child
+            interrupted = exc
+        try:
+            process.kill()  # direct-child fallback if signalling the process group failed
+        except ProcessLookupError:
+            pass
+        except BaseException as exc:  # noqa: BLE001 - retain ownership until a later wait proves termination
+            interrupted = exc
+        try:
+            threading.Event().wait(0.01)
+        except BaseException as exc:  # noqa: BLE001 - interruption cannot remove the cleanup fence
+            interrupted = exc
+    if interrupted is not None:
+        raise interrupted
 
 
 class Gws:
@@ -168,32 +211,56 @@ class Gws:
         Raises:
             OSError: If the executable can't be started.
         """
+        return self._run(executable, arguments, timeout, (environment(), NEUTRAL, MAX_BYTES))
+
+    def _run(
+        self,
+        executable: str,
+        arguments: Sequence[str],
+        timeout: float,
+        context: tuple[Mapping[str, str], str, int],
+    ) -> Process:
+        """Run a bounded process using the caller-selected private environment.
+
+        Raises:
+            OSError: If the subprocess cannot be started or confirmed stopped.
+        """
+        env, cwd, limit = context
         process = subprocess.Popen(  # noqa: S603 - an argument list, the executable resolved to an absolute path
             [executable, *arguments],
             stdin=subprocess.DEVNULL,
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
-            env=environment(),
-            cwd=NEUTRAL,
+            env=dict(env),
+            cwd=cwd,
             start_new_session=True,
         )
-        stdout = _Capture(cast("IO[bytes]", process.stdout), MAX_BYTES + 1)
-        stderr = _Capture(cast("IO[bytes]", process.stderr), MAX_STDERR)
-        exit_code: int | None
+        stdout: _Capture | None = None
+        stderr: _Capture | None = None
         try:
-            exit_code = process.wait(timeout)
-        except subprocess.TimeoutExpired:
-            exit_code = None
-            _signal_group(process.pid, signal.SIGTERM)
+            stdout = _Capture(cast("IO[bytes]", process.stdout), limit + 1)
+            stderr = _Capture(cast("IO[bytes]", process.stderr), MAX_STDERR)
             try:
-                process.wait(GRACE)
+                exit_code = process.wait(timeout)
             except subprocess.TimeoutExpired:
-                _signal_group(process.pid, signal.SIGKILL)
-                process.wait()
-        _signal_group(process.pid, signal.SIGKILL)  # whatever it left running
+                exit_code = None
+                signal_group(process.pid, signal.SIGTERM)
+                with contextlib.suppress(subprocess.TimeoutExpired):
+                    process.wait(GRACE)
+        finally:
+            try:
+                _stop_and_reap(process)
+            finally:
+                if stdout is not None:
+                    stdout.data()
+                if stderr is not None:
+                    stderr.data()
+        if stdout is None or stderr is None:
+            msg = "The Google subprocess output could not be captured"
+            raise OSError(msg)
         out = stdout.data()
-        cut = len(out) > MAX_BYTES or stdout.draining  # still draining: something it started holds the pipe
-        return Process(exit_code, out[:MAX_BYTES], stderr.data(), truncated=cut)
+        cut = len(out) > limit or stdout.draining
+        return Process(exit_code, out[:limit], stderr.data(), truncated=cut)
 
     def login(self, executable: str, arguments: Sequence[str], timeout: float) -> int | None:
         """Run `gws auth login` with the terminal, so the person sees its link and prompts; its exit code.
@@ -209,15 +276,15 @@ class Gws:
         try:
             return process.wait(timeout)
         except subprocess.TimeoutExpired:
-            _signal_group(process.pid, signal.SIGTERM)
+            signal_group(process.pid, signal.SIGTERM)
             try:
                 process.wait(GRACE)
             except subprocess.TimeoutExpired:
-                _signal_group(process.pid, signal.SIGKILL)
+                signal_group(process.pid, signal.SIGKILL)
                 process.wait()
             return None
         finally:
-            _signal_group(process.pid, signal.SIGKILL)  # whatever it left running
+            signal_group(process.pid, signal.SIGKILL)  # whatever it left running
 
     def sleep(self, seconds: float) -> None:
         """Wait `seconds` before retrying after a rate limit."""
@@ -328,6 +395,11 @@ class GoogleSession:
         self._settings = settings
         self._gws = gws
         self._checked: str | None = None  # the executable whose version was checked
+
+    @property
+    def settings(self) -> GoogleSettings:
+        """An independent snapshot of the owning plugin's effective settings."""
+        return self._settings.model_copy(deep=True)
 
     def executable(self) -> str:
         """The absolute path of `gws`: `google.gws_path`, or `gws` on PATH.

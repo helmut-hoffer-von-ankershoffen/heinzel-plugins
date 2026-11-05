@@ -1,0 +1,13 @@
+{
+  "name": "heinzel-google-browser-tests",
+  "private": true,
+  "version": "0.0.0",
+  "devDependencies": {
+    "axe-core": "4.14.0",
+    "playwright-core": "1.64.1"
+  },
+  "scripts": {
+    "browser:install": "playwright-core install chromium webkit",
+    "browser:install-deps": "playwright-core install-deps chromium webkit"
+  }
+}
