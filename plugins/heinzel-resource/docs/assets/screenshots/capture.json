@@ -2,11 +2,11 @@
   "format": 1,
   "plugin": "heinzel-resource",
   "core_version": "0.9.16",
-  "inputs_sha256": "a839049342aded99bfcf65a69595b3745519275e2870b1a5f4a663ee6bb47f65",
+  "inputs_sha256": "a8bf23ed905aeaebec341b912a7304a5596e3985fdfbc65d05b1ea999128a052",
   "images": {
     "docs/assets/screenshots/resources-pane.png": "d702403ee7c4b3c7c8bb63d997307c179e7666c55f033b95ae36bacd3544be62",
-    "docs/assets/screenshots/today-resources.png": "66737813903d4599f50f173e437f3e5ed6597f05f7cac580c9456700085f9f0b",
-    "docs/assets/screenshots/phone-resources.png": "2834872f1d7e81584f19538d76d45e26babac25a593d0b5ac377537643a5235f",
+    "docs/assets/screenshots/today-resources.png": "197daedc26f8836d1e459f5c9c9185dad9abdcd18be57439453c4577c8a83a59",
+    "docs/assets/screenshots/phone-resources.png": "63d4444ce2e15f719dfffa0edfc22554951893ad5a28a6c2b0537a5285c00bc6",
     "docs/assets/screenshots/cli-resources.png": "3d8012cf0ff56ee191ad3c8616855bc514e3a6692621c7248f8a72b554a96073",
     "docs/assets/screenshots/terminal-resources.png": "eb9be4a0f4407111eb02c848a00d048be5f99a7ed9442e740cef7f9e5728b0ec",
     "docs/assets/screenshots/terminal-resources-json.png": "22742147d3a2d3914a440e04297ddb4f184f6c5a2cda6aa738e9c4baab4c3d7c"
@@ -15,18 +15,18 @@
     "format": 2,
     "source_story": {
       "path": "source-story.md",
-      "sha256": "5e17f1d052fd6d077373465a0cae7d6995c36d957fdfc554388d8372317c4393"
+      "sha256": "dc10d3569982af22cd6390ef7474e82b2f8a6eb649c6e0d2ba156abd2ad4e640"
     },
     "definition": {
       "format": 1,
       "reviewer": "Codex feature-story agent",
-      "source_sha256": "62bb3516df10ae6c8dac6164581d862777677240cfd7d91635baf96759418eff",
+      "source_sha256": "a7da53b9ca44bbd3863b19deee5f56fb4e0661ca0db647e391e2bca53a044804",
       "plan_sha256": "e22cda995d6c0250f768d803d002daa9c6005af9588c750e8c42e8285d898185",
-      "story_sha256": "5e17f1d052fd6d077373465a0cae7d6995c36d957fdfc554388d8372317c4393"
+      "story_sha256": "dc10d3569982af22cd6390ef7474e82b2f8a6eb649c6e0d2ba156abd2ad4e640"
     },
     "plugin": "heinzel-resource",
     "core_version": "0.9.16",
-    "inputs_sha256": "a839049342aded99bfcf65a69595b3745519275e2870b1a5f4a663ee6bb47f65",
+    "inputs_sha256": "a8bf23ed905aeaebec341b912a7304a5596e3985fdfbc65d05b1ea999128a052",
     "screenshots": [
       {
         "path": "docs/assets/screenshots/resources-pane.png",
@@ -61,8 +61,8 @@
     ],
     "images": {
       "resources-pane.png": "d702403ee7c4b3c7c8bb63d997307c179e7666c55f033b95ae36bacd3544be62",
-      "today-resources.png": "66737813903d4599f50f173e437f3e5ed6597f05f7cac580c9456700085f9f0b",
-      "phone-resources.png": "2834872f1d7e81584f19538d76d45e26babac25a593d0b5ac377537643a5235f",
+      "today-resources.png": "197daedc26f8836d1e459f5c9c9185dad9abdcd18be57439453c4577c8a83a59",
+      "phone-resources.png": "63d4444ce2e15f719dfffa0edfc22554951893ad5a28a6c2b0537a5285c00bc6",
       "cli-resources.png": "3d8012cf0ff56ee191ad3c8616855bc514e3a6692621c7248f8a72b554a96073",
       "terminal-resources.png": "eb9be4a0f4407111eb02c848a00d048be5f99a7ed9442e740cef7f9e5728b0ec",
       "terminal-resources-json.png": "22742147d3a2d3914a440e04297ddb4f184f6c5a2cda6aa738e9c4baab4c3d7c"
@@ -75,11 +75,11 @@
       "terminal-resources.txt": "a5752e5cf7cc4f35be802368fc40a60681e3abbe173f96bfc4f8a0fc8d7f6c50",
       "terminal-resources-json.txt": "a80a7a1da7c4fd6f2bab702f1971d936a1b474ec1bf373ede27db6471b9e58d0"
     },
-    "bundle_sha256": "92e66677a17069b29f3cb37c18f67b8c50a00a30ab29b4080594d10523995487"
+    "bundle_sha256": "4d65cbcc0562a75d4193145078d0cbef1a586927a9b9f1481531024b99cdf35a"
   },
   "privacy_review": {
     "format": 1,
-    "bundle_sha256": "92e66677a17069b29f3cb37c18f67b8c50a00a30ab29b4080594d10523995487",
+    "bundle_sha256": "4d65cbcc0562a75d4193145078d0cbef1a586927a9b9f1481531024b99cdf35a",
     "reviewer": "Codex privacy agent",
     "decision": "approve",
     "checked_images": [
