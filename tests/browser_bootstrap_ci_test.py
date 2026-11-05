@@ -67,7 +67,7 @@ def test_project_selection_runs_exact_locked_commands_without_import_or_shell(tm
         ["npm", "ci", "--ignore-scripts", "--no-audit", "--no-fund"],
         ["npm", "run", "--ignore-scripts", "browser:install-deps"],
     ]
-    assert all(call[1] == {"cwd": browser, "check": True, "timeout": 120} for call in calls)
+    assert all(call[1] == {"cwd": browser, "check": True} for call in calls)
 
 
 @pytest.mark.parametrize("missing_package", [False, True])
@@ -161,3 +161,10 @@ def test_composition_profile_selects_only_its_owning_projects(tmp_path, monkeypa
     SCRIPT["bootstrap_profile"]("standard", tmp_path)
     assert len(calls) == 2
     assert all(call[1]["cwd"] == browser for call in calls)
+
+
+def test_shared_setup_preserves_protected_caller_job_deadlines():
+    # Protected main bounded inline npm with these existing job deadlines.
+    assert workflow("ci")["jobs"]["plugin"]["timeout-minutes"] == 15
+    assert workflow("release")["jobs"]["build"]["timeout-minutes"] == 20
+    assert workflow("compose")["jobs"]["compose"]["timeout-minutes"] == 20

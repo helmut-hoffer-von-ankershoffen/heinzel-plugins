@@ -36,8 +36,10 @@ def bootstrap(name: str, root: Path) -> bool:
     if not lock.is_file():
         raise ValueError("Declared browser libraries require the owning package-lock.json")
     lock.resolve().relative_to(directory.resolve())
-    subprocess.run(["npm", "ci", "--ignore-scripts", "--no-audit", "--no-fund"], cwd=directory, check=True, timeout=120)
-    subprocess.run(["npm", "run", "--ignore-scripts", "browser:install-deps"], cwd=directory, check=True, timeout=120)
+    # Inherit the owning workflow job deadline, as the original inline setup did.
+    # A separate subprocess timeout can kill npm while leaving its APT child alive.
+    subprocess.run(["npm", "ci", "--ignore-scripts", "--no-audit", "--no-fund"], cwd=directory, check=True)
+    subprocess.run(["npm", "run", "--ignore-scripts", "browser:install-deps"], cwd=directory, check=True)
     return True
 
 
