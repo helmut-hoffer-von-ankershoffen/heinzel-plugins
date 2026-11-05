@@ -110,35 +110,35 @@ def verify_managed_profile(interpreter: Path, profile: Path) -> None:
     with _workspace("hz-managed-profile-") as root:
         env = isolated_environment(root)
         constraints = root / "constraints.txt"
-        constraints.write_text(
-            "".join(
-                f"{item['name']} @ {source.as_uri()}\n" for source, item in zip(sources, data["artifacts"], strict=True)
-            )
-        )
+        # uv persists install-time constraints in its receipt. Pin the SDK's future
+        # content-addressed wheel URLs before installation, so receipt, environment
+        # and preserved installed provenance all name the same selected bytes.
+        retained = []
+        wheels = []
+        core_source = None
+        for source, item in zip(sources, data["artifacts"], strict=True):
+            digest = original[source]
+            wheel = Path(env["HZ_DATA_DIR"]) / "app-artifacts" / digest / source.name
+            uri = f"{wheel.as_uri()}#sha256={digest}"
+            retained.append(f"{item['name']} @ {uri}\n")
+            wheels.append((wheel, digest))
+            if item["name"] == "heinzel":
+                core_source = uri
+        _require(core_source is not None, "The managed profile does not select a core wheel")
+        constraints.write_text("".join(retained))
         env["UV_CONSTRAINT"] = str(constraints)
         _run(
             [str(interpreter), "-I", str(interpreter.parent / "hz-install"), "--profile", str(profile)],
             cwd=root,
             env=env,
         )
-        # hz-install retains the verified wheels under its content-addressed artifact store.
-        # Normal mutations preserve those hash-bound URLs; an original download URL would
-        # contradict that provenance even when both files contain the same selected bytes.
-        retained = []
-        core_source = None
-        for source, item in zip(sources, data["artifacts"], strict=True):
-            digest = original[source]
-            wheel = Path(env["HZ_DATA_DIR"]) / "app-artifacts" / digest / source.name
+        # The normal SDK owns copying and verifying these artifacts. The harness
+        # independently proves retention; it never creates them or edits a receipt.
+        for wheel, digest in wheels:
             _require(
                 wheel.is_file() and hashlib.sha256(wheel.read_bytes()).hexdigest() == digest,
                 "The managed artifact store does not retain the selected release bytes",
             )
-            uri = f"{wheel.as_uri()}#sha256={digest}"
-            retained.append(f"{item['name']} @ {uri}\n")
-            if item["name"] == "heinzel":
-                core_source = uri
-        _require(core_source is not None, "The managed profile does not select a core wheel")
-        constraints.write_text("".join(retained))
         hz = root / "bin/hz"
         prefix = root / "tools/heinzel"
 

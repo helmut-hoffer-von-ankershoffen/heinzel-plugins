@@ -74,7 +74,7 @@ def test_isolation_removes_checkout_overrides_and_tool_authority_but_preserves_i
 )
 def test_managed_acceptance_requires_offline_membership_and_updated_runtime(tmp_path, monkeypatch, failure):
     profile, wheel = local_profile(tmp_path)
-    state = {"version": None, "updates": 0, "launches": 0}
+    state = {"version": None, "updates": 0, "launches": 0, "persisted_constraints": None}
 
     def run(command, *, cwd, env):
         assert "PYTHONPATH" not in env and "PYTHONHOME" not in env
@@ -82,8 +82,16 @@ def test_managed_acceptance_requires_offline_membership_and_updated_runtime(tmp_
         digest = hashlib.sha256(b"accepted SDK fixture").hexdigest()
         retained = Path(env["HZ_DATA_DIR"]) / "app-artifacts" / digest / wheel.name
         initial = "--profile" in command
-        expected_source = wheel.as_uri() if initial else f"{retained.as_uri()}#sha256={digest}"
-        assert Path(env["UV_CONSTRAINT"]).read_text() == f"heinzel @ {expected_source}\n"
+        expected_source = f"{retained.as_uri()}#sha256={digest}"
+        constraints = Path(env["UV_CONSTRAINT"]).read_text()
+        assert constraints == f"heinzel @ {expected_source}\n"
+        if initial:
+            # uv retains install-time constraints in its receipt. Later commands
+            # must remain compatible with that original policy, not replace it.
+            assert not retained.exists()
+            state["persisted_constraints"] = constraints
+        else:
+            assert constraints == state["persisted_constraints"]
         if initial and failure != "missing-retained":
             retained.parent.mkdir(parents=True)
             retained.write_bytes(b"corrupt" if failure == "changed-retained" else wheel.read_bytes())

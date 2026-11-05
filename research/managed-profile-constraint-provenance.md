@@ -5,42 +5,65 @@ failed in run 42020635931, job 127222379947. Independent plugin acceptance,
 installed discovery and UI views passed. The managed installer installed all
 69 packages, including the five selected release wheels and uv 0.13.7.
 
-The first subsequent mutation in `verify_managed_profile` is
-`hz system plugin develop <isolated-root>/probe --json`. Its constraint-policy
-validation combines the harness's `UV_CONSTRAINT` entries with the installed
-checkpoint's preserved wheel sources. The harness named the original download
-locations. The installer correctly retained the same bytes in its private
-`app-artifacts/<sha256>/<filename>` store and installed hash-bound URLs there.
-The SDK correctly rejects two different direct URLs for one distribution,
-before invoking uv. The final error is the SDK's deliberate constraint refusal,
-not a failed uv dependency solve. The job does not print the internal managed
-commands; command attribution follows the preserved harness and SDK call path.
+## Actual installed failures
 
-The repair retains the initial source constraints during installation. After
-installation it independently hashes every retained wheel against the original
-selected bytes, then constrains every distribution to the retained URL including
-its SHA-256 fragment. The explicit local update uses the identical hash-bound
-core URL. No constraints, lifecycle operations, startup checkpoints, daemon
-quiescence, offline launches or artifact-integrity checks are removed. The
-published SDK and plugin releases do not change.
+A bounded diagnostic study exercised two fresh Linux runners with genuine user
+managers, exact bootstrap Python 3.14.4 and uv 0.13.7. Both arms independently
+verified all five wheel hashes, GitHub/PyPI byte equality and attestations, then
+passed the normal managed installation, startup checkpoint and offline inventory.
+Both failed at the first actual command:
+
+`hz system plugin develop <isolated-root>/probe --json`
+
+The baseline used source `53218549`; the candidate used `0d78dbcb`. The candidate's change of the current constraints after
+installation did not fix the failure. Both actual `uv-receipt.toml` files still
+contained five original download-path constraints. The candidate's environment
+instead named the retained `app-artifacts/<sha256>/<filename>#sha256=<digest>`
+URLs. The normal SDK preserves receipt constraints and verified installed wheel
+provenance, so correctly refused those different sources before invoking uv.
+
+The earlier policy-only counterfactual omitted persisted receipt constraints.
+Its narrow success was insufficient and is superseded by these installed results.
+An earlier diagnostic study was invalid setup: neither lifecycle ran. Every
+original failed run and artifact remains preserved.
+
+## Necessary harness preparation and remaining SDK prerequisite
+
+The harness now pins the SDK's future content-addressed wheel URLs, including
+SHA-256 fragments, before installation. Its constraints remain identical across
+installation and every mutation. The normal SDK still owns copying and verifying
+all wheels; the harness independently hashes every retained wheel afterward.
+The explicit local update names the identical hash-bound core URL. No receipt
+is hand-edited, constraint removed, or lifecycle/checkpoint/daemon check bypassed.
+
+This preparation does **not** make the immutable SDK 0.9.16 pass. uv 0.13.7
+serializes local-wheel constraints as fragmentless path entries in its receipt.
+SDK 0.9.16 reconstructs that path as a fragmentless file URL, then compares it
+against the preserved hash-bound URL by exact string equality. Even identical
+paths therefore conflict solely because one URL carries the hash fragment.
+The SDK already documents uv's hash-dropping behavior in its transient-wheel
+receipt matching, but its selected constraint-policy comparison does not account
+for it.
+
+A new SDK needs a source-identity round trip that preserves both the immutable
+receipt policy and the strongest verified hash identity for the same local
+wheel. Different paths, conflicting hashes, changed bytes, ambiguous metadata,
+foreign ownership and version conflicts must remain refusals. Merely dropping
+fragments, constraints or checks is insufficient. Existing SDK releases remain
+immutable; this finding is a next-SDK requirement, not a successful app release.
 
 ## Evidence and limits
 
-- The actual installed 0.9.16 SDK policy, with all five released wheels, rejects
-  the original plus retained URL constraints, accepts identical retained
-  constraints, and still rejects a genuine `heinzel==0.9.15` conflict.
-- Owning installation and composition tests: 21 passed. Regression coverage
-  checks the initial constraints, retained hash-bound constraints, exact local
-  update source, missing/corrupt retained bytes, and existing lifecycle negatives.
-- Repository Python lint and format checks passed.
-- Independent strongest source review approved the final implementation,
-  explicitly finding no weakened policy, provenance, constraints, checkpoint,
-  daemon boundary or lifecycle step.
-- A fresh macOS managed acceptance attempt stopped at the genuine daemon
-  absence boundary. This is preserved as a failure; it does not establish the
-  full lifecycle. No absence check was mocked or bypassed.
-
-The next required evidence is an independently reviewed, bounded Linux installed
-before/after study using these same immutable releases and the unmodified normal
-managed lifecycle. A new full composition or publication is not justified by
-source review or the focused policy counterfactual alone.
+- The actual Linux receipts prove why changing only current constraints fails.
+- A separate isolated, explicit normal uv 0.13.7 tool installation of all five
+  selected immutable wheels, without overrides, independently captures its receipt serialization and asks the unchanged installed SDK 0.9.16
+  parser and constraint validator to round-trip that policy. It does not run a
+  daemon, native profile or installed application, and is not lifecycle acceptance.
+- Owning harness tests require the initial constraints already to name every
+  retained URL/hash and to remain identical afterward. Existing missing/corrupt
+  artifact, checkpoint, offline inventory, update and source-integrity negatives
+  remain.
+- Source preparation and passing unit tests cannot qualify the full Linux
+  lifecycle. The next SDK repair requires owning regressions, independent source
+  review and a fresh bounded installed Linux before/after study before composition
+  or publication.
