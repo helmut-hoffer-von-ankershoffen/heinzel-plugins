@@ -1,34 +1,37 @@
-## Audience
+## Audience and outcome
 
-A distributed team deciding whether World Clock will make it easier to see colleagues’ local times and working hours without leaving Heinzelmännchen. The plugin is included in the standard app.
-
-## Outcome
-
-A viewer can see the team’s current coverage, inspect individual workday countdowns, and compare a future moment using the command line.
+For a distributed team choosing when to meet, World Clock makes local time and working-hour overlap visible in the app and available to scripts. This plan preserves the existing gallery’s useful views and adds explicit light and dark appearances. It does not claim the plugin has been installed or the screenshots captured.
 
 ## Scenes
 
-1. **World clock:** Show the globe and three local clocks alongside Today’s 2/3 working-hours metric.
-2. **Team overview:** Show the Today metric, sidebar ticker, and primary footer clock in their everyday context.
-3. **Footer detail:** Open the primary clock to inspect all configured zones and their countdowns.
-4. **Phone world clock:** Show the same globe and team clocks at a phone viewport.
-5. **CLI times:** Show the table of zones, local times, working hours, and working status.
-6. **Terminal current:** Run the operation in the app terminal at 15:30 UTC, when two zones are working.
-7. **Terminal overlap:** Preview 16:30 UTC in the terminal, when all three zones are working, while the app clock remains fixed at 15:30 UTC.
+1. **World clock, light:** Open the actual World Clock panel alongside Today. The globe, city list and 2/3 working metric introduce the fictional team’s current overlap.
+2. **Team overview, dark:** Show the Today metric, sidebar ticker and primary footer clock together, illustrating how the clock remains useful while working elsewhere in the app.
+3. **Footer detail:** Open the primary clock’s detail to inspect all configured cities and their workday countdowns.
+4. **Phone:** Show the same real panel at a narrow viewport, with the globe and city list visible. This is a responsive use case, not a separate feature.
+5. **CLI:** Show `hz clock --at` at the fixture’s fixed time, including zones, working hours and working status.
+6. **App terminal, current time:** Run the same operation for 15:30 UTC in the native terminal: Berlin and New York are working, and Los Angeles begins in 30 minutes.
+7. **App terminal, later time:** Run it for 16:30 UTC to show the three-zone overlap. The app clock remains at the fixture time; `--at` affects the command result.
 
-## Fictional fixtures
+The two terminal examples are parameter cases of the one declared operation. They supplement, rather than replace, the genuine feature UI scenes. Reject duplicate captures and caption-only differences; if the phone or overview does not communicate its stated use, revise or omit it during review.
 
-Use the existing `docs/screenshot_fixture.py` bootstrap and the fixed Monday, 26 October 2026 at 15:30 UTC. The fictional team uses Berlin, New York, and Los Angeles, each with local working hours of 09:00–18:00. Berlin is primary. At 15:30 UTC, Berlin and New York are working and Los Angeles starts in 30 minutes; at 16:30 UTC, all three are within working hours.
+## Fictional fixtures and presentation
 
-## Privacy pitfalls
+`docs/screenshot_fixture.py` is the existing capture bootstrap. It fixes plugin time at 2026-10-26 15:30 UTC, configures fictional Berlin, New York and Los Angeles zones with 09:00–18:00 hours, and enables the sidebar and footer contributions. `browser_time` aligns browser-rendered clocks with that moment. The second terminal command deliberately previews a different moment.
 
-Capture only in the temporary fictional profile described by the screenshot documentation. Check the whole app frame and terminal for real account names, messages, project data, machine paths, credentials, and other personal information before sharing. The fixture configures clock data and contributions; it does not by itself prove that every surrounding app surface is free of private data.
+Normal presentation fictionalization is explicitly limited: verified owning-interpreter paths become `/demo-profile/.venv`, and only the verified whole hostname detail in the genuine Doctor row becomes `demo-host`. These mappings change no SDK health status or remaining detail and establish no privacy acceptance; unknown identities still fail and independent review must inspect every image and transcript. Apply either mapping only after its source and full value have been verified.
 
-## Acceptance criteria
+## Source-bound UI surface inventory
 
-- The declared plugin route opens the real World Clock panel; the globe renders and the three demo zones are legible.
-- Today shows 2/3 at the fixed moment, and the footer detail shows the configured zones and a Berlin countdown.
-- The phone capture remains readable at 390 × 844.
-- The CLI result shows all three zones, their local times, 09–18 working hours, and working status. The two native-terminal cases visibly demonstrate the change from two working zones to three.
-- Captions identify the data or time as demonstration material. Inspect the resulting captures for privacy and visual accuracy.
-- The plan has been checked against the supplied format and source declarations by inspection; capture and runtime behavior have not been executed or verified.
+- **Plugin entrypoint:** `pyproject.toml`, `[project.entry-points."heinzel.modules"]`, declares `clock = "heinzel_clock"`; its actual declaration is `module = Module("clock", ...)` in `src/heinzel_clock/__init__.py`.
+- **Genuine plugin feature UI:** `module.nav(... sidebar=Navigate(path="/?panel=clock:world-clock"))` and `module.view(... name="world-clock", source="clock", ...)` declare the panel and its actual route. `web/src/index.ts` returns `WorldClock`; `web/src/ClockPanel.tsx` implements the globe or static fallback, zone list, local clocks, work status, primary marker and settings shortcut. `src/heinzel_clock/views/index.js` is the declared built view directory’s entry artifact; its presence does not by itself verify a capture.
+- **Core-rendered feature contributions:** `primary_zone` declares a footer status with detailed clocks and navigation; `zones_ticker` declares the sidebar ticker; `module.action("team-clock", ...)` declares a header action and working count; and `at_work` declares the Today metric. All are sourced from the `clock` operation in `src/heinzel_clock/__init__.py`. The plan uses the observed declarations rather than treating the panel as the only UI.
+- **Operation and terminal:** `@module.operation(render=_render, audience="everyday")` declares one operation, with optional ISO 8601 `at`, a Rich table renderer and structured zone results. README documents CLI, MCP and REST exposure. The two app-terminal scenes are terminal output inside Core, not plugin feature UI; the standalone CLI scene is also terminal output.
+- **Setup, settings and health:** `ClockSettings`, `@module.setup` and `@module.health` in `src/heinzel_clock/__init__.py` declare configuration, an interactive setup flow and Doctor checks. Core may render generic setup, settings and health surfaces from these declarations; their exact presentation is not established by this source alone. Legacy `working_hours` is read but reported degraded, and unknown zone names produce a down check and an operation error. Do not present either as healthy.
+- **External provider UI:** No external provider UI is declared in the provided source. `ClockPanel.tsx` says its globe does not contact a map service. MCP and REST are interfaces, not evidence of an external provider screen.
+- **Other declared surfaces and uncertainty:** The module docstring describes a status item, header action and Today widget, while the actual declarations also include a sidebar ticker and World Clock view. The catalog in `pyproject.toml` describes a “World Clock page,” but the declaration specifies a panel route; use that route and do not invent a separate page. No channel, approval, or info contribution is declared in the provided module. The supplied source does not establish other Core routes or their rendered contents.
+
+## Privacy pitfalls and acceptance criteria
+
+Capture only with the isolated fictional profile and existing bootstrap. Inspect every image and transcript independently for names, account identifiers, hostnames, paths, tokens and unrelated app data; unknown identities fail review. Do not mask a health status or alter details beyond the narrowly verified mappings above.
+
+Accept only real application or terminal captures with no forged HTML. Verify the applied light and dark appearances, readable UI at desktop and phone sizes, the actual panel and footer detail, and the distinct 15:30 and 16:30 command results. Ensure the globe has rendered before accepting globe scenes, and confirm that the fixed browser and plugin times agree. If a scene cannot be reproduced from these declarations and fixture, report it rather than inventing a screen. The TOML below has been checked by inspection against the requested structure; capture, rendering, privacy review and runtime validation remain outstanding because code execution is prohibited.

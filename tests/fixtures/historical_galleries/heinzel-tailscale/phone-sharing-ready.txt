@@ -1,0 +1,26 @@
+Skip to content
+M
+Home
+Today
+
+Nothing needs you right now. Ask anything below.
+
+Page
+Chat
+v0.9.1
+Updates, off
+Tailscale, OK
+Daemon not installed, off
+0
+System health, warning
+No calendar connected, error
+
+Tailscale
+
+Share over Tailscale
+
+[authentication link hidden]
+
+Copy URL
+Open
+Private sharing is ready for an authenticated browser.

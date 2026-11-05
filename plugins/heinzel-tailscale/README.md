@@ -69,13 +69,13 @@ Turn private sharing off explicitly — fictional local Tailscale demo
 <details>
 <summary>Command line</summary>
 
-<img src="docs/assets/screenshots/sharing-request-cli.png" alt="Inspect saved intent and mapping, with web verification pending — fictional local Tailscale demo in a separate CLI process" width="960">
+<img src="docs/assets/screenshots/sharing-request-cli.png" alt="Inspect the saved request and mapping with web verification pending — fictional local Tailscale demo" width="960">
 
-Inspect saved intent and mapping, with web verification pending — fictional local Tailscale demo in a separate CLI process
+Inspect the saved request and mapping with web verification pending — fictional local Tailscale demo
 
-<img src="docs/assets/screenshots/sharing-off-cli.png" alt="Confirm the owned mapping is gone and the request is off — fictional local Tailscale demo" width="960">
+<img src="docs/assets/screenshots/sharing-off-cli.png" alt="Inspect the request and mapping after switching off — fictional local Tailscale demo" width="960">
 
-Confirm the owned mapping is gone and the request is off — fictional local Tailscale demo
+Inspect the request and mapping after switching off — fictional local Tailscale demo
 
 </details>
 

@@ -28,7 +28,7 @@ def test_theme_and_soundscapes_are_owned_public_contributions(make_kernel):
 def test_standard_profile_membership_is_declared_only_by_the_plugin():
     metadata = tomllib.loads((Path(__file__).parents[2] / "pyproject.toml").read_text())
     assert metadata["tool"]["heinzel"]["plugin"]["profiles"] == ["standard"]
-    assert metadata["project"]["dependencies"] == ["heinzel>=0.9.8,<0.10"]
+    assert metadata["project"]["dependencies"] == ["heinzel>=0.9.16,<0.10"]
 
 
 def test_primary_button_text_has_aa_contrast_in_both_modes(make_kernel):

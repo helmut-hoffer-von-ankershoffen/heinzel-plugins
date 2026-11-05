@@ -1,0 +1,4 @@
+   Theme             Title            From           Colours
+*  heinzelmaennchen  Heinzelmännchen  heinzel-theme  ██ ██
+Next:
+  hz system theme use default

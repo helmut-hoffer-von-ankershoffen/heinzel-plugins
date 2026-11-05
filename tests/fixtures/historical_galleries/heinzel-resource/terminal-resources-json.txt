@@ -1,0 +1,43 @@
+Skip to content
+Heinzelmännchen
+Heinzelmännchen
+Contracts
+Team graph
+Organisation
+Team roster
+M
+Mira
+· EM
+Home
+Today
+Doctor: 7 checks need attention
+
+ai.access ai access, system.credential backend, system.credential credential ai.access/api-key…
+
+Open
+Ask about it
+Computer resources
+
+CPU 36%
+
+Ask about it
+v0.9.1
+Updates, off
+Daemon not installed, off
+0
+System health, warning
+No calendar connected, error
+Chat
+Terminal
+Demo complete
+$ hz resource --json; printf '\033]0;Demo complete\007'
+{
+  "hostname": "demo-workstation",
+  "sampled_at": "2026-10-31T10:00:00Z",
+  "cpu_percent": 36.0,
+  "memory_percent": 62.0,
+  "load_1m": 0.65,
+  "logical_cores": 8,
+  "problems": []
+}
+$

@@ -6,6 +6,7 @@ browser_time = "2026-10-26T15:30:00Z"
 name = "world-clock"
 surface = "ui"
 route = "/?panel=clock:world-clock"
+appearance = "light"
 caption = "Find overlap across Berlin, New York and Los Angeles while staying on Today — demonstration time"
 reduced_motion = "no-preference"
 
@@ -35,6 +36,7 @@ action = "wait-webgl"
 name = "team-overview"
 surface = "ui"
 route = "/"
+appearance = "dark"
 caption = "Team working hours at a glance: Today, sidebar ticker and primary footer clock — demonstration time"
 
 [[scenes.steps]]
@@ -139,7 +141,6 @@ surface = "cli"
 caption = "The same team zones and working hours in the CLI — fixed fictional demonstration time"
 command = ["clock", "--at", "2026-10-26T15:30:00Z"]
 
-# Two parameter cases for the same operation in the native app terminal.
 [[scenes]]
 name = "terminal-current"
 surface = "ui"

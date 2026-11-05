@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.9.5
+
+Require Heinzel 0.9.16 as the supported standard-app installation and plugin-change baseline.
+Refresh the dependency lock, including the pinned uv runtime, and the source-bound gallery.
+
 ## 0.9.4
 
 Keep the footer clock visible on narrow screens by requesting priority through the core footer contract.

@@ -1,12 +1,12 @@
 [project]
 name = "heinzel-tailscale"
-version = "0.9.2"
+version = "0.9.3"
 description = "Share the authenticated web app privately through Tailscale Serve: a Heinzelmännchen plugin."
 readme = "README.md"
 license = "MIT"
 license-files = ["LICENSE"]
 requires-python = ">=3.12"
-dependencies = ["heinzel>=0.9.1,<0.10", "httpx>=0.28"]
+dependencies = ["heinzel>=0.9.16,<0.10", "httpx>=0.28"]
 
 [project.urls]
 Source = "https://github.com/helmut-hoffer-von-ankershoffen/heinzel-plugins/tree/main/plugins/heinzel-tailscale"
@@ -152,7 +152,7 @@ caption = "Inspect the private link at phone width — fictional local Tailscale
 [[tool.heinzel.catalog.screenshots]]
 path = "docs/assets/screenshots/sharing-request-cli.png"
 surface = "cli"
-caption = "Inspect saved intent and mapping, with web verification pending — fictional local Tailscale demo in a separate CLI process"
+caption = "Inspect the saved request and mapping with web verification pending — fictional local Tailscale demo"
 
 [[tool.heinzel.catalog.screenshots]]
 path = "docs/assets/screenshots/sharing-off.png"
@@ -162,4 +162,4 @@ caption = "Turn private sharing off explicitly — fictional local Tailscale dem
 [[tool.heinzel.catalog.screenshots]]
 path = "docs/assets/screenshots/sharing-off-cli.png"
 surface = "cli"
-caption = "Confirm the owned mapping is gone and the request is off — fictional local Tailscale demo"
+caption = "Inspect the request and mapping after switching off — fictional local Tailscale demo"

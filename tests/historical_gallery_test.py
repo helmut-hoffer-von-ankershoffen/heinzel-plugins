@@ -12,6 +12,7 @@ from heinzel_plugin_tools._historical_galleries import MANIFESTS, PUBLIC_BASE, P
 
 pytestmark = pytest.mark.unit
 REPO = Path(__file__).resolve().parents[1]
+RECAPTURED = ("heinzel-clock", "heinzel-resource", "heinzel-tailscale", "heinzel-theme")
 
 
 def file_hashes(folder):
@@ -24,16 +25,20 @@ def file_hashes(folder):
 
 @pytest.mark.parametrize("plugin", sorted(MANIFESTS))
 def test_exact_authenticated_historical_gallery_integrity_is_read_only(plugin, monkeypatch):
-    owner = REPO / "plugins" / plugin
-    manifest_bytes = (owner / capture.MANIFEST).read_bytes()
+    folder = (
+        REPO / "tests/fixtures/historical_galleries" / plugin
+        if plugin in RECAPTURED
+        else REPO / "plugins" / plugin / capture.OUTPUT
+    )
+    manifest_bytes = (folder / capture.MANIFEST.name).read_bytes()
     assert hashlib.sha256(manifest_bytes).hexdigest() == MANIFESTS[plugin]
     assert PUBLIC_BASE == "3be4b072ca2c78c6558298434319e30550e91a23"
     assert PUBLIC_TREE == "4bd7c172d84526497cceba28b9c20e714897922d"
-    before = file_hashes(owner / capture.OUTPUT)
+    before = file_hashes(folder)
     monkeypatch.setattr(privacy, "run_agent", lambda *a, **kw: pytest.fail("read-only check cannot start an agent"))
-    privacy.validate_historical_gallery(manifest_bytes, owner / capture.OUTPUT, plugin)
-    assert before == file_hashes(owner / capture.OUTPUT)
-    assert (owner / capture.MANIFEST).read_bytes() == manifest_bytes
+    privacy.validate_historical_gallery(manifest_bytes, folder, plugin)
+    assert before == file_hashes(folder)
+    assert (folder / capture.MANIFEST.name).read_bytes() == manifest_bytes
 
 
 @pytest.fixture

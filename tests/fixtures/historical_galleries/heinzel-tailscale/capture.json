@@ -1,0 +1,89 @@
+{
+  "format": 1,
+  "plugin": "heinzel-tailscale",
+  "core_version": "0.9.1",
+  "inputs_sha256": "c24e10a93e1f2792b76ef439cbb334a52486f94654e88ca5605abc61ea68f507",
+  "images": {
+    "docs/assets/screenshots/sharing-ready.png": "ffef3fcbe76424d5e5c84f54a75dcdd287c18c2c2b13fde0d27542a53130b8e0",
+    "docs/assets/screenshots/phone-sharing-ready.png": "deadbfacf8f0cbef3eff077ce93325bba414795a17ad0d99d6f40a4e6de2faaa",
+    "docs/assets/screenshots/sharing-request-cli.png": "0cfe04db310718329079a55c64b62a5d936bbfc1afeffc5132c73b39c2757254",
+    "docs/assets/screenshots/sharing-off.png": "25cd3e6644031e2b07f4ea39a15c9c0e3c38b27227d3309e4edf9181ef81ec30",
+    "docs/assets/screenshots/sharing-off-cli.png": "258d18283c592905ed4faac4dcb3dd47ab1930071da6db5e1aac866b1c2f4250"
+  },
+  "review_bundle": {
+    "format": 1,
+    "definition": {
+      "format": 1,
+      "reviewer": "Codex feature-story agent",
+      "source_sha256": "46c04f4f92749532e20611cad98b161959c8f2c0b53fa45064a0cfefd4e4101d",
+      "plan_sha256": "c747f3e93001c3137d6b966ae7cb36ff2b32142a047f32dbfd1ed694a33c1151",
+      "story_sha256": "7315deae0e66340ea57d4f9b5b66a7f7475764fd318aba2c7378c2c34538db0a"
+    },
+    "plugin": "heinzel-tailscale",
+    "core_version": "0.9.1",
+    "inputs_sha256": "c24e10a93e1f2792b76ef439cbb334a52486f94654e88ca5605abc61ea68f507",
+    "screenshots": [
+      {
+        "path": "docs/assets/screenshots/sharing-ready.png",
+        "surface": "ui",
+        "caption": "Enable private sharing and see verified readiness \u2014 fictional local Tailscale demo"
+      },
+      {
+        "path": "docs/assets/screenshots/phone-sharing-ready.png",
+        "surface": "ui",
+        "caption": "Inspect the private link at phone width \u2014 fictional local Tailscale demo; no remote connection tested"
+      },
+      {
+        "path": "docs/assets/screenshots/sharing-request-cli.png",
+        "surface": "cli",
+        "caption": "Inspect saved intent and mapping, with web verification pending \u2014 fictional local Tailscale demo in a separate CLI process"
+      },
+      {
+        "path": "docs/assets/screenshots/sharing-off.png",
+        "surface": "ui",
+        "caption": "Turn private sharing off explicitly \u2014 fictional local Tailscale demo"
+      },
+      {
+        "path": "docs/assets/screenshots/sharing-off-cli.png",
+        "surface": "cli",
+        "caption": "Confirm the owned mapping is gone and the request is off \u2014 fictional local Tailscale demo"
+      }
+    ],
+    "images": {
+      "sharing-ready.png": "ffef3fcbe76424d5e5c84f54a75dcdd287c18c2c2b13fde0d27542a53130b8e0",
+      "phone-sharing-ready.png": "deadbfacf8f0cbef3eff077ce93325bba414795a17ad0d99d6f40a4e6de2faaa",
+      "sharing-request-cli.png": "0cfe04db310718329079a55c64b62a5d936bbfc1afeffc5132c73b39c2757254",
+      "sharing-off.png": "25cd3e6644031e2b07f4ea39a15c9c0e3c38b27227d3309e4edf9181ef81ec30",
+      "sharing-off-cli.png": "258d18283c592905ed4faac4dcb3dd47ab1930071da6db5e1aac866b1c2f4250"
+    },
+    "transcripts": {
+      "sharing-ready.txt": "a0e4e6cb0748ff0300e1cacbc774b884550075bed29ab662216f01de3162fc57",
+      "phone-sharing-ready.txt": "0a56b0e9e56dfadfeaf1d8ab9f28a527706a96f3adb36d820b3daf246a4940a4",
+      "sharing-request-cli.txt": "cd6e362469359568951c423a64ad05247395de7032281d07addf6b7ce10bdd2d",
+      "sharing-off.txt": "4e4d90e850a5eebb50d7860c0113d94816bf431eb390eff2f1cd7a3eb18732a1",
+      "sharing-off-cli.txt": "4d0c6d11c3a596857032c07677d48bb49d42f898f73f9e031a4388d922710890"
+    },
+    "bundle_sha256": "edb12baee8a4a82afda89afceda9bba3e29a202842d48d6e255d9a7b75747f71"
+  },
+  "privacy_review": {
+    "format": 1,
+    "bundle_sha256": "edb12baee8a4a82afda89afceda9bba3e29a202842d48d6e255d9a7b75747f71",
+    "reviewer": "Codex privacy agent",
+    "decision": "approve",
+    "checked_images": [
+      "sharing-ready.png",
+      "phone-sharing-ready.png",
+      "sharing-request-cli.png",
+      "sharing-off.png",
+      "sharing-off-cli.png"
+    ],
+    "checks": {
+      "tokens_absent": true,
+      "personal_data_absent": true,
+      "feature_relevant": true,
+      "multiple_ui_scenes": true,
+      "captions_accurate": true
+    },
+    "findings": []
+  }
+}

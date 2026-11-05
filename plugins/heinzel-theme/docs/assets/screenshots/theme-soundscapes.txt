@@ -8,19 +8,19 @@ Team roster
 M
 Mira
 · EM
-Home
 Today
-Doctor: 7 checks need attention
+Today
+Doctor: 3 checks need attention
 
-ai.access ai access, system.credential backend, system.credential credential ai.access/api-key…
+ai.access ai access, system.doctor installation, system.runner claude-code
 
 Open
 Ask about it
-v0.9.8
+v0.9.16
 Updates, off
 0
 System health, warning
-No calendar connected, error
+Calendar unavailable
 Daemon not installed, off
 Chat
 New chat
@@ -54,6 +54,7 @@ Team
 This computer
 
 Credentials
+Web server
 Daemon
 Configuration files
 From Claude
@@ -61,14 +62,14 @@ Updates
 System
 Appearance
 
-First-Party
-v0.9.8
+First-party
+v0.9.16
 
 Mode
 
 Theme
 
-Home
+Today
 Search
 Today
 Weekly digest
@@ -80,7 +81,7 @@ theme
 In use
 Sound
 
-A soundscape plays once you press Play. It mutes in meetings and, where supported, gets softer while you type.
+Pick a soundscape and it plays. It mutes in meetings and, where supported, gets softer while you type.
 
 Claude FM
 Plugin: heinzel-theme · Plays from YouTube
