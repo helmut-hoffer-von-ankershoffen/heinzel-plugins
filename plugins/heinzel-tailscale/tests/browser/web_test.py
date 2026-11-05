@@ -63,6 +63,27 @@ def fixture_url(server: subprocess.Popen[str], lifecycle: Path) -> str:
     pytest.fail("\n".join(details))
 
 
+def test_failure_observability_contract():
+    """The launch adapter preserves native arguments, errors and diagnostic privacy."""
+    subprocess.run(
+        [
+            "uv",
+            "run",
+            "--no-project",
+            "--script",
+            str(REPO / "web/build.py"),
+            "exec",
+            "node",
+            "--test",
+            str(REPO / "tests/browser/diagnostics.test.mjs"),
+            str(REPO / "tests/browser/diagnostic-adapter.test.mjs"),
+        ],
+        cwd=REPO,
+        check=True,
+        timeout=180,
+    )
+
+
 @pytest.mark.timeout(300)
 def test_mounted_sharing_hot_applies_copies_and_disables_without_os_changes(tmp_path):
     environment = {key: value for key, value in os.environ.items() if key in {"PATH", "LANG", "LC_ALL", "TMPDIR"}}
@@ -107,7 +128,14 @@ def test_mounted_sharing_hot_applies_copies_and_disables_without_os_changes(tmp_
         assert url.startswith("http://127.0.0.1:")
         assert "#token=" in url
         driven = subprocess.run(
-            [*run, "exec", "node", str(REPO / "web/e2e/tailscale.mjs")],
+            [
+                *run,
+                "exec",
+                "node",
+                "--import",
+                str(REPO / "tests/browser/diagnostic-preload.mjs"),
+                str(REPO / "web/e2e/tailscale.mjs"),
+            ],
             input=json.dumps({"url": url, "shots": str(tmp_path / "screenshots")}),
             cwd=REPO,
             capture_output=True,
