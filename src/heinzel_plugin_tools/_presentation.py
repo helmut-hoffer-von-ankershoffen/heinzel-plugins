@@ -100,11 +100,19 @@ def redact_owning_prefix(page, identity: OwningPrefix) -> None:
           const escape = value => value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
           const pattern = new RegExp('(^|[\\s(\\[\\{\\x22\\x27=])' + escape(prefix) +
             '(?=$|[/\\s)\\]\\}\\x22\\x27])(?:/[^\\s()\\[\\]{}\\x22\\x27<>]*)?', 'g');
-          const scrub = text => text.replace(pattern, (match, lead) => {
+          const scrub = text => {
+            // A URL/email-bearing node is ambiguous, including whitespace inside query values.
+            // Leave it for the ordinary scanner rather than interpreting it as path presentation.
+            if (/[a-z][a-z0-9+.-]*:\/\/|mailto:|@/i.test(text)) return text;
+            return text.replace(pattern, (match, lead) => {
             const path = match.slice(lead.length);
-            if (path.split('/').includes('..')) return match;
+            const suffix = path.slice(prefix.length);
+            // No normalization/decoding grants authority to a different spelling of a path.
+            if (/[\\%?#]/.test(suffix) ||
+                (suffix && suffix.slice(1).split('/').some(part => ['', '.', '..'].includes(part)))) return match;
             return lead + '/demo-profile/.venv' + path.slice(prefix.length);
-          });
+            });
+          };
           const walker = document.createTreeWalker(document.body, NodeFilter.SHOW_TEXT);
           let node;
           while ((node = walker.nextNode())) {

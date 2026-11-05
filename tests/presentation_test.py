@@ -153,7 +153,22 @@ def test_only_exact_owning_path_text_changes_and_all_doctor_rows_statuses_and_de
     assert page.saved
 
 
-@pytest.mark.parametrize("suffix", ["-other", "2", ".backup", "/../foreign"])
+@pytest.mark.parametrize(
+    "suffix",
+    [
+        "-other",
+        "2",
+        ".backup",
+        "/../foreign",
+        "/./lib",
+        "/%2e/lib",
+        "/%2E%2e/foreign",
+        "/%252e%252e/foreign",
+        "/lib%2f..%2fforeign",
+        "/lib\\..\\foreign",
+        "/lib//foreign",
+    ],
+)
 def test_lookalike_and_traversal_paths_remain_private_and_refuse_screenshot(environment, tmp_path, suffix):
     root, interpreter = environment
     identity = presentation.owning_prefix(root, interpreter)
@@ -172,4 +187,27 @@ def test_unknown_private_path_in_another_row_still_refuses_the_entire_capture(en
     with pytest.raises(CaptureError, match="private paths"):
         capture.safe_screenshot(page, tmp_path / "refused.png", owning_interpreter_prefix=identity)
     assert page.texts == ["installation (/demo-profile/.venv)", "/private/tmp/unknown-owner/secret"]
+    assert not page.saved
+
+
+@pytest.mark.parametrize(
+    "context",
+    [
+        "https://example.invalid/?path={prefix}",
+        "https://example.invalid/?path= {prefix}",
+        "https://example.invalid/?path=\t{prefix}",
+        "https://example.invalid/?path=\n{prefix}/lib",
+        "demo@example.invalid {prefix}",
+        "demo@{prefix}",
+        "mailto:demo@example.invalid?body= {prefix}",
+    ],
+)
+def test_url_and_email_contexts_do_not_gain_path_redaction(environment, tmp_path, context):
+    root, interpreter = environment
+    identity = presentation.owning_prefix(root, interpreter)
+    value = context.format(prefix=identity.prefix)
+    page = TextPage(["DOWN", value])
+    with pytest.raises(CaptureError, match="private paths"):
+        capture.safe_screenshot(page, tmp_path / "refused.png", owning_interpreter_prefix=identity)
+    assert page.texts == ["DOWN", value]
     assert not page.saved

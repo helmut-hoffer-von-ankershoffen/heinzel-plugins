@@ -228,7 +228,9 @@ defines the redaction prefix.
 Before each image save, that verified prefix alone is replaced in rendered text by `/demo-profile/.venv`.
 The UI transcript uses the same rendered text. This is presentation redaction, not a changed SDK report: every
 Doctor row, status, error and remaining detail survives. Exact directory boundaries are required; lookalikes,
-traversal and unknown private paths still fail the ordinary scan. Disclose the fictionalized paths in the source
+dot segments, repeated separators, percent-encoded suffixes and unknown private paths are left unchanged for
+the ordinary scan. URL/email-bearing text nodes are also left unchanged, including whitespace in query values.
+This deliberately narrow matching rule does not normalize paths or establish a general privacy guarantee. Disclose the fictionalized paths in the source
 story and captions. Independent review must still inspect every image and transcript.
 
 External prepared `--python` mode keeps its prior behavior and receives no new owning-prefix redaction authority.
