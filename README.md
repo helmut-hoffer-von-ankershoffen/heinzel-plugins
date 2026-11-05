@@ -166,7 +166,8 @@ and runs the owning head and browser tests. Browser projects keep exact Node dep
 `tests/browser/package-lock.json`. Their explicit `browser:install` npm script installs all tested engines with the
 locked `playwright-core` CLI; `browser:install-deps` declares matching Linux runner libraries installed visibly
 in the owning CI job. Lifecycle scripts stay disabled. Local fixtures install browsers only, never OS packages,
-and honor `PLAYWRIGHT_BROWSERS_PATH` for isolated cold-cache validation.
+and honor `PLAYWRIGHT_BROWSERS_PATH` for isolated cold-cache validation. Installer and isolated child share
+one resolved cache, including Linux XDG and relative paths; `0` keeps browsers inside the owning locked package.
 `release` checks and builds one plugin and prints its independent tag/artifacts.
 It publishes nothing. The Release workflow previews by default; its explicit publish option creates that plugin's
 tag, GitHub release and optional PyPI artifacts with build provenance. `make publish NAME=<name>` dispatches that

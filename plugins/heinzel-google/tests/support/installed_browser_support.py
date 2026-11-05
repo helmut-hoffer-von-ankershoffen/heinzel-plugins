@@ -13,16 +13,46 @@ import pytest
 pytestmark = pytest.mark.e2e
 
 
+def _playwright_env(name: str) -> str | None:
+    for key in (name, f"npm_config_{name.lower()}", f"npm_package_config_{name.lower()}"):
+        if key in os.environ:
+            return os.environ[key]
+    return None
+
+
+def _browser_cache(directory: Path) -> Path:
+    """Resolve the owning locked Playwright cache once, before npm changes cwd or the child changes HOME."""
+    selected = _playwright_env("PLAYWRIGHT_BROWSERS_PATH")
+    if selected == "0":
+        cache = directory / "node_modules/playwright-core/.local-browsers"
+    elif selected:
+        cache = Path(selected)
+    elif sys.platform == "darwin":
+        cache = Path.home() / "Library/Caches/ms-playwright"
+    elif sys.platform == "win32":
+        cache = Path(os.environ.get("LOCALAPPDATA") or Path.home() / "AppData/Local") / "ms-playwright"
+    else:
+        cache = Path(os.environ.get("XDG_CACHE_HOME") or Path.home() / ".cache") / "ms-playwright"
+    if not cache.is_absolute():
+        cache = Path(_playwright_env("INIT_CWD") or Path.cwd()) / cache
+    return cache.resolve()
+
+
 @lru_cache(maxsize=1)
-def browser_package() -> Path:
+def browser_package() -> tuple[Path, Path]:
     """Install only this plugin's pinned browser test dependencies, with package scripts disabled."""
     directory = Path(__file__).resolve().parents[1] / "browser"
+    cache = _browser_cache(directory)
     npm = shutil.which("npm")
     if npm is None:
         msg = "npm is required for the Google plugin's browser tests"
         raise RuntimeError(msg)
     node_bin = Path(nodejs_wheel.__file__).parent / "bin"
-    environment = dict(os.environ, PATH=f"{node_bin}{os.pathsep}{os.environ.get('PATH', '')}")
+    environment = dict(
+        os.environ,
+        PATH=f"{node_bin}{os.pathsep}{os.environ.get('PATH', '')}",
+        PLAYWRIGHT_BROWSERS_PATH=str(cache),
+    )
     subprocess.run(
         [npm, "ci", "--ignore-scripts", "--no-audit", "--no-fund"],
         cwd=directory,
@@ -41,11 +71,11 @@ def browser_package() -> Path:
         timeout=120,
         check=True,
     )
-    return directory / "package.json"
+    return directory / "package.json", cache
 
 
 def run_installed_browser(path: Path, function: str, root: Path, engine: str) -> None:
-    package = browser_package()
+    package, cache = browser_package()
     script = r"""
 import os, runpy, sys
 from pathlib import Path
@@ -61,11 +91,6 @@ with MonkeyPatch.context() as patches:
 """
     home = root / "isolated-home"
     home.mkdir()
-    cache = (
-        Path(os.environ["PLAYWRIGHT_BROWSERS_PATH"])
-        if "PLAYWRIGHT_BROWSERS_PATH" in os.environ
-        else (Path.home() / ("Library/Caches/ms-playwright" if sys.platform == "darwin" else ".cache/ms-playwright"))
-    )
     env = {
         "PATH": os.environ.get("PATH", "/usr/bin:/bin"),
         "HOME": str(home),
