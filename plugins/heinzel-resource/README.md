@@ -1,6 +1,6 @@
 # heinzel-resource
 
-Shows CPU, memory and load for the machine your helper runs on, on Today and in the footer.
+Shows CPU, memory and load for the machine your Heinzels run on. Find the readings on Today and in the footer.
 
 Included in the standard app.
 
