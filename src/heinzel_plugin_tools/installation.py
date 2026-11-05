@@ -107,21 +107,38 @@ def verify_managed_profile(interpreter: Path, profile: Path) -> None:
     sources = [Path(item["url"]).resolve() for item in data["artifacts"]]
     original = {source: hashlib.sha256(source.read_bytes()).hexdigest() for source in sources}
     expected = {item["name"] for item in data["artifacts"] if item["name"] != "heinzel"}
-    core = next(source for source, item in zip(sources, data["artifacts"], strict=True) if item["name"] == "heinzel")
     with _workspace("hz-managed-profile-") as root:
         env = isolated_environment(root)
         constraints = root / "constraints.txt"
-        constraints.write_text(
-            "".join(
-                f"{item['name']} @ {source.as_uri()}\n" for source, item in zip(sources, data["artifacts"], strict=True)
-            )
-        )
+        # uv persists install-time constraints in its receipt. Pin the SDK's future
+        # content-addressed wheel URLs before installation, so receipt, environment
+        # and preserved installed provenance all name the same selected bytes.
+        retained = []
+        wheels = []
+        core_source = None
+        for source, item in zip(sources, data["artifacts"], strict=True):
+            digest = original[source]
+            wheel = Path(env["HZ_DATA_DIR"]) / "app-artifacts" / digest / source.name
+            uri = f"{wheel.as_uri()}#sha256={digest}"
+            retained.append(f"{item['name']} @ {uri}\n")
+            wheels.append((wheel, digest))
+            if item["name"] == "heinzel":
+                core_source = uri
+        _require(core_source is not None, "The managed profile does not select a core wheel")
+        constraints.write_text("".join(retained))
         env["UV_CONSTRAINT"] = str(constraints)
         _run(
             [str(interpreter), "-I", str(interpreter.parent / "hz-install"), "--profile", str(profile)],
             cwd=root,
             env=env,
         )
+        # The normal SDK owns copying and verifying these artifacts. The harness
+        # independently proves retention; it never creates them or edits a receipt.
+        for wheel, digest in wheels:
+            _require(
+                wheel.is_file() and hashlib.sha256(wheel.read_bytes()).hexdigest() == digest,
+                "The managed artifact store does not retain the selected release bytes",
+            )
         hz = root / "bin/hz"
         prefix = root / "tools/heinzel"
 
@@ -172,7 +189,7 @@ def verify_managed_profile(interpreter: Path, profile: Path) -> None:
         launch(expected | {"heinzel-lifecycle-probe"}, "plugin installation")
         _require(command("lifecycleprobe", "ping") == "0.1.0", "The installed probe is not the original version")
         _probe_project(fixture, "0.2.0")
-        updated = command("system", "update", "--source", str(core))
+        updated = command("system", "update", "--source", core_source)
         _require(updated["after"] == data["core_version"], "The SDK changed during a fixture-only update")
         _require(command("lifecycleprobe", "ping") == "0.2.0", "The local provider did not update")
         launch(expected | {"heinzel-lifecycle-probe"}, "local update")
