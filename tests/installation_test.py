@@ -1,5 +1,6 @@
 """Profile claims require the selected SDK and a complete managed lifecycle, not parser acceptance alone."""
 
+import hashlib
 import json
 import subprocess
 import sys
@@ -68,7 +69,9 @@ def test_isolation_removes_checkout_overrides_and_tool_authority_but_preserves_i
     assert not {"AWS_SECRET_ACCESS_KEY", "ACCEPTANCE_SENTINEL", "GH_TOKEN", "PYTHONPATH"} & observed.keys()
 
 
-@pytest.mark.parametrize("failure", [None, "missing-checkpoint", "stale-update", "changed-artifact"])
+@pytest.mark.parametrize(
+    "failure", [None, "missing-checkpoint", "stale-update", "changed-artifact", "missing-retained", "changed-retained"]
+)
 def test_managed_acceptance_requires_offline_membership_and_updated_runtime(tmp_path, monkeypatch, failure):
     profile, wheel = local_profile(tmp_path)
     state = {"version": None, "updates": 0, "launches": 0}
@@ -76,7 +79,14 @@ def test_managed_acceptance_requires_offline_membership_and_updated_runtime(tmp_
     def run(command, *, cwd, env):
         assert "PYTHONPATH" not in env and "PYTHONHOME" not in env
         assert "UV_FIND_LINKS" not in env
-        assert Path(env["UV_CONSTRAINT"]).read_text() == f"heinzel @ {wheel.as_uri()}\n"
+        digest = hashlib.sha256(b"accepted SDK fixture").hexdigest()
+        retained = Path(env["HZ_DATA_DIR"]) / "app-artifacts" / digest / wheel.name
+        initial = "--profile" in command
+        expected_source = wheel.as_uri() if initial else f"{retained.as_uri()}#sha256={digest}"
+        assert Path(env["UV_CONSTRAINT"]).read_text() == f"heinzel @ {expected_source}\n"
+        if initial and failure != "missing-retained":
+            retained.parent.mkdir(parents=True)
+            retained.write_bytes(b"corrupt" if failure == "changed-retained" else wheel.read_bytes())
         if str(command[0]).endswith("/bin/hz"):
             args = command[1:-1]
             if args[:3] == ["system", "plugin", "develop"]:
@@ -85,6 +95,7 @@ def test_managed_acceptance_requires_offline_membership_and_updated_runtime(tmp_
                     wheel.write_bytes(b"modified SDK")
                 return '{"done":true}'
             if args[:2] == ["system", "update"]:
+                assert args == ["system", "update", "--source", f"{retained.as_uri()}#sha256={digest}"]
                 state["updates"] += 1
                 if failure != "stale-update":
                     state["version"] = "0.2.0"
