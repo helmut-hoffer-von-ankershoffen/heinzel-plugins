@@ -38,11 +38,8 @@ class OwningPrefix:
             raise CaptureError("The owning capture environment changed after prefix verification")
 
 
-def owning_prefix(root: Path, interpreter: Path) -> OwningPrefix:
-    """Attest the tool's fixed .venv; no caller-supplied prefix or external environment gains authority."""
-    expected = root.resolve(strict=True) / ".venv"
-    binary = expected / "bin/python"
-    config = expected / "pyvenv.cfg"
+def _validate_environment(expected: Path, binary: Path, config: Path, interpreter: Path) -> None:
+    """Refuse unsafe roots, aliases, ownership, permissions and non-owning selection."""
     if expected in {Path(expected.anchor), Path.home().resolve()}:
         raise CaptureError("A root or home directory cannot be an owning capture prefix")
     for path in (expected, expected / "bin", config):
@@ -53,6 +50,10 @@ def owning_prefix(root: Path, interpreter: Path) -> OwningPrefix:
         raise CaptureError("The owning capture environment is not a normal project .venv")
     if interpreter.absolute() != binary:
         raise CaptureError("The selected Python is not the normal owning capture interpreter")
+
+
+def _interpreter_paths(expected: Path, binary: Path, config: Path) -> list[Path]:
+    """Boundedly retain every alias identity, refusing cycles and foreign virtual environments."""
     paths = [expected, expected / "bin", config]
     current = binary
     for _ in range(16):
@@ -68,27 +69,23 @@ def owning_prefix(root: Path, interpreter: Path) -> OwningPrefix:
         current = target if target.is_absolute() else current.parent / target
     else:
         raise CaptureError("The owning capture interpreter has too many aliases")
-    evidence = tuple((path, _identity(path)) for path in paths)
-    probe = subprocess.run(
-        [
-            str(binary),
-            "-I",
-            "-B",
-            "-c",
-            "import json,socket,sys;print(json.dumps([sys.prefix,sys.executable,socket.gethostname()]))",
-        ],
-        capture_output=True,
-        text=True,
-        check=True,
-        timeout=5,
-    )
-    identity = json.loads(probe.stdout)
+    return paths
+
+
+def _prefix_aliases(expected: Path) -> set[str]:
+    """Recognize fixed Darwin OS aliases only when they reach the same canonical directory."""
     aliases = {str(expected)}
     if sys.platform == "darwin":
         for alias in ("/var", "/tmp"):  # noqa: S108 - inspect fixed OS aliases; no temporary file is created
             canonical = Path("/private" + alias)
             if str(expected).startswith(str(canonical) + "/") and Path(alias).resolve() == canonical:
                 aliases.add(str(expected).removeprefix("/private"))
+    return aliases
+
+
+def _verify_reported_identity(identity: object, expected: Path, binary: Path) -> tuple[str, str]:
+    """Bind reported prefix/executable and independent hostname to the validated environment."""
+    aliases = _prefix_aliases(expected)
     if (
         not isinstance(identity, list)
         or len(identity) != 3
@@ -105,7 +102,32 @@ def owning_prefix(root: Path, interpreter: Path) -> OwningPrefix:
         identity[2],
     ):
         raise CaptureError("The selected Python did not attest the same unambiguous controller hostname")
-    result = OwningPrefix(identity[0], evidence, identity[2])
+    return identity[0], identity[2]
+
+
+def owning_prefix(root: Path, interpreter: Path) -> OwningPrefix:
+    """Attest the tool's fixed .venv; no caller-supplied prefix or external environment gains authority."""
+    expected = root.resolve(strict=True) / ".venv"
+    binary = expected / "bin/python"
+    config = expected / "pyvenv.cfg"
+    _validate_environment(expected, binary, config, interpreter)
+    paths = _interpreter_paths(expected, binary, config)
+    evidence = tuple((path, _identity(path)) for path in paths)
+    probe = subprocess.run(
+        [
+            str(binary),
+            "-I",
+            "-B",
+            "-c",
+            "import json,socket,sys;print(json.dumps([sys.prefix,sys.executable,socket.gethostname()]))",
+        ],
+        capture_output=True,
+        text=True,
+        check=True,
+        timeout=5,
+    )
+    prefix, hostname = _verify_reported_identity(json.loads(probe.stdout), expected, binary)
+    result = OwningPrefix(prefix, evidence, hostname)
     result.verify()
     return result
 

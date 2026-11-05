@@ -878,4 +878,5 @@ def test_normal_setup_routes_its_derived_identity_to_every_presentation_save(har
     monkeypatch.setattr(capture, "owning_prefix", attest)
     monkeypatch.setattr(capture, "safe_screenshot", save)
     assert capture.capture(harness.owner, core=None, headed=False, draft_only=True)["ok"]
-    assert observed and all(value is identity for value in observed)
+    assert observed
+    assert all(value is identity for value in observed)
