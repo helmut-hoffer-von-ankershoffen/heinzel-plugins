@@ -67,3 +67,28 @@ immutable; this finding is a next-SDK requirement, not a successful app release.
   lifecycle. The next SDK repair requires owning regressions, independent source
   review and a fresh bounded installed Linux before/after study before composition
   or publication.
+
+## Subsequent candidate-SDK lifecycle qualification
+
+A second installed comparison showed that repairing same-wheel receipt source
+identity allowed the first development operation, but a later local Core update
+still lost the verified local-wheel hashes for all five distributions. That
+intermediate candidate was therefore insufficient. The updater now forwards the
+checkpoint-authorized unchanged wheel hashes alongside the explicitly selected
+Core hash; it preserves the identical receipt-derived constraint policy.
+
+A fresh paired Linux study ran the unchanged managed lifecycle with the same
+published standard plugin wheels, bootstrap versions and harness. The intermediate
+control failed at the update. The repaired, explicitly unpublished source
+candidate completed install, development, update, probe removal and reinstall,
+including every startup checkpoint, offline inventory, selected-byte integrity
+check and daemon-off assertion. Both complete result archives and original
+failures were retained. This is installed Linux diagnostic evidence for the
+combined harness and candidate SDK repairs, not a registry release, native Mac
+result or combined application acceptance.
+
+The harness implementation and owning tests in this branch remain unchanged
+when incorporating the newly reviewed Google provider on main. Its source
+qualification must still pass ordinary current-head CI; the original Zoom test
+timeouts remain unresolved. Published SDK 0.9.16 cannot pass this lifecycle. The
+new SDK and composed app require their normal publication and both-OS acceptance.
