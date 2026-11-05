@@ -1,5 +1,6 @@
 """The planner and boundary guard must work for a new plugin without registry edits."""
 
+import hashlib
 import json
 import os
 import shlex
@@ -10,9 +11,48 @@ from pathlib import Path
 
 import pytest
 
+from heinzel_plugin_tools import capture, privacy
 from heinzel_plugin_tools import cli as plugins
 
 pytestmark = pytest.mark.integration
+
+
+@pytest.mark.parametrize("plugin", ("heinzel-clock", "heinzel-resource", "heinzel-tailscale", "heinzel-theme"))
+def test_recaptured_current_gallery_has_fresh_independent_format_two_review(tmp_path, plugin, monkeypatch):
+    source = Path(__file__).resolve().parents[1] / "plugins" / plugin
+
+    def cold_inputs(directory, names):
+        ignored = set(names) & (capture.IGNORED | {".pytest_cache", ".mypy_cache", ".ruff_cache", ".coverage"})
+        # Clock declares this generated directory in its .gitignore; a checkout never contains these outputs.
+        if plugin == "heinzel-clock" and Path(directory).relative_to(source) == Path("src/heinzel_clock"):
+            ignored.add("views")
+        return ignored
+
+    owner = tmp_path / plugin
+    shutil.copytree(source, owner, ignore=cold_inputs)
+
+    def gallery_hashes():
+        return {
+            path.relative_to(owner).as_posix(): hashlib.sha256(path.read_bytes()).hexdigest()
+            for path in (owner / capture.OUTPUT).rglob("*")
+            if path.is_file()
+        }
+
+    before = gallery_hashes()
+    monkeypatch.setattr(privacy, "run_agent", lambda *a, **kw: pytest.fail("read-only check cannot start an agent"))
+    if plugin == "heinzel-clock":
+        assert not (owner / "src/heinzel_clock/views").exists()
+        with pytest.raises(privacy.CaptureError, match="Screenshots are stale"):
+            capture.check_capture(owner)
+    inventory = plugins.projects(owner)
+    assert len(inventory) == 1 and inventory[0].name == plugin
+    # The normal owning entrypoint builds real frontend assets before applying the unchanged digest checks.
+    report = plugins.check_screenshots(inventory[0])
+    assert report["fresh"] is True
+    assert report["privacy_reviewed"] is True
+    assert report["review_bundle_format"] == 2
+    assert report["source_story_bundle_reviewed"] is True
+    assert before == gallery_hashes()
 
 
 @pytest.mark.parametrize("name", ["harbor", None])

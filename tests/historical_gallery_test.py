@@ -41,19 +41,6 @@ def test_exact_authenticated_historical_gallery_integrity_is_read_only(plugin, m
     assert (folder / capture.MANIFEST.name).read_bytes() == manifest_bytes
 
 
-@pytest.mark.parametrize("plugin", RECAPTURED)
-def test_recaptured_current_gallery_has_fresh_independent_format_two_review(plugin, monkeypatch):
-    owner = REPO / "plugins" / plugin
-    before = file_hashes(owner / capture.OUTPUT)
-    monkeypatch.setattr(privacy, "run_agent", lambda *a, **kw: pytest.fail("read-only check cannot start an agent"))
-    report = capture.check_capture(owner)
-    assert report["fresh"] is True
-    assert report["privacy_reviewed"] is True
-    assert report["review_bundle_format"] == 2
-    assert report["source_story_bundle_reviewed"] is True
-    assert before == file_hashes(owner / capture.OUTPUT)
-
-
 @pytest.fixture
 def historical(tmp_path):
     owner = tmp_path / "weather"
