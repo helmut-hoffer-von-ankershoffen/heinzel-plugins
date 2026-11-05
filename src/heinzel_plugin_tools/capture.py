@@ -33,6 +33,7 @@ if __package__ in {None, ""}:
 
 from heinzel_plugin_tools.privacy import (
     DRAFT,
+    SOURCE_STORY,
     CaptureError,
     atomic_text,
     bundle_digest,
@@ -40,6 +41,7 @@ from heinzel_plugin_tools.privacy import (
     prepare_review,
     run_agent,
     safe_path,
+    story_bytes,
     validate_bundle,
     validate_review,
 )
@@ -744,6 +746,7 @@ def publish_draft(root: Path, receipt: Path | None = None) -> dict:
         raise CaptureError("Draft captions differ from the current scene plan. Capture again")
     for filename in bundle["transcripts"]:
         scan_text(safe_path(folder, filename).read_text())
+    scan_text(story_bytes(folder, SOURCE_STORY).decode("utf-8"))
     review = run_agent(root, bundle, receipt)
     # An independent agent may take minutes; recheck bytes and sources at the publication boundary.
     validate_bundle(bundle, folder)
@@ -773,7 +776,7 @@ def publish_draft(root: Path, receipt: Path | None = None) -> dict:
     with tempfile.TemporaryDirectory(prefix=".gallery-stage-", dir=target.parent) as temporary:
         staging = Path(temporary) / "screenshots"
         staging.mkdir()
-        for filename in [*bundle["images"], *bundle["transcripts"]]:
+        for filename in [*bundle["images"], *bundle["transcripts"], SOURCE_STORY]:
             shutil.copyfile(safe_path(folder, filename), staging / filename)
         # Regenerate the contact sheet from reviewed captions, never copy unreviewed supplier HTML.
         (staging / "index.html").write_text(preview_document(bundle["plugin"], plan["scenes"], bundle["core_version"]))
@@ -865,7 +868,7 @@ def capture(
     from rich.terminal_theme import MONOKAI
     from rich.text import Text
 
-    from heinzel_plugin_tools.planning import ensure_definition
+    from heinzel_plugin_tools.planning import STORY, ensure_definition, validate_definition
 
     root = root.resolve()
     definition = ensure_definition(root)
@@ -1131,8 +1134,17 @@ def capture(
             for extension in ("png", "txt"):
                 shutil.copyfile(work / f"{scene['name']}.{extension}", folder / f"{scene['name']}.{extension}")
         (folder / "index.html").write_text(preview_document(name, plan["scenes"], version))
+        evidence = story_bytes(root, STORY)
+        if (
+            validate_definition(root, plan) != definition
+            or hashlib.sha256(evidence).hexdigest() != definition["story_sha256"]
+        ):
+            raise CaptureError("Source story changed during capture; define and capture again")
+        scan_text(evidence.decode("utf-8"))
+        (folder / SOURCE_STORY).write_bytes(evidence)
         bundle = {
-            "format": 1,
+            "format": 2,
+            "source_story": {"path": SOURCE_STORY, "sha256": definition["story_sha256"]},
             "definition": definition,
             "plugin": name,
             "core_version": version,

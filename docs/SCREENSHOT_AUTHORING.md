@@ -179,3 +179,17 @@ The toolkit's dedicated CI journey creates a new unknown plugin, captures real T
 installed released SDK, verifies explicit review and README publication, detects staleness, fails a scene, and recovers.
 It also proves authentication presentation is removed before both success and failure image saves. Ordinary offline
 checks neither import a plugin nor start a browser.
+
+### Source evidence in the review bundle
+
+New captures use a format-2 review bundle with a fixed `source-story.md` file. It contains the normal source-analysis
+agent's exact story, bound by SHA-256 to both the definition and review bundle. The file must be regular, unlinked,
+bounded UTF-8; missing or changed evidence refuses review and publication. It is retained beside the published
+images and transcripts. A receipt for older bytes or a bundle without that evidence cannot approve a new capture.
+
+Source analysis inventories all declared entry points and actual declarations, including generic Core-rendered
+approvals and other feature surfaces. It distinguishes external provider UI, Core feature UI and terminal-only
+results. No Page declaration alone does not prove a plugin is terminal-only. The independent reviewer reads this
+untrusted evidence and every image/transcript; contradictory or insufficient evidence refuses publication. A plugin
+with feature UI still needs at least two genuine feature UI scenes plus a CLI scene. Terminal output cannot replace
+those views, and a story cannot override privacy checks or grant approval.
