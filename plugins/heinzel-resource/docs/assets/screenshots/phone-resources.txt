@@ -1,6 +1,6 @@
 Skip to content
 M
-Home
+Today
 Today
 Computer resources
 
@@ -12,15 +12,16 @@ Nothing needs you right now. Ask anything below.
 
 Page
 Chat
-v0.9.1
-Updates, off
-Daemon not installed, off
-0
+v0.9.16
 System health, warning
-No calendar connected, error
-
-Computer resources; CPU: 36%; Memory: 62%; Load (scaled): 4.0625%
-
+Calendar unavailable
+Updates
+Updates, off
+Heinzelmännchen
+0
+Computer resources
+Daemon not installed
+Daemon not installed, off
 Host: demo-workstation
 CPU: 36%
 Memory: 62%

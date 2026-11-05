@@ -82,6 +82,18 @@ try {
     deviceScaleFactor: 3,
     permissions: ["clipboard-read", "clipboard-write"],
   });
+  // Exercise the real native-share failure and clipboard fallback without opening any OS share target.
+  await context.addInitScript(() => {
+    const calls = [];
+    Object.defineProperty(window, "__tailscaleShareCalls", { value: calls });
+    Object.defineProperty(navigator, "share", {
+      configurable: true,
+      value: async (data) => {
+        calls.push(data);
+        throw new DOMException("Fictional native share target is unavailable", "NotAllowedError");
+      },
+    });
+  });
   const page = await context.newPage();
   const errors = [];
   const failedRequests = [];
@@ -99,6 +111,7 @@ try {
     if (path === "/api/restart") mutations.restart++;
   });
   await page.goto(url);
+  assert.equal(await page.evaluate(() => window.__tailscaleShareCalls.length), 0);
   await loaded(page);
   const anonymous = await context.request.get(new URL("/api/tailscale/status", url).href);
   assert.equal(anonymous.status(), 401);
@@ -121,8 +134,17 @@ try {
   assert.equal(ready.state, "ready");
   assert.equal(ready.target, `http://127.0.0.1:${new URL(url).port}`);
   assert.equal((await externalStatus(context.request, url)).status(), 200);
+  assert.equal(await panel.getByRole("button", { name: "Copy URL", exact: true }).count(), 0);
+  await panel.getByRole("button", { name: "Share", exact: true }).click();
+  await panel.getByRole("alert").filter({ hasText: "Could not share the link. You can copy it instead." }).waitFor();
+  const shared = await page.evaluate(() => window.__tailscaleShareCalls);
+  assert.equal(shared.length, 1);
+  assert.deepEqual(Object.keys(shared[0]), ["url"]);
+  assert.equal(new URL(shared[0].url).origin, ORIGIN);
+  assert.equal(new URL(shared[0].url).hash, new URL(url).hash);
   await panel.getByRole("button", { name: "Copy URL", exact: true }).click();
   const copied = await page.evaluate(() => navigator.clipboard.readText());
+  assert.equal(shared[0].url, copied);
   assert.equal(new URL(copied).origin, "https://workstation.tail-example.ts.net");
   assert.equal(new URL(copied).hash, new URL(url).hash);
   assert.ok(
@@ -130,6 +152,7 @@ try {
     "The displayed authenticated URL includes the token a person needs to share it.",
   );
   const layouts = [];
+  let shareAttempts = 1;
   for (const [width, height] of [
     [360, 780],
     [390, 844],
@@ -147,7 +170,15 @@ try {
     await control.focus();
     assert.equal(await control.evaluate((element) => document.activeElement === element), true);
     await page.keyboard.press("Tab");
+    const share = panel.getByRole("button", { name: "Share", exact: true });
+    assert.equal(await share.evaluate((element) => document.activeElement === element), true);
+    await share.press("Enter");
+    const attempts = await page.evaluate(() => window.__tailscaleShareCalls);
+    assert.equal(attempts.length, ++shareAttempts);
+    assert.equal(attempts.at(-1).url, copied);
     const copy = panel.getByRole("button", { name: "Copy URL", exact: true });
+    await copy.waitFor({ state: "visible" });
+    await page.keyboard.press("Tab");
     assert.equal(await copy.evaluate((element) => document.activeElement === element), true);
     await copy.press("Enter");
     assert.equal(await page.evaluate(() => navigator.clipboard.readText()), copied);

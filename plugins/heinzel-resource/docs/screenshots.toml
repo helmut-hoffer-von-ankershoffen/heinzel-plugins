@@ -6,6 +6,7 @@ browser_time = "2026-10-31T10:00:00Z"
 name = "resources-pane"
 surface = "ui"
 route = "/"
+appearance = "light"
 caption = "CPU, memory and scaled load in the expanded monitor — fictional demo workstation"
 
 [[scenes.steps]]
@@ -35,6 +36,7 @@ name_regex = "^Computer resources"
 name = "today-resources"
 surface = "ui"
 route = "/"
+appearance = "dark"
 caption = "A quick CPU summary on Today, with three compact footer meters — demonstration values"
 
 [[scenes.steps]]
@@ -88,7 +90,6 @@ surface = "cli"
 caption = "The same fictional CPU, memory and raw load measurements in the CLI"
 command = ["resource"]
 
-# Native-terminal cases for the plugin's single operation.
 [[scenes]]
 name = "terminal-resources"
 surface = "ui"

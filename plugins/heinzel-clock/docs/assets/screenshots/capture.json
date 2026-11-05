@@ -1,29 +1,33 @@
 {
   "format": 1,
   "plugin": "heinzel-clock",
-  "core_version": "0.9.15",
-  "inputs_sha256": "db0f421dea2c0122a8f10e14f6bf893ed2571c0ea985934887cb485ec319e0bc",
+  "core_version": "0.9.16",
+  "inputs_sha256": "ab7dcada68576b625221af122fffb1ad6b35fc01d1d0fc3e590ab4908638c2e4",
   "images": {
-    "docs/assets/screenshots/world-clock.png": "9cf5caf68fdd11c3dacda7d268e6bf8d374a76b7000c3906aaf92fe8084e558a",
-    "docs/assets/screenshots/team-overview.png": "fc78d24ac546ed236600834472dd2cbf08fb2bab981fa9f3975b6fa7e60f8ddc",
-    "docs/assets/screenshots/footer-detail.png": "6cde48b608701d41646efc2cf423e7853baaae0632612801252da842039f28fb",
-    "docs/assets/screenshots/phone-world-clock.png": "c212c3d204e72c56625620c916365f9658646d44f5e687ea664cb5b1ffa21acc",
+    "docs/assets/screenshots/world-clock.png": "dbdb8f1b48a9de150e7ea193f195f49f1de6abb69a05a1971c1afafca6b6413f",
+    "docs/assets/screenshots/team-overview.png": "893597dac4a5ecf27c977680000a87d991a1bfca90ebbf71e3d955e0222adca5",
+    "docs/assets/screenshots/footer-detail.png": "d3f4c7cc5cb6ad2572abc1ebba5ec15a02eaea5ae1041f580409ac216546e918",
+    "docs/assets/screenshots/phone-world-clock.png": "9dfe199bd766949de0c4141ba1d8215e0411e4664b948b64299a91d12cd2e780",
     "docs/assets/screenshots/cli-times.png": "6b5424327b872c1494ba191a4c697b4bdde5f9ed461cc25150b14e5845205f52",
-    "docs/assets/screenshots/terminal-current.png": "f507febd21ee027588331c4c553bc176c2d1a387e2f9c0c99aec08fb33f9d2b1",
-    "docs/assets/screenshots/terminal-overlap.png": "ebfe7299ecf527dafa98bb6c71d48a5be41313163a78a525142865ff2e411564"
+    "docs/assets/screenshots/terminal-current.png": "ef00b2278cfd85c576851f6b18a265b1ff506023d2c8870e87fabd65e7a49fe7",
+    "docs/assets/screenshots/terminal-overlap.png": "92ecec047a5d6f55eec4c2264d38df8c3cafbc98a3376521a6841654800019a4"
   },
   "review_bundle": {
-    "format": 1,
+    "format": 2,
+    "source_story": {
+      "path": "source-story.md",
+      "sha256": "2919388475f855cab87aeef780dafd1aee4216cee2245f641010b7dba6150a89"
+    },
     "definition": {
       "format": 1,
       "reviewer": "Codex feature-story agent",
-      "source_sha256": "9332fb8aac4c4b88aa9600e722e2789fd1692e9d1a399b0a9353299dc043d374",
-      "plan_sha256": "27d94c2ba408739014e81f097c1aeb8541273f634dbfacf023d62a0e48c5acfe",
-      "story_sha256": "e8a119c1d1e0d3d2194e4fac4fc6ff436a9ab09f6c5ca14f53486369cf09d390"
+      "source_sha256": "6f2e7170c6628e1837c1f5dce4680a0d16b64121351bf5723882f4c48d7a6724",
+      "plan_sha256": "adfb0fe0a3f6ad1b42dec6d332134b549046d41939cbda297bee3978f8a1b33c",
+      "story_sha256": "2919388475f855cab87aeef780dafd1aee4216cee2245f641010b7dba6150a89"
     },
     "plugin": "heinzel-clock",
-    "core_version": "0.9.15",
-    "inputs_sha256": "db0f421dea2c0122a8f10e14f6bf893ed2571c0ea985934887cb485ec319e0bc",
+    "core_version": "0.9.16",
+    "inputs_sha256": "ab7dcada68576b625221af122fffb1ad6b35fc01d1d0fc3e590ab4908638c2e4",
     "screenshots": [
       {
         "path": "docs/assets/screenshots/world-clock.png",
@@ -62,28 +66,28 @@
       }
     ],
     "images": {
-      "world-clock.png": "9cf5caf68fdd11c3dacda7d268e6bf8d374a76b7000c3906aaf92fe8084e558a",
-      "team-overview.png": "fc78d24ac546ed236600834472dd2cbf08fb2bab981fa9f3975b6fa7e60f8ddc",
-      "footer-detail.png": "6cde48b608701d41646efc2cf423e7853baaae0632612801252da842039f28fb",
-      "phone-world-clock.png": "c212c3d204e72c56625620c916365f9658646d44f5e687ea664cb5b1ffa21acc",
+      "world-clock.png": "dbdb8f1b48a9de150e7ea193f195f49f1de6abb69a05a1971c1afafca6b6413f",
+      "team-overview.png": "893597dac4a5ecf27c977680000a87d991a1bfca90ebbf71e3d955e0222adca5",
+      "footer-detail.png": "d3f4c7cc5cb6ad2572abc1ebba5ec15a02eaea5ae1041f580409ac216546e918",
+      "phone-world-clock.png": "9dfe199bd766949de0c4141ba1d8215e0411e4664b948b64299a91d12cd2e780",
       "cli-times.png": "6b5424327b872c1494ba191a4c697b4bdde5f9ed461cc25150b14e5845205f52",
-      "terminal-current.png": "f507febd21ee027588331c4c553bc176c2d1a387e2f9c0c99aec08fb33f9d2b1",
-      "terminal-overlap.png": "ebfe7299ecf527dafa98bb6c71d48a5be41313163a78a525142865ff2e411564"
+      "terminal-current.png": "ef00b2278cfd85c576851f6b18a265b1ff506023d2c8870e87fabd65e7a49fe7",
+      "terminal-overlap.png": "92ecec047a5d6f55eec4c2264d38df8c3cafbc98a3376521a6841654800019a4"
     },
     "transcripts": {
-      "world-clock.txt": "06822d6b0f5d65c7272d2754314028a9aa3dc58f19471bf937604c376b11744b",
-      "team-overview.txt": "3a26477023687da55ffae0a975bc453e70a331933c1c76ed6bf3ef6e8097e142",
-      "footer-detail.txt": "38a6df152e2774a6de0a961055d9a13ce0c913665f47be61164dd79f82d51ce1",
-      "phone-world-clock.txt": "0bdd5f50b0368d881409863f83c70c33d9b5099d8ab71317f1b66da9ab5767d6",
+      "world-clock.txt": "39fd03e5ce69baf3588ab82b8c529768fd5f29fac6d3982b71aa8cb8e514472b",
+      "team-overview.txt": "9bd414a15da69f003149b55312849f31b14cc58bf6ff8b506487cd5f9120a88b",
+      "footer-detail.txt": "8fa9fc29bc91ff3bf5348473826d66f0a50f841ab32d0313c0547e96accc3130",
+      "phone-world-clock.txt": "916b27c8b5df0dfd64d903562e53e0f235af0b3738a7b92ec67425f987df082d",
       "cli-times.txt": "05f1fa56e8a12d26bad2cf2635575d237d9ace564a919e04e76e0b75ed699843",
-      "terminal-current.txt": "7ab17ecf443464cb8d12c0a63456e9b2a91a2cfd96383712e002831458ef5e84",
-      "terminal-overlap.txt": "1f38c27310135a4b21848fe6a014e1aa030e284672ff67147564993f9e5c893f"
+      "terminal-current.txt": "b99a82433fc31ea5e5a1c94f51a5becad4bcd3d8fee8507c88d12470d8ce3b02",
+      "terminal-overlap.txt": "3f8dd3fa7d8c4bcaf6014f4492b49dfa30d58c7342093a38e3455a8eda00a205"
     },
-    "bundle_sha256": "1cd8d57f69c7fee975494db10e62644453fee3ef80b765b3ffb10750011eedee"
+    "bundle_sha256": "4509953365ca797d2c1c23e4b96f01cb446d612bde8bc60faf40f394991d0cc4"
   },
   "privacy_review": {
     "format": 1,
-    "bundle_sha256": "1cd8d57f69c7fee975494db10e62644453fee3ef80b765b3ffb10750011eedee",
+    "bundle_sha256": "4509953365ca797d2c1c23e4b96f01cb446d612bde8bc60faf40f394991d0cc4",
     "reviewer": "Codex privacy agent",
     "decision": "approve",
     "checked_images": [
