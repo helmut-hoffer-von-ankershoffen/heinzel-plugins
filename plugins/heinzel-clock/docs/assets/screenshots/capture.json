@@ -1,13 +1,13 @@
 {
   "format": 1,
   "plugin": "heinzel-clock",
-  "core_version": "0.9.16",
-  "inputs_sha256": "83854585b33fe84e2b4998fa4562187c4f9191ee0f12179f61023393e1d90bbf",
+  "core_version": "0.9.21",
+  "inputs_sha256": "0d466cc5eece15683e43a0325f28b9c6b06de4f321f49e27764bac587d45739c",
   "images": {
-    "docs/assets/screenshots/world-clock.png": "5bd3a72eb50976c9d89c5657318493e2bf45956ec2589e34c1b6115955c0a9f9",
-    "docs/assets/screenshots/team-overview.png": "2e52fbb9d3486413b9be42343e9c0e6787296b6757bf6e1b3b032ed80c821812",
+    "docs/assets/screenshots/world-clock.png": "35827c7639743777d23752b7c52d40670eb4128c0ddf50d573fe1cb561436f40",
+    "docs/assets/screenshots/team-overview.png": "7357c1ace0edc3043cab277d3a6cd04aa83d11c4cfa1937e58c7d2d1e1898f5a",
     "docs/assets/screenshots/footer-detail.png": "d3f4c7cc5cb6ad2572abc1ebba5ec15a02eaea5ae1041f580409ac216546e918",
-    "docs/assets/screenshots/phone-world-clock.png": "b70b2deff05f1da0ed6768b6aaedd5d4fc0bfb1304427817a76d281500d17a50",
+    "docs/assets/screenshots/phone-world-clock.png": "246fb726c46ecb4c320a84733185972f71e89b6010fed5531bb75807c98e5e09",
     "docs/assets/screenshots/cli-times.png": "6b5424327b872c1494ba191a4c697b4bdde5f9ed461cc25150b14e5845205f52",
     "docs/assets/screenshots/terminal-current.png": "b5db7d975bb6edca3d096a4116f3178a02e1c2baeb212f1205063a4604af5ad4",
     "docs/assets/screenshots/terminal-overlap.png": "35c49f5f914791bbc2104be0a68769f072d000d6c3be5bdf856ba2c77e494376"
@@ -16,18 +16,18 @@
     "format": 2,
     "source_story": {
       "path": "source-story.md",
-      "sha256": "108b00b97c066caf5d40baa2a92e799b08d72224ac48ace02904f67b9536cd62"
+      "sha256": "0d165c2351969102b29aef68bcf032d66ca423f31adb30be0a52bce668a215a8"
     },
     "definition": {
       "format": 1,
       "reviewer": "Codex feature-story agent",
-      "source_sha256": "a33cbadac3c06d12107e2454eb3de0a3e6266e1b31726749220f5e8ef8bf4a4a",
+      "source_sha256": "0803ea050485e8c691370c1fdc77ef459b2fb19a968120aedd248d86bdaacb28",
       "plan_sha256": "394ee2c05a25733cb5dcd34dd0fdf5e29d525573700868e03b81d9eca06aabba",
-      "story_sha256": "108b00b97c066caf5d40baa2a92e799b08d72224ac48ace02904f67b9536cd62"
+      "story_sha256": "0d165c2351969102b29aef68bcf032d66ca423f31adb30be0a52bce668a215a8"
     },
     "plugin": "heinzel-clock",
-    "core_version": "0.9.16",
-    "inputs_sha256": "83854585b33fe84e2b4998fa4562187c4f9191ee0f12179f61023393e1d90bbf",
+    "core_version": "0.9.21",
+    "inputs_sha256": "0d466cc5eece15683e43a0325f28b9c6b06de4f321f49e27764bac587d45739c",
     "screenshots": [
       {
         "path": "docs/assets/screenshots/world-clock.png",
@@ -66,28 +66,28 @@
       }
     ],
     "images": {
-      "world-clock.png": "5bd3a72eb50976c9d89c5657318493e2bf45956ec2589e34c1b6115955c0a9f9",
-      "team-overview.png": "2e52fbb9d3486413b9be42343e9c0e6787296b6757bf6e1b3b032ed80c821812",
+      "world-clock.png": "35827c7639743777d23752b7c52d40670eb4128c0ddf50d573fe1cb561436f40",
+      "team-overview.png": "7357c1ace0edc3043cab277d3a6cd04aa83d11c4cfa1937e58c7d2d1e1898f5a",
       "footer-detail.png": "d3f4c7cc5cb6ad2572abc1ebba5ec15a02eaea5ae1041f580409ac216546e918",
-      "phone-world-clock.png": "b70b2deff05f1da0ed6768b6aaedd5d4fc0bfb1304427817a76d281500d17a50",
+      "phone-world-clock.png": "246fb726c46ecb4c320a84733185972f71e89b6010fed5531bb75807c98e5e09",
       "cli-times.png": "6b5424327b872c1494ba191a4c697b4bdde5f9ed461cc25150b14e5845205f52",
       "terminal-current.png": "b5db7d975bb6edca3d096a4116f3178a02e1c2baeb212f1205063a4604af5ad4",
       "terminal-overlap.png": "35c49f5f914791bbc2104be0a68769f072d000d6c3be5bdf856ba2c77e494376"
     },
     "transcripts": {
-      "world-clock.txt": "39fd03e5ce69baf3588ab82b8c529768fd5f29fac6d3982b71aa8cb8e514472b",
-      "team-overview.txt": "ed56d8ef42b4d8ecb87c6ac47aa54ea7c66c5af7c9aaffd8cddeaab5c329082b",
-      "footer-detail.txt": "8fa9fc29bc91ff3bf5348473826d66f0a50f841ab32d0313c0547e96accc3130",
-      "phone-world-clock.txt": "916b27c8b5df0dfd64d903562e53e0f235af0b3738a7b92ec67425f987df082d",
+      "world-clock.txt": "4849f3c532914d4d669a65d1a0d8a5465fffd69984657d3f9669408c13a6bd68",
+      "team-overview.txt": "3e83e09ac34681deb5a49c4a38cd62e7403c9647309401dc1ed16757ce39b30d",
+      "footer-detail.txt": "012c9b8ac0e614b15085c08ecb4b76e74ca118f52f9785a3ff8a38f09004d981",
+      "phone-world-clock.txt": "e8f05d7590230afeff0bd44a70aae9ad9224e5247e5bb1abab10e92557be64a6",
       "cli-times.txt": "05f1fa56e8a12d26bad2cf2635575d237d9ace564a919e04e76e0b75ed699843",
-      "terminal-current.txt": "b99a82433fc31ea5e5a1c94f51a5becad4bcd3d8fee8507c88d12470d8ce3b02",
-      "terminal-overlap.txt": "3f8dd3fa7d8c4bcaf6014f4492b49dfa30d58c7342093a38e3455a8eda00a205"
+      "terminal-current.txt": "21fdd25395f3ed75ce5530056179a4904b77fab2814f70430e0cb1f5e8a2ad22",
+      "terminal-overlap.txt": "4d43632954dcd887d50a16ecce07ab0182a16ca3c3fdb4b6b7e1d1015f6b3a66"
     },
-    "bundle_sha256": "0684d7e449b3c20d73d5ce394b09e3167964f366989e391630dcc8c5c2511160"
+    "bundle_sha256": "644a21e4cd0b25752af894417021dc4afba7abe87aa6d9b01aef604df54098c9"
   },
   "privacy_review": {
     "format": 1,
-    "bundle_sha256": "0684d7e449b3c20d73d5ce394b09e3167964f366989e391630dcc8c5c2511160",
+    "bundle_sha256": "644a21e4cd0b25752af894417021dc4afba7abe87aa6d9b01aef604df54098c9",
     "reviewer": "Codex independent clock gallery reviewer",
     "decision": "approve",
     "checked_images": [

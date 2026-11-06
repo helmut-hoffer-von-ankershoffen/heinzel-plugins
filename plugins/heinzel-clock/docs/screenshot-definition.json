@@ -1,7 +1,7 @@
 {
   "format": 1,
   "reviewer": "Codex feature-story agent",
-  "source_sha256": "a33cbadac3c06d12107e2454eb3de0a3e6266e1b31726749220f5e8ef8bf4a4a",
+  "source_sha256": "0803ea050485e8c691370c1fdc77ef459b2fb19a968120aedd248d86bdaacb28",
   "plan_sha256": "394ee2c05a25733cb5dcd34dd0fdf5e29d525573700868e03b81d9eca06aabba",
-  "story_sha256": "108b00b97c066caf5d40baa2a92e799b08d72224ac48ace02904f67b9536cd62"
+  "story_sha256": "0d165c2351969102b29aef68bcf032d66ca423f31adb30be0a52bce668a215a8"
 }
