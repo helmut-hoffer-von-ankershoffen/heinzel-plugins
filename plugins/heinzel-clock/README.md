@@ -32,36 +32,36 @@ license notices are packaged alongside the built view.
 <!-- screenshots:start -->
 ## Screenshots
 
-<img src="docs/assets/screenshots/world-clock.png" alt="Find overlap across Berlin, New York and Los Angeles while staying on Today — demonstration time" width="960">
+<img src="docs/assets/screenshots/world-clock.png" alt="Find overlap across Berlin, New York and Los Angeles with the World Clock — fictional demonstration time" width="960">
 
-Find overlap across Berlin, New York and Los Angeles while staying on Today — demonstration time
+Find overlap across Berlin, New York and Los Angeles with the World Clock — fictional demonstration time
 
-<img src="docs/assets/screenshots/team-overview.png" alt="Team working hours at a glance: Today, sidebar ticker and primary footer clock — demonstration time" width="960">
+<img src="docs/assets/screenshots/team-overview.png" alt="Fictional team working hours at a glance: Today, sidebar ticker and primary footer clock" width="960">
 
-Team working hours at a glance: Today, sidebar ticker and primary footer clock — demonstration time
+Fictional team working hours at a glance: Today, sidebar ticker and primary footer clock
 
-<img src="docs/assets/screenshots/footer-detail.png" alt="Inspect every configured time zone from the primary footer clock — demonstration time" width="960">
+<img src="docs/assets/screenshots/footer-detail.png" alt="Inspect all configured time zones from the primary footer clock — fictional demonstration data" width="960">
 
-Inspect every configured time zone from the primary footer clock — demonstration time
+Inspect all configured time zones from the primary footer clock — fictional demonstration data
 
-<img src="docs/assets/screenshots/phone-world-clock.png" alt="The live globe and all three team clocks on a phone — fixed demonstration time" width="960">
+<img src="docs/assets/screenshots/phone-world-clock.png" alt="The globe and three fictional team clocks on a phone — fixed demonstration time" width="960">
 
-The live globe and all three team clocks on a phone — fixed demonstration time
+The globe and three fictional team clocks on a phone — fixed demonstration time
 
-<img src="docs/assets/screenshots/terminal-current.png" alt="Fictional demo team at 15:30 UTC: Berlin and New York are within working hours; Los Angeles starts in 30 minutes." width="960">
+<img src="docs/assets/screenshots/terminal-current.png" alt="Fictional demo team at 15:30 UTC: Berlin and New York are working; Los Angeles starts in 30 minutes." width="960">
 
-Fictional demo team at 15:30 UTC: Berlin and New York are within working hours; Los Angeles starts in 30 minutes.
+Fictional demo team at 15:30 UTC: Berlin and New York are working; Los Angeles starts in 30 minutes.
 
-<img src="docs/assets/screenshots/terminal-overlap.png" alt="Preview 16:30 UTC with --at: all three fictional demo zones are within working hours; the app clock stays at 15:30 UTC." width="960">
+<img src="docs/assets/screenshots/terminal-overlap.png" alt="Preview 16:30 UTC: all three fictional demo zones are within working hours." width="960">
 
-Preview 16:30 UTC with --at: all three fictional demo zones are within working hours; the app clock stays at 15:30 UTC.
+Preview 16:30 UTC: all three fictional demo zones are within working hours.
 
 <details>
 <summary>Command line</summary>
 
-<img src="docs/assets/screenshots/cli-times.png" alt="The same team zones and working hours in the CLI — fixed fictional demonstration time" width="960">
+<img src="docs/assets/screenshots/cli-times.png" alt="The same fictional team zones and working hours in the CLI — fixed demonstration time" width="960">
 
-The same team zones and working hours in the CLI — fixed fictional demonstration time
+The same fictional team zones and working hours in the CLI — fixed demonstration time
 
 </details>
 

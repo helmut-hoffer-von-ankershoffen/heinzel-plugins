@@ -34,7 +34,7 @@ module = Module("clock", "World clock: what time it is for everyone on the team.
 
 module.nav(
     title="World clock",
-    icon="clock",
+    icon="globe",
     settings=NavSettings(sections=("clock",), group="preferences"),
     sidebar=Navigate(path="/?panel=clock:world-clock"),
 )

@@ -30,3 +30,4 @@ System health, warning
 Calendar unavailable
 Daemon not installed, off
 16:30:00
+Open
