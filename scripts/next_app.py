@@ -4,6 +4,8 @@ import hashlib
 import json
 import os
 import re
+import sys
+import time
 from http import HTTPStatus
 from pathlib import Path
 from urllib.error import HTTPError
@@ -18,6 +20,8 @@ from heinzel_plugin_tools.publishing import api, find_release
 CORE_REPOSITORY = "helmut-hoffer-von-ankershoffen/heinzel"
 EDGE_POINTER = f"https://github.com/{CORE_REPOSITORY}/releases/download/edge-channel/edge.json"
 MAX_METADATA = 2 * 1024 * 1024
+EXPLICIT_METADATA_ATTEMPTS = 4
+EXPLICIT_METADATA_WAIT = 10
 
 
 def download(url, limit=MAX_METADATA):
@@ -41,7 +45,29 @@ def download(url, limit=MAX_METADATA):
 
 def package(version=""):
     suffix = f"{version}/" if version else ""
-    return json.loads(download(f"https://pypi.org/pypi/heinzel/{suffix}json"))
+    url = f"https://pypi.org/pypi/heinzel/{suffix}json"
+    explicit = bool(re.fullmatch(r"[0-9]+\.[0-9]+\.[0-9]+", version)) and str(Version(version)) == version
+    attempt = 0
+    while True:
+        attempt += 1
+        try:
+            return json.loads(download(url))
+        except HTTPError as error:
+            if (
+                not explicit
+                or error.code != HTTPStatus.NOT_FOUND
+                or error.url != url
+                or attempt >= EXPLICIT_METADATA_ATTEMPTS
+            ):
+                raise
+            error.close()
+            print(
+                f"Explicit SDK metadata returned HTTP 404 (attempt {attempt}/{EXPLICIT_METADATA_ATTEMPTS}); "
+                f"waiting {EXPLICIT_METADATA_WAIT}s before checking the same version again",
+                file=sys.stderr,
+                flush=True,
+            )
+            time.sleep(EXPLICIT_METADATA_WAIT)
 
 
 def complete_app(repository, version, release, metadata):
