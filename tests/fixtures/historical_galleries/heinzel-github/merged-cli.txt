@@ -1,0 +1,7 @@
+┏━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━┓
+┃ Merged ┃ Pull request                                ┃ Author ┃
+┡━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━┩
+│ 20 Oct │ #7 Render widgets in dark mode              │ ada    │
+│ 22 Oct │ #8 Keep the last row when exporting widgets │ mira   │
+│ 23 Oct │ #9 Add release readiness checks             │ jonas  │
+└────────┴─────────────────────────────────────────────┴────────┘

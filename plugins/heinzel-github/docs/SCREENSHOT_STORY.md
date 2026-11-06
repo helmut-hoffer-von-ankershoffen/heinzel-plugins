@@ -1,33 +1,40 @@
-**Audience**
-Developers and team leads who want GitHub changes available to Heinzelmännchen workflows through the `code-host:read` and `tracker:read` capabilities.
+## Audience and outcome
 
-**Outcome**
-“What shipped, and what needs attention?” Follow a fictional widget team through three merged changes, two issue updates, and a contract declaring both inputs. Show readable results and structured JSON so viewers can judge whether this adapter fits their workflows.
+A developer or team lead considering a GitHub connector should see how a local workflow can declare both merged pull requests and updated issues as inputs, and what those reads return. The story should make clear that the example is fictional, the workflow is only declared, and no review report has been generated.
 
-Production reads use GitHub CLI 2.40.0 or later and its authentication. The adapter sends GET requests; the account used by `gh` may have broader permissions. The useful reading commands shown here belong to the existing documentation fixture, not the installed plugin’s public CLI. The plugin’s own operation is `hz github info`.
+## Scenes
 
-**Scenes**
-1. **merged-work — useful app view.** At `/`, run the existing fixture requester in the native terminal. Show October’s three merged pull requests with dates and authors: a small, readable account of what shipped.
-2. **issue-changes — useful app view.** At `/`, show the two issue updates with state and owner. The wobbling widgets issue remains open with Grace; the API documentation issue is closed with Ada. Pull request #7 must be excluded from these issue results.
-3. **merged-cli — shell result.** Show the same merged work outside the app, demonstrating the existing requester’s table rendering.
-4. **issues-json — structured shell result.** Show the issue records as JSON, including source URLs, timestamps, owners, states and labels.
-5. **workflow-context — declared workflow.** Preserve the existing `/contracts/weekly-code-review` scene. Show the local “Weekly code review” contract declaring both capabilities and inputs. It is an example declaration; no review or report has been generated.
+1. **Workflow collection, light:** Find the fictional Weekly code review alongside local workflows. This establishes where the example is discovered.
+2. **Workflow context, dark:** Inspect the same workflow’s distinct detail state: its two capability inputs, repository, and intended output. It is a declaration, not a completed review.
+3. **Merged work, app terminal:** Show the fictional merged pull requests returned by the real adapter through the fixture-only requester.
+4. **Issue changes, app terminal:** Show fictional issue titles, states, and owners; the adapter excludes pull requests from issue results.
+5. **Merged work, CLI:** Show the same useful read in a native terminal, identifying the requester as demonstration-only.
+6. **Issues as JSON, CLI:** Show a different capability and output format for scripts, with fictional data.
 
-Preserve all five existing scenes, their commands, routes and order. The plan changes only clarify fictional data and declaration wording, and add a fixed browser clock. This connector supplies no theme, so theme demonstration scenes are unnecessary.
+The first two are Core feature UI scenes with different purposes; the app-terminal scenes are terminal results within the app, not feature UI. The existing plan already expresses this story and is preserved below. Its routes and rendered results still require capture-time verification.
 
-**Fictional fixtures**
-Use only `docs/screenshot_fixture.py`, during explicit capture. It binds `DemoGh` while retaining the real adapter and its conversions, and supplies documentation-only `showcase merged` and `showcase issues` operations. Both use the fixed UTC interval `[2026-10-01, 2026-11-01)`.
+## Fictional fixtures
 
-The fixture contains `acme/widgets` pull requests #7 “Render widgets in dark mode” by Ada, #8 “Keep the last row when exporting widgets” by Mira, and #9 “Add release readiness checks” by Jonas. Its issue results are #3 “Widgets wobble at high speed” and #4 “Document the widget API.” It also creates the existing demonstration contract beneath the isolated state directory. No additional fixture files or repository variants are needed.
+`docs/screenshot_fixture.py` creates the local Weekly code review contract in isolated state, binds both capabilities to GitHub, and supplies `DemoGh` responses for `acme/widgets`. Its `showcase.merged` and `showcase.issues` operations use the real adapter with October 2026 fixture responses. The names, repository, accounts, PRs, issues, and links are example data; they are not evidence of a real GitHub connection. The fixture’s fixed window and `browser_time` make the story coherent. Some raw fixture records reuse an API URL or ID despite differing displayed numbers; do not present those raw fields as consistent production records.
 
-**Privacy pitfalls**
-Capture in the documented temporary profile without connected accounts. Keep real repositories, credentials, account names, paths and terminal history out of frame. Treat `acme/widgets`, the named contributors, and the simulated login and CLI version as demonstration values; matching public identities or URLs do not establish real activity. Do not open external source links or present fixture results as live GitHub access. The bootstrap writes local demonstration state only when capture is explicitly run.
+## Source-bound UI surface inventory
 
-**Acceptance criteria**
-- Five scenes: three useful UI views and two CLI results; both data-reading cases appear in the native app terminal.
-- Merged results contain #7, #8 and #9 in merge-date order. Issue results contain #3 open/Grace and #4 closed/Ada, excluding the pull request mixed into the vendor response.
-- JSON exposes the same two issues with their typed fields and source URLs.
-- The contract view shows “Weekly code review” and remains clearly a local declaration with no generated report.
-- Every caption identifies fictional, fixture or demonstration content and stays within 180 characters. Tables, commands and relevant output remain readable without clipping or unrelated history.
-- Terminal actions rely on their built-in completion handling; there are no individual-cell text waits, selectors, evaluation scripts or invented panels.
-- The TOML below was manually checked for syntax, table scope and the requested field constraints. Runtime parsing and screenshot capture remain unverified: no imports, plugin execution, bootstrap execution or network calls were performed.
+- `pyproject.toml` declares both `heinzel.modules` and `heinzel.connected_sources` entrypoints as `github = "heinzel_github"`. Their target, `src/heinzel_github/__init__.py`, configures the module, settings, services, skill, two read capability providers, `info` operation, system-info contribution, and offline and live health contributions. The connected-source entrypoint points to that same package; the supplied source does not independently establish a separate connector screen or its exact rendering.
+- `src/heinzel_github/_module.py` declares the GitHub module. `src/heinzel_github/_adapter.py` implements merged pull-request and updated-issue reads. No plugin-specific Page, View, navigation, channel, approval, setup, or footer declaration appears in the supplied plugin source. That absence alone does not rule out Core-rendered UI.
+- `README.md` explicitly describes Core Settings → Connectors, connector list/test, system capability list, system info, and doctor. `src/heinzel_github/__init__.py` and `_service.py` provide the info and health data those generic surfaces may render; exact routes and visual controls are not established by these sources. The live test contacts GitHub when explicitly run, so it is outside this offline fixture story.
+- `docs/screenshot_fixture.py` contributes the fictional workflow and two fixture-only operations. `docs/screenshots.toml` declares `/contracts` and `/contracts/weekly-code-review` for collection and detail captures. These are Core workflow surfaces, not GitHub-owned screens; the provided plan is evidence of the intended detail route, not proof that it currently renders. If capture cannot verify it, do not substitute invented HTML or an assumed route.
+- `src/heinzel_github/__init__.py` conditionally registers `GithubReleaseFeeds` from `src/heinzel_github/_release_feed.py`; `README.md` describes its draft-workflow release-feed use. The supplied fixture does not demonstrate that flow or establish its UI, so no release-feed screenshot is claimed.
+- GitHub and `gh auth login` are external provider tools. The app-terminal and native CLI outputs are terminal surfaces. The `review-pull-request` skill declared in `src/heinzel_github/skills/review-pull-request/SKILL.md` is agent guidance, not an evidenced product screen. The existence of the `info` CLI operation does not prove it is terminal-only.
+
+## Privacy pitfalls
+
+Normal presentation fictionalization is limited to these explicit mappings: verified owning-interpreter paths become `/demo-profile/.venv`, and only the verified whole hostname detail in the genuine Doctor row becomes `demo-host`. These mappings change no SDK health status or remaining detail and establish no privacy acceptance. Unknown identities still fail, and an independent reviewer must inspect every image and transcript. Review account names, paths, hostnames, URLs, environment-derived details, tokens, logs, browser chrome, and unrelated background content; fixture labels alone do not establish privacy. Do not run the live connector test during this offline story.
+
+## Acceptance criteria
+
+- Capture the two genuine Core workflow states in applied light and dark appearances, plus the distinct app-terminal and native CLI results. Verify actual routes, headings, and data during capture; do not treat this source review as a successful capture.
+- The collection and detail must show meaningfully different states. Reject duplicate images, caption-only changes, terminal output represented as feature UI, and forged HTML.
+- Verify the merged results and issue results against the fixture and adapter, including exclusion of the PR-shaped issue; show JSON only if it is the actual CLI output. Clearly label the fixture-only requester and fictional data.
+- Do not imply that the declared workflow ran, that a report exists, or that the fixture proves a live GitHub login or production health.
+- Inspect every image and transcript independently for privacy and truthful presentation before publication. Only the narrowly specified path and Doctor-host mappings are permitted; unknown identities fail review.
+- The TOML below was checked against the requested structure by inspection only. No parser, fixture, application, capture, network call, or source code was executed, so runtime route, theme, and output validation remains outstanding.

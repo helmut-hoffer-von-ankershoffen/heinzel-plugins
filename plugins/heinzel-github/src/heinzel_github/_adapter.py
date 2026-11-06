@@ -174,3 +174,6 @@ def _issue(repository: str, item: dict[str, Any], updated: datetime) -> Issue:
     except (KeyError, TypeError, ValueError):
         msg = "GitHub's answer lacks fields of an issue; is github.host a GitHub server?"
         raise HeinzelError(msg) from None
+
+
+repository_name = _repository
