@@ -1,4 +1,4 @@
-"""Offline, exact-wheel provenance and a closed namespace-only vendor projection."""
+"""Offline exact-wheel provenance, namespace relocation and one pinned security repair."""
 
 import ast
 import copy
@@ -8,6 +8,7 @@ import json
 import re
 import stat
 import tempfile
+import textwrap
 import tokenize
 import tomllib
 import unicodedata
@@ -23,6 +24,106 @@ from packaging.utils import canonicalize_name
 from packaging.version import Version
 
 TRANSFORM_VERSION = "namespace-relocation-v1"
+SLACK_SECURITY_TRANSFORM = "namespace-relocation-v1+slack-sdk-3.46.0-security-v4"
+SLACK_SECURITY_OWNER = "heinzel_slack._vendor.slack_sdk"
+SLACK_SECURITY_WHEEL = "slack_sdk-3.46.0-py2.py3-none-any.whl"
+SLACK_SECURITY_WHEEL_SHA256 = "6286d89da97ea193c853609131515e6f1b3edf86866d6e5aad0dba9dcf1cb72d"
+SLACK_SECURITY_PATCHES = {
+    "slack_sdk/socket_mode/builtin/internals.py": (
+        "e98b873e92e58f5909229030441e78da4820f47c74ed4e5eea9717917a5ed861",
+        "8a2f6bdb9ed6df887c9b152a3752e5341602359af808b3e49ab322454d19e4c9",
+        (
+            (
+                "_use_or_create_ssl_context",
+                "    return ssl_context if ssl_context is not None else ssl.create_default_context()",
+                "    if ssl_context is not None:\n"
+                "        return ssl_context\n"
+                "    context = ssl.create_default_context()\n"
+                "    minimum = context.minimum_version\n"
+                "    context.minimum_version = ssl.TLSVersion.TLSv1_2\n"
+                "    if minimum > ssl.TLSVersion.TLSv1_2:\n"
+                "        context.minimum_version = minimum\n"
+                "    return context",
+            ),
+            (
+                "_build_data_frame_for_sending",
+                "    mask_key: List[int] = random.choices(range(256), k=4)",
+                "    mask_key: List[int] = list(os.urandom(4))",
+            ),
+            (
+                "_establish_new_socket_connection",
+                '            logger.debug(f"Proxy connect request (session id: {session_id}):\\n{req}")',
+                '            logger.debug(f"Proxy connect request sent (session id: {session_id})")',
+            ),
+            (
+                "_establish_new_socket_connection",
+                "        status, text = _parse_connect_response(sock)",
+                "        try:\n"
+                "            status, text = _parse_connect_response(sock)\n"
+                "        except (ValueError, IndexError):\n"
+                '            raise ConnectionError("Malformed proxy CONNECT response") from None',
+            ),
+            (
+                "_establish_new_socket_connection",
+                '            log_message = f"Proxy connect response (session id: {session_id}):\\n{text}"',
+                '            log_message = f"Proxy connect response (session id: {session_id}, status: {status})"',
+            ),
+            (
+                "_establish_new_socket_connection",
+                '            raise Exception(f"Failed to connect to the proxy '
+                '(proxy: {proxy}, connect status code: {status})")',
+                '            raise Exception(f"Failed to connect to the proxy (connect status code: {status})")',
+            ),
+            (
+                "_establish_new_socket_connection",
+                "    if server_port != 443:\n"
+                "        # only for library testing\n"
+                '        logger.info(f"Using non-ssl socket to connect '
+                '({server_hostname}:{server_port})")\n'
+                "        sock = socket.create_connection((server_hostname, "
+                "server_port), timeout=3)\n"
+                "        return sock\n",
+                "",
+            ),
+            (
+                "_fetch_messages",
+                "            if current_data is not None and len(current_data) >= 0:\n"
+                "                _append_message(messages, current_header, current_data)",
+                "            if current_data is not None:\n"
+                "                _append_message(messages, current_header, current_data)",
+            ),
+        ),
+    ),
+    "slack_sdk/proxy_env_variable_loader.py": (
+        "bf08e211ae42dff0d784f12e957e1ffd1b00db546c2e938fd7976f0faf48f4d3",
+        "457ae15cab87ff86b02e0062e7a5a3d3551330c7c9f095ca60aa5fc53e790fa7",
+        (
+            (
+                "load_http_proxy_from_env",
+                '    logger.debug(f"HTTP proxy URL has been loaded from an env variable: {proxy_url}")',
+                '    logger.debug("HTTP proxy URL has been loaded from an env variable")',
+            ),
+        ),
+    ),
+    "slack_sdk/web/base_client.py": (
+        "fd7beafe11ec7a0661005c96617378ad4ff0873b5f095205ac993f1a762b88ae",
+        "66bf86b8841a666edff4c0f22dbe74c8e0d76136815e83b082840e4f79fbffcd",
+        (
+            (
+                "BaseClient._perform_urllib_http_request_internal",
+                "                resp = urlopen(req, context=self.ssl, timeout=self.timeout)",
+                "                opener = urllib.request.build_opener(ProxyHandler({}), "
+                "HTTPSHandler(context=self.ssl))\n"
+                "                resp = opener.open(req, timeout=self.timeout)",
+            ),
+        ),
+    ),
+    "slack_sdk/web/internal_utils.py": (
+        "57079c812b5ad1b9a1ec287a05f1c33d4a43977ed06f3ce5c0f213e730f1cfad",
+        "401b13f1e3fbddf7a1a397865be5783a68a01828d1b29301c767c8611c1ecd51",
+        (("_build_req_args", "    token = token\n", ""),),
+    ),
+}
 MANIFEST = "vendor-manifest.json"
 SHA256 = re.compile(r"[0-9a-f]{64}")
 MODULE = re.compile(r"[a-zA-Z_]\w*(?:\.[a-zA-Z_]\w*)*")
@@ -31,6 +132,86 @@ MODULE = re.compile(r"[a-zA-Z_]\w*(?:\.[a-zA-Z_]\w*)*")
 def digest(data: bytes) -> str:
     """Return the immutable byte identity, independent of wheel RECORD claims."""
     return hashlib.sha256(data).hexdigest()
+
+
+def required_transform(upstream: dict[str, object], source: str, target: str, owner: str) -> str:
+    """Select verifier-owned policy; a manifest cannot supply security patch parameters."""
+    # The owning namespace decides whether the repair is mandatory. Untrusted
+    # upstream metadata must never turn that requirement off (including name aliases).
+    if target != SLACK_SECURITY_OWNER and canonicalize_name(owner) != "heinzel-slack":
+        return TRANSFORM_VERSION
+    if (
+        source,
+        target,
+        upstream["distribution"],
+        upstream["version"],
+        upstream["wheel"],
+        upstream["sha256"],
+    ) != (
+        "slack_sdk",
+        SLACK_SECURITY_OWNER,
+        "slack_sdk",
+        "3.46.0",
+        SLACK_SECURITY_WHEEL,
+        SLACK_SECURITY_WHEEL_SHA256,
+    ):
+        raise ValueError("The Slack security repair requires its exact approved upstream wheel")
+    return SLACK_SECURITY_TRANSFORM
+
+
+def replace_statement(function: ast.FunctionDef, before: str, after: str) -> None:
+    """Construct the expected AST independently of byte replacement, in one fixed function scope."""
+    pattern = ast.dump(ast.parse(textwrap.dedent(before)).body[0])
+    replacement = ast.parse(textwrap.dedent(after)).body
+    matches = 0
+
+    class Expected(ast.NodeTransformer):
+        def visit(self, node: ast.AST):
+            nonlocal matches
+            if isinstance(node, ast.stmt) and ast.dump(node) == pattern:
+                matches += 1
+                return copy.deepcopy(replacement)
+            return super().visit(node)
+
+    Expected().visit(function)
+    if matches != 1:
+        raise ValueError("Slack security statement identity differs")
+
+
+def repair_security_member(path: str, original: bytes) -> bytes:
+    """Apply only fixed source statements, verified by pre/post hashes and independent scoped AST edits."""
+    before_hash, after_hash, changes = SLACK_SECURITY_PATCHES[path]
+    if digest(original) != before_hash:
+        raise ValueError("Slack security preimage differs from the reviewed member")
+    patched = original
+    expected = ast.parse(original)
+    for function_name, before, after in changes:
+        if patched.count(before.encode()) != 1:
+            raise ValueError("Slack security statement must occur exactly once")
+        patched = patched.replace(before.encode(), after.encode())
+        scope = expected.body
+        if "." in function_name:
+            class_name, function_name = function_name.split(".", 1)
+            classes = [node for node in scope if isinstance(node, ast.ClassDef) and node.name == class_name]
+            if len(classes) != 1:
+                raise ValueError("Slack security class identity differs")
+            scope = classes[0].body
+        functions = [node for node in scope if isinstance(node, ast.FunctionDef) and node.name == function_name]
+        if len(functions) != 1:
+            raise ValueError("Slack security function identity differs")
+        replace_statement(functions[0], before, after)
+    if ast.dump(expected) != ast.dump(ast.parse(patched)) or digest(patched) != after_hash:
+        raise ValueError("Slack security semantic delta or postimage differs")
+    return patched
+
+
+def projected_member(original: bytes, path: str, source: str, target: str, transform: str) -> bytes:
+    """Apply the selected closed policy before the unchanged namespace-only transform."""
+    if transform not in {TRANSFORM_VERSION, SLACK_SECURITY_TRANSFORM}:
+        raise ValueError("Unsupported vendor transform")
+    if transform == SLACK_SECURITY_TRANSFORM and path in SLACK_SECURITY_PATCHES:
+        original = repair_security_member(path, original)
+    return relocate(original, source, target) if path.endswith((".py", ".pyi")) else original
 
 
 def archive_regular(info: zipfile.ZipInfo) -> None:
@@ -235,19 +416,22 @@ def projection(root: Path) -> tuple[VerifiedInventory, dict[str, bytes]]:
         json.loads(regular(root, MANIFEST).read_bytes()),
         {"format", "transform_version", "upstream", "package", "files"},
     )
-    if manifest["format"] != 1 or manifest["transform_version"] != TRANSFORM_VERSION:
+    if manifest["format"] != 1:
         raise ValueError("Unsupported vendor manifest/transform version")
     upstream = mapping(
         manifest["upstream"], {"distribution", "version", "wheel", "sha256", "license_paths", "license_expression"}
     )
     source_package = mapping(manifest["package"], {"source", "target"})
     source, target = string(source_package["source"]), string(source_package["target"])
+    metadata = tomllib.loads(regular(root, "pyproject.toml").read_text())
+    transform = required_transform(upstream, source, target, string(metadata["project"]["name"]))
+    if manifest["transform_version"] != transform:
+        raise ValueError("Unsupported vendor transform or missing mandatory security repair")
     if not source.isidentifier() or not MODULE.fullmatch(target) or target.split(".")[1:-1] != ["_vendor"]:
         raise ValueError("Vendor target must be an owning package's _vendor namespace")
     if target.split(".")[-1] != source:
         raise ValueError("Vendor namespace must preserve the upstream package name")
     target_root = "src/" + target.replace(".", "/")
-    metadata = tomllib.loads(regular(root, "pyproject.toml").read_text())
     owners = metadata.get("project", {}).get("entry-points", {}).get("heinzel.modules", {})
     if target.split(".")[0] not in {value.split(":")[0].split(".")[0] for value in owners.values()}:
         raise ValueError("Vendor target is outside the owning entry-point namespace")
@@ -278,6 +462,8 @@ def projection(root: Path) -> tuple[VerifiedInventory, dict[str, bytes]]:
     for raw_entry in raw_entries:
         entry_fields = mapping(raw_entry, {"source", "target", "original_sha256", "projected_sha256"})
         entries.append(Entry(**{key: string(value) for key, value in entry_fields.items()}))
+    if transform == SLACK_SECURITY_TRANSFORM and not set(SLACK_SECURITY_PATCHES) <= {entry.source for entry in entries}:
+        raise ValueError("Slack security repair member is missing from the inventory")
     if len({entry.source for entry in entries}) != len(entries) or len({entry.target for entry in entries}) != len(
         entries
     ):
@@ -335,7 +521,7 @@ def projection(root: Path) -> tuple[VerifiedInventory, dict[str, bytes]]:
             original = archive.read(entry.source)
             if not SHA256.fullmatch(entry.original_sha256) or digest(original) != entry.original_sha256:
                 raise ValueError("Original vendor file hash mismatch")
-            projected = relocate(original, source, target) if entry.source.endswith((".py", ".pyi")) else original
+            projected = projected_member(original, entry.source, source, target, transform)
             if not SHA256.fullmatch(entry.projected_sha256) or digest(projected) != entry.projected_sha256:
                 raise ValueError("Projected vendor file hash/transform mismatch")
             expected[entry.target] = projected
@@ -618,12 +804,24 @@ def generate_manifest(
     data = regular(wheel.parent, wheel.name).read_bytes()
     if not SHA256.fullmatch(sha256) or digest(data) != sha256:
         raise ValueError("Explicit upstream wheel SHA256 mismatch")
+    upstream: dict[str, object] = {
+        "distribution": distribution,
+        "version": version,
+        "wheel": wheel.name,
+        "sha256": sha256,
+        "license_paths": license_paths,
+        "license_expression": license_expression,
+    }
+    metadata = tomllib.loads(regular(root, "pyproject.toml").read_text())
+    transform = required_transform(upstream, source, target, string(metadata["project"]["name"]))
+    if transform == SLACK_SECURITY_TRANSFORM and not set(SLACK_SECURITY_PATCHES) <= set(paths):
+        raise ValueError("Slack security repair member is missing from the inventory")
     entries = []
     with zipfile.ZipFile(io.BytesIO(data)) as archive:
         for path in sorted(paths + license_paths):
             relative(path)
             original = archive.read(path)
-            projected = relocate(original, source, target) if path.endswith((".py", ".pyi")) else original
+            projected = projected_member(original, path, source, target, transform)
             suffix = "/" + PurePosixPath(path).name if path in license_paths else path[len(source) :]
             entries.append(
                 {
@@ -635,15 +833,8 @@ def generate_manifest(
             )
     manifest = {
         "format": 1,
-        "transform_version": TRANSFORM_VERSION,
-        "upstream": {
-            "distribution": distribution,
-            "version": version,
-            "wheel": wheel.name,
-            "sha256": sha256,
-            "license_paths": license_paths,
-            "license_expression": license_expression,
-        },
+        "transform_version": transform,
+        "upstream": upstream,
         "package": {"source": source, "target": target},
         "files": entries,
     }

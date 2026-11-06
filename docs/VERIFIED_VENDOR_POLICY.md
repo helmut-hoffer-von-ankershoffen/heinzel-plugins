@@ -71,6 +71,29 @@ restricted namespace transform, not a sandbox for executing upstream code. A
 different upstream shape requires a reviewed new transform version, never a
 manual patch to exempt source.
 
+## Fixed Slack 3.46.0 security amendment
+
+[ADR 0002](adr/0002-pinned-slack-security-repair.md) adds one closed transform:
+`namespace-relocation-v1+slack-sdk-3.46.0-security-v1`. It applies only to distribution
+`slack_sdk` version `3.46.0`, the exact approved upstream wheel, and owning target
+`heinzel_slack._vendor.slack_sdk`. The verifier selects it from that identity; both
+generation and verification reject a downgrade to namespace-only for the affected pin.
+All unaffected projects keep `namespace-relocation-v1` unchanged.
+
+There are no new manifest fields, patch arguments, source callbacks, or executable
+patch files. Code-owned constants bind the wheel name/hash and three member paths,
+preimage/postimage hashes, function identities, and fixed statement replacements.
+Byte replacement and independent scoped AST transformation must agree. All repaired
+members are mandatory. Original manifest hashes still identify genuine upstream
+bytes; projected hashes identify the repaired and relocated bytes. The immutable
+upstream wheel remains unmodified. On-disk, quality-policy, build and accepted-wheel
+verification all use this same projection.
+
+The allowed delta repairs frame-mask entropy, removes direct plaintext fallback,
+and removes proxy credential-bearing request/response and URL diagnostics. It does
+not add Core runtime permissions, arbitrary patch support, or a security-scanner
+exclusion. Broader patches and upstream upgrades require a new independent review.
+
 ## Verification and diagnostics
 
 `project(root)` verifies the entire wheel SHA256 before reading members, then
@@ -143,3 +166,16 @@ changes. Publication follows the owning release priorities and normal required
 gates after independent review. A passing projection proves byte provenance and
 the limited relocation; it does not establish upstream safety or live-provider
 behavior.
+
+The canonical owning project `heinzel-slack` or protected `heinzel_slack._vendor.slack_sdk` target makes the security repair mandatory before upstream
+identity is inspected. A raw distribution-name alias, version change, or coherently repacked wheel and lock cannot
+select namespace-only mode. Changing the approved upstream identity requires a separately reviewed verifier change.
+
+Malformed proxy CONNECT response parsing raises a fixed diagnostic with its exception context suppressed, so raw
+status tokens and decoding errors cannot be copied into caller exception logs. This parser repair alone does not promise general SDK
+debug-log secrecy; the owning adapter boundary separately isolates logging and refuses unsupported proxy schemes.
+
+The same pinned policy includes the exact `slack_sdk/web/base_client.py` direct-route repair documented in ADR 0002.
+Its no-proxy branch uses a local empty ProxyHandler, preventing ambient proxy rediscovery without global mutation.
+The owning adapter separately refuses credentialed or unsupported proxy URIs and isolates SDK logging. The new
+class/method-scoped fixed statement is verifier code, not a manifest-supplied transform.

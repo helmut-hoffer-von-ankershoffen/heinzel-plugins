@@ -1,0 +1,73 @@
+Skip to content
+Heinzelmännchen
+Heinzelmännchen
+Contracts
+Team graph
+Organisation
+Team roster
+M
+Mira
+· EM
+Today
+Today
+Doctor: 7 checks need attention
+
+ai.access ai access, system.credential backend, system.credential credential slack/app-token…
+
+Open
+Ask about it
+v0.9.20
+Updates, off
+1
+System health, warning
+Calendar unavailable
+Daemon not installed, off
+Chat
+New chat
+
+About: text hz-01M6QN9MZ6WQZYXBMDP6RE38EC
+
+Ask about your setup, your team's contracts or what to do next. The chat reads with hz and asks you before it changes anything.
+The Heinzel proposes
+
+This changes something, so it runs only if you confirm, exactly as shown.
+
+Review exact channel posting account, destination, scope and full message
+
+Exactly these arguments:
+
+{
+  "session_id": "hz-01M6QN9MZ6WQZYXBMDP6RE38EC",
+  "request_id": "gallery-notice",
+  "review": {
+    "session_id": "hz-01M6QN9MZ6WQZYXBMDP6RE38EC",
+    "request_id": "gallery-notice",
+    "owner": "u-66bbc051e8f29158633f0633f1185966",
+    "channel": "slack",
+    "kind": "notice",
+    "binding_id": "bf400bae1f4b61c039f5490f6f67ffc7f1a3f45a65e0a8e828f045a05bc26764",
+    "target": {
+      "account": "slack:T0DEMO0001:U0DEMO0001",
+      "destination": "D0DEMO0001",
+      "scope": "slack:owner-dm:U0MIRA0001:chat.write:v1"
+    },
+    "actor": null,
+    "notice": {
+      "key": "3d3060212e2bd4fed125a9e700b23c1d3084b958c1ff2e697ddea7474bee8f36",
+      "helper": "Lotte",
+      "title": "Weekly report is ready",
+      "body": "Lotte finished the fictional reading-list rollout report. Mira can review it before the demo team meeting.",
+      "route": ""
+    },
+    "approval": null,
+    "write_request": null,
+    "write_review": null
+  }
+}
+Confirm
+Decline
+Your message
+Default
+
+Up to $0.25 per message · this chat $0.00
+Runs your agent runner and may cost money: at most $0.25 per message, $2.00 per chat; this chat has cost $0.00. It reads with hz and asks you before it changes anything.

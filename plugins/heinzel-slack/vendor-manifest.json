@@ -1,0 +1,326 @@
+{
+  "files": [
+    {
+      "original_sha256": "088e0b5b7549aa3b55345661d7036fe056ab472044bc8b17cff58864288d9522",
+      "projected_sha256": "088e0b5b7549aa3b55345661d7036fe056ab472044bc8b17cff58864288d9522",
+      "source": "slack_sdk-3.46.0.dist-info/licenses/LICENSE",
+      "target": "src/heinzel_slack/_vendor/slack_sdk/LICENSE"
+    },
+    {
+      "original_sha256": "70b8a3bcf1ffc6484bf259de3735c857eaa3ad9580ef55db034fa47b50d55d3a",
+      "projected_sha256": "70b8a3bcf1ffc6484bf259de3735c857eaa3ad9580ef55db034fa47b50d55d3a",
+      "source": "slack_sdk/__init__.py",
+      "target": "src/heinzel_slack/_vendor/slack_sdk/__init__.py"
+    },
+    {
+      "original_sha256": "67fd27ea7d5945aadd288cbf7f7a9dd0a2f85c419af79ce2f5daccbe8dd0f219",
+      "projected_sha256": "67fd27ea7d5945aadd288cbf7f7a9dd0a2f85c419af79ce2f5daccbe8dd0f219",
+      "source": "slack_sdk/errors/__init__.py",
+      "target": "src/heinzel_slack/_vendor/slack_sdk/errors/__init__.py"
+    },
+    {
+      "original_sha256": "478b6e2353c9e52495facc32a1b06f6c777960607e2a4e39c147266bf12f1af8",
+      "projected_sha256": "478b6e2353c9e52495facc32a1b06f6c777960607e2a4e39c147266bf12f1af8",
+      "source": "slack_sdk/http_retry/__init__.py",
+      "target": "src/heinzel_slack/_vendor/slack_sdk/http_retry/__init__.py"
+    },
+    {
+      "original_sha256": "95a5e0fb23556556f929a10d5fc9c346b1a288fa853986e730b9105cca84248a",
+      "projected_sha256": "cfe1b01c49edbb547cc5226adc7b9b2555c9651d8b2d66c0a7b9a21dbf864a63",
+      "source": "slack_sdk/http_retry/builtin_handlers.py",
+      "target": "src/heinzel_slack/_vendor/slack_sdk/http_retry/builtin_handlers.py"
+    },
+    {
+      "original_sha256": "c82512b80efdae8870f6ba35bfb260ffd944b06a43b4afc4d8755d27ae54d208",
+      "projected_sha256": "c82512b80efdae8870f6ba35bfb260ffd944b06a43b4afc4d8755d27ae54d208",
+      "source": "slack_sdk/http_retry/builtin_interval_calculators.py",
+      "target": "src/heinzel_slack/_vendor/slack_sdk/http_retry/builtin_interval_calculators.py"
+    },
+    {
+      "original_sha256": "35de67a736b8dfaf24af5e88d474118c0a8c32a0c86f4caf5b8c1ae4e6c6fcf6",
+      "projected_sha256": "33a2f5bf7b274af58c5c49eaf2205fb9475f63354ba7d9a55efa8f63f1124501",
+      "source": "slack_sdk/http_retry/handler.py",
+      "target": "src/heinzel_slack/_vendor/slack_sdk/http_retry/handler.py"
+    },
+    {
+      "original_sha256": "e3f2c79104636f681dec500bea26e32160760e018fac5ea8e1fd625fc27572df",
+      "projected_sha256": "e3f2c79104636f681dec500bea26e32160760e018fac5ea8e1fd625fc27572df",
+      "source": "slack_sdk/http_retry/interval_calculator.py",
+      "target": "src/heinzel_slack/_vendor/slack_sdk/http_retry/interval_calculator.py"
+    },
+    {
+      "original_sha256": "72b32596346b1c901b87d89949b2e038ab2a8d45d78919fb4850c0cc64f3e424",
+      "projected_sha256": "72b32596346b1c901b87d89949b2e038ab2a8d45d78919fb4850c0cc64f3e424",
+      "source": "slack_sdk/http_retry/jitter.py",
+      "target": "src/heinzel_slack/_vendor/slack_sdk/http_retry/jitter.py"
+    },
+    {
+      "original_sha256": "71a5a75643b9b925d65bc169a6ad4e54204b97c140c71ad4125ea5dac0009af3",
+      "projected_sha256": "71a5a75643b9b925d65bc169a6ad4e54204b97c140c71ad4125ea5dac0009af3",
+      "source": "slack_sdk/http_retry/request.py",
+      "target": "src/heinzel_slack/_vendor/slack_sdk/http_retry/request.py"
+    },
+    {
+      "original_sha256": "1655bd715740fde64683fd2b69e4b4b01e88d9c977c50821408f40c7d9bb5b28",
+      "projected_sha256": "1655bd715740fde64683fd2b69e4b4b01e88d9c977c50821408f40c7d9bb5b28",
+      "source": "slack_sdk/http_retry/response.py",
+      "target": "src/heinzel_slack/_vendor/slack_sdk/http_retry/response.py"
+    },
+    {
+      "original_sha256": "f0879f74192497c38089bcc43a3c089982837deb21bcd7a50c5754a7b260ba70",
+      "projected_sha256": "f0879f74192497c38089bcc43a3c089982837deb21bcd7a50c5754a7b260ba70",
+      "source": "slack_sdk/http_retry/state.py",
+      "target": "src/heinzel_slack/_vendor/slack_sdk/http_retry/state.py"
+    },
+    {
+      "original_sha256": "ee815724a779db16d064a7d2503b35546fdb7e315cd6babd68bbc772d0992973",
+      "projected_sha256": "ee815724a779db16d064a7d2503b35546fdb7e315cd6babd68bbc772d0992973",
+      "source": "slack_sdk/models/__init__.py",
+      "target": "src/heinzel_slack/_vendor/slack_sdk/models/__init__.py"
+    },
+    {
+      "original_sha256": "c6d58e768d09317ef289c2fe0541a37151416c03061d36f99c03771f507a8cd8",
+      "projected_sha256": "5e0cde374793b68d9892a347c5c12aa4e075d37ac917a669478b02b5d7c6c341",
+      "source": "slack_sdk/models/attachments/__init__.py",
+      "target": "src/heinzel_slack/_vendor/slack_sdk/models/attachments/__init__.py"
+    },
+    {
+      "original_sha256": "be9168572ab49e578ac0557a11c93f26104e3acdf625d4c1ddc7c9595e0490ef",
+      "projected_sha256": "f0be9736298ab6d0908b98abd1bd0b50e28a066fafc9469b1510361430f13867",
+      "source": "slack_sdk/models/basic_objects.py",
+      "target": "src/heinzel_slack/_vendor/slack_sdk/models/basic_objects.py"
+    },
+    {
+      "original_sha256": "55f38d17a14f0e248480551409c81e45639686da0aa8382c07e8d5fb941be2d1",
+      "projected_sha256": "55f38d17a14f0e248480551409c81e45639686da0aa8382c07e8d5fb941be2d1",
+      "source": "slack_sdk/models/blocks/__init__.py",
+      "target": "src/heinzel_slack/_vendor/slack_sdk/models/blocks/__init__.py"
+    },
+    {
+      "original_sha256": "71fdb00b7ed0e65e8aca4a6c30322b173d35dc28954426534b5164fabd5d1d87",
+      "projected_sha256": "6986fee9ac03abb9bc7efa800ada93305aaeaf500982ddeb93fb4d0dd3660eaf",
+      "source": "slack_sdk/models/blocks/basic_components.py",
+      "target": "src/heinzel_slack/_vendor/slack_sdk/models/blocks/basic_components.py"
+    },
+    {
+      "original_sha256": "808a65e1bc4c7a33e666efe01d178dc119285e798d8b984e2698c2e5895fc367",
+      "projected_sha256": "03507bef8e18765f97d91d190ee2266c03b3d5d39094981351287373934edf90",
+      "source": "slack_sdk/models/blocks/block_elements.py",
+      "target": "src/heinzel_slack/_vendor/slack_sdk/models/blocks/block_elements.py"
+    },
+    {
+      "original_sha256": "8d8c4e7ae03927bcdaed6ce10955fe22d55570a2e0c96459118ae288549686ea",
+      "projected_sha256": "06cf158d91c5b6fb4fd9d6aacea8599a54b78bc5e1d5906ecfa5af88416dfd62",
+      "source": "slack_sdk/models/blocks/blocks.py",
+      "target": "src/heinzel_slack/_vendor/slack_sdk/models/blocks/blocks.py"
+    },
+    {
+      "original_sha256": "4f5bb2ae2679f6444dfee3c32a4f12968c9750f1a8755e6bc7afdf1f5990f2d9",
+      "projected_sha256": "c85049e9b5d652f5d79457cd56ddb62fdcacfaf620bca89836decea000e14e98",
+      "source": "slack_sdk/models/messages/__init__.py",
+      "target": "src/heinzel_slack/_vendor/slack_sdk/models/messages/__init__.py"
+    },
+    {
+      "original_sha256": "efd404b346a381df6ed250571dd38f523218388a202575aeaa0b5440b1721d46",
+      "projected_sha256": "4d9c69f41af33320912b069a8a09a3093e1b38f37965f17fd4a20d579cd847d5",
+      "source": "slack_sdk/models/messages/chunk.py",
+      "target": "src/heinzel_slack/_vendor/slack_sdk/models/messages/chunk.py"
+    },
+    {
+      "original_sha256": "f37cd418d68efce7881a7f89bb1e80b6c9518fc5f292106b57eddc56c7c5ab90",
+      "projected_sha256": "682eef5a5399e656e2bfc14fe75b1ed2275bf3c89e2f25c53b8433fe43560453",
+      "source": "slack_sdk/models/metadata/__init__.py",
+      "target": "src/heinzel_slack/_vendor/slack_sdk/models/metadata/__init__.py"
+    },
+    {
+      "original_sha256": "6e0df3b0f16237575196db8bd84eb8b5c99b4be3d9b540d10d6af473e9e3a54e",
+      "projected_sha256": "755dad6619d5e9a2bb278cbdb16ddaa076dc8858aa67ad36b93e8143636a1c8c",
+      "source": "slack_sdk/models/views/__init__.py",
+      "target": "src/heinzel_slack/_vendor/slack_sdk/models/views/__init__.py"
+    },
+    {
+      "original_sha256": "bf08e211ae42dff0d784f12e957e1ffd1b00db546c2e938fd7976f0faf48f4d3",
+      "projected_sha256": "457ae15cab87ff86b02e0062e7a5a3d3551330c7c9f095ca60aa5fc53e790fa7",
+      "source": "slack_sdk/proxy_env_variable_loader.py",
+      "target": "src/heinzel_slack/_vendor/slack_sdk/proxy_env_variable_loader.py"
+    },
+    {
+      "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "projected_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source": "slack_sdk/py.typed",
+      "target": "src/heinzel_slack/_vendor/slack_sdk/py.typed"
+    },
+    {
+      "original_sha256": "1e70d8da1a8091e03a159fd64923db0e210431478bb022db646d5d9d666910d4",
+      "projected_sha256": "1e70d8da1a8091e03a159fd64923db0e210431478bb022db646d5d9d666910d4",
+      "source": "slack_sdk/socket_mode/__init__.py",
+      "target": "src/heinzel_slack/_vendor/slack_sdk/socket_mode/__init__.py"
+    },
+    {
+      "original_sha256": "1221ad3f1ea8ba184e84b67d3e30355ef2bfbbd2af4e356cba90490786523369",
+      "projected_sha256": "1221ad3f1ea8ba184e84b67d3e30355ef2bfbbd2af4e356cba90490786523369",
+      "source": "slack_sdk/socket_mode/builtin/__init__.py",
+      "target": "src/heinzel_slack/_vendor/slack_sdk/socket_mode/builtin/__init__.py"
+    },
+    {
+      "original_sha256": "e277d71be37bc410f63b0a20f7a8d4dc894ad435abe49c912e6d063099756eca",
+      "projected_sha256": "9382644f37a637100a675c61263363b1e18e239ed06af300057e6e85c2aa3902",
+      "source": "slack_sdk/socket_mode/builtin/client.py",
+      "target": "src/heinzel_slack/_vendor/slack_sdk/socket_mode/builtin/client.py"
+    },
+    {
+      "original_sha256": "48d80eefa8a7e1d65462d1944fd3ecaa26f12f4cf8ce20dfe9768074fb8fb863",
+      "projected_sha256": "323aca1c58f810b500c8429c54ac634ec500c90e88d92e2097da38085ef6b502",
+      "source": "slack_sdk/socket_mode/builtin/connection.py",
+      "target": "src/heinzel_slack/_vendor/slack_sdk/socket_mode/builtin/connection.py"
+    },
+    {
+      "original_sha256": "0b162ec6cad2b9b61c932a5b22bb94164669463f223b264c236a77423cf8c1d4",
+      "projected_sha256": "0b162ec6cad2b9b61c932a5b22bb94164669463f223b264c236a77423cf8c1d4",
+      "source": "slack_sdk/socket_mode/builtin/frame_header.py",
+      "target": "src/heinzel_slack/_vendor/slack_sdk/socket_mode/builtin/frame_header.py"
+    },
+    {
+      "original_sha256": "e98b873e92e58f5909229030441e78da4820f47c74ed4e5eea9717917a5ed861",
+      "projected_sha256": "8a2f6bdb9ed6df887c9b152a3752e5341602359af808b3e49ab322454d19e4c9",
+      "source": "slack_sdk/socket_mode/builtin/internals.py",
+      "target": "src/heinzel_slack/_vendor/slack_sdk/socket_mode/builtin/internals.py"
+    },
+    {
+      "original_sha256": "a33c5cbf7b4a8f478159d93b9b1bfd7b10b11009691f50f43734bf70dba8111a",
+      "projected_sha256": "ab5d69e60f8259e0846d2ee27094d3f3cc1a50a4d4ac1dd11d049169e6814437",
+      "source": "slack_sdk/socket_mode/client.py",
+      "target": "src/heinzel_slack/_vendor/slack_sdk/socket_mode/client.py"
+    },
+    {
+      "original_sha256": "97434f3e5772c7a01cfc51608a70d569e6bb9413a6fad8785fe48b88f672058c",
+      "projected_sha256": "97434f3e5772c7a01cfc51608a70d569e6bb9413a6fad8785fe48b88f672058c",
+      "source": "slack_sdk/socket_mode/interval_runner.py",
+      "target": "src/heinzel_slack/_vendor/slack_sdk/socket_mode/interval_runner.py"
+    },
+    {
+      "original_sha256": "34ee4d8e2803a7bb8377a1dfbb299afad1e4a34e307414cefdc6111a690da813",
+      "projected_sha256": "a7abb0c76b273e5737e044971d29e3a653c297bc5476310b31e071b18fbfeb34",
+      "source": "slack_sdk/socket_mode/listeners.py",
+      "target": "src/heinzel_slack/_vendor/slack_sdk/socket_mode/listeners.py"
+    },
+    {
+      "original_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "projected_sha256": "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855",
+      "source": "slack_sdk/socket_mode/logger/__init__.py",
+      "target": "src/heinzel_slack/_vendor/slack_sdk/socket_mode/logger/__init__.py"
+    },
+    {
+      "original_sha256": "40471dc82efe9b056eacf6f06931cb780cd2e23ab438723fbf4c49fc444956df",
+      "projected_sha256": "40471dc82efe9b056eacf6f06931cb780cd2e23ab438723fbf4c49fc444956df",
+      "source": "slack_sdk/socket_mode/logger/messages.py",
+      "target": "src/heinzel_slack/_vendor/slack_sdk/socket_mode/logger/messages.py"
+    },
+    {
+      "original_sha256": "aa9e04f13869f8741ed323cd1cb5082c1ffe2f87800c3e6e47c443093dfd9784",
+      "projected_sha256": "0006619b28f937b14b881a238b1f11f7a808e1f4839a003472c486d82ac3a6ee",
+      "source": "slack_sdk/socket_mode/request.py",
+      "target": "src/heinzel_slack/_vendor/slack_sdk/socket_mode/request.py"
+    },
+    {
+      "original_sha256": "bc08b57894bdbdbd46dae4f09a009ea73c7991276cfb910b4fab0d9930e6d949",
+      "projected_sha256": "9d79eceb86419570b0c12dcc25a5fcc459b7682b994d647755f70dd5a590aba5",
+      "source": "slack_sdk/socket_mode/response.py",
+      "target": "src/heinzel_slack/_vendor/slack_sdk/socket_mode/response.py"
+    },
+    {
+      "original_sha256": "cc9c3f2b2b25bec530c4fafe907e93a43f12188778192a1b2a75631e15dd7219",
+      "projected_sha256": "cc9c3f2b2b25bec530c4fafe907e93a43f12188778192a1b2a75631e15dd7219",
+      "source": "slack_sdk/version.py",
+      "target": "src/heinzel_slack/_vendor/slack_sdk/version.py"
+    },
+    {
+      "original_sha256": "e6f12ef9476fbce2a7d7c4af02b17afb1921c0c4a25ec4179dc3ce1e4f44fc22",
+      "projected_sha256": "e6f12ef9476fbce2a7d7c4af02b17afb1921c0c4a25ec4179dc3ce1e4f44fc22",
+      "source": "slack_sdk/web/__init__.py",
+      "target": "src/heinzel_slack/_vendor/slack_sdk/web/__init__.py"
+    },
+    {
+      "original_sha256": "fd7beafe11ec7a0661005c96617378ad4ff0873b5f095205ac993f1a762b88ae",
+      "projected_sha256": "569ce15004d4289ae9a69cf97cb0492c5ae1f797f990f92a65f54b2cf453e357",
+      "source": "slack_sdk/web/base_client.py",
+      "target": "src/heinzel_slack/_vendor/slack_sdk/web/base_client.py"
+    },
+    {
+      "original_sha256": "c7fad43a19779690a6613564b66ccaa5ba00d5f0a727800b8f778478f1850fb5",
+      "projected_sha256": "9485776eb7579edd63d2c127a3ff0fb4002228981347039a8092087b3a77f0e3",
+      "source": "slack_sdk/web/chat_stream.py",
+      "target": "src/heinzel_slack/_vendor/slack_sdk/web/chat_stream.py"
+    },
+    {
+      "original_sha256": "bc9dfda87690a1557e12ef162230103481c5347be107d7191ea7c018c6858402",
+      "projected_sha256": "9c4fc76c45d56aefb665f5057b927c7803dcfe6c75d7597cf472e56e4d6d5ed2",
+      "source": "slack_sdk/web/client.py",
+      "target": "src/heinzel_slack/_vendor/slack_sdk/web/client.py"
+    },
+    {
+      "original_sha256": "dd880253e995c6ec696084c718d8e55d0d7ddb435b97756f675020f53a1f52d9",
+      "projected_sha256": "dd880253e995c6ec696084c718d8e55d0d7ddb435b97756f675020f53a1f52d9",
+      "source": "slack_sdk/web/deprecation.py",
+      "target": "src/heinzel_slack/_vendor/slack_sdk/web/deprecation.py"
+    },
+    {
+      "original_sha256": "29c31c14a04db6dffedba46c5d79243174b62378642f7f4e380d7f02fb118213",
+      "projected_sha256": "29c31c14a04db6dffedba46c5d79243174b62378642f7f4e380d7f02fb118213",
+      "source": "slack_sdk/web/file_upload_v2_result.py",
+      "target": "src/heinzel_slack/_vendor/slack_sdk/web/file_upload_v2_result.py"
+    },
+    {
+      "original_sha256": "57079c812b5ad1b9a1ec287a05f1c33d4a43977ed06f3ce5c0f213e730f1cfad",
+      "projected_sha256": "2dd1df7034fed6d46ef2465960e6b63e8409724b341f06098bd9bbdf39c489cd",
+      "source": "slack_sdk/web/internal_utils.py",
+      "target": "src/heinzel_slack/_vendor/slack_sdk/web/internal_utils.py"
+    },
+    {
+      "original_sha256": "1ead231aa9367ae237bff776c3a716fc6ca3879d5253f3cab674f13b62d0f2de",
+      "projected_sha256": "4356d83decd03005bcabb5c8833b053c5a1773e3e326842b4bc4f0e131073860",
+      "source": "slack_sdk/web/slack_response.py",
+      "target": "src/heinzel_slack/_vendor/slack_sdk/web/slack_response.py"
+    },
+    {
+      "original_sha256": "ba5dfbc3aacf67596bfe2cecf6117f3ec0e1c8afa8505055c2425e61d1375a42",
+      "projected_sha256": "ba5dfbc3aacf67596bfe2cecf6117f3ec0e1c8afa8505055c2425e61d1375a42",
+      "source": "slack_sdk/webhook/__init__.py",
+      "target": "src/heinzel_slack/_vendor/slack_sdk/webhook/__init__.py"
+    },
+    {
+      "original_sha256": "e75dc85e1891861658a722988c42381033467e688b8297e8d3d2316ea5e5b8be",
+      "projected_sha256": "1c49c5b73b9a9f68eabc2be10c4aeb3175e31c927dcd1dd8292ae77fa5c7e429",
+      "source": "slack_sdk/webhook/client.py",
+      "target": "src/heinzel_slack/_vendor/slack_sdk/webhook/client.py"
+    },
+    {
+      "original_sha256": "f24f4235746f3c1b8d5dfc13e4bad6291dd307dd1b31258d7ac11219516879c2",
+      "projected_sha256": "30422456f4bedd1271f69b82188b30d720f5c219d1b6c4f262f1588d4ae51112",
+      "source": "slack_sdk/webhook/internal_utils.py",
+      "target": "src/heinzel_slack/_vendor/slack_sdk/webhook/internal_utils.py"
+    },
+    {
+      "original_sha256": "e6ef7eddfcec1c06b130809d043fd109f773e92b5e82683853c40419825a8185",
+      "projected_sha256": "e6ef7eddfcec1c06b130809d043fd109f773e92b5e82683853c40419825a8185",
+      "source": "slack_sdk/webhook/webhook_response.py",
+      "target": "src/heinzel_slack/_vendor/slack_sdk/webhook/webhook_response.py"
+    }
+  ],
+  "format": 1,
+  "package": {
+    "source": "slack_sdk",
+    "target": "heinzel_slack._vendor.slack_sdk"
+  },
+  "transform_version": "namespace-relocation-v1+slack-sdk-3.46.0-security-v4",
+  "upstream": {
+    "distribution": "slack_sdk",
+    "license_expression": "MIT",
+    "license_paths": [
+      "slack_sdk-3.46.0.dist-info/licenses/LICENSE"
+    ],
+    "sha256": "6286d89da97ea193c853609131515e6f1b3edf86866d6e5aad0dba9dcf1cb72d",
+    "version": "3.46.0",
+    "wheel": "slack_sdk-3.46.0-py2.py3-none-any.whl"
+  }
+}

@@ -1,0 +1,84 @@
+{
+  "format": 1,
+  "plugin": "heinzel-slack",
+  "core_version": "0.9.20",
+  "inputs_sha256": "6188c937d7e03095803a2cebb5ca018f952a967de52712701308ac07be79a348",
+  "images": {
+    "docs/assets/screenshots/review-slack-notice.png": "e890f2589783ed5ff53b2793a3fd244c2016f3270b94e00412b2fce01d2d4cfb",
+    "docs/assets/screenshots/slack-notice-delivered.png": "46fdea305de766e15a5cda0e853813985f7db7149d5d6eb4f9762dca8f5f2db4",
+    "docs/assets/screenshots/slack-draft-cli.png": "deafce0823dac89ac55bd82af30659c5ca89da2d8d20647351959bade3a5ef19",
+    "docs/assets/screenshots/slack-draft-decision-cli.png": "c73817c1612ca1bcb357efcd31953186371538883b4d9c80d47f6cf0742fc410"
+  },
+  "review_bundle": {
+    "format": 2,
+    "source_story": {
+      "path": "source-story.md",
+      "sha256": "6ddcb1c5dc12404bb18752beaa99b676ece2a3103c47feee33abc81f1d90893c"
+    },
+    "definition": {
+      "format": 1,
+      "reviewer": "Codex feature-story agent",
+      "source_sha256": "6657e0bf84705c1ed3e58b642b8f28acd5d4af66b03f6b8af407f6d0dcb48d39",
+      "plan_sha256": "c81beb38f83dc32b8271f05edf06c7b5f8b5f5e0b209dc0edea2ad8b97b87336",
+      "story_sha256": "6ddcb1c5dc12404bb18752beaa99b676ece2a3103c47feee33abc81f1d90893c"
+    },
+    "plugin": "heinzel-slack",
+    "core_version": "0.9.20",
+    "inputs_sha256": "6188c937d7e03095803a2cebb5ca018f952a967de52712701308ac07be79a348",
+    "screenshots": [
+      {
+        "path": "docs/assets/screenshots/review-slack-notice.png",
+        "surface": "ui",
+        "caption": "Demo data: Mira reviews the fictional Slack account, destination, scope and complete weekly-report notice before delivery."
+      },
+      {
+        "path": "docs/assets/screenshots/slack-notice-delivered.png",
+        "surface": "ui",
+        "caption": "Demo data: Core reports the fictional notice delivered to the local stand-in after Mira confirms; this does not approve a captured write."
+      },
+      {
+        "path": "docs/assets/screenshots/slack-draft-cli.png",
+        "surface": "cli",
+        "caption": "Demo data: the fictional weekly-report draft and printed button labels, rendered in the terminal from Slack message blocks."
+      },
+      {
+        "path": "docs/assets/screenshots/slack-draft-decision-cli.png",
+        "surface": "cli",
+        "caption": "Demo data: fictional clicks exercise the real decision code; Mira's exact approval records one reply while invalid attempts are refused."
+      }
+    ],
+    "images": {
+      "review-slack-notice.png": "e890f2589783ed5ff53b2793a3fd244c2016f3270b94e00412b2fce01d2d4cfb",
+      "slack-notice-delivered.png": "46fdea305de766e15a5cda0e853813985f7db7149d5d6eb4f9762dca8f5f2db4",
+      "slack-draft-cli.png": "deafce0823dac89ac55bd82af30659c5ca89da2d8d20647351959bade3a5ef19",
+      "slack-draft-decision-cli.png": "c73817c1612ca1bcb357efcd31953186371538883b4d9c80d47f6cf0742fc410"
+    },
+    "transcripts": {
+      "review-slack-notice.txt": "4dc619e17249b62fb82206675dc3b8ca2d3e44d1753b733d73fdbacde029a433",
+      "slack-notice-delivered.txt": "05cc9b172daadf9e6d4e8f8ba8ee715be017c65e698dccb00ce8cdd4f631403d",
+      "slack-draft-cli.txt": "be3327018fe6adc629a085bf15b212eb24e321038d3cc9acdc18def44c2e96d1",
+      "slack-draft-decision-cli.txt": "0bab28155fbc709895dee63143b93edbb1f07227635f1fb6e158f8568fd779fe"
+    },
+    "bundle_sha256": "47c07ac0904339ed6d8e840c322f10f718d0f4f07bbbc705829f10ae4e0ef752"
+  },
+  "privacy_review": {
+    "format": 1,
+    "bundle_sha256": "47c07ac0904339ed6d8e840c322f10f718d0f4f07bbbc705829f10ae4e0ef752",
+    "reviewer": "Codex privacy agent",
+    "decision": "approve",
+    "checked_images": [
+      "review-slack-notice.png",
+      "slack-notice-delivered.png",
+      "slack-draft-cli.png",
+      "slack-draft-decision-cli.png"
+    ],
+    "checks": {
+      "tokens_absent": true,
+      "personal_data_absent": true,
+      "feature_relevant": true,
+      "multiple_ui_scenes": true,
+      "captions_accurate": true
+    },
+    "findings": []
+  }
+}
