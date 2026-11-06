@@ -92,8 +92,7 @@ jobs:
           if [ "$released" = false ] && [[ "$VERSION" != *dev* ]]; then
             uv run --frozen --no-build --group tooling python scripts/publish.py --tag "app-v$VERSION" --revision "$REVISION" --directory dist --make-latest true
           else # an edge or held app is a pre-release: the default install paths can never select it
-            uv run --frozen --no-build --group tooling python scripts/publish.py --tag "app-v$VERSION" --revision "$REVISION" --directory dist --make-latest false
-            gh release edit "app-v$VERSION" --prerelease
+            uv run --frozen --no-build --group tooling python scripts/publish.py --tag "app-v$VERSION" --revision "$REVISION" --directory dist --make-latest false --prerelease
           fi
   finalize:
     needs: select
