@@ -1,12 +1,12 @@
 [project]
 name = "heinzel-github"
-version = "0.9.1"
+version = "0.9.2"
 description = "Read pull requests and issues from GitHub: the code-host and tracker capabilities."
 readme = "README.md"
 license = "MIT"
 license-files = ["LICENSE"]
 requires-python = ">=3.12"
-dependencies = ["heinzel>=0.9.1,<0.10"]
+dependencies = ["heinzel>=0.9.16,<0.10"]
 
 [project.urls]
 Source = "https://github.com/helmut-hoffer-von-ankershoffen/heinzel-plugins/tree/main/plugins/heinzel-github"
@@ -14,6 +14,9 @@ Changelog = "https://github.com/helmut-hoffer-von-ankershoffen/heinzel-plugins/b
 Issues = "https://github.com/helmut-hoffer-von-ankershoffen/heinzel-plugins/issues"
 
 [project.entry-points."heinzel.modules"]
+github = "heinzel_github"
+
+[project.entry-points."heinzel.connected_sources"]
 github = "heinzel_github"
 
 [build-system]
@@ -140,26 +143,31 @@ highlights = [
 ]
 
 [[tool.heinzel.catalog.screenshots]]
-path = "docs/assets/screenshots/merged-work.png"
+path = "docs/assets/screenshots/workflow-collection.png"
 surface = "ui"
-caption = "Merged pull requests in the app terminal — fictional data, fixture-only requester, real GitHub adapter"
-
-[[tool.heinzel.catalog.screenshots]]
-path = "docs/assets/screenshots/issue-changes.png"
-surface = "ui"
-caption = "Issue changes, owners and states in the app terminal — fictional GitHub repository"
-
-[[tool.heinzel.catalog.screenshots]]
-path = "docs/assets/screenshots/merged-cli.png"
-surface = "cli"
-caption = "Read merged work in the shell — fictional data, fixture-only requester, real GitHub adapter"
-
-[[tool.heinzel.catalog.screenshots]]
-path = "docs/assets/screenshots/issues-json.png"
-surface = "cli"
-caption = "Typed issue results for scripts and agents — fixture-only requester, fictional GitHub data"
+caption = "Explore the fictional weekly code review in the local workflow collection"
 
 [[tool.heinzel.catalog.screenshots]]
 path = "docs/assets/screenshots/workflow-context.png"
 surface = "ui"
-caption = "Weekly code review declares merged-work and issue inputs — fictional local example, no report generated"
+caption = "Fictional weekly review declares merged-work and issue inputs; no report was generated"
+
+[[tool.heinzel.catalog.screenshots]]
+path = "docs/assets/screenshots/merged-work.png"
+surface = "ui"
+caption = "Fictional merged pull requests in the app terminal, using a fixture-only requester and the real adapter"
+
+[[tool.heinzel.catalog.screenshots]]
+path = "docs/assets/screenshots/issue-changes.png"
+surface = "ui"
+caption = "Fictional issue changes, owners and states in the app terminal, using a fixture-only requester"
+
+[[tool.heinzel.catalog.screenshots]]
+path = "docs/assets/screenshots/merged-cli.png"
+surface = "cli"
+caption = "Read fictional merged work in the shell with a fixture-only requester and the real adapter"
+
+[[tool.heinzel.catalog.screenshots]]
+path = "docs/assets/screenshots/issues-json.png"
+surface = "cli"
+caption = "Fictional issue results as JSON for scripts and agents, using a fixture-only requester"

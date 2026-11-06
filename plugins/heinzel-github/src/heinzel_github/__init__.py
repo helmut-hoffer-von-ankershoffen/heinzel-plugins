@@ -8,6 +8,8 @@ through the GitHub CLI `gh`, which owns authentication: run `gh auth login` once
 
 from pathlib import Path
 
+import heinzel
+import heinzel.kernel as kernel_contracts
 from heinzel import Check
 from heinzel.kernel import CapabilityView
 
@@ -20,6 +22,14 @@ from heinzel_github._service import GithubService
 module.settings(GithubSettings)
 module.service(GithubService)
 module.service(Gh)
+if (
+    hasattr(kernel_contracts, "ReleaseFeedService")
+    and callable(getattr(heinzel, "captured_source_active", None))
+    and heinzel.captured_source_active()
+):
+    from heinzel_github._release_feed import GithubReleaseFeeds
+
+    module.service(GithubReleaseFeeds)
 module.skill(Path(__file__).parent / "skills")  # advice for AI, read-only (ADR 0061)
 
 

@@ -127,30 +127,45 @@ Development and release commands: [repository guide](../../README.md).
 <!-- screenshots:start -->
 ## Screenshots
 
-<img src="docs/assets/screenshots/merged-work.png" alt="Merged pull requests in the app terminal — fictional data, fixture-only requester, real GitHub adapter" width="960">
+<img src="docs/assets/screenshots/workflow-collection.png" alt="Explore the fictional weekly code review in the local workflow collection" width="960">
 
-Merged pull requests in the app terminal — fictional data, fixture-only requester, real GitHub adapter
+Explore the fictional weekly code review in the local workflow collection
 
-<img src="docs/assets/screenshots/issue-changes.png" alt="Issue changes, owners and states in the app terminal — fictional GitHub repository" width="960">
+<img src="docs/assets/screenshots/workflow-context.png" alt="Fictional weekly review declares merged-work and issue inputs; no report was generated" width="960">
 
-Issue changes, owners and states in the app terminal — fictional GitHub repository
+Fictional weekly review declares merged-work and issue inputs; no report was generated
 
-<img src="docs/assets/screenshots/workflow-context.png" alt="Weekly code review declares merged-work and issue inputs — fictional local example, no report generated" width="960">
+<img src="docs/assets/screenshots/merged-work.png" alt="Fictional merged pull requests in the app terminal, using a fixture-only requester and the real adapter" width="960">
 
-Weekly code review declares merged-work and issue inputs — fictional local example, no report generated
+Fictional merged pull requests in the app terminal, using a fixture-only requester and the real adapter
+
+<img src="docs/assets/screenshots/issue-changes.png" alt="Fictional issue changes, owners and states in the app terminal, using a fixture-only requester" width="960">
+
+Fictional issue changes, owners and states in the app terminal, using a fixture-only requester
 
 <details>
 <summary>Command line</summary>
 
-<img src="docs/assets/screenshots/merged-cli.png" alt="Read merged work in the shell — fictional data, fixture-only requester, real GitHub adapter" width="960">
+<img src="docs/assets/screenshots/merged-cli.png" alt="Read fictional merged work in the shell with a fixture-only requester and the real adapter" width="960">
 
-Read merged work in the shell — fictional data, fixture-only requester, real GitHub adapter
+Read fictional merged work in the shell with a fixture-only requester and the real adapter
 
-<img src="docs/assets/screenshots/issues-json.png" alt="Typed issue results for scripts and agents — fixture-only requester, fictional GitHub data" width="960">
+<img src="docs/assets/screenshots/issues-json.png" alt="Fictional issue results as JSON for scripts and agents, using a fixture-only requester" width="960">
 
-Typed issue results for scripts and agents — fixture-only requester, fictional GitHub data
+Fictional issue results as JSON for scripts and agents, using a fixture-only requester
 
 </details>
 
 [Open the screenshot gallery](docs/assets/screenshots/index.html).
 <!-- screenshots:end -->
+
+### Release feed for draft workflows
+
+With Heinzel 0.9.16 or newer, the GitHub plugin installed from a wheel can supply a release feed to a draft workflow. Give the
+workflow an exact HTTPS GitHub blob URL for the Markdown CHANGELOG. The feed reads the same repository's published
+release notes and the matching literal CHANGELOG section. It starts from the current release frontier and returns
+later releases in publication order.
+
+An ambiguous tag, a lost frontier, or a full GitHub page of 100 entries including drafts stops the read without
+advancing the cursor. The feed uses `gh` and holds the selected credential privately for the read. It never stores
+or displays the token. Changing the selected account, configuration, or executable requires a new review.

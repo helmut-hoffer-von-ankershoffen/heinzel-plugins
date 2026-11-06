@@ -303,6 +303,10 @@ class Gh:
             raise HeinzelError(msg)
         return self._execute(path, args, timeout, host)
 
+    def execution_environment(self, host: str) -> dict[str, str]:
+        """Return the allowlisted CLI environment; captured leases override it with their pinned credentials."""
+        return environment(host)
+
     def _execute(self, path: str, args: Sequence[str], timeout: float, host: str | None = None) -> GhResult:
         deadline = time.monotonic() + timeout
         out, err = bytearray(), bytearray()
@@ -316,7 +320,7 @@ class Gh:
                 stdout=subprocess.PIPE,
                 stderr=subprocess.PIPE,
                 cwd=Path.home(),
-                env=environment(host or self._settings.host),
+                env=self.execution_environment(host or self._settings.host),
                 start_new_session=_POSIX,
             )
         except (OSError, RuntimeError) as exc:  # RuntimeError: no home directory
