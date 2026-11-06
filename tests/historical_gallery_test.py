@@ -12,7 +12,14 @@ from heinzel_plugin_tools._historical_galleries import MANIFESTS, PUBLIC_BASE, P
 
 pytestmark = pytest.mark.unit
 REPO = Path(__file__).resolve().parents[1]
-RECAPTURED = ("heinzel-clock", "heinzel-resource", "heinzel-tailscale", "heinzel-theme", "heinzel-google")
+RECAPTURED = (
+    "heinzel-clock",
+    "heinzel-resource",
+    "heinzel-tailscale",
+    "heinzel-theme",
+    "heinzel-google",
+    "heinzel-github",
+)
 
 
 def file_hashes(folder):
