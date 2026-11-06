@@ -49,7 +49,7 @@ def test_ask_status_and_wait_round_trip(rig):
 
 def test_ask_says_why_it_was_not_shared(rig):
     with pytest.raises(HeinzelError, match="hide text"):
-        plugin.ask(rig.service, rig.channel, "x", "bad‮text")
+        plugin.ask(rig.service, rig.channel, "x", "bad\u202etext")
     rig.slack.fail_post = True
     with pytest.raises(HeinzelError, match="refused"):
         plugin.ask(rig.service, rig.channel, "x", "fine text")

@@ -7,7 +7,7 @@ pytestmark = pytest.mark.unit
 
 
 def test_digest_is_of_the_exact_bytes():
-    assert draft_digest("a") == draft_digest("a")
+    assert draft_digest("a") == "b030031b0a03eb27801669d0643e682d285d0bcac81cef787d8c52febed29a46"
     assert draft_digest("a") != draft_digest("a ")
     assert draft_digest("é") != draft_digest("é")  # no normalisation: bytes are bytes
     assert len(draft_digest("a")) == 64
@@ -15,7 +15,7 @@ def test_digest_is_of_the_exact_bytes():
 
 @pytest.mark.parametrize(
     "draft",
-    ["", "   \n", "x" * 4_001, "hi‮there", "zero​width", "nul\x00", "bell\x07", "carriage\rreturn"],
+    ["", "   \n", "x" * 4_001, "hi\u202ethere", "zero\u200bwidth", "nul\x00", "bell\x07", "carriage\rreturn"],
 )
 def test_drafts_a_person_could_not_review_are_refused(draft):
     with pytest.raises(HeinzelError):

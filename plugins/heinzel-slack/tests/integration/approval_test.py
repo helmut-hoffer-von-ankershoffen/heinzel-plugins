@@ -266,7 +266,7 @@ def test_text_in_a_message_or_username_is_data_not_an_answer(rig):
 
 
 def test_a_preview_that_hides_text_is_refused_and_never_posted(rig):
-    receipt = rig.post(preview="looks fine‮ txt.exe")
+    receipt = rig.post(preview="looks fine\u202e txt.exe")
     assert receipt.status == "refused"
     assert rig.slack.posts == []
 

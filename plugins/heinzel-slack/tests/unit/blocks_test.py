@@ -10,10 +10,10 @@ NOW = datetime(2026, 10, 31, 12, 0, tzinfo=UTC)
 
 
 def test_plain_defuses_mentions_links_and_hidden_characters():
-    text = plain("<!channel> <@U123> <https://evil.example|click> ‮ & \x00done")
+    text = plain("<!channel> <@U123> <https://evil.example|click> \u202e & \x00done")
     assert "<" not in text
     assert "&lt;!channel&gt;" in text
-    assert "‮" not in text
+    assert "\u202e" not in text
     assert "&amp;" in text
 
 
