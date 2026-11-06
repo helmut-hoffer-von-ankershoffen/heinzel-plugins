@@ -182,7 +182,7 @@
     },
     {
       "original_sha256": "e98b873e92e58f5909229030441e78da4820f47c74ed4e5eea9717917a5ed861",
-      "projected_sha256": "5b676cec15b79d10a326cdda2f92f9309e8e41525e68ab995e95046d3b926330",
+      "projected_sha256": "8a2f6bdb9ed6df887c9b152a3752e5341602359af808b3e49ab322454d19e4c9",
       "source": "slack_sdk/socket_mode/builtin/internals.py",
       "target": "src/heinzel_slack/_vendor/slack_sdk/socket_mode/builtin/internals.py"
     },
@@ -312,7 +312,7 @@
     "source": "slack_sdk",
     "target": "heinzel_slack._vendor.slack_sdk"
   },
-  "transform_version": "namespace-relocation-v1+slack-sdk-3.46.0-security-v3",
+  "transform_version": "namespace-relocation-v1+slack-sdk-3.46.0-security-v4",
   "upstream": {
     "distribution": "slack_sdk",
     "license_expression": "MIT",

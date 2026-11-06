@@ -43,8 +43,10 @@ def _use_or_create_ssl_context(ssl_context: Optional[ssl.SSLContext] = None):
     if ssl_context is not None:
         return ssl_context
     context = ssl.create_default_context()
-    if context.minimum_version < ssl.TLSVersion.TLSv1_2:
-        context.minimum_version = ssl.TLSVersion.TLSv1_2
+    minimum = context.minimum_version
+    context.minimum_version = ssl.TLSVersion.TLSv1_2
+    if minimum > ssl.TLSVersion.TLSv1_2:
+        context.minimum_version = minimum
     return context
 
 

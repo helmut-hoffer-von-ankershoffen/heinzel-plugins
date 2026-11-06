@@ -196,6 +196,22 @@ def test_default_tls_context_enforces_floor_without_lowering_stronger_default(mo
     assert context.minimum_version == expected
 
 
+def test_default_tls_context_is_not_returned_if_stronger_minimum_cannot_be_restored(monkeypatch):
+    class Context:
+        @property
+        def minimum_version(self):
+            return ssl.TLSVersion.TLSv1_3
+
+        @minimum_version.setter
+        def minimum_version(self, value):
+            if value == ssl.TLSVersion.TLSv1_3:
+                raise ssl.SSLError("stronger minimum could not be restored")
+
+    monkeypatch.setattr(internals.ssl, "create_default_context", Context)
+    with pytest.raises(ssl.SSLError, match="stronger minimum could not be restored"):
+        internals._use_or_create_ssl_context()
+
+
 def test_supported_python_default_context_already_requires_verified_tls_12_or_newer():
     context = internals._use_or_create_ssl_context()
     assert context.minimum_version >= ssl.TLSVersion.TLSv1_2
