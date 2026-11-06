@@ -4,6 +4,7 @@ import base64
 import logging
 import ssl
 from threading import Lock
+from types import SimpleNamespace
 
 import pytest
 
@@ -178,6 +179,21 @@ def test_proxy_environment_selection_does_not_log_its_credentials(monkeypatch, c
     assert proxy_env_variable_loader.load_http_proxy_from_env() == proxy
     assert "loaded from an env variable" in caplog.text
     assert "fictional-user" not in caplog.text and "fictional-password" not in caplog.text
+
+
+@pytest.mark.parametrize(
+    ("initial", "expected"),
+    [
+        (ssl.TLSVersion.MINIMUM_SUPPORTED, ssl.TLSVersion.TLSv1_2),
+        (ssl.TLSVersion.TLSv1_2, ssl.TLSVersion.TLSv1_2),
+        (ssl.TLSVersion.TLSv1_3, ssl.TLSVersion.TLSv1_3),
+    ],
+)
+def test_default_tls_context_enforces_floor_without_lowering_stronger_default(monkeypatch, initial, expected):
+    context = SimpleNamespace(minimum_version=initial)
+    monkeypatch.setattr(internals.ssl, "create_default_context", lambda: context)
+    assert internals._use_or_create_ssl_context() is context
+    assert context.minimum_version == expected
 
 
 def test_supported_python_default_context_already_requires_verified_tls_12_or_newer():

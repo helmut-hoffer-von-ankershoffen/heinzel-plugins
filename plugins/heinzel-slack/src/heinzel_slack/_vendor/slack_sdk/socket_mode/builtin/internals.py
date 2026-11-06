@@ -40,7 +40,12 @@ def _parse_connect_response(sock: Socket) -> Tuple[Optional[int], str]:
 
 
 def _use_or_create_ssl_context(ssl_context: Optional[ssl.SSLContext] = None):
-    return ssl_context if ssl_context is not None else ssl.create_default_context()
+    if ssl_context is not None:
+        return ssl_context
+    context = ssl.create_default_context()
+    if context.minimum_version < ssl.TLSVersion.TLSv1_2:
+        context.minimum_version = ssl.TLSVersion.TLSv1_2
+    return context
 
 
 def _establish_new_socket_connection(

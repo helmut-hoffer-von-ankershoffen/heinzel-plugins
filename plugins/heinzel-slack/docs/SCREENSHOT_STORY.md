@@ -1,42 +1,38 @@
 ## Audience
 
-Someone considering Slack as a private notification channel and a way to collect an owner’s decision on an exact draft.
+A Heinzelmännchen user deciding whether Slack is a useful private mailbox for notices and exact-draft decisions, and whether its setup and approval limits fit their workflow.
 
 ## Outcome
 
-Show the distinction between reviewing a Slack delivery in Heinzelmännchen, delivering a notice to a local stand-in, and receiving a separate owner decision on a draft. The plugin is in development; `README.md` says installed acceptance against the released SDK and a new gallery review are pending. These scenes do not establish live Slack delivery or installed acceptance.
+Show the owner reviewing the exact account, destination, scope and notice before a fictional delivery, then seeing Core's delivery receipt. Complement that flow with a terminal rendering of a draft and the decision code's responses to valid and invalid clicks. The receipt means the local stand-in reported delivery; it does not mean a captured write was approved or that a real Slack delivery occurred.
 
 ## Scenes
 
-1. **Review the notice — light UI.** In Core’s actual chat review, Mira sees the fictional account, destination, scope and complete notice before confirming. This is a genuine Core feature surface staged by `docs/screenshot_fixture.py`, not a Slack screen.
-2. **Delivery receipt — dark UI.** After confirmation, the same flow reports delivery to the local Slack stand-in. The receipt explicitly says this does not approve a captured write. This is a meaningful subsequent state, not a duplicate capture.
-3. **The draft — CLI.** The fixture renders the plugin-produced Slack message blocks as terminal text, including the fictional draft and printed button labels. It is a terminal representation, not an interactive Slack screenshot.
-4. **The decisions — CLI.** A second fixture operation exercises decision handling for the owner, a stranger, a stale button, typed text, replay and expiry. It shows a recorded owner reply and refusals without implying a live Slack interaction.
-
-The existing plan already tells this story, so its scenes and capture actions are preserved. The fixture operations are documentation-only demonstrations, not installed `hz slack` commands.
+1. **Review the notice — light.** In Core's real chat confirmation surface, Mira reviews Lotte's complete fictional weekly-report notice and its posting terms before deciding. The fixture stages a pending `deliver-channel-item` action without posting (`docs/screenshot_fixture.py`, `stage_notice`).
+2. **See the result — dark.** Confirm the same kind of staged notice and show the resulting Core receipt. The fixture's loopback stand-in accepts one matching post; this is a distinct state of the real review flow, not evidence of live Slack delivery (`docs/screenshot_fixture.py`, `StandIn` and `stage_notice`).
+3. **Read a draft — CLI.** Show the fictional weekly report and button labels rendered from the plugin's Slack message blocks in the native terminal. This is a fixture rendering, not a screenshot of Slack (`docs/screenshot_fixture.py`, `share` and `draw`).
+4. **Understand the decision — CLI.** Show the fixture's table of owner, stranger, stale, replay and other cases, including the reply returned to the host. These are simulated payloads passed to the real decision code, not live clicks (`docs/screenshot_fixture.py`, `answers`).
 
 ## Fictional fixtures
 
-`docs/screenshot_fixture.py` supplies Mira, Jonas, Lotte, a demo workspace, synthetic IDs and a weekly report. Its UI bootstrap stages a real Core review and uses a loopback Slack stand-in; its CLI demonstrations use an in-memory transport and actual plugin channel and decision code. The fixture fences network access and subprocesses when it runs. Capture must use the existing isolated bootstrap; no fixture file is invented here.
-
-Normal presentation fictionalization is explicitly limited as follows: verified owning-interpreter paths become `/demo-profile/.venv`, and only the verified whole hostname detail in the genuine Doctor row becomes `demo-host`. These mappings change no SDK health status or remaining detail and establish no privacy acceptance. Unknown identities still fail, and independent review must inspect every image and transcript.
-
-## Privacy pitfalls
-
-Review every image and transcript for real workspace, member, account and DM identifiers; tokens, credential paths, local usernames, hostnames, URLs, message contents and unrelated application data. The fixture’s synthetic identifiers are acceptable only after verification against the fixture. Do not generalize the two presentation mappings to unverified strings or use them to conceal unexpected identities. Do not publish a failed or partially captured scene.
-
-## Acceptance criteria
-
-- Capture the actual light review and dark delivered states with the specified appearance applied; the account, destination, scope and full fictional notice must be readable in the review. The second image must show the actual delivery receipt and its limitation.
-- Capture both distinct CLI results from the existing fixture. Clearly label the printed buttons as terminal output; do not present them as Slack UI or as live clicks.
-- Reject duplicates, caption-only changes, forged HTML, missing review terms, unexpected identities and any screenshot or transcript that fails independent privacy review. Preserve the actual SDK health status and all detail outside the narrowly verified mappings.
-- Treat capture and privacy acceptance as pending until the images and transcripts have actually been inspected. The plan below was checked against the supplied schema and source by inspection; it was not executed or capture-tested.
+Use the existing `docs/screenshot_fixture.py` bootstrap and its isolated gallery profile, fictional Mira, Jonas, Lotte, workspace, DM and weekly report. The UI transport uses an exact loopback stand-in; the CLI fixture records posts in memory. Its `showcase share` and `showcase answers` operations are documentation-only fixture commands, not declared product CLI operations. No new fixture files or product screens are needed.
 
 ## Source-bound UI surface inventory
 
-- `pyproject.toml`, `[project.entry-points."heinzel.modules"]` and `[project.entry-points."heinzel.connected_sources"]`, both declare `slack = "heinzel_slack"`. `src/heinzel_slack/_module.py` declares `Module("slack", ...)`; `src/heinzel_slack/__init__.py` registers settings, transport, service and `SlackChannel`, plus `manifest`, `notify`, `ask`, `status`, `wait` and `listen` operations, a scheduled listener, health checks, optional setup and system info. These declarations can contribute to Core-rendered operation, setup, information and health surfaces; the supplied source does not establish a plugin-specific navigation route or prove those operations terminal-only.
-- `src/heinzel_slack/_channel.py` and `src/heinzel_slack/__init__.py` provide notification and approval channel behavior. The actual Core confirmation and resulting chat state are evidenced concretely by the staged `/` flow in `docs/screenshot_fixture.py`; they are the two feature UI scenes. The captured notice confirmation is distinct from approving a draft.
-- Slack’s actual DM and its Approve/Decline controls are **external provider UI**: `src/heinzel_slack/_blocks.py` constructs message blocks, and `README.md` describes their use. The supplied fixture draws those blocks in a terminal, not in Slack; no genuine provider UI capture is established.
-- `src/heinzel_slack/links/__init__.py` conditionally registers `SlackReviewedLinks` under `Module("links", ...)`, and `src/heinzel_slack/links/_reviewed_link.py` implements the reviewed-link channel. `README.md` calls this a separate `slack.links` module record, while the supplied `pyproject.toml` declares only the two `slack` entry points above. Discovery of that separate record and its corresponding Core review surface are therefore unresolved from these files; do not invent a route or scene for it.
-- `@module.info`, `@module.health`, `@module.health(live=True)` and `@module.setup` in `src/heinzel_slack/__init__.py` are Core contributions; their exact UI placement is not established by the supplied source. No plugin page, view, navigation or footer declaration was found in the first-party declarations. That absence alone does not make channel or operation behavior terminal-only.
-- `docs/screenshot_fixture.py` declares the documentation-only `showcase.share` and `showcase.answers` operations and their terminal renderers. They support the two useful CLI captures, but do not establish that the plugin’s broader behavior is CLI-only. `manifest()` reads `src/heinzel_slack/manifest.json`, which is absent from the supplied file inventory; manifest availability remains unresolved.
+- `pyproject.toml` declares both `heinzel.modules: slack = heinzel_slack` and `heinzel.connected_sources: slack = heinzel_slack`. Their target, `src/heinzel_slack/__init__.py`, registers settings, transport, service and channel, and declares operations `info`, `manifest`, `notify`, `ask`, `status`, `wait` and `listen`; the scheduled `listen` job; local and live health checks; optional setup; and a system-info contribution. `src/heinzel_slack/_module.py` declares the `slack` module. These declarations can feed generic Core operation, setup, health and info surfaces; absence of a plugin Page or View is not evidence that no feature UI exists. Exact generic surfaces beyond the fixture's demonstrated confirmation flow remain unverified from the supplied sources.
+- `src/heinzel_slack/_channel.py` supplies the notification and approval channel; the fixture demonstrates Core's genuine chat proposal and confirmation UI for a notice. Pending review and delivered receipt are two useful states of that same feature flow. The delivered receipt must not be described as draft approval.
+- Slack's DM, message blocks and Approve/Decline buttons are **external provider UI**, built by `src/heinzel_slack/_blocks.py` and used by the channel/service. The terminal rendering in `docs/screenshot_fixture.py` is an explanatory representation of those blocks, not actual Slack UI. Live provider capture is not established by this offline fixture.
+- `src/heinzel_slack/links/__init__.py` declares a separate `links` module and conditionally registers `SlackReviewedLinks` when the Core contract and captured-source condition exist; `src/heinzel_slack/links/_reviewed_link.py` names its channel `slack-reviewed-links` and implements reviewed link delivery. README describes it as `slack.links`, but `pyproject.toml` declares only `heinzel_slack` for both entry points; the supplied declarations do not establish how the separate record is discovered. Its generic Core review surface and installed availability remain unresolved, so this plan does not invent a route or capture for it.
+- The declared setup and `system_info` contribution can appear in Core surfaces; health checks can inform Doctor. No plugin nav, footer, Page or View declaration is established in the supplied first-party source. `manifest()` reads `src/heinzel_slack/manifest.json`, which is absent from the supplied file inventory, so its availability cannot be assumed. README also says installed acceptance against the released SDK and a new gallery review are pending; existing captures illustrate earlier behavior.
+
+## Privacy pitfalls
+
+Use synthetic identities, report text and isolated credentials only. Normal presentation fictionalization is explicitly limited to verified owning-interpreter paths becoming `/demo-profile/.venv`, and only the verified whole hostname detail in the genuine Doctor row becoming `demo-host`. These mappings change no SDK health status or remaining detail and establish no privacy acceptance. Unknown identities still fail; independent review must inspect every image and transcript for identifiers, credentials, paths and unintended content. Do not treat an apparent fixture, sanitized path or hostname as proof of privacy.
+
+## Acceptance criteria
+
+- Capture the two genuine Core feature states in applied light and dark appearance, plus both useful native-terminal fixture results. Reject duplicate captures, caption-only changes, terminal output presented as feature UI, and forged HTML.
+- Show the complete review terms and the actual delivery receipt; retain the distinction between consent to send a notice, the stand-in's delivery report, and a separate draft approval.
+- Label all scenes as demo data. Do not imply the fixture proves a real Slack workspace, released-SDK acceptance, live provider behavior or privacy acceptance.
+- Independently inspect every image and transcript, failing unknown identities and any exposed secrets or unintended personal data. Verify the selected UI actions, appearance and readable framing during explicit capture.
+- Preserve the existing plan's four useful scenes. The TOML below has been checked against the supplied format and source declarations by inspection; no code execution, capture or runtime validation was performed.

@@ -2,10 +2,10 @@
   "format": 1,
   "plugin": "heinzel-slack",
   "core_version": "0.9.20",
-  "inputs_sha256": "8060cbfa9a6e6c7d1edfe065cdb0ca26ea394def8c918e719a258a56e782c42e",
+  "inputs_sha256": "5a8626b647f470ec60ecc439881de1a2c19e24670c3b366ab24a4917fa0ca61c",
   "images": {
-    "docs/assets/screenshots/review-slack-notice.png": "d980b75c51614775e2c83158bfd32c20969263b65429c2676941850fbfc2dbb4",
-    "docs/assets/screenshots/slack-notice-delivered.png": "569836bc50b64d6237c8eb55bbe1ab5442d9e1e753a88f70df206cfa2e62619d",
+    "docs/assets/screenshots/review-slack-notice.png": "ec2e72592286dbedc065a5720d4a9324259a643f22133f78f0d7a827b697c1ee",
+    "docs/assets/screenshots/slack-notice-delivered.png": "b95a94a45a17ad51ff1d766eb1535971a93b46f6df2626def15a53af0b3be25b",
     "docs/assets/screenshots/slack-draft-cli.png": "deafce0823dac89ac55bd82af30659c5ca89da2d8d20647351959bade3a5ef19",
     "docs/assets/screenshots/slack-draft-decision-cli.png": "c73817c1612ca1bcb357efcd31953186371538883b4d9c80d47f6cf0742fc410"
   },
@@ -13,18 +13,18 @@
     "format": 2,
     "source_story": {
       "path": "source-story.md",
-      "sha256": "9fbfded3ca1b0bda1f2532c77f22c2813a41d228565c1da93954638355ebf91f"
+      "sha256": "c0566743113dedf74a334ce5eb937c6485cb149061e3e5df9f8680250efcb71e"
     },
     "definition": {
       "format": 1,
       "reviewer": "Codex feature-story agent",
-      "source_sha256": "cc1ed859a24c473bb85a9e19a33bc35a594048f5dc22bf5e524c980ba9a6c6e1",
+      "source_sha256": "60acd676f9e0f1071584e72a3c27b57ad0badc82e7fb6b0e6d79183c7357b5e4",
       "plan_sha256": "c81beb38f83dc32b8271f05edf06c7b5f8b5f5e0b209dc0edea2ad8b97b87336",
-      "story_sha256": "9fbfded3ca1b0bda1f2532c77f22c2813a41d228565c1da93954638355ebf91f"
+      "story_sha256": "c0566743113dedf74a334ce5eb937c6485cb149061e3e5df9f8680250efcb71e"
     },
     "plugin": "heinzel-slack",
     "core_version": "0.9.20",
-    "inputs_sha256": "8060cbfa9a6e6c7d1edfe065cdb0ca26ea394def8c918e719a258a56e782c42e",
+    "inputs_sha256": "5a8626b647f470ec60ecc439881de1a2c19e24670c3b366ab24a4917fa0ca61c",
     "screenshots": [
       {
         "path": "docs/assets/screenshots/review-slack-notice.png",
@@ -48,22 +48,22 @@
       }
     ],
     "images": {
-      "review-slack-notice.png": "d980b75c51614775e2c83158bfd32c20969263b65429c2676941850fbfc2dbb4",
-      "slack-notice-delivered.png": "569836bc50b64d6237c8eb55bbe1ab5442d9e1e753a88f70df206cfa2e62619d",
+      "review-slack-notice.png": "ec2e72592286dbedc065a5720d4a9324259a643f22133f78f0d7a827b697c1ee",
+      "slack-notice-delivered.png": "b95a94a45a17ad51ff1d766eb1535971a93b46f6df2626def15a53af0b3be25b",
       "slack-draft-cli.png": "deafce0823dac89ac55bd82af30659c5ca89da2d8d20647351959bade3a5ef19",
       "slack-draft-decision-cli.png": "c73817c1612ca1bcb357efcd31953186371538883b4d9c80d47f6cf0742fc410"
     },
     "transcripts": {
-      "review-slack-notice.txt": "3efc7fa616a6c8fdc8644d500e9517fb96a1a132ad6d3caaf27202900bbcb7ff",
-      "slack-notice-delivered.txt": "6248d0e92e69e542bf701e5c5bfd22d0120d3644cbe5ab461fc496ca5bb689ce",
+      "review-slack-notice.txt": "2fbfacaeb84333dd655a57c8f1d974470c25c37ffcb8f1dd71d4164a03d533bd",
+      "slack-notice-delivered.txt": "3ec7abafd2bfdcfd37bb989bdcce14954e61ed9318e9c03b5bf8c26b16fb1791",
       "slack-draft-cli.txt": "be3327018fe6adc629a085bf15b212eb24e321038d3cc9acdc18def44c2e96d1",
       "slack-draft-decision-cli.txt": "0bab28155fbc709895dee63143b93edbb1f07227635f1fb6e158f8568fd779fe"
     },
-    "bundle_sha256": "0c8c80ecf63d5d9cc6e48a6bb21aa6e4fcf7db857464329008b47d2cb3890d33"
+    "bundle_sha256": "d69d19077a1fb3d8c9849d893107b248c4f91d9fc10933925f28fbe89221e98e"
   },
   "privacy_review": {
     "format": 1,
-    "bundle_sha256": "0c8c80ecf63d5d9cc6e48a6bb21aa6e4fcf7db857464329008b47d2cb3890d33",
+    "bundle_sha256": "d69d19077a1fb3d8c9849d893107b248c4f91d9fc10933925f28fbe89221e98e",
     "reviewer": "Codex privacy agent",
     "decision": "approve",
     "checked_images": [

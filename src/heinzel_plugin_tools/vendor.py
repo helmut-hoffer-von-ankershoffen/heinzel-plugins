@@ -24,15 +24,25 @@ from packaging.utils import canonicalize_name
 from packaging.version import Version
 
 TRANSFORM_VERSION = "namespace-relocation-v1"
-SLACK_SECURITY_TRANSFORM = "namespace-relocation-v1+slack-sdk-3.46.0-security-v2"
+SLACK_SECURITY_TRANSFORM = "namespace-relocation-v1+slack-sdk-3.46.0-security-v3"
 SLACK_SECURITY_OWNER = "heinzel_slack._vendor.slack_sdk"
 SLACK_SECURITY_WHEEL = "slack_sdk-3.46.0-py2.py3-none-any.whl"
 SLACK_SECURITY_WHEEL_SHA256 = "6286d89da97ea193c853609131515e6f1b3edf86866d6e5aad0dba9dcf1cb72d"
 SLACK_SECURITY_PATCHES = {
     "slack_sdk/socket_mode/builtin/internals.py": (
         "e98b873e92e58f5909229030441e78da4820f47c74ed4e5eea9717917a5ed861",
-        "dce0a5f17a119ff01dbe9e5648ac5784b7ee8187153b9604600236d5a61bdab4",
+        "5b676cec15b79d10a326cdda2f92f9309e8e41525e68ab995e95046d3b926330",
         (
+            (
+                "_use_or_create_ssl_context",
+                "    return ssl_context if ssl_context is not None else ssl.create_default_context()",
+                "    if ssl_context is not None:\n"
+                "        return ssl_context\n"
+                "    context = ssl.create_default_context()\n"
+                "    if context.minimum_version < ssl.TLSVersion.TLSv1_2:\n"
+                "        context.minimum_version = ssl.TLSVersion.TLSv1_2\n"
+                "    return context",
+            ),
             (
                 "_build_data_frame_for_sending",
                 "    mask_key: List[int] = random.choices(range(256), k=4)",

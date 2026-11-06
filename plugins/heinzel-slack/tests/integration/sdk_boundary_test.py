@@ -4,6 +4,7 @@ import io
 import json
 import logging
 import socket
+import ssl
 import urllib.request
 from email.message import Message
 from urllib.response import addinfourl
@@ -155,6 +156,8 @@ def test_real_socket_connection_uses_snapshot_after_environment_changes(monkeypa
     raw, secured = Wire(raw_sent), Wire(tls_sent)
 
     class TLS:
+        minimum_version = ssl.TLSVersion.TLSv1_2
+
         def wrap_socket(self, sock, **kwargs):
             wrapped.append((sock, kwargs["server_hostname"]))
             return secured

@@ -16,7 +16,7 @@ would be a larger unrelated trust change. Namespace-only projection cannot hones
 
 ## Decision
 
-Amend ADR 0001 with one verifier-owned transform, `namespace-relocation-v1+slack-sdk-3.46.0-security-v2`, for only
+Amend ADR 0001 with one verifier-owned transform, `namespace-relocation-v1+slack-sdk-3.46.0-security-v3`, for only
 `heinzel_slack._vendor.slack_sdk` and the exact `slack_sdk` 3.46.0 wheel
 `slack_sdk-3.46.0-py2.py3-none-any.whl`, SHA256
 `6286d89da97ea193c853609131515e6f1b3edf86866d6e5aad0dba9dcf1cb72d`.

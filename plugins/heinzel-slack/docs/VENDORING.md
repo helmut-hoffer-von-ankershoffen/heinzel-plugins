@@ -17,7 +17,7 @@ OAuth and alternative websocket implementations are outside that closure. The ma
 one typing marker and one license; no extra or missing SDK files are accepted.
 
 `heinzel_plugin_tools.vendor` owns generation and verification. The owning transform is
-`namespace-relocation-v1+slack-sdk-3.46.0-security-v2`. It applies exact, hash-pinned source repairs before the
+`namespace-relocation-v1+slack-sdk-3.46.0-security-v3`. It applies exact, hash-pinned source repairs before the
 ordinary import-prefix relocation: frame masks use four OS entropy bytes, direct sockets always establish TLS,
 and proxy credentials/request or response bodies stay out of diagnostics. The proxy environment helper still
 selects the same value without logging it. The frame reader retains empty partial messages and request token selection
@@ -31,9 +31,8 @@ refused. Do not format or hand-edit projected files. See the [security amendment
 
 The upstream proxy CONNECT implementation still supports authentication on its first hop, so the owning adapter
 refuses authenticated proxies. It wraps a supported unauthenticated tunnel with its existing TLS context. Nonstandard direct ports also use that context; TLS
-failure does not fall back to cleartext. The adapter supplies no custom context, so Python 3.12+ defaults already
-require certificate/hostname verification and TLS 1.2 or newer. No TLS options, Core import policy, or retry behavior
-are changed. This is not a claim that arbitrary SDK tracing of every other protocol field is safe.
+failure does not fall back to cleartext. The adapter uses Python's certificate and hostname verification and enforces a TLS 1.2 floor for the default
+Socket Mode context. A stronger platform minimum is preserved. Core import policy and retry behavior are unchanged. This is not a claim that arbitrary SDK tracing of every other protocol field is safe.
 
 The existing gallery describes the previous source and needs a fresh source-bound capture and independent review.
 Offline transport fixtures prove frame construction and socket/diagnostic choices, not live Slack delivery or an
