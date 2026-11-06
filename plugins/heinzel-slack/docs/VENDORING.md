@@ -16,10 +16,27 @@ package initializers, their synchronous model and retry helpers, the typing mark
 OAuth and alternative websocket implementations are outside that closure. The manifest contains 49 Python files,
 one typing marker and one license; no extra or missing SDK files are accepted.
 
-`heinzel_plugin_tools.vendor` owns generation and verification. Its fixed `namespace-relocation-v1` transform changes
-only absolute import module prefixes. Relative imports, annotations, string literals, comments and program logic
-stay unchanged. Independent AST equivalence rejects edits outside that mapping; dynamic import/execution,
-unexpected namespace identifiers and unsupported files are refused. Do not format or hand-edit projected files.
+`heinzel_plugin_tools.vendor` owns generation and verification. The owning transform is
+`namespace-relocation-v1+slack-sdk-3.46.0-security-v1`. It applies two exact, hash-pinned source repairs before the
+ordinary import-prefix relocation: frame masks use four OS entropy bytes, direct sockets always establish TLS,
+and proxy credentials/request or response bodies stay out of diagnostics. The proxy environment helper still
+selects the same value without logging it. The original upstream wheel and original member hashes are retained.
+
+These are verifier-owned fixed statements, not manifest-provided patch parameters. Independent function-scoped
+AST edits and exact pre/post hashes reject any additional logic change. The three required members cannot be omitted,
+and the old namespace-only mode is refused for this owner and pin. Other SDK files retain their ordinary
+namespace-only projection. Dynamic import/execution, unexpected namespace identifiers and unsupported files remain
+refused. Do not format or hand-edit projected files. See the [security amendment](../../../docs/adr/0002-pinned-slack-security-repair.md).
+
+The upstream proxy CONNECT implementation still supports authentication on its first hop, so the owning adapter
+refuses authenticated proxies. It wraps a supported unauthenticated tunnel with its existing TLS context. Nonstandard direct ports also use that context; TLS
+failure does not fall back to cleartext. The adapter supplies no custom context, so Python 3.12+ defaults already
+require certificate/hostname verification and TLS 1.2 or newer. No TLS options, Core import policy, or retry behavior
+are changed. This is not a claim that arbitrary SDK tracing of every other protocol field is safe.
+
+The existing gallery describes the previous source and needs a fresh source-bound capture and independent review.
+Offline transport fixtures prove frame construction and socket/diagnostic choices, not live Slack delivery or an
+installed-wheel acceptance run. Publication remains gated on fresh gallery and installed acceptance.
 
 From this plugin directory, the vendor-aware toolkit can reproduce the current projection offline:
 
@@ -45,3 +62,25 @@ through the real Slack decision/store code and the real host consumer to an inde
 The Slack Web API is a loopback stand-in; it uses the actual projected Web API client. Wrong scope/account,
 non-owner and unauthenticated attempts, repeated confirmation/consumption and captured-source tampering refuse
 without an extra post or write. The fixture evidence covers the offline approval and delivery boundaries.
+
+Malformed proxy CONNECT response parsing raises a fixed diagnostic with its exception context suppressed, so raw
+status tokens and decoding errors cannot be copied into caller exception logs. This parser repair alone does not promise general SDK
+debug-log secrecy; the owning adapter boundary separately isolates logging and refuses unsupported proxy schemes.
+
+## Owning adapter credential boundary
+
+The owning Web API and Socket Mode adapters pass a private disabled, non-propagating SDK logger to both clients,
+including the WebClient used to obtain Socket Mode tickets. Host DEBUG settings cannot expose SDK response bodies
+through this logger. The plugin continues to report its own fixed, credential-free operation errors.
+
+The adapter snapshots the SDK's documented proxy environment precedence before constructing clients. Direct
+connections and unauthenticated `http://host[:port]` CONNECT proxies remain supported. HTTPS/SOCKS proxy URIs,
+userinfo (including authenticated HTTP proxies), malformed ports, paths, queries and fragments are refused before
+SDK construction. This intentionally removes previously accepted configurations: the builtin transport cannot protect
+proxy credentials on its plaintext CONNECT first hop. An `HTTPS_PROXY` variable containing an unauthenticated
+`http://` URL is supported; the variable names the destination protocol, not the proxy transport.
+
+Clients retain that snapshot. SDK constructor fallback is overwritten before requests, and the pinned no-proxy Web
+API branch uses a local opener with an empty ProxyHandler instead of urllib's ambient/global opener. Later environment
+or OS proxy changes cannot redirect these clients. No process environment, global logger or global opener is mutated.
+These guarantees cover this plugin's constructed clients, not arbitrary direct use of the upstream SDK.

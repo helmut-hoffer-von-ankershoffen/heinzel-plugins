@@ -536,7 +536,8 @@ class BaseClient:
             if opener:
                 resp = opener.open(req, timeout=self.timeout)
             else:
-                resp = urlopen(req, context=self.ssl, timeout=self.timeout)
+                opener = urllib.request.build_opener(ProxyHandler({}), HTTPSHandler(context=self.ssl))
+                resp = opener.open(req, timeout=self.timeout)
             if resp.headers.get_content_type() == "application/gzip":
                 # admin.analytics.getFile
                 body: bytes = resp.read()

@@ -18,6 +18,7 @@ from typing import Any, Protocol
 from heinzel import ChannelTarget, Credentials, HeinzelError
 
 from heinzel_slack._module import module
+from heinzel_slack._sdk import SDK_LOGGER, sdk_proxy, sdk_web_client
 from heinzel_slack._settings import SlackSettings
 from heinzel_slack._vendor.slack_sdk import WebClient
 from heinzel_slack._vendor.slack_sdk.errors import SlackApiError
@@ -140,7 +141,7 @@ class WebApi:
         """Create the client; no request is made. `base_url` exists so tests can point at a local server."""
         object.__setattr__(self, "_token", token.strip())
         object.__setattr__(
-            self, "_client", WebClient(token=token, timeout=int(timeout), base_url=base_url, retry_handlers=[])
+            self, "_client", sdk_web_client(token=token, timeout=int(timeout), base_url=base_url, proxy=sdk_proxy())
         )
 
     def identity(self) -> Identity:  # noqa: D102
@@ -240,7 +241,11 @@ class SocketListener:
         self._lock = threading.Lock()
 
     def start(self, handler: Callable[[dict[str, Any]], None]) -> None:  # noqa: D102
-        client = SocketModeClient(app_token=self._token)
+        proxy = sdk_proxy()
+        client = SocketModeClient(
+            app_token=self._token, proxy=proxy, logger=SDK_LOGGER, web_client=sdk_web_client(proxy=proxy, retry=True)
+        )
+        client.proxy = proxy
 
         def on_request(socket: BaseSocketModeClient, request: SocketModeRequest) -> None:
             socket.send_socket_mode_response(SocketModeResponse(envelope_id=request.envelope_id))

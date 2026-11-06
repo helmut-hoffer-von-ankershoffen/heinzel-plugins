@@ -78,15 +78,18 @@ def _establish_new_socket_connection(
         message.append("")
         req: str = "\r\n".join([line.lstrip() for line in message])
         if trace_enabled:
-            logger.debug(f"Proxy connect request (session id: {session_id}):\n{req}")
+            logger.debug(f"Proxy connect request sent (session id: {session_id})")
         with sock_send_lock:
             sock.send(req.encode("utf-8"))
-        status, text = _parse_connect_response(sock)
+        try:
+            status, text = _parse_connect_response(sock)
+        except (ValueError, IndexError):
+            raise ConnectionError("Malformed proxy CONNECT response") from None
         if trace_enabled:
-            log_message = f"Proxy connect response (session id: {session_id}):\n{text}"
+            log_message = f"Proxy connect response (session id: {session_id}, status: {status})"
             logger.debug(log_message)
         if status != 200:
-            raise Exception(f"Failed to connect to the proxy (proxy: {proxy}, connect status code: {status})")
+            raise Exception(f"Failed to connect to the proxy (connect status code: {status})")
 
         sock = ssl_context.wrap_socket(
             sock,
@@ -96,11 +99,6 @@ def _establish_new_socket_connection(
         )
         return sock
 
-    if server_port != 443:
-        # only for library testing
-        logger.info(f"Using non-ssl socket to connect ({server_hostname}:{server_port})")
-        sock = socket.create_connection((server_hostname, server_port), timeout=3)
-        return sock
 
     sock = socket.create_connection((server_hostname, server_port), receive_timeout)
     sock = ssl_context.wrap_socket(
@@ -401,7 +399,7 @@ def _build_data_frame_for_sending(
         b2 = masked << 7 | 126
         header += struct.pack("!BH", b2, payload_length)
 
-    mask_key: List[int] = random.choices(range(256), k=4)
+    mask_key: List[int] = list(os.urandom(4))
     header += bytes(mask_key)
 
     payload_data: bytes = bytes(byte ^ mask for byte, mask in zip(original_payload_data, itertools.cycle(mask_key)))

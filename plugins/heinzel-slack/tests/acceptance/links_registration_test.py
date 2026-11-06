@@ -53,6 +53,7 @@ def test_installed_bot_and_cli_links_have_separate_exact_captured_module_records
         "HZ_DATA_DIR": str(tmp_path / "data"),
         "HZ_CACHE_DIR": str(tmp_path / "cache"),
         "HZ_LOG_DIR": str(tmp_path / "logs"),
+        "HZ_SYSTEM_CREDENTIAL__BACKEND": "environment",
         "HZ_FEATURES": "captured_writes,connected_frontdoor,connected_channels",
         "PYTHONDONTWRITEBYTECODE": "1",
     }

@@ -10,3 +10,10 @@ condition = "AND"
 regexTarget = "secret"
 paths = ['^plugins/heinzel-slack/docs/assets/screenshots/review-slack-notice\.txt$']
 regexes = ['^2b50bbebfaeda2bcc533421d85ec81653f2c051180380dce0d3fe5cf193004ee$']
+
+[[rules.allowlists]]
+description = "Exact generated replay identifier for the refreshed fictional Slack gallery notice"
+condition = "AND"
+regexTarget = "secret"
+paths = ['^plugins/heinzel-slack/docs/assets/screenshots/review-slack-notice\.txt$']
+regexes = ['^22e977fa149a6644c1c52f7be25c94bc6e0971c294cdcc37c6c743d334f18e34$']
