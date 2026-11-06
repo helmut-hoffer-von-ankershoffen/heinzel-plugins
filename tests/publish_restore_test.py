@@ -462,7 +462,7 @@ def test_the_publish_command_uploads_every_file_except_the_release_record(tmp_pa
     )
     assert seen["args"][:3] == (REPOSITORY, "plugin/v1.0.0", REVISION)
     assert [path.name for path in seen["args"][3]] == ["a.whl", "b.tar.gz"]
-    assert seen["kwargs"] == {"pypi": True, "make_latest": "false"}
+    assert seen["kwargs"] == {"pypi": True, "make_latest": "false", "prerelease": False}
 
 
 def test_publishing_without_a_built_revision_is_a_usage_error(tmp_path, monkeypatch):

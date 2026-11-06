@@ -212,3 +212,36 @@ def test_unverified_assets_cannot_change_latest_policy(tmp_path, monkeypatch):
     )
     with pytest.raises(ValueError, match="differs or has no verifiable digest"):
         publisher.publish(REPOSITORY, "app-v0.9.1", REVISION, [artifact], make_latest="true")
+
+
+@pytest.mark.parametrize("state", ["draft", "held", "final"])
+def test_app_prerelease_publishes_atomically_without_reclassifying_public_releases(tmp_path, monkeypatch, state):
+    wheel = tmp_path / "artifact.whl"
+    wheel.write_bytes(b"checked artifact")
+    release = {
+        "id": 7,
+        "draft": state == "draft",
+        "prerelease": state == "held",
+        "assets": [{"name": wheel.name, "digest": "sha256:" + hashlib.sha256(wheel.read_bytes()).hexdigest()}],
+    }
+    writes = []
+
+    def api(path, data=None, method="GET"):
+        assert path == "repos/example/plugins/releases/7"
+        if data is not None:
+            writes.append((method, data))
+        return release
+
+    monkeypatch.setattr(publisher, "api", api)
+    monkeypatch.setattr(publisher, "exact_tag", lambda *_: None)
+    monkeypatch.setattr(publisher, "find_release", lambda *_: release)
+
+    if state == "final":
+        with pytest.raises(ValueError, match="already public final app"):
+            publisher.publish(REPOSITORY, "app-v0.9.0", REVISION, [wheel], make_latest="false", prerelease=True)
+    else:
+        publisher.publish(REPOSITORY, "app-v0.9.0", REVISION, [wheel], make_latest="false", prerelease=True)
+
+    assert writes == (
+        [("PATCH", {"draft": False, "make_latest": "false", "prerelease": True})] if state == "draft" else []
+    )

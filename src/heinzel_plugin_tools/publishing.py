@@ -126,6 +126,7 @@ def publish(
     *,
     pypi: bool = False,
     make_latest: str | None = None,
+    prerelease: bool = False,
 ) -> None:
     if make_latest not in {None, "true", "false"}:
         raise ValueError("Choose an explicit true or false latest-release policy")
@@ -135,6 +136,8 @@ def publish(
         raise ValueError("Use a canonical tag and exact built commit")
     if not artifacts or len(artifacts) > 128 or any(not path.is_file() or path.is_symlink() for path in artifacts):
         raise ValueError("Select the exact built artifact files")
+    if prerelease and (pypi or make_latest != "false" or not tag.startswith("app-v")):
+        raise ValueError("App prereleases require nonlatest GitHub-only publication")
     exact_tag(repository, tag, revision)
     release = find_release(repository, tag)
     pending = existing_assets(release, artifacts)
@@ -163,13 +166,20 @@ def publish(
             check=True,
             timeout=600,
         )
-    if not release or existing_assets(api(f"repos/{repository}/releases/{release['id']}"), artifacts):
+    verified = api(f"repos/{repository}/releases/{release['id']}") if release else None
+    if not verified or existing_assets(verified, artifacts):
         raise ValueError("Publication is incomplete; retry the same built artifacts")
     exact_tag(repository, tag, revision)
+    if prerelease and verified.get("draft") is not True:
+        if verified.get("draft") is False and verified.get("prerelease") is True:
+            return
+        raise ValueError("Refusing to mark an already public final app as a prerelease")
     if release and (release.get("draft", False) or make_latest is not None):
         publication: dict[str, object] = {"draft": False}
         if make_latest is not None:
             publication["make_latest"] = _latest_setting(repository, tag, make_latest)
+        if prerelease:
+            publication["prerelease"] = True
         api(f"repos/{repository}/releases/{release['id']}", data=publication, method="PATCH")
 
 
@@ -296,6 +306,7 @@ def main() -> None:
     parser.add_argument("--directory", type=Path, required=True)
     parser.add_argument("--pypi", action="store_true")
     parser.add_argument("--make-latest", choices=("true", "false"))
+    parser.add_argument("--prerelease", action="store_true")
     parser.add_argument("--restore", action="store_true")
     parser.add_argument("--name")
     args = parser.parse_args()
@@ -312,7 +323,15 @@ def main() -> None:
     if not args.revision:
         parser.error("Publication requires the exact built revision")
     files = sorted(path for path in args.directory.iterdir() if path.name != "release.json" and path.is_file())
-    publish(os.environ["GH_REPO"], args.tag, args.revision, files, pypi=args.pypi, make_latest=args.make_latest)
+    publish(
+        os.environ["GH_REPO"],
+        args.tag,
+        args.revision,
+        files,
+        pypi=args.pypi,
+        make_latest=args.make_latest,
+        prerelease=args.prerelease,
+    )
 
 
 if __name__ == "__main__":
