@@ -7,7 +7,7 @@ name = "world-clock"
 surface = "ui"
 route = "/?panel=clock:world-clock"
 appearance = "light"
-caption = "Find overlap across Berlin, New York and Los Angeles while staying on Today — demonstration time"
+caption = "Find overlap across Berlin, New York and Los Angeles with the World Clock — fictional demonstration time"
 reduced_motion = "no-preference"
 
 [[scenes.steps]]
@@ -37,7 +37,7 @@ name = "team-overview"
 surface = "ui"
 route = "/"
 appearance = "dark"
-caption = "Team working hours at a glance: Today, sidebar ticker and primary footer clock — demonstration time"
+caption = "Fictional team working hours at a glance: Today, sidebar ticker and primary footer clock"
 
 [[scenes.steps]]
 action = "wait"
@@ -75,7 +75,7 @@ name = "Today"
 name = "footer-detail"
 surface = "ui"
 route = "/"
-caption = "Inspect every configured time zone from the primary footer clock — demonstration time"
+caption = "Inspect all configured time zones from the primary footer clock — fictional demonstration data"
 
 [[scenes.steps]]
 action = "wait"
@@ -105,7 +105,7 @@ name_regex = "^Berlin"
 name = "phone-world-clock"
 surface = "ui"
 route = "/?panel=clock:world-clock"
-caption = "The live globe and all three team clocks on a phone — fixed demonstration time"
+caption = "The globe and three fictional team clocks on a phone — fixed demonstration time"
 reduced_motion = "no-preference"
 
 [[scenes.steps]]
@@ -138,14 +138,14 @@ height = 844
 [[scenes]]
 name = "cli-times"
 surface = "cli"
-caption = "The same team zones and working hours in the CLI — fixed fictional demonstration time"
+caption = "The same fictional team zones and working hours in the CLI — fixed demonstration time"
 command = ["clock", "--at", "2026-10-26T15:30:00Z"]
 
 [[scenes]]
 name = "terminal-current"
 surface = "ui"
 route = "/"
-caption = "Fictional demo team at 15:30 UTC: Berlin and New York are within working hours; Los Angeles starts in 30 minutes."
+caption = "Fictional demo team at 15:30 UTC: Berlin and New York are working; Los Angeles starts in 30 minutes."
 viewport = { width = 1280, height = 900 }
 timeout_ms = 30000
 
@@ -167,7 +167,7 @@ command = ["clock", "--at", "2026-10-26T15:30:00Z"]
 name = "terminal-overlap"
 surface = "ui"
 route = "/"
-caption = "Preview 16:30 UTC with --at: all three fictional demo zones are within working hours; the app clock stays at 15:30 UTC."
+caption = "Preview 16:30 UTC: all three fictional demo zones are within working hours."
 viewport = { width = 1280, height = 900 }
 timeout_ms = 30000
 

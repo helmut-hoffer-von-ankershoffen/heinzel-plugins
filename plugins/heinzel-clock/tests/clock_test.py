@@ -257,7 +257,7 @@ def test_the_plugin_declares_its_settings_and_existing_panel_navigation():
     (navigation,) = [let for let in module.lets if isinstance(let, NavLet)]
     assert navigation.settings.sections == ("clock",)
     assert navigation.settings.group == "preferences"
-    assert navigation.icon == "clock"
+    assert navigation.icon == "globe"
     assert navigation.sidebar == Navigate(path="/?panel=clock:world-clock")
 
 

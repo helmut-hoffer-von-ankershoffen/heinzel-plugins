@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.9.6
+
+Use the globe icon consistently for World Clock navigation.
+
 ## 0.9.5
 
 Require Heinzel 0.9.16 as the supported standard-app installation and plugin-change baseline.
