@@ -253,7 +253,7 @@ def _fetch_messages(
             remaining_bytes += receive()  # type: ignore[call-arg]
 
         if remaining_bytes[0] == 10:  # \n
-            if current_data is not None and len(current_data) >= 0:
+            if current_data is not None:
                 _append_message(messages, current_header, current_data)
             _append_message(messages, None, remaining_bytes[:1])
             remaining_bytes = remaining_bytes[1:]

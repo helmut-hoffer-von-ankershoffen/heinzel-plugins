@@ -16,7 +16,7 @@ would be a larger unrelated trust change. Namespace-only projection cannot hones
 
 ## Decision
 
-Amend ADR 0001 with one verifier-owned transform, `namespace-relocation-v1+slack-sdk-3.46.0-security-v1`, for only
+Amend ADR 0001 with one verifier-owned transform, `namespace-relocation-v1+slack-sdk-3.46.0-security-v2`, for only
 `heinzel_slack._vendor.slack_sdk` and the exact `slack_sdk` 3.46.0 wheel
 `slack_sdk-3.46.0-py2.py3-none-any.whl`, SHA256
 `6286d89da97ea193c853609131515e6f1b3edf86866d6e5aad0dba9dcf1cb72d`.
@@ -25,13 +25,17 @@ The original wheel is retained. Fixed member identities are:
 
 | Upstream member | Original SHA256 | Repaired SHA256 |
 | --- | --- | --- |
-| `slack_sdk/socket_mode/builtin/internals.py` | `e98b873e92e58f5909229030441e78da4820f47c74ed4e5eea9717917a5ed861` | `aad42b74ddebd7f4e0870f263c09747e0f50995ab35d61bb4b33e675528ac2f3` |
+| `slack_sdk/socket_mode/builtin/internals.py` | `e98b873e92e58f5909229030441e78da4820f47c74ed4e5eea9717917a5ed861` | `dce0a5f17a119ff01dbe9e5648ac5784b7ee8187153b9604600236d5a61bdab4` |
 | `slack_sdk/proxy_env_variable_loader.py` | `bf08e211ae42dff0d784f12e957e1ffd1b00db546c2e938fd7976f0faf48f4d3` | `457ae15cab87ff86b02e0062e7a5a3d3551330c7c9f095ca60aa5fc53e790fa7` |
+| `slack_sdk/web/internal_utils.py` | `57079c812b5ad1b9a1ec287a05f1c33d4a43977ed06f3ce5c0f213e730f1cfad` | `401b13f1e3fbddf7a1a397865be5783a68a01828d1b29301c767c8611c1ecd51` |
 
 The approved statements change only frame-mask generation to `list(os.urandom(4))`, remove the non-443 plaintext
 branch, and replace proxy request/response and URL diagnostics with session/status or fixed text. Proxy authentication
 remains in the CONNECT request sent to the configured proxy. Both direct and proxied destinations use the existing
 TLS wrapper, including legitimate nonstandard TLS ports; failed TLS has no plaintext fallback.
+
+The frame reader removes a redundant nonnegative length check while retaining the distinction between absent and empty
+partial messages. The request builder removes a self-assignment and keeps the client, query, then JSON token precedence.
 
 The verifier requires original and repaired hashes, exact function-scoped statement identities, independent AST
 agreement, complete inventory and final projected bytes. The manifest cannot supply edits or select custom policy.
@@ -71,5 +75,5 @@ was selected, the same closed transform additionally repairs `slack_sdk/web/base
 - Only `BaseClient._perform_urllib_http_request_internal`'s no-proxy `urlopen` statement becomes a local opener
   using `ProxyHandler({})`, the existing `HTTPSHandler(context=self.ssl)` and the same request and timeout.
 
-The exact class/method scope, original/postimage and projection hashes are checked. All three fixed repair members
+The exact class/method scope, original/postimage and projection hashes are checked. All four fixed repair members
 must be present. Unaffected projects retain namespace-only projection. This does not enable general manifest patches.

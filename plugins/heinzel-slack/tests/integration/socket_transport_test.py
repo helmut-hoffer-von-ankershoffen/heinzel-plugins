@@ -10,8 +10,49 @@ import pytest
 from heinzel_slack._vendor.slack_sdk import proxy_env_variable_loader
 from heinzel_slack._vendor.slack_sdk.socket_mode.builtin import internals
 from heinzel_slack._vendor.slack_sdk.socket_mode.builtin.connection import Connection
+from heinzel_slack._vendor.slack_sdk.web.internal_utils import _build_req_args
 
 pytestmark = pytest.mark.integration
+
+
+@pytest.mark.parametrize("pending", [None, b"", b"pending"])
+def test_newline_preserves_present_partial_message_including_empty_bytes(pending):
+    messages = internals._fetch_messages(
+        [],
+        receive=lambda: b"",
+        logger=logging.getLogger("transport-proof"),
+        remaining_bytes=b"\n",
+        current_data=pending,
+    )
+    expected = [] if pending is None else [(None, pending)]
+    assert messages == [*expected, (None, b"\n")]
+
+
+@pytest.mark.parametrize(
+    ("client", "query_token", "body_token", "expected"),
+    [
+        ("client", None, None, "client"),
+        ("client", "query", None, "query"),
+        ("client", None, "body", "body"),
+        ("client", "query", "body", "body"),
+    ],
+)
+def test_request_token_precedence_and_payload_removal(client, query_token, body_token, expected):
+    request = _build_req_args(
+        token=client,
+        http_verb="POST",
+        files=None,
+        data=None,
+        default_params={},
+        params={"token": query_token} if query_token else None,
+        json={"token": body_token} if body_token else None,
+        headers={},
+        auth=None,
+        ssl=None,
+        proxy=None,
+    )
+    assert request["headers"]["Authorization"] == f"Bearer {expected}"
+    assert "token" not in (request["params"] or {}) and "token" not in (request["json"] or {})
 
 
 class CapturedSocket:

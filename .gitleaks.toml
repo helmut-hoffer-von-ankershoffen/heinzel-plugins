@@ -17,3 +17,10 @@ condition = "AND"
 regexTarget = "secret"
 paths = ['^plugins/heinzel-slack/docs/assets/screenshots/review-slack-notice\.txt$']
 regexes = ['^22e977fa149a6644c1c52f7be25c94bc6e0971c294cdcc37c6c743d334f18e34$']
+
+[[rules.allowlists]]
+description = "Exact generated replay identifier for the reviewed Slack reliability gallery notice"
+condition = "AND"
+regexTarget = "secret"
+paths = ['^plugins/heinzel-slack/docs/assets/screenshots/review-slack-notice\.txt$']
+regexes = ['^28728cb070405d4d0d45b3037986876f9e780ef74591d7d386c7348decb2475b$']

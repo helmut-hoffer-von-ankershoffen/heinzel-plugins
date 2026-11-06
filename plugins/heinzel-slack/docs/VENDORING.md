@@ -17,13 +17,14 @@ OAuth and alternative websocket implementations are outside that closure. The ma
 one typing marker and one license; no extra or missing SDK files are accepted.
 
 `heinzel_plugin_tools.vendor` owns generation and verification. The owning transform is
-`namespace-relocation-v1+slack-sdk-3.46.0-security-v1`. It applies two exact, hash-pinned source repairs before the
+`namespace-relocation-v1+slack-sdk-3.46.0-security-v2`. It applies exact, hash-pinned source repairs before the
 ordinary import-prefix relocation: frame masks use four OS entropy bytes, direct sockets always establish TLS,
 and proxy credentials/request or response bodies stay out of diagnostics. The proxy environment helper still
-selects the same value without logging it. The original upstream wheel and original member hashes are retained.
+selects the same value without logging it. The frame reader retains empty partial messages and request token selection
+retains its client, query, then JSON precedence. The original upstream wheel and original member hashes are retained.
 
 These are verifier-owned fixed statements, not manifest-provided patch parameters. Independent function-scoped
-AST edits and exact pre/post hashes reject any additional logic change. The three required members cannot be omitted,
+AST edits and exact pre/post hashes reject any additional logic change. The four required members cannot be omitted,
 and the old namespace-only mode is refused for this owner and pin. Other SDK files retain their ordinary
 namespace-only projection. Dynamic import/execution, unexpected namespace identifiers and unsupported files remain
 refused. Do not format or hand-edit projected files. See the [security amendment](../../../docs/adr/0002-pinned-slack-security-repair.md).

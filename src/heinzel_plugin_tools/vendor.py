@@ -24,14 +24,14 @@ from packaging.utils import canonicalize_name
 from packaging.version import Version
 
 TRANSFORM_VERSION = "namespace-relocation-v1"
-SLACK_SECURITY_TRANSFORM = "namespace-relocation-v1+slack-sdk-3.46.0-security-v1"
+SLACK_SECURITY_TRANSFORM = "namespace-relocation-v1+slack-sdk-3.46.0-security-v2"
 SLACK_SECURITY_OWNER = "heinzel_slack._vendor.slack_sdk"
 SLACK_SECURITY_WHEEL = "slack_sdk-3.46.0-py2.py3-none-any.whl"
 SLACK_SECURITY_WHEEL_SHA256 = "6286d89da97ea193c853609131515e6f1b3edf86866d6e5aad0dba9dcf1cb72d"
 SLACK_SECURITY_PATCHES = {
     "slack_sdk/socket_mode/builtin/internals.py": (
         "e98b873e92e58f5909229030441e78da4820f47c74ed4e5eea9717917a5ed861",
-        "aad42b74ddebd7f4e0870f263c09747e0f50995ab35d61bb4b33e675528ac2f3",
+        "dce0a5f17a119ff01dbe9e5648ac5784b7ee8187153b9604600236d5a61bdab4",
         (
             (
                 "_build_data_frame_for_sending",
@@ -73,6 +73,13 @@ SLACK_SECURITY_PATCHES = {
                 "        return sock\n",
                 "",
             ),
+            (
+                "_fetch_messages",
+                "            if current_data is not None and len(current_data) >= 0:\n"
+                "                _append_message(messages, current_header, current_data)",
+                "            if current_data is not None:\n"
+                "                _append_message(messages, current_header, current_data)",
+            ),
         ),
     ),
     "slack_sdk/proxy_env_variable_loader.py": (
@@ -98,6 +105,11 @@ SLACK_SECURITY_PATCHES = {
                 "                resp = opener.open(req, timeout=self.timeout)",
             ),
         ),
+    ),
+    "slack_sdk/web/internal_utils.py": (
+        "57079c812b5ad1b9a1ec287a05f1c33d4a43977ed06f3ce5c0f213e730f1cfad",
+        "401b13f1e3fbddf7a1a397865be5783a68a01828d1b29301c767c8611c1ecd51",
+        (("_build_req_args", "    token = token\n", ""),),
     ),
 }
 MANIFEST = "vendor-manifest.json"

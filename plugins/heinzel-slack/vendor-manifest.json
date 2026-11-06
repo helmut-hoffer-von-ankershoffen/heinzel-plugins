@@ -182,7 +182,7 @@
     },
     {
       "original_sha256": "e98b873e92e58f5909229030441e78da4820f47c74ed4e5eea9717917a5ed861",
-      "projected_sha256": "aad42b74ddebd7f4e0870f263c09747e0f50995ab35d61bb4b33e675528ac2f3",
+      "projected_sha256": "dce0a5f17a119ff01dbe9e5648ac5784b7ee8187153b9604600236d5a61bdab4",
       "source": "slack_sdk/socket_mode/builtin/internals.py",
       "target": "src/heinzel_slack/_vendor/slack_sdk/socket_mode/builtin/internals.py"
     },
@@ -272,7 +272,7 @@
     },
     {
       "original_sha256": "57079c812b5ad1b9a1ec287a05f1c33d4a43977ed06f3ce5c0f213e730f1cfad",
-      "projected_sha256": "079e05f2eec81f0976911079b82347d4d9df4a122fe56d96df4543a7da632d6c",
+      "projected_sha256": "2dd1df7034fed6d46ef2465960e6b63e8409724b341f06098bd9bbdf39c489cd",
       "source": "slack_sdk/web/internal_utils.py",
       "target": "src/heinzel_slack/_vendor/slack_sdk/web/internal_utils.py"
     },
@@ -312,7 +312,7 @@
     "source": "slack_sdk",
     "target": "heinzel_slack._vendor.slack_sdk"
   },
-  "transform_version": "namespace-relocation-v1+slack-sdk-3.46.0-security-v1",
+  "transform_version": "namespace-relocation-v1+slack-sdk-3.46.0-security-v2",
   "upstream": {
     "distribution": "slack_sdk",
     "license_expression": "MIT",

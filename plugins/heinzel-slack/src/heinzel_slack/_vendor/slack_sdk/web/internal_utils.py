@@ -163,7 +163,6 @@ def _build_req_args(
     if json is not None and isinstance(json, dict):
         _set_default_params(json, default_params)
 
-    token = token
     if params is not None and "token" in params:
         token = params.pop("token")
     if json is not None and "token" in json:

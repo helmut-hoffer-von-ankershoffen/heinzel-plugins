@@ -1,4 +1,4 @@
-"""Only three exact upstream members can receive the verifier-owned transport security repair."""
+"""Only four exact upstream members can receive the verifier-owned Slack SDK repairs."""
 
 import ast
 import copy
@@ -327,3 +327,17 @@ def test_every_security_member_is_mandatory_and_rejects_preimage_drift(secured, 
         vendor.project(secured)
     with pytest.raises(ValueError, match="preimage"):
         vendor.repair_security_member(path, original(secured, path) + b"\n")
+    upstream = value["upstream"]
+    with pytest.raises(ValueError, match="member is missing"):
+        vendor.generate_manifest(
+            secured,
+            secured / "vendor-provenance" / upstream["wheel"],
+            distribution=upstream["distribution"],
+            version=upstream["version"],
+            sha256=upstream["sha256"],
+            license_expression=upstream["license_expression"],
+            license_paths=upstream["license_paths"],
+            source=value["package"]["source"],
+            target=value["package"]["target"],
+            paths=[entry["source"] for entry in value["files"] if entry["source"] not in upstream["license_paths"]],
+        )

@@ -2,10 +2,10 @@
   "format": 1,
   "plugin": "heinzel-slack",
   "core_version": "0.9.20",
-  "inputs_sha256": "35405e1c39633907d269978ef8bc25e650afa6acdb35f3ec8ae3cc807feda31f",
+  "inputs_sha256": "8060cbfa9a6e6c7d1edfe065cdb0ca26ea394def8c918e719a258a56e782c42e",
   "images": {
-    "docs/assets/screenshots/review-slack-notice.png": "cb396be6b0d0258d829ad185ec6304f372fcbd261675ff6875dbd4a69a493ea2",
-    "docs/assets/screenshots/slack-notice-delivered.png": "2ace06d7efe93047e5a9f87b3741df056ff003e258d0814a171670bb331d5984",
+    "docs/assets/screenshots/review-slack-notice.png": "d980b75c51614775e2c83158bfd32c20969263b65429c2676941850fbfc2dbb4",
+    "docs/assets/screenshots/slack-notice-delivered.png": "569836bc50b64d6237c8eb55bbe1ab5442d9e1e753a88f70df206cfa2e62619d",
     "docs/assets/screenshots/slack-draft-cli.png": "deafce0823dac89ac55bd82af30659c5ca89da2d8d20647351959bade3a5ef19",
     "docs/assets/screenshots/slack-draft-decision-cli.png": "c73817c1612ca1bcb357efcd31953186371538883b4d9c80d47f6cf0742fc410"
   },
@@ -13,18 +13,18 @@
     "format": 2,
     "source_story": {
       "path": "source-story.md",
-      "sha256": "75ecffef332190264bb60a2bce3e5e4d2ce55be970319d0f1e27b2ce1e148cd1"
+      "sha256": "9fbfded3ca1b0bda1f2532c77f22c2813a41d228565c1da93954638355ebf91f"
     },
     "definition": {
       "format": 1,
       "reviewer": "Codex feature-story agent",
-      "source_sha256": "5e343e2795eea667a0a4a9da84ce2d46c4d32f458704061ffd6552ef12187028",
+      "source_sha256": "cc1ed859a24c473bb85a9e19a33bc35a594048f5dc22bf5e524c980ba9a6c6e1",
       "plan_sha256": "c81beb38f83dc32b8271f05edf06c7b5f8b5f5e0b209dc0edea2ad8b97b87336",
-      "story_sha256": "75ecffef332190264bb60a2bce3e5e4d2ce55be970319d0f1e27b2ce1e148cd1"
+      "story_sha256": "9fbfded3ca1b0bda1f2532c77f22c2813a41d228565c1da93954638355ebf91f"
     },
     "plugin": "heinzel-slack",
     "core_version": "0.9.20",
-    "inputs_sha256": "35405e1c39633907d269978ef8bc25e650afa6acdb35f3ec8ae3cc807feda31f",
+    "inputs_sha256": "8060cbfa9a6e6c7d1edfe065cdb0ca26ea394def8c918e719a258a56e782c42e",
     "screenshots": [
       {
         "path": "docs/assets/screenshots/review-slack-notice.png",
@@ -48,23 +48,23 @@
       }
     ],
     "images": {
-      "review-slack-notice.png": "cb396be6b0d0258d829ad185ec6304f372fcbd261675ff6875dbd4a69a493ea2",
-      "slack-notice-delivered.png": "2ace06d7efe93047e5a9f87b3741df056ff003e258d0814a171670bb331d5984",
+      "review-slack-notice.png": "d980b75c51614775e2c83158bfd32c20969263b65429c2676941850fbfc2dbb4",
+      "slack-notice-delivered.png": "569836bc50b64d6237c8eb55bbe1ab5442d9e1e753a88f70df206cfa2e62619d",
       "slack-draft-cli.png": "deafce0823dac89ac55bd82af30659c5ca89da2d8d20647351959bade3a5ef19",
       "slack-draft-decision-cli.png": "c73817c1612ca1bcb357efcd31953186371538883b4d9c80d47f6cf0742fc410"
     },
     "transcripts": {
-      "review-slack-notice.txt": "4db1000229b8b483f9885c0a9c71c1fc5052623634e452be2cd504835686aac6",
-      "slack-notice-delivered.txt": "26cc780463544a4f63edcc367b2351d5f36ea5062f3364a4658d9d28ebc47f30",
+      "review-slack-notice.txt": "3efc7fa616a6c8fdc8644d500e9517fb96a1a132ad6d3caaf27202900bbcb7ff",
+      "slack-notice-delivered.txt": "6248d0e92e69e542bf701e5c5bfd22d0120d3644cbe5ab461fc496ca5bb689ce",
       "slack-draft-cli.txt": "be3327018fe6adc629a085bf15b212eb24e321038d3cc9acdc18def44c2e96d1",
       "slack-draft-decision-cli.txt": "0bab28155fbc709895dee63143b93edbb1f07227635f1fb6e158f8568fd779fe"
     },
-    "bundle_sha256": "3d70eaf4256636a692e74ec7e282b54fb7a30c19964855214f19080b15ef8974"
+    "bundle_sha256": "0c8c80ecf63d5d9cc6e48a6bb21aa6e4fcf7db857464329008b47d2cb3890d33"
   },
   "privacy_review": {
     "format": 1,
-    "bundle_sha256": "3d70eaf4256636a692e74ec7e282b54fb7a30c19964855214f19080b15ef8974",
-    "reviewer": "Codex independent visual/privacy agent /root/final_identity_review",
+    "bundle_sha256": "0c8c80ecf63d5d9cc6e48a6bb21aa6e4fcf7db857464329008b47d2cb3890d33",
+    "reviewer": "Codex privacy agent",
     "decision": "approve",
     "checked_images": [
       "review-slack-notice.png",
