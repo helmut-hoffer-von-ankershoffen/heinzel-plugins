@@ -1,0 +1,30 @@
+Skip to content
+M
+Today
+Today
+Doctor: 7 checks need attention
+
+ai.access ai access, system.credential backend, system.credential credential slack/app-token…
+
+Open
+Ask about it
+Page
+Chat
+Chat
+text hz-01M6QEDVHV3QW9D8N75H3XHRRS
+
+About: text hz-01M6QEDVHV3QW9D8N75H3XHRRS
+
+Ran `Review exact channel posting account, destination, scope and full message`: The channel reported delivered. This does not approve the captured write.
+Your message
+Default
+
+Up to $0.25 per message · this chat $0.00
+Runs your agent runner and may cost money: at most $0.25 per message, $2.00 per chat; this chat has cost $0.00. It reads with hz and asks you before it changes anything.
+
+v0.9.20
+Updates, off
+1
+System health, warning
+Calendar unavailable
+Daemon not installed, off

@@ -1,0 +1,51 @@
+format = 1
+bootstrap = "docs/screenshot_fixture.py"
+browser_time = "2026-11-02T10:00:00+01:00"
+
+[[scenes]]
+name = "review-slack-notice"
+surface = "ui"
+route = "/"
+appearance = "light"
+caption = "Demo data: Mira reviews the fictional Slack account, destination, scope and complete weekly-report notice before delivery."
+timeout_ms = 20000
+viewport = { width = 1440, height = 1700 }
+steps = [
+  { action = "click", role = "button", name = "New chat: switch chats" },
+  { action = "click", role = "button", within_role = "dialog", name_regex = '^text hz-[0-9A-HJKMNP-TV-Z]{26}\b' },
+  { action = "wait", role = "heading", name = "The Heinzel proposes" },
+  { action = "wait", text = "Review exact channel posting account, destination, scope and full message" },
+  { action = "wait", role = "button", name = "Confirm" },
+  { action = "wait", role = "button", name = "Decline" },
+]
+focus = { role = "region", name = "The Heinzel proposes" }
+
+[[scenes]]
+name = "slack-notice-delivered"
+surface = "ui"
+route = "/"
+appearance = "dark"
+caption = "Demo data: Core reports the fictional notice delivered to the local stand-in after Mira confirms; this does not approve a captured write."
+timeout_ms = 20000
+viewport = { width = 900, height = 1500 }
+steps = [
+  { action = "click", role = "tab", name = "Chat" },
+  { action = "click", role = "button", name = "New chat: switch chats" },
+  { action = "click", role = "button", within_role = "dialog", name_regex = '^text hz-[0-9A-HJKMNP-TV-Z]{26}\b' },
+  { action = "wait", role = "heading", name = "The Heinzel proposes" },
+  { action = "wait", text = "Review exact channel posting account, destination, scope and full message" },
+  { action = "click", role = "button", within_role = "region", name = "Confirm" },
+  { action = "wait", text = "Ran `Review exact channel posting account, destination, scope and full message`: The channel reported delivered. This does not approve the captured write." },
+]
+
+[[scenes]]
+name = "slack-draft-cli"
+surface = "cli"
+command = ["showcase", "share"]
+caption = "Demo data: the fictional weekly-report draft and printed button labels, rendered in the terminal from Slack message blocks."
+
+[[scenes]]
+name = "slack-draft-decision-cli"
+surface = "cli"
+command = ["showcase", "answers"]
+caption = "Demo data: fictional clicks exercise the real decision code; Mira's exact approval records one reply while invalid attempts are refused."
