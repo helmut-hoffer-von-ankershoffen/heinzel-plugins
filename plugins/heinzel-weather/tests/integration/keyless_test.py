@@ -83,3 +83,11 @@ def test_weather_results_keep_the_source_with_the_data(hz, operation):
 @pytest.mark.parametrize("operation", [(), ("show",), ("forecast",)])
 def test_rendered_weather_credits_the_provider(hz, operation):
     assert "Open-Meteo.com (CC BY 4.0)" in hz("weather", *operation, json=False).output
+
+
+def test_the_optional_key_never_degrades_health_with_the_default_provider(hz):
+    checks = hz("system", "doctor").json["checks"]
+    every = [check for group in checks.values() for check in group]
+    key = [check for check in every if check["name"] == "credential weather/api-key"]
+    assert [check["status"] for check in key] == ["up"]  # declared, optional: reported, never a degraded health
+    assert {check["status"] for check in checks["weather"]} == {"up"}

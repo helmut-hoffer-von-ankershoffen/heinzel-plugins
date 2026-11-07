@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.5.2
+
+The OpenWeather API key is optional: with the default provider (Open-Meteo) Heinzelmännchen is no longer reported as degraded for a key it does not need, and no notification is posted. With OpenWeather and no key, the weather health check still asks for it.
+
 ## 0.5.1
 
 The data credit (Open-Meteo, CC BY 4.0) is shown once, behind the info button on the Weather page, with its link; it is gone from the footer pane, the Today cards and the notifications. The Weather page build script runs only a fixed set of pnpm commands.
