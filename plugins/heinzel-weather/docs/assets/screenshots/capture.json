@@ -1,27 +1,32 @@
 {
   "format": 1,
   "plugin": "heinzel-weather",
-  "core_version": "0.9.1",
-  "inputs_sha256": "f3d33aba4aa7e139d98977be565b9f346759091722429706a7bc880b1f26b538",
+  "core_version": "0.9.26",
+  "inputs_sha256": "771baac3bcdea797324543528ab51626f4e07380e7a3f77ab03c2dda28589d73",
   "images": {
-    "docs/assets/screenshots/today-weather.png": "f063a1a0fed14e250d41d77dea074855a69563e379b6958773d23a67714411ef",
-    "docs/assets/screenshots/weather-detail.png": "b607b71a8d80ca3548c3e60ee4ff83e9ee527cbc9fd018d1593c81c4b0d4bb9f",
-    "docs/assets/screenshots/phone-weather.png": "c57c653c3a28f090bd739c6b048e36e18e909fecf9c8af549a8fb67474cec457",
-    "docs/assets/screenshots/cli-weather.png": "d188cf2d04447adb1540602ff80d8e9d7985a093eea0d834af23faeab096d3b8",
-    "docs/assets/screenshots/cli-forecast.png": "ea0bdbd5ea8440182177bd180c67e4c22434a28173c42c9fa0864e355659654e"
+    "docs/assets/screenshots/today-weather.png": "15e1fd8fbcb99e6594c339ad6f854c2351e5763a01ca867c6a96b2361e3e0e3b",
+    "docs/assets/screenshots/weather-detail.png": "c985ad1c81df6c17ca4b7a6f883ac7b72b4eeee5c244523eaf7539e025ee8a96",
+    "docs/assets/screenshots/weather-page.png": "54c46183ef3d1f9164340b87e0113bb9f21c7139571131bf29342a446f9770fb",
+    "docs/assets/screenshots/phone-weather.png": "c65885e6b4fcd892d08422a32fd5d72dc414ffa6e838c74e0da6b84f79472716",
+    "docs/assets/screenshots/cli-weather.png": "487fcd8cea3f66c07181d7561504668e52277674f812175eb3a05d3949efae98",
+    "docs/assets/screenshots/cli-forecast.png": "a449f4918e215e747bc3633d164b72d1c60db85ebfea43388e93d2eede00ac7a"
   },
   "review_bundle": {
-    "format": 1,
+    "format": 2,
+    "source_story": {
+      "path": "source-story.md",
+      "sha256": "9c52022ef64423e6a8f11031ab11e52004a21cc43c0b499b741393c7ceff6e64"
+    },
     "definition": {
       "format": 1,
       "reviewer": "Codex feature-story agent",
-      "source_sha256": "89a32b79ab0878674b246091b2d7960e1ebb6f36e28181766fe5f1b2e55c0d82",
-      "plan_sha256": "55ee58c64e5507bce04028e3b89aa703ba600ae3ebbd9d54359ff11ee75c6f65",
-      "story_sha256": "c402d63a5b47faf56019ca5342bc027e868eeb0d547d51b89a963be29aecfd62"
+      "source_sha256": "0d957711f6225ea8b33126a11e771c6beaa1bf7898077fe499c235778865d8cd",
+      "plan_sha256": "a4690e6d1981136118056f7c3b4f7f789a31d9a35e9066061079fb0f7a43a06b",
+      "story_sha256": "9c52022ef64423e6a8f11031ab11e52004a21cc43c0b499b741393c7ceff6e64"
     },
     "plugin": "heinzel-weather",
-    "core_version": "0.9.1",
-    "inputs_sha256": "f3d33aba4aa7e139d98977be565b9f346759091722429706a7bc880b1f26b538",
+    "core_version": "0.9.26",
+    "inputs_sha256": "771baac3bcdea797324543528ab51626f4e07380e7a3f77ab03c2dda28589d73",
     "screenshots": [
       {
         "path": "docs/assets/screenshots/today-weather.png",
@@ -32,6 +37,11 @@
         "path": "docs/assets/screenshots/weather-detail.png",
         "surface": "ui",
         "caption": "Inspect conditions, feels-like temperature and rain chance \u2014 fictional local forecast"
+      },
+      {
+        "path": "docs/assets/screenshots/weather-page.png",
+        "surface": "ui",
+        "caption": "Explore current conditions, the hourly outlook and a warning \u2014 fictional Berlin forecast"
       },
       {
         "path": "docs/assets/screenshots/phone-weather.png",
@@ -50,29 +60,32 @@
       }
     ],
     "images": {
-      "today-weather.png": "f063a1a0fed14e250d41d77dea074855a69563e379b6958773d23a67714411ef",
-      "weather-detail.png": "b607b71a8d80ca3548c3e60ee4ff83e9ee527cbc9fd018d1593c81c4b0d4bb9f",
-      "phone-weather.png": "c57c653c3a28f090bd739c6b048e36e18e909fecf9c8af549a8fb67474cec457",
-      "cli-weather.png": "d188cf2d04447adb1540602ff80d8e9d7985a093eea0d834af23faeab096d3b8",
-      "cli-forecast.png": "ea0bdbd5ea8440182177bd180c67e4c22434a28173c42c9fa0864e355659654e"
+      "today-weather.png": "15e1fd8fbcb99e6594c339ad6f854c2351e5763a01ca867c6a96b2361e3e0e3b",
+      "weather-detail.png": "c985ad1c81df6c17ca4b7a6f883ac7b72b4eeee5c244523eaf7539e025ee8a96",
+      "weather-page.png": "54c46183ef3d1f9164340b87e0113bb9f21c7139571131bf29342a446f9770fb",
+      "phone-weather.png": "c65885e6b4fcd892d08422a32fd5d72dc414ffa6e838c74e0da6b84f79472716",
+      "cli-weather.png": "487fcd8cea3f66c07181d7561504668e52277674f812175eb3a05d3949efae98",
+      "cli-forecast.png": "a449f4918e215e747bc3633d164b72d1c60db85ebfea43388e93d2eede00ac7a"
     },
     "transcripts": {
-      "today-weather.txt": "c814bed3c18c56c478673284ae0253aa2ee4c0c4ef0febe7fd2666ab80bb468d",
-      "weather-detail.txt": "f405437c242bb51ad8eaab04e57b0f7f79ed0b5f93ffab5db0885d2f7631c420",
-      "phone-weather.txt": "8e3e0328912be4fb633c6d1cbe99b26dd2a096deb50e6f32aa61d19570e92a5c",
-      "cli-weather.txt": "dcf3117864bf4bcd91c18cb9f66484b64d1d231ad160ac626b0c1f50ec357558",
-      "cli-forecast.txt": "673b66f59c488773e1863ddae01bb96112ad49657b0ca445c32807b44c9c0b30"
+      "today-weather.txt": "f603188d9ffba74b8f82a68b326b2161127f6db2f7bde3e7953df1597ab6a526",
+      "weather-detail.txt": "697c92fd55e5a7452fb7f1272a67d85f3e313741b7f0d71330c2d882f4ceffb4",
+      "weather-page.txt": "e0fd7e4a6dffb40b2af5b6e4c8b56b88b76e7081d10600215f026f59f039f06a",
+      "phone-weather.txt": "b698d39fbe39865b68c66a1d72a47e770b4301f74daaa8b8f0788d92067eda0b",
+      "cli-weather.txt": "38aadc60695a44b00960ab18d6d90c6317d968dc84b1635fad890b7e079f2e3d",
+      "cli-forecast.txt": "4c7878e10ff90decddaf70105fb9d77d04345b321059357280943439437dab54"
     },
-    "bundle_sha256": "6ce4e989c2035647c1019ce1c0437c3a73f4ae66556a6e0c4eb51ff3d1df427b"
+    "bundle_sha256": "e7eb01ce9476bee7c3f7574d503e945f571fddba9300f6b89a704a8129976117"
   },
   "privacy_review": {
     "format": 1,
-    "bundle_sha256": "6ce4e989c2035647c1019ce1c0437c3a73f4ae66556a6e0c4eb51ff3d1df427b",
+    "bundle_sha256": "e7eb01ce9476bee7c3f7574d503e945f571fddba9300f6b89a704a8129976117",
     "reviewer": "Codex privacy agent",
     "decision": "approve",
     "checked_images": [
       "today-weather.png",
       "weather-detail.png",
+      "weather-page.png",
       "phone-weather.png",
       "cli-weather.png",
       "cli-forecast.png"
