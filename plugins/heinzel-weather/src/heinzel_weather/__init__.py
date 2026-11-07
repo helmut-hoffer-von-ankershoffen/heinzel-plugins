@@ -51,12 +51,14 @@ from heinzel_weather._models import (
     Info,
     Now,
     Observation,
+    PageState,
     Provider,
     Report,
     Signals,
     UiWeather,
     Units,
     Watched,
+    WeatherPage,
     WeatherSettings,
 )
 from heinzel_weather._module import API_KEY, FALLBACK_VARIABLE, module
@@ -67,12 +69,23 @@ SETTINGS = Navigate(path="/?settings=weather")
 module.settings(WeatherSettings)
 module.service(WeatherService)
 module.skill(Path(__file__).parent / "skills")
+PAGE = Navigate(path="/?panel=weather:forecast")
+"""The weather page: the sidebar item and the footer item open it; Settings stay behind the page's place button."""
 module.nav(
     "weather",
     title="Weather",
     icon="cloud-sun",
     settings=NavSettings(sections=("weather",), group="preferences"),
-    sidebar=SETTINGS,
+    sidebar=PAGE,
+)
+module.view(
+    Path(__file__).parent / "views",
+    abi=1,
+    name="forecast",
+    source="page",
+    title="Weather",
+    fallback="Weather is unavailable here; run hz weather show for the text view.",
+    refresh=300,
 )
 MAX_TEXT = 80
 """The longest text of a status item or a widget title (ADR 0056)."""
@@ -165,6 +178,7 @@ def _weather_status(value: UiWeather) -> StatusItem:
         tone="warn" if value.stale else "neutral",
         icon=ui_icon(now.condition),
         detail=detail,
+        effect=PAGE,
         actions=[WidgetAction(label="Change place", icon="cloud", effect=SETTINGS)],
     )
 
@@ -214,6 +228,12 @@ def _forecast_card(value: UiWeather) -> ListWidget | None:
 def ui(service: WeatherService) -> UiWeather:
     """Return the shared cached observation for the app's status and Today card."""
     return service.ui_weather()
+
+
+@module.operation(audience="expert")
+def page(service: WeatherService) -> WeatherPage:
+    """Return what the weather page shows: now, the next 24 hours, the next 7 days and alerts, or why not."""
+    return service.page()
 
 
 @module.operation
@@ -375,11 +395,13 @@ __all__ = [
     "Info",
     "Now",
     "Observation",
+    "PageState",
     "Provider",
     "Report",
     "Signals",
     "Units",
     "Watched",
+    "WeatherPage",
     "WeatherService",
     "WeatherSettings",
     "module",

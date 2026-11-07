@@ -241,6 +241,34 @@ class UiWeather(_Strict):
     stale: bool = False
 
 
+class PageState(StrEnum):
+    """What the weather page has to show."""
+
+    READY = "ready"
+    """A report, fresh or the last one while a refresh failed (`stale`)."""
+    NEEDS_LOCATION = "needs-location"
+    """No place is set, so there is nothing to show yet."""
+    UNAVAILABLE = "unavailable"
+    """No report was ever fetched and the provider can't be reached (or needs a key); `message` says why."""
+
+
+class WeatherPage(_Strict):
+    """Everything the weather page shows in one answer; it never fails, it says what is wrong instead."""
+
+    state: PageState = Field(description="ready, needs-location or unavailable.")
+    report: Report | None = Field(
+        default=None, description="Now, the next 24 hours, the next 7 days and alerts; only while ready."
+    )
+    message: str = Field(default="", description="Why there is no weather, while unavailable.")
+    provider: Provider = Field(description="Who the weather comes from.")
+    attribution: str = Field(description="Where the data comes from, and under which licence if it asks one.")
+    fetched_at: AwareDatetime = Field(description="When the report was fetched; the last time while stale.")
+    stale: bool = Field(default=False, description="Whether the latest refresh failed and this is the last report.")
+    guessed: bool = Field(
+        default=False, description="Whether the place is a guess from the machine's time zone, as none is set."
+    )
+
+
 class Info(_Strict):
     """What this plugin is, which provider serves the weather, and the attribution its data asks for."""
 
