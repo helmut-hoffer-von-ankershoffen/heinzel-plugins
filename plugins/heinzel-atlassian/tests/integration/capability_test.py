@@ -55,26 +55,29 @@ def site(acli_on_path):
 def test_a_requester_reads_issues_through_the_bound_adapter(atlassian_kernel, site):
     code, issues = hz(atlassian_kernel(BOUND, digest=digest()), "digest", "issues", "WID", SINCE, UNTIL)
     assert code == 0, issues
+    # Exactly what the installed core's `Issue` serializes for these values: fields the core adds later (ADR 0136's
+    # release and reporter fields) must be at their defaults, since the adapter doesn't fill them.
     assert issues == [
-        {
-            "key": "WID-3",
-            "title": "Widget export drops the last row",
-            "url": f"{SITE}/browse/WID-3",
-            "state": "In Progress",
-            "updated_at": "2026-10-05T10:00:00Z",
-            "assignee": "Wilma Widget",
-            "labels": ["export", "ui"],
-        },
-        {
-            "key": "WID-4",
-            "title": "Document the widget API",
-            "url": f"{SITE}/browse/WID-4",
-            "state": "Done",
-            "updated_at": "2026-10-06T00:00:00Z",
-            "assignee": None,
-            "labels": [],
-        },
+        Issue(
+            key="WID-3",
+            title="Widget export drops the last row",
+            url=f"{SITE}/browse/WID-3",
+            state="In Progress",
+            updated_at=datetime.fromisoformat("2026-10-05T10:00:00Z"),
+            assignee="Wilma Widget",
+            labels=["export", "ui"],
+        ).model_dump(mode="json"),
+        Issue(
+            key="WID-4",
+            title="Document the widget API",
+            url=f"{SITE}/browse/WID-4",
+            state="Done",
+            updated_at=datetime.fromisoformat("2026-10-06T00:00:00Z"),
+            assignee=None,
+            labels=[],
+        ).model_dump(mode="json"),
     ]
+    assert {key for issue in issues for key in issue} == set(Issue.model_fields)
     (call,) = site.calls
     assert call.args[:4] == ["jira", "workitem", "search", "--jql"]
 
