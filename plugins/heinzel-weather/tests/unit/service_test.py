@@ -203,7 +203,8 @@ def test_the_watch_notices_rain_the_swing_and_the_alert_once(service):
     assert notices.emitted[2]["urgent"] is True
     assert {item["kind"] for item in notices.emitted} == {NOTICE_KIND}
     assert all(item["key"].startswith("weather:") and item["route"] == "/" for item in notices.emitted)
-    assert all("Weather data by OpenWeather" in item["body"] for item in notices.emitted)
+    # the data credit lives once, on the Weather page
+    assert not any("Weather data by" in item["body"] for item in notices.emitted)
     assert not watcher.watch(notices).checked  # within refresh_minutes: nothing asked
     later = NOW + timedelta(minutes=31)
     watcher.clock = lambda: later

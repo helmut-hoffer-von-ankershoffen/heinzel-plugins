@@ -1,9 +1,10 @@
-import { CloudOff, CloudSun, Droplets, MapPin, TriangleAlert, Umbrella, Wind, X } from "lucide-react";
+import { CloudOff, CloudSun, Droplets, ExternalLink, Info, MapPin, TriangleAlert, Umbrella, Wind, X } from "lucide-react";
+import { useState } from "react";
 import { ConditionIcon } from "./ConditionIcon";
 import { t } from "./messages";
 import { Button, SettingsShortcut } from "./sdk";
 import type { ViewProps } from "./sdk";
-import { SETTINGS_PATH, dayLabel, degrees, isNight, percent, placeTime, span, tiles, unitLabel, updatedAt } from "./model";
+import { SETTINGS_PATH, attributionParts, dayLabel, degrees, isNight, percent, placeTime, span, tiles, unitLabel, updatedAt } from "./model";
 import type { Day, Hour, Page } from "./model";
 
 type Report = NonNullable<Page["report"]>;
@@ -27,6 +28,7 @@ export function WeatherPage({ data, loading, onClose, flowing = false }: Readonl
         <h2>
           {place ? (<><span className="wx-sr">{t("weather.in")} </span>{place}</>) : t("weather.title")}
         </h2>
+        {report && <Attribution text={page?.attribution ?? ""} />}
         {report && <SettingsShortcut section="weather" label={t("weather.changeLocation")} />}
         <Button variant="ghost" size="icon" aria-label={t("weather.close")} onClick={onClose}>
           <X aria-hidden />
@@ -38,6 +40,29 @@ export function WeatherPage({ data, loading, onClose, flowing = false }: Readonl
         </div>
       </div>
     </section>
+  );
+}
+
+/** The data's licence asks for credit once: an info button that shows it on tap, hover and focus, with the link. */
+function Attribution({ text }: Readonly<{ text: string }>) {
+  const [open, setOpen] = useState(false);
+  const { text: words, url } = attributionParts(text);
+  return (
+    <span className="wx-source" onMouseEnter={() => setOpen(true)} onMouseLeave={() => setOpen(false)} onBlur={(event) => { if (!event.currentTarget.contains(event.relatedTarget)) setOpen(false); }}>
+      <Button variant="ghost" size="icon" aria-label={t("weather.source")} aria-expanded={open} title={words} onClick={() => setOpen(true)} onFocus={() => setOpen(true)} onKeyDown={(event) => { if (event.key === "Escape") setOpen(false); }}>
+        <Info aria-hidden />
+      </Button>
+      {open && (
+        <output className="wx-pop">
+          {words}
+          {url && (
+            <a href={url} target="_blank" rel="noopener noreferrer" aria-label={t("weather.sourceLink")} title={t("weather.sourceLink")}>
+              <ExternalLink aria-hidden />
+            </a>
+          )}
+        </output>
+      )}
+    </span>
   );
 }
 
@@ -127,7 +152,7 @@ function Forecast({ page, report }: Readonly<{ page: Page; report: Report }>) {
         </ul>
       </section>
       <p className="wx-meta">
-        <time dateTime={page.fetched_at}>{t("weather.updated", { at: stamp })}</time> · {t("weather.attribution", { provider: page.attribution })}
+        <time dateTime={page.fetched_at}>{t("weather.updated", { at: stamp })}</time>
       </p>
     </>
   );

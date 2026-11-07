@@ -27,13 +27,13 @@ at openweathermap.org; it also brings severe weather alerts.
 
 Contributed as data (ADR 0056), nothing to install on the app's side:
 
-- A Weather page, opened from the sidebar item or the footer temperature: now (temperature, sky, feels like, wind,
+- A Weather page (its info button credits the data provider, Open-Meteo under CC BY 4.0, with the link), opened from the sidebar item or the footer temperature: now (temperature, sky, feels like, wind,
   humidity, rain), the next 24 hours, the next 7 days, alerts and when it was updated. Celsius and km/h, or Fahrenheit
   and mph by locale. The button beside the place name opens Settings > Weather; without a place it asks for one.
 - A status item in the footer and the sidebar: the temperature and sky, with the place, feels-like, what the
-  Heinzelmännchen wears and the attribution on hover; "Change place" opens Settings > Weather; nothing is typed into a terminal.
+  Heinzelmännchen wears; "Change place" opens Settings > Weather; nothing is typed into a terminal.
 - Today: a graphic with the temperature beside the Heinzelmännchen dressed for the weather (an umbrella in or near rain,
-  sunglasses in clear daylight, a scarf in the cold), and a list of the next days with the attribution.
+  sunglasses in clear daylight, a scarf in the cold), and a list of the next days.
 - Notices (the daemon's `weather.watch` job) when rain starts within the hour, the temperature swings or, with
   OpenWeather, an alert is issued.
 

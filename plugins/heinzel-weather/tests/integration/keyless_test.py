@@ -55,13 +55,15 @@ def test_the_web_app_gets_a_status_item_and_widgets_as_data(hz):
     now = next(entry for entry in item if entry["id"] == "weather:weather-now")
     assert now["item"]["text"].startswith("12°C Lisbon, PT")
     assert now["item"]["detail"][0]["text"].startswith("Mainly clear · Lisbon, PT")
-    assert any("Open-Meteo.com (CC BY 4.0)" in line["text"] for line in now["item"]["detail"])
+    assert not any("Open-Meteo" in line["text"] for line in now["item"]["detail"])  # credited on the page instead
     widgets = {entry["id"]: entry["widget"] for entry in hz("system", "ui", "widgets").json}
     graphic = widgets["weather:weather-today"]
     assert (graphic["kind"], graphic["value"]) == ("graphic", "12°C")
-    assert graphic["caption"].startswith("mainly clear · Weather data by Open-Meteo.com (CC BY 4.0)")
+    assert graphic["caption"] == "mainly clear"
     assert graphic["avatar"] == {"accessories": ["umbrella"]}
-    assert widgets["weather:forecast-today"]["items"][-1]["text"].startswith("Weather data by Open-Meteo.com")
+    assert not any("Open-Meteo" in entry["text"] for entry in widgets["weather:forecast-today"]["items"])
+    page = hz("weather", "page").json  # the attribution the page's info button shows
+    assert "Open-Meteo.com (CC BY 4.0)" in page["attribution"]
 
 
 def test_a_place_to_set_instead_of_an_error(hz, monkeypatch):

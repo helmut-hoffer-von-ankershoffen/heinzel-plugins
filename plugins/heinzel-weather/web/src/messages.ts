@@ -29,7 +29,8 @@ const messages: Record<string, string> = {
   "weather.unavailable.title": "The weather is not available",
   "weather.unavailable.body": "No report could be fetched yet.",
   "weather.unavailable.action": "Open weather settings",
-  "weather.attribution": "Data: {provider}",
+  "weather.source": "Data source",
+  "weather.sourceLink": "Open the data provider's page",
 };
 export function t(key: string, params: Record<string, string | number> = {}): string {
   return (messages[key] ?? key).replace(/\{(\w+)\}/g, (_, name: string) => String(params[name] ?? ""));
