@@ -16,7 +16,7 @@ function openSettings() {
   window.dispatchEvent(new PopStateEvent("popstate"));
 }
 
-export function WeatherPage({ data, loading, onClose, flowing = false }: ViewProps) {
+export function WeatherPage({ data, loading, onClose, flowing = false }: Readonly<ViewProps>) {
   const page = data as Page | undefined;
   const report = page?.state === "ready" ? page.report : null;
   const place = report?.now.location;
@@ -34,22 +34,27 @@ export function WeatherPage({ data, loading, onClose, flowing = false }: ViewPro
       </header>
       <div className={flowing ? "wx-body" : "wx-body wx-scroll"}>
         <div className="wx-stack">
-          {!page ? (
-            <p role="status" className="wx-note">{loading ? t("weather.loading") : t("weather.unavailable.body")}</p>
-          ) : page.state === "needs-location" ? (
-            <Notice icon={MapPin} title={t("weather.setup.title")} body={t("weather.setup.body")} action={t("weather.setup.action")} />
-          ) : !report ? (
-            <Notice icon={CloudOff} title={t("weather.unavailable.title")} body={page.message || t("weather.unavailable.body")} action={t("weather.unavailable.action")} />
-          ) : (
-            <Forecast page={page} report={report} />
-          )}
+          <Body page={page} report={report} loading={loading} />
         </div>
       </div>
     </section>
   );
 }
 
-function Notice({ icon: Icon, title, body, action }: { icon: typeof MapPin; title: string; body: string; action: string }) {
+function Body({ page, report, loading }: Readonly<{ page: Page | undefined; report: Report | null; loading: boolean }>) {
+  if (!page) {
+    return <output className="wx-note">{loading ? t("weather.loading") : t("weather.unavailable.body")}</output>;
+  }
+  if (page.state === "needs-location") {
+    return <Notice icon={MapPin} title={t("weather.setup.title")} body={t("weather.setup.body")} action={t("weather.setup.action")} />;
+  }
+  if (!report) {
+    return <Notice icon={CloudOff} title={t("weather.unavailable.title")} body={page.message || t("weather.unavailable.body")} action={t("weather.unavailable.action")} />;
+  }
+  return <Forecast page={page} report={report} />;
+}
+
+function Notice({ icon: Icon, title, body, action }: Readonly<{ icon: typeof MapPin; title: string; body: string; action: string }>) {
   return (
     <div className="wx-card wx-notice">
       <Icon aria-hidden />
@@ -60,7 +65,7 @@ function Notice({ icon: Icon, title, body, action }: { icon: typeof MapPin; titl
   );
 }
 
-function Forecast({ page, report }: { page: Page; report: Report }) {
+function Forecast({ page, report }: Readonly<{ page: Page; report: Report }>) {
   const { now, hours, days, alerts } = report;
   const degree = unitLabel(now.units);
   const stamp = updatedAt(page.fetched_at);
@@ -68,10 +73,10 @@ function Forecast({ page, report }: { page: Page; report: Report }) {
   return (
     <>
       {page.stale && (
-        <p role="status" className="wx-banner">
+        <output className="wx-banner">
           <TriangleAlert aria-hidden />
           {t("weather.stale", { at: stamp })}
-        </p>
+        </output>
       )}
       {page.guessed && <p className="wx-note">{t("weather.guessed")}</p>}
       {alerts.length > 0 && (
@@ -128,7 +133,7 @@ function Forecast({ page, report }: { page: Page; report: Report }) {
   );
 }
 
-function HourCell({ hour, days, first }: { hour: Hour; days: Day[]; first: boolean }) {
+function HourCell({ hour, days, first }: Readonly<{ hour: Hour; days: Day[]; first: boolean }>) {
   const rainy = hour.rain_chance >= 0.1;
   return (
     <li className="wx-card wx-hour">
@@ -143,7 +148,7 @@ function HourCell({ hour, days, first }: { hour: Hour; days: Day[]; first: boole
   );
 }
 
-function DayRow({ day, days, index }: { day: Day; days: Day[]; index: number }) {
+function DayRow({ day, days, index }: Readonly<{ day: Day; days: Day[]; index: number }>) {
   const bar = span(days, day);
   return (
     <li className="wx-day">

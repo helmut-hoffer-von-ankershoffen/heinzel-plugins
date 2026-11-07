@@ -2,11 +2,18 @@ import type { Day, Hour, Page } from "./model";
 
 /** A fictional Berlin forecast: an overcast day with rain coming. */
 const clock = (hour: number) => `2026-11-07T${String(hour % 24).padStart(2, "0")}:00:00+01:00`;
-export const hours: Hour[] = Array.from({ length: 24 }, (_, index) => ({
-  at: `2026-11-${index + 9 < 24 ? "07" : "08"}T${String((index + 9) % 24).padStart(2, "0")}:00:00+01:00`,
-  condition: index > 5 && index < 10 ? "rain" : index > 14 ? "clear" : "clouds",
-  description: "overcast", temperature: 2.4 - index * 0.2, rain_chance: index > 5 && index < 10 ? 0.7 : 0.02, rain_mm: index > 5 && index < 10 ? 0.4 : 0,
-}));
+const skyAt = (index: number): Hour["condition"] => {
+  if (index > 5 && index < 10) return "rain";
+  return index > 14 ? "clear" : "clouds";
+};
+export const hours: Hour[] = Array.from({ length: 24 }, (_, index) => {
+  const raining = skyAt(index) === "rain";
+  return {
+    at: `2026-11-${index + 9 < 24 ? "07" : "08"}T${String((index + 9) % 24).padStart(2, "0")}:00:00+01:00`,
+    condition: skyAt(index),
+    description: "overcast", temperature: 2.4 - index * 0.2, rain_chance: raining ? 0.7 : 0.02, rain_mm: raining ? 0.4 : 0,
+  };
+});
 export const days: Day[] = Array.from({ length: 7 }, (_, index) => ({
   day: `2026-11-${String(7 + index).padStart(2, "0")}`,
   condition: index === 1 ? "rain" : "clouds", description: index === 1 ? "rain" : "overcast",

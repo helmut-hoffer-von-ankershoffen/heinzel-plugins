@@ -15,7 +15,8 @@ class ViewBuildHook(BuildHookInterface):
         """Build in this project's PEP 517 environment; editable Python installs stay fast."""
         if version == "editable":
             return
-        subprocess.run([sys.executable, str(Path(self.root) / "web/build.py"), "run", "build"], check=True, timeout=600)  # noqa: S603 - own build hook, no shell
+        # Own build script, fixed arguments, no shell.
+        subprocess.run([sys.executable, str(Path(self.root) / "web/build.py"), "run", "build"], check=True, timeout=600)  # noqa: S603
         assets = Path(self.root) / "src/heinzel_weather/views"
         included = cast("dict[str, str]", build_data.setdefault("force_include", {}))
         included[str(assets)] = "heinzel_weather/views"

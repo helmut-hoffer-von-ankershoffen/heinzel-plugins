@@ -44,7 +44,7 @@ Chat
 Weather
 Weather in
 Berlin, DE
-Thunderstorm warning · until 16:00 · Example Weather Service
+Thunderstorm warning · until 22:00 · Example Weather Service
 
 22°
 °C
@@ -66,95 +66,95 @@ Now
 22°
 10%
 10% chance of rain
-11:00
+17:00
 20°
 80%
 80% chance of rain
-12:00
+18:00
 18°
 80%
 80% chance of rain
-13:00
+19:00
 17°
 80%
 80% chance of rain
-14:00
+20:00
 15°
 80%
 80% chance of rain
-15:00
-14°
-10%
-10% chance of rain
-16:00
-12°
-10%
-10% chance of rain
-17:00
-14°
-10%
-10% chance of rain
-18:00
-15°
-10%
-10% chance of rain
-19:00
-16°
-10%
-10% chance of rain
-20:00
-12°
-10%
-10% chance of rain
 21:00
-13°
+14°
 10%
 10% chance of rain
 22:00
-14°
+12°
 10%
 10% chance of rain
 23:00
-15°
+14°
 10%
 10% chance of rain
 00:00
-16°
-10%
-10% chance of rain
-01:00
-12°
-10%
-10% chance of rain
-02:00
-13°
-10%
-10% chance of rain
-03:00
-14°
-10%
-10% chance of rain
-04:00
 15°
 10%
 10% chance of rain
-05:00
+01:00
 16°
 10%
 10% chance of rain
-06:00
+02:00
 12°
 10%
 10% chance of rain
-07:00
+03:00
 13°
 10%
 10% chance of rain
-08:00
+04:00
 14°
 10%
 10% chance of rain
+05:00
+15°
+10%
+10% chance of rain
+06:00
+16°
+10%
+10% chance of rain
+07:00
+12°
+10%
+10% chance of rain
+08:00
+13°
+10%
+10% chance of rain
 09:00
+14°
+10%
+10% chance of rain
+10:00
+15°
+10%
+10% chance of rain
+11:00
+16°
+10%
+10% chance of rain
+12:00
+12°
+10%
+10% chance of rain
+13:00
+13°
+10%
+10% chance of rain
+14:00
+14°
+10%
+10% chance of rain
+15:00
 15°
 10%
 10% chance of rain
@@ -202,4 +202,4 @@ Friday
 12°
 24°
 
-Updated 10:04 · Data: Weather data by OpenWeather, openweathermap.org
+Updated 16:01 · Data: Weather data by OpenWeather, openweathermap.org
