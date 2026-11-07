@@ -28,7 +28,6 @@ from heinzel import (
     Navigate,
     NavSettings,
     Notifications,
-    OpenUrl,
     Prompter,
     Status,
     StatusItem,
@@ -171,8 +170,6 @@ def _weather_status(value: UiWeather) -> StatusItem:
         detail.append(DetailLine(text="Place guessed from your time zone; set yours in Settings", tone="warn"))
     if value.stale:
         detail.append(DetailLine(text="Showing the last observation; refresh failed", tone="warn"))
-    else:
-        detail.append(DetailLine(text=conditions.attribution[:MAX_TEXT]))
     return StatusItem(
         text=f"{now.temperature:.0f}{now.units.degree} {now.location}{' · stale' if value.stale else ''}",
         tone="warn" if value.stale else "neutral",
@@ -192,7 +189,7 @@ def _weather_card(value: UiWeather) -> GraphicWidget | None:
     return GraphicWidget(
         label=f"Weather in {now.location}"[:MAX_TEXT],
         value=f"{round(now.temperature) + 0}{now.units.degree}",
-        caption=f"{now.description[:24]}{stale} · {conditions.attribution.partition(', https://')[0]}",
+        caption=f"{now.description[:24]}{stale}",
         avatar=Avatar(accessories=conditions.accessories),
         size="medium",
     )
@@ -219,8 +216,6 @@ def _forecast_card(value: UiWeather) -> ListWidget | None:
             for day in conditions.days[1:4]
         ),
     ]
-    attribution_link = OpenUrl(url="https://open-meteo.com/") if conditions.provider is Provider.OPEN_METEO else None
-    items.append(ListEntry(text=conditions.attribution, effect=attribution_link))
     return ListWidget(title=f"Weather in {now.location}"[:MAX_TEXT], items=items)
 
 

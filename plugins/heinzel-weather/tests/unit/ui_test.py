@@ -43,7 +43,8 @@ def test_weather_status_and_today_card_expose_condition_and_accessible_forecast_
     assert card.label == "Weather in Berlin, DE"
     assert card.value == "22°C"
     assert card.avatar.accessories == ["umbrella"]
-    assert card.caption.startswith("clear sky · Weather data by OpenWeather")
+    assert card.caption == "clear sky"  # the attribution lives behind the info button of the Weather page
+    assert not any("Weather data by" in line.text for line in status.detail)
 
 
 def test_without_a_place_the_status_opens_this_plugins_settings_never_a_terminal(service):

@@ -80,3 +80,9 @@ export function tiles(report: NonNullable<Page["report"]>): Tile[] {
     { key: "precipitation", value: precipitation(hours.slice(0, 24), now.units) },
   ];
 }
+
+/** "Weather data by Open-Meteo.com (CC BY 4.0), https://open-meteo.com/" as its words and its link. */
+export function attributionParts(text: string): { text: string; url: string | null } {
+  const [words, link] = text.split(", https://");
+  return { text: words, url: link ? `https://${link}` : null };
+}

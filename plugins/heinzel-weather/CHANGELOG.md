@@ -2,7 +2,7 @@
 
 ## 0.5.0
 
-Weather has its own page: the sidebar item and the footer temperature open it instead of Settings. It shows the temperature, sky, feels like, wind, humidity and rain, the next 24 hours, the next 7 days, alerts, and when the data was updated, in Celsius and km/h (Fahrenheit and mph by locale). A small button in its header changes the place in Settings. Without a place, or while the provider cannot be reached, it says so in words with one button. Needs Heinzelmännchen 0.9.16 or later.
+Weather has its own page: the sidebar item and the footer temperature open it instead of Settings. It shows the temperature, sky, feels like, wind, humidity and rain, the next 24 hours, the next 7 days, alerts, and when the data was updated, in Celsius and km/h (Fahrenheit and mph by locale). A small button in its header changes the place in Settings. Without a place, or while the provider cannot be reached, it says so in words with one button. The data credit (Open-Meteo, CC BY 4.0) is one info button on the page with the link, no longer a line in the footer pane and on the Today card. Needs Heinzelmännchen 0.9.16 or later.
 
 ## 0.4.1
 

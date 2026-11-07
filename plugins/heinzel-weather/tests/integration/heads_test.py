@@ -102,9 +102,10 @@ def test_app_weather_items_are_discoverable_with_readable_status_and_controls(hz
     ]
     assert widget["widget"]["label"] == "Weather in Berlin, DE"
     assert widget["widget"]["value"] == "22°C"
-    assert "Weather data by OpenWeather" in widget["widget"]["caption"]
+    assert "Weather data by" not in widget["widget"]["caption"]
+    assert not any("Weather data by" in line["text"] for line in status["item"]["detail"])
     assert widget["widget"]["avatar"]["accessories"] == ["umbrella"]
-    assert forecast["widget"]["items"][-1]["text"].startswith("Weather data by OpenWeather")
+    assert not any("Weather data by" in item["text"] for item in forecast["widget"]["items"])
     assert not any(action["id"] == "weather:weather-report" for action in actions)
     weather = next(entry for entry in navigation if entry["id"] == "weather:weather")
     assert weather["title"] == "Weather"

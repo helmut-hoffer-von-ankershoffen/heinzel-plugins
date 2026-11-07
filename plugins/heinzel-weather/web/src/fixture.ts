@@ -15,7 +15,7 @@ export const days: Day[] = Array.from({ length: 7 }, (_, index) => ({
 }));
 export const ready: Page = {
   state: "ready", message: "", provider: "open-meteo", fetched_at: "2026-11-07T08:38:00+00:00", stale: false, guessed: false,
-  attribution: "Open-Meteo.com (CC BY 4.0)",
+  attribution: "Weather data by Open-Meteo.com (CC BY 4.0), https://open-meteo.com/",
   report: {
     now: {
       location: "Berlin, DE", condition: "clouds", description: "overcast", temperature: 2.4, feels_like: -0.4, high: 4, low: -1,

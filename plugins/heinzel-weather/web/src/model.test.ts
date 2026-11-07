@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { days, hours, ready } from "./fixture";
-import { dayLabel, degrees, isNight, percent, placeTime, precipitation, span, tiles, unitLabel, updatedAt, wind } from "./model";
+import { attributionParts, dayLabel, degrees, isNight, percent, placeTime, precipitation, span, tiles, unitLabel, updatedAt, wind } from "./model";
 
 describe("formatting", () => {
   it("rounds temperatures and never shows a negative zero", () => {
@@ -53,4 +53,9 @@ describe("layout numbers", () => {
       ["wind", "12 km/h"], ["humidity", "87%"], ["rain", "30%"], ["precipitation", "1.6 mm"],
     ]);
   });
+});
+
+it("splits an attribution into its words and its link", () => {
+  expect(attributionParts("Weather data by Open-Meteo.com (CC BY 4.0), https://open-meteo.com/")).toEqual({ text: "Weather data by Open-Meteo.com (CC BY 4.0)", url: "https://open-meteo.com/" });
+  expect(attributionParts("Weather data by OpenWeather")).toEqual({ text: "Weather data by OpenWeather", url: null });
 });
