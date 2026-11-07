@@ -10,16 +10,16 @@ Weather
 M
 Mira
 · EM
-Home
+Today
 Today
 Weather in Berlin, DE
 ☀ 22°C clear sky
 feels like 21°C, wearing umbrella
-Mon ☁ 10 to 19°C
+Sun ☁ 10 to 19°C
 broken clouds, 10% rain
-Tue 🌧 9 to 18°C
+Mon 🌧 9 to 18°C
 moderate rain, 80% rain
-Wed ☀ 12 to 21°C
+Tue ☀ 12 to 21°C
 clear sky, 10% rain
 Weather data by OpenWeather, openweathermap.org
 Ask about it
@@ -33,13 +33,13 @@ Ask about it
 
 Nothing needs you right now. Ask anything below.
 
-v0.9.1
+v0.9.26
 Updates, off
-22°C Berlin, DE, off
-Daemon not installed, off
 0
 System health, warning
-No calendar connected, error
+Calendar, error
+22°C Berlin, DE, off
+Daemon not installed, off
 Chat
 New chat
 Ask about your setup, your team's contracts or what to do next. The chat reads with hz and asks you before it changes anything.
@@ -55,4 +55,5 @@ Clear sky · Berlin, DE
 Feels like 21°C
 Today 12 to 24°C · 80% rain
 Weather data by OpenWeather, openweathermap.org
+Open
 Change place

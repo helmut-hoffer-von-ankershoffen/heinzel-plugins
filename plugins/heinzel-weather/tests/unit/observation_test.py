@@ -15,7 +15,7 @@ def test_workflow_and_app_share_one_fetch_through_the_fifteen_minute_boundary(se
     elapsed = [0.0]
     weather.monotonic = lambda: elapsed[0]
     calls = []
-    monkeypatch.setattr(weather, "report", lambda: calls.append(True) or report)
+    monkeypatch.setattr(weather, "report", lambda **_: calls.append(True) or report)
     observed = weather.observation()
     shown = weather.ui_weather()
     assert observed.report == report
@@ -42,7 +42,7 @@ def test_stale_evidence_retains_lineage_but_cannot_offer_actionable_changes(serv
     elapsed[0] = 900
     attempts = []
 
-    def unavailable():
+    def unavailable(**_):
         attempts.append(True)
         msg = "Provider unavailable"
         raise HeinzelError(msg)
@@ -67,7 +67,7 @@ def test_wall_clock_rollback_does_not_extend_freshness_or_unblock_stale_changes(
     report = weather.report()
     attempts = []
 
-    def provider():
+    def provider(**_):
         attempts.append(True)
         if len(attempts) == 1:
             return report
@@ -97,7 +97,7 @@ def test_wall_clock_rollback_does_not_extend_freshness_or_unblock_stale_changes(
 
 def test_missing_location_is_explicit_and_does_not_fetch(service, monkeypatch):
     weather = service(locations=[])
-    monkeypatch.setattr(weather, "report", lambda: pytest.fail("must not fetch without a location"))
+    monkeypatch.setattr(weather, "report", lambda **_: pytest.fail("must not fetch without a location"))
     observed = weather.observation()
     assert observed.needs_location is True
     assert observed.report is None
@@ -110,7 +110,7 @@ def test_first_provider_failure_is_not_a_successful_empty_observation(service, m
     weather = service()
     attempts = []
 
-    def unavailable():
+    def unavailable(**_):
         attempts.append(True)
         msg = "Provider unavailable"
         raise HeinzelError(msg)
@@ -131,7 +131,7 @@ def test_cached_alert_rain_and_swing_expire_at_their_exact_clock_boundary(servic
     alert = report.alerts[0].model_copy(update={"start": NOW - timedelta(hours=1), "end": boundary})
     report = report.model_copy(update={"hours": [rain, swing], "alerts": [alert]})
     calls = []
-    monkeypatch.setattr(weather, "report", lambda: calls.append(True) or report)
+    monkeypatch.setattr(weather, "report", lambda **_: calls.append(True) or report)
     original = weather.observation()
     assert [item.kind for item in original.changes] == ["rain", "swing", "alert"]
     weather.clock = lambda: boundary - timedelta(seconds=1)
@@ -152,7 +152,7 @@ def test_cached_forecast_signal_enters_the_approved_window_without_another_provi
     rain = report.hours[1].model_copy(update={"at": NOW + timedelta(minutes=65), "temperature": report.now.temperature})
     report = report.model_copy(update={"hours": [rain], "alerts": []})
     calls = []
-    monkeypatch.setattr(weather, "report", lambda: calls.append(True) or report)
+    monkeypatch.setattr(weather, "report", lambda **_: calls.append(True) or report)
     original = weather.observation()
     assert original.changes == []
     weather.clock = lambda: NOW + timedelta(minutes=5) - timedelta(seconds=1)

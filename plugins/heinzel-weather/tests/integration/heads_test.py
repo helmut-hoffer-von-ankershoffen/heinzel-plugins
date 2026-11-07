@@ -93,7 +93,10 @@ def test_app_weather_items_are_discoverable_with_readable_status_and_controls(hz
     assert status["refresh"] == widget["refresh"] == forecast["refresh"] == 900
     assert status["item"]["icon"] == "sun"
     assert status["item"]["text"].startswith("22°C Berlin, DE")
-    assert status["item"].get("effect") is None
+    assert status["item"]["effect"] == {
+        "kind": "navigate",
+        "path": "/?panel=weather:forecast",
+    }  # the footer opens the page
     assert [(a["label"], a["effect"]) for a in status["item"]["actions"]] == [
         ("Change place", {"kind": "navigate", "path": "/?settings=weather"})
     ]
@@ -106,6 +109,12 @@ def test_app_weather_items_are_discoverable_with_readable_status_and_controls(hz
     weather = next(entry for entry in navigation if entry["id"] == "weather:weather")
     assert weather["title"] == "Weather"
     assert weather["settings"]["sections"] == ["weather"]
+    assert weather["sidebar"] == {"kind": "navigate", "path": "/?panel=weather:forecast"}  # the page, not Settings
+    page = hz("system", "ui", "views").json
+    assert any(view["id"] == "weather:forecast" and view["source"]["path"] == "/weather/page" for view in page)
+    data = hz("weather", "page").json
+    assert data["state"] == "ready"
+    assert (len(data["report"]["hours"]), len(data["report"]["days"])) == (24, 7)
 
 
 def test_setup_saves_places_and_units_and_stores_the_key(hz, hz_prompter, hz_credentials, monkeypatch):
