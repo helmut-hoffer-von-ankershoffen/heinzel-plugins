@@ -1,0 +1,11 @@
+.venv/
+.acceptance/
+.preview/
+dist/
+release-dist/
+__pycache__/
+.pytest_cache/
+.mypy_cache/
+.coverage*
+*.egg-info/
+.ruff_cache/

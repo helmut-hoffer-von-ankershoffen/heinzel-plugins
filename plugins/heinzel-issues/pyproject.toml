@@ -1,0 +1,68 @@
+[project]
+name = "heinzel-issues"
+version = "0.1.0"
+description = "Report a problem or request something, and see when it is worked on, done and released."
+readme = "README.md"
+license = "MIT"
+license-files = ["LICENSE"]
+requires-python = ">=3.12"
+dependencies = ["heinzel>=0.9.26,<0.10"]
+
+[project.urls]
+Source = "https://github.com/helmut-hoffer-von-ankershoffen/heinzel-plugins/tree/main/plugins/heinzel-issues"
+Changelog = "https://github.com/helmut-hoffer-von-ankershoffen/heinzel-plugins/blob/main/plugins/heinzel-issues/CHANGELOG.md"
+Issues = "https://github.com/helmut-hoffer-von-ankershoffen/heinzel-plugins/issues"
+
+[project.entry-points."heinzel.modules"]
+issues = "heinzel_issues"
+
+[build-system]
+requires = ["hatchling>=1.29.0"]
+build-backend = "hatchling.build"
+
+[dependency-groups]
+test = ["editables>=0.5", "pytest>=9.0.3,<10", "pytest-timeout>=2.4.0,<3", "ruff==0.17.2", "mypy>=1.19.0,<3", "coverage>=7.12", "pyright[nodejs]==1.1.414"]
+
+[tool.heinzel.plugin]
+layout = "collection"
+requires = ["core:plugin-api@1"]
+provides = []
+
+[tool.mypy]
+strict = true
+files = ["src"]
+plugins = ["pydantic.mypy"]
+
+[tool.pyright]
+typeCheckingMode = "strict"
+include = ["src"]
+pythonVersion = "3.12"
+
+[tool.pytest]
+testpaths = ["tests"]
+addopts = ["--import-mode=importlib"]
+filterwarnings = ["error"]
+markers = ["unit: Isolated behavior.", "integration: Public contracts across layers.", "e2e: Installed artifacts.", "perf: Explicit timing tests.", "long_running: Extended end-to-end budget."]
+
+[tool.coverage.run]
+source = ["heinzel_issues"]
+branch = true
+
+[tool.coverage.report]
+fail_under = 90
+show_missing = true
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/heinzel_issues"]
+
+[tool.hatch.build.targets.sdist]
+exclude = [".venv", ".acceptance", ".preview", "dist", "**/__pycache__", ".pytest_cache", ".mypy_cache", ".coverage*"]
+
+[tool.heinzel.catalog]
+title = "Issues"
+category = "utilities"
+highlights = [
+    "Report a problem or request something in plain words",
+    "See Received, Being worked on or Done, and the release that shipped it",
+    "A notice when something changes; any tracker behind one contract, Beads built in",
+]
