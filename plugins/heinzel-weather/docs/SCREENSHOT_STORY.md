@@ -1,42 +1,36 @@
-## Audience
+## Audience and outcome
 
-Someone deciding whether Weather makes the Heinzelmännchen app more useful for a quick daily check, while still offering a detailed forecast and command-line access.
-
-## Outcome
-
-Show a fictional Berlin day at a glance, invite the viewer to inspect the weather behind it, and demonstrate the same local forecast in the real CLI. The warning is fictional fixture data, not a live safety alert.
+For someone deciding whether Weather makes Heinzelmännchen useful at a glance: show a fictional clear Berlin morning, the rain approaching, and the fuller forecast available when they want to investigate. The gallery also shows the real CLI’s concise and detailed outputs.
 
 ## Scenes
 
-1. **Today weather:** The light Today view combines the current temperature, weather-dressed character and coming days. This is the quick answer before leaving home.
-2. **Weather detail:** Hover the footer weather item to inspect the place, feels-like temperature and rain chance. This is a different interaction and detail state, not a second caption on the same capture.
-3. **Weather page:** The actual Weather panel shows current conditions, the hourly outlook and the fixture warning. Its daily forecast and provider information are part of the same view; capture only what is genuinely visible.
-4. **Phone weather:** The dark, phone-sized Today view demonstrates a different viewport and applied appearance. Keep it only if the resulting capture is visibly useful and distinct from scene 1.
-5. **CLI weather:** `hz weather show` presents the current report, hours, days and warning in the native terminal.
-6. **CLI forecast:** `hz weather forecast --days 3` demonstrates a shorter, parameterized daily outlook in the native terminal.
+1. **Today, light:** the weather graphic and near forecast put current conditions beside the character. `src/heinzel_weather/__init__.py` declares the `weather-today`, `temperature-today`, and `forecast-today` widgets.
+2. **Footer detail:** hover over the real weather status to see the place, feels-like temperature and rain chance. The `weather-now` status declares footer and sidebar slots and a detail action in `src/heinzel_weather/__init__.py`.
+3. **Weather page, light:** show the actual forecast panel, including the fictional warning and hourly outlook. The `forecast` view and `/?panel=weather:forecast` navigation are declared in `src/heinzel_weather/__init__.py`; `web/src/WeatherPage.tsx` renders the forecast and alerts.
+4. **Today, dark and phone-sized:** show the same useful weather contribution in a compact applied dark view. This is a responsive and theme comparison, not a claim of another feature.
+5. **CLI report:** `hz weather show` renders current conditions, alerts, hours and days.
+6. **CLI outlook:** `hz weather forecast --days 3` demonstrates a shorter parameterized forecast. Both operations and renderers are declared in `src/heinzel_weather/__init__.py`.
 
 ## Fictional fixtures
 
-`docs/screenshot_fixture.py` is the existing capture bootstrap. It starts the plugin's local fake, selects OpenWeather, sets fictional Berlin and metric units, and supplies a fake key. `src/heinzel_weather/fake.py` specifies clear weather at 21.5 °C, rain beginning in the next hour, cooling, and an example thunderstorm warning. Its server data is anchored to the actual capture hour; `browser_time` fixes only the browser clock. Review timestamps for coherence rather than claiming the server forecast is fixed to the browser date. This fixture demonstrates the OpenWeather path; the normal default is keyless Open-Meteo, which does not provide severe alerts (`README.md`, `src/heinzel_weather/_models.py`).
-
-## Privacy pitfalls
-
-Normal presentation fictionalization is explicitly limited to these verified mappings: verified owning-interpreter paths become `/demo-profile/.venv`, and only the verified whole hostname detail in the genuine Doctor row becomes `demo-host`. These mappings change no SDK health status or remaining detail and establish no privacy acceptance. Unknown identities still fail. Independent review must inspect every image and transcript for identities, credentials, paths, location leakage and other sensitive data before publication. The fixture key is fake; do not expose real credentials. Doctor dismissals in the plan are optional and must not be represented as a healthy Doctor result.
-
-## Acceptance criteria
-
-- Capture genuine app and CLI output using the existing local bootstrap; do not fabricate HTML or present terminal output as feature UI. Retain at least two useful, distinct feature UI scenes and a useful CLI result.
-- Confirm the light and dark appearances are actually applied, the phone layout is legible, and each scene shows the behavior its caption claims. Reject duplicate captures, caption-only differences, loading or error states, clipped essential content, and invisible or unverified warnings.
-- Verify the footer hover opens the actual detail and that the focused region contains useful weather information. Confirm the panel route resolves to the real Weather view and the hourly heading appears. If Core's accessibility names or layout differ, revise the plan against observed UI rather than inventing selectors or screens.
-- Confirm both CLI commands finish successfully and show their distinct reports, attribution and fictional location; do not use exact waits for individual table cells.
-- Keep provider attribution where the actual UI or CLI supplies it. Do not imply Open-Meteo supplies the fixture's warning, or that a candidate weather change proves notice delivery.
-- Independently inspect every final image and transcript and reject unknown identities or unapproved sensitive content. No capture, runtime behavior, privacy outcome or automated validation has been observed in this read-only review; the TOML was checked structurally against the requested schema without executing code.
+Use the existing `docs/screenshot_fixture.py` bootstrap, which selects a local fake OpenWeather provider, fictional Berlin, metric units and a dummy key. `src/heinzel_weather/fake.py` supplies clear weather, approaching rain and a fictional thunderstorm warning from Example Weather Service. The fake anchors server data to the actual capture hour; `browser_time` controls the browser clock, so reviewers must check displayed times and freshness rather than assume the two clocks are synchronized. The fixture illustrates OpenWeather behavior; it does not demonstrate the default Open-Meteo provider, which the README says has no severe alerts.
 
 ## Source-bound UI surface inventory
 
-- **Entrypoint:** `pyproject.toml`, `[project.entry-points."heinzel.modules"]`, declares `weather = "heinzel_weather"`. Its actual module is defined in `src/heinzel_weather/_module.py` and registered in `src/heinzel_weather/__init__.py`.
-- **Plugin feature view:** `src/heinzel_weather/__init__.py` declares `module.nav` with sidebar `/?panel=weather:forecast` and `module.view(... name="forecast", source="page", abi=1)`. `web/src/index.ts` returns `WeatherPage`; `web/src/WeatherPage.tsx` renders the ready, needs-location, unavailable, stale and guessed states, alerts, current conditions, hourly and daily forecasts, attribution and a settings shortcut. `src/heinzel_weather/views/index.js` is the packaged view. The plan uses the declared route, not a route inferred from the plugin name.
-- **Core-rendered feature UI:** `current_weather` is a `module.status` contribution to footer and sidebar; `today_weather` and `forecast_today` are `module.widget` contributions. Their source operation `ui` supplies a shared observation (`src/heinzel_weather/__init__.py`). The status detail and its Change place action are real contributions. The README claims attribution in status detail and Today, but the inspected contribution builders do not explicitly add an attribution line; whether Core adds it is unresolved and must be checked in captures.
-- **Generic Core surfaces:** `module.settings(WeatherSettings)`, `module.nav(... settings=NavSettings(...))`, `module.setup`, `module.health`, and the credential declaration support settings, setup and Doctor surfaces; `ready` checks configuration and credentials without contacting the provider (`src/heinzel_weather/__init__.py`, `src/heinzel_weather/_module.py`, `src/heinzel_weather/_models.py`). Operations `ui`, `page`, `observe`, `weather`, `show`, `forecast`, `signals`, `conditions` and `info` are declared in `src/heinzel_weather/__init__.py`; Core may render operation-related surfaces, but their exact appearance is not established by the supplied plugin source. `watch` can contribute notices through Core notifications. No plugin channel or approval declaration was found; the packaged `weather-trend` skill and `docs/adr/0002-weather-observations-and-trend-advice.md` describe possible reviewed workflow proposals, not an implemented plugin approval screen or proof of delivery.
-- **CLI and other interfaces:** `weather`, `show`, `forecast` and `conditions` have declared renderers, and the README documents CLI, MCP and REST interfaces. The planned CLI scenes are genuine terminal results, not substitutes for the existing feature UI. Exact Core-rendered operation, setup, Doctor and notification layouts are not established by these sources.
-- **External provider UI:** Open-Meteo and OpenWeather are external data providers; the README describes an OpenWeather subscription and key, but declares no external provider screen to capture. The fixture is a local fake, not either provider's live interface.
+- **Plugin feature UI:** `pyproject.toml` declares the sole `heinzel.modules` entry point, `weather = heinzel_weather`. `src/heinzel_weather/__init__.py` registers the forecast view, its sidebar route, the footer/sidebar status and three Today widgets. `web/src/WeatherPage.tsx` implements ready, missing-location, unavailable and stale presentations, attribution and a settings shortcut. The existing plan captures the ready view and contributed Today/status surfaces; it does not claim to capture every state.
+- **Core-rendered contributions:** `module.settings(WeatherSettings)`, `module.setup`, `module.health`, `module.credential`, `module.nav`, the status and widgets are declared in `src/heinzel_weather/__init__.py` and `src/heinzel_weather/_module.py`. Setup and Doctor may appear through Core, but their precise Core rendering is not established by these provided sources. The `watch` job can create notices; no particular notice screen or delivery outcome is established. The operations `ui`, `page`, `observe`, `weather`, `show`, `forecast`, `signals`, `conditions`, and `info` are declared there; generic Core presentation of operations or info beyond the documented interfaces remains unverified. No plugin channel or approval contribution is declared. `docs/adr/0002-weather-observations-and-trend-advice.md` assigns grants and approval to the engine and does not establish a plugin approval screen.
+- **External provider UI:** Open-Meteo and OpenWeather are data providers described in `README.md`; their websites and account flows are not plugin screens and are not part of this gallery.
+- **Terminal and programmatic interfaces:** `README.md` documents CLI, MCP and REST operations. The two CLI scenes are real command outputs, not substitutes presented as feature UI. The packaged `weather-trend` skill is registered in `src/heinzel_weather/__init__.py`; its proposed workflow does not establish a separate UI.
+- **Evidence to resolve:** the README mentions provider attribution in status detail, while the `DetailLine` construction in `src/heinzel_weather/__init__.py` contains condition, location, feels-like, range and rain chance but no explicit attribution line. Do not claim that detail shows attribution without observing it. The exact appearance of the generic Core surfaces and the footer hover target must be confirmed during capture.
+
+## Privacy pitfalls
+
+Use only the isolated fictional profile and dummy credential; inspect the entire frame and transcript for real locations, account identifiers, secrets, paths and hostnames. Normal presentation fictionalization is expressly limited to verified owning-interpreter paths becoming `/demo-profile/.venv`, and only the verified whole hostname detail in the genuine Doctor row becoming `demo-host`. These mappings change no SDK health status or remaining detail and establish no privacy acceptance. Unknown identities still fail, and independent review must inspect every image and transcript.
+
+## Acceptance criteria
+
+- Capture genuine application surfaces and real CLI output using the existing bootstrap; no forged HTML, invented screens or terminal output labelled as feature UI.
+- Verify the Today widgets, footer detail and forecast panel show useful distinct content; reject duplicates or caption-only changes. Confirm the warning is visibly fictional and the provider attribution is accurate.
+- Confirm both light and dark appearances are actually applied, and the phone view remains legible. Check hover/focus targeting and any Doctor dismissal against the running app.
+- Confirm both CLI commands complete with useful fictional results, including the requested three-day limit. Review all images and transcripts independently for privacy and unknown identities before publication.
+- This plan is preserved from `docs/screenshots.toml`; its TOML structure and supplied field constraints were checked by inspection only. Capture behavior, Core routes and visual output have not been executed or verified in this read-only task.

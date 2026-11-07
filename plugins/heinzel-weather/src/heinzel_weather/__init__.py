@@ -16,6 +16,9 @@ from typing import Annotated
 
 from heinzel import (
     Avatar,
+    ChartPoint,
+    ChartRange,
+    ChartWidget,
     Check,
     ConfigEditor,
     Credentials,
@@ -87,6 +90,10 @@ module.view(
     refresh=300,
 )
 MAX_TEXT = 80
+CHART_HOURS = 24
+"""How many hours the Today chart spans."""
+RAINY = 0.5
+"""The chance of rain from which the chart says rain is likely."""
 """The longest text of a status item or a widget title (ADR 0056)."""
 Location = Annotated[
     str | None,
@@ -108,13 +115,12 @@ def _now_line(now: Now) -> Text:
 
 def _hours(hours: list[Hour], unit: str) -> Table:
     table = Table(title="Next hours", title_justify="left")
-    for column in ("Time", "", "Temp", "Rain", "Sky"):
+    for column in ("Time", "Temp", "Rain", "Sky"):
         table.add_column(column)
     for hour in hours:
         rain = f"{round(hour.rain_chance * 100)}%"
         table.add_row(  # Text, never markup: the descriptions come from OpenWeather
             Text(hour.at.strftime("%H:%M")),
-            Text(hour.icon),
             Text(f"{hour.temperature:.0f}{unit}"),
             Text(rain),
             Text(hour.description),
@@ -124,12 +130,11 @@ def _hours(hours: list[Hour], unit: str) -> Table:
 
 def _days(days: list[Day], unit: str) -> Table:
     table = Table(title="Days", title_justify="left")
-    for column in ("Day", "", "Low", "High", "Rain", "Sky"):
+    for column in ("Day", "Low", "High", "Rain", "Sky"):
         table.add_column(column)
     for day in days:
         table.add_row(
             Text(day.day.strftime("%a %d %b")),
-            Text(day.icon),
             Text(f"{day.low:.0f}{unit}"),
             Text(f"{day.high:.0f}{unit}"),
             Text(f"{round(day.rain_chance * 100)}%"),
@@ -195,6 +200,39 @@ def _weather_card(value: UiWeather) -> GraphicWidget | None:
     )
 
 
+def _temperature_chart(value: UiWeather) -> ChartWidget | None:
+    """The next hours as a line with rain-chance bars, today's range and a now marker; none without two hours."""
+    now = value.conditions.now
+    seen: set[str] = set()
+    hours: list[tuple[str, Hour]] = []
+    for hour in value.conditions.hours[:CHART_HOURS]:
+        label = hour.at.strftime("%Y-%m-%dT%H:%M")
+        if label not in seen:  # a clock change repeats an hour; the axis needs distinct labels
+            seen.add(label)
+            hours.append((label, hour))
+    if now is None or len(hours) < 2:  # noqa: PLR2004
+        return None
+    degree = now.units.degree
+    temperatures = [round(hour.temperature) + 0 for _, hour in hours]
+    rainy = next((label[11:] for label, hour in hours if hour.rain_chance >= RAINY), None)
+    rain = f"; rain likely from {rainy}" if rainy else "; little rain"
+    summary = (
+        f"{now.location}: {round(now.temperature) + 0}{degree} now, {min(temperatures)} to {max(temperatures)}{degree} "
+        f"over the next {len(hours)} hours{rain}."
+    )
+    return ChartWidget(
+        title=f"Temperature and rain, next {len(hours)} hours"[:MAX_TEXT],
+        summary=summary,
+        unit=degree,
+        series=[ChartPoint(at=label, value=hour.temperature) for label, hour in hours],
+        bars=[min(max(hour.rain_chance, 0.0), 1.0) for _, hour in hours],
+        bars_label="Rain chance",
+        range=ChartRange(low=min(now.low, now.high), high=max(now.low, now.high)),
+        now=hours[0][0],
+        size="medium",
+    )
+
+
 def _forecast_card(value: UiWeather) -> ListWidget | None:
     conditions = value.conditions
     now = conditions.now
@@ -251,6 +289,12 @@ def current_weather(value: UiWeather) -> StatusItem:
 def today_weather(value: UiWeather) -> GraphicWidget | None:
     """Show the current temperature with the weather accessory on Today."""
     return _weather_card(value)
+
+
+@module.widget(source="ui", name="temperature-today", refresh="15m")
+def temperature_today(value: UiWeather) -> ChartWidget | None:
+    """Show the temperature over the next hours with the chance of rain, and a marker for now."""
+    return _temperature_chart(value)
 
 
 @module.widget(source="ui", name="forecast-today", refresh="15m")

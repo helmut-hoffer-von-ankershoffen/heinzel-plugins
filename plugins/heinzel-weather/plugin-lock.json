@@ -5,7 +5,7 @@
     "coverage>=7.12",
     "editables>=0.5",
     "hatchling>=1.29.0",
-    "heinzel>=0.9.16,<0.10",
+    "heinzel>=0.9.29,<0.10",
     "httpx>=0.28",
     "mypy>=1.19.0,<3",
     "nodejs-wheel-binaries==24.19.0",
@@ -16,7 +16,7 @@
     "ruff==0.17.2"
   ],
   "core": {
-    "version": "0.9.26",
+    "version": "0.9.29",
     "dependencies": [
       "croniter>=6.2.4",
       "fastapi>=0.161",

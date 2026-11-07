@@ -4,7 +4,7 @@ from pathlib import Path
 import pytest
 from heinzel import ActionLet, NavLet, StatusLet, WidgetLet
 
-from heinzel_weather import _weather_card, _weather_status, module
+from heinzel_weather import _temperature_chart, _weather_card, _weather_status, module
 from heinzel_weather._service import local_city
 
 pytestmark = pytest.mark.unit
@@ -22,6 +22,7 @@ def test_weather_ui_placements_share_one_read_only_source_and_refresh_every_900_
     ]
     assert [(item.source, item.name, item.refresh) for item in widgets] == [
         ("ui", "weather-today", timedelta(seconds=900)),
+        ("ui", "temperature-today", timedelta(seconds=900)),
         ("ui", "forecast-today", timedelta(seconds=900)),
     ]
     assert not actions
@@ -71,3 +72,30 @@ def test_a_time_zone_city_comes_from_the_machines_zone_link(monkeypatch):
     assert local_city() is None
     monkeypatch.setattr("pathlib.Path.readlink", lambda _self: (_ for _ in ()).throw(OSError()))
     assert local_city() is None
+
+
+def test_the_today_chart_shows_the_next_hours_with_rain_bars_range_and_a_now_marker(service):
+    observed = service().ui_weather()
+    chart = _temperature_chart(observed)
+    hours = observed.conditions.hours
+    assert chart is not None
+    assert len(chart.series) == len(chart.bars) == min(24, len(hours)) >= 2
+    assert chart.now == chart.series[0].at
+    assert (chart.range.low, chart.range.high) == (observed.conditions.now.low, observed.conditions.now.high)
+    assert chart.unit == observed.conditions.now.units.degree
+    assert "Berlin, DE" in chart.summary
+    assert len({point.at for point in chart.series}) == len(chart.series)
+
+
+def test_the_today_chart_never_carries_the_data_credit(service):
+    chart = _temperature_chart(service().ui_weather())
+    assert chart is not None
+    assert "Open-Meteo" not in chart.model_dump_json()
+    assert "Weather data by" not in chart.model_dump_json()
+
+
+def test_without_a_place_there_is_no_chart(service):
+    observed = service().ui_weather()
+    conditions = observed.conditions.model_copy(update={"now": None, "hours": []})
+    empty = observed.model_copy(update={"conditions": conditions})
+    assert _temperature_chart(empty) is None
