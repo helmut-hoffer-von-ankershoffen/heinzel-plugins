@@ -2,7 +2,7 @@
 # requires-python = ">=3.12"
 # dependencies = ["nodejs-wheel-binaries==24.19.0"]
 # ///
-"""Pinned Node and pnpm for this plugin's frontend, independent of a core checkout."""
+"""Pinned Node and pnpm for the Weather view's frontend, independent of a core checkout."""
 
 import hashlib
 import os
@@ -12,21 +12,57 @@ from pathlib import Path
 
 import nodejs_wheel
 
-web = Path(__file__).resolve().parent
-node = Path(nodejs_wheel.__file__).parent / "bin"
-env = dict(os.environ)
-env["PATH"] = str(node) + os.pathsep + env.get("PATH", "")
-env["npm_config_update_notifier"] = "false"
-# The package manager itself is pinned; every frontend dependency is locked by this project.
-npm = node.parent / "lib/node_modules/npm/bin/npm-cli.js"
-command = [str(node / "node"), str(npm), "exec", "--yes", "--package=pnpm@12.15.0", "--", "pnpm"]
-args = sys.argv[1:] or ["run", "build"]
-stamp = web / "node_modules/.heinzel-lock"
-initializing = args[0] == "install" and "--no-frozen-lockfile" in args
-digest = "" if initializing else hashlib.sha256((web / "pnpm-lock.yaml").read_bytes()).hexdigest()
-if not initializing and (not stamp.is_file() or stamp.read_text() != digest):
-    subprocess.run(  # noqa: S603 - pinned package manager, no shell
-        [*command, "install", "--frozen-lockfile", "--prefer-offline"], cwd=web, env=env, check=True, timeout=600
-    )
-    stamp.write_text(digest)
-sys.exit(subprocess.run([*command, *args], cwd=web, env=env, check=False, timeout=600).returncode)  # noqa: S603 - CLI arguments, no shell
+WEB = Path(__file__).resolve().parent
+NODE_BIN = Path(nodejs_wheel.__file__).parent / "bin"
+PNPM_VERSION = "12.15.0"
+LOCK_STAMP = WEB / "node_modules/.heinzel-lock"
+LOCKFILE = WEB / "pnpm-lock.yaml"
+TIMEOUT_SECONDS = 600
+
+# The only pnpm invocations this project makes: its own check steps and the (re)install of its locked dependencies.
+# Command-line text never reaches the process; it only selects one of these fixed argument lists.
+INVOCATIONS: dict[tuple[str, ...], tuple[str, ...]] = {
+    ("install",): ("install",),
+    ("install", "--frozen-lockfile"): ("install", "--frozen-lockfile"),
+    ("install", "--no-frozen-lockfile"): ("install", "--no-frozen-lockfile"),
+    ("run", "build"): ("run", "build"),
+    ("run", "lint"): ("run", "lint"),
+    ("run", "test"): ("run", "test"),
+    ("run", "typecheck"): ("run", "typecheck"),
+}
+
+
+def pnpm(arguments: tuple[str, ...]) -> int:
+    """Run the pinned pnpm, through the pinned npm of the pinned Node, in the web directory."""
+    environment = {
+        **os.environ,
+        "PATH": str(NODE_BIN) + os.pathsep + os.environ.get("PATH", ""),
+        "npm_config_update_notifier": "false",
+    }
+    npm = NODE_BIN.parent / "lib/node_modules/npm/bin/npm-cli.js"
+    command = [str(NODE_BIN / "node"), str(npm), "exec", "--yes", f"--package=pnpm@{PNPM_VERSION}", "--", "pnpm"]
+    return subprocess.run(  # noqa: S603
+        [*command, *arguments], cwd=WEB, env=environment, check=False, timeout=TIMEOUT_SECONDS
+    ).returncode
+
+
+def main(requested: list[str]) -> int:
+    """Install the locked dependencies when the lockfile changed, then run the one allowed invocation."""
+    arguments = INVOCATIONS.get(tuple(requested or ["run", "build"]))
+    if arguments is None:
+        allowed = ", ".join(" ".join(key) for key in INVOCATIONS)
+        sys.stderr.write(f"unsupported pnpm invocation {requested!r}; allowed: {allowed}\n")
+        return 2
+    if arguments[0] == "install" and "--no-frozen-lockfile" in arguments:
+        return pnpm(arguments)
+    digest = hashlib.sha256(LOCKFILE.read_bytes()).hexdigest()
+    if not LOCK_STAMP.is_file() or LOCK_STAMP.read_text() != digest:
+        installed = pnpm(("install", "--frozen-lockfile", "--prefer-offline"))
+        if installed != 0:
+            return installed
+        LOCK_STAMP.write_text(digest)
+    return pnpm(arguments)
+
+
+if __name__ == "__main__":
+    sys.exit(main(sys.argv[1:]))

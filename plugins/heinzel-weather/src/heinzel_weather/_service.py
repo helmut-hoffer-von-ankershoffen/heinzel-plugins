@@ -362,9 +362,7 @@ class WeatherService:
             _write(self._watch_file, state)
         found = changes(report, now=now, rain_chance=self._settings.rain_chance, swing=self._settings.temperature_swing)
         new = fresh(found, state.noticed, now)
-        noticed = sum(
-            1 for change in new if notifications is not None and _notify(notifications, change, self.attribution())
-        )
+        noticed = sum(1 for change in new if notifications is not None and _notify(notifications, change))
         # An alert still in effect stays remembered for as long as it lasts, not just KEEP after it was first seen.
         current = {change.key: now for change in found if change.kind == "alert"}
         state.noticed = prune({**state.noticed, **current, **{change.key: now for change in new}}, now)
@@ -415,11 +413,11 @@ def _write(path: Path, state: BaseModel) -> None:
         return
 
 
-def _notify(notifications: Notifications, change: Change, attribution: str) -> bool:
+def _notify(notifications: Notifications, change: Change) -> bool:
     notice = notifications.emit(
         NOTICE_KIND,
         change.title,
-        f"{change.body} {attribution}",
+        change.body,
         route="/",
         command="hz weather show",
         key=f"weather:{change.key}",

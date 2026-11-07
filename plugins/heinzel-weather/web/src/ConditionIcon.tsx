@@ -9,7 +9,7 @@ const day: Record<Condition, Glyph> = {
 };
 
 /** The sky as one line icon. The words always sit beside it, so the icon is never the only signal. */
-export function ConditionIcon({ condition, night = false, className }: { condition: Condition; night?: boolean; className?: string }) {
+export function ConditionIcon({ condition, night = false, className }: Readonly<{ condition: Condition; night?: boolean; className?: string }>) {
   const Icon = night && condition === "clear" ? Moon : day[condition];
   return <Icon aria-hidden className={className} />;
 }

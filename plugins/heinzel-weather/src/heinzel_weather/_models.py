@@ -11,6 +11,8 @@ from pydantic import AwareDatetime, BaseModel, ConfigDict, Field, field_validato
 
 DEFAULT_BASE_URL = "https://api.openweathermap.org"
 LOOPBACK_NAMES = frozenset({"localhost"})
+PROVIDER_DESCRIPTION = "Who the weather comes from."
+ATTRIBUTION_DESCRIPTION = "Where the data comes from, and under which licence if it asks one."
 
 
 class Units(StrEnum):
@@ -226,8 +228,8 @@ class Conditions(_Strict):
     accessories: list[Accessory] = Field(
         description="What the Heinzelmännchen wears for it: umbrella, sunglasses, scarf."
     )
-    provider: Provider = Field(description="Who the weather comes from.")
-    attribution: str = Field(description="Where the data comes from, and under which licence if it asks one.")
+    provider: Provider = Field(description=PROVIDER_DESCRIPTION)
+    attribution: str = Field(description=ATTRIBUTION_DESCRIPTION)
     guessed: bool = Field(
         default=False, description="Whether the place is a guess from the machine's time zone, as none is set."
     )
@@ -260,8 +262,8 @@ class WeatherPage(_Strict):
         default=None, description="Now, the next 24 hours, the next 7 days and alerts; only while ready."
     )
     message: str = Field(default="", description="Why there is no weather, while unavailable.")
-    provider: Provider = Field(description="Who the weather comes from.")
-    attribution: str = Field(description="Where the data comes from, and under which licence if it asks one.")
+    provider: Provider = Field(description=PROVIDER_DESCRIPTION)
+    attribution: str = Field(description=ATTRIBUTION_DESCRIPTION)
     fetched_at: AwareDatetime = Field(description="When the report was fetched; the last time while stale.")
     stale: bool = Field(default=False, description="Whether the latest refresh failed and this is the last report.")
     guessed: bool = Field(
@@ -274,9 +276,9 @@ class Info(_Strict):
 
     version: str = Field(description="This plugin's version.")
     heinzel: str = Field(description="The Heinzelmännchen it runs on.")
-    provider: Provider = Field(description="Who the weather comes from.")
+    provider: Provider = Field(description=PROVIDER_DESCRIPTION)
     keyless: bool = Field(description="Whether the provider needs no account or key.")
-    attribution: str = Field(description="Where the data comes from, and under which licence if it asks one.")
+    attribution: str = Field(description=ATTRIBUTION_DESCRIPTION)
     license_url: str | None = Field(description="The licence of the data, if it has one.")
 
 
