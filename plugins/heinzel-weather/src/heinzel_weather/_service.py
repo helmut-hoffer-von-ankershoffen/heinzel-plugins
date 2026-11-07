@@ -209,6 +209,7 @@ class WeatherService:
             needs_location=observed.needs_location,
             now=report.now if report else None,
             days=report.days[:4] if report else [],
+            hours=report.hours if report else [],
             accessories=(
                 accessories(report.now, units=report.now.units, rain=self._settings.rain_chance) if report else []
             ),

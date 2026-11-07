@@ -21,18 +21,46 @@ Mon 🌧 9 to 18°C
 moderate rain, 80% rain
 Tue ☀ 12 to 21°C
 clear sky, 10% rain
-Ask about it
+Temperature and rain, next 24 hours
+21:00
+08:00
+20:00
+Temperature and rain, next 24 hours
+Time	°C	Rain chance
+21:00	21.5	10%
+22:00	19.9	80%
+23:00	18.3	80%
+00:00	16.7	80%
+01:00	15.1	80%
+02:00	13.5	10%
+03:00	12	10%
+04:00	14	10%
+05:00	15	10%
+06:00	16	10%
+07:00	12	10%
+08:00	13	10%
+09:00	14	10%
+10:00	15	10%
+11:00	16	10%
+12:00	12	10%
+13:00	13	10%
+14:00	14	10%
+15:00	15	10%
+16:00	16	10%
+17:00	12	10%
+18:00	13	10%
+19:00	14	10%
+20:00	15	10%
+11.5 to 24 °C · Rain chance
 Weather in Berlin, DE
 
 22°C
 
 clear sky
 
-Ask about it
-
 Nothing needs you right now. Ask anything below.
 
-v0.9.26
+v0.9.29
 Updates, off
 0
 System health, warning
@@ -43,7 +71,7 @@ Chat
 Weather
 Weather in
 Berlin, DE
-Thunderstorm warning · until 23:00 · Example Weather Service
+Thunderstorm warning · until 03:00 · Example Weather Service
 
 22°
 °C
@@ -65,40 +93,24 @@ Now
 22°
 10%
 10% chance of rain
-18:00
+22:00
 20°
 80%
 80% chance of rain
-19:00
+23:00
 18°
 80%
 80% chance of rain
-20:00
+00:00
 17°
 80%
 80% chance of rain
-21:00
+01:00
 15°
 80%
 80% chance of rain
-22:00
-14°
-10%
-10% chance of rain
-23:00
-12°
-10%
-10% chance of rain
-00:00
-14°
-10%
-10% chance of rain
-01:00
-15°
-10%
-10% chance of rain
 02:00
-16°
+14°
 10%
 10% chance of rain
 03:00
@@ -106,54 +118,70 @@ Now
 10%
 10% chance of rain
 04:00
-13°
+14°
 10%
 10% chance of rain
 05:00
-14°
+15°
 10%
 10% chance of rain
 06:00
-15°
+16°
 10%
 10% chance of rain
 07:00
-16°
+12°
 10%
 10% chance of rain
 08:00
-12°
+13°
 10%
 10% chance of rain
 09:00
-13°
+14°
 10%
 10% chance of rain
 10:00
-14°
-10%
-10% chance of rain
-11:00
 15°
 10%
 10% chance of rain
-12:00
+11:00
 16°
 10%
 10% chance of rain
-13:00
+12:00
 12°
 10%
 10% chance of rain
-14:00
+13:00
 13°
 10%
 10% chance of rain
-15:00
+14:00
 14°
 10%
 10% chance of rain
+15:00
+15°
+10%
+10% chance of rain
 16:00
+16°
+10%
+10% chance of rain
+17:00
+12°
+10%
+10% chance of rain
+18:00
+13°
+10%
+10% chance of rain
+19:00
+14°
+10%
+10% chance of rain
+20:00
 15°
 10%
 10% chance of rain
@@ -201,4 +229,6 @@ Friday
 12°
 24°
 
-Updated 17:09
+Updated 21:55
+
+Audio

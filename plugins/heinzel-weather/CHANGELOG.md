@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.5.3
+
+A chart on Today: the temperature over the next 24 hours as a line, the chance of rain as bars, today's range as a band and a marker for now, with a text summary and a table of values for screen readers. Needs Heinzelmännchen 0.9.29.
+
 ## 0.5.2
 
 The OpenWeather API key is optional: with the default provider (Open-Meteo) Heinzelmännchen is no longer reported as degraded for a key it does not need, and no notification is posted. With OpenWeather and no key, the weather health check still asks for it.

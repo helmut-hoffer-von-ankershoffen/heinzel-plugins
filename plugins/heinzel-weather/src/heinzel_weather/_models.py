@@ -225,6 +225,9 @@ class Conditions(_Strict):
     needs_location: bool = Field(description="Whether no place is set yet, so there is no weather to show.")
     now: Now | None = Field(description="The weather now at the primary location; none while no place is set.")
     days: list[Day] = Field(description="The next days, from today; none while no place is set.")
+    hours: list[Hour] = Field(
+        default_factory=list[Hour], description="The next hours, from now; none while no place is set."
+    )
     accessories: list[Accessory] = Field(
         description="What the Heinzelmännchen wears for it: umbrella, sunglasses, scarf."
     )
