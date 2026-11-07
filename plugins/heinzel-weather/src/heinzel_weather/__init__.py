@@ -90,11 +90,11 @@ module.view(
     refresh=300,
 )
 MAX_TEXT = 80
+"""The longest text of a status item or a widget title (ADR 0056)."""
 CHART_HOURS = 24
 """How many hours the Today chart spans."""
 RAINY = 0.5
 """The chance of rain from which the chart says rain is likely."""
-"""The longest text of a status item or a widget title (ADR 0056)."""
 Location = Annotated[
     str | None,
     Field(

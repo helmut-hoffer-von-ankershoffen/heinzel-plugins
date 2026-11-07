@@ -1,5 +1,6 @@
-from datetime import timedelta
+from datetime import datetime, timedelta
 from pathlib import Path
+from zoneinfo import ZoneInfo
 
 import pytest
 from heinzel import ActionLet, NavLet, StatusLet, WidgetLet
@@ -99,3 +100,22 @@ def test_without_a_place_there_is_no_chart(service):
     conditions = observed.conditions.model_copy(update={"now": None, "hours": []})
     empty = observed.model_copy(update={"conditions": conditions})
     assert _temperature_chart(empty) is None
+
+
+def test_a_repeated_hour_from_a_clock_change_is_drawn_once(service):
+    observed = service().ui_weather()
+    zone = ZoneInfo("Europe/Berlin")
+    first = datetime(2026, 10, 25, 2, 0, tzinfo=zone, fold=0)  # 02:00 happens twice when the clocks go back
+    second = datetime(2026, 10, 25, 2, 0, tzinfo=zone, fold=1)
+    template = observed.conditions.hours[0]
+    hours = [
+        template.model_copy(update={"at": first}),
+        template.model_copy(update={"at": second}),
+        template.model_copy(update={"at": datetime(2026, 10, 25, 3, 0, tzinfo=zone)}),
+    ]
+    conditions = observed.conditions.model_copy(update={"hours": hours})
+    chart = _temperature_chart(observed.model_copy(update={"conditions": conditions}))
+    assert chart is not None
+    assert [point.at for point in chart.series] == ["2026-10-25T02:00", "2026-10-25T03:00"]
+    assert "next 2 hours" in chart.title
+    assert len(chart.bars) == 2
