@@ -1,0 +1,204 @@
+Skip to content
+Heinzelmännchen
+Heinzelmännchen
+Contracts
+Team graph
+Organisation
+Team roster
+Weather
+22°C Berlin, DE
+M
+Mira
+· EM
+Today
+Today
+Weather in Berlin, DE
+☀ 22°C clear sky
+feels like 21°C, wearing umbrella
+Sun ☁ 10 to 19°C
+broken clouds, 10% rain
+Mon 🌧 9 to 18°C
+moderate rain, 80% rain
+Tue ☀ 12 to 21°C
+clear sky, 10% rain
+Ask about it
+Weather in Berlin, DE
+
+22°C
+
+clear sky
+
+Ask about it
+
+Nothing needs you right now. Ask anything below.
+
+v0.9.26
+Updates, off
+0
+System health, warning
+Calendar, error
+22°C Berlin, DE, off
+Daemon not installed, off
+Chat
+Weather
+Weather in
+Berlin, DE
+Thunderstorm warning · until 16:00 · Example Weather Service
+
+22°
+°C
+
+Clear Sky
+
+Feels like 21° · High 24° · Low 12°
+
+Wind
+15 km/h
+Humidity
+48%
+Chance of rain
+80%
+Rain, next 24 h
+6.4 mm
+Next 24 hours
+Now
+22°
+10%
+10% chance of rain
+11:00
+20°
+80%
+80% chance of rain
+12:00
+18°
+80%
+80% chance of rain
+13:00
+17°
+80%
+80% chance of rain
+14:00
+15°
+80%
+80% chance of rain
+15:00
+14°
+10%
+10% chance of rain
+16:00
+12°
+10%
+10% chance of rain
+17:00
+14°
+10%
+10% chance of rain
+18:00
+15°
+10%
+10% chance of rain
+19:00
+16°
+10%
+10% chance of rain
+20:00
+12°
+10%
+10% chance of rain
+21:00
+13°
+10%
+10% chance of rain
+22:00
+14°
+10%
+10% chance of rain
+23:00
+15°
+10%
+10% chance of rain
+00:00
+16°
+10%
+10% chance of rain
+01:00
+12°
+10%
+10% chance of rain
+02:00
+13°
+10%
+10% chance of rain
+03:00
+14°
+10%
+10% chance of rain
+04:00
+15°
+10%
+10% chance of rain
+05:00
+16°
+10%
+10% chance of rain
+06:00
+12°
+10%
+10% chance of rain
+07:00
+13°
+10%
+10% chance of rain
+08:00
+14°
+10%
+10% chance of rain
+09:00
+15°
+10%
+10% chance of rain
+Next 7 days
+Today
+, moderate rain
+80%
+80% chance of rain
+12°
+24°
+Tomorrow
+, broken clouds
+10%
+10% chance of rain
+10°
+19°
+Monday
+, moderate rain
+80%
+80% chance of rain
+9°
+18°
+Tuesday
+, clear sky
+10%
+10% chance of rain
+12°
+21°
+Wednesday
+, clear sky
+10%
+10% chance of rain
+13°
+24°
+Thursday
+, broken clouds
+10%
+10% chance of rain
+13°
+22°
+Friday
+, moderate rain
+80%
+80% chance of rain
+12°
+24°
+
+Updated 10:44

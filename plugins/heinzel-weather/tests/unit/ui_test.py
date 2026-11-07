@@ -27,7 +27,7 @@ def test_weather_ui_placements_share_one_read_only_source_and_refresh_every_900_
     assert not actions
     assert len(navigation) == 1
     assert navigation[0].settings.sections == ("weather",)
-    assert navigation[0].sidebar.path == "/?settings=weather"  # the place is set in Settings, not typed in a terminal
+    assert navigation[0].sidebar.path == "/?panel=weather:forecast"  # the page; Settings stay behind its place button
 
 
 def test_weather_status_and_today_card_expose_condition_and_accessible_forecast_actions(service):
@@ -38,12 +38,13 @@ def test_weather_status_and_today_card_expose_condition_and_accessible_forecast_
     assert status.icon == "sun"
     assert "☀" not in status.text
     assert status.detail[0].text == "Clear sky · Berlin, DE"
-    assert status.effect is None
+    assert status.effect.path == "/?panel=weather:forecast"
     assert [(action.label, action.effect.path) for action in status.actions] == [("Change place", "/?settings=weather")]
     assert card.label == "Weather in Berlin, DE"
     assert card.value == "22°C"
     assert card.avatar.accessories == ["umbrella"]
-    assert card.caption.startswith("clear sky · Weather data by OpenWeather")
+    assert card.caption == "clear sky"  # the attribution lives behind the info button of the Weather page
+    assert not any("Weather data by" in line.text for line in status.detail)
 
 
 def test_without_a_place_the_status_opens_this_plugins_settings_never_a_terminal(service):

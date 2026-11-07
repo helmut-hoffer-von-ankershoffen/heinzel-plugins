@@ -19,6 +19,7 @@ RECAPTURED = (
     "heinzel-theme",
     "heinzel-google",
     "heinzel-github",
+    "heinzel-weather",
 )
 
 
@@ -52,7 +53,7 @@ def test_exact_authenticated_historical_gallery_integrity_is_read_only(plugin, m
 def historical(tmp_path):
     owner = tmp_path / "weather"
     shutil.copytree(
-        REPO / "plugins/heinzel-weather",
+        REPO / "plugins/heinzel-zoom",
         owner,
         ignore=shutil.ignore_patterns("node_modules", ".venv", ".preview", "__pycache__"),
     )
@@ -87,7 +88,7 @@ def test_historical_validation_rejects_every_changed_bound_input(historical, cha
     manifest_path = owner / capture.MANIFEST
     manifest = json.loads(manifest_path.read_bytes())
     if change == "source":
-        path = owner / "src/heinzel_weather/__init__.py"
+        path = owner / "src/heinzel_zoom/__init__.py"
         path.write_text(path.read_text() + "\n# changed source\n")
     elif change == "plan":
         path = owner / capture.PLAN
@@ -132,7 +133,7 @@ def test_cross_plugin_substitution_and_unknown_or_rewritten_manifests_are_refuse
     # Re-serialization retains the same semantic bundle/receipt but is not the authenticated entire manifest.
     rewritten = json.dumps(json.loads(raw), sort_keys=True).encode()
     with pytest.raises(privacy.CaptureError, match="not pinned"):
-        privacy.validate_historical_gallery(rewritten, owner / capture.OUTPUT, "heinzel-weather")
+        privacy.validate_historical_gallery(rewritten, owner / capture.OUTPUT, "heinzel-zoom")
 
 
 @pytest.mark.parametrize("route", ["bundle", "review", "prepare", "agent", "canonicalize", "publish"])
@@ -160,7 +161,7 @@ def test_pinned_legacy_evidence_is_rejected_by_every_draft_or_admission_route(hi
     with pytest.raises(privacy.CaptureError, match="format is invalid"):
         actions[route]()
     assert file_hashes(folder) == before
-    assert (owner / capture.MANIFEST).read_bytes() == (REPO / "plugins/heinzel-weather" / capture.MANIFEST).read_bytes()
+    assert (owner / capture.MANIFEST).read_bytes() == (REPO / "plugins/heinzel-zoom" / capture.MANIFEST).read_bytes()
 
 
 def test_original_receipt_cannot_be_reused_after_constructing_a_format2_story_bundle(historical):

@@ -12,7 +12,7 @@ def test_suspend_gap_expires_old_observation_when_monotonic_has_not_advanced(ser
     weather.monotonic = lambda: 10.0
     report = weather.report()
     calls = []
-    monkeypatch.setattr(weather, "report", lambda: calls.append(True) or report)
+    monkeypatch.setattr(weather, "report", lambda **_: calls.append(True) or report)
     first = weather.observation()
     weather.clock = lambda: NOW + timedelta(hours=2)
     after_suspend = weather.observation()
@@ -29,7 +29,7 @@ def test_failed_refresh_after_suspend_keeps_lineage_and_throttles_from_attempt_t
     fresh = weather.observation()
     attempts = []
 
-    def unavailable():
+    def unavailable(**_):
         attempts.append(True)
         msg = "Provider unavailable"
         raise HeinzelError(msg)
@@ -68,7 +68,7 @@ def test_initial_provider_failure_retries_once_after_suspend_gap_and_then_thrott
     weather.monotonic = lambda: 0.0
     attempts = []
 
-    def unavailable():
+    def unavailable(**_):
         attempts.append(True)
         msg = "Provider unavailable"
         raise HeinzelError(msg)

@@ -26,12 +26,14 @@ from heinzel_weather._models import (
     Info,
     Now,
     Observation,
+    PageState,
     Provider,
     Report,
     Signals,
     UiWeather,
     Units,
     Watched,
+    WeatherPage,
     WeatherSettings,
 )
 from heinzel_weather._module import API_KEY, FALLBACK_VARIABLE
@@ -43,6 +45,10 @@ HOURS = 12
 DAYS = 5
 """How many days a report shows by default; OpenWeather forecasts eight."""
 MAX_DAYS = 8
+PAGE_HOURS = 24
+"""How many of the next hours the weather page shows."""
+PAGE_DAYS = 7
+"""How many days the weather page shows."""
 UI_REFRESH = timedelta(minutes=15)
 """The one refresh interval for every weather value shown in the app."""
 NO_LOCATION = (
@@ -211,6 +217,28 @@ class WeatherService:
         )
         return UiWeather(conditions=conditions, fetched_at=observed.fetched_at, stale=observed.stale)
 
+    def page(self) -> WeatherPage:
+        """What the weather page shows: the shared cached report, or why there is none. Never raises."""
+        try:
+            observed = self.observation()
+        except HeinzelError as error:
+            return WeatherPage(
+                state=PageState.UNAVAILABLE,
+                message=str(error),
+                provider=self.provider,
+                attribution=self.attribution(),
+                fetched_at=self.clock(),
+            )
+        return WeatherPage(
+            state=PageState.NEEDS_LOCATION if observed.report is None else PageState.READY,
+            report=observed.report,
+            provider=observed.provider,
+            attribution=observed.attribution,
+            fetched_at=observed.fetched_at,
+            stale=observed.stale,
+            guessed=self.guessed,
+        )
+
     def observation(self) -> Observation:
         """Read the shared 15-minute report and its candidate changes without consuming or delivering them.
 
@@ -245,7 +273,7 @@ class WeatherService:
             self._ui_attempted_monotonic = elapsed
             self._ui_attempted_at = now
             try:
-                report = self.report() if self.places else None
+                report = self.report(days=PAGE_DAYS, hours=PAGE_HOURS) if self.places else None
                 result = Observation(
                     needs_location=not self.places,
                     report=report,
@@ -275,8 +303,8 @@ class WeatherService:
             self._ui_cache = result
             return result
 
-    def report(self, location: str | None = None, days: int = DAYS) -> Report:
-        """The weather now, the next hours and `days` days, and alerts, at `location` or the primary one.
+    def report(self, location: str | None = None, days: int = DAYS, hours: int = HOURS) -> Report:
+        """The weather now, the next `hours` hours and `days` days, and alerts, at `location` or the primary one.
 
         Raises:
             HeinzelError: If no location is configured, the selected provider needs a key, or the provider fails.
@@ -291,7 +319,8 @@ class WeatherService:
                 place = self._place(weather, query)
                 answer = weather.one_call(place.lat, place.lon, self.units)
         report = _report(answer, place, self.units, self.clock(), min(max(days, 1), MAX_DAYS))
-        return report.model_copy(update={"now": report.now.model_copy(update={"attribution": self.attribution()})})
+        now = report.now.model_copy(update={"attribution": self.attribution()})
+        return report.model_copy(update={"now": now, "hours": report.hours[: max(hours, 1)]})
 
     def forecast(self, location: str | None = None, days: int = DAYS) -> Forecast:
         """The next `days` days at `location` or the primary one."""
@@ -457,7 +486,7 @@ def _report(answer: OneCall, place: Place, units: Units, now: datetime, days: in
             sunset=sunset,
         ),
         hours=[_hour(raw, zone, units) for raw in answer.hourly if _at(raw.dt, zone) + timedelta(hours=1) > now][
-            :HOURS
+            :PAGE_HOURS
         ],
         days=[
             Day(

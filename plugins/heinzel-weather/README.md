@@ -27,10 +27,13 @@ at openweathermap.org; it also brings severe weather alerts.
 
 Contributed as data (ADR 0056), nothing to install on the app's side:
 
+- A Weather page (its info button credits the data provider, Open-Meteo under CC BY 4.0, with the link), opened from the sidebar item or the footer temperature: now (temperature, sky, feels like, wind,
+  humidity, rain), the next 24 hours, the next 7 days, alerts and when it was updated. Celsius and km/h, or Fahrenheit
+  and mph by locale. The button beside the place name opens Settings > Weather; without a place it asks for one.
 - A status item in the footer and the sidebar: the temperature and sky, with the place, feels-like, what the
-  Heinzelmännchen wears and the attribution on hover; "Change place" opens Settings > Weather; nothing is typed into a terminal.
+  Heinzelmännchen wears; "Change place" opens Settings > Weather; nothing is typed into a terminal.
 - Today: a graphic with the temperature beside the Heinzelmännchen dressed for the weather (an umbrella in or near rain,
-  sunglasses in clear daylight, a scarf in the cold), and a list of the next days with the attribution.
+  sunglasses in clear daylight, a scarf in the cold), and a list of the next days.
 - Notices (the daemon's `weather.watch` job) when rain starts within the hour, the temperature swings or, with
   OpenWeather, an alert is issued.
 
@@ -53,9 +56,9 @@ Until a place is set, the status item says "Set a location".
 Every command takes `--json`. A place is a city and country (`"Lisbon, PT"`) or coordinates (`"38.72,-9.14"`).
 
 In `hz ui`, Weather adds a condition and temperature status item to the footer and sidebar, a detailed Today card, and
-a Weather entry under Settings. The status and card share one plugin observation, refreshed every
-15 minutes; if a refresh fails, they keep the last observation and mark it stale. The Settings/sidebar entry opens the
-full forecast command.
+a Weather entry under Settings. The page, the status and the card share one plugin observation, refreshed every
+15 minutes; if a refresh fails, they keep the last observation and mark it stale. The sidebar entry opens the
+Weather page; Settings stay reachable from its place button.
 
 ## Settings
 
@@ -98,6 +101,10 @@ Current weather and the coming days on Today — fictional Berlin forecast
 <img src="docs/assets/screenshots/weather-detail.png" alt="Inspect conditions, feels-like temperature and rain chance — fictional local forecast" width="960">
 
 Inspect conditions, feels-like temperature and rain chance — fictional local forecast
+
+<img src="docs/assets/screenshots/weather-page.png" alt="Explore current conditions, the hourly outlook and a warning — fictional Berlin forecast" width="960">
+
+Explore current conditions, the hourly outlook and a warning — fictional Berlin forecast
 
 <img src="docs/assets/screenshots/phone-weather.png" alt="Weather and near forecast in the phone-sized Today view — fictional local forecast" width="960">
 
