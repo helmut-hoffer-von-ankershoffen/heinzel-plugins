@@ -182,17 +182,17 @@ Development and release commands: [repository guide](../../README.md).
 <!-- screenshots:start -->
 ## Screenshots
 
-<img src="docs/assets/screenshots/google-upcoming-review.png" alt="A fictional launch review appears in the Core agenda through the Google calendar adapter." width="960">
+<img src="docs/assets/screenshots/google-upcoming-review.png" alt="A fictional launch review shows as the next meeting in the footer, read through the Google calendar adapter." width="960">
 
-A fictional launch review appears in the Core agenda through the Google calendar adapter.
+A fictional launch review shows as the next meeting in the footer, read through the Google calendar adapter.
 
 <img src="docs/assets/screenshots/google-calendar-week.png" alt="The real Core calendar reads a fictional launch week through the Google adapter; no Google account is contacted." width="960">
 
 The real Core calendar reads a fictional launch week through the Google adapter; no Google account is contacted.
 
-<img src="docs/assets/screenshots/google-source-review.png" alt="Inspect a fictional selected-source identity on a phone; its real digest is continuity evidence, not a login or publisher check." width="960">
+<img src="docs/assets/screenshots/google-source-review.png" alt="Inspect a fictional selected-source identity on a phone, as the Google source review panel shows it." width="960">
 
-Inspect a fictional selected-source identity on a phone; its real digest is continuity evidence, not a login or publisher check.
+Inspect a fictional selected-source identity on a phone, as the Google source review panel shows it.
 
 <details>
 <summary>Command line</summary>
@@ -205,17 +205,17 @@ Inspect a three-day launch-file query as structured data — actual Google opera
 
 Try a seven-day file query — fictional replies demonstrate invocation, not verified server-side filtering.
 
-<img src="docs/assets/screenshots/launch-plan.png" alt="Read a fictional Google Doc as useful text through the real adapter and a fixture-only requester." width="960">
+<img src="docs/assets/screenshots/launch-plan.png" alt="Read a fictional Google Doc through the real adapter; this showcase command exists only in the documentation fixture." width="960">
 
-Read a fictional Google Doc as useful text through the real adapter and a fixture-only requester.
+Read a fictional Google Doc through the real adapter; this showcase command exists only in the documentation fixture.
 
-<img src="docs/assets/screenshots/launch-metrics.png" alt="Read a fictional Sheet as a table through the real adapter and a fixture-only requester." width="960">
+<img src="docs/assets/screenshots/launch-metrics.png" alt="Read a fictional Sheet through the real adapter; this showcase command exists only in the documentation fixture." width="960">
 
-Read a fictional Sheet as a table through the real adapter and a fixture-only requester.
+Read a fictional Sheet through the real adapter; this showcase command exists only in the documentation fixture.
 
-<img src="docs/assets/screenshots/mail-content.png" alt="Read a fictional launch message through the real Gmail adapter and a fixture-only requester." width="960">
+<img src="docs/assets/screenshots/mail-content.png" alt="Read a fictional message through the real Gmail adapter; this showcase command exists only in the documentation fixture." width="960">
 
-Read a fictional launch message through the real Gmail adapter and a fixture-only requester.
+Read a fictional message through the real Gmail adapter; this showcase command exists only in the documentation fixture.
 
 </details>
 

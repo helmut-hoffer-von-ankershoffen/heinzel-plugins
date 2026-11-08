@@ -2,13 +2,13 @@
   "format": 1,
   "plugin": "heinzel-google",
   "core_version": "0.9.16",
-  "inputs_sha256": "6339be6c0b5b4aa65d056269ae929b18b13f990fce0f675183290e01e4fa9212",
+  "inputs_sha256": "a20693a4fbe521c082590d3dce20e01e7ed4218b4c13ec9854757ba3a226add9",
   "images": {
-    "docs/assets/screenshots/google-upcoming-review.png": "5e4d77fb10639a34261ed7d95724060ad014ef13f24c7cff893e93e4fb88cf19",
-    "docs/assets/screenshots/google-calendar-week.png": "fd7d636633d543caaa2684ecf2ef20fac404e21f91d616b74a06cc8f00f96054",
-    "docs/assets/screenshots/google-source-review.png": "3bfe2c20fb028daeb6afef7d370629b5c2d82ea92a14902c41f9c86ba9309b47",
-    "docs/assets/screenshots/launch-files-json.png": "d49f653fdab0a9d8940bf6b6810e148a22e66837a2639a48d06c3f487a99b502",
-    "docs/assets/screenshots/launch-files-week.png": "85a7245ab79ec4b3629b4e52255f3185575ce66590a8d05b13aa7947f4d7afb9",
+    "docs/assets/screenshots/google-upcoming-review.png": "28c723ffeb57486bf12f331b42cd4ef403e530f9fad8fb0510f3fc5381060e0c",
+    "docs/assets/screenshots/google-calendar-week.png": "ea5da928962e6bb685ad9f6cbc477c9e0b03fe2d2ef60f1ffdb49ea117426eaf",
+    "docs/assets/screenshots/google-source-review.png": "e4e3d724626495f108f120d96d030a67de8e8ed8b31647feba2f29690ee048ea",
+    "docs/assets/screenshots/launch-files-json.png": "22f18303c555d06965060fb6762f82d12afc7240cd8a3f15b78381f5b92c5d1c",
+    "docs/assets/screenshots/launch-files-week.png": "9b9c6d84278d52c5b9ac519ff56936792744e667813c91020f729847faa8990f",
     "docs/assets/screenshots/launch-plan.png": "a8f723cff386597587a28aa1a76dc6e59b72b40665107629cda30dc1c060fe09",
     "docs/assets/screenshots/launch-metrics.png": "694361694713cb2bb4b3e9a89ec50004ab36120233ed8dbe615466cd5ae09a62",
     "docs/assets/screenshots/mail-content.png": "ceef4e8ed3b08a9d3b787467049c7e8e45effbbdfcaacee0508b023d51691cd4"
@@ -17,23 +17,23 @@
     "format": 2,
     "source_story": {
       "path": "source-story.md",
-      "sha256": "b8ef62b9ea8dff99bce65a5134422bd0c727160e3ae98e3df2c59d2e28383b07"
+      "sha256": "0646b806ddce6086800a2b89fc06801c294c649e131aaf5a81fa37d19b650a8b"
     },
     "definition": {
       "format": 1,
       "reviewer": "Codex feature-story agent",
-      "source_sha256": "bc0ad763bfaecfc7aef0e3282bb6631fadbb530fa138258920a00b01f3e5f120",
-      "plan_sha256": "4e108b766bea092f91874218e698958118c008e7f2bae50977077ef7b5856e77",
-      "story_sha256": "b8ef62b9ea8dff99bce65a5134422bd0c727160e3ae98e3df2c59d2e28383b07"
+      "source_sha256": "c136baf183f9642c964ef633fbfdfe097a7f7b34c031fd1490cc5e7d957007bf",
+      "plan_sha256": "efc3caf6d50d563855cd6b0219d463b8a668c6684d4effbc2f044b7f7eb62d83",
+      "story_sha256": "0646b806ddce6086800a2b89fc06801c294c649e131aaf5a81fa37d19b650a8b"
     },
     "plugin": "heinzel-google",
     "core_version": "0.9.16",
-    "inputs_sha256": "6339be6c0b5b4aa65d056269ae929b18b13f990fce0f675183290e01e4fa9212",
+    "inputs_sha256": "a20693a4fbe521c082590d3dce20e01e7ed4218b4c13ec9854757ba3a226add9",
     "screenshots": [
       {
         "path": "docs/assets/screenshots/google-upcoming-review.png",
         "surface": "ui",
-        "caption": "A fictional launch review appears in the Core agenda through the Google calendar adapter."
+        "caption": "A fictional launch review shows as the next meeting in the footer, read through the Google calendar adapter."
       },
       {
         "path": "docs/assets/screenshots/google-calendar-week.png",
@@ -43,7 +43,7 @@
       {
         "path": "docs/assets/screenshots/google-source-review.png",
         "surface": "ui",
-        "caption": "Inspect a fictional selected-source identity on a phone; its real digest is continuity evidence, not a login or publisher check."
+        "caption": "Inspect a fictional selected-source identity on a phone, as the Google source review panel shows it."
       },
       {
         "path": "docs/assets/screenshots/launch-files-json.png",
@@ -58,44 +58,44 @@
       {
         "path": "docs/assets/screenshots/launch-plan.png",
         "surface": "cli",
-        "caption": "Read a fictional Google Doc as useful text through the real adapter and a fixture-only requester."
+        "caption": "Read a fictional Google Doc through the real adapter; this showcase command exists only in the documentation fixture."
       },
       {
         "path": "docs/assets/screenshots/launch-metrics.png",
         "surface": "cli",
-        "caption": "Read a fictional Sheet as a table through the real adapter and a fixture-only requester."
+        "caption": "Read a fictional Sheet through the real adapter; this showcase command exists only in the documentation fixture."
       },
       {
         "path": "docs/assets/screenshots/mail-content.png",
         "surface": "cli",
-        "caption": "Read a fictional launch message through the real Gmail adapter and a fixture-only requester."
+        "caption": "Read a fictional message through the real Gmail adapter; this showcase command exists only in the documentation fixture."
       }
     ],
     "images": {
-      "google-upcoming-review.png": "5e4d77fb10639a34261ed7d95724060ad014ef13f24c7cff893e93e4fb88cf19",
-      "google-calendar-week.png": "fd7d636633d543caaa2684ecf2ef20fac404e21f91d616b74a06cc8f00f96054",
-      "google-source-review.png": "3bfe2c20fb028daeb6afef7d370629b5c2d82ea92a14902c41f9c86ba9309b47",
-      "launch-files-json.png": "d49f653fdab0a9d8940bf6b6810e148a22e66837a2639a48d06c3f487a99b502",
-      "launch-files-week.png": "85a7245ab79ec4b3629b4e52255f3185575ce66590a8d05b13aa7947f4d7afb9",
+      "google-upcoming-review.png": "28c723ffeb57486bf12f331b42cd4ef403e530f9fad8fb0510f3fc5381060e0c",
+      "google-calendar-week.png": "ea5da928962e6bb685ad9f6cbc477c9e0b03fe2d2ef60f1ffdb49ea117426eaf",
+      "google-source-review.png": "e4e3d724626495f108f120d96d030a67de8e8ed8b31647feba2f29690ee048ea",
+      "launch-files-json.png": "22f18303c555d06965060fb6762f82d12afc7240cd8a3f15b78381f5b92c5d1c",
+      "launch-files-week.png": "9b9c6d84278d52c5b9ac519ff56936792744e667813c91020f729847faa8990f",
       "launch-plan.png": "a8f723cff386597587a28aa1a76dc6e59b72b40665107629cda30dc1c060fe09",
       "launch-metrics.png": "694361694713cb2bb4b3e9a89ec50004ab36120233ed8dbe615466cd5ae09a62",
       "mail-content.png": "ceef4e8ed3b08a9d3b787467049c7e8e45effbbdfcaacee0508b023d51691cd4"
     },
     "transcripts": {
-      "google-upcoming-review.txt": "14fbd73021a194afdc8ef70ba0c751cddf8ed4a2d8da474b4617fe581459dd4f",
-      "google-calendar-week.txt": "60c853ea9d55a0d90235d7ed024ac48720675ef8eeb36304bc6d1f15fb3482f1",
-      "google-source-review.txt": "1b5163c79af36829e2580c892fa34eb6a1ca64c6e3e3b6c91d71d6f2d10bb9a0",
-      "launch-files-json.txt": "47dc362fadaa63a56e8fa44608038165ad90ab4bb06a2198c18fecd403413f65",
-      "launch-files-week.txt": "d5b99c3c838c544191f48bba2960935f2592ea28ec68409dd196147a2529bdbf",
+      "google-upcoming-review.txt": "ca1ae614158d3aed2d3c058fa8dd7310d934feaa8b87079af7744a4145dd7656",
+      "google-calendar-week.txt": "134402030ca8d85d4bf579ee82a15c7f752cb8f3296769e8fbad0f2dcd27133b",
+      "google-source-review.txt": "115dc054c726361c779ccd4d3bfcad5ea4fb587509bfe73d673aac755b9458a5",
+      "launch-files-json.txt": "f42d9d8230e448fa2087aa547d6c04ee8c7d721df692eb9a4b512076ce0676b4",
+      "launch-files-week.txt": "324a9507a4af600957520f4861c92ac5f1c280c419c2ff6055ba987ab5789ec5",
       "launch-plan.txt": "a7ded47e8432d800d520488f35d85f613b09609b4041a074ae8a13aaa7c37d91",
       "launch-metrics.txt": "d3f2f19f3a5f470e2c567dd65d8333fdba8fb653a2346a31cfa8b9c008545a04",
       "mail-content.txt": "57cda012c3d61d21aa3e387c296ebce6483c114b169bb416d5296d4af344a813"
     },
-    "bundle_sha256": "e876de5d23c6cba3b4e4db89753b6f3395654e0322b7ee5812271b43e4f48562"
+    "bundle_sha256": "41da6b5dff39e830871c61a23a3e532e952c031ebc303c5193992bb0f72aeda1"
   },
   "privacy_review": {
     "format": 1,
-    "bundle_sha256": "e876de5d23c6cba3b4e4db89753b6f3395654e0322b7ee5812271b43e4f48562",
+    "bundle_sha256": "41da6b5dff39e830871c61a23a3e532e952c031ebc303c5193992bb0f72aeda1",
     "reviewer": "Codex privacy agent",
     "decision": "approve",
     "checked_images": [

@@ -92,7 +92,10 @@ def run_setup(  # noqa: PLR0913, PLR0917 - what the step is injected with
 
 
 def _writes(prompter: Prompter, *, calendar: bool, mail: bool, documents: bool = False) -> frozenset[str]:
-    """Ask whether hz may write the calendar and the mail it reads from Google; the ones it may. "No" is the default."""
+    """Ask whether hz may write the calendar, the mail and the Docs it reads from Google; the ones it may.
+
+    "No" is the default; Docs has its own two-line consent.
+    """
     allowed: set[str] = set()
     if calendar and prompter.confirm(
         "Let hz also create, move, cancel and answer events, each only after you confirm it?", default=False
@@ -109,7 +112,10 @@ def _writes(prompter: Prompter, *, calendar: bool, mail: bool, documents: bool =
 
 
 DOCS_ASKED = "Asked: Google's permission to change your Docs; reading them needs nothing more."
-DOCS_HAPPENS = "Then: hz adds to a document only after you confirm each change; Google opens your browser to approve."
+DOCS_HAPPENS = (
+    "Then: hz adds to a document only after you confirm each change; "
+    "if you also agree to sign in again, Google opens your browser to approve."
+)
 
 
 def _documents_consent(prompter: Prompter) -> bool:
