@@ -8,6 +8,17 @@ from typing import Self, cast
 from heinzel import HeinzelError
 
 _PORT = 443
+
+
+class SharingProblemError(HeinzelError):
+    """A refusal with its one short status line for the pane; the full message stays the explanation."""
+
+    def __init__(self, message: str, summary: str) -> None:
+        """Keep the long message for the CLI and Details, and the short line (<= 60 characters) for the pane."""
+        super().__init__(message)
+        self.summary = summary
+
+
 _DNS = re.compile(r"(?=.{1,253}\Z)(?:[a-z0-9](?:[a-z0-9-]{0,61}[a-z0-9])?\.)+[a-z0-9-]+\Z")
 
 
@@ -24,12 +35,13 @@ class Mapping:
         """Validate the node DNS name and explicit local/external ports before making a plan.
 
         Raises:
-            HeinzelError: If the reported name or either port is unsafe.
+            HeinzelError: If either port is unsafe.
+            SharingProblemError: If the reported name is not a tailnet DNS name.
         """
         name = hostname.removesuffix(".").lower()
         if not _DNS.fullmatch(name) or not name.endswith(".ts.net"):
             msg = "Tailscale did not report a valid tailnet DNS name; sign in and enable MagicDNS first."
-            raise HeinzelError(msg)
+            raise SharingProblemError(msg, "Turn on MagicDNS in Tailscale, then try again.")
         if not 1 <= backend_port <= 65535 or not 1 <= port <= 65535:  # noqa: PLR2004 - network port bounds
             msg = "The local backend and external HTTPS ports must be between 1 and 65535."
             raise HeinzelError(msg)
@@ -77,14 +89,14 @@ class Mapping:
         """Add the private handler without replacing any conflicting handler or unrelated value.
 
         Raises:
-            HeinzelError: If existing configuration conflicts with private hz sharing.
+            SharingProblemError: If existing configuration conflicts with private hz sharing.
         """
         handler = self._check(config)
         if handler and handler != {"Proxy": self.target}:
             msg = (
                 "Another service already uses this Tailscale web address. Choose a different sharing port in Settings."
             )
-            raise HeinzelError(msg)
+            raise SharingProblemError(msg, f"Port {self.port} is taken. Pick another port in Settings.")
         result = copy.deepcopy(config)
         tcp = _table(result, "TCP")
         tcp[str(self.port)] = {"HTTPS": True}
@@ -122,14 +134,14 @@ class Mapping:
         funnel = _read_table(config, "AllowFunnel")
         if funnel.get(self.authority):
             msg = "Tailscale already shares this port with the whole internet (Funnel). hz did not use or change it."
-            raise HeinzelError(msg)
+            raise SharingProblemError(msg, f"Port {self.port} is public (Funnel). Pick another port.")
         tcp = _read_table(config, "TCP").get(str(self.port))
         if tcp is not None and tcp != {"HTTPS": True}:
             msg = "Tailscale uses this port for something else. hz left it alone."
-            raise HeinzelError(msg)
+            raise SharingProblemError(msg, f"Port {self.port} is taken. Pick another port in Settings.")
         if config.get("Foreground"):
             msg = "A tailscale serve command is running in a terminal. hz left it alone."
-            raise HeinzelError(msg)
+            raise SharingProblemError(msg, "Stop tailscale serve in the terminal, then try again.")
         handlers = _read_table(_read_table(_read_table(config, "Web"), self.authority), "Handlers")
         return _read_table(handlers, "/")
 

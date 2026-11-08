@@ -7,5 +7,7 @@
   "mapped": false,
   "origin": "https://workstation.tail-example.ts.net",
   "target": "http://127.0.0.1:8737",
+  "summary": null,
+  "problem": false,
   "message": "Private web sharing is off."
 }

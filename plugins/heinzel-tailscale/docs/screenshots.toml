@@ -7,7 +7,7 @@ name = "sharing-ready"
 surface = "ui"
 route = "/"
 appearance = "dark"
-caption = "Enable private sharing and see verified readiness — fictional local Tailscale demo"
+caption = "Turn private sharing on; the switch reads On with Copy URL and Open — fictional local Tailscale demo"
 timeout_ms = 30000
 
 [[scenes.steps]]
@@ -34,10 +34,6 @@ name = "Share over Tailscale"
 
 [[scenes.steps]]
 action = "wait"
-text = "Private sharing is ready for an authenticated browser."
-
-[[scenes.steps]]
-action = "wait"
 role = "link"
 name = "Open"
 
@@ -46,51 +42,9 @@ role = "region"
 name = "Tailscale"
 
 [[scenes]]
-name = "phone-sharing-ready"
-surface = "ui"
-route = "/"
-caption = "Inspect the private link at phone width — fictional local Tailscale demo; no remote connection tested"
-timeout_ms = 30000
-
-[[scenes.steps]]
-action = "click"
-role = "button"
-name_regex = "^Dismiss Doctor"
-optional = true
-
-[[scenes.steps]]
-action = "click"
-role = "button"
-name = "More status items"
-optional = true
-
-[[scenes.steps]]
-action = "click"
-role = "button"
-name_regex = "^Tailscale"
-
-[[scenes.steps]]
-action = "wait"
-role = "region"
-name = "Tailscale"
-
-[[scenes.steps]]
-action = "wait"
-text = "Private sharing is ready for an authenticated browser."
-
-[[scenes.steps]]
-action = "wait"
-role = "link"
-name = "Open"
-
-[scenes.viewport]
-width = 390
-height = 844
-
-[[scenes]]
 name = "sharing-request-cli"
 surface = "cli"
-caption = "Inspect the saved request and mapping with web verification pending — fictional local Tailscale demo"
+caption = "Inspect the saved request and mapping from the CLI — fictional local Tailscale demo"
 command = ["tailscale", "status", "--json"]
 
 [[scenes]]
@@ -125,7 +79,7 @@ name = "Share over Tailscale"
 
 [[scenes.steps]]
 action = "wait"
-text = "Private web sharing is off."
+text = "Off"
 
 [scenes.focus]
 role = "region"
