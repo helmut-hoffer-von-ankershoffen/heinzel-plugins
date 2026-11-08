@@ -6,11 +6,16 @@
 
 import argparse
 import hashlib
+import http.client
 import os
+import secrets
 import shutil
-import urllib.request
+import ssl
+import time
 from pathlib import Path
+from urllib.error import HTTPError
 from urllib.parse import urlsplit
+from urllib.request import urlopen
 
 from packaging.utils import parse_wheel_filename
 from packaging.version import Version
@@ -18,6 +23,31 @@ from packaging.version import Version
 from heinzel_plugin_tools.cli import ROOT, acceptance, profile, projects, run, validate_lock, write_accepted_profile
 from heinzel_plugin_tools.installation import check_profile_format, isolated_environment, verify_managed_profile
 from heinzel_plugin_tools.publishing import restore, tag_revision
+
+TRANSIENT = frozenset({429, 500, 502, 503, 504})
+ATTEMPTS = 3
+
+
+def fetch_bytes(url, *, timeout, limit, sleep=time.sleep):
+    """The final URL and at most `limit + 1` body bytes, with three jittered tries on gateway or transport errors.
+
+    A 404 or a certificate failure is raised at once; the caller still checks every byte it uses.
+    """
+    attempt = 1
+    while True:
+        try:
+            with urlopen(url, timeout=timeout) as response:  # noqa: S310 - callers pass checked official HTTPS URLs
+                return response.url, response.read(limit + 1)
+        except HTTPError as error:
+            error.close()
+            if error.code not in TRANSIENT or attempt == ATTEMPTS:
+                raise
+        except (OSError, http.client.HTTPException) as error:
+            reason = getattr(error, "reason", error)
+            if attempt == ATTEMPTS or isinstance(reason, ssl.SSLCertVerificationError):
+                raise
+        sleep(2 ** (attempt - 1) * (0.5 + secrets.randbelow(1001) / 1000))  # jitter spreads the retries
+        attempt += 1
 
 
 def compose(core: Path, destination: Path, base_url: str | None, *, core_sha256: str | None = None) -> None:
@@ -134,10 +164,9 @@ def main() -> None:
     destination = ROOT / "dist/standard"
     destination.mkdir(parents=True, exist_ok=True)
     core = destination / Path(url.path).name
-    with urllib.request.urlopen(args.core_url, timeout=60) as response:  # noqa: S310 - exact HTTPS official release checked
-        if urlsplit(response.url).scheme != "https":
-            parser.error("The core download redirected away from HTTPS")
-        content = response.read(128 * 1024 * 1024 + 1)
+    final, content = fetch_bytes(args.core_url, timeout=60, limit=128 * 1024 * 1024)  # exact official release checked
+    if urlsplit(final).scheme != "https":
+        parser.error("The core download redirected away from HTTPS")
     if len(content) > 128 * 1024 * 1024:
         parser.error("Core wheel exceeds its size limit")
     core.write_bytes(content)

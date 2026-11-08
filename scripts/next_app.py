@@ -1,9 +1,12 @@
 """Select a published SDK whose independently verified standard composition is still missing."""
 
 import hashlib
+import http.client
 import json
 import os
 import re
+import secrets
+import ssl
 import sys
 import time
 from http import HTTPStatus
@@ -23,6 +26,31 @@ MAX_METADATA = 2 * 1024 * 1024
 EXPLICIT_METADATA_ATTEMPTS = 4
 EXPLICIT_METADATA_WAIT = 10
 
+TRANSIENT = frozenset({429, 500, 502, 503, 504})
+ATTEMPTS = 3
+
+
+def fetch_bytes(url, *, timeout, limit, sleep=time.sleep):
+    """The final URL and at most `limit + 1` body bytes, with three jittered tries on gateway or transport errors.
+
+    A 404 or a certificate failure is raised at once; the caller still checks every byte it uses.
+    """
+    attempt = 1
+    while True:
+        try:
+            with urlopen(url, timeout=timeout) as response:  # noqa: S310 - callers pass checked official HTTPS URLs
+                return response.url, response.read(limit + 1)
+        except HTTPError as error:
+            error.close()
+            if error.code not in TRANSIENT or attempt == ATTEMPTS:
+                raise
+        except (OSError, http.client.HTTPException) as error:
+            reason = getattr(error, "reason", error)
+            if attempt == ATTEMPTS or isinstance(reason, ssl.SSLCertVerificationError):
+                raise
+        sleep(2 ** (attempt - 1) * (0.5 + secrets.randbelow(1001) / 1000))  # jitter spreads the retries
+        attempt += 1
+
 
 def download(url, limit=MAX_METADATA):
     parsed = urlsplit(url)
@@ -34,10 +62,9 @@ def download(url, limit=MAX_METADATA):
         or parsed.fragment
     ):
         raise ValueError("Release metadata must come from the official HTTPS endpoints")
-    with urlopen(url, timeout=30) as response:  # noqa: S310 - official HTTPS endpoints checked above
-        if not response.url.startswith("https://"):
-            raise ValueError("Release metadata redirected away from HTTPS")
-        content = response.read(limit + 1)
+    final, content = fetch_bytes(url, timeout=30, limit=limit)
+    if not final.startswith("https://"):
+        raise ValueError("Release metadata redirected away from HTTPS")
     if len(content) > limit:
         raise ValueError("Public SDK metadata exceeds the release-selection limit")
     return content
