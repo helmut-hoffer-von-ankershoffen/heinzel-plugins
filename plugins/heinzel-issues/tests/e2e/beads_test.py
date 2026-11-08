@@ -3,7 +3,7 @@
 import pytest
 from heinzel import HeinzelError
 
-from heinzel_issues import Beads, BeadsSettings, IssuesSettings
+from heinzel_issues import BeadsBoard, BeadsSettings
 
 pytestmark = pytest.mark.e2e
 
@@ -16,12 +16,12 @@ def test_submit_work_finish_and_release_with_real_beads(issues_kernel, real_bd, 
     journey(issues_kernel(folder, real_bd), folder, real_bd, tmp_path)
 
 
-def test_the_tracker_capability_records_actors_and_refuses_a_held_claim_with_real_beads(real_bd, bd_run, tmp_path):
+def test_the_tracker_contract_records_actors_and_refuses_a_held_claim_with_real_beads(real_bd, bd_run, tmp_path):
     folder = tmp_path / "board"
     folder.mkdir()
     bd_run(["git", "init", "-q"], folder)
     bd_run([real_bd, "init", "--prefix", "demo", "--stealth", "--skip-agents"], folder)
-    tracker = Beads(IssuesSettings(tracker="beads", beads=BeadsSettings(path=folder, bd=real_bd)))
+    tracker = BeadsBoard(BeadsSettings(path=folder, bd=real_bd))
     issue = tracker.create("heinzel-issues", "Crash on save", "It crashes.", "mira", [])
     assert (issue.state, issue.reporter, issue.labels) == ("open", "mira", ["heinzel-issues"])
     assert tracker.claim(issue.key, "builder").assignee == "builder"

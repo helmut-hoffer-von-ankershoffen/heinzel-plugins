@@ -139,5 +139,8 @@ def bd_run():
 @pytest.fixture
 def real_bd():
     if REAL_BD is None:
+        # CI installs a pinned bd and sets HZ_ISSUES_REQUIRE_BD=1, so there a missing bd fails instead of skipping.
+        if os.environ.get("HZ_ISSUES_REQUIRE_BD") == "1":
+            pytest.fail("HZ_ISSUES_REQUIRE_BD=1 but the bd program is not installed")
         pytest.skip("the bd program is not installed")
     return REAL_BD

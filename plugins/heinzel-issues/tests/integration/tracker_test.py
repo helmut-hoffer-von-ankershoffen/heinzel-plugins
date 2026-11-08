@@ -1,16 +1,16 @@
-"""The Beads database is Heinzel's `tracker` capability (ADR 0141): writes name their actor, claims are atomic."""
+"""Beads through the `Tracker` contract (ADR 0141): writes name their actor, claims are atomic, nothing is bound."""
 
 import json
 import logging
 from datetime import UTC, datetime, timedelta
 
 import pytest
-from heinzel import HeinzelError, Tracker, Window
+from heinzel import Config, HeinzelError, Issue, Module, Tracker, Window
 from heinzel.heads.cli import build
 from typer.testing import CliRunner
 
 import heinzel_issues
-from heinzel_issues import Beads, BeadsSettings, IssuesService
+from heinzel_issues import BeadsBoard, BeadsSettings, IssuesService
 
 pytestmark = pytest.mark.integration
 
@@ -24,8 +24,7 @@ def board(tmp_path):
 
 @pytest.fixture
 def tracker(board, fake_bd) -> Tracker:
-    settings = heinzel_issues.IssuesSettings(tracker="beads", beads=BeadsSettings(path=board, bd=fake_bd))
-    return Beads(settings)
+    return BeadsBoard(BeadsSettings(path=board, bd=fake_bd))
 
 
 def test_an_issue_round_trips_create_claim_note_attach_and_close(tracker, board):
@@ -55,14 +54,32 @@ def test_an_unknown_or_malformed_key_is_refused(tracker):
         tracker.close("../etc", "builder", "no")
 
 
-def test_capability_list_shows_beads_reads_and_writes_and_submit_writes(issues_kernel, board, fake_bd):
+def test_installing_issues_binds_and_replaces_no_tracker(issues_kernel, board, fake_bd):
     kernel = issues_kernel(board, fake_bd)
     result = CliRunner().invoke(build(kernel), ["system", "capability", "list", "--json"])
     assert result.exit_code == 0, result.output
     report = json.loads(result.stdout)
-    adapter = next(a for a in report["adapters"] if a["capability"] == "tracker")
-    assert (adapter["adapter"], adapter["modes"], adapter["module"]) == ("beads", ["read", "write"], "issues")
-    assert ("issues submit", "beads:tracker:write") in {(u["requester"], u["requirement"]) for u in report["uses"]}
+    assert [a for a in report["adapters"] if a["module"] == "issues"] == []
+    assert [u for u in report["uses"] if u["requester"].startswith("issues")] == []
+
+
+class Hub:
+    """A read-only tracker adapter like GitHub's or Atlassian's."""
+
+    def issues_updated(self, project: str, window: Window) -> list[Issue]:
+        return []
+
+
+def test_another_tracker_stays_bound_automatically_with_issues_installed(make_kernel, tmp_path):
+    hub = Module("hub", "Test-only read-only tracker adapter.")
+    hub.provides("tracker", modes={"read"}, hosts=["hub.invalid"])(Hub)
+    settings = {"hz": {"state_dir": str(tmp_path / "state")}}
+    kernel = make_kernel(builtins=True, config=Config(files=(), data=settings), hub=hub, issues=heinzel_issues.module)
+    result = CliRunner().invoke(build(kernel), ["system", "capability", "list", "--json"])
+    assert result.exit_code == 0, result.output
+    tracker = next(c for c in json.loads(result.stdout)["capabilities"] if c["name"] == "tracker")
+    assert tracker["bound"] == "hub"
+    assert [a["adapter"] for a in json.loads(result.stdout)["adapters"] if a["capability"] == "tracker"] == ["hub"]
 
 
 def test_submit_goes_through_the_tracker_and_logs_without_the_text(issues_kernel, board, fake_bd, caplog):

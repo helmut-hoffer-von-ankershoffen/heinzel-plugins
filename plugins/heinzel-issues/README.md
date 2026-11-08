@@ -4,7 +4,9 @@ Report a problem or request something, then see where it stands: **Received**, *
 once it ships, **Released in 0.9.27 on 7 Nov 2026**. You never see the tracker behind it: no statuses of its own,
 no ids, no pull requests, unless you ask for the details.
 
-Add it with `hz system plugin add issues --confirm`. It is off until you choose a tracker.
+It is not installed, bundled or recommended by default: it needs a Beads database you can write to (today the
+private management repository). Add it with `hz system plugin add issues --confirm`.
+Until a tracker is set up it only shows **Issue tracking is not set up** with a setup button, never an error.
 
 ## Use it
 
@@ -87,11 +89,9 @@ Beads is built in: Issues runs `bd ... --json` in the configured folder, on this
 pushes or publishes. Other trackers (Linear, Jira, GitHub issues, cards in git) plug in behind the same contract,
 described in [docs/CONTRACT.md](docs/CONTRACT.md), without a change to Issues or to Heinzel's core.
 
-The same Beads database is also Heinzel's `tracker` capability, adapter `beads`, with reads and writes (core
-ADR 0141): what you send goes through it, and other Heinzelmännchen and tools on this computer can create, claim,
-note, attach to, move and close items through Heinzel, each write recorded with its actor (`bd --actor`). If
-another tracker adapter is installed too (GitHub, Atlassian), choose the one for reading with
-`hz system config set capabilities.tracker <adapter>`; sending to Beads always uses its own adapter.
+Issues writes to Beads through the methods of Heinzel's `Tracker` contract (core ADR 0141): each write runs
+`bd --actor`, and a claim is Beads' atomic `--claim`. It registers no `tracker` capability adapter, so installing it
+never unbinds or replaces the tracker other plugins (GitHub, Atlassian) use.
 
 ## Privacy
 

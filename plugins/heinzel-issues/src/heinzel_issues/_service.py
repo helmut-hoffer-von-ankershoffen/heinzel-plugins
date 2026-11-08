@@ -191,7 +191,7 @@ class IssuesService:
         return self.report(self.tracker().get(task_id))
 
     def submit(self, text: str, attachments: Sequence[Path] = (), board: Tracker | None = None) -> Report:
-        """Send a report or request to the tracker, through Heinzel's `tracker` capability `board` for Beads.
+        """Send a report or request to the tracker; for Beads through `board`, which implements Heinzel's `Tracker`.
 
         Logs `issues.submit.start` and one `issues.submit.outcome` with the tracker, attachment count, outcome and
         duration; never the text.

@@ -9,6 +9,7 @@
 - A notice when a report is being worked on, is done, or is released; open reports on Today.
 - Send from the app: the view's form uses the typed-input `send` action (Heinzel 0.9.30+), confirmed before it
   runs; an older Heinzel gets the terminal command instead.
-- The Beads database is Heinzel's `tracker` capability with reads and writes (adapter `beads`, core ADR 0141);
-  `hz issues submit` writes through it with the sender as actor. Requires Heinzel 0.9.31.
+- Beads writes go through the methods of Heinzel's `Tracker` contract (core ADR 0141) with the sender as actor;
+  no capability adapter is registered, so other trackers stay bound. Requires Heinzel 0.9.31.
+- Opt-in only: in no standard set, and it says how to set it up until a reachable tracker is configured.
 - Structured `issues.submit.*` and `issues.watch.*` log events, never with the typed text.

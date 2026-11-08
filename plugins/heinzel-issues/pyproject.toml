@@ -1,7 +1,7 @@
 [project]
 name = "heinzel-issues"
 version = "0.1.0"
-description = "Report a problem or request something, and see when it is worked on, done and released."
+description = "Report a problem or request something, and see when it is done and released; needs a Beads database you can write to."
 readme = "README.md"
 license = "MIT"
 license-files = ["LICENSE"]
@@ -25,6 +25,7 @@ test = ["editables>=0.5", "pytest>=9.0.3,<10", "pytest-timeout>=2.4.0,<3", "ruff
 
 [tool.heinzel.plugin]
 layout = "collection"
+profiles = []
 requires = ["core:plugin-api@1"]
 provides = []
 
@@ -65,6 +66,7 @@ highlights = [
     "Report a problem or request something in plain words",
     "See Received, Being worked on or Done, and the release that shipped it",
     "A notice when something changes; any tracker behind one contract, Beads built in",
+    "For maintainers: needs a Beads database you can write to (today the private management repository); until then it only says how to set it up",
 ]
 
 [[tool.heinzel.catalog.screenshots]]

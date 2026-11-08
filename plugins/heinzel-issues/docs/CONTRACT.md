@@ -40,10 +40,10 @@ It runs `bd create|list|show|update --json` in `issues.beads.path` with `BD_NON_
 report with `issues.beads.label`, lists only items with that label, and copies attachments to
 `.beads/attachments/<id>/` next to the database, noting their path on the item.
 
-## Heinzel's tracker capability
+## Heinzel's Tracker contract
 
-The same database is also the `beads` adapter of Heinzel's `tracker` capability (core ADR 0141): `issues_updated`,
-`create`, `claim`, `transition`, `note`, `attach` and `close`. A project is a Beads label. Every write runs
-`bd ... --actor <actor>`; `claim` is Beads' atomic `--claim` and refuses an item another actor holds. Attachments are
-saved next to the database like the connector's and named in the item's notes. `hz issues submit` writes through
-this capability (`requires=["beads:tracker:write"]`); listing and the watch read through the connector above.
+`BeadsBoard` implements core's `Tracker` protocol (ADR 0141) over the same database: `issues_updated`, `create`,
+`claim`, `transition`, `note`, `attach` and `close`. A project is a Beads label. Every write runs
+`bd ... --actor <actor>`; `claim` is Beads' atomic `--claim` and refuses an item another actor holds. `hz issues
+submit` writes through it; listing and the watch read through the connector above. Issues registers no capability
+adapter, so it never changes which tracker other plugins are bound to.

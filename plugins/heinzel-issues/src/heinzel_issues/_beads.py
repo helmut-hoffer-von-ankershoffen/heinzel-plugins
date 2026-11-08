@@ -311,7 +311,10 @@ ATTACHMENT_NOTE = "Attachment: "
 
 
 class BeadsBoard:
-    """Heinzel's `tracker` capability (read and write, ADR 0141) over the same local Beads database.
+    """Heinzel's `Tracker` contract (read and write, ADR 0141) over the same local Beads database.
+
+    Issues uses it directly and registers no capability adapter, so installing Issues never changes the tracker other
+    plugins are bound to.
 
     Every write runs `bd` with `--actor`, so Beads records who it was done for. A project is a label: `create` gives
     it to the new item and `issues_updated` lists the items that carry it. A claim is Beads' own atomic `--claim`,
