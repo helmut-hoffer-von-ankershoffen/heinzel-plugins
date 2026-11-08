@@ -2,32 +2,32 @@
   "format": 1,
   "plugin": "heinzel-clock",
   "core_version": "0.9.21",
-  "inputs_sha256": "0d466cc5eece15683e43a0325f28b9c6b06de4f321f49e27764bac587d45739c",
+  "inputs_sha256": "241640a1c65ec151270db2723a02f2d6957f6191b56a97c70ac8a7502cc84ea6",
   "images": {
-    "docs/assets/screenshots/world-clock.png": "35827c7639743777d23752b7c52d40670eb4128c0ddf50d573fe1cb561436f40",
+    "docs/assets/screenshots/world-clock.png": "be99e7a258cf6cf3709038528787c53ede3f2e86f159cfdb1b305b59954c93ea",
     "docs/assets/screenshots/team-overview.png": "7357c1ace0edc3043cab277d3a6cd04aa83d11c4cfa1937e58c7d2d1e1898f5a",
     "docs/assets/screenshots/footer-detail.png": "d3f4c7cc5cb6ad2572abc1ebba5ec15a02eaea5ae1041f580409ac216546e918",
-    "docs/assets/screenshots/phone-world-clock.png": "246fb726c46ecb4c320a84733185972f71e89b6010fed5531bb75807c98e5e09",
-    "docs/assets/screenshots/cli-times.png": "6b5424327b872c1494ba191a4c697b4bdde5f9ed461cc25150b14e5845205f52",
+    "docs/assets/screenshots/phone-world-clock.png": "38b15efa688ccc27eb908d1bf34fae6d697d4d3499e3337fa9dbb56097fa9524",
     "docs/assets/screenshots/terminal-current.png": "b5db7d975bb6edca3d096a4116f3178a02e1c2baeb212f1205063a4604af5ad4",
-    "docs/assets/screenshots/terminal-overlap.png": "35c49f5f914791bbc2104be0a68769f072d000d6c3be5bdf856ba2c77e494376"
+    "docs/assets/screenshots/terminal-overlap.png": "35c49f5f914791bbc2104be0a68769f072d000d6c3be5bdf856ba2c77e494376",
+    "docs/assets/screenshots/cli-json.png": "9034b7749189a58ef9506674b6dd5150b562fe44513c0f50c1052f799f3f06d3"
   },
   "review_bundle": {
     "format": 2,
     "source_story": {
       "path": "source-story.md",
-      "sha256": "0d165c2351969102b29aef68bcf032d66ca423f31adb30be0a52bce668a215a8"
+      "sha256": "3d8ef54f81a733d84fe58a284972f2494315461d8a5e4f63ba8cb838218332a3"
     },
     "definition": {
       "format": 1,
       "reviewer": "Codex feature-story agent",
-      "source_sha256": "0803ea050485e8c691370c1fdc77ef459b2fb19a968120aedd248d86bdaacb28",
-      "plan_sha256": "394ee2c05a25733cb5dcd34dd0fdf5e29d525573700868e03b81d9eca06aabba",
-      "story_sha256": "0d165c2351969102b29aef68bcf032d66ca423f31adb30be0a52bce668a215a8"
+      "source_sha256": "cdf61880445d96b14798b697f1951f6154284d8c106edfea736a08d0c3ff3fb2",
+      "plan_sha256": "2512c6c881c23040b76eafbab5edbdb4eee9d69115ea1af0a8e10a9daba0fde5",
+      "story_sha256": "3d8ef54f81a733d84fe58a284972f2494315461d8a5e4f63ba8cb838218332a3"
     },
     "plugin": "heinzel-clock",
     "core_version": "0.9.21",
-    "inputs_sha256": "0d466cc5eece15683e43a0325f28b9c6b06de4f321f49e27764bac587d45739c",
+    "inputs_sha256": "241640a1c65ec151270db2723a02f2d6957f6191b56a97c70ac8a7502cc84ea6",
     "screenshots": [
       {
         "path": "docs/assets/screenshots/world-clock.png",
@@ -37,7 +37,7 @@
       {
         "path": "docs/assets/screenshots/team-overview.png",
         "surface": "ui",
-        "caption": "Fictional team working hours at a glance: Today, sidebar ticker and primary footer clock"
+        "caption": "Fictional team working hours at a glance: the Today count and the primary footer clock"
       },
       {
         "path": "docs/assets/screenshots/footer-detail.png",
@@ -50,54 +50,54 @@
         "caption": "The globe and three fictional team clocks on a phone \u2014 fixed demonstration time"
       },
       {
-        "path": "docs/assets/screenshots/cli-times.png",
-        "surface": "cli",
-        "caption": "The same fictional team zones and working hours in the CLI \u2014 fixed demonstration time"
-      },
-      {
         "path": "docs/assets/screenshots/terminal-current.png",
         "surface": "ui",
-        "caption": "Fictional demo team at 15:30 UTC: Berlin and New York are working; Los Angeles starts in 30 minutes."
+        "caption": "Terminal output shown in the app, not a feature view: fictional demo team at 15:30 UTC: Berlin and New York are working; Los Angeles starts in 30 minutes."
       },
       {
         "path": "docs/assets/screenshots/terminal-overlap.png",
         "surface": "ui",
-        "caption": "Preview 16:30 UTC: all three fictional demo zones are within working hours."
+        "caption": "Terminal output shown in the app, not a feature view: at 16:30 UTC all three fictional demo zones are within working hours."
+      },
+      {
+        "path": "docs/assets/screenshots/cli-json.png",
+        "surface": "cli",
+        "caption": "Structured clock data for the fictional team at the fixed demonstration time."
       }
     ],
     "images": {
-      "world-clock.png": "35827c7639743777d23752b7c52d40670eb4128c0ddf50d573fe1cb561436f40",
+      "world-clock.png": "be99e7a258cf6cf3709038528787c53ede3f2e86f159cfdb1b305b59954c93ea",
       "team-overview.png": "7357c1ace0edc3043cab277d3a6cd04aa83d11c4cfa1937e58c7d2d1e1898f5a",
       "footer-detail.png": "d3f4c7cc5cb6ad2572abc1ebba5ec15a02eaea5ae1041f580409ac216546e918",
-      "phone-world-clock.png": "246fb726c46ecb4c320a84733185972f71e89b6010fed5531bb75807c98e5e09",
-      "cli-times.png": "6b5424327b872c1494ba191a4c697b4bdde5f9ed461cc25150b14e5845205f52",
+      "phone-world-clock.png": "38b15efa688ccc27eb908d1bf34fae6d697d4d3499e3337fa9dbb56097fa9524",
       "terminal-current.png": "b5db7d975bb6edca3d096a4116f3178a02e1c2baeb212f1205063a4604af5ad4",
-      "terminal-overlap.png": "35c49f5f914791bbc2104be0a68769f072d000d6c3be5bdf856ba2c77e494376"
+      "terminal-overlap.png": "35c49f5f914791bbc2104be0a68769f072d000d6c3be5bdf856ba2c77e494376",
+      "cli-json.png": "9034b7749189a58ef9506674b6dd5150b562fe44513c0f50c1052f799f3f06d3"
     },
     "transcripts": {
       "world-clock.txt": "4849f3c532914d4d669a65d1a0d8a5465fffd69984657d3f9669408c13a6bd68",
-      "team-overview.txt": "3e83e09ac34681deb5a49c4a38cd62e7403c9647309401dc1ed16757ce39b30d",
+      "team-overview.txt": "cdadce78d3613d6eb8a16a48e4021d86bee22c71e04d126a4e4f6f0a1c4a0b40",
       "footer-detail.txt": "012c9b8ac0e614b15085c08ecb4b76e74ca118f52f9785a3ff8a38f09004d981",
       "phone-world-clock.txt": "e8f05d7590230afeff0bd44a70aae9ad9224e5247e5bb1abab10e92557be64a6",
-      "cli-times.txt": "05f1fa56e8a12d26bad2cf2635575d237d9ace564a919e04e76e0b75ed699843",
-      "terminal-current.txt": "21fdd25395f3ed75ce5530056179a4904b77fab2814f70430e0cb1f5e8a2ad22",
-      "terminal-overlap.txt": "4d43632954dcd887d50a16ecce07ab0182a16ca3c3fdb4b6b7e1d1015f6b3a66"
+      "terminal-current.txt": "1088791e80072bf30bf774e177e20918b6912cb4aaaf37e0ceec7c8f0feca534",
+      "terminal-overlap.txt": "28f9d043553627c542ae7c991f448d4e29aabd591853bff8981021081d19216f",
+      "cli-json.txt": "8cc4255d19d78d8dee533a130c756f8d32e7d3cc594d21493ded166c4965d167"
     },
-    "bundle_sha256": "644a21e4cd0b25752af894417021dc4afba7abe87aa6d9b01aef604df54098c9"
+    "bundle_sha256": "a73807852049d4e19281756e477c3d1dbe49230f15647095b8953596642fc641"
   },
   "privacy_review": {
     "format": 1,
-    "bundle_sha256": "644a21e4cd0b25752af894417021dc4afba7abe87aa6d9b01aef604df54098c9",
-    "reviewer": "Codex independent clock gallery reviewer",
+    "bundle_sha256": "a73807852049d4e19281756e477c3d1dbe49230f15647095b8953596642fc641",
+    "reviewer": "Codex privacy agent",
     "decision": "approve",
     "checked_images": [
       "world-clock.png",
       "team-overview.png",
       "footer-detail.png",
       "phone-world-clock.png",
-      "cli-times.png",
       "terminal-current.png",
-      "terminal-overlap.png"
+      "terminal-overlap.png",
+      "cli-json.png"
     ],
     "checks": {
       "tokens_absent": true,

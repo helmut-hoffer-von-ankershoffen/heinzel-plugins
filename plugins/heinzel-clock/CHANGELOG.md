@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.9.7
+
+Show "Edit time zones" as a pane action and highlight city rows on hover instead of underlining them.
+
 ## 0.9.6
 
 Use the globe icon consistently for World Clock navigation.
