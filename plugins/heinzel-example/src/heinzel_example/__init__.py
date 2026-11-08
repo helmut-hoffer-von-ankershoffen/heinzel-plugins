@@ -6,7 +6,7 @@ below it that declares `module = Module(...)` becomes a submodule (see `hello/`)
 
 from pathlib import Path
 
-from heinzel import MetricWidget, Module, Navigate, NoticeKind, Notifications, StatusItem
+from heinzel import DetailLine, MetricWidget, Module, Navigate, NoticeKind, Notifications, StatusItem
 
 from heinzel_example._models import ExampleAbout, ExampleSettings
 from heinzel_example._service import ExampleService
@@ -46,10 +46,15 @@ def notify(notifications: Notifications) -> str:
     return notice.title if notice else "Notifications are disabled"
 
 
-@module.status(source="sample", order=700, slots={"footer": False, "sidebar": True})
+@module.status(source="sample", order=700, slots={"footer": True, "sidebar": True})
 def status(value: int) -> StatusItem:
-    """Render checked data through the same host slots as built-in modules."""
-    return StatusItem(text=f"Example: {value}", icon="star", effect=Navigate(path="/?panel=example:inspector"))
+    """Contribute the footer icon and the sidebar item; a click opens the Example pane (the view below)."""
+    return StatusItem(
+        text=f"Example: {value}",
+        icon="star",
+        detail=[DetailLine(text="Example")],
+        effect=Navigate(path="/?panel=example:inspector"),
+    )
 
 
 @module.widget(source="sample", order=700)

@@ -1,5 +1,6 @@
 """The plugin through hz's real heads with its default provider: Open-Meteo, no key, the recorded Lisbon answers."""
 
+import json
 from datetime import UTC, datetime
 from functools import wraps
 
@@ -64,6 +65,25 @@ def test_the_web_app_gets_a_status_item_and_widgets_as_data(hz):
     assert not any("Open-Meteo" in entry["text"] for entry in widgets["weather:forecast-today"]["items"])
     page = hz("weather", "page").json  # the attribution the page's info button shows
     assert "Open-Meteo.com (CC BY 4.0)" in page["attribution"]
+
+
+def test_no_card_pane_or_chart_names_the_data_provider_while_the_about_data_does(hz):
+    """The credit lives once, in the About data (the page's info button and `hz weather info`), never on a card."""
+    shown = [
+        entry
+        for command in (("system", "ui", "status"), ("system", "ui", "widgets"), ("system", "ui", "list"))
+        for entry in hz(*command).json
+        if entry["id"].startswith("weather:")
+    ]
+    expected = {"weather:weather-now", "weather:weather-today", "weather:temperature-today"}
+    assert {entry["id"] for entry in shown} >= expected
+    for entry in shown:
+        text = json.dumps(entry).lower()
+        assert "open-meteo" not in text, entry["id"]
+        assert "cc by" not in text, entry["id"]
+        assert "weather data by" not in text, entry["id"]
+    assert "Open-Meteo.com (CC BY 4.0)" in hz("weather", "page").json["attribution"]
+    assert "Open-Meteo.com (CC BY 4.0)" in hz("weather", "info").json["attribution"]
 
 
 def test_a_place_to_set_instead_of_an_error(hz, monkeypatch):
