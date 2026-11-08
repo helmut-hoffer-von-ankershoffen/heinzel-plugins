@@ -16,7 +16,7 @@ Today
 Notifications
 1 unread
 Example is ready
-00:03
+08:42
 All notifications
 Example is ready
 Open
@@ -28,6 +28,7 @@ Example value
 Ask about it
 v0.9.1
 Updates, off
+Example: 42, off
 Daemon not installed, off
 0
 System health, warning
@@ -53,7 +54,7 @@ Tests
 Heinzel check-ins
 Today
 Example is ready
-00:03
+08:42
 quiet mode is on: hz system config set system.notify.quiet false
 Unread
 desktop notifications through Heinzel Notifier; a click opens the screen
