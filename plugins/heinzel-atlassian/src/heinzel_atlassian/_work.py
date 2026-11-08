@@ -311,6 +311,7 @@ class JiraWork:
     def __init__(self, settings: AtlassianSettings, acli: Acli) -> None:
         """Build the reader; the kernel injects the settings and acli."""
         self._settings = settings
+        self._acli = acli
         self._client = AcliClient(acli, settings.timeout)
 
     def _search(self, jql: str, subject: str, fields: str = "key,summary,status") -> list[Any]:
@@ -335,7 +336,7 @@ class JiraWork:
         Raises:
             HeinzelError: If the project is malformed, the site is not set, or acli fails.
         """
-        site = require_site(self._settings)
+        site = require_site(self._settings, self._acli)
         scope = f" AND project = {_quoted(project_key(project))}" if project else ""
         jql = f"assignee = currentUser() AND statusCategory != Done{scope} ORDER BY duedate ASC, key ASC"
         keys = _keys(self._search(jql, "your assigned work"))
@@ -350,7 +351,7 @@ class JiraWork:
         Raises:
             HeinzelError: If the project is malformed, the site is not set, or acli fails.
         """
-        site = require_site(self._settings)
+        site = require_site(self._settings, self._acli)
         scope = f" AND project = {_quoted(project_key(project))}" if project else ""
         keys = _keys(self._search(f"issuetype = Epic AND statusCategory != Done{scope} ORDER BY key ASC", "your epics"))
         epics = self._view(site, keys[: max(1, min(limit, MAX_EPICS))])
@@ -411,7 +412,7 @@ class JiraWork:
             msg = "since needs a time zone, e.g. 2026-10-31T09:00:00+01:00"
             raise HeinzelError(msg)
         clock = (now or datetime.now(UTC)).astimezone(UTC)
-        site = require_site(self._settings)
+        site = require_site(self._settings, self._acli)
         scope = f" AND project = {_quoted(project_key(project))}" if project else ""
         minute = int(since.astimezone(UTC).timestamp() // 60 * 60_000)
         mine_jql = (

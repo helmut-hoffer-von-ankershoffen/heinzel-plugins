@@ -1,0 +1,17 @@
+/* Scoped to the Issues view; colours come from the app's theme tokens, so light and dark both follow it. */
+.hzi { display: flex; flex-direction: column; gap: 0.75rem; }
+.hzi-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; }
+.hzi-item { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 0.25rem 0.75rem; padding: 0.5rem 0; border-bottom: 1px solid var(--color-border); }
+.hzi-item:last-child { border-bottom: 0; }
+.hzi-title { min-width: 0; overflow-wrap: anywhere; }
+.hzi-state { color: var(--color-muted-foreground); white-space: nowrap; }
+.hzi-working { color: var(--color-warn); }
+.hzi-done { color: var(--color-ok); }
+.hzi-muted { color: var(--color-muted-foreground); }
+.hzi-bad { color: var(--color-bad, #b42318); }
+.hzi-form { display: flex; flex-direction: column; gap: 0.5rem; }
+.hzi-label { font-weight: 600; }
+.hzi-text { width: 100%; resize: vertical; min-height: 4.5rem; padding: 0.5rem; border: 1px solid var(--color-border); border-radius: 0.375rem; background: var(--color-input); color: var(--color-foreground); font: inherit; }
+.hzi-text:focus-visible { outline: 2px solid var(--color-ring); outline-offset: 2px; }
+.hzi-actions { display: flex; flex-wrap: wrap; gap: 0.5rem; padding-top: 0.75rem; border-top: 1px solid var(--color-border); }
+@media (pointer: coarse) { .hzi-actions button { min-height: 44px; } }

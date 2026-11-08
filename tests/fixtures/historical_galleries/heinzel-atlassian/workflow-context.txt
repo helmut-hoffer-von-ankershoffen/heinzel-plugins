@@ -1,0 +1,50 @@
+Skip to content
+Heinzelmännchen
+Heinzelmännchen
+Contracts
+Team graph
+Weekly work review
+Organisation
+Team roster
+M
+Mira
+· EM
+weekly-work-review
+Weekly work review
+
+Review issue progress against the widget launch plan.
+
+ready
+Schedule: by hand only
+0 drafts so far
+/demo-profile/state_dir/demonstration-contracts/weekly-work-review.prose.md
+
+it has no schedule: add `schedule: "0 7 * * MON"` under `hz:` in /demo-profile/state_dir/demonstration-contracts/weekly-work-review.prose.md, or run it by hand: hz heinzel wake me:weekly-work-review
+
+Requirements
+tracker:read atlassian
+documents:read atlassian
+agent-runner:read claude-code
+Inputs
+issues: tracker.issues_updated
+plan: documents.read
+Outputs
+notes: markdown
+Next steps
+hz heinzel wake me:weekly-work-review --dry-run
+the packet the agent gets; nothing is spent
+hz heinzel wake me:weekly-work-review
+draft it now, at most 0.5 USD; the draft is saved under /demo-profile/data_dir/workflow/drafts/me-weekly-work-review
+v0.9.1
+Updates, off
+Daemon not installed, off
+0
+System health, warning
+No calendar connected, error
+Chat
+New chat
+Your message
+Default
+
+Up to $0.25 per message · this chat $0.00
+Runs your agent runner and may cost money: at most $0.25 per message, $2.00 per chat; this chat has cost $0.00. It reads with hz and asks you before it changes anything.

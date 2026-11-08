@@ -36,9 +36,9 @@ license notices are packaged alongside the built view.
 
 Find overlap across Berlin, New York and Los Angeles with the World Clock — fictional demonstration time
 
-<img src="docs/assets/screenshots/team-overview.png" alt="Fictional team working hours at a glance: Today, sidebar ticker and primary footer clock" width="960">
+<img src="docs/assets/screenshots/team-overview.png" alt="Fictional team working hours at a glance: the Today count and the primary footer clock" width="960">
 
-Fictional team working hours at a glance: Today, sidebar ticker and primary footer clock
+Fictional team working hours at a glance: the Today count and the primary footer clock
 
 <img src="docs/assets/screenshots/footer-detail.png" alt="Inspect all configured time zones from the primary footer clock — fictional demonstration data" width="960">
 
@@ -48,20 +48,20 @@ Inspect all configured time zones from the primary footer clock — fictional de
 
 The globe and three fictional team clocks on a phone — fixed demonstration time
 
-<img src="docs/assets/screenshots/terminal-current.png" alt="Fictional demo team at 15:30 UTC: Berlin and New York are working; Los Angeles starts in 30 minutes." width="960">
+<img src="docs/assets/screenshots/terminal-current.png" alt="Terminal output shown in the app, not a feature view: fictional demo team at 15:30 UTC: Berlin and New York are working; Los Angeles starts in 30 minutes." width="960">
 
-Fictional demo team at 15:30 UTC: Berlin and New York are working; Los Angeles starts in 30 minutes.
+Terminal output shown in the app, not a feature view: fictional demo team at 15:30 UTC: Berlin and New York are working; Los Angeles starts in 30 minutes.
 
-<img src="docs/assets/screenshots/terminal-overlap.png" alt="Preview 16:30 UTC: all three fictional demo zones are within working hours." width="960">
+<img src="docs/assets/screenshots/terminal-overlap.png" alt="Terminal output shown in the app, not a feature view: at 16:30 UTC all three fictional demo zones are within working hours." width="960">
 
-Preview 16:30 UTC: all three fictional demo zones are within working hours.
+Terminal output shown in the app, not a feature view: at 16:30 UTC all three fictional demo zones are within working hours.
 
 <details>
 <summary>Command line</summary>
 
-<img src="docs/assets/screenshots/cli-times.png" alt="The same fictional team zones and working hours in the CLI — fixed demonstration time" width="960">
+<img src="docs/assets/screenshots/cli-json.png" alt="Structured clock data for the fictional team at the fixed demonstration time." width="960">
 
-The same fictional team zones and working hours in the CLI — fixed demonstration time
+Structured clock data for the fictional team at the fixed demonstration time.
 
 </details>
 

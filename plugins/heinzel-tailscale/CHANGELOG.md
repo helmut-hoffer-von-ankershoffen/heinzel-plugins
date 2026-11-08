@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.9.4
+
+The switch shows your choice: On reads On while hz finishes turning it on. One short status line replaces the
+long text under it (*Turning on…*, the URL, or one cause such as *Sign in to Tailscale, then try again.* with
+Try again); the full explanation moves to Details on cores that support it. Sharing turned on from the CLI, or
+after a web restart, now finishes on the web app's next status read instead of waiting for a restart.
+
 ## 0.9.3
 
 Require Heinzel 0.9.16 as the supported standard-app installation and plugin-change baseline.

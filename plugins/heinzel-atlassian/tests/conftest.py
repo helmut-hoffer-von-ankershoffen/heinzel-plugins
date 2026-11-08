@@ -67,6 +67,11 @@ def sample(name: str) -> Any:
     return json.loads((FIXTURES / name).read_text(encoding="utf-8"))
 
 
+def auth(name: str) -> str:
+    """A recorded `acli ... auth status` answer from tests/fixtures/auth (a made-up person and site)."""
+    return (FIXTURES / "auth" / f"{name}.txt").read_text(encoding="utf-8")
+
+
 def live(name: str) -> Any:
     """An answer recorded from the real acli 1.3.39 on a Jira Cloud test project, with the people made fictional."""
     return json.loads((FIXTURES / "live" / name).read_text(encoding="utf-8"))
@@ -96,6 +101,7 @@ class FakeAcli(Acli):
     PAGE = PAGE
     UNAUTHORIZED = UNAUTHORIZED
     sample = staticmethod(sample)
+    auth = staticmethod(auth)
     live = staticmethod(live)
 
     answers: dict[str, dict[str, Any]] = field(default_factory=dict)
@@ -124,6 +130,8 @@ class FakeAcli(Acli):
         if self.handler is not None and (routed := self.handler(list(args))) is not None:
             return Completed(routed[0], routed[1].encode(), routed[2].encode(), overflow=False)
         answer = self.answers.get(" ".join(args[:4])) or self.answers.get(" ".join(args[:3]))
+        if answer is None and list(args[-2:]) == ["auth", "status"]:  # signed out unless a test says otherwise
+            return Completed(1, b"", UNAUTHORIZED.encode(), overflow=False)
         assert answer is not None, f"unexpected acli {' '.join(args)}"
         stdout = (answer["stdout"] * answer["repeat"]).encode()
         return Completed(answer["exit"], stdout, answer["stderr"].encode(), overflow=False)

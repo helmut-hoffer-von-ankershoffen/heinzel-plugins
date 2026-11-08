@@ -7,6 +7,7 @@ import select
 import subprocess
 import sys
 import tomllib
+from importlib.metadata import version
 from pathlib import Path
 from urllib.parse import parse_qs, urlsplit
 
@@ -136,7 +137,7 @@ def test_mounted_sharing_hot_applies_copies_and_disables_without_os_changes(tmp_
                 str(REPO / "tests/browser/diagnostic-preload.mjs"),
                 str(REPO / "web/e2e/tailscale.mjs"),
             ],
-            input=json.dumps({"url": url, "shots": str(tmp_path / "screenshots")}),
+            input=json.dumps({"url": url, "shots": str(tmp_path / "screenshots"), "core": version("heinzel")}),
             cwd=REPO,
             capture_output=True,
             text=True,

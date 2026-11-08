@@ -15,14 +15,17 @@ Mira
 Today
 2
 Today
+Doctor: 4 checks need attention
+
+ai.access ai access, system.doctor installation, system.prerequisite system.runner: claude…
+
+Open
+Ask about it
 Zones at work now
 
 2/3
 
 Ask about it
-
-Nothing needs you right now. Ask anything below.
-
 v0.9.21
 Updates, off
 0

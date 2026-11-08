@@ -9,6 +9,8 @@ vi.mock("cobe", () => ({default: create}));
 vi.mock("./sdk", () => ({
   Button: ({children, variant: _variant, size: _size, ...props}: any) => <button {...props}>{children}</button>,
   SettingsShortcut: ({label}: {label: string}) => <a href="/?settings=clock" aria-label={label}>Settings</a>,
+  PaneActions: ({children}: any) => <div>{children}</div>,
+  PaneAction: ({children, to}: any) => <a href={to}>{children}</a>,
 }));
 const zones = ["Europe/Berlin", "America/New_York", "UTC"].map(zone => ({zone, hours: [9,18], working: false, primary: zone === "Europe/Berlin", time: ""}));
 const props = {data: zones, loading: false, visible: true, compact: false, flowing: false, onClose: vi.fn()};

@@ -1,7 +1,7 @@
 import createGlobe from "cobe";
-import { ChevronLeft, ChevronRight, Globe, X } from "lucide-react";
+import { ChevronLeft, ChevronRight, Globe, Settings2, X } from "lucide-react";
 import { useEffect, useId, useMemo, useRef, useState } from "react";
-import { SettingsShortcut } from "./sdk";
+import { PaneAction, PaneActions, SettingsShortcut } from "./sdk";
 import { Button } from "./sdk";
 import { WorkStateIcon } from "./WorkStateIcon";
 import { t } from "./messages";
@@ -293,9 +293,6 @@ export function WorldClock({ data, loading, visible = true, onClose, flowing = f
               {flat ? t("worldClock.static") : t("worldClock.drag")}
               {t("worldClock.explanation")}
             </p>
-            <div className="flex justify-end">
-              <SettingsShortcut section="clock" label={t("status.editZones")} />
-            </div>
             <ul className="divide-y divide-border">
               {times.map((zone, index) => {
                 const work = workingHours(zone, now);
@@ -303,7 +300,7 @@ export function WorldClock({ data, loading, visible = true, onClose, flowing = f
                   <li key={zone.zone} className="flex items-center gap-3 py-3">
                     <button
                       type="button"
-                      className="min-w-0 flex-1 rounded-md text-left hover:underline focus-visible:outline-2"
+                      className="min-w-0 flex-1 rounded-md px-2 py-1 text-left hover:bg-accent focus-visible:outline-2 pointer-coarse:min-h-11"
                       disabled={!zoneLocation(zone.zone)}
                       onClick={() => {
                         const point = zoneLocation(zone.zone);
@@ -336,6 +333,15 @@ export function WorldClock({ data, loading, visible = true, onClose, flowing = f
                 );
               })}
             </ul>
+            {PaneActions && PaneAction ? (
+              <PaneActions>
+                <PaneAction icon={Settings2} to="?settings=clock">
+                  {t("status.editZones")}
+                </PaneAction>
+              </PaneActions>
+            ) : (
+              <SettingsShortcut section="clock" label={t("status.editZones")} />
+            )}
           </>
         )}
       </div>

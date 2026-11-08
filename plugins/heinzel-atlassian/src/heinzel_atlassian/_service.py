@@ -7,8 +7,9 @@ from urllib.parse import urlsplit
 from heinzel import Check, HeinzelError, Kernel, Login, Status, __version__
 
 from heinzel_atlassian._acli import MINIMUM_VERSION, Acli, AcliTimeoutError
-from heinzel_atlassian._client import INSTALL, LOGIN, SITE_FIX, AcliClient, AcliLoginError, Product
+from heinzel_atlassian._client import INSTALL, INSTALL_COMMAND, LOGIN, SITE_FIX, AcliClient, AcliLoginError, Product
 from heinzel_atlassian._models import AtlassianAbout, AtlassianSettings
+from heinzel_atlassian._status import AtlassianStatus, read
 
 DISTRIBUTION = "heinzel-atlassian"
 ADAPTER = "atlassian"
@@ -70,13 +71,18 @@ class AtlassianService:
             version=installed,
             heinzel_version=__version__,
             modules=[r.qualname for r in self._kernel.modules if r.origin.distribution == DISTRIBUTION],
-            site_url=self._settings.site_url,
+            site_url=self._acli.site(self._settings),
             acli=self._acli.path(),
             commands=COMMANDS,
         )
 
     def _site(self) -> str:
-        return urlsplit(self._settings.site_url).hostname or "" if self._settings.site_url else ""
+        site = self._acli.site(self._settings)
+        return urlsplit(site).hostname or "" if site else ""
+
+    def status(self, bindings: Bindings) -> AtlassianStatus:
+        """What acli says about its sign-in, for the products in use; reads only acli's local status commands."""
+        return read(self._acli, self._settings.timeout, self.products(bindings))
 
     def products(self, bindings: Bindings) -> list[Product]:
         """The products the adapters serve now (Jira for tracker, Confluence for documents); Jira if neither."""
@@ -94,8 +100,8 @@ class AtlassianService:
                 name="acli",
                 status=Status.DEGRADED,
                 detail=f"{self._settings.acli}, Atlassian's CLI, is not on PATH; every read goes through it",
-                fix=f"install acli ({INSTALL}), then {LOGINS}",
-                login=login,
+                fix=f"install acli with `{INSTALL_COMMAND}` ({INSTALL}), then {LOGINS}",
+                login=Login(signed_in=False, command=INSTALL_COMMAND),
             )
         try:
             found = self._acli.version()
@@ -117,11 +123,19 @@ class AtlassianService:
                 login=login,
             )
         said = ".".join(str(part) for part in found) if found else "of a version it doesn't name"
+        sign_in = self.status(bindings)
+        known = None if all(p.authorised is None for p in sign_in.products) else sign_in.state == "connected"
         return Check(
             name="acli",
-            status=Status.UP,
-            detail=f"{path}, acli {said}; login is acli's ({LOGINS}), checked on first use: doctor stays offline",
-            login=login,
+            status=Status.UP if sign_in.state == "connected" else Status.DEGRADED,
+            detail=f"{path}, acli {said}; {sign_in.cause}",
+            fix=sign_in.command,
+            login=Login(
+                signed_in=known,
+                account=sign_in.identity,
+                site=sign_in.site or self._site(),
+                command=sign_in.command or login.command,
+            ),
         )
 
     def checks(self, bindings: Bindings) -> list[Check]:
@@ -133,7 +147,7 @@ class AtlassianService:
         acli refuses as unauthorized fails with the login command.
         """
         acli = self._acli_check(bindings)
-        if self._settings.site_url is None:
+        if self._acli.site(self._settings) is None:
             site = Check(
                 name="site",
                 status=Status.DEGRADED,
@@ -144,7 +158,7 @@ class AtlassianService:
             site = Check(
                 name="site",
                 status=Status.UP,
-                detail=f"{self._settings.site_url}; not contacted; {GATEWAY_NOTE}",
+                detail=f"{self._acli.site(self._settings)}; not contacted; {GATEWAY_NOTE}",
             )
         checks = [acli, site]
         bound = {capability: bindings.bound(capability) for capability in CAPABILITIES}

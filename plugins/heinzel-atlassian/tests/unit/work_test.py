@@ -230,4 +230,4 @@ def test_work_that_cannot_be_read_says_why(fake_acli):
 def test_without_a_site_acli_does_not_run(fake_acli):
     with pytest.raises(HeinzelError, match=r"atlassian\.site_url"):
         JiraWork(AtlassianSettings(), fake_acli).assigned()
-    assert fake_acli.calls == []
+    assert all(call.args[-2:] == ["auth", "status"] for call in fake_acli.calls)  # only acli's local status

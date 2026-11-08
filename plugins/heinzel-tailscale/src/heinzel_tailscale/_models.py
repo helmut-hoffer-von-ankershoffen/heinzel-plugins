@@ -23,7 +23,13 @@ class SharingState(BaseModel):
     mapped: bool = Field(default=False, description="Whether the exact hz HTTPS root mapping is present.")
     origin: str | None = Field(default=None, description="The exact HTTPS origin, without any sign-in credential.")
     target: str | None = Field(default=None, description="The intended loopback backend address.")
-    message: str = Field(description="A concise explanation of readiness or the action required.")
+    summary: str | None = Field(
+        default=None,
+        max_length=60,
+        description="One short line for the pane in the person's words; none when off or when the URL says it.",
+    )
+    problem: bool = Field(default=False, description="Whether the summary names something the person must fix.")
+    message: str = Field(description="The full explanation, for the CLI and the pane's Details.")
 
 
 class SharingIntent(BaseModel):

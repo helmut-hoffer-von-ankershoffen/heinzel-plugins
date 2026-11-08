@@ -1,0 +1,32 @@
+[
+  {
+    "zone": "Europe/Berlin",
+    "time": "Mon 16:30",
+    "hours": [
+      9,
+      18
+    ],
+    "working": true,
+    "primary": true
+  },
+  {
+    "zone": "America/New_York",
+    "time": "Mon 11:30",
+    "hours": [
+      9,
+      18
+    ],
+    "working": true,
+    "primary": false
+  },
+  {
+    "zone": "America/Los_Angeles",
+    "time": "Mon 08:30",
+    "hours": [
+      9,
+      18
+    ],
+    "working": false,
+    "primary": false
+  }
+]

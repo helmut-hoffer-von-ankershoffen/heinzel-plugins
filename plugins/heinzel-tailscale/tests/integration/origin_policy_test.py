@@ -34,7 +34,9 @@ def expected(client, origins):
     }
 
 
-def test_actual_tailscale_apply_metadata_is_verified_by_the_replacement_owner(make_kernel, tmp_path):
+def test_a_running_owner_finishes_a_saved_request_and_a_replacement_owner_agrees(make_kernel, tmp_path):
+    """A request saved elsewhere needs no restart: the running owner loads exactly its origin on one status read."""
+
     class StaticClient(TailscaleCli):
         def executable(self):
             return "/fake/tailscale"
@@ -65,18 +67,21 @@ def test_actual_tailscale_apply_metadata_is_verified_by_the_replacement_owner(ma
         "[tailscale.intent]\nenabled = true\n"
         f'origin = "{ONE}"\nbackend_port = 8000\nhttps_port = 443\nadded_origin = true\nphase = "owned"\n'
     )
+    external = AUTH | {"host": ONE[8:], "origin": ONE}
+    assert before.get("/api/tailscale/status", headers=external).status_code == 403
     row = before.get("/api/system/ui/status", params={"item": "tailscale:sharing"}, headers=AUTH).json()[0]
     assert row["problem"] is None
-    assert row["item"]["toggle"]["checked"] is False
-    apply = row["item"]["toggle"]["apply_settings"]
-    assert apply == {"hz.ui_allowed_origins": [ONE]}
-    assert not before.post(
-        "/api/lifecycle/verify", headers=AUTH, json=expected(before, apply["hz.ui_allowed_origins"])
-    ).json()["matches"]
+    assert row["item"]["toggle"]["checked"] is True
+    assert row["item"]["toggle"]["requested"] is True
+    assert row["item"]["toggle"]["url"] == ONE
+    assert row["item"]["toggle"]["apply_settings"] == {}
+    # The running owner now accepts the exact origin it loaded, and nothing else.
+    assert before.get("/api/tailscale/status", headers=external).status_code == 200
+    other = AUTH | {"host": TWO[8:], "origin": TWO}
+    assert before.get("/api/tailscale/status", headers=other).status_code == 403
     replacement = instance(config.reread())
-    proof = replacement.post(
-        "/api/lifecycle/verify", headers=AUTH, json=expected(replacement, apply["hz.ui_allowed_origins"])
-    )
+    proof = replacement.post("/api/lifecycle/verify", headers=AUTH, json=expected(replacement, [ONE]))
     assert proof.json()["matches"] is True
     ready = replacement.get("/api/system/ui/status", params={"item": "tailscale:sharing"}, headers=AUTH).json()[0]
     assert ready["item"]["toggle"]["checked"] is True
+    assert ready["item"]["toggle"]["apply_settings"] == {}
