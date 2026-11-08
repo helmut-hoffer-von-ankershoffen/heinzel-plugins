@@ -20,6 +20,7 @@ RECAPTURED = (
     "heinzel-google",
     "heinzel-github",
     "heinzel-weather",
+    "heinzel-example",
 )
 
 
