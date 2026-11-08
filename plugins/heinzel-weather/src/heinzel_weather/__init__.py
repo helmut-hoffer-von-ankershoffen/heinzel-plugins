@@ -16,6 +16,9 @@ from typing import Annotated
 
 from heinzel import (
     Avatar,
+    ChartPoint,
+    ChartRange,
+    ChartWidget,
     Check,
     ConfigEditor,
     Credentials,
@@ -28,7 +31,6 @@ from heinzel import (
     Navigate,
     NavSettings,
     Notifications,
-    OpenUrl,
     Prompter,
     Status,
     StatusItem,
@@ -51,12 +53,14 @@ from heinzel_weather._models import (
     Info,
     Now,
     Observation,
+    PageState,
     Provider,
     Report,
     Signals,
     UiWeather,
     Units,
     Watched,
+    WeatherPage,
     WeatherSettings,
 )
 from heinzel_weather._module import API_KEY, FALLBACK_VARIABLE, module
@@ -67,15 +71,30 @@ SETTINGS = Navigate(path="/?settings=weather")
 module.settings(WeatherSettings)
 module.service(WeatherService)
 module.skill(Path(__file__).parent / "skills")
+PAGE = Navigate(path="/?panel=weather:forecast")
+"""The weather page: the sidebar item and the footer item open it; Settings stay behind the page's place button."""
 module.nav(
     "weather",
     title="Weather",
     icon="cloud-sun",
     settings=NavSettings(sections=("weather",), group="preferences"),
-    sidebar=SETTINGS,
+    sidebar=PAGE,
+)
+module.view(
+    Path(__file__).parent / "views",
+    abi=1,
+    name="forecast",
+    source="page",
+    title="Weather",
+    fallback="Weather is unavailable here; run hz weather show for the text view.",
+    refresh=300,
 )
 MAX_TEXT = 80
 """The longest text of a status item or a widget title (ADR 0056)."""
+CHART_HOURS = 24
+"""How many hours the Today chart spans."""
+RAINY = 0.5
+"""The chance of rain from which the chart says rain is likely."""
 Location = Annotated[
     str | None,
     Field(
@@ -96,13 +115,12 @@ def _now_line(now: Now) -> Text:
 
 def _hours(hours: list[Hour], unit: str) -> Table:
     table = Table(title="Next hours", title_justify="left")
-    for column in ("Time", "", "Temp", "Rain", "Sky"):
+    for column in ("Time", "Temp", "Rain", "Sky"):
         table.add_column(column)
     for hour in hours:
         rain = f"{round(hour.rain_chance * 100)}%"
         table.add_row(  # Text, never markup: the descriptions come from OpenWeather
             Text(hour.at.strftime("%H:%M")),
-            Text(hour.icon),
             Text(f"{hour.temperature:.0f}{unit}"),
             Text(rain),
             Text(hour.description),
@@ -112,12 +130,11 @@ def _hours(hours: list[Hour], unit: str) -> Table:
 
 def _days(days: list[Day], unit: str) -> Table:
     table = Table(title="Days", title_justify="left")
-    for column in ("Day", "", "Low", "High", "Rain", "Sky"):
+    for column in ("Day", "Low", "High", "Rain", "Sky"):
         table.add_column(column)
     for day in days:
         table.add_row(
             Text(day.day.strftime("%a %d %b")),
-            Text(day.icon),
             Text(f"{day.low:.0f}{unit}"),
             Text(f"{day.high:.0f}{unit}"),
             Text(f"{round(day.rain_chance * 100)}%"),
@@ -158,13 +175,12 @@ def _weather_status(value: UiWeather) -> StatusItem:
         detail.append(DetailLine(text="Place guessed from your time zone; set yours in Settings", tone="warn"))
     if value.stale:
         detail.append(DetailLine(text="Showing the last observation; refresh failed", tone="warn"))
-    else:
-        detail.append(DetailLine(text=conditions.attribution[:MAX_TEXT]))
     return StatusItem(
         text=f"{now.temperature:.0f}{now.units.degree} {now.location}{' · stale' if value.stale else ''}",
         tone="warn" if value.stale else "neutral",
         icon=ui_icon(now.condition),
         detail=detail,
+        effect=PAGE,
         actions=[WidgetAction(label="Change place", icon="cloud", effect=SETTINGS)],
     )
 
@@ -178,8 +194,41 @@ def _weather_card(value: UiWeather) -> GraphicWidget | None:
     return GraphicWidget(
         label=f"Weather in {now.location}"[:MAX_TEXT],
         value=f"{round(now.temperature) + 0}{now.units.degree}",
-        caption=f"{now.description[:24]}{stale} · {conditions.attribution.partition(', https://')[0]}",
+        caption=f"{now.description[:24]}{stale}",
         avatar=Avatar(accessories=conditions.accessories),
+        size="medium",
+    )
+
+
+def _temperature_chart(value: UiWeather) -> ChartWidget | None:
+    """The next hours as a line with rain-chance bars, today's range and a now marker; none without two hours."""
+    now = value.conditions.now
+    seen: set[str] = set()
+    hours: list[tuple[str, Hour]] = []
+    for hour in value.conditions.hours[:CHART_HOURS]:
+        label = hour.at.strftime("%Y-%m-%dT%H:%M")
+        if label not in seen:  # a clock change repeats an hour; the axis needs distinct labels
+            seen.add(label)
+            hours.append((label, hour))
+    if now is None or len(hours) < 2:  # noqa: PLR2004
+        return None
+    degree = now.units.degree
+    temperatures = [round(hour.temperature) + 0 for _, hour in hours]
+    rainy = next((label[11:] for label, hour in hours if hour.rain_chance >= RAINY), None)
+    rain = f"; rain likely from {rainy}" if rainy else "; little rain"
+    summary = (
+        f"{now.location}: {round(now.temperature) + 0}{degree} now, {min(temperatures)} to {max(temperatures)}{degree} "
+        f"over the next {len(hours)} hours{rain}."
+    )
+    return ChartWidget(
+        title=f"Temperature and rain, next {len(hours)} hours"[:MAX_TEXT],
+        summary=summary,
+        unit=degree,
+        series=[ChartPoint(at=label, value=hour.temperature) for label, hour in hours],
+        bars=[min(max(hour.rain_chance, 0.0), 1.0) for _, hour in hours],
+        bars_label="Rain chance",
+        range=ChartRange(low=min(now.low, now.high), high=max(now.low, now.high)),
+        now=hours[0][0],
         size="medium",
     )
 
@@ -205,8 +254,6 @@ def _forecast_card(value: UiWeather) -> ListWidget | None:
             for day in conditions.days[1:4]
         ),
     ]
-    attribution_link = OpenUrl(url="https://open-meteo.com/") if conditions.provider is Provider.OPEN_METEO else None
-    items.append(ListEntry(text=conditions.attribution, effect=attribution_link))
     return ListWidget(title=f"Weather in {now.location}"[:MAX_TEXT], items=items)
 
 
@@ -214,6 +261,12 @@ def _forecast_card(value: UiWeather) -> ListWidget | None:
 def ui(service: WeatherService) -> UiWeather:
     """Return the shared cached observation for the app's status and Today card."""
     return service.ui_weather()
+
+
+@module.operation(audience="expert")
+def page(service: WeatherService) -> WeatherPage:
+    """Return what the weather page shows: now, the next 24 hours, the next 7 days and alerts, or why not."""
+    return service.page()
 
 
 @module.operation
@@ -236,6 +289,12 @@ def current_weather(value: UiWeather) -> StatusItem:
 def today_weather(value: UiWeather) -> GraphicWidget | None:
     """Show the current temperature with the weather accessory on Today."""
     return _weather_card(value)
+
+
+@module.widget(source="ui", name="temperature-today", refresh="15m")
+def temperature_today(value: UiWeather) -> ChartWidget | None:
+    """Show the temperature over the next hours with the chance of rain, and a marker for now."""
+    return _temperature_chart(value)
 
 
 @module.widget(source="ui", name="forecast-today", refresh="15m")
@@ -375,11 +434,13 @@ __all__ = [
     "Info",
     "Now",
     "Observation",
+    "PageState",
     "Provider",
     "Report",
     "Signals",
     "Units",
     "Watched",
+    "WeatherPage",
     "WeatherService",
     "WeatherSettings",
     "module",

@@ -7,6 +7,7 @@ browser_time = "2026-11-01T12:00:00+01:00"
 name = "today-weather"
 surface = "ui"
 route = "/"
+appearance = "light"
 caption = "Current weather and the coming days on Today — fictional Berlin forecast"
 
 [[scenes.steps]]
@@ -56,9 +57,28 @@ role = "region"
 name_regex = "Berlin"
 
 [[scenes]]
+name = "weather-page"
+surface = "ui"
+route = "/?panel=weather:forecast"
+appearance = "light"
+caption = "Explore current conditions, the hourly outlook and a warning — fictional Berlin forecast"
+
+[[scenes.steps]]
+action = "wait"
+role = "heading"
+name = "Next 24 hours"
+
+[[scenes.steps]]
+action = "click"
+role = "button"
+name_regex = "^Dismiss Doctor"
+optional = true
+
+[[scenes]]
 name = "phone-weather"
 surface = "ui"
 route = "/"
+appearance = "dark"
 caption = "Weather and near forecast in the phone-sized Today view — fictional local forecast"
 
 [[scenes.steps]]

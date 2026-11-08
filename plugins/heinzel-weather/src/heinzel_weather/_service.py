@@ -26,12 +26,14 @@ from heinzel_weather._models import (
     Info,
     Now,
     Observation,
+    PageState,
     Provider,
     Report,
     Signals,
     UiWeather,
     Units,
     Watched,
+    WeatherPage,
     WeatherSettings,
 )
 from heinzel_weather._module import API_KEY, FALLBACK_VARIABLE
@@ -43,6 +45,10 @@ HOURS = 12
 DAYS = 5
 """How many days a report shows by default; OpenWeather forecasts eight."""
 MAX_DAYS = 8
+PAGE_HOURS = 24
+"""How many of the next hours the weather page shows."""
+PAGE_DAYS = 7
+"""How many days the weather page shows."""
 UI_REFRESH = timedelta(minutes=15)
 """The one refresh interval for every weather value shown in the app."""
 NO_LOCATION = (
@@ -203,6 +209,7 @@ class WeatherService:
             needs_location=observed.needs_location,
             now=report.now if report else None,
             days=report.days[:4] if report else [],
+            hours=report.hours if report else [],
             accessories=(
                 accessories(report.now, units=report.now.units, rain=self._settings.rain_chance) if report else []
             ),
@@ -210,6 +217,28 @@ class WeatherService:
             attribution=observed.attribution,
         )
         return UiWeather(conditions=conditions, fetched_at=observed.fetched_at, stale=observed.stale)
+
+    def page(self) -> WeatherPage:
+        """What the weather page shows: the shared cached report, or why there is none. Never raises."""
+        try:
+            observed = self.observation()
+        except HeinzelError as error:
+            return WeatherPage(
+                state=PageState.UNAVAILABLE,
+                message=str(error),
+                provider=self.provider,
+                attribution=self.attribution(),
+                fetched_at=self.clock(),
+            )
+        return WeatherPage(
+            state=PageState.NEEDS_LOCATION if observed.report is None else PageState.READY,
+            report=observed.report,
+            provider=observed.provider,
+            attribution=observed.attribution,
+            fetched_at=observed.fetched_at,
+            stale=observed.stale,
+            guessed=self.guessed,
+        )
 
     def observation(self) -> Observation:
         """Read the shared 15-minute report and its candidate changes without consuming or delivering them.
@@ -245,7 +274,7 @@ class WeatherService:
             self._ui_attempted_monotonic = elapsed
             self._ui_attempted_at = now
             try:
-                report = self.report() if self.places else None
+                report = self.report(days=PAGE_DAYS, hours=PAGE_HOURS) if self.places else None
                 result = Observation(
                     needs_location=not self.places,
                     report=report,
@@ -275,8 +304,8 @@ class WeatherService:
             self._ui_cache = result
             return result
 
-    def report(self, location: str | None = None, days: int = DAYS) -> Report:
-        """The weather now, the next hours and `days` days, and alerts, at `location` or the primary one.
+    def report(self, location: str | None = None, days: int = DAYS, hours: int = HOURS) -> Report:
+        """The weather now, the next `hours` hours and `days` days, and alerts, at `location` or the primary one.
 
         Raises:
             HeinzelError: If no location is configured, the selected provider needs a key, or the provider fails.
@@ -291,7 +320,8 @@ class WeatherService:
                 place = self._place(weather, query)
                 answer = weather.one_call(place.lat, place.lon, self.units)
         report = _report(answer, place, self.units, self.clock(), min(max(days, 1), MAX_DAYS))
-        return report.model_copy(update={"now": report.now.model_copy(update={"attribution": self.attribution()})})
+        now = report.now.model_copy(update={"attribution": self.attribution()})
+        return report.model_copy(update={"now": now, "hours": report.hours[: max(hours, 1)]})
 
     def forecast(self, location: str | None = None, days: int = DAYS) -> Forecast:
         """The next `days` days at `location` or the primary one."""
@@ -333,9 +363,7 @@ class WeatherService:
             _write(self._watch_file, state)
         found = changes(report, now=now, rain_chance=self._settings.rain_chance, swing=self._settings.temperature_swing)
         new = fresh(found, state.noticed, now)
-        noticed = sum(
-            1 for change in new if notifications is not None and _notify(notifications, change, self.attribution())
-        )
+        noticed = sum(1 for change in new if notifications is not None and _notify(notifications, change))
         # An alert still in effect stays remembered for as long as it lasts, not just KEEP after it was first seen.
         current = {change.key: now for change in found if change.kind == "alert"}
         state.noticed = prune({**state.noticed, **current, **{change.key: now for change in new}}, now)
@@ -386,11 +414,11 @@ def _write(path: Path, state: BaseModel) -> None:
         return
 
 
-def _notify(notifications: Notifications, change: Change, attribution: str) -> bool:
+def _notify(notifications: Notifications, change: Change) -> bool:
     notice = notifications.emit(
         NOTICE_KIND,
         change.title,
-        f"{change.body} {attribution}",
+        change.body,
         route="/",
         command="hz weather show",
         key=f"weather:{change.key}",
@@ -457,7 +485,7 @@ def _report(answer: OneCall, place: Place, units: Units, now: datetime, days: in
             sunset=sunset,
         ),
         hours=[_hour(raw, zone, units) for raw in answer.hourly if _at(raw.dt, zone) + timedelta(hours=1) > now][
-            :HOURS
+            :PAGE_HOURS
         ],
         days=[
             Day(

@@ -1,6 +1,6 @@
 [project]
 name = "heinzel-weather"
-version = "0.4.1"
+version = "0.5.3"
 description = "Weather where you are, keyless from Open-Meteo (or OpenWeather with your key): now, the next hours and days, and a heads-up when it changes. Set your place in Settings; until then your time zone's city is used."
 readme = "README.md"
 authors = [{ name = "Helmut Hoffer von Ankershoffen", email = "helmuthva@gmail.com" }]
@@ -16,7 +16,7 @@ classifiers = [
     "Programming Language :: Python :: 3",
     "Typing :: Typed",
 ]
-dependencies = ["heinzel>=0.9.1,<0.10", "httpx>=0.28"]
+dependencies = ["heinzel>=0.9.29,<0.10", "httpx>=0.28"]
 
 [project.entry-points."heinzel.modules"]
 weather = "heinzel_weather"
@@ -27,7 +27,7 @@ Changelog = "https://github.com/helmut-hoffer-von-ankershoffen/heinzel-plugins/b
 Issues = "https://github.com/helmut-hoffer-von-ankershoffen/heinzel-plugins/issues"
 
 [build-system]
-requires = ["hatchling>=1.29.0"]
+requires = ["hatchling>=1.29.0", "nodejs-wheel-binaries==24.19.0"]
 build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
@@ -123,6 +123,8 @@ profiles = []
 requires = ["core:plugin-api@1"]
 provides = ["theme-signals@1", "numeric-signals@1"]
 
+[tool.hatch.build.hooks.custom]
+
 [tool.coverage.run]
 source = ["heinzel_weather"]
 branch = true
@@ -159,6 +161,11 @@ caption = "Current weather and the coming days on Today — fictional Berlin for
 path = "docs/assets/screenshots/weather-detail.png"
 surface = "ui"
 caption = "Inspect conditions, feels-like temperature and rain chance — fictional local forecast"
+
+[[tool.heinzel.catalog.screenshots]]
+path = "docs/assets/screenshots/weather-page.png"
+surface = "ui"
+caption = "Explore current conditions, the hourly outlook and a warning — fictional Berlin forecast"
 
 [[tool.heinzel.catalog.screenshots]]
 path = "docs/assets/screenshots/phone-weather.png"
