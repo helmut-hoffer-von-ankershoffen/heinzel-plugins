@@ -1,0 +1,16 @@
+Widget plan
+                                              Widget launch plan
+
+Ship reliable widgets without losing export data.
+
+Scope
+
+ • Mira: fix the export boundary.
+ • Jonas: document the widget API.
+ • Priya: verify dark-mode screenshots.
+
+Next milestone
+
+Release review on Tuesday after all three checks pass.
+Source: https://acme.atlassian.net/wiki/spaces/WID/pages/123456/Widget+plan
+Revision: 3

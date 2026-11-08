@@ -1,6 +1,6 @@
 [project]
 name = "heinzel-atlassian"
-version = "0.9.2"
+version = "0.9.3"
 description = "Read Jira issues and Confluence pages through acli: the tracker and documents capabilities."
 readme = "README.md"
 license = "MIT"
@@ -140,14 +140,14 @@ highlights = [
 ]
 
 [[tool.heinzel.catalog.screenshots]]
-path = "docs/assets/screenshots/jira-issues.png"
+path = "docs/assets/screenshots/review-inventory.png"
 surface = "ui"
-caption = "Demo data: fictional Jira changes, owners and states in the app terminal, using the real adapter and a fixture-only requester."
+caption = "Demo data: find the fictional Weekly work review among local contracts."
 
 [[tool.heinzel.catalog.screenshots]]
-path = "docs/assets/screenshots/confluence-plan.png"
+path = "docs/assets/screenshots/workflow-context.png"
 surface = "ui"
-caption = "Demo data: read the fictional Widget launch plan with its source and revision, using the real adapter and a fixture-only requester."
+caption = "Demo data: the local Weekly work review declares Jira and Confluence inputs; no report has been generated."
 
 [[tool.heinzel.catalog.screenshots]]
 path = "docs/assets/screenshots/issues-json.png"
@@ -158,13 +158,3 @@ caption = "Demo data: structured fictional Jira changes through the real adapter
 path = "docs/assets/screenshots/confluence-cli.png"
 surface = "cli"
 caption = "Demo data: the fictional Confluence plan, source and revision in the shell, using a fixture-only requester and local vendor replies."
-
-[[tool.heinzel.catalog.screenshots]]
-path = "docs/assets/screenshots/workflow-context.png"
-surface = "ui"
-caption = "Demo data: the local Weekly work review contract declares Jira and Confluence inputs; no report has been generated."
-
-[[tool.heinzel.catalog.screenshots]]
-path = "docs/assets/screenshots/jira-parameters.png"
-surface = "ui"
-caption = "Demo data: lowercase wid resolves to WID; the fixture requester returns structured Jira changes with --json in the app terminal."

@@ -66,7 +66,14 @@ async function withinViewport(locator) {
 
 let input = "";
 for await (const chunk of process.stdin) input += chunk;
-const { url, shots } = JSON.parse(input);
+const { url, shots, core } = JSON.parse(input);
+// Core 0.9.33 (links standard) renamed the pane copy; the plugin supports older cores, so assert the exact copy of the core under test.
+const [major, minor, patch] = core.split(".").map(Number);
+const linksStandard = major > 0 || minor > 9 || (minor === 9 && patch >= 33);
+const COPY = linksStandard ? "Copy link" : "Copy URL";
+const SHARE_FAILED = linksStandard
+  ? "Could not share the link; copy it instead."
+  : "Could not share the link. You can copy it instead.";
 if (shots) mkdirSync(shots, { recursive: true });
 let browser;
 try {
@@ -119,7 +126,7 @@ try {
   let panel = await openSharing(page);
   let control = panel.getByRole("switch", { name: "Share over Tailscale", exact: true });
   assert.equal(await control.getAttribute("aria-checked"), "false");
-  assert.equal(await panel.getByRole("button", { name: "Copy URL", exact: true }).count(), 0);
+  assert.equal(await panel.getByRole("button", { name: COPY, exact: true }).count(), 0);
   await control.click();
   // The live server applies access policy in-process; no daemon restart or replacement process is needed.
   await page.waitForFunction(
@@ -134,15 +141,15 @@ try {
   assert.equal(ready.state, "ready");
   assert.equal(ready.target, `http://127.0.0.1:${new URL(url).port}`);
   assert.equal((await externalStatus(context.request, url)).status(), 200);
-  assert.equal(await panel.getByRole("button", { name: "Copy URL", exact: true }).count(), 0);
+  assert.equal(await panel.getByRole("button", { name: COPY, exact: true }).count(), 0);
   await panel.getByRole("button", { name: "Share", exact: true }).click();
-  await panel.getByRole("alert").filter({ hasText: "Could not share the link. You can copy it instead." }).waitFor();
+  await panel.getByRole("alert").filter({ hasText: SHARE_FAILED }).waitFor();
   const shared = await page.evaluate(() => window.__tailscaleShareCalls);
   assert.equal(shared.length, 1);
   assert.deepEqual(Object.keys(shared[0]), ["url"]);
   assert.equal(new URL(shared[0].url).origin, ORIGIN);
   assert.equal(new URL(shared[0].url).hash, new URL(url).hash);
-  await panel.getByRole("button", { name: "Copy URL", exact: true }).click();
+  await panel.getByRole("button", { name: COPY, exact: true }).click();
   const copied = await page.evaluate(() => navigator.clipboard.readText());
   assert.equal(shared[0].url, copied);
   assert.equal(new URL(copied).origin, "https://workstation.tail-example.ts.net");
@@ -170,13 +177,19 @@ try {
     await control.focus();
     assert.equal(await control.evaluate((element) => document.activeElement === element), true);
     await page.keyboard.press("Tab");
+    // Core 0.9.33 puts the server's explanation behind a native Details disclosure between the switch and the actions.
+    const details = panel.locator("details > summary");
+    if (linksStandard && (await details.count())) {
+      assert.equal(await details.evaluate((element) => document.activeElement === element), true);
+      await page.keyboard.press("Tab");
+    }
     const share = panel.getByRole("button", { name: "Share", exact: true });
     assert.equal(await share.evaluate((element) => document.activeElement === element), true);
     await share.press("Enter");
     const attempts = await page.evaluate(() => window.__tailscaleShareCalls);
     assert.equal(attempts.length, ++shareAttempts);
     assert.equal(attempts.at(-1).url, copied);
-    const copy = panel.getByRole("button", { name: "Copy URL", exact: true });
+    const copy = panel.getByRole("button", { name: COPY, exact: true });
     await copy.waitFor({ state: "visible" });
     await page.keyboard.press("Tab");
     assert.equal(await copy.evaluate((element) => document.activeElement === element), true);
@@ -192,7 +205,7 @@ try {
   await control.click();
   await page.waitForFunction(() => !document.querySelector('[role="switch"][aria-checked="true"]'));
   await page.waitForFunction(() => document.querySelector('[role="switch"][aria-busy="false"]'));
-  assert.equal(await panel.getByRole("button", { name: "Copy URL", exact: true }).count(), 0);
+  assert.equal(await panel.getByRole("button", { name: COPY, exact: true }).count(), 0);
   const status = await sharingStatus(page);
   assert.equal(status.state, "off");
   assert.equal(status.desired_enabled, false);

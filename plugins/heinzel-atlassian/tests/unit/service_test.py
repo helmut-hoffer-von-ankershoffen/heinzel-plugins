@@ -38,17 +38,22 @@ def test_about_describes_plugin_site_acli_and_commands(fake_acli):
 
 
 def test_checks_when_acli_is_there_and_the_site_set_and_bound(fake_acli):
+    fake_acli.answer("jira auth status", fake_acli.auth("authenticated"))
+    fake_acli.answer("confluence auth status", fake_acli.auth("authenticated"))
     bindings = Bindings(tracker="atlassian", documents="atlassian")
     checks = {c.name: c for c in service(fake_acli, **CONFIGURED).checks(bindings)}
     assert set(checks) == {"acli", "site", "tracker", "documents"}
     assert all(c.status is Status.UP for c in checks.values())
-    assert checks["acli"].detail.startswith(f"{ACLI}, acli 1.3.39; login is acli's (acli jira auth login;")
-    assert "checked on first use: doctor stays offline" in checks["acli"].detail
+    assert checks["acli"].detail == f"{ACLI}, acli 1.3.39; Signed in as ada@example.com at acme.atlassian.net."
     assert (
         checks["site"].detail
         == "https://acme.atlassian.net; not contacted; with a browser login, acli's answers name no site to match"
     )
-    assert fake_acli.calls == []  # `--version` only, which the fake answers without a run
+    assert [call.args for call in fake_acli.calls] == [
+        ["auth", "status"],
+        ["jira", "auth", "status"],
+        ["confluence", "auth", "status"],
+    ]
 
 
 def test_without_acli_the_check_is_degraded_and_names_the_install_and_login(fake_acli):
@@ -80,6 +85,7 @@ def test_an_acli_that_does_not_answer_its_version_is_degraded(fake_acli, error):
 
 def test_an_acli_that_names_no_version_is_up_and_says_so(fake_acli):
     fake_acli.reported = None
+    fake_acli.answer("jira auth status", fake_acli.auth("authenticated"))
     acli = check(fake_acli, **CONFIGURED)
     assert acli.status is Status.UP
     assert "of a version it doesn't name" in acli.detail
@@ -110,13 +116,13 @@ def test_installed_but_serving_nothing_is_degraded_with_the_fix(fake_acli):
     assert "[" not in checks["bindings"].fix + checks["tracker"].detail  # Rich markup would eat it
 
 
-def test_offline_the_sign_in_is_unknown_with_the_login_of_the_product_in_use(fake_acli):
+def test_the_login_names_the_product_in_use_and_its_browser_sign_in(fake_acli):
     jira = check(fake_acli, bindings=Bindings(tracker="atlassian"), **CONFIGURED).login
-    assert jira == Login(signed_in=None, site="acme.atlassian.net", command="acli jira auth login")
+    assert jira == Login(signed_in=False, site="acme.atlassian.net", command="acli jira auth login --web")
     confluence = check(fake_acli, bindings=Bindings(documents="atlassian")).login
-    assert confluence == Login(signed_in=None, command="acli confluence auth login")
+    assert confluence == Login(signed_in=False, command="acli confluence auth login --web")
     fake_acli.location = None
-    assert check(fake_acli, bindings=Bindings()).login == Login(signed_in=None, command="acli jira auth login")
+    assert check(fake_acli, bindings=Bindings()).login == Login(signed_in=False, command="brew install acli")
 
 
 def test_the_live_test_reads_one_item_of_each_product_in_use(fake_acli):

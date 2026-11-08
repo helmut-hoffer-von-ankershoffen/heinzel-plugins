@@ -206,11 +206,12 @@ class JiraDrafts:
     def __init__(self, settings: AtlassianSettings, acli: Acli) -> None:
         """Build the drafter; the kernel injects the settings and acli."""
         self._settings = settings
+        self._acli = acli
         self._client = AcliClient(acli, settings.timeout)
 
     def _target(self, key: str) -> Ticket:
         key = issue_key(key)
-        site = require_site(self._settings)
+        site = require_site(self._settings, self._acli)
         answer = self._client.json("Jira", ["jira", "workitem", "view", key, "--fields", VIEW, "--json"], key)
         if len(answer) != 1 or not isinstance(answer[0], dict):
             msg = f"acli's view answer for {key} is not a Jira work item; is acli up to date?"
@@ -371,7 +372,7 @@ class JiraDrafts:
         Raises:
             HeinzelError: If the arguments are not a ready draft, or Jira or acli refuses.
         """
-        site = require_site(self._settings)
+        site = require_site(self._settings, self._acli)
         draft = self.draft_create(project, kind, summary, description, parent, labels, assign_to_me, due)
         _ready(draft)
         a = draft.arguments
@@ -450,7 +451,7 @@ class JiraDrafts:
         Raises:
             HeinzelError: If the arguments are not a ready draft, the work item changed, or Jira or acli refuses.
         """
-        site = require_site(self._settings)
+        site = require_site(self._settings, self._acli)
         target = self._target(issue_key(key))
         draft = self._update_draft(target, summary, description, (add_labels, remove_labels), assign_to_me, status)
         _ready(draft)
@@ -496,7 +497,7 @@ class JiraDrafts:
         Raises:
             HeinzelError: If the arguments are not a ready draft, the work item changed, or Jira or acli refuses.
         """
-        site = require_site(self._settings)
+        site = require_site(self._settings, self._acli)
         target = self._target(issue_key(key))
         draft = self._comment_draft(target, text)
         _ready(draft)

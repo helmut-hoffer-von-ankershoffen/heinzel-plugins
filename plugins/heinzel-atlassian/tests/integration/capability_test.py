@@ -144,18 +144,20 @@ def test_doctor_without_acli_or_site_is_degraded_and_offline(atlassian_kernel):
     assert not [name for name in credentials if "atlassian" in name]
 
 
-def test_doctor_when_set_up_is_up_and_never_runs_acli(atlassian_kernel, site):
+def test_doctor_when_set_up_is_up_and_runs_only_acli_status(atlassian_kernel, site):
+    site.answer("jira auth status", site.auth("authenticated"))
+    site.answer("confluence auth status", site.auth("authenticated"))
     code, report = hz(atlassian_kernel(BOUND), "system", "doctor")
     assert code == 0
     checks = {c["name"]: c for c in report["checks"]["atlassian"]}
     assert checks["acli"]["status"] == "up"
-    assert "acli jira auth login" in checks["acli"]["detail"]
+    assert "Signed in as ada@example.com" in checks["acli"]["detail"]
     assert checks["site"] == {
         **checks["site"],
         "status": "up",
         "detail": f"{SITE}; not contacted; with a browser login, acli's answers name no site to match",
     }
-    assert site.calls == []
+    assert {tuple(call.args[-2:]) for call in site.calls} == {("auth", "status")}
 
 
 def test_unbound_the_requester_fails_and_doctor_names_the_binding(atlassian_kernel, acli_on_path):
@@ -219,4 +221,4 @@ def test_a_project_file_alone_cannot_set_the_site(atlassian_kernel, site, tmp_pa
     code, output = hz(atlassian_kernel(Config.load(project), digest=digest()), "digest", "issues", "WID", SINCE, UNTIL)
     assert code != 0
     assert "atlassian.site_url" in str(output)
-    assert site.calls == []
+    assert {tuple(call.args[-2:]) for call in site.calls} <= {("auth", "status")}  # a project never sets the site

@@ -14,8 +14,8 @@ hz system plugin remove heinzel-atlassian
 ## Set up
 
 The plugin does only what you could do yourself: every read runs [acli](https://developer.atlassian.com/cloud/acli/),
-logged in as you ([ADR 0035](https://github.com/helmut-hoffer-von-ankershoffen/heinzel/blob/main/docs/adr/0035-integrations-go-through-vendor-clis-as-an-ordinary-employee.md)). It stores no token and needs no app an administrator registers. Install acli 1.3.39 or later
-([guide](https://developer.atlassian.com/cloud/acli/guides/install-acli/)) and log in to both products, in the
+logged in as you ([ADR 0035](https://github.com/helmut-hoffer-von-ankershoffen/heinzel/blob/main/docs/adr/0035-integrations-go-through-vendor-clis-as-an-ordinary-employee.md)). It stores no token and needs no app an administrator registers. Install acli 1.3.39 or later (`brew install acli`;
+[guide](https://developer.atlassian.com/cloud/acli/guides/install-acli/)) and log in to both products, in the
 browser or with an API token without scopes:
 
 ```bash
@@ -23,8 +23,8 @@ acli jira auth login --web
 acli confluence auth login --web
 ```
 
-Name the site acli is logged in to, and bind the adapter, in your user configuration (never a project `hz.toml`,
-which Heinzelmännchen ignores for both):
+The site is read from acli (`acli jira auth status`), so you need not name it. To pin another site, and to bind the
+adapter, use your user configuration (never a project `hz.toml`, which Heinzelmännchen ignores for both):
 
 ```bash
 hz system config set atlassian.site_url https://acme.atlassian.net
@@ -60,6 +60,12 @@ own tool (on macOS: `security delete-generic-password -s heinzel/atlassian -a at
 `atlassian.email` from your configuration.
 
 ### Is it connected?
+
+`hz atlassian status` (and the connector page) reads acli's own local status commands, `acli auth status` and
+`acli <product> auth status`, and reports one state: `not-installed`, `not-connected`, `needs-attention` or
+`connected`, with `identity`, `site`, a one-line `cause`, and the one `command` to copy next (`brew install acli`, or
+`acli jira auth login --web`, which opens your browser; you run it). A product counts only when its own status says
+authorised: being signed in to acli's global profile (which serves Rovo and Admin) is not enough.
 
 Bound automatically while it is the only installed adapter of a capability, [ADR
 0055](https://github.com/helmut-hoffer-von-ankershoffen/heinzel/blob/main/docs/adr/0055-connectors-show-their-sign-in-test-live-on-demand-and-bind-themselves-when-alone.md). `hz
@@ -194,21 +200,13 @@ The `--json` shapes from acli are assumed from Atlassian's REST APIs and not yet
 <!-- screenshots:start -->
 ## Screenshots
 
-<img src="docs/assets/screenshots/jira-issues.png" alt="Demo data: fictional Jira changes, owners and states in the app terminal, using the real adapter and a fixture-only requester." width="960">
+<img src="docs/assets/screenshots/review-inventory.png" alt="Demo data: find the fictional Weekly work review among local contracts." width="960">
 
-Demo data: fictional Jira changes, owners and states in the app terminal, using the real adapter and a fixture-only requester.
+Demo data: find the fictional Weekly work review among local contracts.
 
-<img src="docs/assets/screenshots/confluence-plan.png" alt="Demo data: read the fictional Widget launch plan with its source and revision, using the real adapter and a fixture-only requester." width="960">
+<img src="docs/assets/screenshots/workflow-context.png" alt="Demo data: the local Weekly work review declares Jira and Confluence inputs; no report has been generated." width="960">
 
-Demo data: read the fictional Widget launch plan with its source and revision, using the real adapter and a fixture-only requester.
-
-<img src="docs/assets/screenshots/workflow-context.png" alt="Demo data: the local Weekly work review contract declares Jira and Confluence inputs; no report has been generated." width="960">
-
-Demo data: the local Weekly work review contract declares Jira and Confluence inputs; no report has been generated.
-
-<img src="docs/assets/screenshots/jira-parameters.png" alt="Demo data: lowercase wid resolves to WID; the fixture requester returns structured Jira changes with --json in the app terminal." width="960">
-
-Demo data: lowercase wid resolves to WID; the fixture requester returns structured Jira changes with --json in the app terminal.
+Demo data: the local Weekly work review declares Jira and Confluence inputs; no report has been generated.
 
 <details>
 <summary>Command line</summary>

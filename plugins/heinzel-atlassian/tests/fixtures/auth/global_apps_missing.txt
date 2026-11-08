@@ -1,0 +1,6 @@
+✓ Authenticated
+  Site: acme.atlassian.net
+  Email: ada@example.com
+  Authentication Type: oauth
+
+Following apps are not authenticated with your global profile: Jira, Confluence

@@ -1,0 +1,1 @@
+✗ Error: unauthorized: use 'acli confluence auth login' to authenticate

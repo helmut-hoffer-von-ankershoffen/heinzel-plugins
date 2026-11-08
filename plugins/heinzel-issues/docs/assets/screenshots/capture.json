@@ -1,0 +1,75 @@
+{
+  "format": 1,
+  "plugin": "heinzel-issues",
+  "core_version": "0.9.31",
+  "inputs_sha256": "cbf4fb5dbe13534029b6123d5d8a2d33dcd005a0ae7ad2e1a35fdf20a15d1048",
+  "images": {
+    "docs/assets/screenshots/issues-page.png": "952f4885a9a8cc2a577f2024aa485c5bda6980ffffd03c06a29cbd171c7ae6dd",
+    "docs/assets/screenshots/today-open-reports.png": "041e6a3a4970d63a3503c88c382b0ddc9b5278c89949b73b839cae134b84e9a2",
+    "docs/assets/screenshots/cli-list.png": "e8a2c412a35760cf9eb4725826c6b6ac075d532ddc910392a48e23af56b563bc"
+  },
+  "review_bundle": {
+    "format": 2,
+    "source_story": {
+      "path": "source-story.md",
+      "sha256": "2f4791b338e71f813786f4e70cf1235db49d054080bba93996f967796065b4d1"
+    },
+    "definition": {
+      "format": 1,
+      "reviewer": "Codex feature-story agent",
+      "source_sha256": "277313aa2d5150ba7c22ee6bc452e51c22d2266bdd174b799d9631c7b1a2ef1a",
+      "plan_sha256": "a9e9eda80fef929ef437c2198b1b13fb00fb5c38b227f6a12f0728b64148c3c1",
+      "story_sha256": "2f4791b338e71f813786f4e70cf1235db49d054080bba93996f967796065b4d1"
+    },
+    "plugin": "heinzel-issues",
+    "core_version": "0.9.31",
+    "inputs_sha256": "cbf4fb5dbe13534029b6123d5d8a2d33dcd005a0ae7ad2e1a35fdf20a15d1048",
+    "screenshots": [
+      {
+        "path": "docs/assets/screenshots/issues-page.png",
+        "surface": "ui",
+        "caption": "Three fictional reports: received, being worked on, and released in 0.9.27 \u2014 with a form to send another"
+      },
+      {
+        "path": "docs/assets/screenshots/today-open-reports.png",
+        "surface": "ui",
+        "caption": "Your open fictional reports and requests on Today, in dark mode; done ones leave the list"
+      },
+      {
+        "path": "docs/assets/screenshots/cli-list.png",
+        "surface": "cli",
+        "caption": "The same fictional reports and their plain states through the real CLI"
+      }
+    ],
+    "images": {
+      "issues-page.png": "952f4885a9a8cc2a577f2024aa485c5bda6980ffffd03c06a29cbd171c7ae6dd",
+      "today-open-reports.png": "041e6a3a4970d63a3503c88c382b0ddc9b5278c89949b73b839cae134b84e9a2",
+      "cli-list.png": "e8a2c412a35760cf9eb4725826c6b6ac075d532ddc910392a48e23af56b563bc"
+    },
+    "transcripts": {
+      "issues-page.txt": "461046452d54605a0a090b40b80c93d8425a275257b0886079a0e6c1005c17a7",
+      "today-open-reports.txt": "dedbb4070791722517ce0f40a3eb36645031ee46f839d9810e8eb7dd2e30ef67",
+      "cli-list.txt": "d0eac2c0b1b435cac45b7f7052b732fe1e8f619035e7778e11b8f6e6101ff08f"
+    },
+    "bundle_sha256": "0d64a2f790bf4197de2badef2cf942bb057f53fb426687aaa1ae159355e41cfa"
+  },
+  "privacy_review": {
+    "format": 1,
+    "bundle_sha256": "0d64a2f790bf4197de2badef2cf942bb057f53fb426687aaa1ae159355e41cfa",
+    "reviewer": "Codex privacy agent",
+    "decision": "approve",
+    "checked_images": [
+      "issues-page.png",
+      "today-open-reports.png",
+      "cli-list.png"
+    ],
+    "checks": {
+      "tokens_absent": true,
+      "personal_data_absent": true,
+      "feature_relevant": true,
+      "multiple_ui_scenes": true,
+      "captions_accurate": true
+    },
+    "findings": []
+  }
+}

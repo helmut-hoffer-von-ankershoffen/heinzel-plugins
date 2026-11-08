@@ -11,10 +11,12 @@ described in [Tailscale's CLI documentation](https://tailscale.com/docs/referenc
 
 In Settings or the footer's sharing icon, turn **Share over Tailscale** on. The control checks the node and existing
 Serve mappings, merges its exact HTTPS origin into your user configuration and configures its loopback target. The
-running web app applies the updated origin policy immediately; it does not require a backend restart. It shows ON and
-a URL only after the owning authenticated web app verifies its actual port, active origin policy and matching Serve
-configuration. A CLI/stdio MCP request saves the same intent but reports verification pending until that web owner
-verifies it. Status reads never enable sharing.
+running web app applies the updated origin policy immediately; it does not require a backend restart. The switch
+shows your choice; its one status line says *Turning on…* until the authenticated web app confirms its actual port,
+active origin policy and matching Serve configuration, then shows the URL. A short cause with **Try again** appears
+when something needs you; the full explanation is under **Details**. From the CLI or stdio MCP it saves the same
+request, and the web app finishes it on its next status read by loading the origin your configuration already allows.
+Status reads never change Tailscale Serve or your configuration.
 
 ```sh
 hz tailscale status --json
@@ -54,13 +56,9 @@ Development and release commands: [repository guide](../../README.md).
 <!-- screenshots:start -->
 ## Screenshots
 
-<img src="docs/assets/screenshots/sharing-ready.png" alt="Enable private sharing and see verified readiness — fictional local Tailscale demo" width="960">
+<img src="docs/assets/screenshots/sharing-ready.png" alt="Turn private sharing on; the switch reads On with Copy URL and Open — fictional local Tailscale demo" width="960">
 
-Enable private sharing and see verified readiness — fictional local Tailscale demo
-
-<img src="docs/assets/screenshots/phone-sharing-ready.png" alt="Inspect the private link at phone width — fictional local Tailscale demo; no remote connection tested" width="960">
-
-Inspect the private link at phone width — fictional local Tailscale demo; no remote connection tested
+Turn private sharing on; the switch reads On with Copy URL and Open — fictional local Tailscale demo
 
 <img src="docs/assets/screenshots/sharing-off.png" alt="Turn private sharing off explicitly — fictional local Tailscale demo" width="960">
 
@@ -69,9 +67,9 @@ Turn private sharing off explicitly — fictional local Tailscale demo
 <details>
 <summary>Command line</summary>
 
-<img src="docs/assets/screenshots/sharing-request-cli.png" alt="Inspect the saved request and mapping with web verification pending — fictional local Tailscale demo" width="960">
+<img src="docs/assets/screenshots/sharing-request-cli.png" alt="Inspect the saved request and mapping from the CLI — fictional local Tailscale demo" width="960">
 
-Inspect the saved request and mapping with web verification pending — fictional local Tailscale demo
+Inspect the saved request and mapping from the CLI — fictional local Tailscale demo
 
 <img src="docs/assets/screenshots/sharing-off-cli.png" alt="Inspect the request and mapping after switching off — fictional local Tailscale demo" width="960">
 

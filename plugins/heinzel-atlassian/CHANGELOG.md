@@ -1,6 +1,12 @@
 # Changelog
 
-## Unreleased
+## 0.9.3
+
+- Say the true sign-in state: `hz atlassian status` reads `acli auth status` and `acli <product> auth status` and
+  reports `not-installed`, `not-connected`, `needs-attention` or `connected` with who, which site, a one-line cause and
+  the one command to run (`brew install acli`, or `acli jira auth login --web`). Signed in to acli but Jira or
+  Confluence not authorised yet is `needs-attention`, not "not connected". The doctor check carries the same verdict.
+- The site is read from acli when `atlassian.site_url` is not set.
 
 - Work with your own Jira work: `assigned`, `epics` and `watch` read assigned work, epics with progress and what
   deserves attention; `draft-*` and `create-issue`, `update-issue`, `comment-issue` propose and, once a person

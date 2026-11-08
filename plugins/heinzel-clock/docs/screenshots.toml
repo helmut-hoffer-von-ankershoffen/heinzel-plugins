@@ -37,7 +37,7 @@ name = "team-overview"
 surface = "ui"
 route = "/"
 appearance = "dark"
-caption = "Fictional team working hours at a glance: Today, sidebar ticker and primary footer clock"
+caption = "Fictional team working hours at a glance: the Today count and the primary footer clock"
 
 [[scenes.steps]]
 action = "wait"
@@ -136,28 +136,10 @@ width = 390
 height = 844
 
 [[scenes]]
-name = "cli-times"
-surface = "cli"
-caption = "The same fictional team zones and working hours in the CLI — fixed demonstration time"
-command = ["clock", "--at", "2026-10-26T15:30:00Z"]
-
-[[scenes]]
 name = "terminal-current"
 surface = "ui"
 route = "/"
-caption = "Fictional demo team at 15:30 UTC: Berlin and New York are working; Los Angeles starts in 30 minutes."
-viewport = { width = 1280, height = 900 }
-timeout_ms = 30000
-
-[[scenes.steps]]
-action = "wait"
-text = "Zones at work now"
-
-[[scenes.steps]]
-action = "click"
-role = "button"
-name_regex = "^Dismiss Doctor"
-optional = true
+caption = "Terminal output shown in the app, not a feature view: fictional demo team at 15:30 UTC: Berlin and New York are working; Los Angeles starts in 30 minutes."
 
 [[scenes.steps]]
 action = "terminal"
@@ -167,20 +149,14 @@ command = ["clock", "--at", "2026-10-26T15:30:00Z"]
 name = "terminal-overlap"
 surface = "ui"
 route = "/"
-caption = "Preview 16:30 UTC: all three fictional demo zones are within working hours."
-viewport = { width = 1280, height = 900 }
-timeout_ms = 30000
-
-[[scenes.steps]]
-action = "wait"
-text = "Zones at work now"
-
-[[scenes.steps]]
-action = "click"
-role = "button"
-name_regex = "^Dismiss Doctor"
-optional = true
+caption = "Terminal output shown in the app, not a feature view: at 16:30 UTC all three fictional demo zones are within working hours."
 
 [[scenes.steps]]
 action = "terminal"
 command = ["clock", "--at", "2026-10-26T16:30:00Z"]
+
+[[scenes]]
+name = "cli-json"
+surface = "cli"
+caption = "Structured clock data for the fictional team at the fixed demonstration time."
+command = ["clock", "--at", "2026-10-26T15:30:00Z", "--json"]

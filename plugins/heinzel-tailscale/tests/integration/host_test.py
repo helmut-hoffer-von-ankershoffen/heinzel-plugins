@@ -139,6 +139,23 @@ def test_cli_enable_persists_request_and_a_fresh_authenticated_web_owner_verifie
     assert store.writes == 1  # Status never replays desired state.
 
 
+def test_a_running_web_owner_finishes_a_cli_request_on_its_next_status_read(setup):
+    """No "saved; restart/apply" step: the web app that was already running loads the origin on one read."""
+    fresh, store = setup
+    web_client = client(fresh())
+    external = AUTH | {"host": "workstation.tail-example.ts.net", "origin": ORIGIN}
+    assert web_client.get("/api/tailscale/status", headers=external).status_code == 403
+    assert command(fresh(), "enable")["state"] == "apply-required"
+    assert store.writes == 1
+    finished = web_client.get("/api/tailscale/status", headers=AUTH)
+    assert finished.status_code == 200, finished.text
+    assert finished.json()["state"] == "ready"
+    assert finished.json()["summary"] is None
+    assert web_client.get("/api/tailscale/status", headers=external).status_code == 200
+    assert store.writes == 1  # The read changed neither Tailscale Serve nor the saved request.
+    assert saved()["tailscale"]["intent"]["enabled"]
+
+
 def test_missing_client_does_not_forget_the_persisted_requested_state(setup, monkeypatch):
     fresh, _store = setup
     command(fresh(), "enable")

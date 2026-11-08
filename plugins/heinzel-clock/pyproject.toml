@@ -1,6 +1,6 @@
 [project]
 name = "heinzel-clock"
-version = "0.9.6"
+version = "0.9.7"
 description = "What time it is for everyone on the team: a Heinzelmännchen plugin."
 readme = "README.md"
 license = "MIT"
@@ -149,7 +149,7 @@ caption = "Find overlap across Berlin, New York and Los Angeles with the World C
 [[tool.heinzel.catalog.screenshots]]
 path = "docs/assets/screenshots/team-overview.png"
 surface = "ui"
-caption = "Fictional team working hours at a glance: Today, sidebar ticker and primary footer clock"
+caption = "Fictional team working hours at a glance: the Today count and the primary footer clock"
 
 [[tool.heinzel.catalog.screenshots]]
 path = "docs/assets/screenshots/footer-detail.png"
@@ -162,16 +162,16 @@ surface = "ui"
 caption = "The globe and three fictional team clocks on a phone — fixed demonstration time"
 
 [[tool.heinzel.catalog.screenshots]]
-path = "docs/assets/screenshots/cli-times.png"
-surface = "cli"
-caption = "The same fictional team zones and working hours in the CLI — fixed demonstration time"
-
-[[tool.heinzel.catalog.screenshots]]
 path = "docs/assets/screenshots/terminal-current.png"
 surface = "ui"
-caption = "Fictional demo team at 15:30 UTC: Berlin and New York are working; Los Angeles starts in 30 minutes."
+caption = "Terminal output shown in the app, not a feature view: fictional demo team at 15:30 UTC: Berlin and New York are working; Los Angeles starts in 30 minutes."
 
 [[tool.heinzel.catalog.screenshots]]
 path = "docs/assets/screenshots/terminal-overlap.png"
 surface = "ui"
-caption = "Preview 16:30 UTC: all three fictional demo zones are within working hours."
+caption = "Terminal output shown in the app, not a feature view: at 16:30 UTC all three fictional demo zones are within working hours."
+
+[[tool.heinzel.catalog.screenshots]]
+path = "docs/assets/screenshots/cli-json.png"
+surface = "cli"
+caption = "Structured clock data for the fictional team at the fixed demonstration time."
