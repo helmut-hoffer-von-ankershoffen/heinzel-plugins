@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.5.0
+
+Add a footer icon that opens an Example pane showing the value 42 big, the same value as the Today widget. The README
+explains how a plugin contributes a footer pane.
+
 ## 0.4.0
 
 Move this plugin to its independent repository project for the Heinzel 0.9 plugin contract.
