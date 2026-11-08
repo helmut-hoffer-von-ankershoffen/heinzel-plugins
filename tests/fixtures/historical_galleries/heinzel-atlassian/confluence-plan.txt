@@ -1,0 +1,41 @@
+Skip to content
+Heinzelmännchen
+Heinzelmännchen
+Contracts
+Team graph
+Weekly work review
+Organisation
+Team roster
+M
+Mira
+· EM
+Home
+Today
+Doctor: 7 checks need attention
+
+ai.access ai access, system.credential backend, system.credential credential ai.access/api-key…
+
+Open
+Ask about it
+v0.9.1
+Updates, off
+Daemon not installed, off
+0
+System health, warning
+No calendar connected, error
+Chat
+Terminal
+Demo complete
+$ hz showcase page; printf '\033]0;Demo complete\007'
+Widget plan
+                                              Widget launch plan
+Ship reliable widgets without losing export data.
+Scope
+ • Mira: fix the export boundary.
+ • Jonas: document the widget API.
+ • Priya: verify dark-mode screenshots.
+Next milestone
+Release review on Tuesday after all three checks pass.
+Source: https://acme.atlassian.net/wiki/spaces/WID/pages/123456/Widget+plan
+Revision: 3
+$
