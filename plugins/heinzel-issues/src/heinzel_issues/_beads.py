@@ -251,10 +251,12 @@ class BeadsTracker:
             TrackerError: If it cannot start, times out or refuses.
         """
         environment = {**os.environ, "BD_NON_INTERACTIVE": "1", "NO_COLOR": "1"}
+        folder = self.folder  # a missing database is what setup fixes; say that before a missing program
+        program = self.program()
         try:
             done = subprocess.run(  # noqa: S603 - a fixed program and argument list, no shell
-                [self.program(), *args],
-                cwd=self.folder,
+                [program, *args],
+                cwd=folder,
                 input=stdin,
                 capture_output=True,
                 text=True,

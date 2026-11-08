@@ -2,9 +2,9 @@
   "format": 1,
   "plugin": "heinzel-issues",
   "core_version": "0.9.31",
-  "inputs_sha256": "f4162fb0e5542cd991bf27907a7e14c3b4a11a1982f5893f8c717b0062c7cf5a",
+  "inputs_sha256": "ba5ea7e8d2224fc9be2c48b4e05ec5d50272f0aecbd24429ebdb192f0efa0518",
   "images": {
-    "docs/assets/screenshots/issues-page.png": "e14f816a662ca7a2ae4b13e81b8d529f484c2078f3348c9ec63254a610f9b454",
+    "docs/assets/screenshots/issues-page.png": "eb7db5dd8bc8e305518c59362634aec0712f352bb62d745e3bc9bdf1eda695f5",
     "docs/assets/screenshots/today-open-reports.png": "9d5c82d95ecda207ec506f96c091467e6e996dbd32de8cadac8ad84cdaa1a939",
     "docs/assets/screenshots/cli-list.png": "e8a2c412a35760cf9eb4725826c6b6ac075d532ddc910392a48e23af56b563bc"
   },
@@ -12,18 +12,18 @@
     "format": 2,
     "source_story": {
       "path": "source-story.md",
-      "sha256": "53cffcb63ecee04889d2dd2f899ab23348c28cb53674eefbc3aff772c05257e6"
+      "sha256": "015d537098c652d1c5719e78c7dadf599343cb47259ae46099eecf3128917b71"
     },
     "definition": {
       "format": 1,
       "reviewer": "Codex feature-story agent",
-      "source_sha256": "6052d769e111eb45b7f206837b23f0cbc0bb7621b5c8f503df9141e9cc7c7606",
+      "source_sha256": "e43ab01feaee832c7ae69eeb77b8a0226a5e46a8a9d99e42354063a9b0113fef",
       "plan_sha256": "a9e9eda80fef929ef437c2198b1b13fb00fb5c38b227f6a12f0728b64148c3c1",
-      "story_sha256": "53cffcb63ecee04889d2dd2f899ab23348c28cb53674eefbc3aff772c05257e6"
+      "story_sha256": "015d537098c652d1c5719e78c7dadf599343cb47259ae46099eecf3128917b71"
     },
     "plugin": "heinzel-issues",
     "core_version": "0.9.31",
-    "inputs_sha256": "f4162fb0e5542cd991bf27907a7e14c3b4a11a1982f5893f8c717b0062c7cf5a",
+    "inputs_sha256": "ba5ea7e8d2224fc9be2c48b4e05ec5d50272f0aecbd24429ebdb192f0efa0518",
     "screenshots": [
       {
         "path": "docs/assets/screenshots/issues-page.png",
@@ -42,7 +42,7 @@
       }
     ],
     "images": {
-      "issues-page.png": "e14f816a662ca7a2ae4b13e81b8d529f484c2078f3348c9ec63254a610f9b454",
+      "issues-page.png": "eb7db5dd8bc8e305518c59362634aec0712f352bb62d745e3bc9bdf1eda695f5",
       "today-open-reports.png": "9d5c82d95ecda207ec506f96c091467e6e996dbd32de8cadac8ad84cdaa1a939",
       "cli-list.png": "e8a2c412a35760cf9eb4725826c6b6ac075d532ddc910392a48e23af56b563bc"
     },
@@ -51,11 +51,11 @@
       "today-open-reports.txt": "dedbb4070791722517ce0f40a3eb36645031ee46f839d9810e8eb7dd2e30ef67",
       "cli-list.txt": "d0eac2c0b1b435cac45b7f7052b732fe1e8f619035e7778e11b8f6e6101ff08f"
     },
-    "bundle_sha256": "911f0826e787eebe6e3198e760371e407b59e2c8165bc79684b73532a5ece3eb"
+    "bundle_sha256": "13ec6b450ade5a8352349346e7054987fe4481ece009cb16ede5019a1ff2348b"
   },
   "privacy_review": {
     "format": 1,
-    "bundle_sha256": "911f0826e787eebe6e3198e760371e407b59e2c8165bc79684b73532a5ece3eb",
+    "bundle_sha256": "13ec6b450ade5a8352349346e7054987fe4481ece009cb16ede5019a1ff2348b",
     "reviewer": "Codex privacy agent",
     "decision": "approve",
     "checked_images": [

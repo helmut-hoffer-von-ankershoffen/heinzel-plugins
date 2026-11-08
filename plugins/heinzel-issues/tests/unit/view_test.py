@@ -1,15 +1,13 @@
 """The app view's form sends the typed text through the `send` action, and falls back on an older Heinzel."""
 
 import json
-import shutil
-import subprocess
 from pathlib import Path
 
 import pytest
+from nodejs_wheel import node
 
 pytestmark = pytest.mark.unit
 VIEW = Path(__file__).resolve().parents[2] / "src" / "heinzel_issues" / "views" / "index.js"
-NODE = shutil.which("node")
 
 # A React stand-in: elements are plain objects, `useState` hands out preset values and records what is set.
 HARNESS = """
@@ -48,11 +46,10 @@ console.log(JSON.stringify({ calls, set }));
 
 
 def render(tmp_path: Path, scenario: str) -> dict:
-    if NODE is None:
-        pytest.skip("node is not installed")
     script = tmp_path / "harness.mjs"
     script.write_text(HARNESS % {"view": json.dumps(VIEW.as_uri()), "scenario": json.dumps(scenario)})
-    done = subprocess.run([NODE, str(script)], capture_output=True, text=True, timeout=30, check=True)  # noqa: S603
+    # The Node.js that pyright[nodejs] brings into every test environment, so this never depends on the machine.
+    done = node([str(script)], return_completed_process=True, capture_output=True, text=True, timeout=30, check=True)
     return json.loads(done.stdout)
 
 
