@@ -1,17 +1,17 @@
 """Fixture-only Jira and Confluence requester; real parsers, no external CLI or account."""
 
-from datetime import UTC, datetime
 import json
 import os
-from pathlib import Path
 import sys
+from datetime import UTC, datetime
+from pathlib import Path
 
 from heinzel import Config, Kernel, Module, ModuleRecord, Settings, Window
 from heinzel.heads.cli import build
 from heinzel.kernel import Origin, discover
-from rich.table import Table
 from rich.console import Group
 from rich.markdown import Markdown
+from rich.table import Table
 from rich.text import Text
 
 SINCE = datetime(2026, 10, 1, tzinfo=UTC)
@@ -58,7 +58,8 @@ PAGE = json.loads(
     '{"id": "123456", "status": "current", "title": "Widget plan", "spaceId": "98304", "parentId": "98305", "authorId": "5b10ac8d82e05b22cc7d4ef5", "createdAt": "2026-09-01T08:00:00.000Z", "version": {"number": 3, "message": "", "minorEdit": false, "authorId": "5b10ac8d82e05b22cc7d4ef5"}, "body": {"storage": {"representation": "storage", "value": "<h1>Widget launch plan</h1><p>Ship reliable widgets without losing export data.</p><h2>Scope</h2><ul><li>Mira: fix the export boundary.</li><li>Jonas: document the widget API.</li><li>Priya: verify dark-mode screenshots.</li></ul><h2>Next milestone</h2><p>Release review on Tuesday after all three checks pass.</p>"}}, "_links": {"webui": "/spaces/WID/pages/123456/Widget+plan", "base": "https://acme.atlassian.net/wiki"}}'
 )
 
-from heinzel import Tracker, Documents, Issue, Document
+from heinzel import Document, Documents, Issue, Tracker
+
 from heinzel_atlassian import Acli, Completed
 
 

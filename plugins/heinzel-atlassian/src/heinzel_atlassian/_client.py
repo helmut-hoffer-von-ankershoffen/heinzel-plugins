@@ -22,6 +22,7 @@ from heinzel_atlassian._models import SITE_EXAMPLE, AtlassianSettings
 type Product = Literal["Jira", "Confluence"]
 
 INSTALL = "https://developer.atlassian.com/cloud/acli/guides/install-acli/"
+INSTALL_COMMAND = "brew install acli"
 LOGIN: dict[Product, str] = {"Jira": "acli jira auth login", "Confluence": "acli confluence auth login"}
 SWITCH: dict[Product, str] = {"Jira": "acli jira auth switch", "Confluence": "acli confluence auth switch"}
 GATEWAY = "https://api.atlassian.com/ex/"
@@ -111,16 +112,17 @@ def same_site(product: Product, site: str, reported: object, path: str) -> None:
     raise HeinzelError(msg)
 
 
-def require_site(settings: AtlassianSettings) -> str:
-    """The configured site; links are built on it.
+def require_site(settings: AtlassianSettings, acli: Acli) -> str:
+    """The configured site, else the one acli says it is signed in to; links are built on it.
 
     Raises:
-        HeinzelError: If it isn't set; it names the command.
+        HeinzelError: If neither is known; it names the command.
     """
-    if settings.site_url is None:
+    site = acli.site(settings)
+    if site is None:
         msg = f"The Atlassian adapter needs atlassian.site_url, the site acli is logged in to. Run: {SITE_FIX}"
         raise HeinzelError(msg)
-    return settings.site_url
+    return site
 
 
 class AcliClient:

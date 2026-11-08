@@ -20,6 +20,7 @@ from heinzel_atlassian._jira import Jira
 from heinzel_atlassian._models import AtlassianAbout, AtlassianSettings
 from heinzel_atlassian._module import module
 from heinzel_atlassian._service import AtlassianService
+from heinzel_atlassian._status import AtlassianStatus
 from heinzel_atlassian._work import Assigned, Epics, JiraWork, Snapshot, Watch
 
 GATEWAY = "api.atlassian.com"
@@ -27,8 +28,9 @@ GATEWAY = "api.atlassian.com"
 
 
 def hosts(settings: AtlassianSettings) -> list[str]:
-    """Where acli sends the reads: the configured site and Atlassian's API gateway; none until the site is set."""
-    return [settings.site_url, GATEWAY] if settings.site_url else []
+    """Where acli sends the reads: the site (the setting, else acli's) and Atlassian's API gateway; none without."""
+    site = settings.site_url or Acli(settings).site(settings)
+    return [site, GATEWAY] if site else []
 
 
 module.settings(AtlassianSettings)
@@ -44,6 +46,12 @@ module.provides("documents", modes={"read"}, hosts=hosts)(Confluence)
 def info(service: AtlassianService) -> AtlassianAbout:
     """Show this plugin's version, the Atlassian site and the acli commands it runs."""
     return service.about()
+
+
+@module.operation
+def status(service: AtlassianService, view: CapabilityView) -> AtlassianStatus:
+    """Whether acli is installed and authorised for Jira and Confluence: state, who, site, cause, next command."""
+    return service.status(view)
 
 
 @module.info
@@ -201,6 +209,7 @@ __all__ = [
     "AtlassianAbout",
     "AtlassianService",
     "AtlassianSettings",
+    "AtlassianStatus",
     "Completed",
     "Confluence",
     "Draft",

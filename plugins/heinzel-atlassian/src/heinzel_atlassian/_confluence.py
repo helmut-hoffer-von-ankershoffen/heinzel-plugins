@@ -38,8 +38,8 @@ class Confluence:
             HeinzelError: If `ref` is neither, or names another site, the site is not set, acli is missing or logged
                 out, or Confluence fails.
         """
-        page_id = page_id_of(ref, self._settings.site_url)
-        site = require_site(self._settings)
+        page_id = page_id_of(ref, self._acli.site(self._settings))
+        site = require_site(self._settings, self._acli)
         args = ["confluence", "page", "view", "--id", page_id, "--body-format", "storage", "--json"]
         answer = AcliClient(self._acli, self._settings.timeout).json("Confluence", args, f"page {page_id}")
         return _document(ref, site, page_id, answer[0] if len(answer) == 1 else answer)

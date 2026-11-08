@@ -39,7 +39,7 @@ v0.9.1
 Updates, off
 Daemon not installed, off
 0
-System health, warning
+System health, error
 No calendar connected, error
 Chat
 New chat

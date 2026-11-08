@@ -25,7 +25,7 @@ def test_plugin_module_is_discovered_and_its_adapters_accepted(boot):
     assert "atlassian" not in kernel.errors
 
 
-def test_info(boot):
+def test_info(boot, no_acli):
     about = json.loads(invoke(boot(), "atlassian", "info", "--json"))
     assert about["plugin"] == "heinzel-atlassian"
     assert about["modules"] == ["atlassian"]

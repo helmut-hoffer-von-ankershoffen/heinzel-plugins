@@ -25,14 +25,16 @@ def atlassian(report: dict) -> dict:
     return next(c for c in report["connectors"] if c["name"] == "atlassian")
 
 
-def test_offline_it_is_not_tested_yet_and_lists_its_tools(atlassian_kernel, acli_on_path):
+def test_it_lists_its_tools_and_reads_the_sign_in_from_acli_status(atlassian_kernel, acli_on_path):
+    acli_on_path.answer("jira auth status", acli_on_path.auth("authenticated"))
+    acli_on_path.answer("confluence auth status", acli_on_path.auth("authenticated"))
     code, report = hz(atlassian_kernel(BOUND), "system", "connector", "list")
     assert code == 0, report
     connector = atlassian(report)
-    assert connector["state"] == "unknown"
+    assert connector["state"] == "connected"
     assert connector["login"] == {
-        "signed_in": None,
-        "account": "",
+        "signed_in": True,
+        "account": "ada@example.com",
         "site": "acme.atlassian.net",
         "command": "acli jira auth login",
     }
@@ -40,7 +42,7 @@ def test_offline_it_is_not_tested_yet_and_lists_its_tools(atlassian_kernel, acli
         ("tracker", "issues_updated", "read"),
         ("documents", "read", "read"),
     }
-    assert acli_on_path.calls == []  # only `acli --version`, which reaches nothing
+    assert {tuple(call.args[-2:]) for call in acli_on_path.calls} == {("auth", "status")}  # local, reaches nothing
 
 
 def test_the_live_test_reads_one_item_per_product_and_is_connected(atlassian_kernel, acli_on_path):
@@ -69,5 +71,5 @@ def test_logged_out_the_live_test_fails_with_the_login_command(atlassian_kernel,
 
 def test_without_acli_the_connect_command_is_still_the_login(atlassian_kernel, no_acli):
     connector = atlassian(hz(atlassian_kernel(BOUND), "system", "connector", "list")[1])
-    assert connector["state"] == "attention"
-    assert connector["connect"] == ["acli jira auth login"]
+    assert connector["state"] == "not-signed-in"
+    assert connector["connect"] == ["brew install acli"]

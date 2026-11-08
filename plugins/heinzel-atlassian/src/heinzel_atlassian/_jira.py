@@ -70,7 +70,7 @@ class Jira:
         since, until = _bounds(window)
         if since == until:
             return []  # the half-open window is empty: nothing to ask
-        site = require_site(self._settings)
+        site = require_site(self._settings, self._acli)
         args = ["jira", "workitem", "search", "--jql", search_jql(key, since, until), "--fields", FIELDS]
         args += ["--paginate", "--json"]
         subject = f"project {key}"
