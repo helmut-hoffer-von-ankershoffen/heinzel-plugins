@@ -1,43 +1,44 @@
 ## Audience
 
-Someone deciding whether to install System Resources who wants a quick picture of the computer running Heinzel and a way to retrieve the same measurements in a command or automation.
+Someone deciding whether Heinzel can give them a quick view of the computer running their Heinzels, and whether they can also use the readings from the command line.
 
 ## Outcome
 
-Show how a glance at Today and the footer leads to a useful expanded monitor, then show the underlying sample in the CLI and app terminal. The readings are a fictional demonstration, not a claim about the viewer’s machine.
+Show a fictional workstation’s CPU, memory and load at a glance, then reveal the fuller resource detail and the same sample in human-readable and structured command output. The plugin is included in the standard app; its measurements describe the machine running `hz`, not necessarily the machine viewing the app (`README.md`; `src/heinzel_resource/__init__.py`, `Resources` and `ResourceService.sample`).
 
 ## Scenes
 
-1. **Expanded resources:** In light appearance, open the footer’s computer-resources status to show CPU, memory, scaled load, hostname, and the explanation of the load bar. This is the central feature view.
-2. **Today at a glance:** In dark appearance, show the CPU widget together with the compact footer meters. This is a different useful state of the same Core UI, not a duplicate of the expanded monitor.
-3. **Phone monitor:** Open the resources detail at a narrow viewport to show that the same readings can be inspected on a phone. Review the result for meaningful mobile layout; reject it if it merely duplicates the desktop crop.
-4. **CLI sample:** Show `hz resource` as a native CLI result, with the fictional hostname, CPU, memory, raw one-minute load, and logical cores.
-5. **App terminal table:** Run `hz resource` in the app terminal to show an interactive route to the sample.
-6. **App terminal JSON:** Run `hz resource --json` in the app terminal to show the structured form useful for automation. These two terminal captures demonstrate different parameter cases of the single operation; neither is presented as feature UI.
+1. **Expanded monitor, light:** Open the footer’s resource control to reveal the host, CPU, memory, one-minute load and logical cores. The meters make the readings easy to scan; the detail explains the load value. (`machine` status declaration.)
+2. **Today, dark:** Show the compact CPU widget alongside the footer meters in the normal app context. This is a different useful state of the same Core interface, not a second invented plugin page. (`overview` widget and `machine` status declarations.)
+3. **Phone monitor:** Open the same resource detail at a narrow viewport to show that it remains usable on a phone. This is a responsive view, not a claim of different functionality.
+4. **CLI:** Show `hz resource` as a native CLI result, with the fictional host, CPU, memory, raw one-minute load and logical cores. (`resource` operation and `render`.)
+5. **App terminal, table:** Run `hz resource` in the genuine app terminal so an app user can see the readable table in context.
+6. **App terminal, JSON:** Run `hz resource --json` in the genuine app terminal to show the structured form for automation. These two parameter cases are distinct useful results of the one declared CLI operation; neither is presented as feature UI. (`README.md`; `resource` operation.)
 
-## Fictional fixtures
+## Fictional fixtures and presentation
 
-The existing `docs/screenshot_fixture.py` replaces `ResourceService.sample` during explicit capture with `demo-workstation`, CPU 36%, memory 62%, one-minute load 0.65, eight logical cores, no problems, and a fixed UTC sample time. The scaled load meter is derived from that sample; it is not the raw load value. The plan uses this existing bootstrap and a matching browser time. No fixture file needs to be invented.
+`docs/screenshot_fixture.py` is the existing capture bootstrap. It replaces the sampler with a fictional `demo-workstation` sample: CPU 36%, memory 62%, one-minute load 0.65, eight logical cores, no problems, sampled at 2026-10-31 10:00 UTC. The footer load meter is scaled against twice the core count, while its detail and CLI show raw load (`machine`; `render`). The fixed browser time matches the sample. This is demonstration data, not a live benchmark or evidence of real machine health.
 
-Normal presentation fictionalization is explicitly permitted for verified owning-interpreter paths, which become `/demo-profile/.venv`, and for only the verified whole hostname detail in the genuine Doctor row, which becomes `demo-host`. These mappings change no SDK health status or remaining detail and establish no privacy acceptance. Unknown identities still fail, and independent review must inspect every image and transcript.
+Normal presentation fictionalization is explicitly limited as follows: verified owning-interpreter paths become `/demo-profile/.venv`, and only the verified whole hostname detail in the genuine Doctor row becomes `demo-host`. These mappings change no SDK health status or remaining detail and establish no privacy acceptance; unknown identities still fail and independent review must inspect every image and transcript. The fixture’s `demo-workstation` is separately supplied plugin sample data, not permission to substitute arbitrary hostnames.
 
 ## Privacy pitfalls
 
-The fixture substitutes resource readings, but other Core surfaces, Doctor output, paths, terminal transcripts, and surrounding profile data can still reveal real identities or machine details. Do not generalize the two permitted mappings to unverified paths, partial hostname matches, other rows, or other identities. Inspect every image and transcript independently before publication; fail on unknown identities. A dismissed Doctor banner is not proof that no sensitive detail remains elsewhere.
-
-## Source-bound UI surface inventory
-
-- `pyproject.toml`, `[project.entry-points."heinzel.modules"]`, declares `resource = "heinzel_resource"`. The actual entrypoint in `src/heinzel_resource/__init__.py` constructs `module = Module("resource", ...)` and registers `ResourceService`.
-- `@module.operation(render=render, audience="everyday")` declares the single `resource` operation. `render` produces the CLI table; the README documents `hz resource` and `--json`. The app terminal can invoke this operation, but terminal output is not a resource feature view. No CLI-only status should be inferred from the absence of a Page or View.
-- `@module.status(source="resource", name="machine", refresh="2s", ... slots={"footer": True, "sidebar": False})` contributes a Core-rendered footer status with three meters and expandable detail. `@module.widget(source="resource", name="machine", refresh="1m", ...)` contributes the Core-rendered Today metric. These are genuine feature UI and support the first three scenes on the existing `/` route. Different states of that route qualify; no distinct plugin route is needed.
-- `@module.health` declares the `sampling` check, which can contribute to Core health/Doctor presentation. It reports degraded when the sample has problems and otherwise up; its hostname and detail must not be rewritten beyond the explicitly permitted verified Doctor-row mapping.
-- The declared module contains no plugin Page, View, navigation, channel, approval, setup, or info contribution. No external provider UI is declared. Generic Core operation and health surfaces still exist despite the absence of a Page or View; the supplied source does not establish additional plugin-specific routes or screens.
-- `README.md` says readings appear on Today and in the footer; `pyproject.toml` catalog metadata also calls out a resource visualizer. The supplied declarations establish the widget and footer detail, but do not independently declare a separate visualizer page. The plan therefore captures the evidenced Core surfaces. `web/build.py` is a frontend build helper, not a declared UI entrypoint; the supplied file inventory contains no frontend implementation establishing another screen. Catalog and README reference generated images that are not present in the supplied file inventory, so their appearance is not verified here.
+The real sampler calls `gethostname()` and reads local machine metrics. Core chrome, Doctor output, terminal transcripts, paths, account information and unrelated notifications can also expose real information even when the plugin sample is fictional. Review every image and transcript independently, including cropped and mobile captures; reject unknown identities and any unverified substitution. Do not infer privacy acceptance from the fixture, the two narrowly specified presentation mappings, or a clean-looking contact sheet alone.
 
 ## Acceptance criteria
 
-- Capture at least the two distinct genuine feature states: expanded footer detail in light appearance and Today plus footer in dark appearance, along with a useful CLI result. Applied appearance must be visible in the captured views.
-- Show the fixture’s values consistently, distinguish scaled load from raw load, and retain genuine Core rendering. Capture the two app-terminal parameter cases as terminal results, not feature views.
-- Reject forged HTML, duplicate captures, caption-only differences, invented routes or screens, and mobile captures that add no meaningful information. Captions identify demo data.
-- During explicit capture, verify the planned accessible controls and text against the actual running Core UI; the provided source does not prove their runtime accessibility or the resulting crops. Validate the resulting TOML with the capture tooling before use. No project code was executed for this proposal.
-- Independently inspect every image and transcript for privacy and factual accuracy, applying only the explicitly permitted verified mappings; unknown identities fail. Preserve health status and all other Doctor detail.
+- Capture the genuine Core-rendered Today widget and expanded footer detail in applied dark and light appearances, plus the responsive phone view. Confirm the shown values and raw-versus-scaled load distinction against the fixture and declarations.
+- Capture the native CLI result and both genuine app-terminal parameter cases. The terminal steps wait for completion; do not add waits for individual table cells.
+- Keep each image meaningfully different: reject duplicate captures, caption-only changes, terminal output labeled as feature UI, and forged HTML. Use real app surfaces and the existing fixture only.
+- Preserve actual SDK and Doctor health statuses and all other details during the disclosed presentation mappings. Independently inspect every image and transcript for privacy, including unknown identities.
+- Check that captions identify demo data and that the plan parses and conforms to the capture format before capture. This plan was reviewed statically; no code or capture was executed.
+
+## Source-bound UI surface inventory
+
+- `pyproject.toml`, `[project.entry-points."heinzel.modules"]`: the sole declared module entrypoint is `resource = "heinzel_resource"`; `[tool.heinzel.plugin]` places it in the standard profile. No plugin navigation entry or custom Page/View is declared in the provided module.
+- `src/heinzel_resource/__init__.py`, `@module.widget(... name="machine" ...)` and `overview`: a Core-rendered Today metric labeled “Computer resources” shows CPU and refreshes every minute. This is genuine feature UI.
+- The same file, `@module.status(... slots={"footer": True, "sidebar": False})` and `machine`: Core renders footer meters and expandable detail, refreshed every two seconds. This is genuine feature UI; there is no declared sidebar status for it.
+- The same file, `@module.operation(render=render, audience="everyday")`, `resource`, and `render`: the operation supplies CLI output and may also be invoked through the Core app terminal. Its table and JSON are command results, not a plugin-owned page. The provided declarations do not establish another generic Core operation screen, so none is invented.
+- The same file, `@module.health` and `sampling`: health contributes a genuine Doctor check, with a hostname-bearing detail and UP or DEGRADED status based on sample problems. It may appear in Core Doctor UI; its exact surrounding presentation is not declared here and must be verified during capture.
+- No channels, approvals, setup, info, plugin navigation, or external-provider UI contributions are declared in the provided source. Absence of a custom Page/View does not negate the declared Core widget, footer or health surfaces.
+- `pyproject.toml` catalog captions and `README.md` describe the expanded monitor, Today, phone, CLI and terminal captures. The existing plan captures those behaviors. Its Today caption mentions only CPU while the catalog also mentions footer meters; the screenshot should be reviewed to confirm the meters are visible. Actual capture rendering and the availability of the referenced Core controls remain unverified from these files alone.
