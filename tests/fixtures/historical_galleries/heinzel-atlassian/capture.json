@@ -1,0 +1,98 @@
+{
+  "format": 1,
+  "plugin": "heinzel-atlassian",
+  "core_version": "0.9.1",
+  "inputs_sha256": "62483b1a7f75d0ff7769807b8884662c316f723948a3f5da16b9dc92cece31a0",
+  "images": {
+    "docs/assets/screenshots/jira-issues.png": "edcd834303bc9710eabd29aa4d36307a373c548bbc2c078ae1c728416e780ce3",
+    "docs/assets/screenshots/confluence-plan.png": "ad068ff0255ad82099ae0cc4315053bf257685c56c3e9b1430f42c3b09c2c282",
+    "docs/assets/screenshots/issues-json.png": "474635006b6e7c0e82eed10f22d44338592fa3eb07cc1d3c7bb635bf050075b7",
+    "docs/assets/screenshots/confluence-cli.png": "6ee48d63544e8aef45de102226a6af51904e5175304b473b65e49b1e6abef622",
+    "docs/assets/screenshots/workflow-context.png": "b38d9ec96278a9d1bd4cf764840cdcc40b9b49457a29a0bca6e04348fe3b558b",
+    "docs/assets/screenshots/jira-parameters.png": "2c280dd060390951cd7f5eb36c7e9c1e974f55dfffa8a9fbfe78a20f7f3b104b"
+  },
+  "review_bundle": {
+    "format": 1,
+    "definition": {
+      "format": 1,
+      "reviewer": "Codex feature-story agent",
+      "source_sha256": "dd14662f0ebed414185083f727f60ed81f72441fff1236afc1374191c15973d8",
+      "plan_sha256": "f59690101925633a3cce229c23e46e4178a013f5691e5c7d2e74b7a73120f75f",
+      "story_sha256": "43557a488a085cf1cd72d4723690ddc9ee3180e321999d83678721cbdf71d972"
+    },
+    "plugin": "heinzel-atlassian",
+    "core_version": "0.9.1",
+    "inputs_sha256": "62483b1a7f75d0ff7769807b8884662c316f723948a3f5da16b9dc92cece31a0",
+    "screenshots": [
+      {
+        "path": "docs/assets/screenshots/jira-issues.png",
+        "surface": "ui",
+        "caption": "Demo data: fictional Jira changes, owners and states in the app terminal, using the real adapter and a fixture-only requester."
+      },
+      {
+        "path": "docs/assets/screenshots/confluence-plan.png",
+        "surface": "ui",
+        "caption": "Demo data: read the fictional Widget launch plan with its source and revision, using the real adapter and a fixture-only requester."
+      },
+      {
+        "path": "docs/assets/screenshots/issues-json.png",
+        "surface": "cli",
+        "caption": "Demo data: structured fictional Jira changes through the real adapter, using a fixture-only requester and local vendor replies."
+      },
+      {
+        "path": "docs/assets/screenshots/confluence-cli.png",
+        "surface": "cli",
+        "caption": "Demo data: the fictional Confluence plan, source and revision in the shell, using a fixture-only requester and local vendor replies."
+      },
+      {
+        "path": "docs/assets/screenshots/workflow-context.png",
+        "surface": "ui",
+        "caption": "Demo data: the local Weekly work review contract declares Jira and Confluence inputs; no report has been generated."
+      },
+      {
+        "path": "docs/assets/screenshots/jira-parameters.png",
+        "surface": "ui",
+        "caption": "Demo data: lowercase wid resolves to WID; the fixture requester returns structured Jira changes with --json in the app terminal."
+      }
+    ],
+    "images": {
+      "jira-issues.png": "edcd834303bc9710eabd29aa4d36307a373c548bbc2c078ae1c728416e780ce3",
+      "confluence-plan.png": "ad068ff0255ad82099ae0cc4315053bf257685c56c3e9b1430f42c3b09c2c282",
+      "issues-json.png": "474635006b6e7c0e82eed10f22d44338592fa3eb07cc1d3c7bb635bf050075b7",
+      "confluence-cli.png": "6ee48d63544e8aef45de102226a6af51904e5175304b473b65e49b1e6abef622",
+      "workflow-context.png": "b38d9ec96278a9d1bd4cf764840cdcc40b9b49457a29a0bca6e04348fe3b558b",
+      "jira-parameters.png": "2c280dd060390951cd7f5eb36c7e9c1e974f55dfffa8a9fbfe78a20f7f3b104b"
+    },
+    "transcripts": {
+      "jira-issues.txt": "a17bfab9a9a0978f59926685df1648eedc3171e3b26db0f92063a650fe9d1059",
+      "confluence-plan.txt": "798c34045b13e0dadfcbe15bad08a6e53d5b47692d5afb6c86072f268e94dfa8",
+      "issues-json.txt": "6a377c231e0b39b0e7e90037a5637c0a49cc11ba5f3da74bfeb6ed4fec6d5ee9",
+      "confluence-cli.txt": "dbac0428b2123fd6cfb248be30010051986995ee83bfa9e33b4b1a272541b710",
+      "workflow-context.txt": "d215aab387a1695e17b5a34e4667c65e0d76734e33f12eb4d3136bfea3a90b75",
+      "jira-parameters.txt": "4af63b654fbdcc82373ec5990f114a3036835a8db589faaedd909b7b02b9417c"
+    },
+    "bundle_sha256": "cc6306ea61bde533e0664a0c60c347b091a2ec3016a150ec426e7a8d1603cf7d"
+  },
+  "privacy_review": {
+    "format": 1,
+    "bundle_sha256": "cc6306ea61bde533e0664a0c60c347b091a2ec3016a150ec426e7a8d1603cf7d",
+    "reviewer": "Codex privacy agent",
+    "decision": "approve",
+    "checked_images": [
+      "jira-issues.png",
+      "confluence-plan.png",
+      "issues-json.png",
+      "confluence-cli.png",
+      "workflow-context.png",
+      "jira-parameters.png"
+    ],
+    "checks": {
+      "tokens_absent": true,
+      "personal_data_absent": true,
+      "feature_relevant": true,
+      "multiple_ui_scenes": true,
+      "captions_accurate": true
+    },
+    "findings": []
+  }
+}

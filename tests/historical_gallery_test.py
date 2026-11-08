@@ -21,6 +21,7 @@ RECAPTURED = (
     "heinzel-github",
     "heinzel-weather",
     "heinzel-example",
+    "heinzel-atlassian",
 )
 
 

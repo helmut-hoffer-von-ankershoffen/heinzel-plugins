@@ -1,0 +1,23 @@
+[
+  {
+    "key": "WID-3",
+    "title": "Widget export drops the last row",
+    "url": "https://acme.atlassian.net/browse/WID-3",
+    "state": "In Progress",
+    "updated_at": "2026-10-05T10:00:00Z",
+    "assignee": "Wilma Widget",
+    "labels": [
+      "export",
+      "ui"
+    ]
+  },
+  {
+    "key": "WID-4",
+    "title": "Document the widget API",
+    "url": "https://acme.atlassian.net/browse/WID-4",
+    "state": "Done",
+    "updated_at": "2026-10-06T00:00:00Z",
+    "assignee": null,
+    "labels": []
+  }
+]

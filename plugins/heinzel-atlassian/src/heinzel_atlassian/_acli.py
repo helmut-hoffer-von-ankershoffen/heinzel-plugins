@@ -19,6 +19,7 @@ from dataclasses import dataclass
 from pathlib import Path
 from typing import cast
 
+from heinzel_atlassian._auth import parse
 from heinzel_atlassian._models import AtlassianSettings
 
 MAX_BYTES = 10 * 1024 * 1024
@@ -28,6 +29,8 @@ MAX_ERROR_BYTES = 64 * 1024
 GRACE = 1.0
 """Seconds the pipes may stay open after acli exited, or after SIGTERM, before its process group is killed."""
 VERSION_TIMEOUT = 10.0
+SITE_TTL = 60.0
+"""Seconds a site read from acli is remembered."""
 MINIMUM_VERSION = (1, 3, 39)
 """The acli release whose commands and flags the adapter was written against."""
 ENVIRONMENT = (
@@ -137,10 +140,36 @@ class Acli:
         """Run the acli the settings name; the kernel injects them."""
         self._settings = settings
         self._versions: dict[str, tuple[int, int, int] | None] = {}
+        self._detected: tuple[str, float, str] | None = None
 
     def path(self) -> str | None:
         """The absolute path of the acli that runs, or None."""
         return executable(self._settings)
+
+    def site(self, settings: AtlassianSettings) -> str | None:
+        """The site links are built on: `atlassian.site_url`, else the one acli says it is signed in to.
+
+        Asked from `acli jira auth status`, then `acli auth status` (local commands), and remembered for a minute
+        when found; None if neither names an Atlassian Cloud site.
+        """
+        if settings.site_url:
+            return settings.site_url
+        path = self.path()
+        if path is None:
+            return None
+        seen = getattr(self, "_detected", None)  # a subclass may skip __init__
+        if seen and seen[0] == path and time.monotonic() - seen[1] < SITE_TTL:
+            return seen[2]
+        for args in (["jira", "auth", "status"], ["auth", "status"]):
+            try:
+                done = self.run(args, min(VERSION_TIMEOUT, settings.timeout))
+            except (AcliTimeoutError, OSError, RuntimeError):
+                continue
+            host = parse((done.stdout + b"\n" + done.stderr).decode("utf-8", errors="replace"), done.returncode).site
+            if host:
+                self._detected = (path, time.monotonic(), f"https://{host}")
+                return self._detected[2]
+        return None
 
     def version(self) -> tuple[int, int, int] | None:
         """Acli's version, from `acli --version`; None if it names none.

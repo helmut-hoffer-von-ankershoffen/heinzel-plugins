@@ -2,37 +2,39 @@
   "format": 1,
   "plugin": "heinzel-atlassian",
   "core_version": "0.9.1",
-  "inputs_sha256": "62483b1a7f75d0ff7769807b8884662c316f723948a3f5da16b9dc92cece31a0",
+  "inputs_sha256": "4dcf4ee11306999429c927fea3893c6a2ef1700fc94b4dd190fb84fe494aff4d",
   "images": {
-    "docs/assets/screenshots/jira-issues.png": "edcd834303bc9710eabd29aa4d36307a373c548bbc2c078ae1c728416e780ce3",
-    "docs/assets/screenshots/confluence-plan.png": "ad068ff0255ad82099ae0cc4315053bf257685c56c3e9b1430f42c3b09c2c282",
+    "docs/assets/screenshots/review-inventory.png": "937ce44a8455fa63454bb0e9c0817137b8ff3b790e31e601f8f55d95e1ac53a8",
+    "docs/assets/screenshots/workflow-context.png": "e05ef018a7cb36fc1fa078678a4d36a03e8cfcf3d05d1b6b4f87c63c8aa4bed4",
     "docs/assets/screenshots/issues-json.png": "474635006b6e7c0e82eed10f22d44338592fa3eb07cc1d3c7bb635bf050075b7",
-    "docs/assets/screenshots/confluence-cli.png": "6ee48d63544e8aef45de102226a6af51904e5175304b473b65e49b1e6abef622",
-    "docs/assets/screenshots/workflow-context.png": "b38d9ec96278a9d1bd4cf764840cdcc40b9b49457a29a0bca6e04348fe3b558b",
-    "docs/assets/screenshots/jira-parameters.png": "2c280dd060390951cd7f5eb36c7e9c1e974f55dfffa8a9fbfe78a20f7f3b104b"
+    "docs/assets/screenshots/confluence-cli.png": "6ee48d63544e8aef45de102226a6af51904e5175304b473b65e49b1e6abef622"
   },
   "review_bundle": {
-    "format": 1,
+    "format": 2,
+    "source_story": {
+      "path": "source-story.md",
+      "sha256": "516735748be7b0d3bf0852e3037f08e686c61defe81f0e612df6d170dd72f90e"
+    },
     "definition": {
       "format": 1,
       "reviewer": "Codex feature-story agent",
-      "source_sha256": "dd14662f0ebed414185083f727f60ed81f72441fff1236afc1374191c15973d8",
-      "plan_sha256": "f59690101925633a3cce229c23e46e4178a013f5691e5c7d2e74b7a73120f75f",
-      "story_sha256": "43557a488a085cf1cd72d4723690ddc9ee3180e321999d83678721cbdf71d972"
+      "source_sha256": "f43851e20424281be07b7a63bcffd7033f58a27ffef9ff379180fc538590615f",
+      "plan_sha256": "3f91fd09ffc8c4b1d0c16cb8004a7f7b56f15f33a8b581781a11d2ffd3016187",
+      "story_sha256": "516735748be7b0d3bf0852e3037f08e686c61defe81f0e612df6d170dd72f90e"
     },
     "plugin": "heinzel-atlassian",
     "core_version": "0.9.1",
-    "inputs_sha256": "62483b1a7f75d0ff7769807b8884662c316f723948a3f5da16b9dc92cece31a0",
+    "inputs_sha256": "4dcf4ee11306999429c927fea3893c6a2ef1700fc94b4dd190fb84fe494aff4d",
     "screenshots": [
       {
-        "path": "docs/assets/screenshots/jira-issues.png",
+        "path": "docs/assets/screenshots/review-inventory.png",
         "surface": "ui",
-        "caption": "Demo data: fictional Jira changes, owners and states in the app terminal, using the real adapter and a fixture-only requester."
+        "caption": "Demo data: find the fictional Weekly work review among local contracts."
       },
       {
-        "path": "docs/assets/screenshots/confluence-plan.png",
+        "path": "docs/assets/screenshots/workflow-context.png",
         "surface": "ui",
-        "caption": "Demo data: read the fictional Widget launch plan with its source and revision, using the real adapter and a fixture-only requester."
+        "caption": "Demo data: the local Weekly work review declares Jira and Confluence inputs; no report has been generated."
       },
       {
         "path": "docs/assets/screenshots/issues-json.png",
@@ -43,48 +45,32 @@
         "path": "docs/assets/screenshots/confluence-cli.png",
         "surface": "cli",
         "caption": "Demo data: the fictional Confluence plan, source and revision in the shell, using a fixture-only requester and local vendor replies."
-      },
-      {
-        "path": "docs/assets/screenshots/workflow-context.png",
-        "surface": "ui",
-        "caption": "Demo data: the local Weekly work review contract declares Jira and Confluence inputs; no report has been generated."
-      },
-      {
-        "path": "docs/assets/screenshots/jira-parameters.png",
-        "surface": "ui",
-        "caption": "Demo data: lowercase wid resolves to WID; the fixture requester returns structured Jira changes with --json in the app terminal."
       }
     ],
     "images": {
-      "jira-issues.png": "edcd834303bc9710eabd29aa4d36307a373c548bbc2c078ae1c728416e780ce3",
-      "confluence-plan.png": "ad068ff0255ad82099ae0cc4315053bf257685c56c3e9b1430f42c3b09c2c282",
+      "review-inventory.png": "937ce44a8455fa63454bb0e9c0817137b8ff3b790e31e601f8f55d95e1ac53a8",
+      "workflow-context.png": "e05ef018a7cb36fc1fa078678a4d36a03e8cfcf3d05d1b6b4f87c63c8aa4bed4",
       "issues-json.png": "474635006b6e7c0e82eed10f22d44338592fa3eb07cc1d3c7bb635bf050075b7",
-      "confluence-cli.png": "6ee48d63544e8aef45de102226a6af51904e5175304b473b65e49b1e6abef622",
-      "workflow-context.png": "b38d9ec96278a9d1bd4cf764840cdcc40b9b49457a29a0bca6e04348fe3b558b",
-      "jira-parameters.png": "2c280dd060390951cd7f5eb36c7e9c1e974f55dfffa8a9fbfe78a20f7f3b104b"
+      "confluence-cli.png": "6ee48d63544e8aef45de102226a6af51904e5175304b473b65e49b1e6abef622"
     },
     "transcripts": {
-      "jira-issues.txt": "a17bfab9a9a0978f59926685df1648eedc3171e3b26db0f92063a650fe9d1059",
-      "confluence-plan.txt": "798c34045b13e0dadfcbe15bad08a6e53d5b47692d5afb6c86072f268e94dfa8",
+      "review-inventory.txt": "44fc95bdccafdbfff60fb8a30cd128fd308c768de45cfd56a5308c534957fc8a",
+      "workflow-context.txt": "6f10311f1488f1149629aaaea2777ef146d2e02340994ad177dbcd94cf593b47",
       "issues-json.txt": "6a377c231e0b39b0e7e90037a5637c0a49cc11ba5f3da74bfeb6ed4fec6d5ee9",
-      "confluence-cli.txt": "dbac0428b2123fd6cfb248be30010051986995ee83bfa9e33b4b1a272541b710",
-      "workflow-context.txt": "d215aab387a1695e17b5a34e4667c65e0d76734e33f12eb4d3136bfea3a90b75",
-      "jira-parameters.txt": "4af63b654fbdcc82373ec5990f114a3036835a8db589faaedd909b7b02b9417c"
+      "confluence-cli.txt": "dbac0428b2123fd6cfb248be30010051986995ee83bfa9e33b4b1a272541b710"
     },
-    "bundle_sha256": "cc6306ea61bde533e0664a0c60c347b091a2ec3016a150ec426e7a8d1603cf7d"
+    "bundle_sha256": "05ba6b2b320e524c60484c7c06577e01bb75e39cfeea418190cf6b19eba05033"
   },
   "privacy_review": {
     "format": 1,
-    "bundle_sha256": "cc6306ea61bde533e0664a0c60c347b091a2ec3016a150ec426e7a8d1603cf7d",
+    "bundle_sha256": "05ba6b2b320e524c60484c7c06577e01bb75e39cfeea418190cf6b19eba05033",
     "reviewer": "Codex privacy agent",
     "decision": "approve",
     "checked_images": [
-      "jira-issues.png",
-      "confluence-plan.png",
-      "issues-json.png",
-      "confluence-cli.png",
+      "review-inventory.png",
       "workflow-context.png",
-      "jira-parameters.png"
+      "issues-json.png",
+      "confluence-cli.png"
     ],
     "checks": {
       "tokens_absent": true,
