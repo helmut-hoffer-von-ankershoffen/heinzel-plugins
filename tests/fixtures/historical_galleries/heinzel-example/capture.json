@@ -1,0 +1,98 @@
+{
+  "format": 1,
+  "plugin": "heinzel-example",
+  "core_version": "0.9.1",
+  "inputs_sha256": "8b97f22b64b7150f4935c63380bb8efa77f6580f659517f007c45c959fc18c14",
+  "images": {
+    "docs/assets/screenshots/widget-and-status.png": "2c64bb11eaa95d6df6a9d497bd793d3deeda47184aab1e90fb0ae27cbbb4c44d",
+    "docs/assets/screenshots/inspector.png": "8467e7f7d7c479046c1cc78adf42c18feaebcb2b8c9127d150e485628b8bb502",
+    "docs/assets/screenshots/greeting-terminal.png": "e84b1526ed6df588a60eb2366e1c529a8436738fc86a8cf5f94b5a414ce1a576",
+    "docs/assets/screenshots/plugin-notice.png": "5423386f2c56d2f529a23093162492b91ff841f66eb4742d467ce5d7403e549f",
+    "docs/assets/screenshots/greeting-cli.png": "375b8962cc5c7c30ab9c63248ea2ac468f325afc3bc53932dd70c9c5da5478fd",
+    "docs/assets/screenshots/sample-json.png": "fcebdd36aba06edc9113cb2009094d20c07f83342ffec053e78d5e47d715e1f5"
+  },
+  "review_bundle": {
+    "format": 1,
+    "definition": {
+      "format": 1,
+      "reviewer": "Codex feature-story agent",
+      "source_sha256": "6c0069d3cc9a595269b9f57a0e507574fed3f79400bf8c6c1b2c4e94380e2c36",
+      "plan_sha256": "619f8beda68547c008f10a6b5864ea7386f0c8bb7fa34d79dac6edfd3e794a7c",
+      "story_sha256": "1155d1ba69f19a7df9ed3f6a18343888ac000096d9f725948dc164548b49c9c6"
+    },
+    "plugin": "heinzel-example",
+    "core_version": "0.9.1",
+    "inputs_sha256": "8b97f22b64b7150f4935c63380bb8efa77f6580f659517f007c45c959fc18c14",
+    "screenshots": [
+      {
+        "path": "docs/assets/screenshots/widget-and-status.png",
+        "surface": "ui",
+        "caption": "Demo data: the constant 42 appears in both the Today widget and sidebar status."
+      },
+      {
+        "path": "docs/assets/screenshots/inspector.png",
+        "surface": "ui",
+        "caption": "Demo data: open the plugin-owned inspector to see the same constant value, 42."
+      },
+      {
+        "path": "docs/assets/screenshots/greeting-terminal.png",
+        "surface": "ui",
+        "caption": "Demo data: greet fictional Mira with structured JSON in the app's native terminal."
+      },
+      {
+        "path": "docs/assets/screenshots/plugin-notice.png",
+        "surface": "ui",
+        "caption": "Demo data: a seeded Example is ready notice appears in the shared in-app notification panel."
+      },
+      {
+        "path": "docs/assets/screenshots/greeting-cli.png",
+        "surface": "cli",
+        "caption": "Demo data: the typed hello operation greets fictional Mira from the CLI."
+      },
+      {
+        "path": "docs/assets/screenshots/sample-json.png",
+        "surface": "cli",
+        "caption": "Demo data: sample returns 42 as JSON, the same constant used by the widget, status and inspector."
+      }
+    ],
+    "images": {
+      "widget-and-status.png": "2c64bb11eaa95d6df6a9d497bd793d3deeda47184aab1e90fb0ae27cbbb4c44d",
+      "inspector.png": "8467e7f7d7c479046c1cc78adf42c18feaebcb2b8c9127d150e485628b8bb502",
+      "greeting-terminal.png": "e84b1526ed6df588a60eb2366e1c529a8436738fc86a8cf5f94b5a414ce1a576",
+      "plugin-notice.png": "5423386f2c56d2f529a23093162492b91ff841f66eb4742d467ce5d7403e549f",
+      "greeting-cli.png": "375b8962cc5c7c30ab9c63248ea2ac468f325afc3bc53932dd70c9c5da5478fd",
+      "sample-json.png": "fcebdd36aba06edc9113cb2009094d20c07f83342ffec053e78d5e47d715e1f5"
+    },
+    "transcripts": {
+      "widget-and-status.txt": "64cf7e21c62b442b760c2d5402f37eafa96bb184b4277afbae49e035a989b8dd",
+      "inspector.txt": "bef7a3e06573ae520aa4f700ba296deaa6c8635efb73e9e7e232ea248e03c6d8",
+      "greeting-terminal.txt": "e55df4196ae966d724212a21c14b826f12e9dc2f937b92744d31d2cd5d2c8de6",
+      "plugin-notice.txt": "ddfb6201a8270c3abf06f8e93ae713f9e7017e36274fbd59332d7db96f262985",
+      "greeting-cli.txt": "0a315745bb1e963bf40b1ccfdc9a822532fa703f2c1b5013c8fe303b8cf0f59f",
+      "sample-json.txt": "084c799cd551dd1d8d5c5f9a5d593b2e931f5e36122ee5c793c1d08a19839cc0"
+    },
+    "bundle_sha256": "a8f8e90fb7bffe9825c7e0973a1e455a825b0b854aa39269aafa04a7d07ea04a"
+  },
+  "privacy_review": {
+    "format": 1,
+    "bundle_sha256": "a8f8e90fb7bffe9825c7e0973a1e455a825b0b854aa39269aafa04a7d07ea04a",
+    "reviewer": "Codex privacy agent",
+    "decision": "approve",
+    "checked_images": [
+      "widget-and-status.png",
+      "inspector.png",
+      "greeting-terminal.png",
+      "plugin-notice.png",
+      "greeting-cli.png",
+      "sample-json.png"
+    ],
+    "checks": {
+      "tokens_absent": true,
+      "personal_data_absent": true,
+      "feature_relevant": true,
+      "multiple_ui_scenes": true,
+      "captions_accurate": true
+    },
+    "findings": []
+  }
+}
