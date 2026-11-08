@@ -15,6 +15,8 @@ Workflow
 What hz knows of your workflow: the systems you connected, the assets playbooks keep and discovery finds, your contracts and the ones playbooks suggest, and what they maintain. Select a node for its details and its command.
 
 Discover
+issues
+plan
 ai-access
 claude-code
 , System

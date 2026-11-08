@@ -18,7 +18,7 @@ export function installDiagnostics() {
       trigger: trigger(),
       switch: panel?.querySelector('[role="switch"]'),
       share: [...(panel?.querySelectorAll("button") ?? [])].find((item) => item.textContent.trim() === "Share"),
-      copy: [...(panel?.querySelectorAll("button") ?? [])].find((item) => item.textContent.trim() === "Copy URL"),
+      copy: [...(panel?.querySelectorAll("button") ?? [])].find((item) => ["Copy URL", "Copy link"].includes(item.textContent.trim())),
       more: document.querySelector('button[aria-label="More status items"]'),
       region: panel,
       overflow: document.querySelector('section[aria-label="More status items"]'),

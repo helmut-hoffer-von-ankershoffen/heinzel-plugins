@@ -157,7 +157,7 @@ class Acli:
         path = self.path()
         if path is None:
             return None
-        seen = getattr(self, "_detected", None)  # a subclass may skip __init__
+        seen: tuple[str, float, str] | None = getattr(self, "_detected", None)  # a subclass may skip __init__
         if seen and seen[0] == path and time.monotonic() - seen[1] < SITE_TTL:
             return seen[2]
         for args in (["jira", "auth", "status"], ["auth", "status"]):

@@ -172,7 +172,7 @@ jobs:
           BD_SHA256: 175c26904bde3ff9168d2282ff6b56f17b17f60c22fa5acb3dacc9fb3465303a
         run: |
           archive="beads_${BD_VERSION}_linux_amd64.tar.gz"
-          curl -fsSL -o "$RUNNER_TEMP/$archive" "https://github.com/gastownhall/beads/releases/download/v${BD_VERSION}/$archive"
+          curl --proto "=https" --proto-redir "=https" -fsSL -o "$RUNNER_TEMP/$archive" "https://github.com/gastownhall/beads/releases/download/v${BD_VERSION}/$archive"
           echo "$BD_SHA256  $RUNNER_TEMP/$archive" | sha256sum -c -
           mkdir -p "$RUNNER_TEMP/bd"
           tar -xzf "$RUNNER_TEMP/$archive" -C "$RUNNER_TEMP/bd" bd

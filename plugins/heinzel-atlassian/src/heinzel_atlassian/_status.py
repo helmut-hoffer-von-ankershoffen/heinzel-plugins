@@ -6,6 +6,7 @@ authorised only when its own status says so: the global profile being signed in 
 owner's: this only names the command; nothing here runs a login or sees a secret.
 """
 
+from collections.abc import Sequence
 from typing import Literal
 
 from pydantic import BaseModel, Field
@@ -45,11 +46,11 @@ class AtlassianStatus(BaseModel):
     refresh: str = Field(default=CHECK_AGAIN, description="Label of the icon button that reads the status again.")
 
 
-def _names(products: list[str]) -> str:
+def _names(products: Sequence[str]) -> str:
     return " and ".join(products)
 
 
-def _are(products: list[str]) -> str:
+def _are(products: Sequence[str]) -> str:
     return "is" if len(products) == 1 else "are"
 
 

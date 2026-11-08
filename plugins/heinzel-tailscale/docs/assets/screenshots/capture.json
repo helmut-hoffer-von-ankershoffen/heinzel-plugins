@@ -2,10 +2,10 @@
   "format": 1,
   "plugin": "heinzel-tailscale",
   "core_version": "0.9.16",
-  "inputs_sha256": "a3d482993badae02a7c8475ac015aabe5dff937e96cc7c258737fedadc329bd9",
+  "inputs_sha256": "68a826616ad9b1517d1f5d541145860e6d0fca3ba01edb48160095d3994df0ba",
   "images": {
     "docs/assets/screenshots/sharing-ready.png": "3d1c6b673ac741b7fa14186a9dff73f5d6caee75d796e1bf0525cc9317681791",
-    "docs/assets/screenshots/sharing-request-cli.png": "1760858fe8db09f3a335f675f0fb7c5a23f7240bedad2dd6e77c9204b48130e6",
+    "docs/assets/screenshots/sharing-request-cli.png": "a364a9fcbce091f53bbfc7f26b0cc9ceec7998bc0df11df49f67bf4cf399e2a8",
     "docs/assets/screenshots/sharing-off.png": "cb0c209370538742a9cada254add2a33389dc8cfe915e2c300264b14eb0fb6af",
     "docs/assets/screenshots/sharing-off-cli.png": "592011836c508fac6809305cbc29752484a4be2cc32546e31dffbc369ee0c774"
   },
@@ -13,18 +13,18 @@
     "format": 2,
     "source_story": {
       "path": "source-story.md",
-      "sha256": "aca4e907697dd74f4d748eeec862b130679ec810297cfe92d256bf6b08632ba9"
+      "sha256": "bb981d0aa1f147a534afc90def874d7c4ef671d03ab215e81791f99987b04d93"
     },
     "definition": {
       "format": 1,
       "reviewer": "Codex feature-story agent",
-      "source_sha256": "81c00bf622d425e7e39b74d4bd1bb3ef85c5e8e092dc42fcdf766e921a7e75ff",
+      "source_sha256": "9903bb62562f67fbf89ca3e3724f690578f3d0fb60f96c34d0b581f028ea59f1",
       "plan_sha256": "e9026f7479f013f04545b708fc116dc6ba0f4d0cf0e234771025c88a3d727b2f",
-      "story_sha256": "aca4e907697dd74f4d748eeec862b130679ec810297cfe92d256bf6b08632ba9"
+      "story_sha256": "bb981d0aa1f147a534afc90def874d7c4ef671d03ab215e81791f99987b04d93"
     },
     "plugin": "heinzel-tailscale",
     "core_version": "0.9.16",
-    "inputs_sha256": "a3d482993badae02a7c8475ac015aabe5dff937e96cc7c258737fedadc329bd9",
+    "inputs_sha256": "68a826616ad9b1517d1f5d541145860e6d0fca3ba01edb48160095d3994df0ba",
     "screenshots": [
       {
         "path": "docs/assets/screenshots/sharing-ready.png",
@@ -49,21 +49,21 @@
     ],
     "images": {
       "sharing-ready.png": "3d1c6b673ac741b7fa14186a9dff73f5d6caee75d796e1bf0525cc9317681791",
-      "sharing-request-cli.png": "1760858fe8db09f3a335f675f0fb7c5a23f7240bedad2dd6e77c9204b48130e6",
+      "sharing-request-cli.png": "a364a9fcbce091f53bbfc7f26b0cc9ceec7998bc0df11df49f67bf4cf399e2a8",
       "sharing-off.png": "cb0c209370538742a9cada254add2a33389dc8cfe915e2c300264b14eb0fb6af",
       "sharing-off-cli.png": "592011836c508fac6809305cbc29752484a4be2cc32546e31dffbc369ee0c774"
     },
     "transcripts": {
       "sharing-ready.txt": "3f81fe45cb0d32e0f4c0ce9125215fb5842033ad6379ab04e879a0f1653d129d",
-      "sharing-request-cli.txt": "7d94204728b96f8ac3aa3129de02e73989a0c4bd9910bbc6f7bc0dc291942feb",
+      "sharing-request-cli.txt": "fc24dedc5683c723aab3df316e9c8052e02a0c3d3788e17abac50e25a7b92eda",
       "sharing-off.txt": "c9f9d1f3e89ad331af3f5e57fca36f7c8f1b3eab6017c2bfe23e9e5ad8702d7d",
       "sharing-off-cli.txt": "cf49c8bdefcb23c7b464e229ae6e18bbd8f639abb0121bf570e3e30b631fc8b0"
     },
-    "bundle_sha256": "a7d015d2c5769510a5537c2eae8438500833cd20a19d14a62e0e7ad8fd2b54ec"
+    "bundle_sha256": "e9080f1d13026992e1a73c64f9178571968d5cae86aaeedf003101b75444a0f3"
   },
   "privacy_review": {
     "format": 1,
-    "bundle_sha256": "a7d015d2c5769510a5537c2eae8438500833cd20a19d14a62e0e7ad8fd2b54ec",
+    "bundle_sha256": "e9080f1d13026992e1a73c64f9178571968d5cae86aaeedf003101b75444a0f3",
     "reviewer": "Codex privacy agent",
     "decision": "approve",
     "checked_images": [
