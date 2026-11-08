@@ -89,7 +89,7 @@ def read(acli: Acli, timeout: float, products: list[Product]) -> AtlassianStatus
             state="connected", identity=email, site=site, cause=f"Signed in{who}{where}.", products=states,
             command="", action="", explanation="",
         )  # fmt: skip
-    pending = [p for p in wanted if each[p] is None or each[p].signed_in is not True]  # type: ignore[union-attr]
+    pending: list[Product] = [p for p in wanted if each[p] is None or each[p].signed_in is not True]  # type: ignore[union-attr]
     command = f"{LOGIN[pending[0]]} --web"
     explanation = BROWSER.format(product=pending[0])
 
