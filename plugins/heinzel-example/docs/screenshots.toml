@@ -5,6 +5,7 @@ bootstrap = "docs/screenshot_fixture.py"
 name = "widget-and-status"
 surface = "ui"
 route = "/"
+appearance = "light"
 caption = "Demo data: the constant 42 appears in both the Today widget and sidebar status."
 
 [[scenes.steps]]
@@ -25,6 +26,7 @@ optional = true
 name = "inspector"
 surface = "ui"
 route = "/?panel=example:inspector"
+appearance = "dark"
 caption = "Demo data: open the plugin-owned inspector to see the same constant value, 42."
 
 [[scenes.steps]]
@@ -34,7 +36,7 @@ name = "Example"
 
 [[scenes.steps]]
 action = "wait"
-text = "The value is 42."
+text = "42"
 
 [[scenes.steps]]
 action = "click"

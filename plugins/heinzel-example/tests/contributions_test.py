@@ -4,7 +4,7 @@ from types import SimpleNamespace
 from unittest.mock import Mock
 
 import pytest
-from heinzel import NoticeKind, Notifications, ViewLet
+from heinzel import NoticeKind, Notifications, StatusLet, ViewLet
 
 from heinzel_example import module, notify, sample, status, today
 
@@ -17,6 +17,18 @@ def test_example_value_owns_its_status_and_today_widget():
     assert today(sample()).value == "42"
     [view] = [let for let in module.lets if isinstance(let, ViewLet)]
     assert view.files
+    assert view.source == "sample"
+
+
+def test_footer_icon_opens_the_example_pane_with_the_value():
+    item = status(sample())
+    [let] = [let for let in module.lets if isinstance(let, StatusLet)]
+    assert dict(let.slots) == {"footer": True, "sidebar": True}
+    assert item.icon == "star"
+    assert item.detail[0].text == "Example"
+    assert item.effect.path == "/?panel=example:inspector"
+    [view] = [let for let in module.lets if isinstance(let, ViewLet)]
+    assert view.title == "Example"
     assert view.source == "sample"
 
 

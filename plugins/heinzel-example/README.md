@@ -32,6 +32,18 @@ runs its full checks. `make build NAME=example` and `make acceptance NAME=exampl
 The modules live in
 `src/heinzel_example/`; read the root [AGENTS.md](../../AGENTS.md) before changing them.
 
+## Footer pane
+
+The example is also the teaching example for a footer icon that opens a pane. Three contributions in
+`src/heinzel_example/__init__.py` do it, with no core change:
+
+- `@module.status(source="sample", slots={"footer": True, "sidebar": True})` returns a `StatusItem` with an `icon`, a
+  `detail` line (the tooltip, "Example") and `effect=Navigate(path="/?panel=example:inspector")`, the click target.
+- `module.view(..., name="inspector", title="Example", source="sample")` is the pane that target opens; its
+  `views/index.js` shows the value (42, the same `sample` operation as the Today widget) big. A pane is content, then a
+  divider and a bottom action row only when it has actions; this one has none.
+- `tests/contributions_test.py` asserts the slots, icon, tooltip, target and view.
+
 Development and release commands: [repository guide](../../README.md).
 
 
