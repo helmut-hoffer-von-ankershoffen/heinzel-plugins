@@ -33,5 +33,3 @@ Tailscale
 
 Share over Tailscale
 Off
-
-Private web sharing is off.

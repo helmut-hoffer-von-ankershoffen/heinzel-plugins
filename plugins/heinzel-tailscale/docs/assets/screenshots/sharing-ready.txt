@@ -38,4 +38,3 @@ On
 
 Copy URL
 Open
-Private sharing is ready for an authenticated browser.

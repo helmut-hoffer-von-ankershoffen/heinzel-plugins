@@ -6,6 +6,8 @@
   "apply_settings": {},
   "mapped": true,
   "origin": "https://workstation.tail-example.ts.net",
-  "target": "http://127.0.0.1:54529",
-  "message": "The request is saved; restart/apply and verify it from the owning web app."
+  "target": "http://127.0.0.1:56843",
+  "summary": "Turning on…",
+  "problem": false,
+  "message": "Sharing is set up in Tailscale. The hz web app finishes turning it on the next time it shows this status."
 }
