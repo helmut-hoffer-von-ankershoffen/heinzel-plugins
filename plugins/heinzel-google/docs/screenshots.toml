@@ -2,6 +2,19 @@ format = 1
 bootstrap = "docs/screenshot_fixture.py"
 
 [[scenes]]
+name = "google-upcoming-review"
+surface = "ui"
+route = "/"
+appearance = "dark"
+caption = "A fictional launch review appears in the Core agenda through the Google calendar adapter."
+timeout_ms = 30000
+viewport = { width = 1280, height = 900 }
+
+[[scenes.steps]]
+action = "wait"
+text = "Next: Launch readiness review"
+
+[[scenes]]
 name = "google-calendar-week"
 surface = "ui"
 route = "/"
@@ -75,12 +88,6 @@ name = "launch-metrics"
 surface = "cli"
 caption = "Read a fictional Sheet as a table through the real adapter and a fixture-only requester."
 command = ["showcase", "notes", "launch-metrics"]
-
-[[scenes]]
-name = "launch-week"
-surface = "cli"
-caption = "Read the fixed fictional October launch week; the separate current-window UI uses the same fixture provider."
-command = ["showcase", "week"]
 
 [[scenes]]
 name = "mail-content"

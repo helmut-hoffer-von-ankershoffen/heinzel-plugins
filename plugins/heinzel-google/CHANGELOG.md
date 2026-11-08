@@ -1,5 +1,10 @@
 # Changelog
 
+## Unreleased
+
+Ask separately, in two plain lines, before the sign-in requests Docs write access (`documents`); reads keep working without it.
+Log the consent step with structured fields (`google.setup.step.start` and `.outcome`).
+
 ## 0.9.2
 
 Add connected reads for mail, calendar and files with item identity, so a helper wakes only on something new.

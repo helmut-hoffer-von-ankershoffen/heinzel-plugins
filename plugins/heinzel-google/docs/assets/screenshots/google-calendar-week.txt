@@ -22,7 +22,7 @@ Updates, off
 System health, warning
 Not in a meeting
 Next: Launch readiness review
-Thu 13:38
+Sun 01:32
 Daemon not installed, off
 Chat
 Calendar
@@ -38,12 +38,12 @@ Nov 2, 2026 – Nov 8, 2026
 
 Launch readiness review
 
-Nov 5, 2026, 13:38 – Nov 5, 2026, 14:08
+Nov 8, 2026, 01:32 – Nov 8, 2026, 02:02
 
 Mira Example / Priya Example — one-on-one
 
-Nov 5, 2026, 14:23 – Nov 5, 2026, 14:53
+Nov 8, 2026, 02:17 – Nov 8, 2026, 02:47
 
 Rollout checkpoint
 
-Nov 5, 2026, 15:08 – Nov 5, 2026, 15:38
+Nov 8, 2026, 03:02 – Nov 8, 2026, 03:32

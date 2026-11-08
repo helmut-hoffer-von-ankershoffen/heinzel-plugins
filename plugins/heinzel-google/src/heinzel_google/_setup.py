@@ -4,7 +4,9 @@ The sign-in asks Google for read-only scopes, Gmail's only when mail is read fro
 calendar and mail only when the person lets hz write them (ADR 0028: a read-only setup never asks for write access).
 """
 
+import logging
 import os
+import time
 from pathlib import Path
 
 from heinzel import ConfigEditor, HeinzelError, Prompter
@@ -12,6 +14,8 @@ from heinzel.kernel import CapabilityView
 
 from heinzel_google._gws import CLIENT, INSTALL, LOGIN_WITH_MAIL, GoogleSession, Gws, login_command
 from heinzel_google._models import GoogleSettings
+
+_LOG = logging.getLogger("heinzel_google.setup")
 
 CAPABILITIES = ("documents", "calendar", "mail")
 OPT_IN = frozenset({"mail"})
@@ -58,7 +62,12 @@ def run_setup(  # noqa: PLR0913, PLR0917 - what the step is injected with
     # Mail Google serves only automatically was asked about in _bind: kept, it is in newly; declined, it is off.
     mail = "mail" in newly or view.binding("mail") in {("google", "configured"), ("google", "default")}
     calendar = "calendar" in newly or view.binding("calendar")[0] == "google"
-    write = _writes(prompter, calendar=calendar, mail=mail)
+    write = _writes(
+        prompter,
+        calendar=calendar,
+        mail=mail,
+        documents="documents" in newly or view.binding("documents")[0] == "google",
+    )
     if signed_in and not mail and not write:
         return
     if signed_in and "mail" not in newly and not write:
@@ -82,7 +91,7 @@ def run_setup(  # noqa: PLR0913, PLR0917 - what the step is injected with
         prompter.say("gws is signed in." if code == 0 else f"gws auth login did not finish (exit {code}).")
 
 
-def _writes(prompter: Prompter, *, calendar: bool, mail: bool) -> frozenset[str]:
+def _writes(prompter: Prompter, *, calendar: bool, mail: bool, documents: bool = False) -> frozenset[str]:
     """Ask whether hz may write the calendar and the mail it reads from Google; the ones it may. "No" is the default."""
     allowed: set[str] = set()
     if calendar and prompter.confirm(
@@ -94,7 +103,29 @@ def _writes(prompter: Prompter, *, calendar: bool, mail: bool) -> frozenset[str]
         default=False,
     ):
         allowed.add("mail")
+    if documents and _documents_consent(prompter):
+        allowed.add("documents")
     return frozenset(allowed)
+
+
+DOCS_ASKED = "Asked: Google's permission to change your Docs; reading them needs nothing more."
+DOCS_HAPPENS = "Then: hz adds to a document only after you confirm each change; Google opens your browser to approve."
+
+
+def _documents_consent(prompter: Prompter) -> bool:
+    """The separate, explicit consent for writing Docs: two plain lines, then the question ("No" is the default)."""
+    started = time.monotonic()
+    fields = {"operation": "setup", "step": "documents-write-consent", "plugin": "heinzel-google"}
+    _LOG.info("google.setup.step.start", extra=fields)
+    prompter.say(DOCS_ASKED)
+    prompter.say(DOCS_HAPPENS)
+    granted = prompter.confirm("Let hz also add to your Google Docs, each only after you confirm it?", default=False)
+    _LOG.info(
+        "google.setup.step.outcome",
+        extra=fields
+        | {"outcome": "granted" if granted else "declined", "duration_ms": int((time.monotonic() - started) * 1000)},
+    )
+    return granted
 
 
 def _bind(view: CapabilityView, prompter: Prompter, editor: ConfigEditor) -> set[str]:

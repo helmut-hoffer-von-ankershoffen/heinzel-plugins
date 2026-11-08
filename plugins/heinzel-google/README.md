@@ -182,6 +182,10 @@ Development and release commands: [repository guide](../../README.md).
 <!-- screenshots:start -->
 ## Screenshots
 
+<img src="docs/assets/screenshots/google-upcoming-review.png" alt="A fictional launch review appears in the Core agenda through the Google calendar adapter." width="960">
+
+A fictional launch review appears in the Core agenda through the Google calendar adapter.
+
 <img src="docs/assets/screenshots/google-calendar-week.png" alt="The real Core calendar reads a fictional launch week through the Google adapter; no Google account is contacted." width="960">
 
 The real Core calendar reads a fictional launch week through the Google adapter; no Google account is contacted.
@@ -208,10 +212,6 @@ Read a fictional Google Doc as useful text through the real adapter and a fixtur
 <img src="docs/assets/screenshots/launch-metrics.png" alt="Read a fictional Sheet as a table through the real adapter and a fixture-only requester." width="960">
 
 Read a fictional Sheet as a table through the real adapter and a fixture-only requester.
-
-<img src="docs/assets/screenshots/launch-week.png" alt="Read the fixed fictional October launch week; the separate current-window UI uses the same fixture provider." width="960">
-
-Read the fixed fictional October launch week; the separate current-window UI uses the same fixture provider.
 
 <img src="docs/assets/screenshots/mail-content.png" alt="Read a fictional launch message through the real Gmail adapter and a fixture-only requester." width="960">
 

@@ -56,7 +56,10 @@ CALENDAR_WRITE_SCOPE = "https://www.googleapis.com/auth/calendar.events"
 MAIL_WRITE_SCOPE = "https://www.googleapis.com/auth/gmail.modify"
 """Gmail's scope to keep drafts, send them and file mail (never to delete it for good), asked for only when you let hz
 write mail; it covers reading too, so it replaces `MAIL_SCOPE`."""
-WRITE_SCOPES = {"calendar": CALENDAR_WRITE_SCOPE, "mail": MAIL_WRITE_SCOPE}
+DOCUMENTS_WRITE_SCOPE = "https://www.googleapis.com/auth/documents"
+"""Docs' scope to change documents (the `document-write` token exchange needs it), asked for only when you let hz write
+your Google Docs; it covers reading too, so reads work with or without it."""
+WRITE_SCOPES = {"calendar": CALENDAR_WRITE_SCOPE, "documents": DOCUMENTS_WRITE_SCOPE, "mail": MAIL_WRITE_SCOPE}
 """The scope each capability's `write` mode needs, by capability."""
 
 
