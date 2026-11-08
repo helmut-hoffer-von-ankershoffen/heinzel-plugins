@@ -1,0 +1,7 @@
+┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━┓
+┃ Report or request                              ┃ Status                           ┃ Sent        ┃
+┡━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━┩
+│ Add a dark theme to the printed agenda         │ Received                         │ 08 Nov 2026 │
+│ The footer clock jumps by a pixel every minute │ Being worked on                  │ 06 Nov 2026 │
+│ Weather shows yesterday's rain after waking up │ Released in 0.9.27 on 7 Nov 2026 │ 04 Nov 2026 │
+└────────────────────────────────────────────────┴──────────────────────────────────┴─────────────┘

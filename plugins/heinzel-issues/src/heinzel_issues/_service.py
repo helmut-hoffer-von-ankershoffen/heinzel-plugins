@@ -1,14 +1,18 @@
 """Issues as a person sees them: what they sent, whether someone is on it, whether it is done and in which release."""
 
+import getpass
 import json
+import logging
+import mimetypes
 import os
 import tempfile
+import time
 from collections.abc import Callable, Mapping, Sequence
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
 from typing import Any
 
-from heinzel import ModuleSettings, NoticeKind, Notifications, Settings, clean_text
+from heinzel import HeinzelError, ModuleSettings, NoticeKind, Notifications, Settings, Tracker, clean_text
 from pydantic import AwareDatetime, BaseModel, Field, JsonValue, ValidationError
 
 from heinzel_issues._beads import BeadsSettings, BeadsTracker
@@ -34,6 +38,20 @@ MAX_ATTACHMENT_BYTES = 5 * 1024 * 1024
 _KINDS = ((b"\x89PNG\r\n\x1a\n", "PNG image"), (b"\xff\xd8\xff", "JPEG image"))
 NOT_SET_UP = "Issue tracking is not set up."
 BUILTIN: Mapping[str, Factory] = {"beads": BeadsTracker.from_settings}
+logger = logging.getLogger("heinzel_issues")
+
+
+def log_event(name: str, **fields: object) -> None:
+    """One structured event: a stable `area.operation.step` name and fields, never what a person typed."""
+    logger.info(name, extra={"event": name, **{key: value for key, value in fields.items() if value is not None}})
+
+
+def reporter() -> str:
+    """Who sends from this computer, as Beads records the actor: the login name."""
+    try:
+        return getpass.getuser()
+    except (OSError, KeyError):
+        return "heinzel-issues"
 
 
 class IssuesSettings(ModuleSettings):
@@ -172,12 +190,30 @@ class IssuesService:
         """
         return self.report(self.tracker().get(task_id))
 
-    def submit(self, text: str, attachments: Sequence[Path] = ()) -> Report:
-        """Send a report or request to the tracker.
+    def submit(self, text: str, attachments: Sequence[Path] = (), board: Tracker | None = None) -> Report:
+        """Send a report or request to the tracker, through Heinzel's `tracker` capability `board` for Beads.
+
+        Logs `issues.submit.start` and one `issues.submit.outcome` with the tracker, attachment count, outcome and
+        duration; never the text.
 
         Raises:
             TrackerError: If the text is empty or too long, an attachment is refused, or the tracker fails.
         """
+        started = time.monotonic()
+        fields: dict[str, object] = {"operation": "submit", "tracker": self.settings.tracker}
+        log_event("issues.submit.start", **fields, attachments=len(attachments))
+        try:
+            report = self._submit(text, attachments, board)
+        except TrackerError:
+            # No message: a tracker's refusal may quote what was typed.
+            duration = round((time.monotonic() - started) * 1000)
+            log_event("issues.submit.outcome", **fields, outcome="failed", duration_ms=duration)
+            raise
+        duration = round((time.monotonic() - started) * 1000)
+        log_event("issues.submit.outcome", **fields, outcome="ok", duration_ms=duration, state=report.state.value)
+        return report
+
+    def _submit(self, text: str, attachments: Sequence[Path], board: Tracker | None) -> Report:
         body = clean_text(text).strip()
         if not body:
             msg = "Say what happened or what you would like."
@@ -189,7 +225,18 @@ class IssuesService:
         if len(files) > MAX_ATTACHMENTS:
             msg = f"At most {MAX_ATTACHMENTS} attachments fit in one report."
             raise TrackerError(msg)
-        return self.report(self.tracker().submit(title_of(body), body, files))
+        if board is None or self.settings.tracker != "beads":
+            return self.report(self.tracker().submit(title_of(body), body, files))
+        tracker = self.tracker()  # checks the folder and program before anything is written
+        actor = reporter()
+        try:
+            issue = board.create(self.settings.beads.label, title_of(body), body, actor, [])
+            for file in files:
+                media_type = mimetypes.guess_type(file.name)[0] or "text/plain"
+                board.attach(issue.key, file.name, file.content, media_type, actor)
+        except HeinzelError as error:
+            raise TrackerError(str(error)) from None
+        return self.report(tracker.get(issue.key))
 
     def report(self, task: Task) -> Report:
         """A task in plain words, with its release once it shipped."""
@@ -219,6 +266,27 @@ class IssuesService:
         """
         if not self.enabled:
             return Watched(checked=False)
+        started = time.monotonic()
+        fields: dict[str, object] = {"operation": "watch", "tracker": self.settings.tracker}
+        log_event("issues.watch.start", **fields)
+        try:
+            result = self._watch(notifications)
+        except TrackerError as error:
+            duration = round((time.monotonic() - started) * 1000)
+            log_event("issues.watch.outcome", **fields, outcome="failed", duration_ms=duration, error=str(error))
+            raise
+        duration = round((time.monotonic() - started) * 1000)
+        log_event(
+            "issues.watch.outcome",
+            **fields,
+            outcome="ok",
+            duration_ms=duration,
+            changes=len(result.changes),
+            noticed=result.noticed,
+        )
+        return result
+
+    def _watch(self, notifications: Notifications | None) -> Watched:
         state = _read(self._watch_file)
         first = state.checked_at is None
         now = self.clock()

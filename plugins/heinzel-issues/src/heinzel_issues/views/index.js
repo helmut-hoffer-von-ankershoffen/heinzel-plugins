@@ -1,6 +1,7 @@
 // Issues: what you reported or requested, in three plain states. No bundler: React comes from the plugin SDK.
-// Sending from the app needs an SDK that lets a view call its own module's operation with text (`call`); until the
-// installed Heinzel offers it, the view says so and offers the app terminal, where `hz issues submit` works today.
+// The form sends what the person typed through the view's `send` action (`submit(action, values)`, Heinzel 0.9.30+):
+// the app shows the call and asks before it runs, and rejects when the person cancels. An older Heinzel without
+// `submit` gets one button that opens `hz issues submit` in the app terminal instead.
 const MARKS = { received: "○", working: "◐", done: "✓" };
 
 export function statusLine(report) {
@@ -12,11 +13,11 @@ export default function createView(sdk) {
   const h = sdk.React.createElement;
   const { useState, useId } = sdk.React;
 
-  function Composer({ call, run }) {
+  function Composer({ submit, run }) {
     const id = useId();
     const [text, setText] = useState("");
     const [state, setState] = useState({ busy: false, message: null, failed: false });
-    if (typeof call !== "function") {
+    if (typeof submit !== "function") {
       return h("div", { className: "hzi-actions" },
         h(sdk.Button, { variant: "default", onClick: () => run?.("report") }, "Report or request"),
       );
@@ -26,11 +27,12 @@ export default function createView(sdk) {
       if (!text.trim()) return;
       setState({ busy: true, message: "Sending…", failed: false });
       try {
-        await call("submit", { text });
+        await submit("send", { text });
         setText("");
         setState({ busy: false, message: "Received. You will see here when someone is on it.", failed: false });
       } catch (error) {
-        setState({ busy: false, message: error?.message || "It could not be sent; try again.", failed: true });
+        // Cancelling the confirmation rejects too; the text stays, so nothing typed is lost.
+        setState({ busy: false, message: error?.message || "Not sent; your text is still here.", failed: true });
       }
     };
     return h("form", { className: "hzi-form", onSubmit: send, "aria-labelledby": `${id}-label` },
@@ -53,7 +55,7 @@ export default function createView(sdk) {
     );
   }
 
-  return function Issues({ data, loading, call, run }) {
+  return function Issues({ data, loading, submit, run }) {
     if (loading && !data) return h("p", { role: "status", className: "hzi-muted" }, "Loading…");
     if (!data) return h("p", { role: "status" }, "Issues cannot be shown here; run hz issues list.");
     if (!data.ready) {
@@ -69,7 +71,7 @@ export default function createView(sdk) {
       reports.length
         ? h("ul", { className: "hzi-list", "aria-label": "Your reports and requests" }, reports.map((report) => h(Item, { key: report.details?.id ?? report.title, report })))
         : h("p", { role: "status", className: "hzi-muted" }, "Nothing reported yet."),
-      h(Composer, { call, run }),
+      h(Composer, { submit, run }),
     );
   };
 }

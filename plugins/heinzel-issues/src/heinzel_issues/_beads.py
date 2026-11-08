@@ -7,15 +7,18 @@ shared database can hold other work that Issues does not show.
 
 import builtins
 import json
+import mimetypes
 import os
 import re
 import shutil
 import subprocess
-from collections.abc import Mapping, Sequence
+from collections.abc import Callable, Mapping, Sequence
 from datetime import datetime
 from pathlib import Path
 from typing import Any, cast
 
+from heinzel import Attachment as FileRef
+from heinzel import HeinzelError, Issue, Window
 from pydantic import BaseModel, ConfigDict, Field, ValidationError, field_validator
 
 from heinzel_issues._contract import Attachment, Task, TaskState, TrackerError
@@ -85,6 +88,9 @@ class _Row(BaseModel):
     closed_at: datetime | None = None
     close_reason: str = ""
     external_ref: str = ""
+    assignee: str | None = None
+    labels: builtins.list[str] = Field(default_factory=builtins.list[str])
+    created_by: str | None = None
 
 
 class BeadsTracker:
@@ -147,15 +153,15 @@ class BeadsTracker:
             TrackerError: If `bd` fails.
         """
         row = self._one(
-            self._run(
+            self.run(
                 ["create", title, "--body-file", "-", "--labels", self._settings.label, "--type", "task", "--json"],
                 stdin=body or title,
             )
         )
         if attachments:
-            saved = [self._attach(row.id, attachment) for attachment in attachments]
+            saved = [self.save_attachment(row.id, attachment) for attachment in attachments]
             note = "\n".join(f"Attachment: {path}" for path in saved)
-            row = self._one(self._run(["update", row.id, "--append-notes", note, "--json"]))
+            row = self._one(self.run(["update", row.id, "--append-notes", note, "--json"]))
         return _task(row)
 
     def list(self) -> builtins.list[Task]:
@@ -193,7 +199,12 @@ class BeadsTracker:
             ["list", "--all", "--label", self._settings.label, "--updated-after", since.isoformat(), "--json"]
         )
 
-    def _attach(self, task_id: str, attachment: Attachment) -> str:
+    def save_attachment(self, task_id: str, attachment: Attachment) -> str:
+        """Copy `attachment` next to the database, under `.beads/attachments/<id>/`; the path relative to the folder.
+
+        Raises:
+            TrackerError: If it cannot be saved.
+        """
         name = _NAME.sub("-", Path(attachment.name).name).strip(".-") or "attachment"
         relative = Path(".beads") / "attachments" / task_id / name
         target = self.folder / relative
@@ -206,20 +217,24 @@ class BeadsTracker:
         return relative.as_posix()
 
     def _rows(self, args: builtins.list[str]) -> builtins.list[Task]:
-        output = self._run(args)
-        try:
-            data = json.loads(output or "[]")
-        except json.JSONDecodeError:
-            msg = "The tracker answered with something that is not JSON; is bd up to date?"
-            raise TrackerError(msg) from None
-        items = cast("list[object]", data if isinstance(data, list) else [data])
-        try:
-            rows = [_Row.model_validate(item) for item in items]
-        except ValidationError:
-            msg = "The tracker answered in a shape Issues does not know; is bd up to date?"
-            raise TrackerError(msg) from None
-        tasks = [_task(row) for row in rows]
+        tasks = [_task(row) for row in self.rows(args)]
         return sorted(tasks, key=lambda task: task.created_at, reverse=True)
+
+    def row(self, args: builtins.list[str], stdin: str | None = None) -> _Row:
+        """The one item a `bd ... --json` call answers with.
+
+        Raises:
+            TrackerError: If `bd` fails or confirms no item.
+        """
+        return self._one(self.run(args, stdin))
+
+    def rows(self, args: builtins.list[str]) -> builtins.list[_Row]:
+        """The items a `bd ... --json` call lists.
+
+        Raises:
+            TrackerError: If `bd` fails or answers in another shape.
+        """
+        return _parse(self.run(args))
 
     def _one(self, output: str) -> _Row:
         try:
@@ -229,7 +244,12 @@ class BeadsTracker:
             msg = "The tracker did not confirm the new item; check it with bd list."
             raise TrackerError(msg) from None
 
-    def _run(self, args: builtins.list[str], stdin: str | None = None) -> str:
+    def run(self, args: builtins.list[str], stdin: str | None = None) -> str:
+        """Run `bd` with `args` in the folder, non-interactively; its standard output.
+
+        Raises:
+            TrackerError: If it cannot start, times out or refuses.
+        """
         environment = {**os.environ, "BD_NON_INTERACTIVE": "1", "NO_COLOR": "1"}
         try:
             done = subprocess.run(  # noqa: S603 - a fixed program and argument list, no shell
@@ -255,6 +275,20 @@ class BeadsTracker:
         return done.stdout
 
 
+def _parse(output: str) -> list[_Row]:
+    try:
+        data = json.loads(output or "[]")
+    except json.JSONDecodeError:
+        msg = "The tracker answered with something that is not JSON; is bd up to date?"
+        raise TrackerError(msg) from None
+    items = cast("list[object]", data if isinstance(data, list) else [data])
+    try:
+        return [_Row.model_validate(item) for item in items]
+    except ValidationError:
+        msg = "The tracker answered in a shape Issues does not know; is bd up to date?"
+        raise TrackerError(msg) from None
+
+
 def _task(row: _Row) -> Task:
     references = "\n".join(part for part in (row.notes, row.external_ref, row.close_reason) if part)
     return Task(
@@ -268,3 +302,110 @@ def _task(row: _Row) -> Task:
         closed_at=row.closed_at,
         references=references,
     )
+
+
+ATTACHMENT_NOTE = "Attachment: "
+"""How a note names a file saved next to the database."""
+
+
+class BeadsBoard:
+    """Heinzel's `tracker` capability (read and write, ADR 0141) over the same local Beads database.
+
+    Every write runs `bd` with `--actor`, so Beads records who it was done for. A project is a label: `create` gives
+    it to the new item and `issues_updated` lists the items that carry it. A claim is Beads' own atomic `--claim`,
+    which refuses an item another actor holds.
+    """
+
+    def __init__(self, settings: BeadsSettings) -> None:
+        """Run nothing yet, like the connector."""
+        self._beads = BeadsTracker(settings)
+
+    @property
+    def beads(self) -> BeadsTracker:
+        """The connector it writes through."""
+        return self._beads
+
+    def issues_updated(self, project: str, window: Window) -> builtins.list[Issue]:
+        """Items labelled `project` updated within `window`, oldest first."""
+        rows = self._call(
+            self._beads.rows,
+            ["list", "--all", "--label", project, "--updated-after", window.since.isoformat(), "--json"],
+        )
+        inside = [row for row in rows if window.since <= row.updated_at < window.until]
+        return [self._issue(row) for row in sorted(inside, key=lambda row: row.updated_at)]
+
+    def create(self, project: str, title: str, body: str, reporter: str, labels: builtins.list[str]) -> Issue:
+        """Open an item labelled `project` and `labels`, created by `reporter`."""
+        tags = ",".join(dict.fromkeys([project, *labels]))
+        args = ["create", title, "--body-file", "-", "--labels", tags, "--type", "task", "--json", "--actor", reporter]
+        return self._issue(self._call(self._beads.row, args, body or title))
+
+    def claim(self, key: str, actor: str) -> Issue:
+        """Beads' atomic claim: assigned to `actor` and in progress, or refused if another actor holds it."""
+        return self._write(key, actor, ["update", key, "--claim"])
+
+    def transition(self, key: str, state: str, actor: str, note: str | None = None) -> Issue:
+        """Set the Beads status `state`, appending `note` to the item's notes if given."""
+        return self._write(key, actor, ["update", key, "--status", state, *(["--append-notes", note] if note else [])])
+
+    def note(self, key: str, text: str, actor: str) -> Issue:
+        """Append `text` to the item's notes."""
+        return self._write(key, actor, ["update", key, "--append-notes", text])
+
+    def attach(self, key: str, name: str, data: bytes, media_type: str, actor: str) -> FileRef:
+        """Save the file next to the database, privately, and name it in the item's notes."""
+        self._known(key)
+        try:
+            path = self._beads.save_attachment(key, Attachment(name=name, content=data))
+        except (TrackerError, ValidationError) as error:
+            raise HeinzelError(str(error)) from None
+        self._write(key, actor, ["update", key, "--append-notes", f"{ATTACHMENT_NOTE}{path}"])
+        return FileRef(name=Path(path).name, media_type=media_type, size=len(data), ref=path)
+
+    def close(self, key: str, actor: str, reason: str) -> Issue:
+        """Close the item, saying why."""
+        return self._write(key, actor, ["close", key, "--reason", reason])
+
+    def _known(self, key: str) -> None:
+        if not _ID.fullmatch(key):
+            msg = f"{key!r} is not a Beads item id."
+            raise HeinzelError(msg)
+
+    def _write(self, key: str, actor: str, args: builtins.list[str]) -> Issue:
+        self._known(key)
+        return self._issue(self._call(self._beads.row, [*args, "--json", "--actor", actor]))
+
+    def _call[T](self, run: Callable[..., T], *args: object) -> T:
+        try:
+            return run(*args)
+        except TrackerError as error:
+            raise HeinzelError(str(error)) from None
+
+    def _issue(self, row: _Row) -> Issue:
+        return Issue(
+            key=row.id,
+            title=row.title,
+            url=f"beads:{row.id}",
+            state=row.status,
+            updated_at=row.updated_at,
+            assignee=row.assignee or None,
+            labels=row.labels,
+            created_at=row.created_at,
+            closed_at=row.closed_at,
+            reporter=row.created_by or None,
+            attachments=self._files(row.notes),
+        )
+
+    def _files(self, notes: str) -> builtins.list[FileRef]:
+        files: builtins.list[FileRef] = []
+        for line in notes.splitlines():
+            if not line.startswith(ATTACHMENT_NOTE):
+                continue
+            ref = line.removeprefix(ATTACHMENT_NOTE).strip()
+            media_type = mimetypes.guess_type(ref)[0] or "application/octet-stream"
+            try:
+                size = (self._beads.folder / ref).stat().st_size
+            except (OSError, TrackerError):
+                size = 0
+            files.append(FileRef(name=Path(ref).name, media_type=media_type, size=size, ref=ref))
+        return files

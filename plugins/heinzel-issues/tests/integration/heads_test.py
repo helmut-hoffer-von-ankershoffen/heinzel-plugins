@@ -75,7 +75,10 @@ def test_health_today_and_the_view_follow_the_tracker(issues_kernel, board, fake
     view = next(entry for entry in views if entry["id"] == "issues:requests")
     assert view["problem"] is None
     assert view["source"]["path"] == "/issues/list"
-    assert set(view["actions"]) == {"setup", "report"}
+    assert set(view["actions"]) == {"setup", "send", "report"}
+    send = view["actions"]["send"]
+    assert (send["kind"], send["operation"], send["inputs"]) == ("operation", "submit", ["text"])
+    assert send["call"] is not None  # system.ui accepted the typed input of a private mutation
     assert any(style.endswith("style.css") for style in view["styles"])
     sent = ui.post(
         "/api/issues/submit",

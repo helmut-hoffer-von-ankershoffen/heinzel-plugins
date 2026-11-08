@@ -9,9 +9,10 @@ Add it with `hz system plugin add issues --confirm`. It is off until you choose 
 ## Use it
 
 - **In the app:** open **Issues** in the sidebar. The list shows each report with its state as a word and a mark
-  (○ Received, ◐ Being worked on, ✓ Done), never colour alone. **Report or request** opens the app's terminal
-  with `hz issues submit`; a text box with **Send** right in the view appears once Heinzel lets plugin views send
-  text to their own operations. Your open reports also appear on Today.
+  (○ Received, ◐ Being worked on, ✓ Done), never colour alone. Type what happened or what you would like and
+  press **Send**; the app shows what it will send and asks first. With a Heinzel older than 0.9.30 the view offers
+  **Report or request** instead, which opens `hz issues submit` in the app's terminal. Your open reports also appear
+  on Today.
 - **In a terminal:**
 
   ```sh
@@ -27,6 +28,29 @@ Add it with `hz system plugin add issues --confirm`. It is off until you choose 
 
 When nothing is set up, the app says **Issue tracking is not set up** with one button, **Set up issue tracking**;
 `hz issues list` says the same and names `hz setup issues`.
+
+<!-- screenshots:start -->
+## Screenshots
+
+<img src="docs/assets/screenshots/issues-page.png" alt="Three fictional reports: received, being worked on, and released in 0.9.27 — with a form to send another" width="960">
+
+Three fictional reports: received, being worked on, and released in 0.9.27 — with a form to send another
+
+<img src="docs/assets/screenshots/today-open-reports.png" alt="Your open fictional reports and requests on Today, in dark mode; done ones leave the list" width="960">
+
+Your open fictional reports and requests on Today, in dark mode; done ones leave the list
+
+<details>
+<summary>Command line</summary>
+
+<img src="docs/assets/screenshots/cli-list.png" alt="The same fictional reports and their plain states through the real CLI" width="960">
+
+The same fictional reports and their plain states through the real CLI
+
+</details>
+
+[Open the screenshot gallery](docs/assets/screenshots/index.html).
+<!-- screenshots:end -->
 
 ## Set it up
 
@@ -62,6 +86,12 @@ last of them is. The clone is only read; keep it fetched as you normally do.
 Beads is built in: Issues runs `bd ... --json` in the configured folder, on this computer, and never syncs,
 pushes or publishes. Other trackers (Linear, Jira, GitHub issues, cards in git) plug in behind the same contract,
 described in [docs/CONTRACT.md](docs/CONTRACT.md), without a change to Issues or to Heinzel's core.
+
+The same Beads database is also Heinzel's `tracker` capability, adapter `beads`, with reads and writes (core
+ADR 0141): what you send goes through it, and other Heinzelmännchen and tools on this computer can create, claim,
+note, attach to, move and close items through Heinzel, each write recorded with its actor (`bd --actor`). If
+another tracker adapter is installed too (GitHub, Atlassian), choose the one for reading with
+`hz system config set capabilities.tracker <adapter>`; sending to Beads always uses its own adapter.
 
 ## Privacy
 

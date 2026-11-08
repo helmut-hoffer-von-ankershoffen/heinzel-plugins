@@ -1,8 +1,9 @@
 """Issues: report a problem or request something, and see whether it is received, being worked on or done.
 
 Behind it is any tracker with a connector for the task-tracking contract (`heinzel_issues._contract`); a local Beads
-database is built in. The tracker's statuses, ids and workflow stay behind the three plain states; the release that
-shipped a fix is read from local git clones. Off until a tracker is set up.
+database is built in. The same database is Heinzel's `tracker` capability with reads and writes (ADR 0141), adapter
+`beads`, and what a person sends goes through it. The tracker's statuses, ids and workflow stay behind the three
+plain states; the release that shipped a fix is read from local git clones. Off until a tracker is set up.
 """
 
 from pathlib import Path
@@ -19,13 +20,15 @@ from heinzel import (
     Notifications,
     Prompter,
     RunCommand,
+    RunOperation,
     Status,
+    Tracker,
 )
 from pydantic import JsonValue
 from rich.table import Table
 from rich.text import Text
 
-from heinzel_issues._beads import BeadsSettings, BeadsTracker, state_of
+from heinzel_issues._beads import BeadsBoard, BeadsSettings, BeadsTracker, state_of
 from heinzel_issues._contract import (
     ENTRY_POINTS,
     STATE_LABELS,
@@ -51,6 +54,17 @@ from heinzel_issues._service import (
 module = Module("issues", "Report a problem or request something, and see when it is done and released.")
 module.settings(IssuesSettings)
 module.service(IssuesService)
+
+
+class Beads(BeadsBoard):
+    """The `beads` adapter of the `tracker` capability, on the Beads database chosen in `hz setup issues`."""
+
+    def __init__(self, settings: IssuesSettings) -> None:
+        """Use the folder, label and program of `issues.beads`."""
+        super().__init__(settings.beads)
+
+
+module.provides("tracker", name="beads", modes={"read", "write"}, hosts=())(Beads)
 module.nav(title="Issues", icon="inbox", sidebar=Navigate(path=ROUTE), order=650)
 module.action("requests", label="Issues", icon="inbox", effect=Navigate(path=ROUTE), order=650)
 module.view(
@@ -64,6 +78,7 @@ module.view(
     refresh=60,
     actions={
         "setup": RunCommand(command=SETUP),
+        "send": RunOperation(operation="submit", inputs=("text",)),
         "report": RunCommand(command="hz issues submit"),
     },
 )
@@ -95,15 +110,17 @@ def list_(service: IssuesService) -> Reports:
     return service.overview()
 
 
-@module.operation(read_only=False, private=True, render=_render_one, audience="everyday")
-def submit(service: IssuesService, text: str, attachment: list[Path] | None = None) -> Report:
+@module.operation(
+    read_only=False, private=True, render=_render_one, audience="everyday", requires=["beads:tracker:write"]
+)
+def submit(service: IssuesService, tracker: Tracker, text: str, attachment: list[Path] | None = None) -> Report:
     """Report a problem or request something; optional attachments are PNG, JPEG or text files.
 
     Raises:
         HeinzelError: If it cannot be sent; the message says why.
     """
     try:
-        return service.submit(text, attachment or [])
+        return service.submit(text, attachment or [], board=tracker)
     except TrackerError as error:
         raise _fail(error) from None
 
@@ -197,6 +214,8 @@ __all__ = [
     "NOT_SET_UP",
     "STATE_LABELS",
     "Attachment",
+    "Beads",
+    "BeadsBoard",
     "BeadsSettings",
     "BeadsTracker",
     "IssuesService",

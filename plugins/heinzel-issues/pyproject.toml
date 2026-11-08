@@ -6,7 +6,7 @@ readme = "README.md"
 license = "MIT"
 license-files = ["LICENSE"]
 requires-python = ">=3.12"
-dependencies = ["heinzel>=0.9.26,<0.10"]
+dependencies = ["heinzel>=0.9.31,<0.10"]
 
 [project.urls]
 Source = "https://github.com/helmut-hoffer-von-ankershoffen/heinzel-plugins/tree/main/plugins/heinzel-issues"
@@ -66,3 +66,18 @@ highlights = [
     "See Received, Being worked on or Done, and the release that shipped it",
     "A notice when something changes; any tracker behind one contract, Beads built in",
 ]
+
+[[tool.heinzel.catalog.screenshots]]
+path = "docs/assets/screenshots/issues-page.png"
+surface = "ui"
+caption = "Three fictional reports: received, being worked on, and released in 0.9.27 — with a form to send another"
+
+[[tool.heinzel.catalog.screenshots]]
+path = "docs/assets/screenshots/today-open-reports.png"
+surface = "ui"
+caption = "Your open fictional reports and requests on Today, in dark mode; done ones leave the list"
+
+[[tool.heinzel.catalog.screenshots]]
+path = "docs/assets/screenshots/cli-list.png"
+surface = "cli"
+caption = "The same fictional reports and their plain states through the real CLI"

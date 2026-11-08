@@ -28,7 +28,7 @@ def main(args: list[str]) -> int:
             "labels": (option(rest, "--labels") or "").split(",") if option(rest, "--labels") else [],
             "created_at": now(),
             "updated_at": now(),
-            "created_by": "Ada Example",
+            "created_by": option(rest, "--actor") or "Ada Example",
         }
         rows.append(row)
         STORE.write_text(json.dumps(rows))
@@ -41,6 +41,12 @@ def main(args: list[str]) -> int:
             return 1
         row = found[0]
         if command == "update":
+            if "--claim" in rest:
+                actor = option(rest, "--actor") or "Ada Example"
+                if row.get("assignee") not in {None, "", actor}:
+                    print(f"Error: {rest[0]} is already claimed by {row['assignee']}", file=sys.stderr)
+                    return 1
+                row.update(assignee=actor, status="in_progress")
             if notes := option(rest, "--append-notes"):
                 row["notes"] = f"{row['notes']}\n{notes}" if row.get("notes") else notes
             if status := option(rest, "--status"):
