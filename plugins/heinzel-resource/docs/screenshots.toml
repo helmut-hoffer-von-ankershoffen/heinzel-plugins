@@ -7,7 +7,7 @@ name = "resources-pane"
 surface = "ui"
 route = "/"
 appearance = "light"
-caption = "CPU, memory and scaled load in the expanded monitor — fictional demo workstation"
+caption = "CPU, memory and one-minute load with the core count in the expanded monitor — fictional demo workstation"
 
 [[scenes.steps]]
 action = "wait"
@@ -53,7 +53,7 @@ optional = true
 name = "phone-resources"
 surface = "ui"
 route = "/"
-caption = "Read CPU, memory and queued load on a phone — fictional demo workstation"
+caption = "Read CPU, memory and one-minute load on a phone — fictional demo workstation"
 
 [[scenes.steps]]
 action = "wait"
@@ -87,27 +87,11 @@ height = 844
 [[scenes]]
 name = "cli-resources"
 surface = "cli"
-caption = "The same fictional CPU, memory and raw load measurements in the CLI"
+caption = "Fictional CPU, memory, raw load and core count in the terminal"
 command = ["resource"]
 
 [[scenes]]
-name = "terminal-resources"
-surface = "ui"
-route = "/"
-caption = "Check CPU, memory, raw load and core count in the app terminal — fictional demo-workstation values"
-viewport = { width = 1280, height = 900 }
-
-[[scenes.steps]]
-action = "terminal"
-command = ["resource"]
-
-[[scenes]]
-name = "terminal-resources-json"
-surface = "ui"
-route = "/"
-caption = "Inspect the structured resource sample for automation in the app terminal — fictional demo-workstation data"
-viewport = { width = 1280, height = 900 }
-
-[[scenes.steps]]
-action = "terminal"
+name = "cli-resources-json"
+surface = "cli"
+caption = "The fictional resource sample as JSON for automation"
 command = ["resource", "--json"]

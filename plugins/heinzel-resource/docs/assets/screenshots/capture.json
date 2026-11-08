@@ -2,36 +2,35 @@
   "format": 1,
   "plugin": "heinzel-resource",
   "core_version": "0.9.16",
-  "inputs_sha256": "a8bf23ed905aeaebec341b912a7304a5596e3985fdfbc65d05b1ea999128a052",
+  "inputs_sha256": "9395e33c40eb05af458a342c48fdbc4d27335a16c386ef7b232437ab5cd13bc6",
   "images": {
-    "docs/assets/screenshots/resources-pane.png": "d702403ee7c4b3c7c8bb63d997307c179e7666c55f033b95ae36bacd3544be62",
-    "docs/assets/screenshots/today-resources.png": "197daedc26f8836d1e459f5c9c9185dad9abdcd18be57439453c4577c8a83a59",
-    "docs/assets/screenshots/phone-resources.png": "63d4444ce2e15f719dfffa0edfc22554951893ad5a28a6c2b0537a5285c00bc6",
+    "docs/assets/screenshots/resources-pane.png": "c12ff57750c0d5a50d3a9692ca188fd1f570564fe536c62c96957e4b6e169292",
+    "docs/assets/screenshots/today-resources.png": "66737813903d4599f50f173e437f3e5ed6597f05f7cac580c9456700085f9f0b",
+    "docs/assets/screenshots/phone-resources.png": "7e28d0d5d17963b0a6a33fdcbe2cd06109de2d4d4420c59b760a8072e1368ff7",
     "docs/assets/screenshots/cli-resources.png": "3d8012cf0ff56ee191ad3c8616855bc514e3a6692621c7248f8a72b554a96073",
-    "docs/assets/screenshots/terminal-resources.png": "eb9be4a0f4407111eb02c848a00d048be5f99a7ed9442e740cef7f9e5728b0ec",
-    "docs/assets/screenshots/terminal-resources-json.png": "22742147d3a2d3914a440e04297ddb4f184f6c5a2cda6aa738e9c4baab4c3d7c"
+    "docs/assets/screenshots/cli-resources-json.png": "5fbe9da5bc431193c690a7b42f2b568aa65da1e8ddd423aa290d650fb8949d9c"
   },
   "review_bundle": {
     "format": 2,
     "source_story": {
       "path": "source-story.md",
-      "sha256": "dc10d3569982af22cd6390ef7474e82b2f8a6eb649c6e0d2ba156abd2ad4e640"
+      "sha256": "cb789b895292e0d8095e1db61e806333b048448fdb60fcb97bc5e6d1e4b2f6c9"
     },
     "definition": {
       "format": 1,
       "reviewer": "Codex feature-story agent",
-      "source_sha256": "a7da53b9ca44bbd3863b19deee5f56fb4e0661ca0db647e391e2bca53a044804",
-      "plan_sha256": "e22cda995d6c0250f768d803d002daa9c6005af9588c750e8c42e8285d898185",
-      "story_sha256": "dc10d3569982af22cd6390ef7474e82b2f8a6eb649c6e0d2ba156abd2ad4e640"
+      "source_sha256": "d9e2628afda2fb8071ff2afded6863ae022cfe0abfb5211b5b40f49f881c36fe",
+      "plan_sha256": "df7fe69910c496132baae19c353553556030612531bb1c50b4e775d26fc93678",
+      "story_sha256": "cb789b895292e0d8095e1db61e806333b048448fdb60fcb97bc5e6d1e4b2f6c9"
     },
     "plugin": "heinzel-resource",
     "core_version": "0.9.16",
-    "inputs_sha256": "a8bf23ed905aeaebec341b912a7304a5596e3985fdfbc65d05b1ea999128a052",
+    "inputs_sha256": "9395e33c40eb05af458a342c48fdbc4d27335a16c386ef7b232437ab5cd13bc6",
     "screenshots": [
       {
         "path": "docs/assets/screenshots/resources-pane.png",
         "surface": "ui",
-        "caption": "CPU, memory and scaled load in the expanded monitor \u2014 fictional demo workstation"
+        "caption": "CPU, memory and one-minute load with the core count in the expanded monitor \u2014 fictional demo workstation"
       },
       {
         "path": "docs/assets/screenshots/today-resources.png",
@@ -41,45 +40,38 @@
       {
         "path": "docs/assets/screenshots/phone-resources.png",
         "surface": "ui",
-        "caption": "Read CPU, memory and queued load on a phone \u2014 fictional demo workstation"
+        "caption": "Read CPU, memory and one-minute load on a phone \u2014 fictional demo workstation"
       },
       {
         "path": "docs/assets/screenshots/cli-resources.png",
         "surface": "cli",
-        "caption": "The same fictional CPU, memory and raw load measurements in the CLI"
+        "caption": "Fictional CPU, memory, raw load and core count in the terminal"
       },
       {
-        "path": "docs/assets/screenshots/terminal-resources.png",
-        "surface": "ui",
-        "caption": "Check CPU, memory, raw load and core count in the app terminal \u2014 fictional demo-workstation values"
-      },
-      {
-        "path": "docs/assets/screenshots/terminal-resources-json.png",
-        "surface": "ui",
-        "caption": "Inspect the structured resource sample for automation in the app terminal \u2014 fictional demo-workstation data"
+        "path": "docs/assets/screenshots/cli-resources-json.png",
+        "surface": "cli",
+        "caption": "The fictional resource sample as JSON for automation"
       }
     ],
     "images": {
-      "resources-pane.png": "d702403ee7c4b3c7c8bb63d997307c179e7666c55f033b95ae36bacd3544be62",
-      "today-resources.png": "197daedc26f8836d1e459f5c9c9185dad9abdcd18be57439453c4577c8a83a59",
-      "phone-resources.png": "63d4444ce2e15f719dfffa0edfc22554951893ad5a28a6c2b0537a5285c00bc6",
+      "resources-pane.png": "c12ff57750c0d5a50d3a9692ca188fd1f570564fe536c62c96957e4b6e169292",
+      "today-resources.png": "66737813903d4599f50f173e437f3e5ed6597f05f7cac580c9456700085f9f0b",
+      "phone-resources.png": "7e28d0d5d17963b0a6a33fdcbe2cd06109de2d4d4420c59b760a8072e1368ff7",
       "cli-resources.png": "3d8012cf0ff56ee191ad3c8616855bc514e3a6692621c7248f8a72b554a96073",
-      "terminal-resources.png": "eb9be4a0f4407111eb02c848a00d048be5f99a7ed9442e740cef7f9e5728b0ec",
-      "terminal-resources-json.png": "22742147d3a2d3914a440e04297ddb4f184f6c5a2cda6aa738e9c4baab4c3d7c"
+      "cli-resources-json.png": "5fbe9da5bc431193c690a7b42f2b568aa65da1e8ddd423aa290d650fb8949d9c"
     },
     "transcripts": {
-      "resources-pane.txt": "c5974368be12d6996a4753d506791f39709e8b93ebb9b4e8a6196e5d780640e6",
+      "resources-pane.txt": "183c168e9a0c50d906c785a35dd0450d6c21d8c288d4456ba127cf0c1fd249a5",
       "today-resources.txt": "ff6cd44e18c023184d2e299111d9bd1dc20132fa9f077e5647a5b74c408a162b",
-      "phone-resources.txt": "5cea0d7b628283334012726084080ba6d3b721d47a8cb070a3c96e024d1f9033",
+      "phone-resources.txt": "40f53a1a9192b1c2215ddc3d67c3348ccb7441a586fab47c3d5f2f6744d59209",
       "cli-resources.txt": "ddef8a589eb34e18d3fd06ab545c884ebcc82923f5270bb88a6fcfc2ae8272a7",
-      "terminal-resources.txt": "a5752e5cf7cc4f35be802368fc40a60681e3abbe173f96bfc4f8a0fc8d7f6c50",
-      "terminal-resources-json.txt": "a80a7a1da7c4fd6f2bab702f1971d936a1b474ec1bf373ede27db6471b9e58d0"
+      "cli-resources-json.txt": "1528547fd02b8022f7f2d35fc020e8b1467459440fbdf289655b686f48042a82"
     },
-    "bundle_sha256": "4d65cbcc0562a75d4193145078d0cbef1a586927a9b9f1481531024b99cdf35a"
+    "bundle_sha256": "d7ad925719f45568b956fc3e908e7212a12d4635566cd4b303e5a48aeb6ff898"
   },
   "privacy_review": {
     "format": 1,
-    "bundle_sha256": "4d65cbcc0562a75d4193145078d0cbef1a586927a9b9f1481531024b99cdf35a",
+    "bundle_sha256": "d7ad925719f45568b956fc3e908e7212a12d4635566cd4b303e5a48aeb6ff898",
     "reviewer": "Codex privacy agent",
     "decision": "approve",
     "checked_images": [
@@ -87,8 +79,7 @@
       "today-resources.png",
       "phone-resources.png",
       "cli-resources.png",
-      "terminal-resources.png",
-      "terminal-resources-json.png"
+      "cli-resources-json.png"
     ],
     "checks": {
       "tokens_absent": true,

@@ -140,7 +140,7 @@ highlights = [
 [[tool.heinzel.catalog.screenshots]]
 path = "docs/assets/screenshots/resources-pane.png"
 surface = "ui"
-caption = "CPU, memory and scaled load in the expanded monitor — fictional demo workstation"
+caption = "CPU, memory and one-minute load with the core count in the expanded monitor — fictional demo workstation"
 
 [[tool.heinzel.catalog.screenshots]]
 path = "docs/assets/screenshots/today-resources.png"
@@ -150,19 +150,14 @@ caption = "A quick CPU summary on Today, with three compact footer meters — de
 [[tool.heinzel.catalog.screenshots]]
 path = "docs/assets/screenshots/phone-resources.png"
 surface = "ui"
-caption = "Read CPU, memory and queued load on a phone — fictional demo workstation"
+caption = "Read CPU, memory and one-minute load on a phone — fictional demo workstation"
 
 [[tool.heinzel.catalog.screenshots]]
 path = "docs/assets/screenshots/cli-resources.png"
 surface = "cli"
-caption = "The same fictional CPU, memory and raw load measurements in the CLI"
+caption = "Fictional CPU, memory, raw load and core count in the terminal"
 
 [[tool.heinzel.catalog.screenshots]]
-path = "docs/assets/screenshots/terminal-resources.png"
-surface = "ui"
-caption = "Check CPU, memory, raw load and core count in the app terminal — fictional demo-workstation values"
-
-[[tool.heinzel.catalog.screenshots]]
-path = "docs/assets/screenshots/terminal-resources-json.png"
-surface = "ui"
-caption = "Inspect the structured resource sample for automation in the app terminal — fictional demo-workstation data"
+path = "docs/assets/screenshots/cli-resources-json.png"
+surface = "cli"
+caption = "The fictional resource sample as JSON for automation"

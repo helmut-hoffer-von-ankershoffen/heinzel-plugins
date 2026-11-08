@@ -1,0 +1,9 @@
+{
+  "hostname": "demo-workstation",
+  "sampled_at": "2026-10-31T10:00:00Z",
+  "cpu_percent": 36.0,
+  "memory_percent": 62.0,
+  "load_1m": 0.65,
+  "logical_cores": 8,
+  "problems": []
+}

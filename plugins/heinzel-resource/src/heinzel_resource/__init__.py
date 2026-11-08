@@ -153,7 +153,6 @@ def machine(sample: Resources) -> StatusItem:
             DetailLine(text=f"CPU: {_percent(sample.cpu_percent)}"),
             DetailLine(text=f"Memory: {_percent(sample.memory_percent)}"),
             DetailLine(text=f"Load (1 min): {load}; {sample.logical_cores or '?'} logical cores"),
-            DetailLine(text="Load is queued work. The bar reaches 100% at twice the logical core count."),
             *[DetailLine(text=problem[:80], tone="warn") for problem in sample.problems],
         ],
     )
