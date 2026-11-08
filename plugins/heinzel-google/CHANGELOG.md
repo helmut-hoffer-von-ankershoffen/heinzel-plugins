@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.9.3
 
 Ask separately, in two plain lines, before the sign-in requests Docs write access (`documents`); reads keep working without it.
 Log the consent step with structured fields (`google.setup.step.start` and `.outcome`).

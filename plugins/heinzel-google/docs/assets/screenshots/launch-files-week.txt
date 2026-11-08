@@ -1,10 +1,10 @@
 ┏━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━┓
 ┃ Ref                                      ┃ Name                       ┃ Kind        ┃ Modified at          ┃
 ┡━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━┩
-│ https://docs.google.com/document/d/launc │ Launch plan                │ document    │ 2026-11-08T00:29:36Z │
+│ https://docs.google.com/document/d/launc │ Launch plan                │ document    │ 2026-11-08T16:02:41Z │
 │ h-plan/edit                              │                            │             │                      │
-│ https://docs.google.com/spreadsheets/d/l │ Launch metrics             │ spreadsheet │ 2026-11-08T00:29:36Z │
+│ https://docs.google.com/spreadsheets/d/l │ Launch metrics             │ spreadsheet │ 2026-11-08T16:02:41Z │
 │ aunch-metrics/edit                       │                            │             │                      │
-│ https://docs.google.com/document/d/launc │ Launch readiness checklist │ document    │ 2026-11-08T00:29:36Z │
+│ https://docs.google.com/document/d/launc │ Launch readiness checklist │ document    │ 2026-11-08T16:02:41Z │
 │ h-readiness/edit                         │                            │             │                      │
 └──────────────────────────────────────────┴────────────────────────────┴─────────────┴──────────────────────┘
