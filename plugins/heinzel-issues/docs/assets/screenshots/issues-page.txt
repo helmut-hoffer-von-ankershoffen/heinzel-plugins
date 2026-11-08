@@ -1,0 +1,38 @@
+Skip to content
+Heinzelmännchen
+Heinzelmännchen
+Contracts
+Team graph
+Organisation
+Team roster
+Issues
+M
+Mira
+· EM
+Today
+Today
+Your reports and requests
+Add a dark theme to the printed agenda
+Received
+The footer clock jumps by a pixel every minute
+Being worked on
+
+Nothing needs you right now. Ask anything below.
+
+v0.9.31
+Updates, off
+0
+System health, warning
+?
+Daemon not installed, off
+Chat
+Issues
+Add a dark theme to the printed agenda
+○ Received
+The footer clock jumps by a pixel every minute
+◐ Being worked on
+Weather shows yesterday's rain after waking up
+✓ Released in 0.9.27 on 7 Nov 2026
+Report or request
+Send
+Audio
