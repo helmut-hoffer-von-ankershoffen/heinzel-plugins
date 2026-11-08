@@ -34,16 +34,19 @@ class SharingReadiness:
         except HeinzelError:
             return False
 
-    def finish(self, mapping: Mapping, configured: frozenset[str]) -> bool:
+    def finish(self, mapping: Mapping, configured: frozenset[str]) -> bool | None:
         """Load the mapping's own origin when the saved request is complete but this web owner has not loaded it yet.
 
         A status read may call this: it changes neither Tailscale Serve nor the configuration, only adds the one
         origin the configuration already allows to this listener's policy, and keeps every origin already loaded, so
         no session is revoked. It is idempotent: once loaded it does nothing.
+
+        Returns:
+            True when it loaded the origin, False when loading failed, None when there was nothing for it to do.
         """
         loaded = self.runtime.loaded_origins
         if mapping.origin in loaded or mapping.origin not in configured or not self._owns(mapping):
-            return False
+            return None
         fields: dict[str, object] = {"operation": "status", "step": "finish", "plugin": "heinzel-tailscale"}
         fields["port"] = mapping.backend_port
         _LOG.info(_EVENT, extra={**fields, "phase": "start"})

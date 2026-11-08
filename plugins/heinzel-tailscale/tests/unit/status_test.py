@@ -190,7 +190,9 @@ def test_a_failed_finish_is_logged_and_reported_without_raising(caplog):
     with caplog.at_level(logging.INFO, logger="heinzel_tailscale._readiness"):
         result = sharing_service.status()
     assert result.state == "apply-required"
-    assert result.summary == "Turning on…"
+    assert result.summary == "Could not finish turning it on. Try again."
+    assert result.problem
+    assert "tailscale.status.finish" in result.message
     assert runtime.loaded_origins == frozenset()
     end = caplog.records[-1]
     assert (end.getMessage(), end.phase, end.outcome, end.levelname) == (
@@ -278,6 +280,12 @@ def every_state():
             owned=True,
             web=(LocalWebRuntime(port=8737), WebUser()),
         ).status(),
+        service(
+            Settings(ui_allowed_origins={MAPPING.origin}),
+            FakeCli(serve=MAPPING.enable({})),
+            owned=True,
+            web=(RefusingRuntime(port=8737), WebUser()),
+        ).status(),
     ]
 
 
@@ -312,6 +320,7 @@ def test_every_state_has_a_short_line_in_the_persons_words_or_none():
         "Stop tailscale serve in the terminal, then try again.",
         "hz did not set this up. Check Tailscale Serve.",
         "Turning on…",
+        "Could not finish turning it on. Try again.",
         "Set up for another hz port. Try again to move it.",
         "Tailscale stopped sharing. Try again.",
     } <= lines
@@ -457,3 +466,25 @@ def test_no_message_offers_a_port_wide_off_command():
     for text in texts:
         assert not re.search(r"--https=\d+ off", text)
     assert "--set-path=/ off" in texts[0]
+
+
+@pytest.mark.parametrize(
+    ("text", "expected"),
+    [
+        ("Short and whole.", "Short and whole."),
+        ("First sentence is here. " + "x" * 300, "First sentence is here. …"),
+        ("One. " + "word " * 80, ("One. " + "word " * 80)[:278].rsplit(" ", 1)[0] + "…"),
+        ("y" * 300, "y" * 279 + "…"),
+    ],
+)
+def test_details_text_is_cut_at_a_sentence_or_word_with_an_ellipsis(text, expected):
+    assert heinzel_tailscale.shorten(text) == expected
+    assert len(heinzel_tailscale.shorten(text)) <= 280
+
+
+def test_long_details_keep_whole_sentences():
+    text = ("This sentence is about forty characters. " * 10).strip()
+    cut = heinzel_tailscale.shorten(text)
+    assert len(cut) <= 280
+    assert cut.endswith("characters. …")
+    assert text.startswith(cut.removesuffix(" …"))

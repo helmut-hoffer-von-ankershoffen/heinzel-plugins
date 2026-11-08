@@ -51,6 +51,25 @@ def disable(service: SharingActions) -> SharingState:
 _PANE_LINES = {"status", "problem", "explanation"} <= ToggleControl.model_fields.keys()
 
 
+_DETAILS = 280
+
+
+def shorten(text: str, limit: int = _DETAILS) -> str:
+    """Fit the Details text: whole sentences when they fit, else whole words, with an ellipsis when cut."""
+    text = text.strip()
+    if len(text) <= limit:
+        return text
+    head = text[: limit - 1]
+    ends = [head.rfind(mark) for mark in (". ", ".\n", "! ", "? ")]
+    sentence = max(ends)
+    if sentence > limit // 2:
+        return head[: sentence + 1] + " …"  # A mark is followed by a space or newline, so this stays within limit.
+    if " " not in head:
+        return head + "…"
+    words = head[: head.rfind(" ")].rstrip(" ,;:")
+    return words + (" …" if words.endswith((".", "!", "?")) else "…")
+
+
 @module.status(source="status", slots={"footer": True, "sidebar": False})
 def sharing(state: SharingState) -> StatusItem:
     """A compact provider-owned status icon with the same explicit control as Settings.
@@ -62,7 +81,7 @@ def sharing(state: SharingState) -> StatusItem:
     # A cause the person must fix gets Try again only once they asked for sharing; before that the switch is the way.
     problem = state.summary if state.problem and state.desired_enabled else None
     status = None if problem else state.summary
-    lines = {"status": status, "problem": problem, "explanation": state.message[:280]} if _PANE_LINES else {}
+    lines = {"status": status, "problem": problem, "explanation": shorten(state.message)} if _PANE_LINES else {}
     return StatusItem(
         text="Tailscale",
         icon="link",

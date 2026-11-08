@@ -130,10 +130,11 @@ class Sharing:
         mapping.enable(config)
         present = mapping.matches(config)
         configured = self.origins()
+        finished: bool | None = None
         if present and old is not None and old.enabled and old.phase == "owned":
             # The saved request is complete in Tailscale and the configuration: the web owner finishes it here, so
             # turning sharing on is one step even when the request came from the CLI or the server restarted.
-            self.readiness.finish(mapping, configured)
+            finished = self.readiness.finish(mapping, configured)
         expected_origins: list[JsonValue] = []
         expected_origins.extend(sorted(configured))
         apply: dict[str, JsonValue] = (
@@ -201,6 +202,14 @@ class Sharing:
             )
             if moved
             else (
+                "Could not finish turning it on. Try again.",
+                (
+                    "Sharing is set up in Tailscale, but this hz web app could not load its address. Try again; if "
+                    "it keeps failing, the hz log has the event tailscale.status.finish."
+                ),
+            )
+            if finished is False
+            else (
                 "Turning on…",
                 (
                     "Sharing is set up in Tailscale. The hz web app finishes turning it on the next time it shows "
@@ -218,7 +227,7 @@ class Sharing:
             target=mapping.target,
             apply_settings=apply,
             summary=summary,
-            problem=moved,
+            problem=moved or finished is False,
             message=message,
         )
 
