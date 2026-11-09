@@ -416,7 +416,14 @@ def check_screenshots(project: Project) -> dict:
     return check_capture(project.directory)
 
 
-def check(project: Project, core: str | None, *, tests_only: bool = False, fast: bool = False) -> None:
+def check(
+    project: Project,
+    core: str | None,
+    *,
+    tests_only: bool = False,
+    fast: bool = False,
+    test_targets: tuple[str, ...] = ("tests",),
+) -> None:
     """Run only the owning package's checks against an installed core/SDK artifact."""
     verified = vendor.project(project.directory)
     if (project.directory / "docs/screenshots.toml").exists() or (
@@ -446,7 +453,7 @@ def check(project: Project, core: str | None, *, tests_only: bool = False, fast:
     # A small plugin may contain only offline integration tests; filtering to unit would exit 5.
     # Fast skips strict types and coverage, while still checking every owning offline behavior.
     marker = "not e2e and not perf"
-    test = ["pytest", "-c", "pyproject.toml", "tests", "-m", marker, "-q"]
+    test = ["pytest", "-c", "pyproject.toml", *test_targets, "-m", marker, "-q"]
     steps.append(test if tests_only or fast else ["coverage", "run", "-m", *test])
     if not tests_only and not fast:
         steps.append(["coverage", "report"])
@@ -965,6 +972,56 @@ def hook_changes() -> list[str]:
     return [path for path in changed.split("\0") if path]
 
 
+def focused_hook_targets(manifest: Path, selected: list[Project], changed: list[str]) -> dict[str, tuple[str, ...]]:
+    """Validate a reviewed test selection for the ordinary hook's exact plugin push."""
+
+    def git(*arguments: str) -> str:
+        return subprocess.check_output(["git", *arguments], cwd=ROOT, text=True, timeout=30)
+
+    before, after = os.environ.get("PRE_COMMIT_FROM_REF"), os.environ.get("PRE_COMMIT_TO_REF")
+    if not before or not after or any(not re.fullmatch(r"[0-9a-f]{40}", sha) for sha in (before, after)):
+        raise ValueError("A focused plugin push requires exact pre-push revisions")
+    if after != git("rev-parse", "HEAD").strip() or git("status", "--porcelain", "--untracked-files=all"):
+        raise ValueError("A focused plugin push requires a clean checkout of the pushed revision")
+    if set(git("diff", "--name-only", "--no-renames", "-z", before, after, "--").split("\0")) - {""} != set(changed):
+        raise ValueError("A focused plugin push supports plugin-only changes")
+
+    plan = json.loads(manifest.read_text(encoding="utf-8"))
+    if not isinstance(plan, dict) or plan.keys() != {"base", "head", "tests"}:
+        raise ValueError("A focused plugin manifest requires base, head and tests")
+    if plan["base"] != before or plan["head"] != after:
+        raise ValueError("The focused plugin manifest must match the pushed revisions")
+    tests = plan["tests"]
+    if not selected or not isinstance(tests, dict) or tests.keys() != {project.name for project in selected}:
+        raise ValueError("Select tests for every owning plugin and contract consumer")
+
+    result = {}
+    for project in selected:
+        paths = tests[project.name]
+        if (
+            not isinstance(paths, list)
+            or not paths
+            or any(
+                not isinstance(path, str)
+                or not re.fullmatch(r"tests/(?:[\w-]+/)*(?:test_[\w-]+|[\w-]+_test)\.py", path, re.ASCII)
+                for path in paths
+            )
+        ):
+            raise ValueError(f"{project.name}: use nonempty literal test file paths")
+        prefix = project.directory.relative_to(ROOT).as_posix() + "/"
+        tracked = {
+            entry.split("\t", 1)[1].removeprefix(prefix)
+            for entry in git("ls-tree", "-rz", after, "--", prefix + "tests/").split("\0")
+            if entry.startswith(("100644 ", "100755 "))
+        }
+        required = {path.removeprefix(prefix) for path in changed if path.startswith(prefix)} & tracked
+        required = {path for path in required if Path(path).name.startswith("test_") or path.endswith("_test.py")}
+        if not required <= set(paths) <= tracked:
+            raise ValueError(f"{project.name}: cover every changed test with tracked test files")
+        result[project.name] = tuple(sorted(set(paths)))
+    return result
+
+
 def screenshot_main(arguments: list[str], *, check: bool = False) -> int:
     """Keep capture help focused and all agent results machine-readable."""
     from heinzel_plugin_tools.capture import PLAN, safe_failure_message, write_default_plan
@@ -1151,9 +1208,14 @@ def main() -> int:
     inventory = projects()
     if args.command == "check-changed":
         changed = hook_changes() if args.git_hook else args.changed
-        selected = {entry["name"] for entry in plan(changed, inventory, ROOT)["include"]}
-        for project in inventory:
-            if project.name in selected:
+        names = {entry["name"] for entry in plan(changed, inventory, ROOT)["include"]}
+        selected = [project for project in inventory if project.name in names]
+        if args.git_hook and (manifest := os.environ.get("HZ_FOCUSED_PLUGIN_PUSH_MANIFEST")):
+            targets = focused_hook_targets(Path(manifest), selected, changed)
+            for project in selected:
+                check(project, args.core, fast=True, test_targets=targets[project.name])
+        else:
+            for project in selected:
                 check(project, args.core, fast=True)
         return 0
     if args.command == "new":

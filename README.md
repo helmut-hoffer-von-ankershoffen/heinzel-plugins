@@ -239,6 +239,15 @@ project. Core's catalog reads metadata automatically, including new plugin direc
 Commit and push hooks select the owning plugin and declared contract consumers through `hz-plugin check-changed
 --git-hook`, including deleted paths. Unrelated changes are a no-op; shared-tooling changes still check tooling.
 
+For a clean, plugin-only update to an existing branch, an independently reviewed test plan can narrow the ordinary
+pre-push test selection. Set `HZ_FOCUSED_PLUGIN_PUSH_MANIFEST` to the plan's absolute path for that push. The JSON
+object contains `base` and `head` with the exact remote and pushed commits, and `tests` mapping every selected
+plugin and declared consumer to tracked, plugin-relative test files. Include every changed test file and the tests
+that cover the affected contracts. The hook still runs the normal boundary, formatting and security checks.
+Leave the variable unset for the default offline suites. Merge the tooling separately before using a plan on a
+plugin branch that already has the selector. Use the default path to bring a branch onto the tooling base, since
+that update changes shared tooling.
+
 ## Custom public and private repositories
 
 Plugins do not have to live here. Follow the
