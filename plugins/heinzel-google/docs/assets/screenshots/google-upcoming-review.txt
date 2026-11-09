@@ -1,0 +1,34 @@
+Skip to content
+Heinzelmännchen
+Heinzelmännchen
+Contracts
+Team graph
+Organisation
+Team roster
+M
+Mira
+· EM
+Today
+Today
+Doctor: 3 checks need attention
+
+ai.access ai access, system.doctor installation, system.runner claude-code
+
+Open
+Ask about it
+v0.9.16
+Updates, off
+0
+System health, warning
+Not in a meeting
+Next: Launch readiness review
+Mon 12:39
+Daemon not installed, off
+Chat
+New chat
+Ask about your setup, your team's contracts or what to do next. The chat reads with hz and asks you before it changes anything.
+Your message
+Default
+
+Up to $0.25 per message · this chat $0.00
+Runs your agent runner and may cost money: at most $0.25 per message, $2.00 per chat; this chat has cost $0.00. It reads with hz and asks you before it changes anything.

@@ -16,13 +16,13 @@ CREDS = {"client_id": "fictional-client", "client_secret": "fictional-secret", "
 
 @pytest.mark.parametrize("status", [401, 403, 503])
 def test_non_scope_oauth_refusal_is_never_retried_with_broader_permissions(monkeypatch, status):
-    refresh = Mock(
-        side_effect=urllib.error.HTTPError("https://oauth2.googleapis.com/token", status, "refused", {}, None)
-    )
+    refused = urllib.error.HTTPError("https://oauth2.googleapis.com/token", status, "refused", {}, None)
+    refresh = Mock(side_effect=refused)
     monkeypatch.setattr(tokens, "_refresh", refresh)
     with pytest.raises(urllib.error.HTTPError) as failure:
         tokens.exchange(json.dumps(CREDS).encode(), artifact="document")
     assert failure.value.code == status
+    refused.close()  # its temporary file would otherwise warn when a later test collects it
     refresh.assert_called_once_with(
         CREDS,
         (
@@ -37,6 +37,7 @@ def test_scope_refusal_fallback_stays_with_the_selected_document_service(monkeyp
     refresh = Mock(side_effect=[refusal, b'{"access_token":"fictional-access"}'])
     monkeypatch.setattr(tokens, "_refresh", refresh)
     assert tokens.exchange(json.dumps(CREDS).encode(), artifact="document") == b'{"access_token":"fictional-access"}'
+    refusal.close()
     assert [call.args[1] for call in refresh.call_args_list] == [
         (
             "https://www.googleapis.com/auth/drive.metadata.readonly",
