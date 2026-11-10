@@ -1,10 +1,13 @@
 """Only the attested owning prefix is fictionalized; all other privacy failures remain failures."""
 
 import json
+import os
 import shutil
 import socket
 import subprocess
 import sys
+import tempfile
+from contextlib import ExitStack
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -110,23 +113,39 @@ def test_group_writable_environment_is_not_a_redaction_authority(environment):
 class TextPage:
     """Execute the real presentation JavaScript against text-node fixtures, never manufactured product UI."""
 
-    def __init__(self, texts):
+    def __init__(self, texts, *, node_transport=None):
         self.texts = texts
         self.saved = False
+        self.node_transport = node_transport
 
     def evaluate(self, script, argument):
         node = shutil.which("node")
         assert node
+        transport = self.node_transport
+        self.node_transport = None  # Compare only the first evaluation, which timed out in CI.
+        entry = before_vm = after_vm = after_output = ""
+        if transport:
+            entry = "const mark=phase=>require('node:fs').writeSync(2,phase+'\\n');mark('entry');"
+            before_vm = "mark('before-vm');"
+            after_vm = "mark('after-vm');"
+            after_output = "mark('after-output');"
         program = (
+            f"{entry}"
             'const vm=require("node:vm");'
             f"const nodes={json.dumps(self.texts)}.map(textContent=>({{textContent,parentElement:{{tagName:'TD'}}}}));"
             "const context={NodeFilter:{SHOW_TEXT:4},location:{hash:'',pathname:'/'},document:{body:{},"
             "createTreeWalker:()=>{let i=0;return{nextNode:()=>nodes[i++]??null}},querySelectorAll:()=>[]}};"
-            f"const outcome=vm.runInNewContext({json.dumps('(' + script + ')')},context)({json.dumps(argument)});"
-            "console.log(JSON.stringify({texts:nodes.map(n=>n.textContent),outcome}));"
+            f"{before_vm}const outcome=vm.runInNewContext({json.dumps('(' + script + ')')},"
+            f"context)({json.dumps(argument)});{after_vm}"
+            f"console.log(JSON.stringify({{texts:nodes.map(n=>n.textContent),outcome}}));{after_output}"
         )
-        result = subprocess.run([node, "-e", program], capture_output=True, text=True, check=True, timeout=5)  # noqa: S603 - fixed Node program exercises the actual renderer
-        result = json.loads(result.stdout)
+        if transport:
+            output = _compare_node_transport(node, program, transport)
+        else:
+            output = subprocess.run(  # noqa: S603 - fixed Node program exercises the actual renderer
+                [node, "-e", program], capture_output=True, text=True, check=True, timeout=5
+            ).stdout
+        result = json.loads(output)
         self.texts = result["texts"]
         return result.get("outcome")
 
@@ -135,6 +154,40 @@ class TextPage:
 
     def screenshot(self, **_options):
         self.saved = True
+
+
+def _compare_node_transport(node, program, transport):
+    """Use the same child and deadline, with or without waiting for captured pipe EOF."""
+    assert transport in {"pipe", "file"}, "Use pipe or file for HZ_COMPARE_PRESENTATION_NODE"
+    with ExitStack() as stack:
+        stdout_file = stack.enter_context(tempfile.TemporaryFile()) if transport == "file" else None
+        stderr_file = stack.enter_context(tempfile.TemporaryFile()) if transport == "file" else None
+        process = stack.enter_context(
+            subprocess.Popen(  # noqa: S603 - same fixed Node fixture as the ordinary test
+                [node, "-e", program], stdout=stdout_file or subprocess.PIPE, stderr=stderr_file or subprocess.PIPE
+            )
+        )
+        timeout_state = None
+        try:
+            stdout, stderr = process.communicate(timeout=5)
+        except subprocess.TimeoutExpired as error:
+            timeout_state = "running" if process.poll() is None else "exited"
+            process.kill()
+            process.wait()
+            stdout, stderr = error.stdout, error.stderr
+        if stdout_file is not None and stderr_file is not None:
+            stdout_file.seek(0)
+            stderr_file.seek(0)
+            stdout, stderr = stdout_file.read(), stderr_file.read()
+        phases = {b"entry", b"before-vm", b"after-vm", b"after-output"}
+        observed = ",".join(line.decode() for line in (stderr or b"").splitlines() if line in phases)
+        state = timeout_state or "completed"
+        print(f"Node transport={transport} child={state} phases={observed or 'none'}", flush=True)
+        if timeout_state:
+            pytest.fail("Node presentation comparison timed out after five seconds", pytrace=False)
+        if process.returncode:
+            pytest.fail(f"Node presentation comparison exited with status {process.returncode}", pytrace=False)
+        return stdout
 
 
 def test_only_exact_owning_path_text_changes_and_all_doctor_rows_statuses_and_details_remain(environment, tmp_path):
@@ -152,7 +205,7 @@ def test_only_exact_owning_path_text_changes_and_all_doctor_rows_statuses_and_de
         "DOWN",
         "Original error",
     ]
-    page = TextPage(before)
+    page = TextPage(before, node_transport=os.environ.get("HZ_COMPARE_PRESENTATION_NODE"))
     body = capture.safe_screenshot(page, tmp_path / "safe.png", owning_interpreter_prefix=identity)
     expected = [text.replace(identity.prefix, "/demo-profile/.venv") for text in before]
     assert page.texts == expected
