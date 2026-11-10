@@ -59,7 +59,11 @@ repos:
         stages: [commit-msg]
       - id: check-fast
         name: make check-fast (format, lint, contracts, generated files, unit tests)
-        entry: bash -c 'test -f pyproject.toml || exit 0; exec make check-fast' # prek also runs this from template/, which has no project
+        # prek also runs this from template/, which has no project.
+        entry: >-
+          bash -c 'test -f pyproject.toml || exit 0;
+          if [ -n "${HZ_PLUGINS_DIAGNOSTIC_SHA:-}" ]; then exec python3 scripts/presentation_push.py check; fi;
+          exec make check-fast'
         language: system
         pass_filenames: false
         exclude: ^plugins/

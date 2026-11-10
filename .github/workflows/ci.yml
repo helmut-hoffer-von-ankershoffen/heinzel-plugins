@@ -49,12 +49,15 @@ jobs:
         shell: bash
         run: |
           os_version="$(awk -F= '$1 == "VERSION_ID" { gsub(/"/, "", $2); print $2 }' /etc/os-release)"
-          [[ "$os_version" == 26.04 && "${ImageOS:-}" =~ ^ubuntu[0-9]+$ && "${ImageVersion:-}" =~ ^[0-9]+(\.[0-9]+)+$ ]]
+          if ! [[ "$os_version" == 26.04 && "${ImageOS:-}" =~ ^ubuntu[0-9]+$ && "${ImageVersion:-}" =~ ^[0-9]+(\.[0-9]+)+$ ]]; then
+            echo 'Runner image metadata is unavailable or unexpected.' >&2
+            exit 1
+          fi
           printf 'runner_os=ubuntu-%s runner_image=%s runner_image_version=%s\n' "$os_version" "$ImageOS" "$ImageVersion"
           python_version="$(uv run --quiet --frozen --no-build --group tooling --extra checks python -c \
             'import platform; print(platform.python_version())' 2>/dev/null)"
-          [[ "$python_version" == 3.14.4 ]]
+          [[ "$python_version" == 3.14.4 ]] || exit 1
           printf 'python=%s\n' "$python_version"
           node_version="$(timeout 5s node --version 2>/dev/null)"
-          [[ "$node_version" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]
+          [[ "$node_version" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]] || exit 1
           printf 'node=%s\n' "${node_version#v}"
