@@ -59,14 +59,16 @@ repos:
         stages: [commit-msg]
       - id: check-fast
         name: make check-fast (format, lint, contracts, generated files, unit tests)
-        entry: bash -c 'test -f pyproject.toml || exit 0; exec make check-fast' # prek also runs this from template/, which has no project
+        entry: >-
+          bash -c 'test -f pyproject.toml || exit 0; if [ "$HZ_TRUSTED_FOCUSED_PUSH" = 1 ]; then exec env -i PATH="$PATH" HOME="$HOME" UV_OFFLINE=1 HZ_TRUSTED_FOCUSED_PUSH=1 PRE_COMMIT_FROM_REF="$PRE_COMMIT_FROM_REF" PRE_COMMIT_TO_REF="$PRE_COMMIT_TO_REF" uv run --no-env-file --project "$PWD" --frozen --group tooling python scripts/focused_hook.py tooling; fi; exec make check-fast'
         language: system
         pass_filenames: false
         exclude: ^plugins/
         stages: [pre-push]
       - id: owning-plugin-checks
         name: owning plugin lint and offline tests
-        entry: uv run --frozen --group tooling hz-plugin check-changed --git-hook
+        entry: >-
+          bash -c 'if [ "$HZ_TRUSTED_FOCUSED_PUSH" = 1 ]; then exec env -i PATH="$PATH" HOME="$HOME" UV_OFFLINE=1 HZ_TRUSTED_FOCUSED_PUSH=1 PRE_COMMIT_FROM_REF="$PRE_COMMIT_FROM_REF" PRE_COMMIT_TO_REF="$PRE_COMMIT_TO_REF" uv run --no-env-file --project "$PWD" --frozen --group tooling python scripts/focused_hook.py owners; fi; exec uv run --frozen --group tooling hz-plugin check-changed --git-hook'
         language: system
         pass_filenames: false
         always_run: true # Git supplies deleted paths as well as existing files; unrelated changes are a no-op.

@@ -423,6 +423,7 @@ def check(
     tests_only: bool = False,
     fast: bool = False,
     test_targets: tuple[str, ...] = ("tests",),
+    frontend: bool = True,
 ) -> None:
     """Run only the owning package's checks against an installed core/SDK artifact."""
     verified = vendor.project(project.directory)
@@ -468,8 +469,9 @@ def check(
         # Match exact verified relative exclusions against a relative scan rooted at the owning cwd.
         with vendor.quality_command(project.directory, ["typos", "."], verified) as configured:
             run(configured, cwd=project.directory)
+    frontend_enabled = frontend
     frontend = project.directory / "web/package.json"
-    if frontend.is_file():
+    if frontend.is_file() and frontend_enabled:
         scripts = json.loads(frontend.read_text()).get("scripts", {})
         for step in (
             ["test"] if fast else ["typecheck", "test"] if tests_only else ["lint", "typecheck", "test", "build"]
