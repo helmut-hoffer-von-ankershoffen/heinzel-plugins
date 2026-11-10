@@ -47,7 +47,8 @@ repos:
         always_run: true
       - id: confidentiality-branch
         name: confidential terms in the branch name
-        entry: uv run --no-project --script scripts/check_confidentiality.py --branch
+        entry: >-
+          bash -c 'if [ "$HZ_TRUSTED_FOCUSED_PUSH" = 1 ]; then exec env -i PATH="$PATH" HOME="$HOME" UV_OFFLINE=1 CONFIDENTIAL_TERMS="$CONFIDENTIAL_TERMS" CONFIDENTIAL_TERMS_FILE="$CONFIDENTIAL_TERMS_FILE" uv run --no-env-file --no-project --script "$PWD/scripts/check_confidentiality.py" --branch; fi; exec uv run --no-project --script scripts/check_confidentiality.py --branch'
         language: system
         pass_filenames: false
         always_run: true
