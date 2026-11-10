@@ -239,6 +239,11 @@ project. Core's catalog reads metadata automatically, including new plugin direc
 Commit and push hooks select the owning plugin and declared contract consumers through `hz-plugin check-changed
 --git-hook`, including deleted paths. Unrelated changes are a no-op; shared-tooling changes still check tooling.
 
+Caller-authored test manifests cannot establish which unchanged contract tests are affected. The hook therefore
+requires every tracked test file for every owning plugin and consumer and still runs each full offline test directory;
+setting `HZ_FOCUSED_PLUGIN_PUSH_MANIFEST` cannot narrow those checks. Leave it unset for the ordinary hook. A safe
+focused route needs independently authenticated review and coverage evidence; a manifest alone is not that evidence.
+
 ## Custom public and private repositories
 
 Plugins do not have to live here. Follow the
