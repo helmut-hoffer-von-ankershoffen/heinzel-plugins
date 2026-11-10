@@ -143,7 +143,7 @@ def test_plugin_only_hooks_do_not_run_collection_checks():
     owner = hooks["owning-plugin-checks"]
     assert "check-changed" in owner["entry"]
     assert owner["require_serial"] is True
-    assert owner["entry"].endswith("--git-hook")
+    assert owner["entry"].endswith("--git-hook'")
     assert owner["pass_filenames"] is False and owner["always_run"] is True
 
 
@@ -156,6 +156,8 @@ def isolated_hook_environment(tmp_path, monkeypatch, request):
         monkeypatch.setenv("GIT_INDEX_FILE", str(foreign))
         monkeypatch.setenv("GIT_DIR", str(tmp_path / "foreign-repository"))
         monkeypatch.setenv("GIT_WORK_TREE", str(tmp_path / "foreign-tree"))
+    # The dispatcher binds the outer snapshot; synthetic repositories must choose their own root.
+    monkeypatch.delenv("PLUGIN_SOURCE_ROOT", raising=False)
     for key in list(os.environ):
         if key.startswith("GIT_") or key.startswith("PRE_COMMIT_"):
             monkeypatch.delenv(key)

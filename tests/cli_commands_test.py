@@ -372,8 +372,10 @@ def test_repository_visibility_comes_from_the_hosting_service_when_not_declared(
         ("stale", "match the pushed revisions"),
         ("consumer", "every owning plugin and contract consumer"),
         ("foreign", "literal test file paths"),
-        ("omitted", "cover every changed test"),
-        ("untracked", "cover every changed test"),
+        ("omitted", "include every tracked test"),
+        ("forged", "include every tracked test"),
+        ("forged_consumer", "include every tracked test"),
+        ("untracked", "include every tracked test"),
         ("mixed", "plugin-only changes"),
         ("dirty", "clean checkout"),
     ],
@@ -409,7 +411,7 @@ def test_focused_plugin_manifest_requires_the_exact_checked_out_hook_revision(co
         cli.focused_hook_targets(manifest, selected, changed)
 
 
-def test_focused_plugin_hook_uses_only_reviewed_tests(collection, monkeypatch):
+def test_focused_plugin_hook_keeps_full_test_directories(collection, monkeypatch):
     manifest, _, changed = plugin_focus_fixture(collection, monkeypatch)
     seen = []
     monkeypatch.setenv("HZ_FOCUSED_PLUGIN_PUSH_MANIFEST", str(manifest))
@@ -417,8 +419,8 @@ def test_focused_plugin_hook_uses_only_reviewed_tests(collection, monkeypatch):
     monkeypatch.setattr(cli, "check", lambda project, _core, **options: seen.append((project.name, options)))
     invoke(monkeypatch, "check-changed", "--git-hook")
     assert seen == [
-        ("heinzel-harbor", {"fast": True, "test_targets": ("tests/unit/changed_test.py",)}),
-        ("heinzel-lighthouse", {"fast": True, "test_targets": ("tests/integration/contract_test.py",)}),
+        ("heinzel-harbor", {"fast": True, "test_targets": ("tests",)}),
+        ("heinzel-lighthouse", {"fast": True, "test_targets": ("tests",)}),
     ]
 
 
@@ -477,17 +479,26 @@ def plugin_focus_fixture(collection, monkeypatch, problem=None):
                 if "heinzel-harbor" in command[-1]:
                     entries = [changed[0], "plugins/heinzel-harbor/tests/unit/other_test.py"]
                 else:
-                    entries = [f"plugins/heinzel-lighthouse/{zoom}"]
+                    entries = [
+                        f"plugins/heinzel-lighthouse/{zoom}",
+                        "plugins/heinzel-lighthouse/tests/integration/unchanged_contract_test.py",
+                    ]
                 return "".join(f"100644 blob oid\t{entry}\0" for entry in entries)
         raise AssertionError(command)
 
     monkeypatch.setattr(cli.subprocess, "check_output", git)
-    paths = {"heinzel-harbor": [google], "heinzel-lighthouse": [zoom]}
+    paths = {
+        "heinzel-harbor": [google, "tests/unit/other_test.py"],
+        "heinzel-lighthouse": [zoom, "tests/integration/unchanged_contract_test.py"],
+    }
+    if problem == "forged_consumer":
+        paths["heinzel-lighthouse"] = [zoom]
     if problem == "consumer":
         paths.pop("heinzel-lighthouse")
-    if problem in {"omitted", "foreign", "untracked"}:
+    if problem in {"omitted", "foreign", "untracked", "forged"}:
         paths["heinzel-harbor"] = {
             "omitted": ["tests/unit/other_test.py"],
+            "forged": [google],
             "foreign": ["../tests/other_test.py"],
             "untracked": [google, "tests/unit/untracked_test.py"],
         }[problem]

@@ -423,6 +423,7 @@ def check(
     tests_only: bool = False,
     fast: bool = False,
     test_targets: tuple[str, ...] = ("tests",),
+    frontend: bool = True,
 ) -> None:
     """Run only the owning package's checks against an installed core/SDK artifact."""
     verified = vendor.project(project.directory)
@@ -468,8 +469,9 @@ def check(
         # Match exact verified relative exclusions against a relative scan rooted at the owning cwd.
         with vendor.quality_command(project.directory, ["typos", "."], verified) as configured:
             run(configured, cwd=project.directory)
+    frontend_enabled = frontend
     frontend = project.directory / "web/package.json"
-    if frontend.is_file():
+    if frontend.is_file() and frontend_enabled:
         scripts = json.loads(frontend.read_text()).get("scripts", {})
         for step in (
             ["test"] if fast else ["typecheck", "test"] if tests_only else ["lint", "typecheck", "test", "build"]
@@ -973,7 +975,7 @@ def hook_changes() -> list[str]:
 
 
 def focused_hook_targets(manifest: Path, selected: list[Project], changed: list[str]) -> dict[str, tuple[str, ...]]:
-    """Validate a reviewed test selection for the ordinary hook's exact plugin push."""
+    """Reject incomplete caller plans and retain the ordinary full owner test target."""
 
     def git(*arguments: str) -> str:
         return subprocess.check_output(["git", *arguments], cwd=ROOT, text=True, timeout=30)
@@ -1014,11 +1016,16 @@ def focused_hook_targets(manifest: Path, selected: list[Project], changed: list[
             for entry in git("ls-tree", "-rz", after, "--", prefix + "tests/").split("\0")
             if entry.startswith(("100644 ", "100755 "))
         }
-        required = {path.removeprefix(prefix) for path in changed if path.startswith(prefix)} & tracked
-        required = {path for path in required if Path(path).name.startswith("test_") or path.endswith("_test.py")}
-        if not required <= set(paths) <= tracked:
-            raise ValueError(f"{project.name}: cover every changed test with tracked test files")
-        result[project.name] = tuple(sorted(set(paths)))
+        required = {
+            path
+            for path in tracked
+            if re.fullmatch(r"tests/(?:[\w-]+/)*(?:test_[\w-]+|[\w-]+_test)\.py", path, re.ASCII)
+        }
+        if set(paths) != required:
+            raise ValueError(f"{project.name}: include every tracked test file; selective plans are not trusted")
+        # File enumeration cannot prove pytest collection completeness, so retain the
+        # default test directory, including nonstandard configured test modules.
+        result[project.name] = ("tests",)
     return result
 
 
