@@ -1,0 +1,4 @@
+# The pinned actionlint runner-label table predates this GitHub-hosted label.
+self-hosted-runner:
+  labels:
+    - ubuntu-26.04

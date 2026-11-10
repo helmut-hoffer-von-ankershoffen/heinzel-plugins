@@ -2,6 +2,7 @@
 
 import json
 import os
+import re
 import shutil
 import socket
 import subprocess
@@ -125,7 +126,9 @@ class TextPage:
         self.node_transport = None  # Compare only the first evaluation, which timed out in CI.
         entry = before_vm = after_vm = after_output = ""
         if transport:
-            entry = "const mark=phase=>require('node:fs').writeSync(2,phase+'\\n');mark('entry');"
+            entry = (
+                "const mark=phase=>require('node:fs').writeSync(2,phase+'\\n');mark('entry '+process.versions.node);"
+            )
             before_vm = "mark('before-vm');"
             after_vm = "mark('after-vm');"
             after_output = "mark('after-output');"
@@ -179,10 +182,19 @@ def _compare_node_transport(node, program, transport):
             stdout_file.seek(0)
             stderr_file.seek(0)
             stdout, stderr = stdout_file.read(), stderr_file.read()
-        phases = {b"entry", b"before-vm", b"after-vm", b"after-output"}
-        observed = ",".join(line.decode() for line in (stderr or b"").splitlines() if line in phases)
+        phases = []
+        version = "unobserved"
+        for line in (stderr or b"").splitlines():
+            if entry := re.fullmatch(rb"entry ([0-9]+\.[0-9]+\.[0-9]+)", line):
+                version = entry[1].decode()
+                phases.append("entry")
+            elif line in {b"before-vm", b"after-vm", b"after-output"}:
+                phases.append(line.decode())
         state = timeout_state or "completed"
-        print(f"Node transport={transport} child={state} phases={observed or 'none'}", flush=True)
+        print(
+            f"Node transport={transport} child={state} phases={','.join(phases) or 'none'} node={version}",
+            flush=True,
+        )
         if timeout_state:
             pytest.fail("Node presentation comparison timed out after five seconds", pytrace=False)
         if process.returncode:
