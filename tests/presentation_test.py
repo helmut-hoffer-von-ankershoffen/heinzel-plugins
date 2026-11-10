@@ -1,6 +1,8 @@
 """Only the attested owning prefix is fictionalized; all other privacy failures remain failures."""
 
 import json
+import os
+import re
 import shutil
 import socket
 import subprocess
@@ -110,22 +112,43 @@ def test_group_writable_environment_is_not_a_redaction_authority(environment):
 class TextPage:
     """Execute the real presentation JavaScript against text-node fixtures, never manufactured product UI."""
 
-    def __init__(self, texts):
+    def __init__(self, texts, *, trace_node=False):
         self.texts = texts
         self.saved = False
+        self.trace_node = trace_node
 
     def evaluate(self, script, argument):
         node = shutil.which("node")
         assert node
+        entry = before_vm = after_vm = ""
+        if self.trace_node:
+            entry = (
+                "const trace=phase=>require('node:fs').writeSync(2,`node ${process.versions.node} ${phase}\\n`);"
+                "trace('entry');"
+            )
+            before_vm = "trace('before-vm');"
+            after_vm = "trace('after-vm');"
         program = (
+            f"{entry}"
             'const vm=require("node:vm");'
             f"const nodes={json.dumps(self.texts)}.map(textContent=>({{textContent,parentElement:{{tagName:'TD'}}}}));"
             "const context={NodeFilter:{SHOW_TEXT:4},location:{hash:'',pathname:'/'},document:{body:{},"
             "createTreeWalker:()=>{let i=0;return{nextNode:()=>nodes[i++]??null}},querySelectorAll:()=>[]}};"
-            f"const outcome=vm.runInNewContext({json.dumps('(' + script + ')')},context)({json.dumps(argument)});"
+            f"{before_vm}const outcome=vm.runInNewContext({json.dumps('(' + script + ')')},"
+            f"context)({json.dumps(argument)});{after_vm}"
             "console.log(JSON.stringify({texts:nodes.map(n=>n.textContent),outcome}));"
         )
-        result = subprocess.run([node, "-e", program], capture_output=True, text=True, check=True, timeout=5)  # noqa: S603 - fixed Node program exercises the actual renderer
+        try:
+            result = subprocess.run([node, "-e", program], capture_output=True, text=True, check=True, timeout=5)  # noqa: S603 - fixed Node program exercises the actual renderer
+        except (subprocess.TimeoutExpired, subprocess.CalledProcessError) as error:
+            if not self.trace_node:
+                raise
+            report_node_phases(error.stderr)
+            # The exception's command embeds fixture paths and the attested hostname.
+            failure = "timed out after five seconds" if isinstance(error, subprocess.TimeoutExpired) else "failed"
+            pytest.fail(f"Node presentation probe {failure}", pytrace=False)
+        if self.trace_node:
+            report_node_phases(result.stderr)
         result = json.loads(result.stdout)
         self.texts = result["texts"]
         return result.get("outcome")
@@ -135,6 +158,15 @@ class TextPage:
 
     def screenshot(self, **_options):
         self.saved = True
+
+
+def report_node_phases(stderr):
+    """Only relay fixed phase markers, including the partial stderr from a timed-out child."""
+    if isinstance(stderr, bytes):
+        stderr = stderr.decode("utf-8", errors="replace")
+    for line in (stderr or "").splitlines():
+        if re.fullmatch(r"node [0-9]+\.[0-9]+\.[0-9]+ (entry|before-vm|after-vm)", line):
+            print(line, flush=True)
 
 
 def test_only_exact_owning_path_text_changes_and_all_doctor_rows_statuses_and_details_remain(environment, tmp_path):
@@ -152,7 +184,7 @@ def test_only_exact_owning_path_text_changes_and_all_doctor_rows_statuses_and_de
         "DOWN",
         "Original error",
     ]
-    page = TextPage(before)
+    page = TextPage(before, trace_node=os.environ.get("HZ_TRACE_PRESENTATION_NODE") == "1")
     body = capture.safe_screenshot(page, tmp_path / "safe.png", owning_interpreter_prefix=identity)
     expected = [text.replace(identity.prefix, "/demo-profile/.venv") for text in before]
     assert page.texts == expected
