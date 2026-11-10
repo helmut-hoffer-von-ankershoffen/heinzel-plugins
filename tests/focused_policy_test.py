@@ -93,3 +93,9 @@ def test_dirty_checkout_fails_closed(history):
     (repo / "source").write_text("dirty\n")
     with pytest.raises(ValueError):
         policy.plan(repo, old, head, trusted)
+
+
+def test_google_plan_includes_changed_tooling_contract_fixture():
+    old = "39c5bcd10f675c63df1b8c1e5892a4fd3a89006f"
+    assert "tests/tooling_test.py" in policy.POLICY_PATHS
+    assert "tests/tooling_test.py" in policy.PLANS[old][1]

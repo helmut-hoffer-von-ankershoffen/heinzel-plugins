@@ -26,6 +26,7 @@ POLICY_PATHS = frozenset(
         "src/heinzel_plugin_tools/cli.py",
         "src/heinzel_plugin_tools/focused_policy.py",
         "tests/cli_commands_test.py",
+        "tests/tooling_test.py",
         "tests/focused_hook_test.py",
         "tests/focused_trust_test.py",
         "tests/focused_policy_test.py",
@@ -40,6 +41,7 @@ PLANS = {
         "c4cf2a3e00856f227c34cf58d141a7a2c9c0719c",
         (
             "tests/cli_commands_test.py",
+            "tests/tooling_test.py",
             "tests/cli_environment_test.py",
             "tests/authoring_test.py",
             "tests/fast_integration_test.py",
