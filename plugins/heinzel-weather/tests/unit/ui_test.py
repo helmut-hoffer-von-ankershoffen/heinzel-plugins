@@ -119,3 +119,16 @@ def test_a_repeated_hour_from_a_clock_change_is_drawn_once(service):
     assert [point.at for point in chart.series] == ["2026-10-25T02:00", "2026-10-25T03:00"]
     assert "next 2 hours" in chart.title
     assert len(chart.bars) == 2
+
+
+def test_no_pane_widget_or_cli_text_carries_the_data_credit(service):
+    observed = service().ui_weather()
+    shown = [
+        _weather_status(observed).model_dump_json(),
+        _weather_card(observed).model_dump_json(),
+        _temperature_chart(observed).model_dump_json(),
+    ]
+    for text in shown:
+        assert "Open-Meteo" not in text
+        assert "CC BY" not in text
+        assert "open-meteo.com" not in text

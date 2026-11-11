@@ -46,7 +46,7 @@ def test_info_shows_the_attribution(hz):
     assert info["provider"] == "open-meteo"
     assert info["keyless"] is True
     assert "Open-Meteo.com (CC BY 4.0)" in info["attribution"]
-    assert "Open-Meteo.com (CC BY 4.0)" in hz("weather", "conditions", json=False).output
+    assert "Open-Meteo" not in hz("weather", "conditions", json=False).output
 
 
 def test_the_web_app_gets_a_status_item_and_widgets_as_data(hz):
@@ -101,8 +101,8 @@ def test_weather_results_keep_the_source_with_the_data(hz, operation):
 
 
 @pytest.mark.parametrize("operation", [(), ("show",), ("forecast",)])
-def test_rendered_weather_credits_the_provider(hz, operation):
-    assert "Open-Meteo.com (CC BY 4.0)" in hz("weather", *operation, json=False).output
+def test_rendered_weather_carries_no_data_credit(hz, operation):
+    assert "Open-Meteo" not in hz("weather", *operation, json=False).output
 
 
 def test_the_optional_key_never_degrades_health_with_the_default_provider(hz):
