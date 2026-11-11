@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.5.4
+
+No data credit in the footer, on Today, in the chart or in the command output. The credit stays on the Weather page (info button with the link), in the README and in `hz weather info`.
+
 ## 0.5.3
 
 A chart on Today: the temperature over the next 24 hours as a line, the chance of rain as bars, today's range as a band and a marker for now, with a text summary and a table of values for screen readers. Needs Heinzelmännchen 0.9.29.
