@@ -11,6 +11,7 @@ import argparse
 import hashlib
 import os
 import stat
+import subprocess
 from pathlib import Path
 
 
@@ -51,14 +52,32 @@ def install(source: Path, hook_dir: Path, source_sha256: str, shim_sha256: str) 
         raise ValueError("stock shim changed during installation")
 
 
+def confined(candidate: Path, root: Path) -> Path:
+    """Resolve a path and refuse anything outside the given root (no traversal, no symlink escape)."""
+    resolved = os.path.realpath(candidate)
+    base = os.path.realpath(root)
+    if os.path.commonpath([resolved, base]) != base:
+        raise ValueError(f"{candidate}: outside {root}")
+    return Path(resolved)
+
+
+def git_path(*args: str) -> Path:
+    out = subprocess.run(  # noqa: S603 - fixed git command, no caller input
+        ["git", "rev-parse", *args], check=True, capture_output=True, text=True
+    ).stdout.strip()
+    return Path(out).resolve()
+
+
 def main() -> None:
     parser = argparse.ArgumentParser()
-    parser.add_argument("source", type=Path)
-    parser.add_argument("hook_dir", type=Path)
+    parser.add_argument("source", type=Path, help="companion inside this checkout")
     parser.add_argument("--reviewed-source-sha256", required=True)
     parser.add_argument("--stock-shim-sha256", required=True)
     args = parser.parse_args()
-    install(args.source, args.hook_dir, args.reviewed_source_sha256, args.stock_shim_sha256)
+    # The hook directory comes from git, never from the command line; the source must live inside this checkout.
+    toplevel = git_path("--show-toplevel")
+    hook_dir = git_path("--git-path", "hooks")
+    install(confined(args.source, toplevel), hook_dir, args.reviewed_source_sha256, args.stock_shim_sha256)
 
 
 if __name__ == "__main__":
