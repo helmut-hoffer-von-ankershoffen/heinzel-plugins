@@ -2,7 +2,7 @@
 
 ## 0.5.4
 
-No data credit on the Weather page, in the footer or on Today, and none in the command output. The credit stays in the README and in `hz weather info`.
+No data credit in the footer, on Today, in the chart or in the command output. The credit stays on the Weather page (info button with the link), in the README and in `hz weather info`.
 
 ## 0.5.3
 

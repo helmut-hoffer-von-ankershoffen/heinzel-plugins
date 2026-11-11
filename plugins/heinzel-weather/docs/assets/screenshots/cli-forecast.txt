@@ -3,7 +3,7 @@ Days
 ┏━━━━━━━━━━━━┳━━━━━━┳━━━━━━┳━━━━━━┳━━━━━━━━━━━━━━━┓
 ┃ Day        ┃ Low  ┃ High ┃ Rain ┃ Sky           ┃
 ┡━━━━━━━━━━━━╇━━━━━━╇━━━━━━╇━━━━━━╇━━━━━━━━━━━━━━━┩
-│ Sun 08 Nov │ 12°C │ 24°C │ 80%  │ moderate rain │
-│ Mon 09 Nov │ 10°C │ 19°C │ 10%  │ broken clouds │
-│ Tue 10 Nov │ 9°C  │ 18°C │ 80%  │ moderate rain │
+│ Wed 11 Nov │ 12°C │ 24°C │ 80%  │ moderate rain │
+│ Thu 12 Nov │ 10°C │ 19°C │ 10%  │ broken clouds │
+│ Fri 13 Nov │ 9°C  │ 18°C │ 80%  │ moderate rain │
 └────────────┴──────┴──────┴──────┴───────────────┘

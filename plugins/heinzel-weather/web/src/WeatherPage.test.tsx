@@ -57,8 +57,10 @@ it("shows loading while there is no answer yet", () => {
   render(<WeatherPage {...props} data={undefined} loading />);
   expect(screen.getByRole("status")).toHaveTextContent("Loading the weather…");
 });
-it("never shows the data provider's credit on the page", () => {
-  const { container } = render(<WeatherPage {...props} data={ready} />);
-  expect(container.textContent).not.toMatch(/Open-Meteo|CC BY/);
-  expect(screen.queryByRole("button", { name: "Data source" })).not.toBeInTheDocument();
+it("credits the data once, behind an info button with the link, and not as standing text", async () => {
+  show(ready);
+  expect(screen.queryByText(/Open-Meteo/)).not.toBeInTheDocument();
+  await userEvent.click(screen.getByRole("button", { name: "Data source" }));
+  expect(screen.getByRole("status")).toHaveTextContent("Open-Meteo.com (CC BY 4.0)");
+  expect(screen.getByRole("link", { name: "Open the data provider's page" })).toHaveAttribute("href", "https://open-meteo.com/");
 });
