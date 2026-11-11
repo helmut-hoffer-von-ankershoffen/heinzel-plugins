@@ -1,6 +1,6 @@
 [project]
 name = "heinzel-resource"
-version = "0.1.3"
+version = "0.1.4"
 description = "See machine CPU, memory and load on Today and in the Heinzel footer."
 license = "MIT"
 license-files = ["LICENSE"]
@@ -140,17 +140,17 @@ highlights = [
 [[tool.heinzel.catalog.screenshots]]
 path = "docs/assets/screenshots/resources-pane.png"
 surface = "ui"
-caption = "CPU, memory and scaled load in the expanded monitor — fictional demo workstation"
+caption = "Host, CPU, memory and one-minute load in the expanded monitor — fictional demo workstation"
 
 [[tool.heinzel.catalog.screenshots]]
 path = "docs/assets/screenshots/today-resources.png"
 surface = "ui"
-caption = "A quick CPU summary on Today, with three compact footer meters — demonstration values"
+caption = "A quick CPU summary on Today — demonstration values"
 
 [[tool.heinzel.catalog.screenshots]]
 path = "docs/assets/screenshots/phone-resources.png"
 surface = "ui"
-caption = "Read CPU, memory and queued load on a phone — fictional demo workstation"
+caption = "Read host, CPU, memory and load on a phone — fictional demo workstation"
 
 [[tool.heinzel.catalog.screenshots]]
 path = "docs/assets/screenshots/cli-resources.png"

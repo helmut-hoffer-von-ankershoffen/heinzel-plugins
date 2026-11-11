@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.4
+
+The footer pane lists the four readings only, without the explanation of the load bar.
+
 ## 0.1.3
 
 Clarify where to find machine resource readings in the app.
