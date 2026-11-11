@@ -66,8 +66,10 @@ def test_focused_confidentiality_hook_ignores_foreign_uv_environment(tmp_path):
     result = subprocess.run(shlex.split(entry), cwd=tmp_path, env=env, text=True, capture_output=True, check=False)  # noqa: S603 - reviewed checked-in hook and fake uv
     assert result.returncode == 0, result.stderr
     observed = (tmp_path / "observed-env").read_text()
-    assert "UV_PROJECT=" not in observed and "UV_WORKING_DIR=" not in observed
-    assert "UV_ENV_FILE=" not in observed and "PYTHONPATH=" not in observed
+    assert "UV_PROJECT=" not in observed
+    assert "UV_WORKING_DIR=" not in observed
+    assert "UV_ENV_FILE=" not in observed
+    assert "PYTHONPATH=" not in observed
     assert "UV_OFFLINE=1" in observed
     assert "CONFIDENTIAL_TERMS=fictional-sensitive-marker" in observed
     assert "CONFIDENTIAL_TERMS_FILE=/fictional/terms" in observed

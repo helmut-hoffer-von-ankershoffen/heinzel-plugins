@@ -436,21 +436,7 @@ def check(
         python_command(project, core, ["python", str(TOOLING_SCRIPT), "boundary", project.name]),
         cwd=project.directory,
     )
-    steps = (
-        []
-        if tests_only
-        else [
-            ["ruff", "check", "--no-fix", "src", "tests"],
-            ["ruff", "format", "--check", "src", "tests"],
-            ["mypy", "--strict", "src"],
-            ["pyright", "--pythonpath", str(project.directory / ".venv/bin/python"), "src"],
-        ]
-    )
-    if fast:
-        steps = steps[:2]
-    if not tests_only:
-        for command in steps[:2]:
-            command += ruff_configuration(project)
+    steps = _static_steps(project, tests_only=tests_only, fast=fast)
     # A small plugin may contain only offline integration tests; filtering to unit would exit 5.
     # Fast skips strict types and coverage, while still checking every owning offline behavior.
     marker = "not e2e and not perf"
@@ -469,18 +455,37 @@ def check(
         # Match exact verified relative exclusions against a relative scan rooted at the owning cwd.
         with vendor.quality_command(project.directory, ["typos", "."], verified) as configured:
             run(configured, cwd=project.directory)
-    frontend_enabled = frontend
-    frontend = project.directory / "web/package.json"
-    if frontend.is_file() and frontend_enabled:
-        scripts = json.loads(frontend.read_text()).get("scripts", {})
-        for step in (
-            ["test"] if fast else ["typecheck", "test"] if tests_only else ["lint", "typecheck", "test", "build"]
-        ):
-            if step in scripts:
-                run(
-                    ["uv", "run", "--no-project", "--script", str(project.directory / "web/build.py"), "run", step],
-                    cwd=project.directory,
-                )
+    if frontend:
+        _frontend_steps(project, tests_only=tests_only, fast=fast)
+
+
+def _static_steps(project: Project, *, tests_only: bool, fast: bool) -> list[list[str]]:
+    if tests_only:
+        return []
+    steps = [
+        ["ruff", "check", "--no-fix", "src", "tests"],
+        ["ruff", "format", "--check", "src", "tests"],
+        ["mypy", "--strict", "src"],
+        ["pyright", "--pythonpath", str(project.directory / ".venv/bin/python"), "src"],
+    ]
+    if fast:
+        steps = steps[:2]
+    for command in steps[:2]:
+        command += ruff_configuration(project)
+    return steps
+
+
+def _frontend_steps(project: Project, *, tests_only: bool, fast: bool) -> None:
+    package = project.directory / "web/package.json"
+    if not package.is_file():
+        return
+    scripts = json.loads(package.read_text()).get("scripts", {})
+    for step in ["test"] if fast else ["typecheck", "test"] if tests_only else ["lint", "typecheck", "test", "build"]:
+        if step in scripts:
+            run(
+                ["uv", "run", "--no-project", "--script", str(project.directory / "web/build.py"), "run", step],
+                cwd=project.directory,
+            )
 
 
 def preview(project: Project, core: str | None) -> None:

@@ -11,6 +11,18 @@ import subprocess
 from dataclasses import dataclass
 from pathlib import Path
 
+_T_CLI_COMMANDS = "tests/cli_commands_test.py"
+_T_TOOLING = "tests/tooling_test.py"
+_T_FOCUSED_HOOK = "tests/focused_hook_test.py"
+_T_FOCUSED_TRUST = "tests/focused_trust_test.py"
+_T_FOCUSED_POLICY = "tests/focused_policy_test.py"
+_T_FOCUSED_DISPATCH = "tests/focused_dispatch_test.py"
+_T_FOCUSED_PUSH_GUARD = "tests/focused_push_guard_test.py"
+_T_FOCUSED_GUARD_INSTALL = "tests/focused_guard_install_test.py"
+_T_FOCUSED_MATERIALIZE = "tests/focused_materialize_test.py"
+_T_CLI_ENVIRONMENT = "tests/cli_environment_test.py"
+_T_AUTHORING = "tests/authoring_test.py"
+_T_FAST_INTEGRATION = "tests/fast_integration_test.py"
 ANCHOR = "f94dbc0d5ecf18b605ed917317d91eb5144eec4f"
 POLICY_PATHS = frozenset(
     {
@@ -25,33 +37,33 @@ POLICY_PATHS = frozenset(
         "scripts/focused_trust.py",
         "src/heinzel_plugin_tools/cli.py",
         "src/heinzel_plugin_tools/focused_policy.py",
-        "tests/cli_commands_test.py",
-        "tests/tooling_test.py",
-        "tests/focused_hook_test.py",
-        "tests/focused_trust_test.py",
-        "tests/focused_policy_test.py",
-        "tests/focused_dispatch_test.py",
-        "tests/focused_push_guard_test.py",
-        "tests/focused_guard_install_test.py",
-        "tests/focused_materialize_test.py",
+        _T_CLI_COMMANDS,
+        _T_TOOLING,
+        _T_FOCUSED_HOOK,
+        _T_FOCUSED_TRUST,
+        _T_FOCUSED_POLICY,
+        _T_FOCUSED_DISPATCH,
+        _T_FOCUSED_PUSH_GUARD,
+        _T_FOCUSED_GUARD_INSTALL,
+        _T_FOCUSED_MATERIALIZE,
     }
 )
 PLANS = {
     "39c5bcd10f675c63df1b8c1e5892a4fd3a89006f": (
         "c4cf2a3e00856f227c34cf58d141a7a2c9c0719c",
         (
-            "tests/cli_commands_test.py",
-            "tests/tooling_test.py",
-            "tests/cli_environment_test.py",
-            "tests/authoring_test.py",
-            "tests/fast_integration_test.py",
-            "tests/focused_hook_test.py",
-            "tests/focused_trust_test.py",
-            "tests/focused_policy_test.py",
-            "tests/focused_dispatch_test.py",
-            "tests/focused_push_guard_test.py",
-            "tests/focused_guard_install_test.py",
-            "tests/focused_materialize_test.py",
+            _T_CLI_COMMANDS,
+            _T_TOOLING,
+            _T_CLI_ENVIRONMENT,
+            _T_AUTHORING,
+            _T_FAST_INTEGRATION,
+            _T_FOCUSED_HOOK,
+            _T_FOCUSED_TRUST,
+            _T_FOCUSED_POLICY,
+            _T_FOCUSED_DISPATCH,
+            _T_FOCUSED_PUSH_GUARD,
+            _T_FOCUSED_GUARD_INSTALL,
+            _T_FOCUSED_MATERIALIZE,
             "plugins/heinzel-google/tests/unit/setup_test.py",
             "plugins/heinzel-google/tests/unit/token_exchange_test.py",
             "plugins/heinzel-google/tests/unit/document_write_contract_test.py",
@@ -66,19 +78,19 @@ PLANS = {
     "e30673ef9cc8cc98de36a418e3b5a6553d5dc416": (
         "b138410ef5ad39a890e2e22630a34cc7095d4859",
         (
-            "tests/cli_commands_test.py",
-            "tests/cli_environment_test.py",
-            "tests/authoring_test.py",
-            "tests/fast_integration_test.py",
-            "tests/focused_hook_test.py",
-            "tests/focused_trust_test.py",
-            "tests/focused_policy_test.py",
-            "tests/focused_dispatch_test.py",
-            "tests/focused_push_guard_test.py",
-            "tests/focused_guard_install_test.py",
-            "tests/focused_materialize_test.py",
+            _T_CLI_COMMANDS,
+            _T_CLI_ENVIRONMENT,
+            _T_AUTHORING,
+            _T_FAST_INTEGRATION,
+            _T_FOCUSED_HOOK,
+            _T_FOCUSED_TRUST,
+            _T_FOCUSED_POLICY,
+            _T_FOCUSED_DISPATCH,
+            _T_FOCUSED_PUSH_GUARD,
+            _T_FOCUSED_GUARD_INSTALL,
+            _T_FOCUSED_MATERIALIZE,
             "tests/download_retry_test.py",
-            "tests/tooling_test.py",
+            _T_TOOLING,
             "tests/compose_test.py",
             "tests/next_app_test.py",
             "tests/next_app_propagation_test.py",
@@ -168,6 +180,38 @@ class CheckPlan:
     guards: tuple[str, ...]
 
 
+def _check_ancestry(repo: Path, old: str, new: str, candidate: str, trusted_policy: str) -> None:
+    if _git(repo, "rev-parse", "HEAD").strip() != new or _git(repo, "status", "--porcelain", "--untracked-files=all"):
+        raise ValueError("expected clean exact checkout")
+    if not all(_ancestor(repo, base, new) for base in (old, candidate, ANCHOR, trusted_policy)):
+        raise ValueError("candidate, protected baseline and policy must be ancestors")
+    # The trusted policy must be independently anchored to the protected baseline.
+    if not _ancestor(repo, ANCHOR, trusted_policy):
+        raise ValueError("untrusted policy ancestry")
+
+
+def _check_frozen_inputs(repo: Path, old: str, new: str, candidate: str, trusted_policy: str) -> None:
+    if _changed(repo, candidate, new) - POLICY_PATHS:
+        raise ValueError("unknown change after frozen candidate")
+    for path in POLICY_PATHS:
+        if _entry(repo, trusted_policy, path) != _entry(repo, new, path):
+            raise ValueError("policy bytes differ from trusted policy")
+    # For every inherited pushed path, matching its anchor entry includes file mode
+    # and deletion. A path touching the reviewed contribution remains contribution.
+    contribution = _changed(repo, ANCHOR, candidate)
+    for path in _changed(repo, old, new) - contribution - POLICY_PATHS:
+        if _entry(repo, ANCHOR, path) != _entry(repo, new, path):
+            raise ValueError("inherited path differs from protected baseline")
+
+
+def _check_required_tests(repo: Path, new: str, candidate: str, tests: tuple[str, ...]) -> None:
+    for path in tests:
+        if not _entry(repo, new, path).startswith(("100644 blob ", "100755 blob ")):
+            raise ValueError("required focused test is missing or not a regular blob")
+        if path not in POLICY_PATHS and _entry(repo, new, path) != _entry(repo, candidate, path):
+            raise ValueError("required focused test differs from frozen candidate")
+
+
 def plan(repo: Path, old: str, new: str, trusted_policy: str) -> CheckPlan:
     """Return a fixed plan, only when trusted launcher and all frozen inputs match.
 
@@ -180,30 +224,9 @@ def plan(repo: Path, old: str, new: str, trusted_policy: str) -> CheckPlan:
     for sha in (old, new, trusted_policy):
         if len(sha) != 40 or any(c not in "0123456789abcdef" for c in sha):
             raise ValueError("expected full immutable commit ids")
-    if _git(repo, "rev-parse", "HEAD").strip() != new or _git(repo, "status", "--porcelain", "--untracked-files=all"):
-        raise ValueError("expected clean exact checkout")
-    if not all(_ancestor(repo, base, new) for base in (old, candidate, ANCHOR, trusted_policy)):
-        raise ValueError("candidate, protected baseline and policy must be ancestors")
-    # The trusted policy must be independently anchored to the protected baseline.
-    if not _ancestor(repo, ANCHOR, trusted_policy):
-        raise ValueError("untrusted policy ancestry")
-    modified = _changed(repo, candidate, new)
-    if modified - POLICY_PATHS:
-        raise ValueError("unknown change after frozen candidate")
-    for path in POLICY_PATHS:
-        if _entry(repo, trusted_policy, path) != _entry(repo, new, path):
-            raise ValueError("policy bytes differ from trusted policy")
-    # For every inherited pushed path, matching its anchor entry includes file mode
-    # and deletion. A path touching the reviewed contribution remains contribution.
-    contribution = _changed(repo, ANCHOR, candidate)
-    for path in _changed(repo, old, new) - contribution - POLICY_PATHS:
-        if _entry(repo, ANCHOR, path) != _entry(repo, new, path):
-            raise ValueError("inherited path differs from protected baseline")
-    for path in tests:
-        if not _entry(repo, new, path).startswith(("100644 blob ", "100755 blob ")):
-            raise ValueError("required focused test is missing or not a regular blob")
-        if path not in POLICY_PATHS and _entry(repo, new, path) != _entry(repo, candidate, path):
-            raise ValueError("required focused test differs from frozen candidate")
+    _check_ancestry(repo, old, new, candidate, trusted_policy)
+    _check_frozen_inputs(repo, old, new, candidate, trusted_policy)
+    _check_required_tests(repo, new, candidate, tests)
     grouped: dict[str, list[str]] = {}
     for path in tests:
         if path.startswith("plugins/") and "/tests/" in path:
