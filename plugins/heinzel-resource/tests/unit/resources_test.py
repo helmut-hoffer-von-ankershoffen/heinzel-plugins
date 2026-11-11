@@ -147,7 +147,8 @@ def test_visualizer_keeps_percentages_and_load_capacity_distinct(probe, cpu, loa
     assert [meter.value for meter in status.meters] == pytest.approx([cpu, 40, min(100, load * 5)])
     assert status.meters[2].tone == load_tone
     assert "workshop.local" in status.detail[0].text
-    assert any("twice the logical core count" in line.text for line in status.detail)
+    assert len(status.detail) == 4  # four facts, no explanatory tail
+    assert not any("queued work" in line.text or "twice the" in line.text for line in status.detail)
     assert overview(sample).value == f"CPU {cpu}%"
     assert sampling(ResourceService())[0].status.value == "up"
 
