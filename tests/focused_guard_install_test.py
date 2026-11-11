@@ -45,3 +45,17 @@ def test_refuse_symlink_or_wrong_stock_shim(tmp_path):
     with pytest.raises(ValueError):
         installer.install(source, hooks, sha(source), sha(source))
     assert not (hooks / "pre-push.legacy").exists()
+
+
+def test_confined_refuses_traversal_and_symlink_escape(tmp_path):
+    root = tmp_path / "repo"
+    root.mkdir()
+    inside = root / "guard"
+    inside.write_bytes(b"x")
+    outside = tmp_path / "other"
+    outside.write_bytes(b"x")
+    (root / "link").symlink_to(outside)
+    assert installer.confined(inside, root) == inside.resolve()
+    for bad in (outside, root / ".." / "other", root / "link"):
+        with pytest.raises(ValueError):
+            installer.confined(bad, root)
