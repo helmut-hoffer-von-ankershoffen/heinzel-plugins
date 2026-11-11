@@ -7,7 +7,7 @@ name = "resources-pane"
 surface = "ui"
 route = "/"
 appearance = "light"
-caption = "CPU, memory and scaled load in the expanded monitor — fictional demo workstation"
+caption = "Host, CPU, memory and one-minute load in the expanded monitor — fictional demo workstation"
 
 [[scenes.steps]]
 action = "wait"
@@ -37,7 +37,7 @@ name = "today-resources"
 surface = "ui"
 route = "/"
 appearance = "dark"
-caption = "A quick CPU summary on Today, with three compact footer meters — demonstration values"
+caption = "A quick CPU summary on Today — demonstration values"
 
 [[scenes.steps]]
 action = "wait"
@@ -53,7 +53,7 @@ optional = true
 name = "phone-resources"
 surface = "ui"
 route = "/"
-caption = "Read CPU, memory and queued load on a phone — fictional demo workstation"
+caption = "Read host, CPU, memory and load on a phone — fictional demo workstation"
 
 [[scenes.steps]]
 action = "wait"
