@@ -30,31 +30,7 @@ def digest(path: Path) -> str:
     return hashlib.sha256(path.read_bytes()).hexdigest()
 
 
-def load(hook_dir: Path, repo: Path, remote_name: str, remote_url: str, old: str, new: str, role: str):
-    pin_path = hook_dir / "focused-policy.json"
-    info = pin_path.lstat()
-    if pin_path.is_symlink() or not stat.S_ISREG(info.st_mode) or info.st_uid != os.geteuid() or info.st_mode & 0o077:
-        raise ValueError("focused policy pin must be private, owned and regular")
-    pin = json.loads(pin_path.read_text())
-    required = {"repo", "remote_name", "remote_url", "destination", "policy_commit", "files"}
-    if not isinstance(pin, dict) or set(pin) != required:
-        raise ValueError("invalid focused policy pin")
-    if pin["repo"] != str(repo.resolve()) or pin["remote_name"] != remote_name or pin["remote_url"] != remote_url:
-        raise ValueError("repository or remote does not match the pin")
-    files = pin["files"]
-    if not isinstance(files, dict) or set(files) != {
-        "guard",
-        "shim",
-        "prek",
-        "guard_python",
-        "dispatcher_python",
-        "policy",
-        "dispatcher",
-        "trust",
-        "hook",
-        "materializer",
-    }:
-        raise ValueError("incomplete executable pins")
+def _check_executables(files: dict, hook_dir: Path, repo: Path) -> None:
     for name, item in files.items():
         if not isinstance(item, dict) or set(item) != {"path", "sha256"}:
             raise ValueError(f"invalid {name} pin")
@@ -77,6 +53,39 @@ def load(hook_dir: Path, repo: Path, remote_name: str, remote_url: str, old: str
     ):
         if digest(repo / relative) != files[name]["sha256"]:
             raise ValueError(f"active candidate {name} differs from its pin")
+
+
+def _read_pin(hook_dir: Path, repo: Path, remote_name: str, remote_url: str) -> dict:
+    pin_path = hook_dir / "focused-policy.json"
+    info = pin_path.lstat()
+    if pin_path.is_symlink() or not stat.S_ISREG(info.st_mode) or info.st_uid != os.geteuid() or info.st_mode & 0o077:
+        raise ValueError("focused policy pin must be private, owned and regular")
+    pin = json.loads(pin_path.read_text())
+    required = {"repo", "remote_name", "remote_url", "destination", "policy_commit", "files"}
+    if not isinstance(pin, dict) or set(pin) != required:
+        raise ValueError("invalid focused policy pin")
+    if pin["repo"] != str(repo.resolve()) or pin["remote_name"] != remote_name or pin["remote_url"] != remote_url:
+        raise ValueError("repository or remote does not match the pin")
+    return pin
+
+
+def load(hook_dir: Path, repo: Path, remote_name: str, remote_url: str, old: str, new: str, role: str):
+    pin = _read_pin(hook_dir, repo, remote_name, remote_url)
+    files = pin["files"]
+    if not isinstance(files, dict) or set(files) != {
+        "guard",
+        "shim",
+        "prek",
+        "guard_python",
+        "dispatcher_python",
+        "policy",
+        "dispatcher",
+        "trust",
+        "hook",
+        "materializer",
+    }:
+        raise ValueError("incomplete executable pins")
+    _check_executables(files, hook_dir, repo)
     version = subprocess.check_output([files["prek"]["path"], "--version"], env=clean_env(), text=True, timeout=30)
     if not version.startswith("prek 0.5.7 "):
         raise ValueError("unsupported prek version")

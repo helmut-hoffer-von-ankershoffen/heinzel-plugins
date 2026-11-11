@@ -32,7 +32,7 @@ def run(command: list[str], cwd: Path) -> None:
     env["UV_OFFLINE"] = "1"
     env["PLUGIN_SOURCE_ROOT"] = str(cwd)
     env["PYTHONDONTWRITEBYTECODE"] = "1"
-    subprocess.run(command, cwd=cwd, env=env, check=True, timeout=600)  # noqa: S603 - fixed reviewed plan, no shell
+    subprocess.run(command, cwd=cwd, env=env, check=True, timeout=600)  # noqa: S603 - fixed reviewed plan without a shell
 
 
 def load_installed_trust(hook_dir: Path):

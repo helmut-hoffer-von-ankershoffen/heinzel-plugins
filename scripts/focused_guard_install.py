@@ -15,7 +15,11 @@ import subprocess
 from pathlib import Path
 
 
-def digest(path: Path) -> str:
+def digest(path: Path, root: Path) -> str:
+    """Hash a regular file that stays lexically inside the given root; the check precedes any access."""
+    base = os.path.realpath(root)
+    if not os.path.abspath(path).startswith(base + os.sep):
+        raise ValueError(f"{path}: outside {root}")
     info = path.lstat()
     if not stat.S_ISREG(info.st_mode) or path.is_symlink():
         raise ValueError(f"{path}: expected a regular file")
@@ -25,11 +29,12 @@ def digest(path: Path) -> str:
 def install(source: Path, hook_dir: Path, source_sha256: str, shim_sha256: str) -> None:
     if len(source_sha256) != 64 or len(shim_sha256) != 64:
         raise ValueError("expected full independent SHA-256 pins")
+    hook_dir = Path(os.path.realpath(hook_dir))
     shim = hook_dir / "pre-push"
     target = hook_dir / "pre-push.legacy"
-    if digest(shim) != shim_sha256 or not os.access(shim, os.X_OK):
+    if digest(shim, hook_dir) != shim_sha256 or not os.access(shim, os.X_OK):
         raise ValueError("stock prek shim is missing or differs from its pin")
-    if digest(source) != source_sha256:
+    if digest(source, source.parent) != source_sha256:
         raise ValueError("companion source differs from its review pin")
     # Never overwrite an existing legacy hook, including a symlink.
     flags = os.O_WRONLY | os.O_CREAT | os.O_EXCL
@@ -44,10 +49,10 @@ def install(source: Path, hook_dir: Path, source_sha256: str, shim_sha256: str) 
     except BaseException:
         target.unlink(missing_ok=True)
         raise
-    if digest(target) != source_sha256:
+    if digest(target, hook_dir) != source_sha256:
         target.unlink(missing_ok=True)
         raise ValueError("installed companion digest mismatch")
-    if digest(shim) != shim_sha256:
+    if digest(shim, hook_dir) != shim_sha256:
         target.unlink(missing_ok=True)
         raise ValueError("stock shim changed during installation")
 
@@ -56,13 +61,13 @@ def confined(candidate: Path, root: Path) -> Path:
     """Resolve a path and refuse anything outside the given root (no traversal, no symlink escape)."""
     resolved = os.path.realpath(candidate)
     base = os.path.realpath(root)
-    if os.path.commonpath([resolved, base]) != base:
+    if resolved != base and not resolved.startswith(base + os.sep):
         raise ValueError(f"{candidate}: outside {root}")
     return Path(resolved)
 
 
 def git_path(*args: str) -> Path:
-    out = subprocess.run(  # noqa: S603 - fixed git command, no caller input
+    out = subprocess.run(  # noqa: S603 - fixed git command without caller input
         ["git", "rev-parse", *args], check=True, capture_output=True, text=True
     ).stdout.strip()
     return Path(out).resolve()
