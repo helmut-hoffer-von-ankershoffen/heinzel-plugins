@@ -11,17 +11,17 @@ hz resource                # CPU, memory and load now; --json for agents
 <!-- screenshots:start -->
 ## Screenshots
 
-<img src="docs/assets/screenshots/resources-pane.png" alt="CPU, memory and scaled load in the expanded monitor — fictional demo workstation" width="960">
+<img src="docs/assets/screenshots/resources-pane.png" alt="Host, CPU, memory and one-minute load in the expanded monitor — fictional demo workstation" width="960">
 
-CPU, memory and scaled load in the expanded monitor — fictional demo workstation
+Host, CPU, memory and one-minute load in the expanded monitor — fictional demo workstation
 
-<img src="docs/assets/screenshots/today-resources.png" alt="A quick CPU summary on Today, with three compact footer meters — demonstration values" width="960">
+<img src="docs/assets/screenshots/today-resources.png" alt="A quick CPU summary on Today — demonstration values" width="960">
 
-A quick CPU summary on Today, with three compact footer meters — demonstration values
+A quick CPU summary on Today — demonstration values
 
-<img src="docs/assets/screenshots/phone-resources.png" alt="Read CPU, memory and queued load on a phone — fictional demo workstation" width="960">
+<img src="docs/assets/screenshots/phone-resources.png" alt="Read host, CPU, memory and load on a phone — fictional demo workstation" width="960">
 
-Read CPU, memory and queued load on a phone — fictional demo workstation
+Read host, CPU, memory and load on a phone — fictional demo workstation
 
 <img src="docs/assets/screenshots/terminal-resources.png" alt="Check CPU, memory, raw load and core count in the app terminal — fictional demo-workstation values" width="960">
 
