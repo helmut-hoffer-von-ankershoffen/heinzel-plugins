@@ -28,6 +28,8 @@ from packaging.version import Version
 
 TRANSIENT_HTTP = frozenset({429, 500, 502, 503, 504})
 FETCH_ATTEMPTS = 3
+DEFAULT_NOTES = "Independently checked artifacts from the exact tagged source commit."
+NOTES_LIMIT = 125_000
 
 
 def fetch_bytes(
@@ -178,6 +180,7 @@ def publish(
     pypi: bool = False,
     make_latest: str | None = None,
     prerelease: bool = False,
+    notes: str = DEFAULT_NOTES,
 ) -> None:
     if make_latest not in {None, "true", "false"}:
         raise ValueError("Choose an explicit true or false latest-release policy")
@@ -189,6 +192,9 @@ def publish(
         raise ValueError("Select the exact built artifact files")
     if prerelease and (pypi or make_latest != "false" or not tag.startswith("app-v")):
         raise ValueError("App prereleases require nonlatest GitHub-only publication")
+    if (not notes.strip() or len(notes) > NOTES_LIMIT) and find_release(repository, tag) is None:
+        # Checked before the tag or any upload; an existing release keeps the body written when its draft was created.
+        raise ValueError("Release notes must be non-empty and within GitHub's body limit")
     exact_tag(repository, tag, revision)
     release = find_release(repository, tag)
     pending = existing_assets(release, artifacts)
@@ -207,7 +213,7 @@ def publish(
                 "tag_name": tag,
                 "target_commitish": revision,
                 "name": tag,
-                "body": "Independently checked artifacts from the exact tagged source commit.",
+                "body": notes,
                 "draft": True,
             },
         )
@@ -360,6 +366,7 @@ def main() -> None:
     parser.add_argument("--prerelease", action="store_true")
     parser.add_argument("--restore", action="store_true")
     parser.add_argument("--name")
+    parser.add_argument("--notes-file", type=Path, help="Release body for a new draft (default: a fixed sentence)")
     args = parser.parse_args()
     if args.restore:
         if not args.name:
@@ -382,6 +389,7 @@ def main() -> None:
         pypi=args.pypi,
         make_latest=args.make_latest,
         prerelease=args.prerelease,
+        notes=args.notes_file.read_text(encoding="utf-8") if args.notes_file else DEFAULT_NOTES,
     )
 
 

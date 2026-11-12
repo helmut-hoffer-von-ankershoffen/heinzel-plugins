@@ -88,11 +88,12 @@ jobs:
           GH_REPO: ${{ github.repository }}
           REVISION: ${{ github.sha }}
         run: |
+          uv run --frozen --no-build --group tooling python scripts/release_notes.py app "$VERSION" --profile dist/standard.json > "$RUNNER_TEMP/release-notes.md"
           released="$(gh release view "v$VERSION" --repo helmut-hoffer-von-ankershoffen/heinzel --json isPrerelease --jq .isPrerelease 2>/dev/null || echo true)"
           if [ "$released" = false ] && [[ "$VERSION" != *dev* ]]; then
-            uv run --frozen --no-build --group tooling python scripts/publish.py --tag "app-v$VERSION" --revision "$REVISION" --directory dist --make-latest true
+            uv run --frozen --no-build --group tooling python scripts/publish.py --tag "app-v$VERSION" --revision "$REVISION" --directory dist --make-latest true --notes-file "$RUNNER_TEMP/release-notes.md"
           else # an edge or held app is a pre-release: the default install paths can never select it
-            uv run --frozen --no-build --group tooling python scripts/publish.py --tag "app-v$VERSION" --revision "$REVISION" --directory dist --make-latest false --prerelease
+            uv run --frozen --no-build --group tooling python scripts/publish.py --tag "app-v$VERSION" --revision "$REVISION" --directory dist --make-latest false --prerelease --notes-file "$RUNNER_TEMP/release-notes.md"
           fi
   finalize:
     needs: select
