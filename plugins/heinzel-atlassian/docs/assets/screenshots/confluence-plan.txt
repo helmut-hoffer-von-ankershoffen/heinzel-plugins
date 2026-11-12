@@ -11,18 +11,17 @@ Mira
 · EM
 Today
 Today
-Doctor: 4 checks need attention
+Doctor: 5 checks need attention
 
 ai.access ai access, system.doctor installation, system.notify notification store…
 
 Open
-Ask about it
-v0.9.15
+v0.9.40
 Plugins changed, warning
 Updates, off
 0
 System health, error
-Calendar unavailable
+?
 Daemon not installed, off
 Chat
 Terminal
@@ -40,3 +39,4 @@ Release review on Tuesday after all three checks pass.
 Source: https://acme.atlassian.net/wiki/spaces/WID/pages/123456/Widget+plan
 Revision: 3
 $
+Audio

@@ -147,7 +147,7 @@ caption = "Merged pull requests in the app terminal — fictional data, fixture-
 [[tool.heinzel.catalog.screenshots]]
 path = "docs/assets/screenshots/issue-changes.png"
 surface = "ui"
-caption = "Issue changes, owners and states in the app terminal — fictional GitHub repository"
+caption = "Issue changes, owners and states in the app terminal — fictional data, fixture-only requester, real GitHub adapter"
 
 [[tool.heinzel.catalog.screenshots]]
 path = "docs/assets/screenshots/merged-cli.png"

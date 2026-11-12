@@ -23,10 +23,21 @@ Ask about it
 
 Nothing needs you right now. Ask anything below.
 
-v0.9.15
+v0.9.40
 Updates, off
 0
 System health, error
-Calendar unavailable
+?
 Daemon not installed, off
 16:30:00
+Audio
+BerlinPrimary
+Ends in 1h 30m
+16:30:00
+New York
+Ends in 6h 30m
+11:30:00
+Los Angeles
+Starts in 30m
+08:30:00
+Open

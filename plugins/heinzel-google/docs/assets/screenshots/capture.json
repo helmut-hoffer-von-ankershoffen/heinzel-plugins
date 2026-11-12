@@ -1,15 +1,15 @@
 {
   "format": 1,
   "plugin": "heinzel-google",
-  "core_version": "0.9.15",
-  "inputs_sha256": "ce44d05d2b24b1cd0e7772053af0b559da60cf8e8665858fb60a8c96c46e5176",
+  "core_version": "0.9.40",
+  "inputs_sha256": "9cd9f93869d1d655707c8e53e51ebb51cb0f85f9d539e1eafff9242853881451",
   "images": {
-    "docs/assets/screenshots/launch-files.png": "1a298a0c1bea856b38d7c6a3bb4109a7104e3e5b237a64ecee4a5b7357dc47c8",
-    "docs/assets/screenshots/launch-files-week.png": "7e2a4885f63b407d686fa85c7d7f07c64dbe60b49302213ee0d17eec9227abba",
-    "docs/assets/screenshots/launch-plan.png": "c20eb56437204b738c3124dfaa4ab67a6e276e8dea78c984e59b8f714a7430a6",
-    "docs/assets/screenshots/launch-week.png": "777eec326cbd4966b79dc688f9f3997be1e2a7c81489694937daae29a9ea8400",
-    "docs/assets/screenshots/launch-inbox.png": "54f01ba07c1804a8814c77d9c8cd6c7ae33ce9672f783d72c5dc3473b6637d85",
-    "docs/assets/screenshots/launch-files-json.png": "43a173e7b2ec0b9c7fce8433c97c217eb80b5ca50e9ff44f110e8f3e06f53c01",
+    "docs/assets/screenshots/launch-files.png": "82d65053d801ec731dd82765fa2985c4e251d6a0c79a1cd8b3cce47b9e41e928",
+    "docs/assets/screenshots/launch-files-week.png": "6e0696371015106b7b0d6eb9b050b9657370ef34743c9ef95bf2ba992ecba8ca",
+    "docs/assets/screenshots/launch-plan.png": "7387f8418da434bab67f840d7f49faa64e1d5b5eb75f25a903eb123236d20570",
+    "docs/assets/screenshots/launch-week.png": "66ab918e74c6a5929288b366c7be0a0735471a660feca5d40e416f6f9cd2f953",
+    "docs/assets/screenshots/launch-inbox.png": "c90838078e9a640de27f90a8a601b428a1e19380965bd406d64bda973d8d7490",
+    "docs/assets/screenshots/launch-files-json.png": "d1e4dee2ce7cc5b3c831d467c42134f145380d6c6bd9bf14d84e9ff8e124334c",
     "docs/assets/screenshots/launch-metrics.png": "694361694713cb2bb4b3e9a89ec50004ab36120233ed8dbe615466cd5ae09a62",
     "docs/assets/screenshots/mail-content.png": "ceef4e8ed3b08a9d3b787467049c7e8e45effbbdfcaacee0508b023d51691cd4"
   },
@@ -18,13 +18,13 @@
     "definition": {
       "format": 1,
       "reviewer": "Codex feature-story agent",
-      "source_sha256": "341e120b5cc8986559b849d7977a5cb2e2e086c602fa06b14a8d44cbe083a1d4",
+      "source_sha256": "c9ce2950cf31d371eaa5a2f20e28d23514999a929136e3aa6ee9912e05530086",
       "plan_sha256": "bc2b6e279d06909da4d37496ac15d5e5dc4fa50f0c34df8aec47b4f9e9e091d8",
-      "story_sha256": "03e001da63c3e0c3ce2122962de50cb8e9c531f77c3bb67681a199c386eee60b"
+      "story_sha256": "554b6f9c33482f8cb873fcb614483ee1975729ad6982d2784b2401c8c7c886e9"
     },
     "plugin": "heinzel-google",
-    "core_version": "0.9.15",
-    "inputs_sha256": "ce44d05d2b24b1cd0e7772053af0b559da60cf8e8665858fb60a8c96c46e5176",
+    "core_version": "0.9.40",
+    "inputs_sha256": "9cd9f93869d1d655707c8e53e51ebb51cb0f85f9d539e1eafff9242853881451",
     "screenshots": [
       {
         "path": "docs/assets/screenshots/launch-files.png",
@@ -68,30 +68,30 @@
       }
     ],
     "images": {
-      "launch-files.png": "1a298a0c1bea856b38d7c6a3bb4109a7104e3e5b237a64ecee4a5b7357dc47c8",
-      "launch-files-week.png": "7e2a4885f63b407d686fa85c7d7f07c64dbe60b49302213ee0d17eec9227abba",
-      "launch-plan.png": "c20eb56437204b738c3124dfaa4ab67a6e276e8dea78c984e59b8f714a7430a6",
-      "launch-week.png": "777eec326cbd4966b79dc688f9f3997be1e2a7c81489694937daae29a9ea8400",
-      "launch-inbox.png": "54f01ba07c1804a8814c77d9c8cd6c7ae33ce9672f783d72c5dc3473b6637d85",
-      "launch-files-json.png": "43a173e7b2ec0b9c7fce8433c97c217eb80b5ca50e9ff44f110e8f3e06f53c01",
+      "launch-files.png": "82d65053d801ec731dd82765fa2985c4e251d6a0c79a1cd8b3cce47b9e41e928",
+      "launch-files-week.png": "6e0696371015106b7b0d6eb9b050b9657370ef34743c9ef95bf2ba992ecba8ca",
+      "launch-plan.png": "7387f8418da434bab67f840d7f49faa64e1d5b5eb75f25a903eb123236d20570",
+      "launch-week.png": "66ab918e74c6a5929288b366c7be0a0735471a660feca5d40e416f6f9cd2f953",
+      "launch-inbox.png": "c90838078e9a640de27f90a8a601b428a1e19380965bd406d64bda973d8d7490",
+      "launch-files-json.png": "d1e4dee2ce7cc5b3c831d467c42134f145380d6c6bd9bf14d84e9ff8e124334c",
       "launch-metrics.png": "694361694713cb2bb4b3e9a89ec50004ab36120233ed8dbe615466cd5ae09a62",
       "mail-content.png": "ceef4e8ed3b08a9d3b787467049c7e8e45effbbdfcaacee0508b023d51691cd4"
     },
     "transcripts": {
-      "launch-files.txt": "a21a3b6e96247ac55499b35996249d48bfadf2ea130d749d409a007e66914ffa",
-      "launch-files-week.txt": "ac596f8a59e64337942c19e3e71d6ebdfa7ba29b95a8336afb250b59aaa35430",
-      "launch-plan.txt": "75bef48a4b1a2556ab53518d27a94c8c11bcd9bb924db63036b6b6030bdf2067",
-      "launch-week.txt": "b03a22d6df7ac1f9c1eca2feecaa62c5bbab953078af99b0244d5342970fea83",
-      "launch-inbox.txt": "b6007ab40280131076f6c5436e8f44bf1c59a39d317952fc8d7a9c09b802f10d",
-      "launch-files-json.txt": "58267ce5f4caa1ce83ccdbf5e9b6f5a5055283478df1caa1982eed64c32ec567",
+      "launch-files.txt": "11512055fc000528aa847cc259d7580f8310fc567fc08a9eb6d624d9057cd70f",
+      "launch-files-week.txt": "1ee2dbb9a5f06b0ee5d96c12d3874d4c79e78ef5d60179c02cae079b1338f702",
+      "launch-plan.txt": "af23c61185a9fb3a9f7db5c28a1a9ad74a95c9401b388fef7874da9053a6ddef",
+      "launch-week.txt": "ff609c87a2c03f4e78a5e8ab56486801682d2bff4e4043cde5aa833fb77822d1",
+      "launch-inbox.txt": "0e421239424f83e75b9449fe269da1045bea7bc02ee9e399d09664269e460efd",
+      "launch-files-json.txt": "9095b69ade328c529dbc5b7bcac5f67e3122d52c813a91c3bb6ef0c75506e43d",
       "launch-metrics.txt": "d3f2f19f3a5f470e2c567dd65d8333fdba8fb653a2346a31cfa8b9c008545a04",
       "mail-content.txt": "57cda012c3d61d21aa3e387c296ebce6483c114b169bb416d5296d4af344a813"
     },
-    "bundle_sha256": "bbe7bbcd2e82de7fd11a9fefc548fb63614dd5f4468ed8ae2456f5336dc3d7c2"
+    "bundle_sha256": "032615b040224bae6ac640c4fc4e7e52aef2bd3f6139741d9f0999132c692027"
   },
   "privacy_review": {
     "format": 1,
-    "bundle_sha256": "bbe7bbcd2e82de7fd11a9fefc548fb63614dd5f4468ed8ae2456f5336dc3d7c2",
+    "bundle_sha256": "032615b040224bae6ac640c4fc4e7e52aef2bd3f6139741d9f0999132c692027",
     "reviewer": "Codex privacy agent",
     "decision": "approve",
     "checked_images": [

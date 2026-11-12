@@ -131,9 +131,9 @@ Development and release commands: [repository guide](../../README.md).
 
 Merged pull requests in the app terminal — fictional data, fixture-only requester, real GitHub adapter
 
-<img src="docs/assets/screenshots/issue-changes.png" alt="Issue changes, owners and states in the app terminal — fictional GitHub repository" width="960">
+<img src="docs/assets/screenshots/issue-changes.png" alt="Issue changes, owners and states in the app terminal — fictional data, fixture-only requester, real GitHub adapter" width="960">
 
-Issue changes, owners and states in the app terminal — fictional GitHub repository
+Issue changes, owners and states in the app terminal — fictional data, fixture-only requester, real GitHub adapter
 
 <img src="docs/assets/screenshots/workflow-context.png" alt="Weekly code review declares merged-work and issue inputs — fictional local example, no report generated" width="960">
 

@@ -1,28 +1,28 @@
 {
   "format": 1,
   "plugin": "heinzel-zoom",
-  "core_version": "0.9.15",
-  "inputs_sha256": "b12cdc325393cfe7ad9079cdc01da413cc6ab3ca5b8db548f92bf43316337f61",
+  "core_version": "0.9.40",
+  "inputs_sha256": "cce1a30bc89271345e2825f75582e6bca22e2834fb69ce6659a8645de2cbb073",
   "images": {
-    "docs/assets/screenshots/meeting-decisions.png": "3ccfae0d45415ccd24ebdb9e4953ea4718dcbc0f0236e2662010baf06beeb3ed",
-    "docs/assets/screenshots/recent-meetings.png": "ba8bb4b807e3fad43806891fbc175f298703dcb34fbceb9d99c8b1b16be1b9b0",
-    "docs/assets/screenshots/launch-decisions.png": "d49fa17cac9a11fd7916b29290ce9a889e83e1a08b462eb30daf88e3243f44be",
+    "docs/assets/screenshots/meeting-decisions.png": "dd12dc25a7969952d993693d89e968e879dac80cdadf42007f3e339f8d6272bf",
+    "docs/assets/screenshots/recent-meetings.png": "712ffc51d4f5afd8784552814873c29bbc726d03940614c023805707ba203fa8",
+    "docs/assets/screenshots/launch-decisions.png": "7a2a187a3fd5254505f57db6bfe19f5bf16e56300576518223ad1ac6816c45b1",
     "docs/assets/screenshots/summary-cli.png": "b6882ac1fc26da06900bfc063db82c5fae23809a5d909c73abdc9aa1d3e2afd6",
     "docs/assets/screenshots/meeting-list-json.png": "4baccb4a6154df4a67ad97a1c24df2b1596ffb24b084aa045e6bc704c4a597c5",
-    "docs/assets/screenshots/workflow-context.png": "b85041d0f8b6a3ff927023f0fb27b747f0f0d429cd5bd9c18c9587769fa8984a"
+    "docs/assets/screenshots/workflow-context.png": "1261cee6ca862753f4a4a5e1d688e655607d889cdfc508e6e671b36ea69daf54"
   },
   "review_bundle": {
     "format": 1,
     "definition": {
       "format": 1,
       "reviewer": "Codex feature-story agent",
-      "source_sha256": "5d8ba3a2a1fe30d9d99398b42d74e02f55c1c14aa7cf18198f6c8db2c5ea6911",
+      "source_sha256": "a88d089fff0dd6c9b2792fb7e8c4dac26eaa8c35ab23065994dc533c629cf09f",
       "plan_sha256": "bccb9a447d26d1483d09cd3f756d90765e6b50b0395da6c6bdf90d9903c996c3",
-      "story_sha256": "1ab7a263f1a69c6c520282d6ab8d77c236b17d1047a5c3a4591ff23784f5f3bb"
+      "story_sha256": "286475fd05791d8c4e3e4e7ac6128f2cb939ec8da846f0deca00f26edcb75762"
     },
     "plugin": "heinzel-zoom",
-    "core_version": "0.9.15",
-    "inputs_sha256": "b12cdc325393cfe7ad9079cdc01da413cc6ab3ca5b8db548f92bf43316337f61",
+    "core_version": "0.9.40",
+    "inputs_sha256": "cce1a30bc89271345e2825f75582e6bca22e2834fb69ce6659a8645de2cbb073",
     "screenshots": [
       {
         "path": "docs/assets/screenshots/meeting-decisions.png",
@@ -56,26 +56,26 @@
       }
     ],
     "images": {
-      "meeting-decisions.png": "3ccfae0d45415ccd24ebdb9e4953ea4718dcbc0f0236e2662010baf06beeb3ed",
-      "recent-meetings.png": "ba8bb4b807e3fad43806891fbc175f298703dcb34fbceb9d99c8b1b16be1b9b0",
-      "launch-decisions.png": "d49fa17cac9a11fd7916b29290ce9a889e83e1a08b462eb30daf88e3243f44be",
+      "meeting-decisions.png": "dd12dc25a7969952d993693d89e968e879dac80cdadf42007f3e339f8d6272bf",
+      "recent-meetings.png": "712ffc51d4f5afd8784552814873c29bbc726d03940614c023805707ba203fa8",
+      "launch-decisions.png": "7a2a187a3fd5254505f57db6bfe19f5bf16e56300576518223ad1ac6816c45b1",
       "summary-cli.png": "b6882ac1fc26da06900bfc063db82c5fae23809a5d909c73abdc9aa1d3e2afd6",
       "meeting-list-json.png": "4baccb4a6154df4a67ad97a1c24df2b1596ffb24b084aa045e6bc704c4a597c5",
-      "workflow-context.png": "b85041d0f8b6a3ff927023f0fb27b747f0f0d429cd5bd9c18c9587769fa8984a"
+      "workflow-context.png": "1261cee6ca862753f4a4a5e1d688e655607d889cdfc508e6e671b36ea69daf54"
     },
     "transcripts": {
-      "meeting-decisions.txt": "478076074ab18dc1d2bb2465f1babd436e389e934a89b7eba829fd8987c82923",
-      "recent-meetings.txt": "c1fd341cb1ca76a5c18292ab1d7b74be2291d5274d1f54145bf6f228e17a8690",
-      "launch-decisions.txt": "bac58b1298e2ed271a7d75241439ba4cfb0cd7755c24336841516b925a5a5eec",
+      "meeting-decisions.txt": "9886e1326b7522df3a4bc9db9095b209437abd06cebfd6d3bc36d4def023cbaa",
+      "recent-meetings.txt": "ad8c7eb5056963f6b8701ba9a1e5abf5ddda9b7d7e16f645cf26c6cc5c5e7991",
+      "launch-decisions.txt": "10d4debdd36d28703591f024e3d2b050c6cf347258cdaae9f66ec94e4532e317",
       "summary-cli.txt": "4be37a1c9908c8f4c8c3bad307e5dbaeb5578b4b71951327f1560dfd3c371c99",
       "meeting-list-json.txt": "2762667503f795cc6f754156a447becaca466c238f3714d29fd2496c3486e210",
-      "workflow-context.txt": "b45a11fe9658424513c9143fedbe0d71337b39e7434aef4cffeda3a25e7873f1"
+      "workflow-context.txt": "b12a34033e0e71290531729c7fbd7f1d90276a5f64d1efdce7d05e935411a0a6"
     },
-    "bundle_sha256": "810fc2f792bab4ab83ab6169b2aaa6b7ffa694a82825014f63b4585376340a6b"
+    "bundle_sha256": "ff97375f4105a6274ed1924fcbac07fc309c7f7a7ed313f4a7ff7036e53c860d"
   },
   "privacy_review": {
     "format": 1,
-    "bundle_sha256": "810fc2f792bab4ab83ab6169b2aaa6b7ffa694a82825014f63b4585376340a6b",
+    "bundle_sha256": "ff97375f4105a6274ed1924fcbac07fc309c7f7a7ed313f4a7ff7036e53c860d",
     "reviewer": "Codex privacy agent",
     "decision": "approve",
     "checked_images": [

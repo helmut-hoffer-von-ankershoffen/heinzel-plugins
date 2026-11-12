@@ -1,13 +1,13 @@
 {
   "format": 1,
   "plugin": "heinzel-tailscale",
-  "core_version": "0.9.15",
-  "inputs_sha256": "a8c737315e4828c5fb8867cd6574a546f5eabb424e2e59d218c56d74d801e56f",
+  "core_version": "0.9.40",
+  "inputs_sha256": "a17502fa7f11307502cfdf64e05c6f0a3895c785ca97b45685dfdf9bb52756ad",
   "images": {
-    "docs/assets/screenshots/sharing-ready.png": "b3b85459bc4f711a6bfaae69d5150cb879690d2e2204fd8c2580f5b25f1dabac",
-    "docs/assets/screenshots/phone-sharing-ready.png": "e68efb779eb0135c153a712da8db148f9daeb699117e6d905a4b7889e0e86dcd",
-    "docs/assets/screenshots/sharing-request-cli.png": "ba2bba0e39fc6406e35ad00f40d996966e2fb42f6262300b0927fc295d9c9b7d",
-    "docs/assets/screenshots/sharing-off.png": "80162e4d82e84801073662c09064fc460afdc667838f7d290093faeeac7ba20a",
+    "docs/assets/screenshots/sharing-ready.png": "04d4d801ca11ecd3d8d9ab7d4250ccd27c480ed7c4926d111f05a078c041a070",
+    "docs/assets/screenshots/phone-sharing-ready.png": "fe8974c60a0e8b432f9f1ca76c9a2cbbc4eb28872bd70c276dc504e5c979eab8",
+    "docs/assets/screenshots/sharing-request-cli.png": "6e8e7d7ddf846ec340b6d984b9f9e228086f814318a045fc131f3e5dc0dfcc2a",
+    "docs/assets/screenshots/sharing-off.png": "c5530b4a9393395f717cdfc787eae9b38738d1a6bd1fcf259a8976120f2565f1",
     "docs/assets/screenshots/sharing-off-cli.png": "258d18283c592905ed4faac4dcb3dd47ab1930071da6db5e1aac866b1c2f4250"
   },
   "review_bundle": {
@@ -15,18 +15,18 @@
     "definition": {
       "format": 1,
       "reviewer": "Codex feature-story agent",
-      "source_sha256": "a75b6d963effe7b163aa1764d4ac9a9e183da854a06bfa248641d67fc721d3e1",
-      "plan_sha256": "eafc886eddfb879c0ac31ac1e0de6df15b0159e957e8a1e1e50bf4cc8d07a08c",
-      "story_sha256": "3319c31e6d4337ce0c7d3d1167cb384e43009c797effc80f75be3effce373d9d"
+      "source_sha256": "53758fdc163e0bb8d988d093ae6e542f9708e80fb7310d21b18d7c2d33febf96",
+      "plan_sha256": "231f8025d112dc972b4b53deb373944c57496d90479978791a89b78c853830f3",
+      "story_sha256": "ed13c5d20486cf5fedf3c2cb3f877df8858b714e86498a7b2a848f6671ec038f"
     },
     "plugin": "heinzel-tailscale",
-    "core_version": "0.9.15",
-    "inputs_sha256": "a8c737315e4828c5fb8867cd6574a546f5eabb424e2e59d218c56d74d801e56f",
+    "core_version": "0.9.40",
+    "inputs_sha256": "a17502fa7f11307502cfdf64e05c6f0a3895c785ca97b45685dfdf9bb52756ad",
     "screenshots": [
       {
         "path": "docs/assets/screenshots/sharing-ready.png",
         "surface": "ui",
-        "caption": "Enable private sharing and see its local readiness message \u2014 fictional Tailscale demo; no remote connection tested"
+        "caption": "Turn private sharing on; the pane offers Copy link and Open \u2014 fictional Tailscale demo; no remote connection tested"
       },
       {
         "path": "docs/assets/screenshots/phone-sharing-ready.png",
@@ -50,24 +50,24 @@
       }
     ],
     "images": {
-      "sharing-ready.png": "b3b85459bc4f711a6bfaae69d5150cb879690d2e2204fd8c2580f5b25f1dabac",
-      "phone-sharing-ready.png": "e68efb779eb0135c153a712da8db148f9daeb699117e6d905a4b7889e0e86dcd",
-      "sharing-request-cli.png": "ba2bba0e39fc6406e35ad00f40d996966e2fb42f6262300b0927fc295d9c9b7d",
-      "sharing-off.png": "80162e4d82e84801073662c09064fc460afdc667838f7d290093faeeac7ba20a",
+      "sharing-ready.png": "04d4d801ca11ecd3d8d9ab7d4250ccd27c480ed7c4926d111f05a078c041a070",
+      "phone-sharing-ready.png": "fe8974c60a0e8b432f9f1ca76c9a2cbbc4eb28872bd70c276dc504e5c979eab8",
+      "sharing-request-cli.png": "6e8e7d7ddf846ec340b6d984b9f9e228086f814318a045fc131f3e5dc0dfcc2a",
+      "sharing-off.png": "c5530b4a9393395f717cdfc787eae9b38738d1a6bd1fcf259a8976120f2565f1",
       "sharing-off-cli.png": "258d18283c592905ed4faac4dcb3dd47ab1930071da6db5e1aac866b1c2f4250"
     },
     "transcripts": {
-      "sharing-ready.txt": "e8676dfcfd126ea7fde8d82c126953b29c51bd0adab1c7b09abdf31f93ea99e1",
-      "phone-sharing-ready.txt": "4269d676fc386f664faadde11100cd986e04b3d482fa67faa363aeb8cdd13c28",
-      "sharing-request-cli.txt": "0a58567b3b53cc15c59bde50b2ad37f5e1b8886aa52af953e8e45737622c7df5",
-      "sharing-off.txt": "71c745f41ea560bee5804cb82b30b1211f309c60f4a3f6fd2c2b930e24710ae6",
+      "sharing-ready.txt": "4a2faf1a360eb493941fbc6404654023aeca1111963fdcf85c00d1aa94991095",
+      "phone-sharing-ready.txt": "f45d2099e580e41e495e8687f1ccf2b4d7a7e87672a07df679c69e2b1f8fd639",
+      "sharing-request-cli.txt": "bdb82fe4e56d1838f163c2f5adfcaf37e715d3d54ae667d729d94028057f9bcc",
+      "sharing-off.txt": "0bbcd63c0c20020b7aea5f136cf964500bcde8baa9101c680d39a9a13d45c801",
       "sharing-off-cli.txt": "4d0c6d11c3a596857032c07677d48bb49d42f898f73f9e031a4388d922710890"
     },
-    "bundle_sha256": "8bbdd438fc2f1d1f28d2a8f1e87d34c36d2d1d9c5fbc02d6f0cb3516e9b518c7"
+    "bundle_sha256": "8afb6179f06734ebf28034ebd31df1621791e037ff5e6470af7ec794de90e490"
   },
   "privacy_review": {
     "format": 1,
-    "bundle_sha256": "8bbdd438fc2f1d1f28d2a8f1e87d34c36d2d1d9c5fbc02d6f0cb3516e9b518c7",
+    "bundle_sha256": "8afb6179f06734ebf28034ebd31df1621791e037ff5e6470af7ec794de90e490",
     "reviewer": "Codex privacy agent",
     "decision": "approve",
     "checked_images": [

@@ -10,19 +10,16 @@ Mira
 · EM
 Today
 Today
-Doctor: 4 checks need attention
+Doctor: 5 checks need attention
 
 ai.access ai access, system.doctor installation, system.notify notification store…
 
 Open
-Ask about it
-v0.9.15
+v0.9.40
 Plugins changed, warning
 Updates, off
 0
 System health, error
-Not in a meeting
-None through tomorrow
 Daemon not installed, off
 Chat
 Terminal
@@ -39,3 +36,4 @@ Thursday launch review, then a ten-percent rollout.
 Source: https://docs.google.com/document/d/launch-plan/edit
 Revision: demo-rev-7
 $
+Audio

@@ -28,5 +28,8 @@ Working · 2h 30m since start · 6h 30m left
 Los Angeles
 Starts in 30m · 2d 14h 30m since end
 08:30:00
-Calendar unavailable
+v0.9.40
+System health, error
+?
 16:30:00
+Audio

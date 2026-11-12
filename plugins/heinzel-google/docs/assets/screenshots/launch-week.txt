@@ -10,19 +10,16 @@ Mira
 · EM
 Today
 Today
-Doctor: 4 checks need attention
+Doctor: 5 checks need attention
 
 ai.access ai access, system.doctor installation, system.notify notification store…
 
 Open
-Ask about it
-v0.9.15
+v0.9.40
 Plugins changed, warning
 Updates, off
 0
 System health, error
-Not in a meeting
-None through tomorrow
 Daemon not installed, off
 Chat
 Terminal
@@ -36,3 +33,4 @@ $ hz showcase week; printf '\033]0;Demo complete\007'
 │ Fri 14:00 │ Rollout checkpoint                        │                             │
 └───────────┴───────────────────────────────────────────┴─────────────────────────────┘
 $
+Audio

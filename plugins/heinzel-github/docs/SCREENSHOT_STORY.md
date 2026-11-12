@@ -1,33 +1,31 @@
 ## Audience
 
-A team lead or workflow author deciding whether GitHub pull requests and issues can feed a Heinzelmännchen review workflow.
+Teams considering a GitHub connector for weekly reviews, and workflow authors who need merged pull requests and issue changes through Heinzelmännchen capabilities.
 
 ## Outcome
 
-Show how the GitHub adapter supplies merged work and updated issues to a capability-based workflow, with readable terminal output and structured JSON for automation. The demonstration uses a fixture-only requester and fictional GitHub responses; it does not show a live GitHub connection or a generated review.
+Show how fictional repository activity becomes readable review context: merged work, issue ownership and structured results. Make clear that the showcase requester and weekly review contract are demonstration fixtures, while the GitHub adapter performs the conversions.
 
 ## Scenes
 
-1. **Merged work, in light appearance:** Three fictional pull requests make recent changes and authors easy to scan in the app terminal.
-2. **Issue changes, in dark appearance:** A second app-terminal view shows fictional issues, states, and owners. Pull requests are excluded from the issue results.
-3. **Merged work in the CLI:** The same fictional pull requests show what a shell user receives from the demonstration requester.
-4. **Issues as JSON:** Structured fictional issue results illustrate a format useful to scripts and agents.
-5. **Workflow context:** A fictional local weekly-review contract declares merged-work and issue inputs. It is a workflow declaration, not a completed report.
+1. **Merged work:** A light app-terminal view lists fictional merged pull requests, dates and authors.
+2. **Issue changes:** A dark app-terminal view shows fictional issues, states and owners.
+3. **Merged CLI:** The same merged-work result is available as a shell command.
+4. **Issues JSON:** Structured fictional issue results illustrate use by scripts and agents.
+5. **Workflow context:** A local weekly-review contract declares both inputs; it does not claim a report was generated.
 
 ## Fictional fixtures
 
-Use the existing `docs/screenshot_fixture.py` bootstrap and its `acme/widgets` responses, October 2026 window, and local weekly-review contract. The `showcase` commands are documentation-only requesters using the real adapter with a fake `gh` implementation; they are not built-in GitHub plugin commands.
+The existing `docs/screenshot_fixture.py` supplies fictional `acme/widgets` responses, an October 2026 window and a local demonstration contract. Its `showcase` commands are documentation-only requesters, not commands supplied by the plugin itself. The fixture uses the real adapter with a simulated GitHub CLI requester.
 
 ## Privacy pitfalls
 
-Capture only the isolated fixture profile. Check screenshots and terminal output for real account names, repository names, tokens, local paths, and unrelated terminal history. Fixture URLs and names are examples, not evidence of a live GitHub request.
+Capture only with the isolated fictional profile and fixture. Check terminal output and contract content for real repository names, account identities, credentials or unrelated local paths before publishing. Example GitHub URLs are fixture data, not evidence of a live request or connected account.
 
 ## Acceptance criteria
 
-- Both app-terminal views show useful, legible results, with light and dark appearances visibly applied.
-- The merged view identifies pull requests and authors; the issue view shows issue states and owners without treating the fixture pull request as an issue.
-- The CLI captures show a readable merged-work result and issue JSON, with no errors or clipped essential output.
-- The workflow view identifies the two declared inputs and does not imply that a report was generated.
-- Every caption identifies demo or fictional data, and the gallery makes the fixture-only requester clear.
-- Captures contain no real credentials or private data. Review the generated images before publication.
-- The plan is checked against the requested format by inspection; capture and runtime validation remain to be performed during explicit screenshot capture.
+- Both app-terminal views show useful, legible fictional results, with merged work and issue changes distinguishable at a glance.
+- CLI captures show a readable merged-work result and structured issue output; captions identify the demo data.
+- The workflow view identifies the contract as a local example and does not imply a report was generated.
+- Captures contain no real account or repository data, secrets or unrelated local information.
+- The existing plan is retained: its five scenes already cover the useful behavior. Its TOML structure and fields were reviewed against the supplied requirements; capture and parser validation remain to be run during an explicit capture workflow.

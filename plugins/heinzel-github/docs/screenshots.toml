@@ -25,7 +25,7 @@ name = "issue-changes"
 surface = "ui"
 route = "/"
 appearance = "dark"
-caption = "Issue changes, owners and states in the app terminal — fictional GitHub repository"
+caption = "Issue changes, owners and states in the app terminal — fictional data, fixture-only requester, real GitHub adapter"
 timeout_ms = 30000
 
 [[scenes.steps]]

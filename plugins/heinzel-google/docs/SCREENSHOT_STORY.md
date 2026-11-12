@@ -1,28 +1,28 @@
 ## Audience
-People deciding whether Heinzelmännchen can bring Google Workspace information into their workflows, especially launch or project coordination.
+People considering a Google Workspace connector for Heinzelmännchen who want to see what it can retrieve before setting up an account.
 
 ## Outcome
-Show how a fictional launch team can find recent files, read a plan and metrics, and review meetings and mail. The native app terminal and CLI demonstrate the plugin’s adapters using local replies; they do not demonstrate a live Google connection.
+Follow a fictional launch from finding its files to reading a plan, checking meetings and scanning mail. The gallery shows the app terminal and command-line output, with structured JSON and a spreadsheet table for people who want to use the results elsewhere.
 
 ## Scenes
-1. **Find launch files:** A three-day, name-filtered Drive listing in the app terminal.
-2. **Broaden the search:** A seven-day listing without the name filter in the app terminal. The fixture returns the same fictional files for both cases, so this illustrates the available parameters, not their filtering effect.
-3. **Read the plan:** The fixture’s requester reads a fictional Google Doc through the documents adapter.
-4. **See the week:** The requester displays fictional meetings and attendees through the Calendar adapter.
-5. **Scan the inbox:** The requester displays fictional launch messages through the Gmail adapter.
-6. **Use structured output:** The CLI presents the fictional file listing as JSON.
-7. **Read metrics:** The CLI renders a fictional Sheet as a table.
-8. **Read a message:** The CLI displays a fictional message’s next actions.
+1. **Find launch files:** Search the past three days by name in the app terminal.
+2. **Broaden the search:** Try a seven-day search without a name filter. The fixture deliberately returns the same files, so this does not demonstrate filtering differences.
+3. **Read the plan:** Show the fictional document’s goals, owners and next milestone.
+4. **Review the week:** Show the fictional calendar events and attendee names.
+5. **Scan the inbox:** Show a focused fictional Gmail query and its results.
+6. **Use structured output:** Show the file search as JSON in the CLI.
+7. **Read metrics:** Show the fictional spreadsheet as a table in the CLI.
+8. **Read a message:** Show the body of a fictional launch message in the CLI.
 
 ## Fictional fixtures
-The existing `docs/screenshot_fixture.py` supplies fictional Drive, Docs, Sheets, Calendar and Gmail replies and registers the documentation-only `showcase` requester. Its people, addresses, messages and launch results are examples. The `google files` operation belongs to the plugin; `showcase` commands are fixture helpers, not advertised plugin commands. The bootstrap runs only during an explicit capture.
+The existing `docs/screenshot_fixture.py` supplies fictional Google responses and a documentation-only `showcase` requester. The `showcase` commands demonstrate the installed adapters through this fixture; they are not presented as built-in Google plugin commands. Its file-list response is fixed for both search cases, while modified times are generated at capture time.
 
 ## Privacy pitfalls
-Capture only with the isolated fixture profile: real file names, document text, meeting attendees, email addresses and message bodies could reveal private information. Do not substitute real credentials or account data. The fixture’s successful responses do not prove sign-in, network access, Google permissions or write behavior. Mail access and calendar/mail writes require separate opt-in in actual use.
+Use an isolated fictional profile and fixture responses, never a connected account or real document, calendar or mail content. Check captures for account identifiers, credentials and unrelated terminal history. Fixture addresses use `example.com`. Do not imply that the gallery proves live Google connectivity, write permissions or confirmation flows; Gmail and writes require their own opt-in setup.
 
 ## Acceptance criteria
-- All eight scenes show legible, completed results with captions identifying demo data; the first five are app-terminal views and the last three are CLI captures.
-- Both `google files` parameter cases appear, without claiming the fixture proves filtering.
-- The plan, metrics, calendar and mail scenes visibly contain the fictional content supplied by the existing fixture.
-- No screenshot presents `showcase` as a shipped Google command or implies a live account was contacted.
-- Review captures for accidental personal data and clipped output. TOML syntax and the supplied scene fields have been checked by inspection; capture and runtime validation were not performed because code execution was prohibited.
+- All eight scenes show readable results, with captions identifying fictional or fixture data.
+- Both file-search parameter cases appear in the app terminal, and the caption explains their identical fixture results.
+- The plan, calendar, inbox, JSON, spreadsheet and message scenes display the corresponding fixture output without clipping essential content.
+- The `showcase` requester is identified as documentation-only, and no invented plugin panel or live Google result is implied.
+- The plan has been checked against the requested structure by inspection; capture and executable TOML validation were not run because this request prohibits code execution.

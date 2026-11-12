@@ -64,9 +64,10 @@ role = "button"
 name_regex = "^Berlin"
 within_role = "contentinfo"
 
+# Core 0.9.40 keeps the Today heading screen-reader only; rest the pointer on the Today region instead.
 [[scenes.steps]]
 action = "hover"
-role = "heading"
+role = "region"
 name = "Today"
 
 [[scenes]]

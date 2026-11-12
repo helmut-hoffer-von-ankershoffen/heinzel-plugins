@@ -7,7 +7,7 @@ name = "sharing-ready"
 surface = "ui"
 route = "/"
 appearance = "light"
-caption = "Enable private sharing and see its local readiness message — fictional Tailscale demo; no remote connection tested"
+caption = "Turn private sharing on; the pane offers Copy link and Open — fictional Tailscale demo; no remote connection tested"
 timeout_ms = 30000
 
 [[scenes.steps]]
@@ -34,12 +34,13 @@ name = "Share over Tailscale"
 
 [[scenes.steps]]
 action = "wait"
-text = "Private sharing is ready for an authenticated browser."
+role = "button"
+name = "Copy link"
 
 [[scenes.steps]]
 action = "wait"
-role = "button"
-name = "Copy URL"
+role = "link"
+name = "Open"
 
 [scenes.focus]
 role = "region"
@@ -77,12 +78,13 @@ name = "Tailscale"
 
 [[scenes.steps]]
 action = "wait"
-text = "Private sharing is ready for an authenticated browser."
+role = "button"
+name = "Copy link"
 
 [[scenes.steps]]
 action = "wait"
-role = "button"
-name = "Copy URL"
+role = "link"
+name = "Open"
 
 [scenes.viewport]
 width = 390
@@ -123,9 +125,10 @@ action = "click"
 role = "switch"
 name = "Share over Tailscale"
 
+# Core 0.9.40 folds the status message into Details; the switch state reads Off.
 [[scenes.steps]]
 action = "wait"
-text = "Private web sharing is off."
+text = "Off"
 
 [scenes.focus]
 role = "region"

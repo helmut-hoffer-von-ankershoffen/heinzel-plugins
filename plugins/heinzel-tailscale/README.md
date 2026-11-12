@@ -54,9 +54,9 @@ Development and release commands: [repository guide](../../README.md).
 <!-- screenshots:start -->
 ## Screenshots
 
-<img src="docs/assets/screenshots/sharing-ready.png" alt="Enable private sharing and see its local readiness message — fictional Tailscale demo; no remote connection tested" width="960">
+<img src="docs/assets/screenshots/sharing-ready.png" alt="Turn private sharing on; the pane offers Copy link and Open — fictional Tailscale demo; no remote connection tested" width="960">
 
-Enable private sharing and see its local readiness message — fictional Tailscale demo; no remote connection tested
+Turn private sharing on; the pane offers Copy link and Open — fictional Tailscale demo; no remote connection tested
 
 <img src="docs/assets/screenshots/phone-sharing-ready.png" alt="Inspect private sharing controls at phone width — fictional local Tailscale demo; no remote connection tested" width="960">
 

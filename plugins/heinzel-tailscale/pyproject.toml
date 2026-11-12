@@ -142,7 +142,7 @@ highlights = [
 [[tool.heinzel.catalog.screenshots]]
 path = "docs/assets/screenshots/sharing-ready.png"
 surface = "ui"
-caption = "Enable private sharing and see its local readiness message — fictional Tailscale demo; no remote connection tested"
+caption = "Turn private sharing on; the pane offers Copy link and Open — fictional Tailscale demo; no remote connection tested"
 
 [[tool.heinzel.catalog.screenshots]]
 path = "docs/assets/screenshots/phone-sharing-ready.png"

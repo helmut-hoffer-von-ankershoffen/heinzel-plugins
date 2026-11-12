@@ -1,32 +1,26 @@
 ## Audience
-
-People deciding whether they want a quick view of the machine running their Heinzel helper, plus people who may use the same measurements in automation. The plugin is included in the standard app.
+People who want a quick picture of the machine running their helper, and those who want the same measurements in scripts or agent workflows. The plugin is included in the standard app.
 
 ## Outcome
-
-Show how CPU, memory and load are available at a glance, how to inspect their meaning, and how to retrieve the same sample as readable output or JSON. The measurements describe the helper's host, which may differ from the device viewing the app.
+See the fictional workstation’s CPU, memory and load at a glance, open the footer for context, and inspect the same sample in readable and structured terminal output. Load is queued work; the footer bar is scaled against twice the logical core count.
 
 ## Scenes
-
-1. **Expanded monitor:** A focused view of the fictional workstation's CPU, memory, one-minute load and logical cores, including the explanation of the scaled load bar.
-2. **Today:** The CPU summary in context, with the resource status control in the footer.
-3. **Phone:** The expanded resource details at a narrow viewport.
-4. **CLI:** The readable resource table with the same fictional measurements.
-5. **App terminal:** The readable resource result in the native terminal.
-6. **App terminal JSON:** The structured result for someone considering automation.
+1. **Resources panel:** Open the footer control for CPU, memory, one-minute load and core count, with the load explanation in context.
+2. **Today:** Show the CPU summary alongside the footer control for a quick everyday check.
+3. **Phone:** Open the same resource details at a narrow viewport.
+4. **CLI:** Show the readable resource table.
+5. **App terminal:** Run `hz resource` for the readable result.
+6. **App terminal JSON:** Run `hz resource --json` to show the structured result useful for automation.
 
 ## Fictional fixtures
-
-The existing `docs/screenshot_fixture.py` supplies `demo-workstation`, CPU 36%, memory 62%, one-minute load 0.65, eight logical cores and a fixed sample time. The plan uses that existing bootstrap and a matching browser time. No additional fixture files are needed.
+The existing `docs/screenshot_fixture.py` supplies a fixed `demo-workstation` sample: CPU 36%, memory 62%, one-minute load 0.65 and 8 logical cores, sampled at 2026-10-31 10:00 UTC. It replaces the sampler during capture; these values are examples, not live measurements.
 
 ## Privacy pitfalls
-
-Real samples expose the helper host's hostname and resource usage. Capture only with the fictional bootstrap and temporary profile, and inspect every image and terminal result for real hostnames, account details or other unrelated private data before publication.
+Capture only with the isolated fictional profile and fixture. Check the images and terminal output for real hostnames, machine metrics, account details or unrelated terminal history before sharing. Captions must identify the data as fictional or demonstrative.
 
 ## Acceptance criteria
-
-- All six scenes show the intended view or completed result, with readable demo data and no unrelated private information.
-- The expanded monitor identifies raw one-minute load separately from the scaled footer bar; captions do not imply the expanded panel contains scaled-load bars.
-- Today, phone and terminal scenes communicate useful behavior without relying on settings or plugin cards.
-- The two native-terminal cases show the readable and JSON forms of the single resource operation.
-- The plan preserves the existing routes, actions and fixture. Its TOML and requested fields have been checked by inspection; capture and runtime validation were not performed.
+- All six existing scenes remain represented, with at least two useful app views and a readable CLI result.
+- The expanded panel, Today summary and phone view show the fictional sample consistently; the panel explains scaled load without presenting it as a CPU percentage.
+- Both native terminal examples finish and show useful results, including structured JSON for the second case.
+- Captions identify demo data, and captures contain no real machine or account information.
+- The plan uses the existing bootstrap and supported routes and actions. Its TOML structure was checked by inspection; no parser or capture was run because code execution was excluded.

@@ -7,17 +7,14 @@ Nothing needs you right now. Ask anything below.
 
 Page
 Chat
-v0.9.15
-System health, error
-Calendar unavailable
-Updates
+v0.9.40
 Updates, off
-Heinzelmännchen
 0
-Tailscale
+System health, error
+?
 Tailscale, OK
-Daemon not installed
 Daemon not installed, off
+Audio
 
 Tailscale
 
@@ -26,6 +23,5 @@ On
 
 [authentication link hidden]
 
-Copy URL
-Open
-Private sharing is ready for an authenticated browser.
+Details
+Copy link

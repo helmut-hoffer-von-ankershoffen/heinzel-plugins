@@ -16,21 +16,20 @@ Today
 Notifications
 1 unread
 Example is ready
-17:46
+18:28
 All notifications
 Example is ready
 Open
-Ask about it
 Example value
 
 42
 
 Ask about it
-v0.9.15
+v0.9.40
 Updates, off
 0
 System health, error
-Calendar unavailable
+?
 Daemon not installed, off
 Chat
 Example
@@ -39,3 +38,4 @@ Example
 The value is 42.
 
 Close example
+Audio

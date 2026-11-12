@@ -10,22 +10,21 @@ Mira
 · EM
 Today
 Today
-Doctor: 4 checks need attention
+Doctor: 5 checks need attention
 
 ai.access ai access, system.doctor installation, system.notify notification store…
 
 Open
-Ask about it
 Computer resources
 
 CPU 36%
 
 Ask about it
-v0.9.15
+v0.9.40
 Updates, off
 0
 System health, error
-Calendar unavailable
+?
 Daemon not installed, off
 Chat
 Terminal
@@ -41,3 +40,4 @@ $ hz resource --json; printf '\033]0;Demo complete\007'
   "problems": []
 }
 $
+Audio

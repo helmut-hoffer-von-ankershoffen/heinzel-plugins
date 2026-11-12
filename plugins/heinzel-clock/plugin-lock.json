@@ -15,7 +15,7 @@
     "ruff==0.17.2"
   ],
   "core": {
-    "version": "0.9.15",
+    "version": "0.9.40",
     "dependencies": [
       "croniter>=6.2.4",
       "fastapi>=0.161",
@@ -30,6 +30,7 @@
       "pydantic-ai-slim[openai]==2.61.0; extra == \"openai\"",
       "pydantic-settings<3,>=2.11.0",
       "pydantic<3,>=2.12.0",
+      "pyjwt[crypto]<3,>=2.15.1; extra == \"openai\"",
       "pyyaml<7,>=6.0.2",
       "rich>=14.2.0",
       "tomlkit>=0.13",
