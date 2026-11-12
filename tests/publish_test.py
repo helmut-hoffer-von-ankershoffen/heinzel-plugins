@@ -284,12 +284,19 @@ def test_the_release_body_is_set_when_the_draft_is_created(tmp_path, monkeypatch
 def test_empty_or_oversized_notes_fail_before_any_publication(tmp_path, monkeypatch, notes):
     wheel = tmp_path / "artifact.whl"
     wheel.write_bytes(b"checked artifact")
-    monkeypatch.setattr(publisher, "exact_tag", lambda *_: None)
-    monkeypatch.setattr(publisher, "find_release", lambda *_: None)
-    monkeypatch.setattr(publisher, "api", lambda *a, **k: pytest.fail("nothing may be published"))
+    calls = []
+
+    def api(path, data=None, **_):
+        calls.append(path)
+        if path == "graphql":  # the read-only release lookup: no release yet
+            return {"data": {"repository": {"release": None}}}
+        pytest.fail(f"nothing may be read or written beyond the release lookup: {path} {data}")
+
+    monkeypatch.setattr(publisher, "api", api)
     monkeypatch.setattr(publisher.subprocess, "run", lambda *a, **k: pytest.fail("nothing may be uploaded"))
     with pytest.raises(ValueError, match="notes"):
         publisher.publish(REPOSITORY, "plugin/v1.0.0", REVISION, [wheel], pypi=True, notes=notes)
+    assert calls == ["graphql"], "no tag ref is created before the notes are refused"
 
 
 def test_a_resumed_release_keeps_its_body_without_new_notes(tmp_path, monkeypatch):

@@ -192,11 +192,11 @@ def publish(
         raise ValueError("Select the exact built artifact files")
     if prerelease and (pypi or make_latest != "false" or not tag.startswith("app-v")):
         raise ValueError("App prereleases require nonlatest GitHub-only publication")
+    if (not notes.strip() or len(notes) > NOTES_LIMIT) and find_release(repository, tag) is None:
+        # Checked before the tag or any upload; an existing release keeps the body written when its draft was created.
+        raise ValueError("Release notes must be non-empty and within GitHub's body limit")
     exact_tag(repository, tag, revision)
     release = find_release(repository, tag)
-    if release is None and (not notes.strip() or len(notes) > NOTES_LIMIT):
-        # Checked before any upload; an existing release keeps the body written when its draft was created.
-        raise ValueError("Release notes must be non-empty and within GitHub's body limit")
     pending = existing_assets(release, artifacts)
     if release is not None and not release.get("draft", False) and pending:
         raise ValueError("A published release is incomplete; refusing to change immutable published artifacts")
