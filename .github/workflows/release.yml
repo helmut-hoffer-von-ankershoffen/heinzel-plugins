@@ -107,7 +107,9 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
           REVISION: ${{ needs.build.outputs.revision }}
-        run: uv run --frozen --no-build --group tooling python -m heinzel_plugin_tools.publishing --tag "$RELEASE_TAG" --revision "$REVISION" --directory dist --pypi --make-latest false
+        run: |
+          uv run --frozen --no-build --group tooling python scripts/release_notes.py plugin "${RELEASE_TAG%/v*}" --version "${RELEASE_TAG##*/v}" > "$RUNNER_TEMP/release-notes.md"
+          uv run --frozen --no-build --group tooling python -m heinzel_plugin_tools.publishing --tag "$RELEASE_TAG" --revision "$REVISION" --directory dist --pypi --make-latest false --notes-file "$RUNNER_TEMP/release-notes.md"
   github-publish:
     if: inputs.publish && inputs.registry == 'github'
     needs: build
@@ -129,4 +131,6 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
           REVISION: ${{ needs.build.outputs.revision }}
-        run: uv run --frozen --no-build --group tooling python -m heinzel_plugin_tools.publishing --tag "$RELEASE_TAG" --revision "$REVISION" --directory dist --make-latest false
+        run: |
+          uv run --frozen --no-build --group tooling python scripts/release_notes.py plugin "${RELEASE_TAG%/v*}" --version "${RELEASE_TAG##*/v}" > "$RUNNER_TEMP/release-notes.md"
+          uv run --frozen --no-build --group tooling python -m heinzel_plugin_tools.publishing --tag "$RELEASE_TAG" --revision "$REVISION" --directory dist --make-latest false --notes-file "$RUNNER_TEMP/release-notes.md"

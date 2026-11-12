@@ -22,6 +22,9 @@ Each directory in `plugins/` is an independent project. Read README.md for ownin
 - Keep changes inside the owning plugin; change shared tooling only for a generic capability.
 - Never run core's suite for a plugin change. Test core contract changes against a candidate core artifact.
 - Versions, tests and releases are per plugin. Publish exactly the accepted wheel; never rebuild an existing version.
+- Every plugin PR that bumps a version adds a non-empty top `## <new version>` CHANGELOG.md section (the release
+  notes; `scripts/plugin_versions.py check` refuses otherwise). Every combine PR body has one
+  `Combines #N type(scope): title` line per member (hz-queue add refuses otherwise).
 - Private plugins use private GitHub releases and authenticated HTTPS installation, never public PyPI. Standalone
   projects use the same toolkit and need no parent edits
   ([author guide](https://github.com/helmut-hoffer-von-ankershoffen/heinzel/blob/main/docs/PLUGIN_AUTHORING.md)).

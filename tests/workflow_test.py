@@ -72,3 +72,20 @@ def test_auto_release_runs_only_trusted_code_from_a_green_main_tip():
     assert "actions/checkout" in checkout["uses"]
     assert "ref" not in checkout["with"]
     assert job["permissions"] == {"contents": "read", "actions": "write"}
+
+
+def test_every_release_body_comes_from_the_changelog_notes():
+    for name in ("compose", "release"):
+        workflow = yaml.safe_load((ROOT / ".github/workflows" / f"{name}.yml").read_text())
+        steps = [
+            step["run"]
+            for job in workflow["jobs"].values()
+            for step in job.get("steps", [])
+            if "publishing --tag" in step.get("run", "") or "scripts/publish.py --tag" in step.get("run", "")
+        ]
+        assert steps, name
+        for run in steps:
+            publications = [line for line in run.splitlines() if "--tag" in line]
+            assert all('--notes-file "$RUNNER_TEMP/release-notes.md"' in line for line in publications), name
+            notes = run.index("scripts/release_notes.py")
+            assert notes < run.index("--tag") and '> "$RUNNER_TEMP/release-notes.md"' in run, name

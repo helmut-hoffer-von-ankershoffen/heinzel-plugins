@@ -29,6 +29,16 @@ def git(*arguments, cwd):
     ).stdout
 
 
+def changelog(*versions):
+    return "# Changelog\n\n" + "".join(f"## {version}\n\n- Change {version}.\n\n" for version in versions)
+
+
+def bump(plugin, version="0.1.1", extra="", notes=True):
+    (plugin / "pyproject.toml").write_text(PROJECT.format(version=version, extra=extra))
+    if notes:
+        (plugin / "CHANGELOG.md").write_text(changelog(version, "0.1.0"))
+
+
 def repository(tmp_path, monkeypatch):
     for key in [key for key in os.environ if key.startswith("GIT_")]:
         monkeypatch.delenv(key)
@@ -38,6 +48,7 @@ def repository(tmp_path, monkeypatch):
     (plugin / "pyproject.toml").write_text(PROJECT.format(version="0.1.0", extra=""))
     (plugin / "src/a.py").write_text("a = 1\n")
     (plugin / "docs/a.md").write_text("one\n")
+    (plugin / "CHANGELOG.md").write_text(changelog("0.1.0"))
     git("init", "-q", "-b", "main", cwd=tmp_path)
     git("add", ".", cwd=tmp_path)
     git("-c", "user.name=t", "-c", "user.email=t@example.invalid", "commit", "-qm", "base", cwd=tmp_path)
@@ -54,7 +65,7 @@ def commit(tmp_path):
 def test_a_docs_change_cannot_bump_a_version(tmp_path, monkeypatch):
     plugin = repository(tmp_path, monkeypatch)
     (plugin / "docs/a.md").write_text("two\n")
-    (plugin / "pyproject.toml").write_text(PROJECT.format(version="0.1.1", extra=""))
+    bump(plugin)
     commit(tmp_path)
     assert versions.unjustified_bumps("base") == ["heinzel-a"]
     assert versions.main(["check", "base"]) == 1
@@ -63,14 +74,14 @@ def test_a_docs_change_cannot_bump_a_version(tmp_path, monkeypatch):
 def test_a_source_change_may_bump_a_version(tmp_path, monkeypatch):
     plugin = repository(tmp_path, monkeypatch)
     (plugin / "src/a.py").write_text("a = 2\n")
-    (plugin / "pyproject.toml").write_text(PROJECT.format(version="0.1.1", extra=""))
+    bump(plugin)
     commit(tmp_path)
     assert versions.main(["check", "base"]) == 0
 
 
 def test_a_metadata_change_may_bump_a_version(tmp_path, monkeypatch):
     plugin = repository(tmp_path, monkeypatch)
-    (plugin / "pyproject.toml").write_text(PROJECT.format(version="0.1.1", extra='description = "new"\n'))
+    bump(plugin, extra='description = "new"\n')
     commit(tmp_path)
     assert versions.unjustified_bumps("base") == []
 
@@ -111,7 +122,7 @@ def test_a_shipped_metadata_change_without_a_bump_fails(tmp_path, monkeypatch):
 def test_a_source_change_with_a_bump_passes(tmp_path, monkeypatch):
     plugin = repository(tmp_path, monkeypatch)
     (plugin / "src/a.py").write_text("a = 2\n")
-    (plugin / "pyproject.toml").write_text(PROJECT.format(version="0.1.1", extra=""))
+    bump(plugin)
     commit(tmp_path)
     assert versions.unbumped_changes("base") == []
     assert versions.main(["check", "base"]) == 0
@@ -124,3 +135,58 @@ def test_docs_and_tests_never_need_a_bump(tmp_path, monkeypatch):
     (plugin / "tests/a_test.py").write_text("pass\n")
     commit(tmp_path)
     assert versions.unbumped_changes("base") == []
+
+
+@pytest.mark.parametrize(
+    "text",
+    [
+        None,  # no changelog line at all
+        "# Changelog\n\n## 0.1.0\n\n- Old.\n",  # the old version still on top
+        "# Changelog\n\n## 0.1.1\n\n## 0.1.0\n\n- Old.\n",  # an empty section
+        "# Changelog\n\n## Unreleased\n\n- New.\n\n## 0.1.1\n\n- New.\n",  # not the top section
+    ],
+)
+def test_a_bump_without_its_changelog_section_fails(tmp_path, monkeypatch, text):
+    plugin = repository(tmp_path, monkeypatch)
+    (plugin / "src/a.py").write_text("a = 2\n")
+    bump(plugin, notes=False)
+    if text is not None:
+        (plugin / "CHANGELOG.md").write_text(text)
+    commit(tmp_path)
+    assert versions.missing_changelogs("base") == ["heinzel-a"]
+    assert versions.main(["check", "base"]) == 1
+
+
+def test_a_bump_with_its_changelog_section_passes(tmp_path, monkeypatch):
+    plugin = repository(tmp_path, monkeypatch)
+    (plugin / "src/a.py").write_text("a = 2\n")
+    bump(plugin)
+    commit(tmp_path)
+    assert versions.missing_changelogs("base") == []
+
+
+def test_a_new_plugin_needs_its_first_changelog_section(tmp_path, monkeypatch):
+    repository(tmp_path, monkeypatch)
+    other = tmp_path / "plugins/heinzel-b"
+    (other / "src").mkdir(parents=True)
+    (other / "pyproject.toml").write_text(PROJECT.format(version="0.1.0", extra="").replace("heinzel-a", "heinzel-b"))
+    (other / "src/b.py").write_text("b = 1\n")
+    commit(tmp_path)
+    assert versions.missing_changelogs("base") == ["heinzel-b"]
+    (other / "CHANGELOG.md").write_text(changelog("0.1.0"))
+    commit(tmp_path)
+    assert versions.missing_changelogs("base") == []
+
+
+def test_unbumped_plugins_need_no_new_section(tmp_path, monkeypatch):
+    plugin = repository(tmp_path, monkeypatch)
+    (plugin / "docs/a.md").write_text("two\n")
+    commit(tmp_path)
+    assert versions.missing_changelogs("base") == []
+
+
+def test_changelog_sections_keep_their_text_and_order():
+    text = "# Changelog\n\n## Unreleased\n\n## 0.2.0\n\n- Two.\n  More.\n\n## 0.1.0\n\n- One.\n"
+    assert versions.changelog_sections(text) == [("Unreleased", ""), ("0.2.0", "- Two.\n  More."), ("0.1.0", "- One.")]
+    assert versions.changelog_section(text, "0.1.0") == "- One."
+    assert versions.changelog_section(text, "0.3.0") == ""

@@ -245,3 +245,61 @@ def test_app_prerelease_publishes_atomically_without_reclassifying_public_releas
     assert writes == (
         [("PATCH", {"draft": False, "make_latest": "false", "prerelease": True})] if state == "draft" else []
     )
+
+
+@pytest.mark.parametrize("notes", [None, "## heinzel-a 1.0.0\n\n- New.\n"])
+def test_the_release_body_is_set_when_the_draft_is_created(tmp_path, monkeypatch, notes):
+    wheel = tmp_path / "artifact.whl"
+    wheel.write_bytes(b"checked artifact")
+    asset = {"name": wheel.name, "digest": "sha256:" + hashlib.sha256(wheel.read_bytes()).hexdigest()}
+    release = None
+    bodies = []
+
+    def api(path, data=None, method="POST", **_):
+        nonlocal release
+        if path == "graphql":
+            return {"data": {"repository": {"release": {"databaseId": 7} if release else None}}}
+        if "/git/ref/" in path:
+            return {"object": {"type": "commit", "sha": REVISION}}
+        if data is not None and method == "PATCH":
+            assert "body" not in data, "notes are written once, at draft creation"
+            release["draft"] = data["draft"]
+        elif data is not None:
+            bodies.append(data["body"])
+            release = {"id": 7, "tag_name": "plugin/v1.0.0", "assets": [], "draft": True}
+        return release
+
+    def execute(command, **_):
+        release["assets"].append(asset)
+        return subprocess.CompletedProcess(command, 0)
+
+    monkeypatch.setattr(publisher, "api", api)
+    monkeypatch.setattr(publisher.subprocess, "run", execute)
+    keywords = {} if notes is None else {"notes": notes}
+    publisher.publish(REPOSITORY, "plugin/v1.0.0", REVISION, [wheel], **keywords)
+    assert bodies == [notes or publisher.DEFAULT_NOTES]
+
+
+@pytest.mark.parametrize("notes", ["", "  \n", "x" * (publisher.NOTES_LIMIT + 1)])
+def test_empty_or_oversized_notes_fail_before_any_publication(tmp_path, monkeypatch, notes):
+    wheel = tmp_path / "artifact.whl"
+    wheel.write_bytes(b"checked artifact")
+    monkeypatch.setattr(publisher, "api", lambda *a, **k: pytest.fail("nothing may be published"))
+    with pytest.raises(ValueError, match="notes"):
+        publisher.publish(REPOSITORY, "plugin/v1.0.0", REVISION, [wheel], notes=notes)
+
+
+def test_the_cli_reads_the_notes_file(tmp_path, monkeypatch):
+    (tmp_path / "dist").mkdir()
+    (tmp_path / "dist/artifact.whl").write_bytes(b"checked artifact")
+    (tmp_path / "notes.md").write_text("- New.\n")
+    seen = {}
+    monkeypatch.setenv("GH_REPO", REPOSITORY)
+    monkeypatch.setattr(publisher, "publish", lambda *a, **k: seen.update(k))
+    arguments = ["publishing", "--tag", "plugin/v1.0.0", "--revision", REVISION, "--directory", str(tmp_path / "dist")]
+    monkeypatch.setattr("sys.argv", [*arguments, "--notes-file", str(tmp_path / "notes.md")])
+    publisher.main()
+    assert seen["notes"] == "- New.\n"
+    monkeypatch.setattr("sys.argv", arguments)
+    publisher.main()
+    assert seen["notes"] == publisher.DEFAULT_NOTES
