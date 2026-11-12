@@ -13,8 +13,9 @@ hz setup weather    # your places and the units (and the provider; Open-Meteo ne
 ```
 
 Open-Meteo needs no account and no key. Its data is licensed [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/)
-and free for non-commercial use, so it is credited wherever the weather shows: in the status item's detail, on the Today
-list and graphic, in CLI output and structured results, and in notices. It has no severe weather alerts.
+and free for non-commercial use, so it is credited once on the Weather page (an info button with the link), here in this
+README and in `hz weather info`; structured results keep the source with the data. The footer, Today and CLI text carry
+no credit. It has no severe weather alerts.
 Location queries are redacted from request logs; an Open-Meteo response is stopped after 2 MB instead of downloading
 an unbounded body.
 

@@ -109,7 +109,7 @@ def _now_line(now: Now) -> Text:
     return Text(
         f"{now.icon}  {now.temperature:.0f}{unit} {now.description} in {now.location} "
         f"(feels like {now.feels_like:.0f}{unit}; today {now.low:.0f} to {now.high:.0f}{unit}, "
-        f"{round(now.rain_chance * 100)}% rain)\n{now.attribution}"
+        f"{round(now.rain_chance * 100)}% rain)"
     )
 
 
@@ -156,7 +156,7 @@ def _render_report(report: Report) -> Group:
 
 
 def _render_forecast(forecast: Forecast) -> Group:
-    return Group(Text(f"{forecast.location}"), _days(forecast.days, forecast.units.degree), Text(forecast.attribution))
+    return Group(Text(f"{forecast.location}"), _days(forecast.days, forecast.units.degree))
 
 
 def _weather_status(value: UiWeather) -> StatusItem:

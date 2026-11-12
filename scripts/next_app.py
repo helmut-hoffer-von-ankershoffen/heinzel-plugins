@@ -10,12 +10,11 @@ from http import HTTPStatus
 from pathlib import Path
 from urllib.error import HTTPError
 from urllib.parse import urlsplit
-from urllib.request import urlopen
 
 from packaging.utils import parse_wheel_filename
 from packaging.version import Version
 
-from heinzel_plugin_tools.publishing import api, find_release
+from heinzel_plugin_tools.publishing import api, fetch_bytes, find_release
 
 CORE_REPOSITORY = "helmut-hoffer-von-ankershoffen/heinzel"
 EDGE_POINTER = f"https://github.com/{CORE_REPOSITORY}/releases/download/edge-channel/edge.json"
@@ -34,10 +33,7 @@ def download(url, limit=MAX_METADATA):
         or parsed.fragment
     ):
         raise ValueError("Release metadata must come from the official HTTPS endpoints")
-    with urlopen(url, timeout=30) as response:  # noqa: S310 - official HTTPS endpoints checked above
-        if not response.url.startswith("https://"):
-            raise ValueError("Release metadata redirected away from HTTPS")
-        content = response.read(limit + 1)
+    _, content = fetch_bytes(url, hosts={"pypi.org", "github.com"}, timeout=30, limit=limit)
     if len(content) > limit:
         raise ValueError("Public SDK metadata exceeds the release-selection limit")
     return content
