@@ -190,3 +190,12 @@ def test_changelog_sections_keep_their_text_and_order():
     assert versions.changelog_sections(text) == [("Unreleased", ""), ("0.2.0", "- Two.\n  More."), ("0.1.0", "- One.")]
     assert versions.changelog_section(text, "0.1.0") == "- One."
     assert versions.changelog_section(text, "0.3.0") == ""
+
+
+def test_an_empty_unreleased_placeholder_above_the_new_section_passes(tmp_path, monkeypatch):
+    plugin = repository(tmp_path, monkeypatch)
+    (plugin / "src/a.py").write_text("a = 2\n")
+    bump(plugin, notes=False)
+    (plugin / "CHANGELOG.md").write_text("# Changelog\n\n## Unreleased\n\n## 0.1.1\n\n- New.\n\n## 0.1.0\n\n- Old.\n")
+    commit(tmp_path)
+    assert versions.missing_changelogs("base") == []

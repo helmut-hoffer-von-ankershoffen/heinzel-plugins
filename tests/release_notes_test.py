@@ -97,7 +97,7 @@ def test_a_changed_plugin_without_its_section_stops_the_app_notes(root, version)
         notes.app_notes(root, "1.2.0", current, profile("1.1.0"), "app-v1.1.0")
 
 
-def test_oversized_notes_keep_every_plugin_line(root, monkeypatch):
+def test_oversized_notes_keep_every_plugin_line(root, monkeypatch, capsys):
     (root / "plugins/heinzel-weather/CHANGELOG.md").write_text("## 0.5.0\n\n" + "- Rain.\n" * 100)
     current = profile("1.2.0", **{"heinzel-clock": "0.3.0", "heinzel-weather": "0.5.0"})
     compact = notes.app_notes(root, "1.2.0", current, None, compact=True)
@@ -105,6 +105,7 @@ def test_oversized_notes_keep_every_plugin_line(root, monkeypatch):
     monkeypatch.setattr(notes, "BODY_LIMIT", len(compact))
     body = notes.app_notes(root, "1.2.0", current, None)
     assert body == compact
+    assert "without its changelog text" in capsys.readouterr().err
     assert "### heinzel-clock new -> 0.3.0" in body
     assert "### heinzel-weather new -> 0.5.0" in body
     assert "- Three." not in body
@@ -156,3 +157,16 @@ def test_notes_that_cannot_fit_stop(root, monkeypatch):
     monkeypatch.setattr(notes, "BODY_LIMIT", 10)
     with pytest.raises(notes.NotesError, match="limit"):
         notes.app_notes(root, "1.2.0", profile("1.2.0", **{"heinzel-clock": "0.3.0"}), None)
+
+
+def test_a_github_failure_stops_the_app_notes_cleanly(root, tmp_path, monkeypatch, capsys):
+    current = tmp_path / "standard.json"
+    current.write_text(json.dumps(profile("1.2.0")))
+    monkeypatch.setenv("GH_REPO", "example/plugins")
+
+    def api(path, **_):
+        raise ValueError(f"GitHub request failed for {path}: HTTP 502")
+
+    monkeypatch.setattr(notes, "api", api)
+    assert notes.main(["app", "1.2.0", "--profile", str(current)], root) == 1
+    assert "Release notes stopped: GitHub request failed" in capsys.readouterr().err

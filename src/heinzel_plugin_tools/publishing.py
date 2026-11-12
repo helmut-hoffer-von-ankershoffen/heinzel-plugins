@@ -182,8 +182,6 @@ def publish(
     prerelease: bool = False,
     notes: str = DEFAULT_NOTES,
 ) -> None:
-    if not notes.strip() or len(notes) > NOTES_LIMIT:
-        raise ValueError("Release notes must be non-empty and within GitHub's body limit")
     if make_latest not in {None, "true", "false"}:
         raise ValueError("Choose an explicit true or false latest-release policy")
     if not re.fullmatch(r"[A-Za-z0-9_.-]+/[A-Za-z0-9_.-]+", repository):
@@ -196,6 +194,9 @@ def publish(
         raise ValueError("App prereleases require nonlatest GitHub-only publication")
     exact_tag(repository, tag, revision)
     release = find_release(repository, tag)
+    if release is None and (not notes.strip() or len(notes) > NOTES_LIMIT):
+        # Checked before any upload; an existing release keeps the body written when its draft was created.
+        raise ValueError("Release notes must be non-empty and within GitHub's body limit")
     pending = existing_assets(release, artifacts)
     if release is not None and not release.get("draft", False) and pending:
         raise ValueError("A published release is incomplete; refusing to change immutable published artifacts")

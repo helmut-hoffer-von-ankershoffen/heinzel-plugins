@@ -15,6 +15,7 @@ import hashlib
 import importlib.util
 import json
 import os
+import subprocess
 import sys
 import tomllib
 from pathlib import Path
@@ -132,6 +133,11 @@ def app_notes(
     if len(body) > BODY_LIMIT:
         if compact:
             raise NotesError("The app release notes exceed GitHub's limit even without changelog text")
+        print(
+            f"The app release notes have {len(body)} characters, over {BODY_LIMIT}; "
+            "listing every plugin without its changelog text.",
+            file=sys.stderr,
+        )
         return app_notes(root, version, profile, previous, previous_tag, compact=True)
     return body
 
@@ -198,7 +204,7 @@ def main(arguments: list[str] | None = None, root: Path = ROOT) -> int:
         else:
             previous_tag, previous = previous_final_app(os.environ["GH_REPO"], args.version)
         sys.stdout.write(app_notes(root, args.version, profile, previous, previous_tag))
-    except (NotesError, InvalidVersion, OSError, KeyError, json.JSONDecodeError) as error:
+    except (ValueError, OSError, KeyError, subprocess.SubprocessError) as error:  # GitHub, git, files, JSON
         print(f"Release notes stopped: {error}", file=sys.stderr)
         return 1
     return 0

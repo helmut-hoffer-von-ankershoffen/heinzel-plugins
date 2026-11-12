@@ -143,6 +143,8 @@ def missing_changelogs(base: str, head: str = "HEAD") -> list[str]:
         if not after or version == _version(_pyproject(base, plugin)):
             continue
         sections = changelog_sections(_changelog(head, plugin))
+        while sections and not sections[0][1] and not sections[0][0][:1].isdigit():
+            sections = sections[1:]  # an empty placeholder such as `## Unreleased` holds nothing to drop
         if not sections or sections[0][0] != version or not sections[0][1]:
             missing.append(plugin)
     return missing

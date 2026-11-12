@@ -24,7 +24,7 @@ Each directory in `plugins/` is an independent project. Read README.md for ownin
 - Versions, tests and releases are per plugin. Publish exactly the accepted wheel; never rebuild an existing version.
 - Every plugin PR that bumps a version adds a non-empty top `## <new version>` CHANGELOG.md section (the release
   notes; `scripts/plugin_versions.py check` refuses otherwise). Every combine PR body has one
-  `Combines #N type(scope): title` line per member (hz-queue add refuses otherwise).
+  `Combines #N type(scope): title` line per member.
 - Private plugins use private GitHub releases and authenticated HTTPS installation, never public PyPI. Standalone
   projects use the same toolkit and need no parent edits
   ([author guide](https://github.com/helmut-hoffer-von-ankershoffen/heinzel/blob/main/docs/PLUGIN_AUTHORING.md)).

@@ -284,9 +284,31 @@ def test_the_release_body_is_set_when_the_draft_is_created(tmp_path, monkeypatch
 def test_empty_or_oversized_notes_fail_before_any_publication(tmp_path, monkeypatch, notes):
     wheel = tmp_path / "artifact.whl"
     wheel.write_bytes(b"checked artifact")
+    monkeypatch.setattr(publisher, "exact_tag", lambda *_: None)
+    monkeypatch.setattr(publisher, "find_release", lambda *_: None)
     monkeypatch.setattr(publisher, "api", lambda *a, **k: pytest.fail("nothing may be published"))
+    monkeypatch.setattr(publisher.subprocess, "run", lambda *a, **k: pytest.fail("nothing may be uploaded"))
     with pytest.raises(ValueError, match="notes"):
-        publisher.publish(REPOSITORY, "plugin/v1.0.0", REVISION, [wheel], notes=notes)
+        publisher.publish(REPOSITORY, "plugin/v1.0.0", REVISION, [wheel], pypi=True, notes=notes)
+
+
+def test_a_resumed_release_keeps_its_body_without_new_notes(tmp_path, monkeypatch):
+    wheel = tmp_path / "artifact.whl"
+    wheel.write_bytes(b"checked artifact")
+    asset = {"name": wheel.name, "digest": "sha256:" + hashlib.sha256(wheel.read_bytes()).hexdigest()}
+    release = {"id": 7, "tag_name": "plugin/v1.0.0", "assets": [asset], "draft": True}
+    patches = []
+    monkeypatch.setattr(publisher, "exact_tag", lambda *_: None)
+    monkeypatch.setattr(publisher, "find_release", lambda *_: release)
+
+    def api(path, data=None, method="POST", **_):
+        if method == "PATCH":
+            patches.append(data)
+        return release
+
+    monkeypatch.setattr(publisher, "api", api)
+    publisher.publish(REPOSITORY, "plugin/v1.0.0", REVISION, [wheel], notes="")
+    assert patches == [{"draft": False}]
 
 
 def test_the_cli_reads_the_notes_file(tmp_path, monkeypatch):

@@ -107,8 +107,11 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
           REVISION: ${{ needs.build.outputs.revision }}
+          RESUME_TAG: ${{ inputs.resume_tag }}
         run: |
-          uv run --frozen --no-build --group tooling python scripts/release_notes.py plugin "${RELEASE_TAG%/v*}" --version "${RELEASE_TAG##*/v}" > "$RUNNER_TEMP/release-notes.md"
+          if ! uv run --frozen --no-build --group tooling python scripts/release_notes.py plugin "${RELEASE_TAG%/v*}" --version "${RELEASE_TAG##*/v}" > "$RUNNER_TEMP/release-notes.md"; then
+            test -n "$RESUME_TAG" # a resumed release keeps its notes; publishing refuses to create one without them
+          fi
           uv run --frozen --no-build --group tooling python -m heinzel_plugin_tools.publishing --tag "$RELEASE_TAG" --revision "$REVISION" --directory dist --pypi --make-latest false --notes-file "$RUNNER_TEMP/release-notes.md"
   github-publish:
     if: inputs.publish && inputs.registry == 'github'
@@ -131,6 +134,9 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
           REVISION: ${{ needs.build.outputs.revision }}
+          RESUME_TAG: ${{ inputs.resume_tag }}
         run: |
-          uv run --frozen --no-build --group tooling python scripts/release_notes.py plugin "${RELEASE_TAG%/v*}" --version "${RELEASE_TAG##*/v}" > "$RUNNER_TEMP/release-notes.md"
+          if ! uv run --frozen --no-build --group tooling python scripts/release_notes.py plugin "${RELEASE_TAG%/v*}" --version "${RELEASE_TAG##*/v}" > "$RUNNER_TEMP/release-notes.md"; then
+            test -n "$RESUME_TAG" # a resumed release keeps its notes; publishing refuses to create one without them
+          fi
           uv run --frozen --no-build --group tooling python -m heinzel_plugin_tools.publishing --tag "$RELEASE_TAG" --revision "$REVISION" --directory dist --make-latest false --notes-file "$RUNNER_TEMP/release-notes.md"
