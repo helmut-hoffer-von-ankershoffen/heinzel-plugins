@@ -366,6 +366,147 @@ def test_repository_visibility_comes_from_the_hosting_service_when_not_declared(
     assert cli.repository_private() is True
 
 
+@pytest.mark.parametrize(
+    ("problem", "message"),
+    [
+        ("stale", "match the pushed revisions"),
+        ("consumer", "every owning plugin and contract consumer"),
+        ("foreign", "literal test file paths"),
+        ("omitted", "include every tracked test"),
+        ("forged", "include every tracked test"),
+        ("forged_consumer", "include every tracked test"),
+        ("untracked", "include every tracked test"),
+        ("mixed", "plugin-only changes"),
+        ("dirty", "clean checkout"),
+    ],
+)
+def test_focused_plugin_manifest_refuses_unsafe_scope(collection, monkeypatch, problem, message):
+    manifest, selected, changed = plugin_focus_fixture(collection, monkeypatch, problem)
+    with pytest.raises(ValueError, match=message):
+        cli.focused_hook_targets(manifest, selected, changed)
+
+
+@pytest.mark.parametrize("contents", ["{", "null", '{"base": "bad", "head": "bad"}'])
+def test_focused_plugin_hook_fails_closed_on_a_malformed_plan(collection, monkeypatch, capsys, contents):
+    manifest, _, changed = plugin_focus_fixture(collection, monkeypatch)
+    manifest.write_text(contents, encoding="utf-8")
+    monkeypatch.setenv("HZ_FOCUSED_PLUGIN_PUSH_MANIFEST", str(manifest))
+    monkeypatch.setattr(cli, "hook_changes", lambda: changed)
+    monkeypatch.setattr(cli, "check", lambda *_args, **_options: pytest.fail("must refuse before any check"))
+    monkeypatch.setattr(sys, "argv", ["hz-plugin", "check-changed", "--git-hook"])
+
+    assert cli.entrypoint() == 1
+    assert "Plugin command failed:" in capsys.readouterr().err
+
+
+@pytest.mark.parametrize("revision", [None, "c" * 40])
+def test_focused_plugin_manifest_requires_the_exact_checked_out_hook_revision(collection, monkeypatch, revision):
+    manifest, selected, changed = plugin_focus_fixture(collection, monkeypatch)
+    if revision is None:
+        monkeypatch.delenv("PRE_COMMIT_TO_REF")
+    else:
+        monkeypatch.setenv("PRE_COMMIT_TO_REF", revision)
+
+    with pytest.raises(ValueError, match="exact pre-push revisions|clean checkout"):
+        cli.focused_hook_targets(manifest, selected, changed)
+
+
+def test_focused_plugin_hook_keeps_full_test_directories(collection, monkeypatch):
+    manifest, _, changed = plugin_focus_fixture(collection, monkeypatch)
+    seen = []
+    monkeypatch.setenv("HZ_FOCUSED_PLUGIN_PUSH_MANIFEST", str(manifest))
+    monkeypatch.setattr(cli, "hook_changes", lambda: changed)
+    monkeypatch.setattr(cli, "check", lambda project, _core, **options: seen.append((project.name, options)))
+    invoke(monkeypatch, "check-changed", "--git-hook")
+    assert seen == [
+        ("heinzel-harbor", {"fast": True, "test_targets": ("tests",)}),
+        ("heinzel-lighthouse", {"fast": True, "test_targets": ("tests",)}),
+    ]
+
+
+def test_focused_plugin_plan_is_optional_and_default_checks_every_consumer(collection, monkeypatch):
+    _, _, changed = plugin_focus_fixture(collection, monkeypatch)
+    seen = []
+    monkeypatch.delenv("HZ_FOCUSED_PLUGIN_PUSH_MANIFEST", raising=False)
+    monkeypatch.setattr(cli, "hook_changes", lambda: changed)
+    monkeypatch.setattr(cli, "check", lambda project, _core, **options: seen.append((project.name, options)))
+
+    invoke(monkeypatch, "check-changed", "--git-hook")
+
+    assert seen == [("heinzel-harbor", {"fast": True}), ("heinzel-lighthouse", {"fast": True})]
+
+
+def test_focused_plugin_check_keeps_owning_boundary_and_lint_checks(project_with_env):
+    project, calls = project_with_env
+
+    cli.check(project, None, fast=True, test_targets=("tests/integration/contract_test.py",))
+
+    assert [Path(command[0]).name for command in calls] == ["python", "ruff", "ruff", "pytest"]
+    assert calls[0][2:] == ["boundary", project.name]
+    assert calls[1][1:5] == ["check", "--no-fix", "src", "tests"]
+    assert calls[2][1:5] == ["format", "--check", "src", "tests"]
+    assert calls[3][1:] == [
+        "-c",
+        "pyproject.toml",
+        "tests/integration/contract_test.py",
+        "-m",
+        "not e2e and not perf",
+        "-q",
+    ]
+
+
+def plugin_focus_fixture(collection, monkeypatch, problem=None):
+    base, head = "a" * 40, "b" * 40
+    monkeypatch.setenv("PRE_COMMIT_FROM_REF", base)
+    monkeypatch.setenv("PRE_COMMIT_TO_REF", head)
+    projects = cli.projects()
+    projects[0].metadata.setdefault("tool", {}).setdefault("heinzel", {})["plugin"] = {"provides": ["mail:read"]}
+    projects[1].metadata.setdefault("tool", {}).setdefault("heinzel", {})["plugin"] = {"requires": ["mail:read"]}
+    monkeypatch.setattr(cli, "projects", lambda: projects)
+    changed = ["plugins/heinzel-harbor/tests/unit/changed_test.py"]
+    google = "tests/unit/changed_test.py"
+    zoom = "tests/integration/contract_test.py"
+
+    def git(command, **_kwargs):
+        match command[1]:
+            case "rev-parse":
+                return head + "\n"
+            case "status":
+                return " M pyproject.toml\n" if problem == "dirty" else ""
+            case "diff":
+                return "\0".join([*changed, "Makefile"] if problem == "mixed" else changed) + "\0"
+            case "ls-tree":
+                if "heinzel-harbor" in command[-1]:
+                    entries = [changed[0], "plugins/heinzel-harbor/tests/unit/other_test.py"]
+                else:
+                    entries = [
+                        f"plugins/heinzel-lighthouse/{zoom}",
+                        "plugins/heinzel-lighthouse/tests/integration/unchanged_contract_test.py",
+                    ]
+                return "".join(f"100644 blob oid\t{entry}\0" for entry in entries)
+        raise AssertionError(command)
+
+    monkeypatch.setattr(cli.subprocess, "check_output", git)
+    paths = {
+        "heinzel-harbor": [google, "tests/unit/other_test.py"],
+        "heinzel-lighthouse": [zoom, "tests/integration/unchanged_contract_test.py"],
+    }
+    if problem == "forged_consumer":
+        paths["heinzel-lighthouse"] = [zoom]
+    if problem == "consumer":
+        paths.pop("heinzel-lighthouse")
+    if problem in {"omitted", "foreign", "untracked", "forged"}:
+        paths["heinzel-harbor"] = {
+            "omitted": ["tests/unit/other_test.py"],
+            "forged": [google],
+            "foreign": ["../tests/other_test.py"],
+            "untracked": [google, "tests/unit/untracked_test.py"],
+        }[problem]
+    manifest = collection / "focused.json"
+    manifest.write_text(json.dumps({"base": base, "head": base if problem == "stale" else head, "tests": paths}))
+    return manifest, projects, changed
+
+
 def test_a_public_audit_runs_the_pinned_scanners_against_the_installed_interpreter(project_with_env, monkeypatch):
     project, calls = project_with_env
     monkeypatch.setenv("PLUGIN_PRIVATE", "false")

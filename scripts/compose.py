@@ -8,7 +8,6 @@ import argparse
 import hashlib
 import os
 import shutil
-import urllib.request
 from pathlib import Path
 from urllib.parse import urlsplit
 
@@ -17,7 +16,7 @@ from packaging.version import Version
 
 from heinzel_plugin_tools.cli import ROOT, acceptance, profile, projects, run, validate_lock, write_accepted_profile
 from heinzel_plugin_tools.installation import check_profile_format, isolated_environment, verify_managed_profile
-from heinzel_plugin_tools.publishing import restore, tag_revision
+from heinzel_plugin_tools.publishing import fetch_bytes, restore, tag_revision
 
 
 def compose(core: Path, destination: Path, base_url: str | None, *, core_sha256: str | None = None) -> None:
@@ -134,10 +133,7 @@ def main() -> None:
     destination = ROOT / "dist/standard"
     destination.mkdir(parents=True, exist_ok=True)
     core = destination / Path(url.path).name
-    with urllib.request.urlopen(args.core_url, timeout=60) as response:  # noqa: S310 - exact HTTPS official release checked
-        if urlsplit(response.url).scheme != "https":
-            parser.error("The core download redirected away from HTTPS")
-        content = response.read(128 * 1024 * 1024 + 1)
+    _, content = fetch_bytes(args.core_url, hosts={"github.com"}, timeout=60, limit=128 * 1024 * 1024)
     if len(content) > 128 * 1024 * 1024:
         parser.error("Core wheel exceeds its size limit")
     core.write_bytes(content)

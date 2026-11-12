@@ -416,7 +416,15 @@ def check_screenshots(project: Project) -> dict:
     return check_capture(project.directory)
 
 
-def check(project: Project, core: str | None, *, tests_only: bool = False, fast: bool = False) -> None:
+def check(
+    project: Project,
+    core: str | None,
+    *,
+    tests_only: bool = False,
+    fast: bool = False,
+    test_targets: tuple[str, ...] = ("tests",),
+    frontend: bool = True,
+) -> None:
     """Run only the owning package's checks against an installed core/SDK artifact."""
     verified = vendor.project(project.directory)
     if (project.directory / "docs/screenshots.toml").exists() or (
@@ -428,25 +436,11 @@ def check(project: Project, core: str | None, *, tests_only: bool = False, fast:
         python_command(project, core, ["python", str(TOOLING_SCRIPT), "boundary", project.name]),
         cwd=project.directory,
     )
-    steps = (
-        []
-        if tests_only
-        else [
-            ["ruff", "check", "--no-fix", "src", "tests"],
-            ["ruff", "format", "--check", "src", "tests"],
-            ["mypy", "--strict", "src"],
-            ["pyright", "--pythonpath", str(project.directory / ".venv/bin/python"), "src"],
-        ]
-    )
-    if fast:
-        steps = steps[:2]
-    if not tests_only:
-        for command in steps[:2]:
-            command += ruff_configuration(project)
+    steps = _static_steps(project, tests_only=tests_only, fast=fast)
     # A small plugin may contain only offline integration tests; filtering to unit would exit 5.
     # Fast skips strict types and coverage, while still checking every owning offline behavior.
     marker = "not e2e and not perf"
-    test = ["pytest", "-c", "pyproject.toml", "tests", "-m", marker, "-q"]
+    test = ["pytest", "-c", "pyproject.toml", *test_targets, "-m", marker, "-q"]
     steps.append(test if tests_only or fast else ["coverage", "run", "-m", *test])
     if not tests_only and not fast:
         steps.append(["coverage", "report"])
@@ -461,17 +455,37 @@ def check(project: Project, core: str | None, *, tests_only: bool = False, fast:
         # Match exact verified relative exclusions against a relative scan rooted at the owning cwd.
         with vendor.quality_command(project.directory, ["typos", "."], verified) as configured:
             run(configured, cwd=project.directory)
-    frontend = project.directory / "web/package.json"
-    if frontend.is_file():
-        scripts = json.loads(frontend.read_text()).get("scripts", {})
-        for step in (
-            ["test"] if fast else ["typecheck", "test"] if tests_only else ["lint", "typecheck", "test", "build"]
-        ):
-            if step in scripts:
-                run(
-                    ["uv", "run", "--no-project", "--script", str(project.directory / "web/build.py"), "run", step],
-                    cwd=project.directory,
-                )
+    if frontend:
+        _frontend_steps(project, tests_only=tests_only, fast=fast)
+
+
+def _static_steps(project: Project, *, tests_only: bool, fast: bool) -> list[list[str]]:
+    if tests_only:
+        return []
+    steps = [
+        ["ruff", "check", "--no-fix", "src", "tests"],
+        ["ruff", "format", "--check", "src", "tests"],
+        ["mypy", "--strict", "src"],
+        ["pyright", "--pythonpath", str(project.directory / ".venv/bin/python"), "src"],
+    ]
+    if fast:
+        steps = steps[:2]
+    for command in steps[:2]:
+        command += ruff_configuration(project)
+    return steps
+
+
+def _frontend_steps(project: Project, *, tests_only: bool, fast: bool) -> None:
+    package = project.directory / "web/package.json"
+    if not package.is_file():
+        return
+    scripts = json.loads(package.read_text()).get("scripts", {})
+    for step in ["test"] if fast else ["typecheck", "test"] if tests_only else ["lint", "typecheck", "test", "build"]:
+        if step in scripts:
+            run(
+                ["uv", "run", "--no-project", "--script", str(project.directory / "web/build.py"), "run", step],
+                cwd=project.directory,
+            )
 
 
 def preview(project: Project, core: str | None) -> None:
@@ -965,6 +979,61 @@ def hook_changes() -> list[str]:
     return [path for path in changed.split("\0") if path]
 
 
+def focused_hook_targets(manifest: Path, selected: list[Project], changed: list[str]) -> dict[str, tuple[str, ...]]:
+    """Reject incomplete caller plans and retain the ordinary full owner test target."""
+
+    def git(*arguments: str) -> str:
+        return subprocess.check_output(["git", *arguments], cwd=ROOT, text=True, timeout=30)
+
+    before, after = os.environ.get("PRE_COMMIT_FROM_REF"), os.environ.get("PRE_COMMIT_TO_REF")
+    if not before or not after or any(not re.fullmatch(r"[0-9a-f]{40}", sha) for sha in (before, after)):
+        raise ValueError("A focused plugin push requires exact pre-push revisions")
+    if after != git("rev-parse", "HEAD").strip() or git("status", "--porcelain", "--untracked-files=all"):
+        raise ValueError("A focused plugin push requires a clean checkout of the pushed revision")
+    if set(git("diff", "--name-only", "--no-renames", "-z", before, after, "--").split("\0")) - {""} != set(changed):
+        raise ValueError("A focused plugin push supports plugin-only changes")
+
+    plan = json.loads(manifest.read_text(encoding="utf-8"))
+    if not isinstance(plan, dict) or plan.keys() != {"base", "head", "tests"}:
+        raise ValueError("A focused plugin manifest requires base, head and tests")
+    if plan["base"] != before or plan["head"] != after:
+        raise ValueError("The focused plugin manifest must match the pushed revisions")
+    tests = plan["tests"]
+    if not selected or not isinstance(tests, dict) or tests.keys() != {project.name for project in selected}:
+        raise ValueError("Select tests for every owning plugin and contract consumer")
+
+    result = {}
+    for project in selected:
+        paths = tests[project.name]
+        if (
+            not isinstance(paths, list)
+            or not paths
+            or any(
+                not isinstance(path, str)
+                or not re.fullmatch(r"tests/(?:[\w-]+/)*(?:test_[\w-]+|[\w-]+_test)\.py", path, re.ASCII)
+                for path in paths
+            )
+        ):
+            raise ValueError(f"{project.name}: use nonempty literal test file paths")
+        prefix = project.directory.relative_to(ROOT).as_posix() + "/"
+        tracked = {
+            entry.split("\t", 1)[1].removeprefix(prefix)
+            for entry in git("ls-tree", "-rz", after, "--", prefix + "tests/").split("\0")
+            if entry.startswith(("100644 ", "100755 "))
+        }
+        required = {
+            path
+            for path in tracked
+            if re.fullmatch(r"tests/(?:[\w-]+/)*(?:test_[\w-]+|[\w-]+_test)\.py", path, re.ASCII)
+        }
+        if set(paths) != required:
+            raise ValueError(f"{project.name}: include every tracked test file; selective plans are not trusted")
+        # File enumeration cannot prove pytest collection completeness, so retain the
+        # default test directory, including nonstandard configured test modules.
+        result[project.name] = ("tests",)
+    return result
+
+
 def screenshot_main(arguments: list[str], *, check: bool = False) -> int:
     """Keep capture help focused and all agent results machine-readable."""
     from heinzel_plugin_tools.capture import PLAN, safe_failure_message, write_default_plan
@@ -1151,9 +1220,14 @@ def main() -> int:
     inventory = projects()
     if args.command == "check-changed":
         changed = hook_changes() if args.git_hook else args.changed
-        selected = {entry["name"] for entry in plan(changed, inventory, ROOT)["include"]}
-        for project in inventory:
-            if project.name in selected:
+        names = {entry["name"] for entry in plan(changed, inventory, ROOT)["include"]}
+        selected = [project for project in inventory if project.name in names]
+        if args.git_hook and (manifest := os.environ.get("HZ_FOCUSED_PLUGIN_PUSH_MANIFEST")):
+            targets = focused_hook_targets(Path(manifest), selected, changed)
+            for project in selected:
+                check(project, args.core, fast=True, test_targets=targets[project.name])
+        else:
+            for project in selected:
                 check(project, args.core, fast=True)
         return 0
     if args.command == "new":
