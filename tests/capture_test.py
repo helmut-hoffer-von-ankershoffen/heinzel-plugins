@@ -552,3 +552,23 @@ def test_detail_focus_rejects_unbounded_padding(owner, padding):
     plan_path.write_text(plan_path.read_text() + f'\n[scenes.focus]\nrole="region"\nname="Tides"\npadding={raw}\n')
     with pytest.raises(capture.CaptureError, match="focus padding"):
         capture.read_plan(owner)
+
+
+def test_pictographs_keep_the_terminal_cell_width_in_recorded_html():
+    """A browser emoji font must not shift the table borders Rich laid out after a weather symbol."""
+    widths = {"\U0001f327": 2, "☁": 1, "☁️": 2}
+    document = '<pre><span style="color:#fff">│ \U0001f327 │ ☁ │ ☁️ │ 12°C │</span></pre>'
+
+    pinned = capture.pin_symbol_cells(document, widths.__getitem__)
+
+    box = '<span style="display:inline-block;width:{}ch;text-align:center">{}</span>'
+    assert pinned == (
+        '<pre><span style="color:#fff">│ '
+        + box.format(2, "\U0001f327")
+        + " │ "
+        + box.format(1, "☁")
+        + " │ "
+        + box.format(2, "☁️")
+        + " │ 12°C │</span></pre>"
+    )
+    assert capture.pin_symbol_cells("<pre>plain ─│ text</pre>", widths.__getitem__) == ("<pre>plain ─│ text</pre>")

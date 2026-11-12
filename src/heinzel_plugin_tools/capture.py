@@ -341,6 +341,25 @@ def validate_browser_time(value: object) -> None:
         raise CaptureError("browser_time must be an ISO8601 date with a timezone") from None
 
 
+def pin_symbol_cells(document: str, cells) -> str:
+    """Give each pictograph in recorded terminal HTML the cell width the terminal laid it out with.
+
+    Browser emoji fonts draw symbols wider or narrower than the monospace cells Rich counted, which shifts the
+    table borders that follow; a fixed inline box keeps every later column aligned as in the terminal.
+    """
+
+    def box(match: re.Match) -> str:
+        symbol = match.group(0)
+        width = cells(symbol)
+        return f'<span style="display:inline-block;width:{width}ch;text-align:center">{symbol}</span>'
+
+    return re.sub(
+        r"[\u2100-\u24ff\u25a0-\U0010ffff]\ufe0f?",
+        lambda match: box(match) if unicodedata.category(match.group(0)[0]) == "So" else match.group(0),
+        document,
+    )
+
+
 def input_digest(root: Path, plan: dict) -> str:
     """Identify visual inputs while excluding generated metadata, captures and environment caches."""
     metadata = project_data(root)
@@ -959,6 +978,7 @@ def capture(
                                     "body{padding:24px;font:16px/1.5 monospace;}"
                                     "pre{white-space:pre;}p{font:14px system-ui;}</style>",
                                 )
+                                document = pin_symbol_cells(document, lambda symbol: Text(symbol).cell_len)
                                 command = "hz " + " ".join(scene["command"])
                                 document = document.replace("<body>", f"<body><p>{html.escape(command)}</p>")
                                 page.set_content(document)
