@@ -1,6 +1,6 @@
 [project]
 name = "heinzel-google"
-version = "0.9.2"
+version = "0.9.3"
 description = "Google Docs, Sheets, Slides, Drive, Calendar and Gmail: the documents, calendar and mail capabilities."
 readme = "README.md"
 license = "MIT"
@@ -143,6 +143,11 @@ highlights = [
 ]
 
 [[tool.heinzel.catalog.screenshots]]
+path = "docs/assets/screenshots/google-upcoming-review.png"
+surface = "ui"
+caption = "A fictional launch review shows as the next meeting in the footer, read through the Google calendar adapter."
+
+[[tool.heinzel.catalog.screenshots]]
 path = "docs/assets/screenshots/google-calendar-week.png"
 surface = "ui"
 caption = "The real Core calendar reads a fictional launch week through the Google adapter; no Google account is contacted."
@@ -150,7 +155,7 @@ caption = "The real Core calendar reads a fictional launch week through the Goog
 [[tool.heinzel.catalog.screenshots]]
 path = "docs/assets/screenshots/google-source-review.png"
 surface = "ui"
-caption = "Inspect a fictional selected-source identity on a phone; its real digest is continuity evidence, not a login or publisher check."
+caption = "Inspect a fictional selected-source identity on a phone, as the Google source review panel shows it."
 
 [[tool.heinzel.catalog.screenshots]]
 path = "docs/assets/screenshots/launch-files-json.png"
@@ -165,19 +170,14 @@ caption = "Try a seven-day file query — fictional replies demonstrate invocati
 [[tool.heinzel.catalog.screenshots]]
 path = "docs/assets/screenshots/launch-plan.png"
 surface = "cli"
-caption = "Read a fictional Google Doc as useful text through the real adapter and a fixture-only requester."
+caption = "Read a fictional Google Doc through the real adapter; this showcase command exists only in the documentation fixture."
 
 [[tool.heinzel.catalog.screenshots]]
 path = "docs/assets/screenshots/launch-metrics.png"
 surface = "cli"
-caption = "Read a fictional Sheet as a table through the real adapter and a fixture-only requester."
-
-[[tool.heinzel.catalog.screenshots]]
-path = "docs/assets/screenshots/launch-week.png"
-surface = "cli"
-caption = "Read the fixed fictional October launch week; the separate current-window UI uses the same fixture provider."
+caption = "Read a fictional Sheet through the real adapter; this showcase command exists only in the documentation fixture."
 
 [[tool.heinzel.catalog.screenshots]]
 path = "docs/assets/screenshots/mail-content.png"
 surface = "cli"
-caption = "Read a fictional launch message through the real Gmail adapter and a fixture-only requester."
+caption = "Read a fictional message through the real Gmail adapter; this showcase command exists only in the documentation fixture."

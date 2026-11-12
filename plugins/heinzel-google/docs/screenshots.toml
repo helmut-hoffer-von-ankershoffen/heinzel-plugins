@@ -2,6 +2,19 @@ format = 1
 bootstrap = "docs/screenshot_fixture.py"
 
 [[scenes]]
+name = "google-upcoming-review"
+surface = "ui"
+route = "/"
+appearance = "dark"
+caption = "A fictional launch review shows as the next meeting in the footer, read through the Google calendar adapter."
+timeout_ms = 30000
+viewport = { width = 1280, height = 900 }
+
+[[scenes.steps]]
+action = "wait"
+text = "Next: Launch readiness review"
+
+[[scenes]]
 name = "google-calendar-week"
 surface = "ui"
 route = "/"
@@ -34,9 +47,9 @@ name = "google-source-review"
 surface = "ui"
 route = "/"
 appearance = "dark"
-caption = "Inspect a fictional selected-source identity on a phone; its real digest is continuity evidence, not a login or publisher check."
+caption = "Inspect a fictional selected-source identity on a phone, as the Google source review panel shows it."
 timeout_ms = 30000
-viewport = { width = 390, height = 844 }
+viewport = { width = 390, height = 1500 }
 
 [[scenes.steps]]
 action = "click"
@@ -67,23 +80,17 @@ command = ["google", "files", "--days", "7"]
 [[scenes]]
 name = "launch-plan"
 surface = "cli"
-caption = "Read a fictional Google Doc as useful text through the real adapter and a fixture-only requester."
+caption = "Read a fictional Google Doc through the real adapter; this showcase command exists only in the documentation fixture."
 command = ["showcase", "notes", "launch-plan"]
 
 [[scenes]]
 name = "launch-metrics"
 surface = "cli"
-caption = "Read a fictional Sheet as a table through the real adapter and a fixture-only requester."
+caption = "Read a fictional Sheet through the real adapter; this showcase command exists only in the documentation fixture."
 command = ["showcase", "notes", "launch-metrics"]
-
-[[scenes]]
-name = "launch-week"
-surface = "cli"
-caption = "Read the fixed fictional October launch week; the separate current-window UI uses the same fixture provider."
-command = ["showcase", "week"]
 
 [[scenes]]
 name = "mail-content"
 surface = "cli"
-caption = "Read a fictional launch message through the real Gmail adapter and a fixture-only requester."
+caption = "Read a fictional message through the real Gmail adapter; this showcase command exists only in the documentation fixture."
 command = ["showcase", "message-content"]
