@@ -2,10 +2,10 @@
   "format": 1,
   "plugin": "heinzel-atlassian",
   "core_version": "0.9.40",
-  "inputs_sha256": "76bf94536544fbd615fafb17310f7d2ece8ab7ba6f4182f2d1939b134d2de917",
+  "inputs_sha256": "fe5d3c8bb141ea577545d88409f8d8f16e90e440d8f5bb09a9c43450944441d3",
   "images": {
-    "docs/assets/screenshots/review-inventory.png": "06bc5ecb4cb172f3cd5b2149352ebb2f0353ab2722f7198d17b6c15cb628f714",
-    "docs/assets/screenshots/workflow-context.png": "602f3545e1aaca01a59ab31e82cdc2e0c0810a1fd3024aff18f469fce4da38c2",
+    "docs/assets/screenshots/review-inventory.png": "9160bd2bdb2bd6715cb053528863577108024e2383b3b010db3e04251e7cc139",
+    "docs/assets/screenshots/workflow-context.png": "af8c75b76c2517d0ef36c18b537b31fff4dcd94366b585cd8236fe4933fb67d0",
     "docs/assets/screenshots/issues-json.png": "530fb20dd9c11947fa7ca48aae30ba0d8435cfceda0e0856252d634d05c5c2a0",
     "docs/assets/screenshots/confluence-cli.png": "6ee48d63544e8aef45de102226a6af51904e5175304b473b65e49b1e6abef622"
   },
@@ -13,18 +13,18 @@
     "format": 2,
     "source_story": {
       "path": "source-story.md",
-      "sha256": "334b62f0ce66582e55821c6a7bd57670f70c00fc3541e60be4f7736a63c01d7d"
+      "sha256": "047347831afd885b3995728eb5ef268844c75d5a71dc87534c86a0bc4b0a37c2"
     },
     "definition": {
       "format": 1,
       "reviewer": "Codex feature-story agent",
-      "source_sha256": "6059d5e5bf343543299b96b010ba4f306e456f2963c8b67b3de3af5ea193d195",
+      "source_sha256": "40ebcebf50a155f29c12e5e0a8744b8811bd9477a0435e312ad4359e1066fb6e",
       "plan_sha256": "3f91fd09ffc8c4b1d0c16cb8004a7f7b56f15f33a8b581781a11d2ffd3016187",
-      "story_sha256": "334b62f0ce66582e55821c6a7bd57670f70c00fc3541e60be4f7736a63c01d7d"
+      "story_sha256": "047347831afd885b3995728eb5ef268844c75d5a71dc87534c86a0bc4b0a37c2"
     },
     "plugin": "heinzel-atlassian",
     "core_version": "0.9.40",
-    "inputs_sha256": "76bf94536544fbd615fafb17310f7d2ece8ab7ba6f4182f2d1939b134d2de917",
+    "inputs_sha256": "fe5d3c8bb141ea577545d88409f8d8f16e90e440d8f5bb09a9c43450944441d3",
     "screenshots": [
       {
         "path": "docs/assets/screenshots/review-inventory.png",
@@ -48,22 +48,22 @@
       }
     ],
     "images": {
-      "review-inventory.png": "06bc5ecb4cb172f3cd5b2149352ebb2f0353ab2722f7198d17b6c15cb628f714",
-      "workflow-context.png": "602f3545e1aaca01a59ab31e82cdc2e0c0810a1fd3024aff18f469fce4da38c2",
+      "review-inventory.png": "9160bd2bdb2bd6715cb053528863577108024e2383b3b010db3e04251e7cc139",
+      "workflow-context.png": "af8c75b76c2517d0ef36c18b537b31fff4dcd94366b585cd8236fe4933fb67d0",
       "issues-json.png": "530fb20dd9c11947fa7ca48aae30ba0d8435cfceda0e0856252d634d05c5c2a0",
       "confluence-cli.png": "6ee48d63544e8aef45de102226a6af51904e5175304b473b65e49b1e6abef622"
     },
     "transcripts": {
-      "review-inventory.txt": "494e340a893835251bca067a2b6e033767400f402bc33ffb3fa14cc7e054d1bc",
-      "workflow-context.txt": "fc5794fba6097622d273a2a7623520edf59b2345b2fe31657640de896225bd87",
+      "review-inventory.txt": "b4ad6b02ce14b05b25e9c4ef7cf30a0a88a995dcfe03376b8a0fff4b37193f8d",
+      "workflow-context.txt": "bd85d9a96bc9a24b6a027a50ae7ab5138be76b282a923c569b8de68783f80773",
       "issues-json.txt": "aac6434c0d1d1dece3ee23798229598f722dbee48a9bc4a854dfc3d6fb532cdc",
       "confluence-cli.txt": "dbac0428b2123fd6cfb248be30010051986995ee83bfa9e33b4b1a272541b710"
     },
-    "bundle_sha256": "ef76d39899788d0b9e61a8683be7162397f68aaef08b81fc3a56331696a5eaf6"
+    "bundle_sha256": "12830ff2d184618f74ff7fc95e8a0ec4e535b1468a92e117b6fbe750ce70f3b3"
   },
   "privacy_review": {
     "format": 1,
-    "bundle_sha256": "ef76d39899788d0b9e61a8683be7162397f68aaef08b81fc3a56331696a5eaf6",
+    "bundle_sha256": "12830ff2d184618f74ff7fc95e8a0ec4e535b1468a92e117b6fbe750ce70f3b3",
     "reviewer": "Codex privacy agent",
     "decision": "approve",
     "checked_images": [

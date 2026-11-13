@@ -47,9 +47,9 @@ name = "google-source-review"
 surface = "ui"
 route = "/"
 appearance = "dark"
-caption = "Inspect a fictional selected-source identity on a phone, as the Google source review panel shows it."
+caption = "Inspect a fictional selected-source identity as the Google source review panel shows it."
 timeout_ms = 30000
-viewport = { width = 390, height = 1500 }
+viewport = { width = 1280, height = 900 }
 
 [[scenes.steps]]
 action = "click"

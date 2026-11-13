@@ -2,12 +2,12 @@
   "format": 1,
   "plugin": "heinzel-example",
   "core_version": "0.9.40",
-  "inputs_sha256": "05e0f73fb5d796623e564e34416c65cfd748f52be744f61c532df1c7ce3e77d5",
+  "inputs_sha256": "855bf3b5a71afd5ca72803e6de2a0920cdb229a90cd1dd6297525b336f353f47",
   "images": {
-    "docs/assets/screenshots/widget-and-status.png": "63894c53a334a569181b019e9932dcb2a3da0e120eb1dc3e868357b2666f767a",
-    "docs/assets/screenshots/inspector.png": "8951777c2e92c46f10c79992b1571182a80e64ef2295fc8cfd9eeba5d78a8faf",
-    "docs/assets/screenshots/greeting-terminal.png": "ef3ed4b172e2a6462635d2aa00c522c93c07124268e47878cd86bb9c4e70e3ed",
-    "docs/assets/screenshots/plugin-notice.png": "b5e330864669e3961d03b25110501832dd790c2fa074854e55ebd8ccbe83b2eb",
+    "docs/assets/screenshots/widget-and-status.png": "b9a98431c74dde61577a3c1061a3e1e0cf8c47cb7775d83b9685eaca515fd44a",
+    "docs/assets/screenshots/inspector.png": "0e1cd838c95633fe133ba2f4ed40ff8cb28b1a032bf451b33a41776ac5b07b61",
+    "docs/assets/screenshots/greeting-terminal.png": "d5d87d85f04dca0d2b4cab6ea7d01b0d321060826f76bb690ca08b48e7e56755",
+    "docs/assets/screenshots/plugin-notice.png": "9c5ed76532219e97d3e7780576487967609416804cd9becc61f8ac4805c762d3",
     "docs/assets/screenshots/greeting-cli.png": "375b8962cc5c7c30ab9c63248ea2ac468f325afc3bc53932dd70c9c5da5478fd",
     "docs/assets/screenshots/sample-json.png": "fcebdd36aba06edc9113cb2009094d20c07f83342ffec053e78d5e47d715e1f5"
   },
@@ -15,18 +15,18 @@
     "format": 2,
     "source_story": {
       "path": "source-story.md",
-      "sha256": "c58a25cbdd8cbbed073d62e135f291bfeb2e71220667a2ab55b314e0524fd808"
+      "sha256": "e7a95d314a1d16b7830c57c69624425cbf3875d57e10260ec7416b5a941fcc70"
     },
     "definition": {
       "format": 1,
       "reviewer": "Codex feature-story agent",
-      "source_sha256": "074feee41f46eb2cccb77dd8f292ec46c578124b6fb7efa525bf225c7c603c04",
+      "source_sha256": "50b56f504ae62164ad6841093f05abef327a6e4f5072af3d67ef62a31de2ea73",
       "plan_sha256": "4349628e972b078196f4ce1aec8c7e248c5c3499a9c8b4b3ae42e4d6242660a7",
-      "story_sha256": "c58a25cbdd8cbbed073d62e135f291bfeb2e71220667a2ab55b314e0524fd808"
+      "story_sha256": "e7a95d314a1d16b7830c57c69624425cbf3875d57e10260ec7416b5a941fcc70"
     },
     "plugin": "heinzel-example",
     "core_version": "0.9.40",
-    "inputs_sha256": "05e0f73fb5d796623e564e34416c65cfd748f52be744f61c532df1c7ce3e77d5",
+    "inputs_sha256": "855bf3b5a71afd5ca72803e6de2a0920cdb229a90cd1dd6297525b336f353f47",
     "screenshots": [
       {
         "path": "docs/assets/screenshots/widget-and-status.png",
@@ -60,26 +60,26 @@
       }
     ],
     "images": {
-      "widget-and-status.png": "63894c53a334a569181b019e9932dcb2a3da0e120eb1dc3e868357b2666f767a",
-      "inspector.png": "8951777c2e92c46f10c79992b1571182a80e64ef2295fc8cfd9eeba5d78a8faf",
-      "greeting-terminal.png": "ef3ed4b172e2a6462635d2aa00c522c93c07124268e47878cd86bb9c4e70e3ed",
-      "plugin-notice.png": "b5e330864669e3961d03b25110501832dd790c2fa074854e55ebd8ccbe83b2eb",
+      "widget-and-status.png": "b9a98431c74dde61577a3c1061a3e1e0cf8c47cb7775d83b9685eaca515fd44a",
+      "inspector.png": "0e1cd838c95633fe133ba2f4ed40ff8cb28b1a032bf451b33a41776ac5b07b61",
+      "greeting-terminal.png": "d5d87d85f04dca0d2b4cab6ea7d01b0d321060826f76bb690ca08b48e7e56755",
+      "plugin-notice.png": "9c5ed76532219e97d3e7780576487967609416804cd9becc61f8ac4805c762d3",
       "greeting-cli.png": "375b8962cc5c7c30ab9c63248ea2ac468f325afc3bc53932dd70c9c5da5478fd",
       "sample-json.png": "fcebdd36aba06edc9113cb2009094d20c07f83342ffec053e78d5e47d715e1f5"
     },
     "transcripts": {
-      "widget-and-status.txt": "b7dd8b149a5ecedfd8e136042250a2ea088e05f36132ab7a748826acbe306936",
-      "inspector.txt": "aed1bfcc39d5b008ac37bf90539761527eb4262a94ac0bdfcd7b6704aed4355a",
-      "greeting-terminal.txt": "0bdffbf0b5db02c68623f7ab456d5ac03ea8cccd6e2a1992a9925b8e1524fdc5",
-      "plugin-notice.txt": "570a3c540b0586678d66ad828a38b5cdd692637f1627afc739873d0b9eb9f224",
+      "widget-and-status.txt": "68df5b282b3ef97193bd8a156c3776d6ddad26956bc09119d7f5a99e1bcdfdae",
+      "inspector.txt": "59df51db803518a3aaeb0982f36e29d6d4dc67bb1d26737a77761fc5578b18b4",
+      "greeting-terminal.txt": "b0560cb65edafd7b11309430eb09f512c099f6c03e2b0df6d76b9edbf0a038b3",
+      "plugin-notice.txt": "753c9cb1e440b913a6ef237bd698a03d9cf17d442982d55b4b9aabb932aa7222",
       "greeting-cli.txt": "0a315745bb1e963bf40b1ccfdc9a822532fa703f2c1b5013c8fe303b8cf0f59f",
       "sample-json.txt": "084c799cd551dd1d8d5c5f9a5d593b2e931f5e36122ee5c793c1d08a19839cc0"
     },
-    "bundle_sha256": "8e60a34359b79d5c8027b486c258ee54729f8781505bb4ac5df2ba5499bca94c"
+    "bundle_sha256": "432a52c7a31ad73dc6a6a3feb3c96df4d8b343dc32a086e37c2c0746873df80d"
   },
   "privacy_review": {
     "format": 1,
-    "bundle_sha256": "8e60a34359b79d5c8027b486c258ee54729f8781505bb4ac5df2ba5499bca94c",
+    "bundle_sha256": "432a52c7a31ad73dc6a6a3feb3c96df4d8b343dc32a086e37c2c0746873df80d",
     "reviewer": "Codex privacy agent",
     "decision": "approve",
     "checked_images": [

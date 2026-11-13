@@ -6,6 +6,8 @@ repos:
     rev: v6.0.0
     hooks:
       - id: check-added-large-files
+        # The one exception is a frozen, byte-for-byte historical plugin archive (570 KB) the historical test unpacks.
+        exclude: ^tests/fixtures/historical_zoom_plugin\.tar\.gz$
       - id: check-case-conflict
       - id: debug-statements
       - id: detect-private-key

@@ -1,6 +1,6 @@
 [project]
 name = "heinzel-google"
-version = "0.9.3"
+version = "0.9.4"
 description = "Google Docs, Sheets, Slides, Drive, Calendar and Gmail: the documents, calendar and mail capabilities."
 readme = "README.md"
 license = "MIT"
@@ -155,7 +155,7 @@ caption = "The real Core calendar reads a fictional launch week through the Goog
 [[tool.heinzel.catalog.screenshots]]
 path = "docs/assets/screenshots/google-source-review.png"
 surface = "ui"
-caption = "Inspect a fictional selected-source identity on a phone, as the Google source review panel shows it."
+caption = "Inspect a fictional selected-source identity as the Google source review panel shows it."
 
 [[tool.heinzel.catalog.screenshots]]
 path = "docs/assets/screenshots/launch-files-json.png"

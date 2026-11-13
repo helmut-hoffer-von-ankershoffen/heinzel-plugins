@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.9.7
+
+Relock opentelemetry-api to 1.45.2 (CVE-2026-126360).
+
 ## 0.9.6
 
 The footer pane no longer has a Details line that only repeats the switch (*Private web sharing is off.*);

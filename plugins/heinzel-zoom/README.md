@@ -112,32 +112,28 @@ Development and release commands: [repository guide](../../README.md).
 <!-- screenshots:start -->
 ## Screenshots
 
-<img src="docs/assets/screenshots/meeting-decisions.png" alt="Fictional Weekly sync: a Thursday release decision and three named next steps, via the fixture-only requester and real Zoom parser." width="960">
+<img src="docs/assets/screenshots/workflow-list.png" alt="Demo data: the fictional Meeting notes workflow declares a need for meeting summaries." width="960">
 
-Fictional Weekly sync: a Thursday release decision and three named next steps, via the fixture-only requester and real Zoom parser.
+Demo data: the fictional Meeting notes workflow declares a need for meeting summaries.
 
-<img src="docs/assets/screenshots/recent-meetings.png" alt="Fictional October mailbox: find Weekly sync and Launch review through the fixture-only requester and real Zoom adapter." width="960">
+<img src="docs/assets/screenshots/workflow-context.png" alt="Demo data: the fictional Meeting notes contract declares summary input and Markdown output; no report has been generated." width="960">
 
-Fictional October mailbox: find Weekly sync and Launch review through the fixture-only requester and real Zoom adapter.
-
-<img src="docs/assets/screenshots/launch-decisions.png" alt="Fictional Launch review: a ten-percent rollout decision and two named owners, using a second meeting argument in the native terminal." width="960">
-
-Fictional Launch review: a ten-percent rollout decision and two named owners, using a second meeting argument in the native terminal.
-
-<img src="docs/assets/screenshots/workflow-context.png" alt="Fictional Meeting notes contract: declares a meeting-summary input and Markdown output; no report has been generated." width="960">
-
-Fictional Meeting notes contract: declares a meeting-summary input and Markdown output; no report has been generated.
+Demo data: the fictional Meeting notes contract declares summary input and Markdown output; no report has been generated.
 
 <details>
 <summary>Command line</summary>
 
-<img src="docs/assets/screenshots/summary-cli.png" alt="Fictional Weekly sync in the CLI: parsed summary sections and a source link, through the fixture-only requester." width="960">
+<img src="docs/assets/screenshots/summary-cli.png" alt="Demo data: the fixture requester shows Weekly sync&#x27;s parsed recap, next steps and source link." width="960">
 
-Fictional Weekly sync in the CLI: parsed summary sections and a source link, through the fixture-only requester.
+Demo data: the fixture requester shows Weekly sync&#x27;s parsed recap, next steps and source link.
 
-<img src="docs/assets/screenshots/meeting-list-json.png" alt="Fictional October meetings as JSON: typed meeting metadata through the fixture-only requester, not verbatim transcripts." width="960">
+<img src="docs/assets/screenshots/launch-cli.png" alt="Demo data: the fixture requester shows Launch review&#x27;s rollout decision and named next steps." width="960">
 
-Fictional October meetings as JSON: typed meeting metadata through the fixture-only requester, not verbatim transcripts.
+Demo data: the fixture requester shows Launch review&#x27;s rollout decision and named next steps.
+
+<img src="docs/assets/screenshots/meeting-list-json.png" alt="Demo data: fictional October meetings as JSON, with meeting metadata rather than verbatim transcripts." width="960">
+
+Demo data: fictional October meetings as JSON, with meeting metadata rather than verbatim transcripts.
 
 </details>
 

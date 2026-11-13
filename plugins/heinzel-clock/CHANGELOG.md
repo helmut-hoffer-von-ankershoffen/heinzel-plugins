@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.9.9
+
+Relock opentelemetry-api to 1.45.2 (CVE-2026-126360).
+
 ## 0.9.8
 
 Relock for Heinzel Core 0.9.40 (its AI extra adds pyjwt). The gallery hovers the Today region (Core 0.9.40 keeps the Today heading screen-reader only) and shows the two time checks as CLI scenes.

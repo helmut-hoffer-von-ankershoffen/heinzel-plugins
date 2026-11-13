@@ -1,41 +1,43 @@
 ## Audience
 
-A person who already uses Tailscale and wants to decide whether to share their authenticated Heinzelmännchen web app privately with another device.
+Someone who wants to reach their authenticated Heinzel web app privately from another device and needs to understand what Tailscale adds, what it requires, and how to stop sharing.
 
 ## Outcome
 
-Show the owner turning sharing on, what the plugin's own status command reports, turning sharing off, and the status afterwards. The demo shows local configuration and readiness, not proof that a phone can connect: the remote device still needs Tailscale access and its own browser authentication. Tailscale must already be installed and signed in; the plugin does not perform vendor login or grant HTTPS consent (`README.md`).
+Show the real sharing control becoming ready, the corresponding honest CLI status, and the control being turned off. The fictional example demonstrates local configuration and readiness; it does not prove that a remote phone can connect. Tailscale must already be installed and signed in, and the remote browser still needs authentication (`README.md`).
 
 ## Scenes
 
-1. **Sharing ready — dark UI.** In the genuine footer Tailscale control, turn on **Share over Tailscale** and wait for the **Open** link. On Core 0.9.40 the control offers **Copy link** and **Open**.
-2. **Requested sharing — CLI.** `hz tailscale status --json` right after scene 1. It shows the saved request and the mapping to the web app's backend port. It reports `apply-required` with the summary *Turning on…*: a separate CLI process has no web runtime, so it cannot verify the web listener and only the web app finishes the transition (`src/heinzel_tailscale/_service.py`, `Sharing._mapping` comment and `Sharing._state`). This is the plugin's real behaviour and must be shown as is.
-3. **Sharing off — light UI.** In the same control, turn sharing off and wait for the switch to read *Off*. Plain Off shows no status line and no Details: the switch already says it (`src/heinzel_tailscale/__init__.py`, `restates_switch`). Details appear only for something to act on or wait for.
-4. **After switching off — CLI.** `hz tailscale status --json` right after scene 3: state `off`, not mapped. The target now shows the configured hz web port, default 8737 (Core `Settings.ui_port`), because without an enabled intent there is no backend port to keep (`Sharing._mapping`: `self.readiness.runtime.port or (old.backend_port if old and old.enabled else self.settings.ui_port)`). The port difference between scenes 2 and 4 is therefore expected, not a sign of a different fixture.
+1. **Sharing ready — dark.** In the genuine footer Tailscale pane, turn on **Share over Tailscale** and wait for **Open**. Show the requested choice and the ready link together, using the fictional local node.
+2. **Status after enabling — CLI.** Run `hz tailscale status --json`. Show the mapped target and `apply-required` if that is the actual separate CLI result: a CLI process cannot verify the web listener and must not claim web readiness.
+3. **Sharing off — light.** Return to the same genuine pane, turn sharing off, and show **Off**. This is a meaningful second state of the actual feature, not a duplicate capture.
+4. **Status after disabling — CLI.** Run `hz tailscale status --json` again to show the resulting unmapped state. Treat the target port and all other values as observed output, not a guarantee imposed by the caption.
 
-## Capture lifecycle (verified against the capture tool source)
-
-`src/heinzel_plugin_tools/capture.py` (`capture`, about lines 933-1140) runs all scenes of one plan inside ONE temporary HOME (`demo_environment`), starts ONE backend process for that HOME, and runs the scenes strictly in plan order. CLI scenes call `hz` with the same environment (`hz(interpreter, scene["command"], env, work)`, about line 986), so they read the same application and fixture state the UI scenes left behind. The fixture state file `fictional-tailscale.json` lives under that HOME's state directory. Scene order and shared state are therefore established by the capture tool, not merely assumed.
+Capture in this order with shared isolated fixture state. The existing plan already demonstrates the useful on/off flow and both applied appearances, so it is preserved. If capture isolation resets state between scenes, or the observed state differs from the captions, resolve that before publication rather than staging a result.
 
 ## Fictional fixtures
 
-`docs/screenshot_fixture.py` supplies the fictional `workstation.tail-example.ts.net` node and a loopback-only LocalAPI. It exercises the real plugin mapping logic and holds an unrelated fictional `svc:notes` service. Every fixture process checks on exit that `svc:notes` is unchanged and raises otherwise (`"The fictional unrelated service must remain unchanged"`), and every Serve write is refused if it alters that service. A capture that completes therefore preserved it. The documentation-only LocalAPI credential must never appear in an image or transcript.
+`docs/screenshot_fixture.py` supplies a fictional `workstation.tail-example.ts.net` node, a loopback-only LocalAPI, and an unrelated example service. It uses the plugin's real sharing operations and checks that the unrelated service remains unchanged. Its bootstrap is for an explicit capture only; it was inspected, not run. The fixture does not establish real Tailscale login, remote access, or phone pairing.
+
+Normal presentation fictionalization is explicitly limited to verified owning-interpreter paths becoming `/demo-profile/.venv`, and only the verified whole hostname detail in the genuine Doctor row becoming `demo-host`. These mappings change no SDK health status or remaining detail and establish no privacy acceptance. Unknown identities still fail, and independent review must inspect every image and transcript.
 
 ## Privacy pitfalls
 
-Normal presentation fictionalization is explicitly limited to verified owning-interpreter paths becoming `/demo-profile/.venv`, and only the verified whole hostname detail in the genuine Doctor row becoming `demo-host`. These mappings change no SDK health status or remaining detail and establish no privacy acceptance. Unknown identities still fail, and an independent reviewer must inspect every image and transcript. A copied sharing link can contain a session `#token` (`README.md`), so the plan never copies or shows the clipboard. Do not capture credentials or a real connected account.
+A copied URL may contain a session token and must be treated like a password (`README.md`). Do not capture or publish real tokens, credentials, user paths, hostnames, tailnet identities, peers, account details, or unrelated private content. The fixture's local credential is demonstration data, but should not be featured. Review every image and transcript independently, including Doctor and surrounding Core UI; stop on unknown identities rather than assuming they are fictional.
 
 ## Acceptance criteria
 
-- The dark image shows the genuine Tailscale control On with Open; the light image shows the same control Off with no Details. Both appearances are applied.
-- Both CLI transcripts are genuine output of the declared status operation in the shared capture state. Scene 2 shows `apply-required` / *Turning on…* (the CLI cannot see the web listener); scene 4 shows `off` with the default port. Captions must state these limits truthfully and must not claim the CLI proves web readiness.
-- No duplicate captures, caption-only differences, forged HTML, invented screens, unknown identities, real credentials, or unreviewed images or transcripts.
-- Each image and transcript is reviewed independently, including the Doctor-row and interpreter-path substitutions.
+- Four distinct captures show genuine product surfaces, in sequence: ready and off in the feature pane, with the two corresponding useful CLI results. No forged HTML, terminal output masquerading as feature UI, duplicate captures, or caption-only state changes.
+- The ready pane visibly reaches the real **Open** link; the off pane visibly reaches **Off**. Dark and light appearances are actually applied. Capture waits for real outcomes and does not manufacture them.
+- CLI results agree with their captions and preserve the distinction between a mapped request and authenticated web readiness. If they do not, correct the capture or caption based on observed output.
+- Captions identify demo data; all images and transcripts pass the independent privacy review described above. A successful local demonstration is not represented as proof of remote access.
+- Use the existing bootstrap and plan; no invented fixture files or product screens. The plan below is structurally checked against the supplied format and existing declarations; no parser, project code, or capture was executed, so runtime validation remains required.
 
 ## Source-bound UI surface inventory
 
-- `pyproject.toml`, `[project.entry-points."heinzel.modules"]`: the sole entry point is `tailscale = "heinzel_tailscale"`; its declarations are in `src/heinzel_tailscale/__init__.py`.
-- `@module.status(source="status", slots={"footer": True, "sidebar": False})`: Core renders the footer status item and the **Share over Tailscale** toggle (genuine feature UI; no custom Page or View is declared).
-- `module.nav(... settings=NavSettings(sections=("tailscale",), group="computer"))` and `module.settings(TailscaleSettings)`: settings contribution (HTTPS port, hidden intent), not needed for this story.
-- Private operations `status`, `enable`, `disable`, exposed through CLI and authenticated API/MCP; the footer toggle invokes enable and disable.
-- Tailscale app, login, certificate consent and OS permissions are external provider UI, not plugin screens (`README.md`).
+- `pyproject.toml`, `[project.entry-points."heinzel.modules"]`: the sole declared plugin entrypoint is `tailscale = "heinzel_tailscale"`. `src/heinzel_tailscale/__init__.py` declares `module.nav` with `NavSettings(sections=("tailscale",), group="computer")`, `module.settings(TailscaleSettings)`, and `module.status(source="status", slots={"footer": True, "sidebar": False})`. Core therefore renders a Settings contribution and a footer status pane; a missing plugin Page/View does not make this feature terminal-only. The supplied declaration does not establish a specific plugin navigation route, so the plan uses the existing `/` route and footer control.
+- `src/heinzel_tailscale/__init__.py`, `sharing`: the footer contribution declares the Tailscale status item and **Share over Tailscale** toggle, with `enable` and `disable` operations, readiness-dependent URL, status/problem and Details data. The exact presentation depends on the installed Core's `ToggleControl` fields; older Core receives a shorter detail fallback. `README.md` describes Settings and footer entry points and the ready, retry, and Details experience. The plan requires the observed Core UI to support its named controls rather than assuming every Core version renders them identically.
+- `src/heinzel_tailscale/_models.py`, `TailscaleSettings`: Core can render the **Private web sharing** settings section and HTTPS sharing port; the intent field is marked hidden and private. Settings is a real contribution but is not substituted for the two useful feature states.
+- `src/heinzel_tailscale/__init__.py`, private `status`, `enable`, and `disable` operations: these support the Core control and CLI; the README also describes authenticated API and stdio MCP access, absent from unauthenticated REST and HTTP MCP heads. The supplied declarations show no channel, approval, setup, info, separate page, or separate view contribution. Generic Core surfaces beyond the declared settings and footer are not evidenced as plugin feature screens here.
+- `README.md` documents `hz tailscale status --json`, `enable --json`, and `disable --json`. CLI results are genuine terminal output, not feature UI. `src/heinzel_tailscale/_readiness.py` and `_service.py` distinguish authenticated web readiness from a separate CLI's inability to verify the listener; the two status scenes deliberately show different states, not two parameters of a single operation because three operations are declared.
+- The Tailscale application and its sign-in, HTTPS consent, and OS permission screens are external provider UI, not plugin screens (`README.md`). No such screen is invented or captured. `web/build.py` is a frontend build helper, not an additional declared module entrypoint or evidence of a product screen.

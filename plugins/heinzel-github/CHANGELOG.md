@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.9.4
+
+Relock opentelemetry-api to 1.45.2 (CVE-2026-126360).
+
 ## 0.9.3
 
 Relock for Heinzel Core 0.9.40 (its AI extra adds pyjwt) and refresh the gallery.

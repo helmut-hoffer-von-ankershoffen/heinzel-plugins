@@ -1,6 +1,6 @@
 [project]
 name = "heinzel-zoom"
-version = "0.9.1"
+version = "0.9.2"
 description = "Read meetings from Zoom's meeting-summary emails: the meetings capability."
 readme = "README.md"
 license = "MIT"
@@ -139,31 +139,26 @@ highlights = [
 ]
 
 [[tool.heinzel.catalog.screenshots]]
-path = "docs/assets/screenshots/meeting-decisions.png"
+path = "docs/assets/screenshots/workflow-list.png"
 surface = "ui"
-caption = "Fictional Weekly sync: a Thursday release decision and three named next steps, via the fixture-only requester and real Zoom parser."
-
-[[tool.heinzel.catalog.screenshots]]
-path = "docs/assets/screenshots/recent-meetings.png"
-surface = "ui"
-caption = "Fictional October mailbox: find Weekly sync and Launch review through the fixture-only requester and real Zoom adapter."
-
-[[tool.heinzel.catalog.screenshots]]
-path = "docs/assets/screenshots/launch-decisions.png"
-surface = "ui"
-caption = "Fictional Launch review: a ten-percent rollout decision and two named owners, using a second meeting argument in the native terminal."
-
-[[tool.heinzel.catalog.screenshots]]
-path = "docs/assets/screenshots/summary-cli.png"
-surface = "cli"
-caption = "Fictional Weekly sync in the CLI: parsed summary sections and a source link, through the fixture-only requester."
-
-[[tool.heinzel.catalog.screenshots]]
-path = "docs/assets/screenshots/meeting-list-json.png"
-surface = "cli"
-caption = "Fictional October meetings as JSON: typed meeting metadata through the fixture-only requester, not verbatim transcripts."
+caption = "Demo data: the fictional Meeting notes workflow declares a need for meeting summaries."
 
 [[tool.heinzel.catalog.screenshots]]
 path = "docs/assets/screenshots/workflow-context.png"
 surface = "ui"
-caption = "Fictional Meeting notes contract: declares a meeting-summary input and Markdown output; no report has been generated."
+caption = "Demo data: the fictional Meeting notes contract declares summary input and Markdown output; no report has been generated."
+
+[[tool.heinzel.catalog.screenshots]]
+path = "docs/assets/screenshots/summary-cli.png"
+surface = "cli"
+caption = "Demo data: the fixture requester shows Weekly sync's parsed recap, next steps and source link."
+
+[[tool.heinzel.catalog.screenshots]]
+path = "docs/assets/screenshots/launch-cli.png"
+surface = "cli"
+caption = "Demo data: the fixture requester shows Launch review's rollout decision and named next steps."
+
+[[tool.heinzel.catalog.screenshots]]
+path = "docs/assets/screenshots/meeting-list-json.png"
+surface = "cli"
+caption = "Demo data: fictional October meetings as JSON, with meeting metadata rather than verbatim transcripts."

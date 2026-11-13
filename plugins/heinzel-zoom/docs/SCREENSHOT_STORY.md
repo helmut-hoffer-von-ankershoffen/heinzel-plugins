@@ -1,24 +1,42 @@
-**Audience.** People who receive Zoom summary emails and want meeting decisions and next actions available to Heinzelmännchen workflows.
+## Audience
 
-**Outcome.** Answer “What did we decide, and who acts next?” using parsed summary emails. Installation requires a bound mail adapter and Zoom sending summaries to that mailbox; this plugin needs no Zoom credentials. These are summaries, not verbatim transcripts.
+A Heinzelmännchen user deciding whether Zoom meeting decisions can feed their workflows without granting this plugin Zoom API credentials.
 
-**Scenes.** Preserve the existing five scenes and add one supported parameter case:
+## Outcome
 
-1. **meeting-decisions:** In the native app terminal, read the fictional Weekly sync: ship Thursday after phone checks, with next steps for Jonas, Priya and Mira.
-2. **recent-meetings:** Show the fictional October meeting table with Weekly sync and Launch review, UTC start times and participant names.
-3. **launch-decisions:** Read Launch review using the second meeting argument. Show its ten-percent rollout decision and two named owners.
-4. **summary-cli:** Retain the shell result showing Weekly sync’s parsed sections and source link.
-5. **meeting-list-json:** Retain structured meeting metadata for workflow authors. Do not describe this output as transcript text.
-6. **workflow-context:** Retain the existing Meeting notes contract view. It declares a summary input and Markdown output; it has not generated a report.
+Show a fictional workflow declaring its need for meeting summaries, then show the actual adapter extracting useful decisions from two fictional summary emails. The summaries are AI-generated meeting summaries, not verbatim transcripts. The plugin reads them through a bound mail adapter; enabling email summaries in Zoom and binding mail are prerequisites (`README.md`, `src/heinzel_zoom/__init__.py`).
 
-**Fictional fixtures.** Reuse only `docs/screenshot_fixture.py`. During explicit capture it supplies the local mailbox, `showcase` requester and demonstration contract. Its existing `sync`, `launch` and newsletter messages use fictional people and decisions. The requester calls the real installed Zoom adapter. `showcase` commands are documentation fixtures; the plugin’s own CLI operation is `hz zoom info`. Freeze browser time after the fixture meetings; the requester’s October window is already fixed.
+## Scenes
 
-**Privacy pitfalls.** Capture only the temporary fictional profile without connected accounts. Names, meeting identifiers, decisions and source URLs can remain visible, so real mailbox data must never replace these fixtures. Leave source links unopened. The supplied messages do not exercise address redaction or token removal, so screenshots cannot establish those protections. Treat the rollout and readiness statements as fictional meeting content.
+1. **Workflow overview — light.** The Core contracts view shows the fictional Meeting notes workflow in context. Its declaration requires `meetings:read` and defines a summary input and Markdown output. This is a declared workflow, not a generated report (`docs/screenshot_fixture.py`, `CONTRACT`).
+2. **Workflow detail — dark.** Open the same fictional workflow to see its input, intended output and completion criteria. This is a meaningful detail state of the same Core feature; do not imply that it has executed. The existing plan names `/contracts/meeting-notes`; confirm that the route and heading actually render during capture (`docs/screenshots.toml`, `docs/screenshot_fixture.py`).
+3. **Weekly sync — CLI.** The fixture-only `showcase one sync` requester displays the parsed recap, next steps and source link. It calls the installed Zoom adapter, not a production Zoom CLI command (`docs/screenshot_fixture.py`, `one` and `summary_body`).
+4. **Launch review — CLI.** Run the same requester with `launch` to show the second meeting's distinct rollout decision and owners (`docs/screenshot_fixture.py`, `CONTENTS` and `one`).
+5. **Meeting list — CLI.** Show the fictional October results as JSON: meeting metadata, rather than verbatim transcripts. The fixture's `ended` operation uses the adapter's `meetings.ended` (`docs/screenshot_fixture.py`, `ended`; `src/heinzel_zoom/_adapter.py`).
 
-**Acceptance criteria.**
+## Fictional fixtures
 
-- Six scenes retain all five existing subjects, with four useful app views and two CLI results. The native terminal demonstrates `one sync` and `one launch`.
-- Weekly sync shows its decision and three owners; Launch review shows its different decision and two owners. The meeting table and JSON contain the two matching summaries and exclude the newsletter.
-- Summary headings, actions and table columns are readable without clipping. The contract heading is visible, with no claim of generated notes.
-- Every caption explicitly identifies fictional data and stays below 180 characters. Commands use argument arrays; terminal actions have no redundant cell waits.
-- The plan was statically checked by inspection against the requested structure and supplied fixture. No code, imports, captures or runtime validator were executed; visual capture verification remains pending.
+Use the existing `docs/screenshot_fixture.py` only during explicit capture. It creates an isolated demonstration contract, binds its fictional `inbox` mail adapter and the installed `zoom` meetings adapter, and supplies Weekly sync, Launch review and an unrelated newsletter. The names, decisions, meeting ID and example addresses are demonstration data. The requester and contract are documentation-only additions, not shipped Zoom features. No report is generated by declaring the contract.
+
+## Source-bound UI surface inventory
+
+- **Plugin entrypoint and adapter:** `pyproject.toml` declares `heinzel.modules.zoom = "heinzel_zoom"`; `src/heinzel_zoom/__init__.py` registers settings, service and the read-only `meetings` provider. `src/heinzel_zoom/_module.py` requires `mail:read`. The adapter methods `ended`, `transcripts` and `transcript` are capability methods, not declared plugin pages (`src/heinzel_zoom/_adapter.py`).
+- **Operations and Core contributions:** `src/heinzel_zoom/__init__.py` declares the `info` operation, system-info contribution, offline health checks and an explicitly invoked live health check. These may appear in Core-rendered operation, information or health surfaces; the supplied sources do not establish their actual web routes or controls. No channel, approval, setup, footer, navigation, Page or View declaration is present in the supplied plugin entrypoint. Absence of a plugin Page or View does not establish absence of a Core-rendered feature UI.
+- **Core feature UI:** the existing plan identifies `/contracts` and `/contracts/meeting-notes` for the fixture's contract (`docs/screenshots.toml`; `docs/screenshot_fixture.py`, `CONTRACT`). These are two useful states of a Core workflow feature, not Zoom-owned screens. The supplied Core implementation is absent, so the detail route, graph presentation and actual rendered fields remain capture-time evidence to verify; do not claim the overview is a graph unless observed.
+- **Terminal output:** `showcase one` and `showcase ended` are fixture-only operations with Rich renderers (`docs/screenshot_fixture.py`). Their CLI output is appropriate as CLI evidence. The existing plan labels three in-app terminal captures as `surface = "ui"`; those are terminal results, not feature UI, so this plan retains their useful cases as CLI scenes instead. The supplied sources do not prove all meeting behavior is terminal-only.
+- **External provider UI:** Zoom's settings portal is an external prerequisite described in `README.md`, not a plugin or Core screen. Do not stage or invent it. `hz system connector test zoom` lists recent matching summary emails through the mail adapter when invoked; it is not a Zoom API connection test (`src/heinzel_zoom/_service.py`, `live`).
+
+## Privacy pitfalls
+
+Capture only the isolated fictional mailbox and contract. Summary text can contain sensitive decisions and names even though the parser removes email addresses, excludes footer content and strips query strings and fragments from Zoom links (`src/heinzel_zoom/_summary.py`, `src/heinzel_zoom/_text.py`). Inspect links, paths, hostnames, account details, terminal history and surrounding Core chrome as well as the main content.
+
+Normal presentation fictionalization is explicitly limited to replacing verified owning-interpreter paths with `/demo-profile/.venv`, and replacing only the verified whole hostname detail in the genuine Doctor row with `demo-host`. These mappings change no SDK health status or remaining detail and establish no privacy acceptance. Unknown identities still fail; an independent reviewer must inspect every image and transcript.
+
+## Acceptance criteria
+
+- Capture the two genuine Core workflow states with the specified applied light and dark appearances, plus the three useful CLI results. Verify that each route and visible state actually exists; stop and report unresolved evidence instead of forging HTML or substituting terminal output for feature UI.
+- Show both `sync` and `launch` parameter cases, with their distinct fixture decisions, and the October JSON list. Do not capture duplicate images or rely on caption-only differences.
+- Every caption identifies demo data. The contract images make clear that a workflow is declared, not executed; the CLI images identify the documentation-only requester. Do not present summaries as verbatim transcripts.
+- Confirm the unrelated newsletter is excluded and the captured meeting data comes from the fixture through the real installed adapter. Treat these as capture-time checks, not results already observed.
+- Independently review every image and transcript for privacy, including the exact permitted presentation mappings. Unknown identities fail review.
+- The TOML below is structurally checked against the supplied scene rules by inspection; it has not been parsed or capture-tested because code execution was prohibited.

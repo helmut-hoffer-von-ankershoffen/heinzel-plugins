@@ -190,9 +190,9 @@ A fictional launch review shows as the next meeting in the footer, read through 
 
 The real Core calendar reads a fictional launch week through the Google adapter; no Google account is contacted.
 
-<img src="docs/assets/screenshots/google-source-review.png" alt="Inspect a fictional selected-source identity on a phone, as the Google source review panel shows it." width="960">
+<img src="docs/assets/screenshots/google-source-review.png" alt="Inspect a fictional selected-source identity as the Google source review panel shows it." width="960">
 
-Inspect a fictional selected-source identity on a phone, as the Google source review panel shows it.
+Inspect a fictional selected-source identity as the Google source review panel shows it.
 
 <details>
 <summary>Command line</summary>

@@ -1,0 +1,9 @@
+Launch review — parsed meeting summary
+Quick recap
+All readiness checks passed; begin a ten-percent rollout.
+Next steps
+- Mira Example will watch the release dashboard.
+- Jonas Example will share the API notes.
+Release readiness
+The team checked the plan, owners and milestone.
+Source: https://us06web.zoom.us/meeting/summary/demo

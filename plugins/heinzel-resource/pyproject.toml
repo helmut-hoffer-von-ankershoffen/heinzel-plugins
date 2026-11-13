@@ -1,6 +1,6 @@
 [project]
 name = "heinzel-resource"
-version = "0.1.5"
+version = "0.1.6"
 description = "See machine CPU, memory and load on Today and in the Heinzel footer."
 license = "MIT"
 license-files = ["LICENSE"]

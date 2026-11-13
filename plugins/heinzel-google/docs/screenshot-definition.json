@@ -1,7 +1,7 @@
 {
   "format": 1,
-  "reviewer": "Codex Sol source-analysis agent",
-  "source_sha256": "ebb84e96e648fe73ee45bee79ebb43700cac123800ec52b7d97daf4a983139d4",
-  "plan_sha256": "efc3caf6d50d563855cd6b0219d463b8a668c6684d4effbc2f044b7f7eb62d83",
-  "story_sha256": "538a63e57961fe204f49af56279cc7ac95710001690601c06cc0a61764a6a533"
+  "reviewer": "Codex feature-story agent",
+  "source_sha256": "828eb73ece74a7b99959089fa5f4ef8df79a8ae5b252386af0a3f8583ab75446",
+  "plan_sha256": "9637999559b5837f54731a2b187721a79780978c3a65b1753399fbf9cb641aaa",
+  "story_sha256": "7d9d1a1e275286cadde6c4f02cfca44097ece6d648e0e5223180e2e95e45519e"
 }
