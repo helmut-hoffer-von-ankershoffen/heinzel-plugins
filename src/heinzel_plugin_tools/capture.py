@@ -5,6 +5,7 @@
 """Capture an owning plugin in an isolated demonstration profile; never run during catalog discovery."""
 
 import argparse
+import contextlib
 import hashlib
 import html
 import io
@@ -24,6 +25,7 @@ import time
 import tomllib
 import unicodedata
 import webbrowser
+from collections.abc import Iterator
 from datetime import datetime
 from pathlib import Path
 from urllib.parse import urlsplit
@@ -878,6 +880,39 @@ def prepared_version(interpreter: Path, metadata: dict) -> str:
     return versions["core"]
 
 
+@contextlib.contextmanager
+def installed_artifact(root: Path, interpreter: Path, *, owning: bool) -> Iterator[None]:
+    """Capture the plugin as people install it: its built wheel, not the editable development link.
+
+    Core captures an installed plugin's source only from real package files, so an editable install is loaded the
+    ordinary way and a fixture that checks for installed source capture refuses it. The owning environment gets
+    the editable install back afterwards. An external prepared interpreter is used exactly as it is.
+    """
+    if not owning:
+        yield
+        return
+    with tempfile.TemporaryDirectory(prefix="hz-capture-wheel-") as built:
+        made = subprocess.run(
+            ["uv", "build", "--wheel", "--no-build-isolation", "--python", str(interpreter), "-o", built, str(root)],
+            capture_output=True,
+            timeout=600,
+        )
+        wheels = sorted(Path(built).glob("*.whl"))
+        if made.returncode or len(wheels) != 1:
+            raise CaptureError("The plugin wheel for capture could not be built. Run make build, then retry")
+        install = ["uv", "pip", "install", "--python", str(interpreter), "--no-deps"]
+        try:
+            if subprocess.run([*install, "--reinstall", str(wheels[0])], capture_output=True, timeout=600).returncode:
+                raise CaptureError("The plugin wheel for capture could not be installed. Run make setup, then retry")
+            yield
+        finally:
+            restored = subprocess.run(
+                [*install, "--no-build-isolation", "--editable", str(root)], capture_output=True, timeout=600
+            )
+            if restored.returncode:
+                print("The editable install was not restored; run make setup.", file=sys.stderr, flush=True)
+
+
 def capture(
     root: Path, *, core: str | None, headed: bool, draft_only: bool = False, prepared_python: Path | None = None
 ) -> dict:
@@ -930,7 +965,10 @@ def capture(
     version = prepared_version(interpreter, metadata)
     # Explicit external prepared environments retain their existing scans, without new redaction authority.
     owning_identity = owning_prefix(root, interpreter) if prepared_python is None else None
-    with tempfile.TemporaryDirectory(prefix="hz-screenshots-") as temporary:
+    with (
+        installed_artifact(root, interpreter, owning=prepared_python is None),
+        tempfile.TemporaryDirectory(prefix="hz-screenshots-") as temporary,
+    ):
         work = Path(temporary).resolve(strict=True)
         env = demo_environment(work, interpreter)
         if plan.get("bootstrap"):
