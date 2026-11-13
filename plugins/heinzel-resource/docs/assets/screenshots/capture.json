@@ -1,32 +1,32 @@
 {
   "format": 1,
   "plugin": "heinzel-resource",
-  "core_version": "0.9.16",
-  "inputs_sha256": "34fbfee428af8c3fe0680b6bdf65d9816499e3f109af25ed3757189700e7a39a",
+  "core_version": "0.9.40",
+  "inputs_sha256": "0aedb622fa238a61914b48c039a20eb9882a247583b17144575ddf880e5b3edc",
   "images": {
-    "docs/assets/screenshots/resources-pane.png": "c12ff57750c0d5a50d3a9692ca188fd1f570564fe536c62c96957e4b6e169292",
-    "docs/assets/screenshots/today-resources.png": "66737813903d4599f50f173e437f3e5ed6597f05f7cac580c9456700085f9f0b",
-    "docs/assets/screenshots/phone-resources.png": "7e28d0d5d17963b0a6a33fdcbe2cd06109de2d4d4420c59b760a8072e1368ff7",
+    "docs/assets/screenshots/resources-pane.png": "d15c0820649ac81806dcf3aa01c566f3293517a7963f0ddbffefe2e1f92c155f",
+    "docs/assets/screenshots/today-resources.png": "793558429938926ac06162cb04a3877ecf6473d590b9dfa9bcdf67a428968a14",
+    "docs/assets/screenshots/phone-resources.png": "b1107cdd2326dda7fa9de6f47e507673d7e8e67c0852e815579755c8d9e78dcb",
     "docs/assets/screenshots/cli-resources.png": "3d8012cf0ff56ee191ad3c8616855bc514e3a6692621c7248f8a72b554a96073",
-    "docs/assets/screenshots/terminal-resources.png": "eb9be4a0f4407111eb02c848a00d048be5f99a7ed9442e740cef7f9e5728b0ec",
-    "docs/assets/screenshots/terminal-resources-json.png": "22742147d3a2d3914a440e04297ddb4f184f6c5a2cda6aa738e9c4baab4c3d7c"
+    "docs/assets/screenshots/terminal-resources.png": "9ad9c39cf1b7f573247a01eb440852e50e7b37ca9e0623f26e4cb0bb60272f91",
+    "docs/assets/screenshots/terminal-resources-json.png": "6b54eaf4d3892e7b9d4a19297706d408a2a0f9baaf9204bc6098bfc4c3477edc"
   },
   "review_bundle": {
     "format": 2,
     "source_story": {
       "path": "source-story.md",
-      "sha256": "194f5bf321287f72a232a5796508d02b880d412f78a4c6b106470807a60a3322"
+      "sha256": "1b906d1bc0665b8d2ec4873878cf98c8f5cf6837e864ce9d05bab604c2aa3079"
     },
     "definition": {
       "format": 1,
       "reviewer": "Codex feature-story agent",
-      "source_sha256": "d2b36ddd63799003c2a3f396639e8f9b50de09dbadecadec9757f2c1441ad577",
+      "source_sha256": "6bf60919d290f4845844a2017b8c5cb12467db8615285fa8a1fa7502549944df",
       "plan_sha256": "9b38b6511c80349092e39d17c5dc81a84501935e568267c8df18b45ee3fd2db4",
-      "story_sha256": "194f5bf321287f72a232a5796508d02b880d412f78a4c6b106470807a60a3322"
+      "story_sha256": "1b906d1bc0665b8d2ec4873878cf98c8f5cf6837e864ce9d05bab604c2aa3079"
     },
     "plugin": "heinzel-resource",
-    "core_version": "0.9.16",
-    "inputs_sha256": "34fbfee428af8c3fe0680b6bdf65d9816499e3f109af25ed3757189700e7a39a",
+    "core_version": "0.9.40",
+    "inputs_sha256": "0aedb622fa238a61914b48c039a20eb9882a247583b17144575ddf880e5b3edc",
     "screenshots": [
       {
         "path": "docs/assets/screenshots/resources-pane.png",
@@ -60,26 +60,26 @@
       }
     ],
     "images": {
-      "resources-pane.png": "c12ff57750c0d5a50d3a9692ca188fd1f570564fe536c62c96957e4b6e169292",
-      "today-resources.png": "66737813903d4599f50f173e437f3e5ed6597f05f7cac580c9456700085f9f0b",
-      "phone-resources.png": "7e28d0d5d17963b0a6a33fdcbe2cd06109de2d4d4420c59b760a8072e1368ff7",
+      "resources-pane.png": "d15c0820649ac81806dcf3aa01c566f3293517a7963f0ddbffefe2e1f92c155f",
+      "today-resources.png": "793558429938926ac06162cb04a3877ecf6473d590b9dfa9bcdf67a428968a14",
+      "phone-resources.png": "b1107cdd2326dda7fa9de6f47e507673d7e8e67c0852e815579755c8d9e78dcb",
       "cli-resources.png": "3d8012cf0ff56ee191ad3c8616855bc514e3a6692621c7248f8a72b554a96073",
-      "terminal-resources.png": "eb9be4a0f4407111eb02c848a00d048be5f99a7ed9442e740cef7f9e5728b0ec",
-      "terminal-resources-json.png": "22742147d3a2d3914a440e04297ddb4f184f6c5a2cda6aa738e9c4baab4c3d7c"
+      "terminal-resources.png": "9ad9c39cf1b7f573247a01eb440852e50e7b37ca9e0623f26e4cb0bb60272f91",
+      "terminal-resources-json.png": "6b54eaf4d3892e7b9d4a19297706d408a2a0f9baaf9204bc6098bfc4c3477edc"
     },
     "transcripts": {
-      "resources-pane.txt": "183c168e9a0c50d906c785a35dd0450d6c21d8c288d4456ba127cf0c1fd249a5",
-      "today-resources.txt": "ff6cd44e18c023184d2e299111d9bd1dc20132fa9f077e5647a5b74c408a162b",
-      "phone-resources.txt": "40f53a1a9192b1c2215ddc3d67c3348ccb7441a586fab47c3d5f2f6744d59209",
+      "resources-pane.txt": "a4da4e36246f2e04cbea8e87b0801e3450f07c01cab8e948a203227bb1fe7a05",
+      "today-resources.txt": "756de0133b4a865eb87d5847f2cdf7ee1eb2456a5bd0a782786dd1d7697b1eb5",
+      "phone-resources.txt": "899cc26be72fcb15a7557a124cde4a2547f2db168d155e1481c0412983d36e00",
       "cli-resources.txt": "ddef8a589eb34e18d3fd06ab545c884ebcc82923f5270bb88a6fcfc2ae8272a7",
-      "terminal-resources.txt": "a5752e5cf7cc4f35be802368fc40a60681e3abbe173f96bfc4f8a0fc8d7f6c50",
-      "terminal-resources-json.txt": "a80a7a1da7c4fd6f2bab702f1971d936a1b474ec1bf373ede27db6471b9e58d0"
+      "terminal-resources.txt": "96e42b48b12ed33dc5e68dade4decde0aeab5154ad997dbf5b4985d87b0276f5",
+      "terminal-resources-json.txt": "4fadad1f41c130ce77f210cb97d73cc35bc4caecf27c01d278177d7b435a1b46"
     },
-    "bundle_sha256": "1a6f17c439bdb30666226ffb31f93ac84903494b5e87e75fc8e4eb700821e377"
+    "bundle_sha256": "eba826441f43ceb0aea223c3c55f9ce11bfe5fbde7f394ff0bfc5dbf522c499d"
   },
   "privacy_review": {
     "format": 1,
-    "bundle_sha256": "1a6f17c439bdb30666226ffb31f93ac84903494b5e87e75fc8e4eb700821e377",
+    "bundle_sha256": "eba826441f43ceb0aea223c3c55f9ce11bfe5fbde7f394ff0bfc5dbf522c499d",
     "reviewer": "Codex privacy agent",
     "decision": "approve",
     "checked_images": [
