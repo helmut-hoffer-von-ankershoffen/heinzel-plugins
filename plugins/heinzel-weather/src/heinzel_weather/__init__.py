@@ -71,7 +71,9 @@ SETTINGS = Navigate(path="/?settings=weather")
 module.settings(WeatherSettings)
 module.service(WeatherService)
 module.skill(Path(__file__).parent / "skills")
-PAGE = Navigate(path="/?panel=weather:forecast")
+ROUTE = "/plugins/weather/forecast"
+"""The weather page's own route in the main area, like every other page; never a side panel."""
+PAGE = Navigate(path=ROUTE)
 """The weather page: the sidebar item and the footer item open it; Settings stay behind the page's place button."""
 module.nav(
     "weather",
@@ -85,6 +87,8 @@ module.view(
     abi=1,
     name="forecast",
     source="page",
+    slot="page",
+    route=ROUTE,
     title="Weather",
     fallback="Weather is unavailable here; run hz weather show for the text view.",
     refresh=300,

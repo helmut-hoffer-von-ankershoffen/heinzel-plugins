@@ -48,8 +48,8 @@
    follows the panel's own width (container queries), never the window's: the same page fits a side panel and a phone. */
 .wx { container-type: inline-size; display: flex; flex-direction: column; color: var(--color-foreground); }
 .wx-fill { height: 100%; }
-.wx-head { display: flex; align-items: center; gap: 0.5rem; height: 3rem; flex-shrink: 0; padding: 0 0.75rem; border-bottom: 1px solid var(--color-border); }
-.wx-head h2 { flex: 1; min-width: 0; margin: 0; font-size: 1rem; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.wx-head { position: relative; display: flex; align-items: center; gap: 0.5rem; height: 3rem; flex-shrink: 0; padding: 0 0.75rem; border-bottom: 1px solid var(--color-border); }
+.wx-head :is(h1, h2) { flex: 1; min-width: 0; margin: 0; font-size: 1rem; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .wx-head svg { flex-shrink: 0; }
 .wx-body { padding: 1rem; }
 .wx-scroll { flex: 1; min-height: 0; overflow: auto; }
@@ -66,8 +66,9 @@ output.wx-note { display: block; }
 .wx-tiles dt { display: flex; align-items: center; gap: 0.375rem; font-size: 0.75rem; color: var(--color-muted-foreground); }
 .wx-tiles dt svg { width: 0.875rem; height: 0.875rem; }
 .wx-tiles dd { margin: 0.125rem 0 0; font-size: 1.125rem; font-weight: 500; }
-.wx h3 { margin: 0 0 0.5rem; font-size: 0.875rem; font-weight: 600; }
-.wx-hours { display: flex; gap: 0.5rem; margin: 0; padding: 0 0 0.5rem; list-style: none; overflow-x: auto; }
+.wx .wx-h { margin: 0 0 0.5rem; font-size: 0.875rem; font-weight: 600; }
+.wx-hours { display: flex; gap: 0.5rem; margin: 0; padding: 0 0 0.5rem; list-style: none; overflow-x: auto; border-radius: var(--radius-lg, 0.5rem); }
+.wx-hours:focus-visible { outline: 2px solid var(--color-ring); outline-offset: 2px; }
 .wx-hour { display: flex; flex-direction: column; align-items: center; gap: 0.25rem; flex: 0 0 4rem; padding: 0.5rem 0.25rem; font-size: 0.875rem; }
 .wx-hour time { font-size: 0.75rem; color: var(--color-muted-foreground); }
 .wx-hour svg, .wx-day svg { width: 1.25rem; height: 1.25rem; flex-shrink: 0; color: var(--color-primary); }
@@ -89,7 +90,7 @@ output.wx-note { display: block; }
 .wx-alerts { display: flex; flex-direction: column; gap: 0.5rem; margin: 0; padding: 0; list-style: none; }
 .wx-notice { display: flex; flex-direction: column; align-items: center; gap: 0.75rem; padding: 2.5rem 1.5rem; text-align: center; }
 .wx-notice svg { width: 2rem; height: 2rem; color: var(--color-muted-foreground); }
-.wx-notice h3 { margin: 0; font-size: 1.125rem; }
+.wx-notice .wx-h { margin: 0; font-size: 1.125rem; }
 .wx-notice p { margin: 0; max-width: 28rem; font-size: 0.875rem; color: var(--color-muted-foreground); }
 .wx-sr { clip-path: inset(50%); white-space: nowrap; border: 0; width: 1px; height: 1px; margin: -1px; padding: 0; position: absolute; overflow: hidden; }
 @container (min-width: 36rem) {
@@ -106,8 +107,9 @@ output.wx-note { display: block; }
   .wx-day-name { flex-basis: 4.5rem; }
   .wx-day .wx-chance { display: none; }
 }
-.wx-source { position: relative; display: inline-flex; }
-.wx-pop { position: absolute; z-index: 5; top: 100%; right: 0; display: flex; align-items: center; gap: 0.5rem; width: max-content; max-width: min(18rem, 80vw); padding: 0.5rem 0.625rem; font-size: 0.8125rem; border: 1px solid var(--color-border); border-radius: var(--radius-lg, 0.5rem); background: var(--color-popover, var(--color-card)); box-shadow: 0 4px 16px rgb(0 0 0 / 0.15); }
+/* The credit pops out under the header, inside the page's right edge, so it never runs off a phone screen. */
+.wx-source { display: inline-flex; }
+.wx-pop { position: absolute; z-index: 5; top: 100%; right: 0.75rem; display: flex; align-items: center; gap: 0.5rem; width: max-content; max-width: min(18rem, calc(100% - 1.5rem)); padding: 0.5rem 0.625rem; font-size: 0.8125rem; border: 1px solid var(--color-border); border-radius: var(--radius-lg, 0.5rem); background: var(--color-popover, var(--color-card)); box-shadow: 0 4px 16px rgb(0 0 0 / 0.15); }
 .wx-pop a { display: inline-flex; flex-shrink: 0; padding: 0.25rem; border-radius: 0.375rem; color: var(--color-muted-foreground); }
 .wx-pop a:hover, .wx-pop a:focus-visible { background: var(--color-accent); color: var(--color-foreground); }
 .wx-pop a svg { width: 1rem; height: 1rem; }

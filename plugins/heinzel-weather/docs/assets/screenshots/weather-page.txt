@@ -10,72 +10,9 @@ Weather
 M
 Mira
 · EM
-Today
-Today
-Weather in Berlin, DE
-☀ 22°C clear sky
-feels like 21°C, wearing umbrella
-Sat ☁ 10 to 19°C
-broken clouds, 10% rain
-Sun 🌧 9 to 18°C
-moderate rain, 80% rain
-Mon ☀ 12 to 21°C
-clear sky, 10% rain
-Ask about it
-Temperature and rain, next 24 hours
-16:00
-03:00
-15:00
-Temperature and rain, next 24 hours
-Time	°C	Rain chance
-16:00	21.5	10%
-17:00	19.9	80%
-18:00	18.3	80%
-19:00	16.7	80%
-20:00	15.1	80%
-21:00	13.5	10%
-22:00	12	10%
-23:00	14	10%
-00:00	15	10%
-01:00	16	10%
-02:00	12	10%
-03:00	13	10%
-04:00	14	10%
-05:00	15	10%
-06:00	16	10%
-07:00	12	10%
-08:00	13	10%
-09:00	14	10%
-10:00	15	10%
-11:00	16	10%
-12:00	12	10%
-13:00	13	10%
-14:00	14	10%
-15:00	15	10%
-11.5 to 24 °C · Rain chance
-Ask about it
-Weather in Berlin, DE
-
-22°C
-
-clear sky
-
-Ask about it
-
-Nothing needs you right now. Ask anything below.
-
-v0.9.40
-Updates, off
-0
-System health, warning
-?
-22°C Berlin, DE, off
-Daemon not installed, off
-Chat
-Weather
 Weather in
 Berlin, DE
-Thunderstorm warning · until 22:00 · Example Weather Service
+Thunderstorm warning · until 00:00 · Example Weather Service
 
 22°
 °C
@@ -97,95 +34,95 @@ Now
 22°
 10%
 10% chance of rain
-17:00
+19:00
 20°
 80%
 80% chance of rain
-18:00
+20:00
 18°
 80%
 80% chance of rain
-19:00
+21:00
 17°
 80%
 80% chance of rain
-20:00
+22:00
 15°
 80%
 80% chance of rain
-21:00
-14°
-10%
-10% chance of rain
-22:00
-12°
-10%
-10% chance of rain
 23:00
 14°
 10%
 10% chance of rain
 00:00
-15°
+12°
 10%
 10% chance of rain
 01:00
-16°
+14°
 10%
 10% chance of rain
 02:00
-12°
+15°
 10%
 10% chance of rain
 03:00
-13°
+16°
 10%
 10% chance of rain
 04:00
-14°
+12°
 10%
 10% chance of rain
 05:00
-15°
+13°
 10%
 10% chance of rain
 06:00
-16°
+14°
 10%
 10% chance of rain
 07:00
-12°
-10%
-10% chance of rain
-08:00
-13°
-10%
-10% chance of rain
-09:00
-14°
-10%
-10% chance of rain
-10:00
 15°
 10%
 10% chance of rain
-11:00
+08:00
 16°
 10%
 10% chance of rain
-12:00
+09:00
 12°
 10%
 10% chance of rain
-13:00
+10:00
 13°
 10%
 10% chance of rain
-14:00
+11:00
 14°
 10%
 10% chance of rain
+12:00
+15°
+10%
+10% chance of rain
+13:00
+16°
+10%
+10% chance of rain
+14:00
+12°
+10%
+10% chance of rain
 15:00
+13°
+10%
+10% chance of rain
+16:00
+14°
+10%
+10% chance of rain
+17:00
 15°
 10%
 10% chance of rain
@@ -233,6 +170,17 @@ Thursday
 12°
 24°
 
-Updated 16:46
+Updated 18:05
 
+v0.9.40
+Updates, off
+0
+System health, warning
+?
+22°C Berlin, DE, off
+Daemon not installed, off
+Chat
+New chat
+Your message
+Default
 Audio

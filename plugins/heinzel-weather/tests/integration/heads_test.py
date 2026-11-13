@@ -95,7 +95,7 @@ def test_app_weather_items_are_discoverable_with_readable_status_and_controls(hz
     assert status["item"]["text"].startswith("22°C Berlin, DE")
     assert status["item"]["effect"] == {
         "kind": "navigate",
-        "path": "/?panel=weather:forecast",
+        "path": "/plugins/weather/forecast",
     }  # the footer opens the page
     assert [(a["label"], a["effect"]) for a in status["item"]["actions"]] == [
         ("Change place", {"kind": "navigate", "path": "/?settings=weather"})
@@ -110,7 +110,7 @@ def test_app_weather_items_are_discoverable_with_readable_status_and_controls(hz
     weather = next(entry for entry in navigation if entry["id"] == "weather:weather")
     assert weather["title"] == "Weather"
     assert weather["settings"]["sections"] == ["weather"]
-    assert weather["sidebar"] == {"kind": "navigate", "path": "/?panel=weather:forecast"}  # the page, not Settings
+    assert weather["sidebar"] == {"kind": "navigate", "path": "/plugins/weather/forecast"}  # the page, not Settings
     page = hz("system", "ui", "views").json
     assert any(view["id"] == "weather:forecast" and view["source"]["path"] == "/weather/page" for view in page)
     data = hz("weather", "page").json

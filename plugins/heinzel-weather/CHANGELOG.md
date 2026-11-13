@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.5.6
+
+The Weather page opens in the main area like every other page (`/plugins/weather/forecast`), not as a side panel: the sidebar item and the footer temperature go there. As a page it has one top heading and no close button. The data credit (Open-Meteo, CC BY 4.0) stays behind its info button on the page and now fits on a phone screen; the hourly strip can be scrolled with the keyboard.
+
 ## 0.5.5
 
 Relock for Heinzel Core 0.9.40 (its AI extra adds pyjwt) and refresh the gallery.

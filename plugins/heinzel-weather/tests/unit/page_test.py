@@ -13,10 +13,11 @@ pytestmark = pytest.mark.unit
 
 def test_the_sidebar_item_opens_the_page_and_the_page_is_a_view_of_the_page_operation():
     (nav,) = [let for let in module.lets if let.__class__.__name__ == "NavLet"]
-    assert nav.sidebar == Navigate(path="/?panel=weather:forecast")
+    assert nav.sidebar == Navigate(path="/plugins/weather/forecast")
     assert nav.settings.sections == ("weather",)  # Settings stay reachable in Settings
     (view,) = [let for let in module.lets if isinstance(let, ViewLet)]
     assert (view.name, view.source, view.title) == ("forecast", "page", "Weather")
+    assert (view.slot, view.route) == ("page", nav.sidebar.path)  # the main area, never a side panel
 
 
 def test_a_ready_page_has_the_next_24_hours_and_7_days_from_the_shared_report(service):
