@@ -2,11 +2,11 @@
   "format": 1,
   "plugin": "heinzel-theme",
   "core_version": "0.9.40",
-  "inputs_sha256": "e872857a1199793f33fcc1dfa751b038671f01314052891f5423f7a81e35a04b",
+  "inputs_sha256": "956c896460db8ead6ba2b06b98384717d5b290d2de55326b75fc95b56a791e1d",
   "images": {
     "docs/assets/screenshots/theme-light.png": "9ddc197bd1054f7a313a0075bade31a56e58c77e601bb4ace0c062d3bb21ae3b",
     "docs/assets/screenshots/theme-dark.png": "408eed5d5646b21c04c2bfe9d4acfbbb2736154954bc81f272e6441980a049a2",
-    "docs/assets/screenshots/theme-soundscapes.png": "c703ea698abe8a12fd5097a362ddb12792229697e9cf4f1ed7a81033cf34768f",
+    "docs/assets/screenshots/theme-soundscapes.png": "a22b1b01149f9dced972595bab03f81bf2fc9041636ed5b4e3f7e85dd3c2920a",
     "docs/assets/screenshots/theme-cli.png": "2ebc7271bafa972d57b82a6278d25aee8901031963a3342297a50658f653e015",
     "docs/assets/screenshots/soundscapes-cli.png": "1307852a559700adac312deaf632275461688a8136b7768777b141afe9a4df46"
   },
@@ -14,18 +14,18 @@
     "format": 2,
     "source_story": {
       "path": "source-story.md",
-      "sha256": "901a6c334e73644e6b77542ad3729d087cba4f89b77d475c0e822a4ae5e79636"
+      "sha256": "63dd3f1259e10fd6ce79356740b96e14194ff1bb56d97e52c85aa684c44ffb33"
     },
     "definition": {
       "format": 1,
       "reviewer": "Codex feature-story agent",
-      "source_sha256": "75e81bec98e9fda9cf02f59d6076a8cca30b0cf5f05181b83992092198fa786d",
-      "plan_sha256": "1ef98fc02c6f93f507152d127ce22e54c1885b5cddb7c293c8339b39ca5b5a84",
-      "story_sha256": "901a6c334e73644e6b77542ad3729d087cba4f89b77d475c0e822a4ae5e79636"
+      "source_sha256": "21a855cd8644a76635c5d7bf63e969dfc118da169fd80bdad7d65c4417403f11",
+      "plan_sha256": "1b258aa7bc78674d2237109fdde1f37a00eb478621ffeea449d8b293f5c4a16b",
+      "story_sha256": "63dd3f1259e10fd6ce79356740b96e14194ff1bb56d97e52c85aa684c44ffb33"
     },
     "plugin": "heinzel-theme",
     "core_version": "0.9.40",
-    "inputs_sha256": "e872857a1199793f33fcc1dfa751b038671f01314052891f5423f7a81e35a04b",
+    "inputs_sha256": "956c896460db8ead6ba2b06b98384717d5b290d2de55326b75fc95b56a791e1d",
     "screenshots": [
       {
         "path": "docs/assets/screenshots/theme-light.png",
@@ -40,7 +40,7 @@
       {
         "path": "docs/assets/screenshots/theme-soundscapes.png",
         "surface": "ui",
-        "caption": "Demo profile: browse three optional YouTube soundscapes; playback starts only after Play."
+        "caption": "Demo profile: browse the three optional YouTube soundscapes in appearance settings."
       },
       {
         "path": "docs/assets/screenshots/theme-cli.png",
@@ -56,7 +56,7 @@
     "images": {
       "theme-light.png": "9ddc197bd1054f7a313a0075bade31a56e58c77e601bb4ace0c062d3bb21ae3b",
       "theme-dark.png": "408eed5d5646b21c04c2bfe9d4acfbbb2736154954bc81f272e6441980a049a2",
-      "theme-soundscapes.png": "c703ea698abe8a12fd5097a362ddb12792229697e9cf4f1ed7a81033cf34768f",
+      "theme-soundscapes.png": "a22b1b01149f9dced972595bab03f81bf2fc9041636ed5b4e3f7e85dd3c2920a",
       "theme-cli.png": "2ebc7271bafa972d57b82a6278d25aee8901031963a3342297a50658f653e015",
       "soundscapes-cli.png": "1307852a559700adac312deaf632275461688a8136b7768777b141afe9a4df46"
     },
@@ -67,11 +67,11 @@
       "theme-cli.txt": "36d653efa87eeec3a67c92ac4c27069a4697714578a9cd172bda926c27fdfa1f",
       "soundscapes-cli.txt": "2ca2445881fd6893242b1be527a70a7791f0f2edf486c7a51c893f2cb41f6369"
     },
-    "bundle_sha256": "425e7c8119280f964185bcc5d1d777f34e83c7ab222c2802dedcdebf9a82b75c"
+    "bundle_sha256": "7a21c69a55f6ca0be169f4c674c904ab565a78b0def91f50d0ea6ec27f983db5"
   },
   "privacy_review": {
     "format": 1,
-    "bundle_sha256": "425e7c8119280f964185bcc5d1d777f34e83c7ab222c2802dedcdebf9a82b75c",
+    "bundle_sha256": "7a21c69a55f6ca0be169f4c674c904ab565a78b0def91f50d0ea6ec27f983db5",
     "reviewer": "Codex privacy agent",
     "decision": "approve",
     "checked_images": [

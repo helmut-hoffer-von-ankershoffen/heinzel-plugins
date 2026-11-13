@@ -1,39 +1,33 @@
 ## Audience
-
-Someone choosing an everyday appearance for Heinzelmännchen who wants to see the theme in real work, compare light and dark, and understand the optional soundscapes before installing.
+People deciding whether the standard Heinzelmännchen appearance and its optional soundscapes fit their daily work.
 
 ## Outcome
-
-Show the warm light palette and dark palette applied to the same useful contract, then show the three soundscape choices and the corresponding discovery commands. The contract is a fictional example; no launch review or report is claimed to have been completed.
+Show the theme applied to a useful, fictional contract in both light and dark appearances, then show the available soundscapes and their command-line discovery. The same contract in both appearances makes the palette comparison meaningful; the soundscape view adds a different capability.
 
 ## Scenes
-
-1. **Light at work:** The fictional Launch review contract in the applied light theme, with its goal and readiness checks visible.
-2. **Dark at work:** The same real contract view in the applied dark theme. This is a meaningful appearance comparison, not a duplicate with a different caption.
-3. **Soundscape choices:** The Core Appearance settings surface lists Claude FM, Die Heinzelmännchen and Hyper Focus in the demo profile. Do not start playback.
-4. **Theme discovery:** Native CLI output for `hz system theme list` identifies the available theme in the demo profile.
-5. **Soundscape discovery:** Native CLI output for `hz system sound list` shows the available soundscapes without starting playback.
+1. **theme-light:** The fictional Launch review contract in the applied light theme, with its configuration and run commands visible.
+2. **theme-dark:** The same contract in the applied dark theme, enabling a direct comparison of legibility and character.
+3. **theme-soundscapes:** The demo profile's appearance settings, showing Claude FM, Die Heinzelmännchen and Hyper Focus before playback.
+4. **theme-cli:** List available themes and identify Heinzelmännchen in the CLI.
+5. **soundscapes-cli:** List the three soundscapes in the CLI without starting playback.
 
 ## Fictional fixtures
+Use the existing `docs/screenshot_fixture.py` bootstrap. It writes a fictional Launch review contract into the isolated `HZ_STATE_DIR` and supplies it as the user contract directory. Mira, Jonas and Priya, their checks, and the launch review are demonstration content; the fixture explicitly says no report has been generated. The gallery documentation describes a temporary fictional profile with no connected accounts (`docs/SCREENSHOTS.md`).
 
-`docs/screenshot_fixture.py` creates a local `launch-review` contract in the isolated state directory and sets the user contract directory. Its people, readiness checks and project are fictional; it explicitly says no report has been generated. Use this existing bootstrap only during explicit capture. The theme and soundscape definitions themselves are real plugin data.
+For normal presentation fictionalization, verified owning-interpreter paths become `/demo-profile/.venv`, and only the verified whole hostname detail in the genuine Doctor row becomes `demo-host`. These mappings change no SDK health status or remaining detail and establish no privacy acceptance. Unknown identities still fail, and independent review must inspect every image and transcript.
 
 ## Privacy pitfalls
-
-Normal presentation fictionalization is explicitly permitted: verified owning-interpreter paths become `/demo-profile/.venv`, and only the verified whole hostname detail in the genuine Doctor row becomes `demo-host`. These mappings change no SDK health status or remaining detail and establish no privacy acceptance. Unknown identities still fail; independent review must inspect every image and transcript. Use the temporary profile without connected accounts described in `docs/SCREENSHOTS.md`. Inspect paths, hostnames, account names and other identifying content, including any incidental terminal output. Do not press Play: the soundscape files describe external YouTube streams and state that YouTube loads only after Play.
-
-## Acceptance criteria
-
-- Capture genuine Core-rendered views with the declared theme actually applied in both light and dark; make the fictional contract content legible. The two appearance states must visibly differ.
-- Show the three soundscape names in the real Appearance interface without playback or provider UI. Do not imply that audio was tested.
-- Capture actual CLI results for both listed commands; preserve their real output and health information. Do not substitute terminal output for a feature UI.
-- Reject duplicate captures, caption-only changes, fabricated HTML, invented screens and unknown identities. Independently review every image and transcript, including any approved presentation substitutions.
-- Confirm the contract route, Appearance query route, accessible waits, theme application and visible results against the compatible Core at capture time. The supplied sources contain an existing plan, but no Core implementation or capture evidence proving these routes and controls. Review the generated contact sheet and manifest as described in `docs/SCREENSHOTS.md`.
+Inspect every capture and transcript for real names, hostnames, paths, tokens, connected accounts and other identifying details; do not assume the bootstrap or the two permitted mappings removes them. Do not start a soundscape during capture: the soundscape declarations say the streams use YouTube and that nothing from YouTube loads until Play. The provider's player is external UI, not a plugin screen. Preserve any actual health status and remaining Doctor details.
 
 ## Source-bound UI surface inventory
+- `pyproject.toml` declares the sole `heinzel.modules` entrypoint, `theme = "heinzel_theme"`. Its catalog declares the five existing screenshot subjects. `src/heinzel_theme/__init__.py` actually registers `module.theme(Path(__file__).parent / "themes")` and `module.soundscape(Path(__file__).parent / "soundscapes")`; it declares no plugin page, navigation, operation, channel, approval, setup, info or footer contribution. That absence alone does not rule out Core-rendered UI.
+- `src/heinzel_theme/themes/heinzelmaennchen.toml` declares the theme, light and dark palettes, priority and logo references. The actual feature UI is Core's applied theme across its interface. The contract detail route and heading are specified by `docs/screenshots.toml`, with content supplied by `docs/screenshot_fixture.py`; the provided sources do not include Core's route implementation, so capture must verify that the route and controls render as expected.
+- `README.md` identifies Core's Settings → Appearance and describes theme selection, soundscape selection, pairing and playback. `docs/screenshots.toml` specifies `/?settings=appearance` and the three expected titles. These are Core-rendered feature controls, not a plugin-owned route; their implementation is not included in the provided sources. `src/heinzel_theme/soundscapes/focus.toml` declares the pairing, while all three soundscape TOMLs declare YouTube streams. Playback and provider UI are outside this capture plan.
+- `README.md` documents theme and sound commands; `docs/screenshots.toml` supplies the two list commands. The provided sources do not establish that these features are terminal-only: the same features also have Core UI. The CLI scenes supplement the UI rather than substitute for it.
+- The theme declares logo paths, but the referenced SVG files are absent from the provided file inventory. Verify their availability in the capture environment; do not manufacture artwork. The README and catalog describe the soundscape behavior and screenshot subjects, but Core implementation and actual generated images are not provided, so those claims and routes remain unverified by this read-only inspection.
 
-- `pyproject.toml`, `[project.entry-points."heinzel.modules"]`: the sole declared plugin entrypoint is `theme = "heinzel_theme"`. `src/heinzel_theme/__init__.py` declares `Module("theme", ...)`, `module.theme(...)` and `module.soundscape(...)`. It declares no plugin Page, View, navigation, operation, channel, approval, setup, info or footer contribution. This absence alone does not establish that the plugin lacks UI: Core renders the declared appearance and soundscape choices.
-- `src/heinzel_theme/themes/heinzelmaennchen.toml` declares the named theme, light and dark palettes, and logo paths. The supplied file inventory does not include the referenced logo files, so their availability and rendering remain unresolved.
-- `src/heinzel_theme/soundscapes/claude-fm.toml`, `focus.toml` and `hyper-focus.toml` declare three YouTube streams; `focus.toml` pairs Die Heinzelmännchen with the theme. YouTube playback is external provider UI, not a plugin screen, and is outside these captures.
-- `README.md` describes Core Settings → Appearance, theme selection, soundscape selection, pairing and CLI commands. `docs/screenshots.toml` supplies the existing `/contracts/launch-review` and `/?settings=appearance` capture routes; their actual Core declarations are not among the provided sources. The contract is Core feature UI and the Appearance screen is Core configuration UI. The two CLI list scenes are genuine terminal results, not evidence that these features are terminal-only.
-- `pyproject.toml` catalog screenshot declarations and `README.md` describe the same five-scene gallery, but the referenced generated images are absent from the supplied inventory. Their captions and plan are intent, not proof that captures succeeded.
+## Acceptance criteria
+- Capture genuine rendered Core UI with the declared theme applied in both light and dark, plus the distinct soundscape settings state and both useful CLI results. Confirm the contract shows useful content and that its two appearance captures visibly differ beyond captions.
+- Confirm all three soundscape titles and the CLI results match actual output. Do not claim playback was tested or initiated. Reject duplicate captures, caption-only changes, terminal output presented as feature UI, and forged HTML.
+- Independently inspect every image and transcript for privacy and truthful status details, applying only the expressly described verified mappings. Unknown identities fail review.
+- Verify the route, accessible names, theme application, referenced artwork and capture results in the actual compatible Core environment. The existing plan is preserved; its TOML was inspected as text, but neither a parser nor capture was run under the no-code-execution constraint.
