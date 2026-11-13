@@ -1,6 +1,6 @@
 [project]
 name = "heinzel-zoom"
-version = "0.9.2"
+version = "0.9.3"
 description = "Read meetings from Zoom's meeting-summary emails: the meetings capability."
 readme = "README.md"
 license = "MIT"

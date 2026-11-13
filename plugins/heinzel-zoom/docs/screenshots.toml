@@ -2,7 +2,7 @@ format = 1
 bootstrap = "docs/screenshot_fixture.py"
 browser_time = "2026-11-01T12:00:00Z"
 
-# Core workflow views use the fixture's declared contract; no report has been generated.
+# The fixture declares this contract; it does not generate a report.
 [[scenes]]
 name = "workflow-list"
 surface = "ui"
