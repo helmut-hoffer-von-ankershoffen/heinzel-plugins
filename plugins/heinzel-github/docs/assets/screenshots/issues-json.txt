@@ -8,7 +8,13 @@
     "assignee": "grace",
     "labels": [
       "bug"
-    ]
+    ],
+    "created_at": null,
+    "closed_at": null,
+    "reporter": null,
+    "released_in": null,
+    "released_at": null,
+    "attachments": []
   },
   {
     "key": "acme/widgets#4",
@@ -19,6 +25,12 @@
     "assignee": "ada",
     "labels": [
       "docs"
-    ]
+    ],
+    "created_at": null,
+    "closed_at": null,
+    "reporter": null,
+    "released_in": null,
+    "released_at": null,
+    "attachments": []
   }
 ]

@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.5.5
+
+Relock for Heinzel Core 0.9.40 (its AI extra adds pyjwt) and refresh the gallery.
+
 ## 0.5.4
 
 No data credit in the footer, on Today, in the chart or in the command output. The credit stays on the Weather page (info button with the link), in the README and in `hz weather info`.

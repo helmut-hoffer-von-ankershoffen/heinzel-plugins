@@ -127,9 +127,9 @@ Development and release commands: [repository guide](../../README.md).
 <!-- screenshots:start -->
 ## Screenshots
 
-<img src="docs/assets/screenshots/workflow-collection.png" alt="Explore the fictional weekly code review in the local workflow collection" width="960">
+<img src="docs/assets/screenshots/workflow-collection.png" alt="The fictional weekly code review in the Core workflow graph and contracts list" width="960">
 
-Explore the fictional weekly code review in the local workflow collection
+The fictional weekly code review in the Core workflow graph and contracts list
 
 <img src="docs/assets/screenshots/workflow-context.png" alt="Fictional weekly review declares merged-work and issue inputs; no report was generated" width="960">
 

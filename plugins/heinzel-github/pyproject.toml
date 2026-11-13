@@ -1,6 +1,6 @@
 [project]
 name = "heinzel-github"
-version = "0.9.2"
+version = "0.9.3"
 description = "Read pull requests and issues from GitHub: the code-host and tracker capabilities."
 readme = "README.md"
 license = "MIT"
@@ -145,7 +145,7 @@ highlights = [
 [[tool.heinzel.catalog.screenshots]]
 path = "docs/assets/screenshots/workflow-collection.png"
 surface = "ui"
-caption = "Explore the fictional weekly code review in the local workflow collection"
+caption = "The fictional weekly code review in the Core workflow graph and contracts list"
 
 [[tool.heinzel.catalog.screenshots]]
 path = "docs/assets/screenshots/workflow-context.png"

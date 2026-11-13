@@ -1,29 +1,29 @@
 ☀  22°C clear sky in Berlin, DE (feels like 21°C; today 12 to 24°C, 80% rain)
-⚠ Thunderstorm warning, Thu 01:00 to Thu 04:00 (Example Weather Service)
+⚠ Thunderstorm warning, Fri 19:00 to Fri 22:00 (Example Weather Service)
 Next hours
 ┏━━━━━━━┳━━━━━━┳━━━━━━┳━━━━━━━━━━━━━━━┓
 ┃ Time  ┃ Temp ┃ Rain ┃ Sky           ┃
 ┡━━━━━━━╇━━━━━━╇━━━━━━╇━━━━━━━━━━━━━━━┩
-│ 22:00 │ 22°C │ 10%  │ broken clouds │
-│ 23:00 │ 20°C │ 80%  │ moderate rain │
-│ 00:00 │ 18°C │ 80%  │ moderate rain │
-│ 01:00 │ 17°C │ 80%  │ moderate rain │
-│ 02:00 │ 15°C │ 80%  │ moderate rain │
-│ 03:00 │ 14°C │ 10%  │ broken clouds │
-│ 04:00 │ 12°C │ 10%  │ broken clouds │
-│ 05:00 │ 14°C │ 10%  │ broken clouds │
-│ 06:00 │ 15°C │ 10%  │ broken clouds │
-│ 07:00 │ 16°C │ 10%  │ broken clouds │
-│ 08:00 │ 12°C │ 10%  │ broken clouds │
-│ 09:00 │ 13°C │ 10%  │ clear sky     │
+│ 16:00 │ 22°C │ 10%  │ broken clouds │
+│ 17:00 │ 20°C │ 80%  │ moderate rain │
+│ 18:00 │ 18°C │ 80%  │ moderate rain │
+│ 19:00 │ 17°C │ 80%  │ moderate rain │
+│ 20:00 │ 15°C │ 80%  │ moderate rain │
+│ 21:00 │ 14°C │ 10%  │ broken clouds │
+│ 22:00 │ 12°C │ 10%  │ broken clouds │
+│ 23:00 │ 14°C │ 10%  │ broken clouds │
+│ 00:00 │ 15°C │ 10%  │ broken clouds │
+│ 01:00 │ 16°C │ 10%  │ broken clouds │
+│ 02:00 │ 12°C │ 10%  │ broken clouds │
+│ 03:00 │ 13°C │ 10%  │ clear sky     │
 └───────┴──────┴──────┴───────────────┘
 Days
 ┏━━━━━━━━━━━━┳━━━━━━┳━━━━━━┳━━━━━━┳━━━━━━━━━━━━━━━┓
 ┃ Day        ┃ Low  ┃ High ┃ Rain ┃ Sky           ┃
 ┡━━━━━━━━━━━━╇━━━━━━╇━━━━━━╇━━━━━━╇━━━━━━━━━━━━━━━┩
-│ Wed 11 Nov │ 12°C │ 24°C │ 80%  │ moderate rain │
-│ Thu 12 Nov │ 10°C │ 19°C │ 10%  │ broken clouds │
-│ Fri 13 Nov │ 9°C  │ 18°C │ 80%  │ moderate rain │
-│ Sat 14 Nov │ 12°C │ 21°C │ 10%  │ clear sky     │
-│ Sun 15 Nov │ 13°C │ 24°C │ 10%  │ clear sky     │
+│ Fri 13 Nov │ 12°C │ 24°C │ 80%  │ moderate rain │
+│ Sat 14 Nov │ 10°C │ 19°C │ 10%  │ broken clouds │
+│ Sun 15 Nov │ 9°C  │ 18°C │ 80%  │ moderate rain │
+│ Mon 16 Nov │ 12°C │ 21°C │ 10%  │ clear sky     │
+│ Tue 17 Nov │ 13°C │ 24°C │ 10%  │ clear sky     │
 └────────────┴──────┴──────┴──────┴───────────────┘

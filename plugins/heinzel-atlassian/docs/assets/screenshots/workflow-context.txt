@@ -32,19 +32,20 @@ Outputs
 notes: markdown
 Next steps
 hz heinzel wake me:weekly-work-review --dry-run
+Run in terminal
 the packet the agent gets; nothing is spent
 hz heinzel wake me:weekly-work-review
+Run in terminal
 draft it now, at most 0.5 USD; the draft is saved under /demo-profile/data_dir/workflow/drafts/me-weekly-work-review
-v0.9.1
+v0.9.40
+Plugins changed, warning
 Updates, off
-Daemon not installed, off
 0
 System health, error
-No calendar connected, error
+?
+Daemon not installed, off
 Chat
 New chat
 Your message
 Default
-
-Up to $0.25 per message · this chat $0.00
-Runs your agent runner and may cost money: at most $0.25 per message, $2.00 per chat; this chat has cost $0.00. It reads with hz and asks you before it changes anything.
+Audio

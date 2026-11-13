@@ -7,14 +7,8 @@ name = "workflow-collection"
 surface = "ui"
 route = "/contracts"
 appearance = "light"
-caption = "Explore the fictional weekly code review in the local workflow collection"
+caption = "The fictional weekly code review in the Core workflow graph and contracts list"
 timeout_ms = 30000
-
-[[scenes.steps]]
-action = "hover"
-role = "link"
-name = "Weekly code review"
-within_role = "main"
 
 [[scenes.steps]]
 action = "wait"
