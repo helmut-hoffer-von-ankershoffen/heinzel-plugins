@@ -1,6 +1,6 @@
 [project]
 name = "heinzel-clock"
-version = "0.9.7"
+version = "0.9.8"
 description = "What time it is for everyone on the team: a Heinzelmännchen plugin."
 readme = "README.md"
 license = "MIT"
@@ -163,13 +163,13 @@ caption = "The globe and three fictional team clocks on a phone — fixed demons
 
 [[tool.heinzel.catalog.screenshots]]
 path = "docs/assets/screenshots/terminal-current.png"
-surface = "ui"
-caption = "Terminal output shown in the app, not a feature view: fictional demo team at 15:30 UTC: Berlin and New York are working; Los Angeles starts in 30 minutes."
+surface = "cli"
+caption = "CLI: fictional demo team at 15:30 UTC: Berlin and New York are within working hours; Los Angeles starts in 30 minutes."
 
 [[tool.heinzel.catalog.screenshots]]
 path = "docs/assets/screenshots/terminal-overlap.png"
-surface = "ui"
-caption = "Terminal output shown in the app, not a feature view: at 16:30 UTC all three fictional demo zones are within working hours."
+surface = "cli"
+caption = "CLI preview with --at: at 16:30 UTC all three fictional demo zones are within working hours."
 
 [[tool.heinzel.catalog.screenshots]]
 path = "docs/assets/screenshots/cli-json.png"

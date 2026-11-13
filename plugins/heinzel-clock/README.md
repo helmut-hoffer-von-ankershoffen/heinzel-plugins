@@ -48,16 +48,16 @@ Inspect all configured time zones from the primary footer clock — fictional de
 
 The globe and three fictional team clocks on a phone — fixed demonstration time
 
-<img src="docs/assets/screenshots/terminal-current.png" alt="Terminal output shown in the app, not a feature view: fictional demo team at 15:30 UTC: Berlin and New York are working; Los Angeles starts in 30 minutes." width="960">
-
-Terminal output shown in the app, not a feature view: fictional demo team at 15:30 UTC: Berlin and New York are working; Los Angeles starts in 30 minutes.
-
-<img src="docs/assets/screenshots/terminal-overlap.png" alt="Terminal output shown in the app, not a feature view: at 16:30 UTC all three fictional demo zones are within working hours." width="960">
-
-Terminal output shown in the app, not a feature view: at 16:30 UTC all three fictional demo zones are within working hours.
-
 <details>
 <summary>Command line</summary>
+
+<img src="docs/assets/screenshots/terminal-current.png" alt="CLI: fictional demo team at 15:30 UTC: Berlin and New York are within working hours; Los Angeles starts in 30 minutes." width="960">
+
+CLI: fictional demo team at 15:30 UTC: Berlin and New York are within working hours; Los Angeles starts in 30 minutes.
+
+<img src="docs/assets/screenshots/terminal-overlap.png" alt="CLI preview with --at: at 16:30 UTC all three fictional demo zones are within working hours." width="960">
+
+CLI preview with --at: at 16:30 UTC all three fictional demo zones are within working hours.
 
 <img src="docs/assets/screenshots/cli-json.png" alt="Structured clock data for the fictional team at the fixed demonstration time." width="960">
 

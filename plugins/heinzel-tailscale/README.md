@@ -56,9 +56,9 @@ Development and release commands: [repository guide](../../README.md).
 <!-- screenshots:start -->
 ## Screenshots
 
-<img src="docs/assets/screenshots/sharing-ready.png" alt="Turn private sharing on; the switch reads On with Copy URL and Open — fictional local Tailscale demo" width="960">
+<img src="docs/assets/screenshots/sharing-ready.png" alt="Turn private sharing on; the switch reads On with Copy link and Open — fictional local Tailscale demo" width="960">
 
-Turn private sharing on; the switch reads On with Copy URL and Open — fictional local Tailscale demo
+Turn private sharing on; the switch reads On with Copy link and Open — fictional local Tailscale demo
 
 <img src="docs/assets/screenshots/sharing-off.png" alt="Turn private sharing off explicitly — fictional local Tailscale demo" width="960">
 
@@ -67,13 +67,13 @@ Turn private sharing off explicitly — fictional local Tailscale demo
 <details>
 <summary>Command line</summary>
 
-<img src="docs/assets/screenshots/sharing-request-cli.png" alt="Inspect the saved request and mapping from the CLI — fictional local Tailscale demo" width="960">
+<img src="docs/assets/screenshots/sharing-request-cli.png" alt="Then hz tailscale status --json: mapped to the web app port; the CLI cannot see the web listener, so it says apply-required — fictional demo" width="960">
 
-Inspect the saved request and mapping from the CLI — fictional local Tailscale demo
+Then hz tailscale status --json: mapped to the web app port; the CLI cannot see the web listener, so it says apply-required — fictional demo
 
-<img src="docs/assets/screenshots/sharing-off-cli.png" alt="Inspect the request and mapping after switching off — fictional local Tailscale demo" width="960">
+<img src="docs/assets/screenshots/sharing-off-cli.png" alt="Then hz tailscale status --json after switching off: not mapped; the target shows the default port 8737 — fictional local Tailscale demo" width="960">
 
-Inspect the request and mapping after switching off — fictional local Tailscale demo
+Then hz tailscale status --json after switching off: not mapped; the target shows the default port 8737 — fictional local Tailscale demo
 
 </details>
 

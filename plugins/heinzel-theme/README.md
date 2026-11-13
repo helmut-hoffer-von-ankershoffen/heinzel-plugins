@@ -29,9 +29,9 @@ A fictional Launch review contract, its configuration and run commands, in the a
 
 The same fictional Launch review contract in the applied Heinzelmännchen dark theme.
 
-<img src="docs/assets/screenshots/theme-soundscapes.png" alt="Demo profile: browse three optional YouTube soundscapes; playback starts only after Play." width="960">
+<img src="docs/assets/screenshots/theme-soundscapes.png" alt="Demo profile: browse the three optional YouTube soundscapes in appearance settings." width="960">
 
-Demo profile: browse three optional YouTube soundscapes; playback starts only after Play.
+Demo profile: browse the three optional YouTube soundscapes in appearance settings.
 
 <details>
 <summary>Command line</summary>

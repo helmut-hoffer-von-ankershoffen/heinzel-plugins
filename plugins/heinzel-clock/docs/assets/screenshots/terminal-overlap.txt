@@ -1,42 +1,3 @@
-Skip to content
-Heinzelmännchen
-Heinzelmännchen
-Contracts
-Team graph
-Organisation
-Team roster
-World clock
-Berlin 16:30:00 · Ends in 1h 30m
-New York 11:30:00 · Ends in 6h 30m
-Los Angeles 08:30:00 · Starts in 30m
-M
-Mira
-· EM
-Today
-2
-Today
-Doctor: 4 checks need attention
-
-ai.access ai access, system.doctor installation, system.prerequisite system.runner: claude…
-
-Open
-Ask about it
-Zones at work now
-
-2/3
-
-Ask about it
-v0.9.21
-Updates, off
-0
-System health, warning
-Calendar unavailable
-Daemon not installed, off
-16:30:00
-Chat
-Terminal
-Demo complete
-$ hz clock --at 2026-10-26T16:30:00Z; printf '\033]0;Demo complete\007'
 ┏━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━┳━━━━━━━━━━━━━━━┳━━━━━━━━━┓
 ┃ Zone                    ┃ Time      ┃ Working hours ┃ Working ┃
 ┡━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━╇━━━━━━━━━━━━━━━╇━━━━━━━━━┩
@@ -44,4 +5,3 @@ $ hz clock --at 2026-10-26T16:30:00Z; printf '\033]0;Demo complete\007'
 │ America/New_York        │ Mon 12:30 │ 09-18         │ yes     │
 │ America/Los_Angeles     │ Mon 09:30 │ 09-18         │ yes     │
 └─────────────────────────┴───────────┴───────────────┴─────────┘
-$

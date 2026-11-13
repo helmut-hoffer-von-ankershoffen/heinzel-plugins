@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.9.5
+
+Relock for Heinzel Core 0.9.40 (its AI extra adds pyjwt) and refresh the gallery.
+
 ## 0.9.4
 
 The switch shows your choice: On reads On while hz finishes turning it on. One short status line replaces the

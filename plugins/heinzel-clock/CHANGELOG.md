@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.9.8
+
+Relock for Heinzel Core 0.9.40 (its AI extra adds pyjwt). The gallery hovers the Today region (Core 0.9.40 keeps the Today heading screen-reader only) and shows the two time checks as CLI scenes.
+
 ## 0.9.7
 
 Show "Edit time zones" as a pane action and highlight city rows on hover instead of underlining them.

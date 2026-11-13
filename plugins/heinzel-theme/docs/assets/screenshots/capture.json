@@ -1,12 +1,12 @@
 {
   "format": 1,
   "plugin": "heinzel-theme",
-  "core_version": "0.9.16",
-  "inputs_sha256": "d80f5a1261d0be715d50d48ed379229a0422c194f6408578442d1f2c97ee0f29",
+  "core_version": "0.9.40",
+  "inputs_sha256": "956c896460db8ead6ba2b06b98384717d5b290d2de55326b75fc95b56a791e1d",
   "images": {
-    "docs/assets/screenshots/theme-light.png": "630f39959a749fc38a80747333b2b257099679efaee0326e2054114b467b6cc9",
-    "docs/assets/screenshots/theme-dark.png": "d603a08412d5b359648334cd4036d7702b5bae6cae7b3fdd889e30d3529b70e4",
-    "docs/assets/screenshots/theme-soundscapes.png": "5821eaefcccbddaebbd0ee8f9f59f1391c9e7d1dcdb771085e4f8d9d824e6473",
+    "docs/assets/screenshots/theme-light.png": "9ddc197bd1054f7a313a0075bade31a56e58c77e601bb4ace0c062d3bb21ae3b",
+    "docs/assets/screenshots/theme-dark.png": "408eed5d5646b21c04c2bfe9d4acfbbb2736154954bc81f272e6441980a049a2",
+    "docs/assets/screenshots/theme-soundscapes.png": "a22b1b01149f9dced972595bab03f81bf2fc9041636ed5b4e3f7e85dd3c2920a",
     "docs/assets/screenshots/theme-cli.png": "2ebc7271bafa972d57b82a6278d25aee8901031963a3342297a50658f653e015",
     "docs/assets/screenshots/soundscapes-cli.png": "1307852a559700adac312deaf632275461688a8136b7768777b141afe9a4df46"
   },
@@ -14,18 +14,18 @@
     "format": 2,
     "source_story": {
       "path": "source-story.md",
-      "sha256": "5e50f711d08b79fe07a4c1db03a5046ccf4266a41063989b75215f9432cc2c90"
+      "sha256": "63dd3f1259e10fd6ce79356740b96e14194ff1bb56d97e52c85aa684c44ffb33"
     },
     "definition": {
       "format": 1,
       "reviewer": "Codex feature-story agent",
-      "source_sha256": "8a10647b3ad22ef9cfd37efb8dae755e1bc2ec1adc13f2667313eac523baad62",
-      "plan_sha256": "1ef98fc02c6f93f507152d127ce22e54c1885b5cddb7c293c8339b39ca5b5a84",
-      "story_sha256": "5e50f711d08b79fe07a4c1db03a5046ccf4266a41063989b75215f9432cc2c90"
+      "source_sha256": "21a855cd8644a76635c5d7bf63e969dfc118da169fd80bdad7d65c4417403f11",
+      "plan_sha256": "1b258aa7bc78674d2237109fdde1f37a00eb478621ffeea449d8b293f5c4a16b",
+      "story_sha256": "63dd3f1259e10fd6ce79356740b96e14194ff1bb56d97e52c85aa684c44ffb33"
     },
     "plugin": "heinzel-theme",
-    "core_version": "0.9.16",
-    "inputs_sha256": "d80f5a1261d0be715d50d48ed379229a0422c194f6408578442d1f2c97ee0f29",
+    "core_version": "0.9.40",
+    "inputs_sha256": "956c896460db8ead6ba2b06b98384717d5b290d2de55326b75fc95b56a791e1d",
     "screenshots": [
       {
         "path": "docs/assets/screenshots/theme-light.png",
@@ -40,7 +40,7 @@
       {
         "path": "docs/assets/screenshots/theme-soundscapes.png",
         "surface": "ui",
-        "caption": "Demo profile: browse three optional YouTube soundscapes; playback starts only after Play."
+        "caption": "Demo profile: browse the three optional YouTube soundscapes in appearance settings."
       },
       {
         "path": "docs/assets/screenshots/theme-cli.png",
@@ -54,24 +54,24 @@
       }
     ],
     "images": {
-      "theme-light.png": "630f39959a749fc38a80747333b2b257099679efaee0326e2054114b467b6cc9",
-      "theme-dark.png": "d603a08412d5b359648334cd4036d7702b5bae6cae7b3fdd889e30d3529b70e4",
-      "theme-soundscapes.png": "5821eaefcccbddaebbd0ee8f9f59f1391c9e7d1dcdb771085e4f8d9d824e6473",
+      "theme-light.png": "9ddc197bd1054f7a313a0075bade31a56e58c77e601bb4ace0c062d3bb21ae3b",
+      "theme-dark.png": "408eed5d5646b21c04c2bfe9d4acfbbb2736154954bc81f272e6441980a049a2",
+      "theme-soundscapes.png": "a22b1b01149f9dced972595bab03f81bf2fc9041636ed5b4e3f7e85dd3c2920a",
       "theme-cli.png": "2ebc7271bafa972d57b82a6278d25aee8901031963a3342297a50658f653e015",
       "soundscapes-cli.png": "1307852a559700adac312deaf632275461688a8136b7768777b141afe9a4df46"
     },
     "transcripts": {
-      "theme-light.txt": "6ab5f60fe4d6d1c7e8ca01b7d4196e91ff0d77b148684fd8cf471ea31201db96",
-      "theme-dark.txt": "6ab5f60fe4d6d1c7e8ca01b7d4196e91ff0d77b148684fd8cf471ea31201db96",
-      "theme-soundscapes.txt": "3cac207f9dc487416d916e0c5b144b55b2a5da5414f31538d1b9940c90682608",
+      "theme-light.txt": "0f0236ae40c88250b50aad22333aa5abe7923a4fd8970a1446863194e6452125",
+      "theme-dark.txt": "6eb303d2e0b3b1c1c8661143de487a890c203c59b477417261ed95fac4c3f4f3",
+      "theme-soundscapes.txt": "1a7da0a02c5fec06a5415443e51e9ded8e814598fbf7ddd37bad920001637c60",
       "theme-cli.txt": "36d653efa87eeec3a67c92ac4c27069a4697714578a9cd172bda926c27fdfa1f",
       "soundscapes-cli.txt": "2ca2445881fd6893242b1be527a70a7791f0f2edf486c7a51c893f2cb41f6369"
     },
-    "bundle_sha256": "75d70b734efb2d4b145b9f68fbc727bca4a85479fd68fb931e3c892f0b1333f6"
+    "bundle_sha256": "7a21c69a55f6ca0be169f4c674c904ab565a78b0def91f50d0ea6ec27f983db5"
   },
   "privacy_review": {
     "format": 1,
-    "bundle_sha256": "75d70b734efb2d4b145b9f68fbc727bca4a85479fd68fb931e3c892f0b1333f6",
+    "bundle_sha256": "7a21c69a55f6ca0be169f4c674c904ab565a78b0def91f50d0ea6ec27f983db5",
     "reviewer": "Codex privacy agent",
     "decision": "approve",
     "checked_images": [

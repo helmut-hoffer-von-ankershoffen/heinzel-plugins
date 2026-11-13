@@ -1,33 +1,33 @@
 {
   "format": 1,
   "plugin": "heinzel-clock",
-  "core_version": "0.9.21",
-  "inputs_sha256": "241640a1c65ec151270db2723a02f2d6957f6191b56a97c70ac8a7502cc84ea6",
+  "core_version": "0.9.40",
+  "inputs_sha256": "4381d47d78e9f7dda9a09834224a3e5ec93754d52d32750a7a3cfa2001ebf2ab",
   "images": {
-    "docs/assets/screenshots/world-clock.png": "be99e7a258cf6cf3709038528787c53ede3f2e86f159cfdb1b305b59954c93ea",
-    "docs/assets/screenshots/team-overview.png": "7357c1ace0edc3043cab277d3a6cd04aa83d11c4cfa1937e58c7d2d1e1898f5a",
-    "docs/assets/screenshots/footer-detail.png": "d3f4c7cc5cb6ad2572abc1ebba5ec15a02eaea5ae1041f580409ac216546e918",
-    "docs/assets/screenshots/phone-world-clock.png": "38b15efa688ccc27eb908d1bf34fae6d697d4d3499e3337fa9dbb56097fa9524",
-    "docs/assets/screenshots/terminal-current.png": "b5db7d975bb6edca3d096a4116f3178a02e1c2baeb212f1205063a4604af5ad4",
-    "docs/assets/screenshots/terminal-overlap.png": "35c49f5f914791bbc2104be0a68769f072d000d6c3be5bdf856ba2c77e494376",
+    "docs/assets/screenshots/world-clock.png": "02f721ffdf50649896e584f56b57acd62c8e3c4244cd5bec3b54e97ef37f648d",
+    "docs/assets/screenshots/team-overview.png": "cefa62cdf2dbe45f7a548a8d5e4ea985833acd602c95ad3fd4f8612f18264313",
+    "docs/assets/screenshots/footer-detail.png": "7ae3d6c3f913430f45de8ca0c4abbc70646f9bc73e5a1d5070df1214b000f905",
+    "docs/assets/screenshots/phone-world-clock.png": "159d24b0bbb03901df093b733649e8d0c94c958050d1d0570b1af8d60104b8d4",
+    "docs/assets/screenshots/terminal-current.png": "6b5424327b872c1494ba191a4c697b4bdde5f9ed461cc25150b14e5845205f52",
+    "docs/assets/screenshots/terminal-overlap.png": "694eb1332ea37f12f01a43d74c5187adb92ab8f2d42fc31267ae2a98169e4b78",
     "docs/assets/screenshots/cli-json.png": "9034b7749189a58ef9506674b6dd5150b562fe44513c0f50c1052f799f3f06d3"
   },
   "review_bundle": {
     "format": 2,
     "source_story": {
       "path": "source-story.md",
-      "sha256": "3d8ef54f81a733d84fe58a284972f2494315461d8a5e4f63ba8cb838218332a3"
+      "sha256": "f23797dfb79feb2830262a07ff0bb8fa40b4cb60b7df0c5d3fb885f48b0de9d9"
     },
     "definition": {
       "format": 1,
       "reviewer": "Codex feature-story agent",
-      "source_sha256": "cdf61880445d96b14798b697f1951f6154284d8c106edfea736a08d0c3ff3fb2",
-      "plan_sha256": "2512c6c881c23040b76eafbab5edbdb4eee9d69115ea1af0a8e10a9daba0fde5",
-      "story_sha256": "3d8ef54f81a733d84fe58a284972f2494315461d8a5e4f63ba8cb838218332a3"
+      "source_sha256": "918ec8603f524396623010c8817ba722cb818b8e31c6eadca58af6727291bf59",
+      "plan_sha256": "4d0c875dbba40b93030be59a181c6535f9b1a6e8b5c47c451e12d4701e2bbba3",
+      "story_sha256": "f23797dfb79feb2830262a07ff0bb8fa40b4cb60b7df0c5d3fb885f48b0de9d9"
     },
     "plugin": "heinzel-clock",
-    "core_version": "0.9.21",
-    "inputs_sha256": "241640a1c65ec151270db2723a02f2d6957f6191b56a97c70ac8a7502cc84ea6",
+    "core_version": "0.9.40",
+    "inputs_sha256": "4381d47d78e9f7dda9a09834224a3e5ec93754d52d32750a7a3cfa2001ebf2ab",
     "screenshots": [
       {
         "path": "docs/assets/screenshots/world-clock.png",
@@ -51,13 +51,13 @@
       },
       {
         "path": "docs/assets/screenshots/terminal-current.png",
-        "surface": "ui",
-        "caption": "Terminal output shown in the app, not a feature view: fictional demo team at 15:30 UTC: Berlin and New York are working; Los Angeles starts in 30 minutes."
+        "surface": "cli",
+        "caption": "CLI: fictional demo team at 15:30 UTC: Berlin and New York are within working hours; Los Angeles starts in 30 minutes."
       },
       {
         "path": "docs/assets/screenshots/terminal-overlap.png",
-        "surface": "ui",
-        "caption": "Terminal output shown in the app, not a feature view: at 16:30 UTC all three fictional demo zones are within working hours."
+        "surface": "cli",
+        "caption": "CLI preview with --at: at 16:30 UTC all three fictional demo zones are within working hours."
       },
       {
         "path": "docs/assets/screenshots/cli-json.png",
@@ -66,28 +66,28 @@
       }
     ],
     "images": {
-      "world-clock.png": "be99e7a258cf6cf3709038528787c53ede3f2e86f159cfdb1b305b59954c93ea",
-      "team-overview.png": "7357c1ace0edc3043cab277d3a6cd04aa83d11c4cfa1937e58c7d2d1e1898f5a",
-      "footer-detail.png": "d3f4c7cc5cb6ad2572abc1ebba5ec15a02eaea5ae1041f580409ac216546e918",
-      "phone-world-clock.png": "38b15efa688ccc27eb908d1bf34fae6d697d4d3499e3337fa9dbb56097fa9524",
-      "terminal-current.png": "b5db7d975bb6edca3d096a4116f3178a02e1c2baeb212f1205063a4604af5ad4",
-      "terminal-overlap.png": "35c49f5f914791bbc2104be0a68769f072d000d6c3be5bdf856ba2c77e494376",
+      "world-clock.png": "02f721ffdf50649896e584f56b57acd62c8e3c4244cd5bec3b54e97ef37f648d",
+      "team-overview.png": "cefa62cdf2dbe45f7a548a8d5e4ea985833acd602c95ad3fd4f8612f18264313",
+      "footer-detail.png": "7ae3d6c3f913430f45de8ca0c4abbc70646f9bc73e5a1d5070df1214b000f905",
+      "phone-world-clock.png": "159d24b0bbb03901df093b733649e8d0c94c958050d1d0570b1af8d60104b8d4",
+      "terminal-current.png": "6b5424327b872c1494ba191a4c697b4bdde5f9ed461cc25150b14e5845205f52",
+      "terminal-overlap.png": "694eb1332ea37f12f01a43d74c5187adb92ab8f2d42fc31267ae2a98169e4b78",
       "cli-json.png": "9034b7749189a58ef9506674b6dd5150b562fe44513c0f50c1052f799f3f06d3"
     },
     "transcripts": {
-      "world-clock.txt": "4849f3c532914d4d669a65d1a0d8a5465fffd69984657d3f9669408c13a6bd68",
-      "team-overview.txt": "cdadce78d3613d6eb8a16a48e4021d86bee22c71e04d126a4e4f6f0a1c4a0b40",
-      "footer-detail.txt": "012c9b8ac0e614b15085c08ecb4b76e74ca118f52f9785a3ff8a38f09004d981",
-      "phone-world-clock.txt": "e8f05d7590230afeff0bd44a70aae9ad9224e5247e5bb1abab10e92557be64a6",
-      "terminal-current.txt": "1088791e80072bf30bf774e177e20918b6912cb4aaaf37e0ceec7c8f0feca534",
-      "terminal-overlap.txt": "28f9d043553627c542ae7c991f448d4e29aabd591853bff8981021081d19216f",
+      "world-clock.txt": "5fb6afc9ddc207addd012a5b9b9dee5d9f25bbf4367002380a16be3e4d09ed73",
+      "team-overview.txt": "eb0e997ce41dd2a81cad452ba554f5d499b6236c994b60c8b244b9004326f3ca",
+      "footer-detail.txt": "162e989d764a756ea3d9b4456b732c26a79126b54b9b6459528c56fef89ad002",
+      "phone-world-clock.txt": "edafeb4b912ed8a0c73f8d2775cc3057a8d4f7184dc7f6d23fc99020c233b93b",
+      "terminal-current.txt": "05f1fa56e8a12d26bad2cf2635575d237d9ace564a919e04e76e0b75ed699843",
+      "terminal-overlap.txt": "38adb315cb9cbf79f485393c40ca00c5fd3af498d201ff024da182f822938553",
       "cli-json.txt": "8cc4255d19d78d8dee533a130c756f8d32e7d3cc594d21493ded166c4965d167"
     },
-    "bundle_sha256": "a73807852049d4e19281756e477c3d1dbe49230f15647095b8953596642fc641"
+    "bundle_sha256": "96c645e7770822a70a58ec1fbf6de9abc26c62582df3a69acc9f605520176644"
   },
   "privacy_review": {
     "format": 1,
-    "bundle_sha256": "a73807852049d4e19281756e477c3d1dbe49230f15647095b8953596642fc641",
+    "bundle_sha256": "96c645e7770822a70a58ec1fbf6de9abc26c62582df3a69acc9f605520176644",
     "reviewer": "Codex privacy agent",
     "decision": "approve",
     "checked_images": [

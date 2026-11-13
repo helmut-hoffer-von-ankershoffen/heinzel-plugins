@@ -7,7 +7,7 @@ name = "sharing-ready"
 surface = "ui"
 route = "/"
 appearance = "dark"
-caption = "Turn private sharing on; the switch reads On with Copy URL and Open — fictional local Tailscale demo"
+caption = "Turn private sharing on; the switch reads On with Copy link and Open — fictional local Tailscale demo"
 timeout_ms = 30000
 
 [[scenes.steps]]
@@ -44,7 +44,7 @@ name = "Tailscale"
 [[scenes]]
 name = "sharing-request-cli"
 surface = "cli"
-caption = "Inspect the saved request and mapping from the CLI — fictional local Tailscale demo"
+caption = "Then hz tailscale status --json: mapped to the web app port; the CLI cannot see the web listener, so it says apply-required — fictional demo"
 command = ["tailscale", "status", "--json"]
 
 [[scenes]]
@@ -88,5 +88,5 @@ name = "Tailscale"
 [[scenes]]
 name = "sharing-off-cli"
 surface = "cli"
-caption = "Inspect the request and mapping after switching off — fictional local Tailscale demo"
+caption = "Then hz tailscale status --json after switching off: not mapped; the target shows the default port 8737 — fictional local Tailscale demo"
 command = ["tailscale", "status", "--json"]

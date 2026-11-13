@@ -1,38 +1,41 @@
 ## Audience
-A distributed team deciding whether World Clock makes it easier to find a good time to work together, and whether its data is useful in scripts.
+
+A distributed team deciding whether World Clock will make it easier to find a considerate time to collaborate, and an agent or terminal user who needs the same information as structured data.
 
 ## Outcome
-Show the same fictional team across a globe, the app’s everyday overview and footer, and command-line results. At the fixed demonstration moment, Berlin and New York are working and Los Angeles starts in 30 minutes; an hour later all three are working.
+
+Show the team at a fixed fictional moment, then preview a later moment when all three working days overlap. The globe, Today metric, sidebar and footer make the answer available in the app; the CLI provides a repeatable preview and JSON output.
 
 ## Scenes
-1. **World clock:** In light appearance, show the genuine globe and zone list for the three fictional cities, with the Today count visible. Wait for the real view and WebGL rather than substituting a mockup.
-2. **Team overview:** In dark appearance, show the Core-rendered Today metric, sidebar ticker and primary footer clock together. This is a distinct everyday use of the same underlying clock data.
-3. **Footer detail:** Open the primary clock’s genuine detail pane and crop to its zone list and workday countdowns.
-4. **Phone world clock:** Show the real panel at phone width, with its globe and zone list. This demonstrates responsive use, not a different feature.
-5. **Current terminal result:** In the native app terminal, run the clock operation at 15:30 UTC to show the table and current working states.
-6. **Overlap terminal result:** Run the same operation at 16:30 UTC to show the changed working states. These two app-terminal scenes are terminal output, not feature UI.
-7. **CLI JSON:** Capture the structured result for the same fictional team at 15:30 UTC, showing its usefulness to scripts and agents.
+
+1. **World clock, light:** Open the genuine World clock panel to see the globe, primary zone, local times and working-hour context for Berlin, New York and Los Angeles. The moment is fictional and fixed.
+2. **Team overview, dark:** Show the Today metric and primary footer clock in their normal app context, with the sidebar ticker available. At the fixture moment, two of three zones are at work.
+3. **Footer detail:** Open the primary clock’s genuine detail pane to compare the configured zones and their countdowns. This is a distinct feature state, not a caption variation.
+4. **World clock on a phone:** Show the same genuine panel at a narrow viewport so a prospective user can assess its mobile layout. Review it for legibility and meaningful differences from the desktop capture.
+5. **CLI at 15:30 UTC:** Show the real `hz clock --at` table for the fictional team: Berlin and New York are working; Los Angeles starts in 30 minutes.
+6. **CLI at 16:30 UTC:** Show the second parameter case, when all three fictional zones are within working hours.
+7. **CLI JSON:** Show the structured result at the original fixed moment for someone evaluating agent or script integration.
 
 ## Fictional fixtures
-Use the existing `docs/screenshot_fixture.py`: it fixes the plugin clock at 2026-10-26 15:30 UTC, configures Berlin, New York and Los Angeles with 09:00–18:00 hours, and enables the sidebar and footer contributions. `browser_time` aligns the browser with that moment. The two explicit `--at` arguments demonstrate different moments without claiming the live clock itself has changed. No additional fixture file is assumed.
 
-Normal presentation fictionalization is explicitly limited to verified owning-interpreter paths becoming `/demo-profile/.venv`, and only the verified whole hostname detail in the genuine Doctor row becoming `demo-host`. These mappings change no SDK health status or remaining detail and establish no privacy acceptance. Unknown identities still fail, and independent review must inspect every image and transcript.
+`docs/screenshot_fixture.py` is the existing bootstrap. It fixes the plugin clock at 2026-10-26 15:30 UTC, supplies three fictional zones with 09:00–18:00 hours, and enables the sidebar ticker and footer contribution. The plan also fixes browser time; the later CLI scene explicitly supplies its own `--at` value. The fixture uses environment configuration and invokes the existing application during explicit capture; it was inspected, not run here.
 
-## Privacy pitfalls
-Capture only in the isolated fictional profile; check the entire frame, terminal output and transcripts for real names, hostnames, paths, accounts, tokens and unrelated notifications. Dismissing a Doctor banner does not prove the rest of a capture is private. Do not replace unknown identities with invented ones or alter health results. Independently review every image and transcript before publication.
+## Privacy and presentation
+
+For normal presentation fictionalization, verified owning-interpreter paths become `/demo-profile/.venv`, and only the verified whole hostname detail in the genuine Doctor row becomes `demo-host`. These mappings change no SDK health status or remaining detail and establish no privacy acceptance. Unknown identities still fail; independent review must inspect every image and transcript. Review all other paths, usernames, hostnames, account information and incidental app content before publication; do not infer safety from the fictional clock data or a dismissed Doctor banner.
 
 ## Acceptance criteria
-- Capture the actual plugin view and Core contributions, with readable fictional data and consistent times. The light World Clock and dark overview must have their appearances applied and visible.
-- Show at least two useful genuine feature UI scenes plus a CLI result. The overview and footer detail are meaningful Core-rendered feature states; the two terminal scenes do not count as feature UI.
-- The two terminal tables must reflect their respective `--at` values; the JSON capture must be genuine operation output. Terminal actions wait for completion without per-cell exact-text waits.
-- Reject duplicate captures, caption-only differences, terminal output presented as feature UI, forged HTML, missing or blank globe rendering, misleading status changes, and unreviewed personal data. Check the phone capture for usable content rather than assuming responsive success.
-- Confirm the footer detail’s Primary presentation matches the installed host: the source supports a badge on newer hosts and text on older ones. Treat a failed or unavailable surface as unresolved evidence, not permission to invent a replacement.
-- The plan below preserves the existing useful scenes and bootstrap. It is structurally reviewed against the supplied scene rules, but capture, runtime behavior and parser validation have not been executed.
+
+- Capture real application surfaces and real CLI output using the existing bootstrap; do not forge HTML, substitute terminal output for feature UI, or invent screens or fixture files.
+- Show at least two useful feature UI states and a useful CLI result. Retain both distinct `--at` cases and the JSON result. Reject duplicate captures or changes consisting only of captions.
+- Confirm the light and dark appearances are actually applied, the globe has rendered, and the phone view is readable. If WebGL or a host contribution is unavailable, report the observed result rather than claiming the intended scene was captured.
+- Verify the displayed times, 2/3 count, countdown and later overlap against the fixed fixture and the captured output. Inspect all images and transcripts independently for privacy, including any unrecognized identity.
+- Capture and validate only during an explicitly authorized capture workflow. This plan was reviewed structurally against the requested format; it was not executed or parser-validated in this read-only task.
 
 ## Source-bound UI surface inventory
-- `pyproject.toml`, `[project.entry-points."heinzel.modules"]`: the sole declared module entrypoint is `clock = "heinzel_clock"`. `src/heinzel_clock/__init__.py`, `module.nav` and `module.view`: the actual World Clock panel route is `/?panel=clock:world-clock`; its ABI 1 view consumes the `clock` operation. `web/src/index.ts`, `createView`, and `web/src/ClockPanel.tsx`, `WorldClock`, establish the genuine globe, zone list, work states, clock controls and settings shortcut. Reduced motion or WebGL failure uses a local static map; there is no external map UI or map-service request.
-- `src/heinzel_clock/__init__.py`, `@module.operation` on `clock` and `_render`: one operation yields zone, local time, hours, working state and primary designation; the CLI renders a table, while `README.md` documents `--json`, MCP and REST. MCP and REST are interfaces, not evidence of separate product screens. The two app-terminal scenes are useful parameter cases of that operation.
-- The same source’s `@module.status` declarations `primary-zone` and `zones-ticker`, `module.action("team-clock", ...)`, and `@module.widget` `at_work` contribute a footer detail, sidebar ticker, header action and Today metric to Core. These are genuine Core-rendered feature surfaces, not separate plugin routes. The fixture explicitly enables the two status slots.
-- `@module.settings` and `module.nav(... settings=NavSettings(...))` declare Core settings; `@module.setup` declares an interactive setup flow; `@module.health` declares Doctor checks for zones and deprecated configuration. These are supporting Core surfaces, not the principal story. The exact Doctor host row and owning-interpreter paths are not declared by this plugin; only verified occurrences qualify for the disclosed mappings.
-- No channel, approval or info contribution is declared in `src/heinzel_clock/__init__.py`; no external provider UI is evidenced by the supplied source. The module docstring describes three views but the actual declarations also include the separately registered World Clock view and two status items; declarations govern this inventory.
-- `pyproject.toml` and `README.md` list a catalog screenshot named `cli-times.png`, while the existing plan names the CLI scene `cli-json`; the supplied files do not establish whether generated artifacts currently agree. Verify generated catalog references during capture rather than claiming freshness. `docs/SCREENSHOTS.md` references a repository-level author guide outside the supplied files, so its additional requirements remain unresolved.
+
+- `pyproject.toml`, `[project.entry-points."heinzel.modules"]`: the sole declared plugin entry point is `clock = "heinzel_clock"`. `src/heinzel_clock/__init__.py` declares the actual module and its contributions.
+- Genuine plugin feature UI: `module.nav` points to `/?panel=clock:world-clock`; `module.view` declares `world-clock`, source `clock`, ABI 1 and a 60-second refresh. `web/src/index.ts` supplies `WorldClock`, and `web/src/ClockPanel.tsx` implements the globe, local-time list, working states and settings shortcut. Its static map is a real fallback for reduced motion or failed WebGL; the globe does not contact a map service. `src/heinzel_clock/views/index.js` is the packaged view. The view declaration also supplies a text fallback directing users to `hz clock`; that fallback does not make the feature terminal-only.
+- Core-rendered feature contributions: `primary_zone` declares the footer status and zone details; `zones_ticker` declares the sidebar ticker; `module.action("team-clock", ...)` declares a header action with a working-count badge; and `at_work` declares the Today metric. Their effects navigate to the declared panel. The exact host rendering and availability remain capture-time evidence, including the older-host detail badge fallback described in `README.md` and `_detail`.
+- Operation and other Core surfaces: `@module.operation` declares one `clock` operation with an optional ISO 8601 `at` parameter and a Rich table renderer; `README.md` identifies CLI, MCP and REST access. `@module.settings`, `@module.health`, and `@module.setup` declare configuration, Doctor checks and an optional setup flow that Core may render. The provided sources do not declare plugin channels, approvals or a separate info contribution; absence of those declarations does not establish what generic Core UI is available. No separate external-provider UI is declared.
+- Evidence limits: the module docstring describes three operation views, while the actual declarations additionally include a sidebar ticker and a custom panel; use the declarations as the more specific inventory. `docs/screenshots.toml` documents intended selectors and Core behavior, but the provided Core implementation and capture results are absent, so route rendering, SDK health, accessibility names and final image content remain unverified.

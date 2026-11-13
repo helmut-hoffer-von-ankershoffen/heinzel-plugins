@@ -28,9 +28,9 @@ Working · 2h 30m since start · 6h 30m left
 Los Angeles
 Starts in 30m · 2d 14h 30m since end
 08:30:00
-v0.9.21
-Updates, off
-0
+Edit time zones
+v0.9.40
 System health, warning
-Daemon not installed, off
+?
 16:30:00
+Audio
