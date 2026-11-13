@@ -70,18 +70,28 @@ def shorten(text: str, limit: int = _DETAILS) -> str:
     return words + (" …" if words.endswith((".", "!", "?")) else "…")
 
 
+def restates_switch(state: SharingState) -> bool:
+    """Whether the state only repeats the switch: plain Off or plain On, nothing to act on or wait for."""
+    if state.problem or state.summary is not None or state.apply_settings:
+        return False
+    plain_off = state.state == "off" and not state.desired_enabled and not state.mapped
+    plain_on = state.state == "ready" and state.desired_enabled
+    return plain_off or plain_on
+
+
 @module.status(source="status", slots={"footer": True, "sidebar": False})
 def sharing(state: SharingState) -> StatusItem:
     """A compact provider-owned status icon with the same explicit control as Settings.
 
     The switch shows the person's choice (`requested`); `checked` says it is live. One short line says what is going
-    on, and the full message is only the Details text.
+    on, and the full message is only the Details text. Plain Off or On has no Details: the switch already says it.
     """
     ready = state.state == "ready"
     # A cause the person must fix gets Try again only once they asked for sharing; before that the switch is the way.
     problem = state.summary if state.problem and state.desired_enabled else None
     status = None if problem else state.summary
-    lines = {"status": status, "problem": problem, "explanation": shorten(state.message)} if _PANE_LINES else {}
+    explanation = None if restates_switch(state) else shorten(state.message)
+    lines = {"status": status, "problem": problem, "explanation": explanation} if _PANE_LINES else {}
     return StatusItem(
         text="Tailscale",
         icon="link",

@@ -10,7 +10,7 @@ Show the owner turning sharing on, what the plugin's own status command reports,
 
 1. **Sharing ready — dark UI.** In the genuine footer Tailscale control, turn on **Share over Tailscale** and wait for the **Open** link. On Core 0.9.40 the control offers **Copy link** and **Open**.
 2. **Requested sharing — CLI.** `hz tailscale status --json` right after scene 1. It shows the saved request and the mapping to the web app's backend port. It reports `apply-required` with the summary *Turning on…*: a separate CLI process has no web runtime, so it cannot verify the web listener and only the web app finishes the transition (`src/heinzel_tailscale/_service.py`, `Sharing._mapping` comment and `Sharing._state`). This is the plugin's real behaviour and must be shown as is.
-3. **Sharing off — light UI.** In the same control, turn sharing off and wait for the switch to read *Off*.
+3. **Sharing off — light UI.** In the same control, turn sharing off and wait for the switch to read *Off*. Plain Off shows no status line and no Details: the switch already says it (`src/heinzel_tailscale/__init__.py`, `restates_switch`). Details appear only for something to act on or wait for.
 4. **After switching off — CLI.** `hz tailscale status --json` right after scene 3: state `off`, not mapped. The target now shows the configured hz web port, default 8737 (Core `Settings.ui_port`), because without an enabled intent there is no backend port to keep (`Sharing._mapping`: `self.readiness.runtime.port or (old.backend_port if old and old.enabled else self.settings.ui_port)`). The port difference between scenes 2 and 4 is therefore expected, not a sign of a different fixture.
 
 ## Capture lifecycle (verified against the capture tool source)
@@ -27,7 +27,7 @@ Normal presentation fictionalization is explicitly limited to verified owning-in
 
 ## Acceptance criteria
 
-- The dark image shows the genuine Tailscale control On with Open; the light image shows the same control Off. Both appearances are applied.
+- The dark image shows the genuine Tailscale control On with Open; the light image shows the same control Off with no Details. Both appearances are applied.
 - Both CLI transcripts are genuine output of the declared status operation in the shared capture state. Scene 2 shows `apply-required` / *Turning on…* (the CLI cannot see the web listener); scene 4 shows `off` with the default port. Captions must state these limits truthfully and must not claim the CLI proves web readiness.
 - No duplicate captures, caption-only differences, forged HTML, invented screens, unknown identities, real credentials, or unreviewed images or transcripts.
 - Each image and transcript is reviewed independently, including the Doctor-row and interpreter-path substitutions.
