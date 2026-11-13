@@ -2,74 +2,54 @@ format = 1
 bootstrap = "docs/screenshot_fixture.py"
 browser_time = "2026-11-01T12:00:00Z"
 
-# showcase is supplied only by the existing documentation fixture.
-# Its operations exercise the real Zoom adapter against fictional mail.
-
+# Core workflow views use the fixture's declared contract; no report has been generated.
 [[scenes]]
-name = "meeting-decisions"
+name = "workflow-list"
 surface = "ui"
-route = "/"
-caption = "Fictional Weekly sync: a Thursday release decision and three named next steps, via the fixture-only requester and real Zoom parser."
+route = "/contracts"
+appearance = "light"
+caption = "Demo data: the fictional Meeting notes workflow declares a need for meeting summaries."
 timeout_ms = 30000
 
 [[scenes.steps]]
-action = "terminal"
-command = ["showcase", "one", "sync"]
+action = "wait"
+text = "Meeting notes"
 
 [scenes.viewport]
 width = 1280
-height = 650
-
-[[scenes]]
-name = "recent-meetings"
-surface = "ui"
-route = "/"
-caption = "Fictional October mailbox: find Weekly sync and Launch review through the fixture-only requester and real Zoom adapter."
-timeout_ms = 30000
-
-[[scenes.steps]]
-action = "terminal"
-command = ["showcase", "ended"]
-
-[scenes.viewport]
-width = 1280
-height = 650
-
-[[scenes]]
-name = "launch-decisions"
-surface = "ui"
-route = "/"
-caption = "Fictional Launch review: a ten-percent rollout decision and two named owners, using a second meeting argument in the native terminal."
-timeout_ms = 30000
-
-[[scenes.steps]]
-action = "terminal"
-command = ["showcase", "one", "launch"]
-
-[scenes.viewport]
-width = 1280
-height = 650
-
-[[scenes]]
-name = "summary-cli"
-surface = "cli"
-caption = "Fictional Weekly sync in the CLI: parsed summary sections and a source link, through the fixture-only requester."
-command = ["showcase", "one", "sync"]
-
-[[scenes]]
-name = "meeting-list-json"
-surface = "cli"
-caption = "Fictional October meetings as JSON: typed meeting metadata through the fixture-only requester, not verbatim transcripts."
-command = ["showcase", "ended", "--json"]
+height = 800
 
 [[scenes]]
 name = "workflow-context"
 surface = "ui"
 route = "/contracts/meeting-notes"
-caption = "Fictional Meeting notes contract: declares a meeting-summary input and Markdown output; no report has been generated."
+appearance = "dark"
+caption = "Demo data: the fictional Meeting notes contract declares summary input and Markdown output; no report has been generated."
 timeout_ms = 30000
 
 [[scenes.steps]]
 action = "wait"
 role = "heading"
 name = "Meeting notes"
+
+[scenes.viewport]
+width = 1280
+height = 800
+
+[[scenes]]
+name = "summary-cli"
+surface = "cli"
+caption = "Demo data: the fixture requester shows Weekly sync's parsed recap, next steps and source link."
+command = ["showcase", "one", "sync"]
+
+[[scenes]]
+name = "launch-cli"
+surface = "cli"
+caption = "Demo data: the fixture requester shows Launch review's rollout decision and named next steps."
+command = ["showcase", "one", "launch"]
+
+[[scenes]]
+name = "meeting-list-json"
+surface = "cli"
+caption = "Demo data: fictional October meetings as JSON, with meeting metadata rather than verbatim transcripts."
+command = ["showcase", "ended", "--json"]

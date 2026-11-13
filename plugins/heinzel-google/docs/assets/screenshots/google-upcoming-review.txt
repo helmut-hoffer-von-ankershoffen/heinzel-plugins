@@ -22,7 +22,7 @@ Updates, off
 System health, warning
 Not in a meeting
 Next: Launch readiness review
-Mon 12:39
+Fri 19:04
 Daemon not installed, off
 Chat
 New chat

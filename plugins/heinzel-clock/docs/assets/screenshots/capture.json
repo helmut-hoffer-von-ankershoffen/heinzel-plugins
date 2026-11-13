@@ -2,7 +2,7 @@
   "format": 1,
   "plugin": "heinzel-clock",
   "core_version": "0.9.40",
-  "inputs_sha256": "4381d47d78e9f7dda9a09834224a3e5ec93754d52d32750a7a3cfa2001ebf2ab",
+  "inputs_sha256": "f3ed7f7f640daabf6095e70e0e9466254d021214395136492f778aec1d74b0a4",
   "images": {
     "docs/assets/screenshots/world-clock.png": "02f721ffdf50649896e584f56b57acd62c8e3c4244cd5bec3b54e97ef37f648d",
     "docs/assets/screenshots/team-overview.png": "cefa62cdf2dbe45f7a548a8d5e4ea985833acd602c95ad3fd4f8612f18264313",
@@ -16,18 +16,18 @@
     "format": 2,
     "source_story": {
       "path": "source-story.md",
-      "sha256": "f23797dfb79feb2830262a07ff0bb8fa40b4cb60b7df0c5d3fb885f48b0de9d9"
+      "sha256": "4e14d7066e718e9dce5caf5cf17526bc1e3a33c4a7accc5687960ff907d73197"
     },
     "definition": {
       "format": 1,
       "reviewer": "Codex feature-story agent",
-      "source_sha256": "918ec8603f524396623010c8817ba722cb818b8e31c6eadca58af6727291bf59",
+      "source_sha256": "13230bb1b73f59c8da2bab49888185f97ac0384e309c346a62ec6be7d8e60513",
       "plan_sha256": "4d0c875dbba40b93030be59a181c6535f9b1a6e8b5c47c451e12d4701e2bbba3",
-      "story_sha256": "f23797dfb79feb2830262a07ff0bb8fa40b4cb60b7df0c5d3fb885f48b0de9d9"
+      "story_sha256": "4e14d7066e718e9dce5caf5cf17526bc1e3a33c4a7accc5687960ff907d73197"
     },
     "plugin": "heinzel-clock",
     "core_version": "0.9.40",
-    "inputs_sha256": "4381d47d78e9f7dda9a09834224a3e5ec93754d52d32750a7a3cfa2001ebf2ab",
+    "inputs_sha256": "f3ed7f7f640daabf6095e70e0e9466254d021214395136492f778aec1d74b0a4",
     "screenshots": [
       {
         "path": "docs/assets/screenshots/world-clock.png",
@@ -83,11 +83,11 @@
       "terminal-overlap.txt": "38adb315cb9cbf79f485393c40ca00c5fd3af498d201ff024da182f822938553",
       "cli-json.txt": "8cc4255d19d78d8dee533a130c756f8d32e7d3cc594d21493ded166c4965d167"
     },
-    "bundle_sha256": "96c645e7770822a70a58ec1fbf6de9abc26c62582df3a69acc9f605520176644"
+    "bundle_sha256": "04ffe4553f1f99b93f0e323343b17509444064c6136a9960166634e3cdc49878"
   },
   "privacy_review": {
     "format": 1,
-    "bundle_sha256": "96c645e7770822a70a58ec1fbf6de9abc26c62582df3a69acc9f605520176644",
+    "bundle_sha256": "04ffe4553f1f99b93f0e323343b17509444064c6136a9960166634e3cdc49878",
     "reviewer": "Codex privacy agent",
     "decision": "approve",
     "checked_images": [

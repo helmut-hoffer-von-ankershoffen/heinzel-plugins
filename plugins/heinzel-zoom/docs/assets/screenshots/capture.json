@@ -2,89 +2,84 @@
   "format": 1,
   "plugin": "heinzel-zoom",
   "core_version": "0.9.1",
-  "inputs_sha256": "b4d7fef470461fb410549bdf599b7d2df1c8358a306809c4df9690a0d48d551d",
+  "inputs_sha256": "f3639c7339be01a8790726f9887933e4314ba05e7efc39e3eaff26ff00057a79",
   "images": {
-    "docs/assets/screenshots/meeting-decisions.png": "5b82ff48819168d3e1a9e7011be29825a34eea51261bf55a03d13170a92ffdbc",
-    "docs/assets/screenshots/recent-meetings.png": "758e24f9ce945c5b77823d27ab5d2952a63ff81c5624326d445300a789fcbe57",
-    "docs/assets/screenshots/launch-decisions.png": "fa55be55d29c4836744711b41b5fdbbe64656b4bd46f1e3284b5809199e7f128",
+    "docs/assets/screenshots/workflow-list.png": "8a2b11458e54d979f38f3b5d6376b03dcecbe39f39e1c9593a5cd813ff3774cd",
+    "docs/assets/screenshots/workflow-context.png": "a08a1f6a7a6e3a98370456eb655e8bb3ea4e074c2c86e0fff611355c2b519545",
     "docs/assets/screenshots/summary-cli.png": "b6882ac1fc26da06900bfc063db82c5fae23809a5d909c73abdc9aa1d3e2afd6",
-    "docs/assets/screenshots/meeting-list-json.png": "4baccb4a6154df4a67ad97a1c24df2b1596ffb24b084aa045e6bc704c4a597c5",
-    "docs/assets/screenshots/workflow-context.png": "ec938fda25182d5f569e9075c238d0142090091e2818996c0799379979e0420d"
+    "docs/assets/screenshots/launch-cli.png": "6eef3cec105f6d2bb71df86e01f3a3d0fb5da6cb1f350b55d6b2e28d6efea3f9",
+    "docs/assets/screenshots/meeting-list-json.png": "4baccb4a6154df4a67ad97a1c24df2b1596ffb24b084aa045e6bc704c4a597c5"
   },
   "review_bundle": {
-    "format": 1,
+    "format": 2,
+    "source_story": {
+      "path": "source-story.md",
+      "sha256": "10c7ee6ff566c2d0f99c6094e961749f2f9015aa2196370494a883816c877263"
+    },
     "definition": {
       "format": 1,
       "reviewer": "Codex feature-story agent",
-      "source_sha256": "665a7a91bfb7aafaedea3d80fcc102e9858a6809eab20efff9c42e2ce9b63d08",
-      "plan_sha256": "528f0651e23d3b36404500f249845dba8c4e1bf92a0c9501632281be2df06ca3",
-      "story_sha256": "fb2db83bd37271cb8f5aab454bf2fd89199ac910da21efed1b5df6fdf18599fe"
+      "source_sha256": "a554378db30fc70eb1c48381eb43a166359df6ef8f3fa77795061d76bb9d4fbe",
+      "plan_sha256": "bd01e764057055ff797769d8d9d052dc62f36575d1e54f58be261509d1c3f51b",
+      "story_sha256": "10c7ee6ff566c2d0f99c6094e961749f2f9015aa2196370494a883816c877263"
     },
     "plugin": "heinzel-zoom",
     "core_version": "0.9.1",
-    "inputs_sha256": "b4d7fef470461fb410549bdf599b7d2df1c8358a306809c4df9690a0d48d551d",
+    "inputs_sha256": "f3639c7339be01a8790726f9887933e4314ba05e7efc39e3eaff26ff00057a79",
     "screenshots": [
       {
-        "path": "docs/assets/screenshots/meeting-decisions.png",
+        "path": "docs/assets/screenshots/workflow-list.png",
         "surface": "ui",
-        "caption": "Fictional Weekly sync: a Thursday release decision and three named next steps, via the fixture-only requester and real Zoom parser."
-      },
-      {
-        "path": "docs/assets/screenshots/recent-meetings.png",
-        "surface": "ui",
-        "caption": "Fictional October mailbox: find Weekly sync and Launch review through the fixture-only requester and real Zoom adapter."
-      },
-      {
-        "path": "docs/assets/screenshots/launch-decisions.png",
-        "surface": "ui",
-        "caption": "Fictional Launch review: a ten-percent rollout decision and two named owners, using a second meeting argument in the native terminal."
-      },
-      {
-        "path": "docs/assets/screenshots/summary-cli.png",
-        "surface": "cli",
-        "caption": "Fictional Weekly sync in the CLI: parsed summary sections and a source link, through the fixture-only requester."
-      },
-      {
-        "path": "docs/assets/screenshots/meeting-list-json.png",
-        "surface": "cli",
-        "caption": "Fictional October meetings as JSON: typed meeting metadata through the fixture-only requester, not verbatim transcripts."
+        "caption": "Demo data: the fictional Meeting notes workflow declares a need for meeting summaries."
       },
       {
         "path": "docs/assets/screenshots/workflow-context.png",
         "surface": "ui",
-        "caption": "Fictional Meeting notes contract: declares a meeting-summary input and Markdown output; no report has been generated."
+        "caption": "Demo data: the fictional Meeting notes contract declares summary input and Markdown output; no report has been generated."
+      },
+      {
+        "path": "docs/assets/screenshots/summary-cli.png",
+        "surface": "cli",
+        "caption": "Demo data: the fixture requester shows Weekly sync's parsed recap, next steps and source link."
+      },
+      {
+        "path": "docs/assets/screenshots/launch-cli.png",
+        "surface": "cli",
+        "caption": "Demo data: the fixture requester shows Launch review's rollout decision and named next steps."
+      },
+      {
+        "path": "docs/assets/screenshots/meeting-list-json.png",
+        "surface": "cli",
+        "caption": "Demo data: fictional October meetings as JSON, with meeting metadata rather than verbatim transcripts."
       }
     ],
     "images": {
-      "meeting-decisions.png": "5b82ff48819168d3e1a9e7011be29825a34eea51261bf55a03d13170a92ffdbc",
-      "recent-meetings.png": "758e24f9ce945c5b77823d27ab5d2952a63ff81c5624326d445300a789fcbe57",
-      "launch-decisions.png": "fa55be55d29c4836744711b41b5fdbbe64656b4bd46f1e3284b5809199e7f128",
+      "workflow-list.png": "8a2b11458e54d979f38f3b5d6376b03dcecbe39f39e1c9593a5cd813ff3774cd",
+      "workflow-context.png": "a08a1f6a7a6e3a98370456eb655e8bb3ea4e074c2c86e0fff611355c2b519545",
       "summary-cli.png": "b6882ac1fc26da06900bfc063db82c5fae23809a5d909c73abdc9aa1d3e2afd6",
-      "meeting-list-json.png": "4baccb4a6154df4a67ad97a1c24df2b1596ffb24b084aa045e6bc704c4a597c5",
-      "workflow-context.png": "ec938fda25182d5f569e9075c238d0142090091e2818996c0799379979e0420d"
+      "launch-cli.png": "6eef3cec105f6d2bb71df86e01f3a3d0fb5da6cb1f350b55d6b2e28d6efea3f9",
+      "meeting-list-json.png": "4baccb4a6154df4a67ad97a1c24df2b1596ffb24b084aa045e6bc704c4a597c5"
     },
     "transcripts": {
-      "meeting-decisions.txt": "5fbe0290f62e975d19f11a737ebe1c98fbe4b5616bc920f97241ab94c79c23c4",
-      "recent-meetings.txt": "4c31c3fffed8431156d200b771acbe58f5de8c7adcc30c01898399a293b6143d",
-      "launch-decisions.txt": "589a001a2df3860226b4be826a4403df6dfdbaaa7921f0bb3f127e42d08016fd",
+      "workflow-list.txt": "007eb46daa148bf6a4708655f7e5842dc60657d5b782ae74e180169ea20e986b",
+      "workflow-context.txt": "aef4b18e3df9d4d6611c80b9abd1b1d6d4445bba3ad8840a7d618d40a808a571",
       "summary-cli.txt": "4be37a1c9908c8f4c8c3bad307e5dbaeb5578b4b71951327f1560dfd3c371c99",
-      "meeting-list-json.txt": "2762667503f795cc6f754156a447becaca466c238f3714d29fd2496c3486e210",
-      "workflow-context.txt": "aef4b18e3df9d4d6611c80b9abd1b1d6d4445bba3ad8840a7d618d40a808a571"
+      "launch-cli.txt": "0c5a827a0454f9a2918a11c13785c51da87128b0cd4baf9fa8081fbcd5d51761",
+      "meeting-list-json.txt": "2762667503f795cc6f754156a447becaca466c238f3714d29fd2496c3486e210"
     },
-    "bundle_sha256": "0f857e01b6c0429de64def04808202f046d4b26ea13857c18f727587bcb0056c"
+    "bundle_sha256": "ee44a0f26b7316c3cf105912d7e5718371e298176845fce336ef582e19ea8aac"
   },
   "privacy_review": {
     "format": 1,
-    "bundle_sha256": "0f857e01b6c0429de64def04808202f046d4b26ea13857c18f727587bcb0056c",
+    "bundle_sha256": "ee44a0f26b7316c3cf105912d7e5718371e298176845fce336ef582e19ea8aac",
     "reviewer": "Codex privacy agent",
     "decision": "approve",
     "checked_images": [
-      "meeting-decisions.png",
-      "recent-meetings.png",
-      "launch-decisions.png",
+      "workflow-list.png",
+      "workflow-context.png",
       "summary-cli.png",
-      "meeting-list-json.png",
-      "workflow-context.png"
+      "launch-cli.png",
+      "meeting-list-json.png"
     ],
     "checks": {
       "tokens_absent": true,

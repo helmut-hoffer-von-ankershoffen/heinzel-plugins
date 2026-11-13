@@ -16,7 +16,7 @@ Today
 Notifications
 1 unread
 Example is ready
-16:20
+18:31
 All notifications
 Example is ready
 Open
@@ -50,7 +50,7 @@ Heinzel check-ins
 Calendar
 Today
 Example is ready
-16:20
+18:31
 quiet mode is on: hz system config set system.notify.quiet false
 Unread
 desktop notifications through Heinzel Notifier; a click opens the screen

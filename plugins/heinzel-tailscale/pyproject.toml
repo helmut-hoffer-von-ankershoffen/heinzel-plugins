@@ -1,6 +1,6 @@
 [project]
 name = "heinzel-tailscale"
-version = "0.9.6"
+version = "0.9.7"
 description = "Share the authenticated web app privately through Tailscale Serve: a Heinzelmännchen plugin."
 readme = "README.md"
 license = "MIT"

@@ -1,6 +1,6 @@
 [project]
 name = "heinzel-example"
-version = "0.5.1"
+version = "0.5.2"
 description = "Show how a Heinzelmännchen plugin is built."
 readme = "README.md"
 authors = [{ name = "Helmut Hoffer von Ankershoffen", email = "helmuthva@gmail.com" }]

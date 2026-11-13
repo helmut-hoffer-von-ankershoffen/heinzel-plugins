@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.9.2
+
+Relock opentelemetry-api to 1.45.2 (CVE-2026-126360).
+
 ## 0.9.1
 
 Move this plugin to its independent repository project for the Heinzel 0.9.1 plugin contract.

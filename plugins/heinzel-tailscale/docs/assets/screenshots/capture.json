@@ -2,10 +2,10 @@
   "format": 1,
   "plugin": "heinzel-tailscale",
   "core_version": "0.9.40",
-  "inputs_sha256": "8eceb36b1aba5bdf23d4293e266ece91e7b157ba4b89b7f29f8c255cf9679297",
+  "inputs_sha256": "9a20c109d44d267cb0279757b972471df5e4d24535a040e6f46c08c21963f8cc",
   "images": {
     "docs/assets/screenshots/sharing-ready.png": "f4580591b620308e61992fb8f1c34b551ee047d882de6426179680d76149169e",
-    "docs/assets/screenshots/sharing-request-cli.png": "ad19b648ed3835b8fbafc9546587c3d9f7f78f7d6788e2216f96f62c7e75946f",
+    "docs/assets/screenshots/sharing-request-cli.png": "a6b88baaafe20ff9d8f0af618aefec954f1408f3af38c6b2edae7b1f2d9a432a",
     "docs/assets/screenshots/sharing-off.png": "2857509036b8ef726839a8fbe5d65ceb19cfe26d760a397cd3a3337339ed42d6",
     "docs/assets/screenshots/sharing-off-cli.png": "592011836c508fac6809305cbc29752484a4be2cc32546e31dffbc369ee0c774"
   },
@@ -13,18 +13,18 @@
     "format": 2,
     "source_story": {
       "path": "source-story.md",
-      "sha256": "b2c758ad8f8b89f5bf2d3682fc474d154206e805bfd9a9bc14315a712755d5f5"
+      "sha256": "82bf96a1bfe41adeba0ca1b3c271816ddb82d809425a63cf0ea1fb5e3f6ef1b7"
     },
     "definition": {
       "format": 1,
-      "reviewer": "Claude source-analysis agent (plugin source and capture.py)",
-      "source_sha256": "3d3e723eef63e64c958a6cb58f3a45aa7b83730e20a3019d2124c5623f3cfa81",
+      "reviewer": "Codex feature-story agent",
+      "source_sha256": "87024d15213c3b3cb2a986ac028bf05a53c960c922b6402b9dc5ea50f220431d",
       "plan_sha256": "1f1fe2b01f478076c38aaac40080e64287b73f784dd8053c4a6792237cf327d3",
-      "story_sha256": "b2c758ad8f8b89f5bf2d3682fc474d154206e805bfd9a9bc14315a712755d5f5"
+      "story_sha256": "82bf96a1bfe41adeba0ca1b3c271816ddb82d809425a63cf0ea1fb5e3f6ef1b7"
     },
     "plugin": "heinzel-tailscale",
     "core_version": "0.9.40",
-    "inputs_sha256": "8eceb36b1aba5bdf23d4293e266ece91e7b157ba4b89b7f29f8c255cf9679297",
+    "inputs_sha256": "9a20c109d44d267cb0279757b972471df5e4d24535a040e6f46c08c21963f8cc",
     "screenshots": [
       {
         "path": "docs/assets/screenshots/sharing-ready.png",
@@ -49,21 +49,21 @@
     ],
     "images": {
       "sharing-ready.png": "f4580591b620308e61992fb8f1c34b551ee047d882de6426179680d76149169e",
-      "sharing-request-cli.png": "ad19b648ed3835b8fbafc9546587c3d9f7f78f7d6788e2216f96f62c7e75946f",
+      "sharing-request-cli.png": "a6b88baaafe20ff9d8f0af618aefec954f1408f3af38c6b2edae7b1f2d9a432a",
       "sharing-off.png": "2857509036b8ef726839a8fbe5d65ceb19cfe26d760a397cd3a3337339ed42d6",
       "sharing-off-cli.png": "592011836c508fac6809305cbc29752484a4be2cc32546e31dffbc369ee0c774"
     },
     "transcripts": {
       "sharing-ready.txt": "c9e329788fd8a746da0e5bf61d45ae58b5868099b62e47818572a3ea882303d2",
-      "sharing-request-cli.txt": "dc4de116a285b82e6e2ea99c51d97b08358add88b819a4a0dfd711c1095196eb",
+      "sharing-request-cli.txt": "cec06487993aa66d2f291740d29bcdf94abfafef7db13ac22156dd11a121c6b7",
       "sharing-off.txt": "6fd68a005ac126204435095850dc44f43d39ad67c978cf8c99523c3b98f56155",
       "sharing-off-cli.txt": "cf49c8bdefcb23c7b464e229ae6e18bbd8f639abb0121bf570e3e30b631fc8b0"
     },
-    "bundle_sha256": "e336d168c0f33130849871f9277cf90c938b7508300827f36d322308914fdffb"
+    "bundle_sha256": "4ce886fc2e95280e81005c63d49889fd59b1bee34808a5b2bff684859f1ba989"
   },
   "privacy_review": {
     "format": 1,
-    "bundle_sha256": "e336d168c0f33130849871f9277cf90c938b7508300827f36d322308914fdffb",
+    "bundle_sha256": "4ce886fc2e95280e81005c63d49889fd59b1bee34808a5b2bff684859f1ba989",
     "reviewer": "Codex privacy agent",
     "decision": "approve",
     "checked_images": [
