@@ -59,7 +59,7 @@ name_regex = "Berlin"
 [[scenes]]
 name = "weather-page"
 surface = "ui"
-route = "/?panel=weather:forecast"
+route = "/plugins/weather/forecast"
 appearance = "light"
 caption = "Explore current conditions, the hourly outlook and a warning — fictional Berlin forecast"
 

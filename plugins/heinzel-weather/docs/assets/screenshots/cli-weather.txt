@@ -1,21 +1,21 @@
 ☀  22°C clear sky in Berlin, DE (feels like 21°C; today 12 to 24°C, 80% rain)
-⚠ Thunderstorm warning, Fri 19:00 to Fri 22:00 (Example Weather Service)
+⚠ Thunderstorm warning, Fri 21:00 to Sat 00:00 (Example Weather Service)
 Next hours
 ┏━━━━━━━┳━━━━━━┳━━━━━━┳━━━━━━━━━━━━━━━┓
 ┃ Time  ┃ Temp ┃ Rain ┃ Sky           ┃
 ┡━━━━━━━╇━━━━━━╇━━━━━━╇━━━━━━━━━━━━━━━┩
-│ 16:00 │ 22°C │ 10%  │ broken clouds │
-│ 17:00 │ 20°C │ 80%  │ moderate rain │
-│ 18:00 │ 18°C │ 80%  │ moderate rain │
-│ 19:00 │ 17°C │ 80%  │ moderate rain │
-│ 20:00 │ 15°C │ 80%  │ moderate rain │
-│ 21:00 │ 14°C │ 10%  │ broken clouds │
-│ 22:00 │ 12°C │ 10%  │ broken clouds │
+│ 18:00 │ 22°C │ 10%  │ broken clouds │
+│ 19:00 │ 20°C │ 80%  │ moderate rain │
+│ 20:00 │ 18°C │ 80%  │ moderate rain │
+│ 21:00 │ 17°C │ 80%  │ moderate rain │
+│ 22:00 │ 15°C │ 80%  │ moderate rain │
 │ 23:00 │ 14°C │ 10%  │ broken clouds │
-│ 00:00 │ 15°C │ 10%  │ broken clouds │
-│ 01:00 │ 16°C │ 10%  │ broken clouds │
-│ 02:00 │ 12°C │ 10%  │ broken clouds │
-│ 03:00 │ 13°C │ 10%  │ clear sky     │
+│ 00:00 │ 12°C │ 10%  │ broken clouds │
+│ 01:00 │ 14°C │ 10%  │ broken clouds │
+│ 02:00 │ 15°C │ 10%  │ broken clouds │
+│ 03:00 │ 16°C │ 10%  │ broken clouds │
+│ 04:00 │ 12°C │ 10%  │ broken clouds │
+│ 05:00 │ 13°C │ 10%  │ clear sky     │
 └───────┴──────┴──────┴───────────────┘
 Days
 ┏━━━━━━━━━━━━┳━━━━━━┳━━━━━━┳━━━━━━┳━━━━━━━━━━━━━━━┓

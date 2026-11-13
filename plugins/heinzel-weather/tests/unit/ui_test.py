@@ -29,7 +29,7 @@ def test_weather_ui_placements_share_one_read_only_source_and_refresh_every_900_
     assert not actions
     assert len(navigation) == 1
     assert navigation[0].settings.sections == ("weather",)
-    assert navigation[0].sidebar.path == "/?panel=weather:forecast"  # the page; Settings stay behind its place button
+    assert navigation[0].sidebar.path == "/plugins/weather/forecast"  # the page; Settings stay behind its place button
 
 
 def test_weather_status_and_today_card_expose_condition_and_accessible_forecast_actions(service):
@@ -40,7 +40,7 @@ def test_weather_status_and_today_card_expose_condition_and_accessible_forecast_
     assert status.icon == "sun"
     assert "☀" not in status.text
     assert status.detail[0].text == "Clear sky · Berlin, DE"
-    assert status.effect.path == "/?panel=weather:forecast"
+    assert status.effect.path == "/plugins/weather/forecast"
     assert [(action.label, action.effect.path) for action in status.actions] == [("Change place", "/?settings=weather")]
     assert card.label == "Weather in Berlin, DE"
     assert card.value == "22°C"
