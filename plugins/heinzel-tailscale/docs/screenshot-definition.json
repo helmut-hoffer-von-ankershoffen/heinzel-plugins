@@ -1,7 +1,7 @@
 {
   "format": 1,
   "reviewer": "Claude source-analysis agent (plugin source and capture.py)",
-  "source_sha256": "8affc9f6207f6e579435daf69bc772c38e2feebfb04829a9452c755a38433135",
+  "source_sha256": "3d3e723eef63e64c958a6cb58f3a45aa7b83730e20a3019d2124c5623f3cfa81",
   "plan_sha256": "1f1fe2b01f478076c38aaac40080e64287b73f784dd8053c4a6792237cf327d3",
-  "story_sha256": "1f04d3649037f2dd8f56fbd0686161d769a83afe5f2ad5387483e339c1b77fdb"
+  "story_sha256": "b2c758ad8f8b89f5bf2d3682fc474d154206e805bfd9a9bc14315a712755d5f5"
 }

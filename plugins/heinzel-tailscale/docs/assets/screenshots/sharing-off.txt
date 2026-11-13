@@ -31,5 +31,3 @@ Tailscale
 
 Share over Tailscale
 Off
-
-Details

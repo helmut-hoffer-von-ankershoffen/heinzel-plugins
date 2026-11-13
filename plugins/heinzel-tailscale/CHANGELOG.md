@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.9.6
+
+The footer pane no longer has a Details line that only repeats the switch (*Private web sharing is off.*);
+Details stay for anything to act on or wait for. The CLI and JSON message is unchanged.
+
 ## 0.9.5
 
 Relock for Heinzel Core 0.9.40 (its AI extra adds pyjwt) and refresh the gallery.
