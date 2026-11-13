@@ -21,22 +21,27 @@ export function WeatherPage({ data, loading, onClose, flowing = false }: Readonl
   const page = data as Page | undefined;
   const report = page?.state === "ready" ? page.report : null;
   const place = report?.now.location;
+  // As a main-area page it carries the page's one h1 and no close button; a panel keeps its h2 and close.
+  const Heading = flowing ? "h1" : "h2";
+  const sub = flowing ? "h2" : "h3";
   return (
     <section className={flowing ? "wx" : "wx wx-fill"} aria-label={t("weather.title")}>
       <header className="wx-head">
         <CloudSun aria-hidden size={16} color="var(--color-primary)" />
-        <h2>
+        <Heading>
           {place ? (<><span className="wx-sr">{t("weather.in")} </span>{place}</>) : t("weather.title")}
-        </h2>
+        </Heading>
         {report && <Attribution text={page?.attribution ?? ""} />}
         {report && <SettingsShortcut section="weather" label={t("weather.changeLocation")} />}
-        <Button variant="ghost" size="icon" aria-label={t("weather.close")} onClick={onClose}>
-          <X aria-hidden />
-        </Button>
+        {!flowing && (
+          <Button variant="ghost" size="icon" aria-label={t("weather.close")} onClick={onClose}>
+            <X aria-hidden />
+          </Button>
+        )}
       </header>
       <div className={flowing ? "wx-body" : "wx-body wx-scroll"}>
         <div className="wx-stack">
-          <Body page={page} report={report} loading={loading} />
+          <Body page={page} report={report} loading={loading} sub={sub} />
         </div>
       </div>
     </section>
@@ -66,31 +71,33 @@ function Attribution({ text }: Readonly<{ text: string }>) {
   );
 }
 
-function Body({ page, report, loading }: Readonly<{ page: Page | undefined; report: Report | null; loading: boolean }>) {
+type Sub = "h2" | "h3";
+
+function Body({ page, report, loading, sub }: Readonly<{ page: Page | undefined; report: Report | null; loading: boolean; sub: Sub }>) {
   if (!page) {
     return <output className="wx-note">{loading ? t("weather.loading") : t("weather.unavailable.body")}</output>;
   }
   if (page.state === "needs-location") {
-    return <Notice icon={MapPin} title={t("weather.setup.title")} body={t("weather.setup.body")} action={t("weather.setup.action")} />;
+    return <Notice sub={sub} icon={MapPin} title={t("weather.setup.title")} body={t("weather.setup.body")} action={t("weather.setup.action")} />;
   }
   if (!report) {
-    return <Notice icon={CloudOff} title={t("weather.unavailable.title")} body={page.message || t("weather.unavailable.body")} action={t("weather.unavailable.action")} />;
+    return <Notice sub={sub} icon={CloudOff} title={t("weather.unavailable.title")} body={page.message || t("weather.unavailable.body")} action={t("weather.unavailable.action")} />;
   }
-  return <Forecast page={page} report={report} />;
+  return <Forecast page={page} report={report} sub={sub} />;
 }
 
-function Notice({ icon: Icon, title, body, action }: Readonly<{ icon: typeof MapPin; title: string; body: string; action: string }>) {
+function Notice({ sub: Title, icon: Icon, title, body, action }: Readonly<{ sub: Sub; icon: typeof MapPin; title: string; body: string; action: string }>) {
   return (
     <div className="wx-card wx-notice">
       <Icon aria-hidden />
-      <h3>{title}</h3>
+      <Title className="wx-h">{title}</Title>
       <p>{body}</p>
       <Button onClick={openSettings}>{action}</Button>
     </div>
   );
 }
 
-function Forecast({ page, report }: Readonly<{ page: Page; report: Report }>) {
+function Forecast({ page, report, sub: Title }: Readonly<{ page: Page; report: Report; sub: Sub }>) {
   const { now, hours, days, alerts } = report;
   const degree = unitLabel(now.units);
   const stamp = updatedAt(page.fetched_at);
@@ -140,13 +147,14 @@ function Forecast({ page, report }: Readonly<{ page: Page; report: Report }>) {
         </dl>
       </div>
       <section aria-labelledby="weather-hourly">
-        <h3 id="weather-hourly">{t("weather.hourly")}</h3>
-        <ol className="wx-hours">
+        <Title id="weather-hourly" className="wx-h">{t("weather.hourly")}</Title>
+        {/* The hours scroll sideways; the list is focusable so a keyboard can scroll it too. */}
+        <ol className="wx-hours" tabIndex={0} aria-labelledby="weather-hourly">
           {hours.slice(0, 24).map((hour, index) => <HourCell key={hour.at} hour={hour} days={days} first={index === 0} />)}
         </ol>
       </section>
       <section aria-labelledby="weather-daily">
-        <h3 id="weather-daily">{t("weather.daily")}</h3>
+        <Title id="weather-daily" className="wx-h">{t("weather.daily")}</Title>
         <ul className="wx-card wx-days">
           {days.slice(0, 7).map((day, index) => <DayRow key={day.day} day={day} days={days} index={index} />)}
         </ul>

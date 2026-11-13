@@ -30,6 +30,16 @@ it("shows the conditions, 24 hours and 7 days for the place, with settings one b
   expect(props.onClose).toHaveBeenCalled();
   expect((await axe.run(container)).violations).toEqual([]);
 });
+it("is a main-area page: one h1, section h2s, no close button, and the credit stays behind its info button", async () => {
+  const { container } = render(<WeatherPage {...props} flowing data={ready} />);
+  expect(screen.getByRole("heading", { level: 1 })).toHaveTextContent("Weather in Berlin, DE");
+  expect(screen.getByRole("heading", { level: 2, name: "Next 24 hours" })).toBeInTheDocument();
+  expect(screen.getByRole("heading", { level: 2, name: "Next 7 days" })).toBeInTheDocument();
+  expect(screen.queryByRole("button", { name: "Close Weather" })).not.toBeInTheDocument();
+  await userEvent.click(screen.getByRole("button", { name: "Data source" }));
+  expect(screen.getByRole("status")).toHaveTextContent("Open-Meteo.com (CC BY 4.0)");
+  expect((await axe.run(container)).violations).toEqual([]);
+});
 it("says when the report is the last one", () => {
   show({ ...ready, stale: true });
   expect(screen.getByRole("status")).toHaveTextContent(/last report from \d\d:\d\d; the refresh failed/);
