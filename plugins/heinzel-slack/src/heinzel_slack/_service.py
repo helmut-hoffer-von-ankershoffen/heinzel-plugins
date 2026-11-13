@@ -87,6 +87,7 @@ class SlackService:
         self.clock: Callable[[], datetime] = lambda: datetime.now(UTC)
         self._lock = threading.Lock()
         self._counts = {"approved": 0, "declined": 0, "refused": 0}
+        self.withdrawing: list[threading.Thread] = []
 
     @property
     def store(self) -> Store:
@@ -246,6 +247,38 @@ class SlackService:
             self._settle(self._transport.api(), self.store.get(reference) or row, outcome)
         except HeinzelError:
             self.store.deny(row.id, "message_not_updated", self.clock())
+
+    def forget(self, request_id: str, reference: str | None) -> None:
+        """Delete every local copy of a request, offline (ADR 0148); idempotent, unknown keys are a no-op.
+
+        `request_id` is the host's id (stored as `external`, its row id is `slot(request_id)`), so a draft stored
+        before a post that never got a receipt is found too; `reference` is the receipt's, when there was one. An
+        open request is withdrawn in Slack afterwards, best effort, on a background thread: forgetting never waits
+        on the network and never fails because of it.
+        """
+        keys = {key for key in (request_id, slot(request_id) if request_id else "", reference) if key}
+        if not keys or (self._store is None and not (self._directory / "approvals.sqlite3").exists()):
+            return  # nothing was ever stored here; do not create the store just to forget
+        rows = self.store.forget(keys)
+        if not self.usable():
+            return
+        for row in rows:
+            if row.state in {"pending", "posting"} and row.message_ts:
+                where = (row.team, row.owner, row.channel, row.message_ts)
+                thread = threading.Thread(target=self._withdraw, args=where, name="slack-withdraw", daemon=True)
+                self.withdrawing.append(thread)
+                thread.start()
+
+    def _withdraw(self, team: str, owner: str, channel: str, ts: str) -> None:
+        # Content-free: the local rows are gone, and nothing of the draft is sent again.
+        try:
+            api = self._transport.api()
+            if api.identity().team_id != team or api.open_dm(owner) != channel:
+                return
+            text, blocks = _blocks.withdrawn()
+            api.update(channel, ts, text, blocks)
+        except Exception:  # noqa: BLE001, S110 - best effort by contract; the local delete already happened
+            pass
 
     def outcome(self, request_id: str, *, now: datetime | None = None) -> DraftStanding:
         """Where a request (by the id the host or `ask` gave) stands; applies expiry first.

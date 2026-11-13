@@ -1,6 +1,6 @@
 [project]
 name = "heinzel-slack"
-version = "0.1.0"
+version = "0.2.0"
 description = "Tell the owner what needs them, and ask for approval of an exact draft, in their own Slack DM."
 readme = "README.md"
 license = "MIT"
