@@ -1,6 +1,6 @@
 [project]
 name = "heinzel-zoom"
-version = "0.9.1"
+version = "0.9.2"
 description = "Read meetings from Zoom's meeting-summary emails: the meetings capability."
 readme = "README.md"
 license = "MIT"
@@ -139,19 +139,29 @@ highlights = [
 ]
 
 [[tool.heinzel.catalog.screenshots]]
+path = "docs/assets/screenshots/workflow-context.png"
+surface = "ui"
+caption = "Fictional Meeting notes contract: a meeting-summary input and Markdown output; no report has been generated."
+
+[[tool.heinzel.catalog.screenshots]]
+path = "docs/assets/screenshots/workflow-discovery.png"
+surface = "ui"
+caption = "Fictional Meeting notes in the Core workflow graph: discover the workflow before opening its details."
+
+[[tool.heinzel.catalog.screenshots]]
 path = "docs/assets/screenshots/meeting-decisions.png"
 surface = "ui"
-caption = "Fictional Weekly sync: a Thursday release decision and three named next steps, via the fixture-only requester and real Zoom parser."
+caption = "Fictional Weekly sync in the app terminal: a Thursday decision and three next steps, parsed through the fixture-only requester."
 
 [[tool.heinzel.catalog.screenshots]]
 path = "docs/assets/screenshots/recent-meetings.png"
 surface = "ui"
-caption = "Fictional October mailbox: find Weekly sync and Launch review through the fixture-only requester and real Zoom adapter."
+caption = "Fictional October meeting list in the app terminal: find Weekly sync and Launch review through the fixture-only requester."
 
 [[tool.heinzel.catalog.screenshots]]
 path = "docs/assets/screenshots/launch-decisions.png"
 surface = "ui"
-caption = "Fictional Launch review: a ten-percent rollout decision and two named owners, using a second meeting argument in the native terminal."
+caption = "Fictional Launch review in the app terminal: a ten-percent rollout decision and two owners, using a second meeting argument."
 
 [[tool.heinzel.catalog.screenshots]]
 path = "docs/assets/screenshots/summary-cli.png"
@@ -162,8 +172,3 @@ caption = "Fictional Weekly sync in the CLI: parsed summary sections and a sourc
 path = "docs/assets/screenshots/meeting-list-json.png"
 surface = "cli"
 caption = "Fictional October meetings as JSON: typed meeting metadata through the fixture-only requester, not verbatim transcripts."
-
-[[tool.heinzel.catalog.screenshots]]
-path = "docs/assets/screenshots/workflow-context.png"
-surface = "ui"
-caption = "Fictional Meeting notes contract: declares a meeting-summary input and Markdown output; no report has been generated."

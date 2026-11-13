@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.5.1
+
+Relock for Heinzel Core 0.9.40 (its AI extra adds pyjwt) and refresh the gallery.
+
 ## 0.5.0
 
 Add a footer icon that opens an Example pane showing the value 42 big, the same value as the Today widget. The README

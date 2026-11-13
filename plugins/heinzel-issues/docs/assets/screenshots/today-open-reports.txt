@@ -16,10 +16,11 @@ Add a dark theme to the printed agenda
 Received
 The footer clock jumps by a pixel every minute
 Being worked on
+Ask about it
 
 Nothing needs you right now. Ask anything below.
 
-v0.9.31
+v0.9.40
 Updates, off
 0
 System health, warning

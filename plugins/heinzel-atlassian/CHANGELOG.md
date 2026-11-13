@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.9.4
+
+Relock for Heinzel Core 0.9.40 (its AI extra adds pyjwt) and refresh the gallery.
+
 ## 0.9.3
 
 - Say the true sign-in state: `hz atlassian status` reads `acli auth status` and `acli <product> auth status` and

@@ -11,30 +11,31 @@ Example: 42
 M
 Mira
 · EM
-Home
+Today
 Today
 Notifications
 1 unread
 Example is ready
-08:42
+16:20
 All notifications
 Example is ready
 Open
-Ask about it
 Example value
 
 42
 
 Ask about it
-v0.9.1
+v0.9.40
 Updates, off
-Example: 42, off
-Daemon not installed, off
 0
 System health, warning
-No calendar connected, error
+?
+Example: 42, off
+Daemon not installed, off
 Chat
 Example
 Example
 
 42
+
+Audio

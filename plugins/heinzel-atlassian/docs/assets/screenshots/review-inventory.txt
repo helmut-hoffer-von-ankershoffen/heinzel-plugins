@@ -10,9 +10,9 @@ M
 Mira
 · EM
 Workflow
-Workflow
+Contracts
 
-What hz knows of your workflow: the systems you connected, the assets playbooks keep and discovery finds, your contracts and the ones playbooks suggest, and what they maintain. Select a node for its details and its command.
+What hz knows of your workflow: the systems you connected, the artifacts playbooks keep and discovery finds, your contracts and the ones playbooks suggest, and what they maintain. Select a node for its details and its command.
 
 Discover
 issues
@@ -46,8 +46,8 @@ team-graph-keeper
 , Output
 Legend
 System
-Asset type
-Discovered asset
+Artifact type
+Discovered artifact
 Contract
 Suggested contract
 Output
@@ -55,16 +55,15 @@ All contracts
 Weekly work review
 me:weekly-work-review
 by hand only
-v0.9.1
+v0.9.40
+Plugins changed, warning
 Updates, off
-Daemon not installed, off
 0
 System health, error
-No calendar connected, error
+?
+Daemon not installed, off
 Chat
 New chat
 Your message
 Default
-
-Up to $0.25 per message · this chat $0.00
-Runs your agent runner and may cost money: at most $0.25 per message, $2.00 per chat; this chat has cost $0.00. It reads with hz and asks you before it changes anything.
+Audio

@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.1
+
+Relock for Heinzel Core 0.9.40 (its AI extra adds pyjwt) and refresh the gallery.
+
 ## 0.1.0
 
 - First release: report a problem or request something from the app or `hz issues submit`, and see it as

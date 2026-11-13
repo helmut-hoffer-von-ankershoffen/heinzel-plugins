@@ -1,6 +1,6 @@
 [project]
 name = "heinzel-issues"
-version = "0.1.0"
+version = "0.1.1"
 description = "Report a problem or request something, and see when it is done and released; needs a Beads database you can write to."
 readme = "README.md"
 license = "MIT"

@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.9.3
+
+Relock for Heinzel Core 0.9.40 (its AI extra adds pyjwt) and refresh the gallery.
+
 ## 0.9.2
 
 Add a GitHub release feed for draft workflows. It starts at the current release frontier and reads published

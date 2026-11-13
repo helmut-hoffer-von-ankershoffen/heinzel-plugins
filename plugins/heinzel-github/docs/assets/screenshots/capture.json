@@ -1,37 +1,37 @@
 {
   "format": 1,
   "plugin": "heinzel-github",
-  "core_version": "0.9.18",
-  "inputs_sha256": "332ffc4a251d426fc1e01dc6295a91357db2114443b33d63d63fe1b6936f9fe9",
+  "core_version": "0.9.40",
+  "inputs_sha256": "c5318483abae083c44054905f35f114121452dc2b04fa15db72efa48c72a876f",
   "images": {
-    "docs/assets/screenshots/workflow-collection.png": "9a2115fd574e4b823feb72bede3c0cc747b9402990a7a3f67294a68767adc474",
-    "docs/assets/screenshots/workflow-context.png": "82139ef90338ac3320a0983c79d6132c24d1888a556182af06adde5fec5f217b",
-    "docs/assets/screenshots/merged-work.png": "8ff2207ebeaaae52e02d3718867d056fa8b2de5410e3ca885598c568ab0af79e",
-    "docs/assets/screenshots/issue-changes.png": "5e5cd61862c5982db2102d6d691e80161462915ff0d985438bb8b2550ee286e0",
+    "docs/assets/screenshots/workflow-collection.png": "bdf9483f5f0560375d63baa9b7d0505fb304c47b9aa06ddd47c3ff31c4f1c2b9",
+    "docs/assets/screenshots/workflow-context.png": "a6aa1bdf70a6886e622f49e0d38e008ecb27669e652f63e39d10df03371cee64",
+    "docs/assets/screenshots/merged-work.png": "0baf90373abc10ed8a8a1f31909a78f6d4e9875d81b3157c4a0a79733c2218d8",
+    "docs/assets/screenshots/issue-changes.png": "bc3311ff71e68815e7488de603f36a4246ef92b55ec598ad0d2f13b988fecdc5",
     "docs/assets/screenshots/merged-cli.png": "787d4a4a73a860dbf4b33fd849f9737e0a58e5495e3e94ea1104a0e60bdf7233",
-    "docs/assets/screenshots/issues-json.png": "ba32601ae9d5cbf3c0925b64388c8786141602e603d5343e8e03efd6365d52bd"
+    "docs/assets/screenshots/issues-json.png": "e3754138bf5a295204a0f986463e9a54dda6168697fa870ab9c3d41b3d7ff6bd"
   },
   "review_bundle": {
     "format": 2,
     "source_story": {
       "path": "source-story.md",
-      "sha256": "a419a4980b5369574d78f4b08c378dca67bdc84d904fb6bd0aebde2a19b80f00"
+      "sha256": "5fdf1c672595365870693e7ae56992c2f682d9c4c222e6cb220e28c57da8733d"
     },
     "definition": {
       "format": 1,
       "reviewer": "Codex feature-story agent",
-      "source_sha256": "0c55c663eadfffa985b01fda7f1a9778f22eb6fe9254f1c08f051a638b93aad6",
-      "plan_sha256": "9d204ce8608ed8eb229529b4fc0fa73fac29b39b2dd9e450b5b4a9f3f9fd55d7",
-      "story_sha256": "a419a4980b5369574d78f4b08c378dca67bdc84d904fb6bd0aebde2a19b80f00"
+      "source_sha256": "4ddb2b8de08af254e44ca8241b15e67287339b3d950aa1b3b58382ce06d578c9",
+      "plan_sha256": "4b2f2733e91a815803ccfec3f3159a7b58900ad41be8c262d4b514b685420e07",
+      "story_sha256": "5fdf1c672595365870693e7ae56992c2f682d9c4c222e6cb220e28c57da8733d"
     },
     "plugin": "heinzel-github",
-    "core_version": "0.9.18",
-    "inputs_sha256": "332ffc4a251d426fc1e01dc6295a91357db2114443b33d63d63fe1b6936f9fe9",
+    "core_version": "0.9.40",
+    "inputs_sha256": "c5318483abae083c44054905f35f114121452dc2b04fa15db72efa48c72a876f",
     "screenshots": [
       {
         "path": "docs/assets/screenshots/workflow-collection.png",
         "surface": "ui",
-        "caption": "Explore the fictional weekly code review in the local workflow collection"
+        "caption": "The fictional weekly code review in the Core workflow graph and contracts list"
       },
       {
         "path": "docs/assets/screenshots/workflow-context.png",
@@ -60,26 +60,26 @@
       }
     ],
     "images": {
-      "workflow-collection.png": "9a2115fd574e4b823feb72bede3c0cc747b9402990a7a3f67294a68767adc474",
-      "workflow-context.png": "82139ef90338ac3320a0983c79d6132c24d1888a556182af06adde5fec5f217b",
-      "merged-work.png": "8ff2207ebeaaae52e02d3718867d056fa8b2de5410e3ca885598c568ab0af79e",
-      "issue-changes.png": "5e5cd61862c5982db2102d6d691e80161462915ff0d985438bb8b2550ee286e0",
+      "workflow-collection.png": "bdf9483f5f0560375d63baa9b7d0505fb304c47b9aa06ddd47c3ff31c4f1c2b9",
+      "workflow-context.png": "a6aa1bdf70a6886e622f49e0d38e008ecb27669e652f63e39d10df03371cee64",
+      "merged-work.png": "0baf90373abc10ed8a8a1f31909a78f6d4e9875d81b3157c4a0a79733c2218d8",
+      "issue-changes.png": "bc3311ff71e68815e7488de603f36a4246ef92b55ec598ad0d2f13b988fecdc5",
       "merged-cli.png": "787d4a4a73a860dbf4b33fd849f9737e0a58e5495e3e94ea1104a0e60bdf7233",
-      "issues-json.png": "ba32601ae9d5cbf3c0925b64388c8786141602e603d5343e8e03efd6365d52bd"
+      "issues-json.png": "e3754138bf5a295204a0f986463e9a54dda6168697fa870ab9c3d41b3d7ff6bd"
     },
     "transcripts": {
-      "workflow-collection.txt": "0efdfa3a76168448e34c421f4183c3bc0f15f206ddd9f62e3dd732af4f490fd8",
-      "workflow-context.txt": "221dca27393be2e21cb9892f6d7e5a5bae1328a29fb72356e0f81017a8df7e6a",
-      "merged-work.txt": "ab950558a095b4ab4b79af69bc5fef6f5f675f8cc4ae84dfb62ca92a6085f086",
-      "issue-changes.txt": "dda7473ff6231e045f48ede7a639ca463a9a32d6e81bcef860718fd1e52a19cc",
+      "workflow-collection.txt": "45ecee7d0affa4a62b37d167c9a48040f22526963bc009c620326b567c78e2b2",
+      "workflow-context.txt": "941b49f0bfccd8be1cc22a6f3075bbb8145b5872c66829c8925195df8d02f985",
+      "merged-work.txt": "ba7f628f51968d826d702e3e435947c0b52b9e3f13e38f1f982a248fe00bc35c",
+      "issue-changes.txt": "c009947a7e48e82bad16a5eed886576348ca2512534d3f3f08732187c0babfa9",
       "merged-cli.txt": "e4df52085e704c49ba37bd75f62656de48cd879405856220a53bcebb7efdebb4",
-      "issues-json.txt": "0478f05c2513c3aec957a26c792f41ff2893fb1eddea11b4f9b472e93b9ac0a4"
+      "issues-json.txt": "a866c9bd0fe09d6dc1355428d53f5ce30511912b71452e84e925b65b89f104b0"
     },
-    "bundle_sha256": "7365f2acd21fc3e1059991cb07196b4ddce6002e38c0722ab51ad29b517d08fe"
+    "bundle_sha256": "86b021aea8e53dbf2575f75b07fc2aa0ce0b729938cc5aa99cfba4ecf47989df"
   },
   "privacy_review": {
     "format": 1,
-    "bundle_sha256": "7365f2acd21fc3e1059991cb07196b4ddce6002e38c0722ab51ad29b517d08fe",
+    "bundle_sha256": "86b021aea8e53dbf2575f75b07fc2aa0ce0b729938cc5aa99cfba4ecf47989df",
     "reviewer": "Codex privacy agent",
     "decision": "approve",
     "checked_images": [

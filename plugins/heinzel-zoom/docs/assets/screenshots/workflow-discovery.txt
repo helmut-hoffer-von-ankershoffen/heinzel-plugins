@@ -1,0 +1,68 @@
+Skip to content
+Heinzelmännchen
+Heinzelmännchen
+Contracts
+Team graph
+Meeting notes
+Organisation
+Team roster
+M
+Mira
+· EM
+Workflow
+Contracts
+
+What hz knows of your workflow: the systems you connected, the artifacts playbooks keep and discovery finds, your contracts and the ones playbooks suggest, and what they maintain. Select a node for its details and its command.
+
+Discover
+summaries
+ai-access
+claude-code
+, System
+directory
+one-on-ones
+, System
+mail
+inbox
+, System
+meetings
+zoom
+, System
+team-graph
+hz-graph
+, System
+Meeting notes
+, Contract
+team-graph-keeper
+graph
+suggested
+, Suggested contract
+notes
+me:meeting-notes
+, Output
+team-graph-keeper
+team-graph-keeper
+, Output
+Legend
+System
+Artifact type
+Discovered artifact
+Contract
+Suggested contract
+Output
+All contracts
+Meeting notes
+me:meeting-notes
+by hand only
+v0.9.40
+Plugins changed, warning
+Updates, off
+0
+System health, warning
+?
+Daemon not installed, off
+Chat
+New chat
+Your message
+Default
+Audio

@@ -1,44 +1,40 @@
 ## Audience
 
-Plugin authors considering a small, working Heinzelmännchen reference. The example demonstrates how one operation can feed several app contributions, alongside a typed greeting and a notification.
+Plugin authors evaluating a small, working Heinzelmännchen extension and curious users who want to see what installing it adds.
 
 ## Outcome
 
-A prospective installer can see the constant `42` in the Today widget, status, and inspector; try a named greeting in the native terminal and CLI; and see a plugin notice in Core’s shared notification panel. These are examples of extension points, not claims that the plugin performs a business workflow.
+Show how one sample value travels from an operation into the Today widget, sidebar and plugin-owned inspector, then show a typed greeting, a notification and machine-readable CLI output. The plugin is a teaching reference; the value 42 and the greeting are demonstrations, not claims about a production integration.
 
 ## Scenes
 
-1. **Widget and status — light.** On Today, show the demo value `42` in both the widget and sidebar status. They share the `sample` operation (`src/heinzel_example/__init__.py`: `sample`, `@module.widget`, and `@module.status`).
-2. **Inspector — dark.** Open the actual `/?panel=example:inspector` view and show its larger rendering of `42`. This is a distinct, useful state of the same feature, with the route declared by `module.nav`, `module.action`, and `module.view` (`src/heinzel_example/__init__.py`; renderer in `src/heinzel_example/views/index.js`).
-3. **Greeting in the native terminal.** Show the fictional name Mira passed to `example hello --json`; the typed greeting illustrates the submodule operation and structured output (`src/heinzel_example/hello/__init__.py`, `src/heinzel_example/_models.py`, and `README.md`). The terminal is presented as a terminal, not as a feature UI.
-4. **Plugin notice.** Show the fixture-seeded “Example is ready” notice in Core’s shared notifications panel. The plugin emits the notice and supplies its route and command; Core owns the surrounding panel (`src/heinzel_example/__init__.py`: `notify`; `docs/screenshot_fixture.py`).
-5. **Greeting CLI.** Show the same fictional named greeting in ordinary CLI output.
-6. **Sample CLI.** Show `sample --json` returning `42`, tying the CLI result back to the app contributions (`src/heinzel_example/__init__.py`: `sample`).
+1. **Widget and status, light:** The Today widget shows “Example value” and the sidebar shows “Example: 42.” This establishes the shared sample data in two Core-rendered contributions.
+2. **Inspector, dark:** The actual Example pane displays 42. This is a second useful feature UI state and demonstrates the navigation target and plugin-owned view.
+3. **Greeting in the native terminal:** Run the greeting with fictional Mira and JSON output inside the app. This is an app-terminal result, not a plugin feature view.
+4. **Notification:** Open the shared notifications panel to show the fixture-seeded “Example is ready” notice. The panel is Core UI populated by the plugin contribution.
+5. **Greeting CLI:** Show the typed greeting for fictional Mira in a standalone CLI capture.
+6. **Sample CLI JSON:** Show the sample operation's JSON result, connecting the CLI to the value in the UI.
 
-## Fictional fixtures and presentation
+The light and dark scenes must show the requested appearance actually applied. Reject duplicate captures, caption-only changes, terminal output presented as feature UI, and forged HTML.
 
-Use the existing `docs/screenshot_fixture.py` bootstrap in an isolated demonstration profile. It disables native, Doctor, and release notifications and seeds the plugin’s notice; it does not establish that all other profile data is fictional. Mira is an example name, and `42` is the actual constant returned by the plugin.
+## Fictional fixtures
 
-Normal presentation fictionalization is explicitly limited to verified owning-interpreter paths becoming `/demo-profile/.venv`, and only the verified whole hostname detail in the genuine Doctor row becoming `demo-host`. These mappings change no SDK health status or remaining detail and establish no privacy acceptance. Unknown identities still fail, and independent review must inspect every image and transcript.
-
-## Privacy pitfalls
-
-Inspect the complete image and transcript, including background app chrome, notifications, terminal output, paths, hostnames, account information, and metadata. Do not generalize either approved mapping to an unverified identity or alter health results. Reject a capture if an unknown identity appears; use an isolated profile without connected accounts as described in `docs/SCREENSHOTS.md`.
-
-## Acceptance criteria
-
-- Capture genuine app surfaces, with the widget/status in applied light appearance and the inspector in applied dark appearance; verify the actual rendered appearance in each image.
-- Confirm both UI scenes show the real `42` contribution, and the inspector is the declared plugin view. Do not substitute terminal output for either feature scene, forge HTML, or accept duplicate captures or caption-only changes.
-- Confirm the native terminal and CLI results come from the stated commands and that the notice is visibly present in the shared panel. Independently inspect every image and transcript for privacy and truthfulness.
-- The existing inspector plan waits for `The value is 42.`, but the supplied renderer displays `String(data)` and its heading is `Example`; the revised plan waits for `42` instead. Verify the real capture, since the supplied files do not prove Core’s full rendering or loading behavior.
-- The plan is structurally reviewed against the requested format without executing code. Actual capture, applied themes, fixture behavior, and SDK compatibility remain to be verified during an explicit capture.
+Use the existing `docs/screenshot_fixture.py` bootstrap with an isolated demonstration profile. It disables native and several system notification sources and seeds the plugin's own notice; it does not define a separate fixture file. Mira is a fictional greeting input, and 42 is the actual constant returned by `sample`. The notice is seeded rather than evidence of a user completing the notification confirmation flow.
 
 ## Source-bound UI surface inventory
 
-- **Discovery and submodule:** `pyproject.toml` declares the sole `heinzel.modules` entry point, `example = "heinzel_example"`; `src/heinzel_example/__init__.py` declares `Module("example", ...)`, and `src/heinzel_example/hello/__init__.py` declares `Module("hello", ...)` and `hello`.
-- **Plugin-owned feature view:** `module.view(... name="inspector", source="sample", title="Example", abi=1)` loads `src/heinzel_example/views/index.js`. The declared navigation, action, and status effect target `/?panel=example:inspector`. The renderer has an `Example` region and displays loading or the raw value; it declares no actions.
-- **Core-rendered feature contributions:** `@module.widget` contributes the Today metric; `@module.status` contributes footer and sidebar slots; `module.action` and `module.nav` contribute entry points. `notify` emits a plugin notice for Core’s notification UI. These declarations are in `src/heinzel_example/__init__.py`; the supplied source does not establish every surrounding Core interaction.
-- **Operations and generic surfaces:** `info`, `sample`, and mutating `notify` are declared operations; `hello` is the submodule operation. `@module.info` contributes to system info, and `module.settings(ExampleSettings)` registers the greeting setting (`src/heinzel_example/__init__.py`, `src/heinzel_example/hello/__init__.py`, `src/heinzel_example/_models.py`). The README documents CLI use and JSON. A confirmation is described for `notify`, but the supplied sources do not establish its exact approval UI. Generic Core rendering of operations, settings, information, or confirmation must not be inferred from a missing Page/View declaration or represented as a verified screen without further evidence.
-- **External provider UI:** No external provider integration or provider-owned UI is declared in the supplied plugin sources.
-- **Terminal-only evidence:** The supplied README documents CLI invocations, but does not prove these operations are exclusively terminal-only. The CLI scenes illustrate real command output; they do not stand in for the established feature UI.
-- **Unresolved claims:** `README.md` describes a health check and refers to `tests/contributions_test.py`, but no health-check declaration or referenced test file is present among the supplied files. The README also describes the inspector as showing `42` big, consistent with its renderer, while the old screenshot plan’s sentence-level wait conflicts with that renderer. The supplied files do not establish a plugin-specific setup flow or channel contribution.
+- `pyproject.toml` declares the sole `heinzel.modules` entry point, `example = "heinzel_example"`. `src/heinzel_example/__init__.py` declares `Module("example", ...)`, settings, service, `info`, `sample`, and the state-changing `notify` operation. `src/heinzel_example/hello/__init__.py` declares the discovered `hello` submodule and its typed `hello` operation; the README documents its collapsed `hz example hello` command.
+- `src/heinzel_example/__init__.py` declares a Core-rendered Today `widget` and footer/sidebar `status`, both sourced from `sample`; its `action` and `nav` navigate to `/?panel=example:inspector`. Its `view` declares that actual panel route, and `src/heinzel_example/views/index.js` renders its Example region and data. The widget and inspector are genuine feature UI, not terminal substitutes.
+- The same module's `notify` emits a plugin notice to the shared notification UI after ordinary operation confirmation. The fixture invokes it directly to seed the notice, so the capture must not imply the confirmation was exercised. `system_info` contributes plugin details to `hz system info`; settings are declared by `ExampleSettings` in `src/heinzel_example/_models.py`. Core may render operation, confirmation, settings or information surfaces, but these provided files do not establish their precise routes or layouts; none is invented in the plan.
+- No channel, setup or external-provider UI is declared in the supplied plugin sources. The CLI and app terminal are output surfaces, not evidence that an operation has no Core-rendered UI. The README mentions a health check, but no plugin health-check declaration appears in the supplied module sources; that discrepancy remains unresolved. The README also references tests and a wider author guide that were not provided, so their behavior is not assumed.
+
+## Privacy pitfalls
+
+Normal presentation fictionalization is explicitly limited to verified owning-interpreter paths becoming `/demo-profile/.venv`, and only the verified whole hostname detail in the genuine Doctor row becoming `demo-host`. These mappings change no SDK health status or remaining detail and establish no privacy acceptance. Unknown identities still fail, and independent review must inspect every image and transcript. Inspect for account names, paths, hostnames, credentials, notification contents and other identifying data; dismissing Doctor where offered is not proof that the remaining capture is private.
+
+## Acceptance criteria
+
+- Capture the six distinct planned scenes from the real app and CLI using the existing bootstrap and fictional profile. Verify the widget and sidebar, inspector, seeded notice and both CLI results against their actual outputs.
+- Confirm that light and dark appearances are applied, that the inspector and Today/status captures are useful feature UI, and that the app-terminal capture is labeled as such. Do not substitute fabricated screens or caption changes for distinct states.
+- Verify commands complete successfully, the greeting and JSON output match the installed plugin, and the notification is represented as seeded. Investigate any mismatch rather than editing the displayed result.
+- Independently review every image and transcript for privacy, including the narrowly permitted path and Doctor hostname mappings. Unknown identities fail review. The source-only plan is structurally checked against the requested format; capture, runtime behavior and privacy acceptance remain to be verified during explicit capture.

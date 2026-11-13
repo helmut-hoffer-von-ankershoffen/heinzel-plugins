@@ -15,56 +15,60 @@ Today
 Weather in Berlin, DE
 ☀ 22°C clear sky
 feels like 21°C, wearing umbrella
-Thu ☁ 10 to 19°C
+Sat ☁ 10 to 19°C
 broken clouds, 10% rain
-Fri 🌧 9 to 18°C
+Sun 🌧 9 to 18°C
 moderate rain, 80% rain
-Sat ☀ 12 to 21°C
+Mon ☀ 12 to 21°C
 clear sky, 10% rain
+Ask about it
 Temperature and rain, next 24 hours
-22:00
-09:00
-21:00
+16:00
+03:00
+15:00
 Temperature and rain, next 24 hours
 Time	°C	Rain chance
-22:00	21.5	10%
-23:00	19.9	80%
-00:00	18.3	80%
-01:00	16.7	80%
-02:00	15.1	80%
-03:00	13.5	10%
-04:00	12	10%
-05:00	14	10%
-06:00	15	10%
-07:00	16	10%
-08:00	12	10%
-09:00	13	10%
-10:00	14	10%
-11:00	15	10%
-12:00	16	10%
-13:00	12	10%
-14:00	13	10%
-15:00	14	10%
-16:00	15	10%
-17:00	16	10%
-18:00	12	10%
-19:00	13	10%
-20:00	14	10%
-21:00	15	10%
+16:00	21.5	10%
+17:00	19.9	80%
+18:00	18.3	80%
+19:00	16.7	80%
+20:00	15.1	80%
+21:00	13.5	10%
+22:00	12	10%
+23:00	14	10%
+00:00	15	10%
+01:00	16	10%
+02:00	12	10%
+03:00	13	10%
+04:00	14	10%
+05:00	15	10%
+06:00	16	10%
+07:00	12	10%
+08:00	13	10%
+09:00	14	10%
+10:00	15	10%
+11:00	16	10%
+12:00	12	10%
+13:00	13	10%
+14:00	14	10%
+15:00	15	10%
 11.5 to 24 °C · Rain chance
+Ask about it
 Weather in Berlin, DE
 
 22°C
 
 clear sky
 
+Ask about it
+
 Nothing needs you right now. Ask anything below.
 
-v0.9.29
+v0.9.40
 Updates, off
 0
 System health, warning
-Calendar, error
+?
 22°C Berlin, DE, off
 Daemon not installed, off
 Chat
@@ -80,4 +84,3 @@ Clear sky · Berlin, DE
 Feels like 21°C
 Today 12 to 24°C · 80% rain
 Open
-Change place
