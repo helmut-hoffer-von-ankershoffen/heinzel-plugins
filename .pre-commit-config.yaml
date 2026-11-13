@@ -6,6 +6,7 @@ repos:
     rev: v6.0.0
     hooks:
       - id: check-added-large-files
+        args: [--maxkb=1024] # the frozen Zoom plugin archive under tests/fixtures
       - id: check-case-conflict
       - id: debug-statements
       - id: detect-private-key
@@ -28,13 +29,13 @@ repos:
         entry: uv run --group tooling ruff format
         language: system
         types: [python]
-        exclude: ^(plugins|tests/fixtures/historical_zoom_plugin)/
+        exclude: ^plugins/
       - id: ruff-check
         name: ruff check
         entry: uv run --group tooling ruff check --fix
         language: system
         types: [python]
-        exclude: ^(plugins|tests/fixtures/historical_zoom_plugin)/
+        exclude: ^plugins/
       - id: confidentiality
         name: confidential terms
         entry: uv run --no-project --script scripts/check_confidentiality.py
@@ -64,7 +65,7 @@ repos:
           bash -c 'test -f pyproject.toml || exit 0; if [ "$HZ_TRUSTED_FOCUSED_PUSH" = 1 ]; then exec env -i PATH="$PATH" HOME="$HOME" UV_OFFLINE=1 HZ_TRUSTED_FOCUSED_PUSH=1 PRE_COMMIT_FROM_REF="$PRE_COMMIT_FROM_REF" PRE_COMMIT_TO_REF="$PRE_COMMIT_TO_REF" uv run --no-env-file --project "$PWD" --frozen --group tooling python scripts/focused_hook.py tooling; fi; exec make check-fast'
         language: system
         pass_filenames: false
-        exclude: ^(plugins|tests/fixtures/historical_zoom_plugin)/
+        exclude: ^plugins/
         stages: [pre-push]
       - id: owning-plugin-checks
         name: owning plugin lint and offline tests

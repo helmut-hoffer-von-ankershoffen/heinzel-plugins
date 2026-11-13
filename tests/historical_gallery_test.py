@@ -3,6 +3,8 @@
 import hashlib
 import json
 import shutil
+import tarfile
+import tempfile
 from pathlib import Path
 
 import pytest
@@ -12,8 +14,12 @@ from heinzel_plugin_tools._historical_galleries import MANIFESTS, PUBLIC_BASE, P
 
 pytestmark = pytest.mark.unit
 REPO = Path(__file__).resolve().parents[1]
-# The whole pre-relock Zoom plugin, frozen: the live plugin carries a current format-2 gallery.
-ZOOM_ORIGINAL = REPO / "tests/fixtures/historical_zoom_plugin"
+# The whole pre-relock Zoom plugin, frozen as an archive: the live plugin carries a current format-2 gallery.
+ZOOM_ARCHIVE = REPO / "tests/fixtures/historical_zoom_plugin.tar.gz"
+_EXTRACTED = tempfile.TemporaryDirectory(prefix="hz-historical-zoom-")
+with tarfile.open(ZOOM_ARCHIVE) as _archive:
+    _archive.extractall(_EXTRACTED.name, filter="data")
+ZOOM_ORIGINAL = Path(_EXTRACTED.name) / "plugins/heinzel-zoom"
 RECAPTURED = (
     "heinzel-clock",
     "heinzel-resource",
