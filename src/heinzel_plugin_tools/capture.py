@@ -363,8 +363,10 @@ def rendered_metadata(root: Path, metadata: dict) -> Path | None:
     """Reduce project metadata in place to what renders (ADR 0003); return the build hook, which renders too.
 
     Dropped: the plugin's own version, version specifiers and test or tooling groups. Kept: the names of every
-    declared dependency (a new plugin dependency adds pages), every locked `heinzel*` distribution with its version,
-    and for a plugin with a build hook the build requirements and their locked versions, which build its views.
+    declared and every locked distribution, because a new plugin dependency, direct or transitive and whatever its
+    name, adds pages; the version of every locked `heinzel*` distribution; and for a plugin with a build hook the
+    build requirements and their locked versions, which build its views. A relock that only moves versions of other
+    packages leaves the digest unchanged.
     """
     project = metadata.setdefault("project", {})
     project.pop("version", None)
@@ -384,9 +386,8 @@ def rendered_metadata(root: Path, metadata: dict) -> Path | None:
     lock = root / "requirements.lock"
     pins = vendor.lock_pins(lock.read_text()) if lock.is_file() and not lock.is_symlink() else {}
     metadata["locked"] = sorted(
-        f"{name}=={version}"
+        f"{name}=={version}" if name.startswith("heinzel") or name in built else name
         for name, versions in pins.items()
-        if name.startswith("heinzel") or name in built
         for version in versions
     )
     return hook

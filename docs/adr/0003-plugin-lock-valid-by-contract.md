@@ -38,9 +38,10 @@ constraints. Plugins import `pydantic` and `rich` without declaring them, becaus
    changed inputs; a Core outside the range. Hash-locked installs and `uv pip check` stay unchanged.
 5. **Locks are tooling.** `requirements.lock` and `plugin-lock.json` are not shipped content. The gallery digest
    covers what renders. It leaves out the plugin's own version, the version specifiers of its dependencies, its
-   dependency groups and the lock. It keeps the names of every declared dependency and the locked version of every
-   `heinzel*` distribution, because a new plugin dependency adds pages, sidebar entries or notices to the captured
-   app. For a plugin with a build hook it also keeps the hook file, the build requirements and their locked
+   dependency groups and the lock. It keeps the names of every declared and every locked distribution, and the locked
+   version of every `heinzel*` distribution, because a new plugin dependency, direct or transitive and whatever its
+   name, adds pages, sidebar entries or notices to the captured app. A relock that only moves versions of other
+   packages leaves the gallery fresh. For a plugin with a build hook it also keeps the hook file, the build requirements and their locked
    versions, because they build the views. The gallery check fails if a published transcript renders the plugin's
    own version. A relock alone needs no version bump, changelog section, recapture or release.
 6. **Security relock path.** Relock every affected plugin in one pull request; no bump, no recapture. Then bump a
@@ -56,7 +57,7 @@ constraints. Plugins import `pydantic` and `rich` without declaring them, becaus
    admit the vulnerable version are not yanked; the app's update installs the new release.
 7. **Standing audit.** A scheduled workflow runs the toolkit's audit (pip-audit on the installed lock closure) for
    every public plugin daily, so a vulnerable plugin-only pin fails without waiting for a Core change or a pull
-   request.
+   request. For each finding the audit names the case of rule 6 that applies.
 8. **Migration.** Lock records of format 1 stay valid; the toolkit reads only their Core version and writes format 2
    (no dependency list) on the next relock. An older toolkit cannot read format 2; toolkit and locks move together,
    also in standalone projects. A gallery or screenshot definition reviewed under the old digest is accepted in two

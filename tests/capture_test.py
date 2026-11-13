@@ -598,6 +598,11 @@ def test_a_relock_bump_or_floor_leaves_the_gallery_fresh(owner, change):
         lambda owner: (owner / "requirements.lock").write_text(
             (owner / "requirements.lock").read_text() + "heinzel-lighthouse==1.0 --hash=sha256:00\n"
         ),
+        # A transitive plugin need not be named heinzel*: any new locked distribution may carry an entry point.
+        lambda owner: (owner / "requirements.lock").write_text(
+            (owner / "requirements.lock").read_text() + "harbor-lights==2.0 --hash=sha256:00\n"
+        ),
+        lambda owner: edit(owner / "requirements.lock", "hatchling==1.29.0", "hatchling-two==1.29.0"),
     ],
 )
 def test_a_new_dependency_or_locked_plugin_can_add_pages_so_it_makes_the_gallery_stale(owner, change):
@@ -670,17 +675,22 @@ def test_a_pinned_migration_keeps_an_old_review_fresh_through_a_relock_but_not_a
 
 def test_every_pinned_migration_matches_a_committed_gallery_or_definition_today():
     root = Path(__file__).resolve().parents[1]
-    used = {}
+    stored, current = {}, {}
     for directory in sorted((root / "plugins").glob("*/")):
         if not (directory / capture.MANIFEST).is_file():
             continue
         plan = capture.read_plan(directory)
-        used[json.loads((directory / capture.MANIFEST).read_text())["inputs_sha256"]] = capture.input_digest(
-            directory, plan
-        )
         definition = directory / planning.DEFINITION
+        pairs = [(json.loads((directory / capture.MANIFEST).read_text())["inputs_sha256"], plan)]
         if definition.is_file():
-            source = capture.input_digest(directory, {"bootstrap": plan.get("bootstrap")})
-            used[json.loads(definition.read_text())["source_sha256"]] = source
+            pairs.append((json.loads(definition.read_text())["source_sha256"], {"bootstrap": plan.get("bootstrap")}))
+        for recorded, inputs in pairs:
+            stored[recorded] = directory.name
+            # Built view assets are inputs; a checkout without them cannot judge its plugin's entries.
+            if capture.input_digest(directory, inputs, legacy=True) == recorded:
+                current[recorded] = capture.input_digest(directory, inputs)
+    hint = "After a recapture, delete the entry from src/heinzel_plugin_tools/_digest_migration.py; never re-pin it."
     for old, new in capture.MIGRATED_DIGESTS.items():
-        assert used.get(old) == new, old
+        assert old in stored, f"{old} pins no committed gallery or definition. {hint}"
+        assert current.get(old, new) == new, f"{old} ({stored[old]}) no longer maps to its digest. {hint}"
+    assert len(current) >= 20  # every gallery without built views is judged on any checkout

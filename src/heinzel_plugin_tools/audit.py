@@ -18,33 +18,72 @@ from importlib import metadata
 from packaging.markers import default_environment
 from packaging.requirements import Requirement
 from packaging.utils import canonicalize_name
-pending = [(sys.argv[1], frozenset())]
-seen, versions = set(), {}
-while pending:
-    name, extras = pending.pop()
-    name = canonicalize_name(name)
-    if (name, extras) in seen:
-        continue
-    seen.add((name, extras))
-    distribution = metadata.distribution(name)
-    versions[name] = distribution.version
-    for text in distribution.requires or []:
+
+def requirements(name, extras):
+    for text in metadata.distribution(name).requires or []:
         requirement = Requirement(text)
         environment = default_environment()
-        active = requirement.marker is None or any(
+        if requirement.marker is None or any(
             requirement.marker.evaluate(environment | {"extra": extra}) for extra in extras | {""}
-        )
-        if active:
-            pending.append((requirement.name, frozenset(requirement.extras)))
-print(json.dumps(versions))
+        ):
+            yield requirement
+
+def closure(start):
+    pending = [(start, frozenset())]
+    seen, versions = set(), {}
+    while pending:
+        name, extras = pending.pop()
+        name = canonicalize_name(name)
+        if (name, extras) in seen:
+            continue
+        seen.add((name, extras))
+        versions[name] = metadata.distribution(name).version
+        pending += [(item.name, frozenset(item.extras)) for item in requirements(name, extras)]
+    return versions
+
+owner = closure(sys.argv[1])
+direct = sorted({canonicalize_name(item.name) for item in requirements(sys.argv[1], frozenset())})
+core = sorted(closure("heinzel")) if "heinzel" in owner else []
+print(json.dumps({"versions": owner, "direct": direct, "core": core}))
 """
+
+# Which security relock case applies to a vulnerable package (plugins ADR 0003).
+CASES = {
+    "core": "comes through Core: Core's release fixes it; relock only, no plugin bump",
+    "declared": "declared dependency: raise its floor in project.dependencies, patch bump and changelog",
+    "transitive": "comes only through this plugin's dependencies: add a direct floor (pkg>=fixed), patch bump",
+}
+
+
+def security_case(package: str, closure: dict) -> str:
+    """Core forces a fix it releases; otherwise the plugin's own metadata must, through a floor."""
+    if package in closure["core"]:
+        return "core"
+    return "declared" if package in closure["direct"] else "transitive"
+
+
+def report_cases(report: Path, closure: dict) -> None:
+    """Name the security case of every vulnerable package pip-audit found."""
+    if not report.is_file():
+        return
+    for dependency in json.loads(report.read_text()).get("dependencies", []):
+        if dependency.get("vulns"):
+            case = security_case(dependency["name"], closure)
+            fixes = sorted({fix for vuln in dependency["vulns"] for fix in vuln.get("fix_versions", [])})
+            identifiers = ", ".join(vuln["id"] for vuln in dependency["vulns"])
+            print(
+                f"{dependency['name']} {dependency['version']} ({identifiers}; fixed in {', '.join(fixes) or 'none'})"
+                f": {CASES[case]}",
+                flush=True,
+            )
 
 
 def main() -> None:
     interpreter, name = sys.argv[1:]
     vendored = vendor.project(Path.cwd())
     result = subprocess.run([interpreter, "-c", INSPECT, name], check=True, text=True, capture_output=True, timeout=60)
-    versions = json.loads(result.stdout)
+    closure = json.loads(result.stdout)
+    versions = closure["versions"]
     allowlist = Path(".license-allowlist")
     if not allowlist.is_file():
         allowlist = Path(__file__).with_name("defaults") / "license-allowlist"
@@ -92,11 +131,13 @@ def main() -> None:
                 )
             )
         requirements.write_text("\n".join(sorted(runtime)) + "\n")
-        subprocess.run(
-            [sys.executable, "-m", "pip_audit", "--strict", "--disable-pip", "--no-deps", "-r", str(requirements)],
-            check=True,
-            timeout=300,
-        )
+        report = Path(temporary) / "audit.json"
+        command = [sys.executable, "-m", "pip_audit", "--strict", "--disable-pip", "--no-deps", "-r", str(requirements)]
+        command += ["--format", "json", "--output", str(report)]
+        audited = subprocess.run(command, check=False, timeout=300)
+        report_cases(report, closure)
+        if audited.returncode:
+            raise subprocess.CalledProcessError(audited.returncode, command)
 
 
 if __name__ == "__main__":

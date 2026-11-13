@@ -196,8 +196,13 @@ def supports_core(project: Project, version: str) -> bool:
 
 def released_core(project: Project) -> str:
     """Find a compatible stable registry wheel so authors need no manual artifact download."""
-    with urllib.request.urlopen("https://pypi.org/pypi/heinzel/json", timeout=30) as response:  # noqa: S310
-        payload = json.loads(response.read(16 * 1024 * 1024))
+    try:
+        with urllib.request.urlopen("https://pypi.org/pypi/heinzel/json", timeout=30) as response:  # noqa: S310
+            payload = json.loads(response.read(16 * 1024 * 1024))
+    except OSError as error:
+        raise ValueError(
+            f"Cannot resolve the newest released core ({error}). Offline, pass CORE=<compatible-core-wheel>."
+        ) from error
     candidates = {
         Version(version): files
         for version, files in payload["releases"].items()

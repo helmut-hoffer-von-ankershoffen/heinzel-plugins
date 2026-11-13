@@ -167,6 +167,15 @@ def test_the_newest_compatible_stable_non_yanked_wheel_is_selected(project, monk
     assert cli.released_core(project) == "https://files.example/0.9.4"
 
 
+def test_an_offline_lookup_of_the_newest_core_asks_for_an_explicit_candidate(project, monkeypatch):
+    def offline(*_, **__):
+        raise cli.urllib.error.URLError("no network")
+
+    monkeypatch.setattr(cli.urllib.request, "urlopen", offline)
+    with pytest.raises(ValueError, match=r"Offline, pass CORE=<compatible-core-wheel>"):
+        cli.released_core(project)
+
+
 def test_no_compatible_release_asks_for_an_explicit_candidate(project, monkeypatch):
     class Response(io.BytesIO):
         def __enter__(self):
