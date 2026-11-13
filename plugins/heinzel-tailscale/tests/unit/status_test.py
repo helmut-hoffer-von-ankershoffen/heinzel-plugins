@@ -385,6 +385,53 @@ def test_a_ready_pane_shows_the_url_and_no_status_line():
         assert item.toggle.problem is None
 
 
+def test_a_plain_off_pane_has_no_details_that_repeat_the_switch():
+    state = service(Settings(), FakeCli()).status()
+    assert state.state == "off"
+    assert state.message == "Private web sharing is off."  # The CLI and JSON keep the message.
+    item = sharing(state)
+    assert item.toggle.checked is False
+    assert item.toggle.requested is False
+    assert item.detail == []
+    if heinzel_tailscale._PANE_LINES:
+        assert item.toggle.status is None
+        assert item.toggle.problem is None
+        assert item.toggle.explanation is None
+
+
+def test_a_plain_on_pane_has_no_details_that_repeat_the_switch():
+    runtime = LocalWebRuntime(port=8737)
+    state = service(
+        Settings(ui_allowed_origins={MAPPING.origin}),
+        FakeCli(serve=MAPPING.enable({})),
+        owned=True,
+        web=(runtime, WebUser()),
+    ).status()
+    assert state.state == "ready"
+    assert state.message  # The CLI and JSON keep the message.
+    if heinzel_tailscale._PANE_LINES:
+        assert sharing(state).toggle.explanation is None
+
+
+@pytest.mark.parametrize(
+    "changes",
+    [
+        {"state": "blocked", "problem": True, "summary": "Check Tailscale Serve."},
+        {"state": "error", "problem": True, "summary": "Tailscale did not answer. Try again."},
+        {"state": "apply-required", "mapped": True, "summary": "Turning on…"},
+        {"desired_enabled": True, "problem": True, "summary": "Tailscale stopped sharing. Try again."},
+        {"apply_settings": {"hz.ui_allowed_origins": []}},
+        {"mapped": True},
+        {"state": "ready", "desired_enabled": False, "mapped": True},
+    ],
+)
+def test_states_to_act_on_or_wait_for_keep_details(changes):
+    if not heinzel_tailscale._PANE_LINES:
+        pytest.skip("Installed Core has no toggle explanation")
+    state = service(Settings(), FakeCli()).status().model_copy(update=changes)
+    assert sharing(state).toggle.explanation == heinzel_tailscale.shorten(state.message)
+
+
 @pytest.mark.parametrize(
     "serve",
     [
