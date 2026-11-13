@@ -228,16 +228,18 @@ released Core in the range, not the one the lock was resolved against. A Core ch
 no relock; one it breaks fails with the relock command. Dependencies on concrete plugin implementations are rejected.
 
 The lock is tooling, not shipped content and not a gallery input: a relock alone needs no version bump, changelog
-section, recapture or release. A security relock relocks every affected plugin in one pull request. It bumps a plugin
-(patch version and changelog section) only when the fixed version is not already forced for its users: raise the
-floor of a declared dependency, or add a direct floor for a vulnerable package that reaches users only through the
-plugin's own dependencies. A package that reaches users through Core is fixed by Core's release. The merge releases
-every bumped plugin in one pass, and the galleries stay fresh. `Audit plugin locks` audits every lock daily.
-Plugins can add ordinary runtime and development dependencies in their own `pyproject.toml`, then regenerate their
-own lock. This requires no core dependency change or sibling environment.
-Plugins may implement and consume public interfaces, capabilities and lets from the SDK or an implementation-free
-contract package. Provider selection happens through contracts and bindings. Declare versioned `requires` and
-`provides` contract identifiers in `[tool.heinzel.plugin]` so the planner also selects affected consumers.
+section or release, and no recapture unless it adds or drops a locked distribution. A security relock relocks every
+affected plugin in one pull request. It bumps a plugin (patch version and changelog section) only when the fixed version
+is not already forced for its users: raise the floor of a declared dependency, or add a direct floor for a vulnerable
+package that reaches users only through the plugin's own dependencies. A package that reaches users through Core is
+fixed by Core's release. The merge releases every bumped plugin in one pass, and the galleries stay fresh. `Audit plugin
+locks` audits every lock daily.
+
+Plugins can add ordinary runtime and development dependencies in their own `pyproject.toml`, then regenerate their own
+lock. This requires no core dependency change or sibling environment. Plugins may implement and consume public
+interfaces, capabilities and lets from the SDK or an implementation-free contract package. Provider selection happens
+through contracts and bindings. Declare versioned `requires` and `provides` contract identifiers in
+`[tool.heinzel.plugin]` so the planner also selects affected consumers.
 
 ```bash
 make plan BASE=origin/main

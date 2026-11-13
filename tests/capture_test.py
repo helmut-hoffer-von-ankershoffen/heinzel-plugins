@@ -4,6 +4,8 @@ import copy
 import hashlib
 import json
 import os
+import re
+import shutil
 import sys
 from pathlib import Path
 from types import SimpleNamespace
@@ -673,24 +675,64 @@ def test_a_pinned_migration_keeps_an_old_review_fresh_through_a_relock_but_not_a
     assert not capture.inputs_current(owner, plan, old)
 
 
-def test_every_pinned_migration_matches_a_committed_gallery_or_definition_today():
-    root = Path(__file__).resolve().parents[1]
-    stored, current = {}, {}
-    for directory in sorted((root / "plugins").glob("*/")):
+REPOSITORY = Path(__file__).resolve().parents[1]
+MIGRATION_HINT = (
+    "After a recapture, delete the entry from src/heinzel_plugin_tools/_digest_migration.py; never re-pin it."
+)
+# Plugins whose built view assets are capture inputs. A checkout without the build (tooling CI) cannot judge their
+# pinned entries; the pin test skips exactly these, visibly, and judges them where `make screenshots-check` ran.
+VIEW_BUILDERS = {"heinzel-clock", "heinzel-weather"}
+
+
+def builds_views(directory):
+    frontend = directory / "web/package.json"
+    return frontend.is_file() and "build" in json.loads(frontend.read_text()).get("scripts", {})
+
+
+def migration_sources():
+    """Every committed reviewed digest, with the plugin and capture inputs it was recorded for."""
+    found = {}
+    for directory in sorted((REPOSITORY / "plugins").glob("*/")):
         if not (directory / capture.MANIFEST).is_file():
             continue
         plan = capture.read_plan(directory)
+        found[json.loads((directory / capture.MANIFEST).read_text())["inputs_sha256"]] = (directory, plan)
         definition = directory / planning.DEFINITION
-        pairs = [(json.loads((directory / capture.MANIFEST).read_text())["inputs_sha256"], plan)]
         if definition.is_file():
-            pairs.append((json.loads(definition.read_text())["source_sha256"], {"bootstrap": plan.get("bootstrap")}))
-        for recorded, inputs in pairs:
-            stored[recorded] = directory.name
-            # Built view assets are inputs; a checkout without them cannot judge its plugin's entries.
-            if capture.input_digest(directory, inputs, legacy=True) == recorded:
-                current[recorded] = capture.input_digest(directory, inputs)
-    hint = "After a recapture, delete the entry from src/heinzel_plugin_tools/_digest_migration.py; never re-pin it."
-    for old, new in capture.MIGRATED_DIGESTS.items():
-        assert old in stored, f"{old} pins no committed gallery or definition. {hint}"
-        assert current.get(old, new) == new, f"{old} ({stored[old]}) no longer maps to its digest. {hint}"
-    assert len(current) >= 20  # every gallery without built views is judged on any checkout
+            source = {"bootstrap": plan.get("bootstrap")}
+            found[json.loads(definition.read_text())["source_sha256"]] = (directory, source)
+    return found
+
+
+SOURCES = migration_sources()
+
+
+def test_the_plugins_whose_pins_need_built_views_are_exactly_the_named_ones():
+    assert {directory.name for directory, _ in SOURCES.values() if builds_views(directory)} == VIEW_BUILDERS
+
+
+@pytest.mark.parametrize("old", sorted(capture.MIGRATED_DIGESTS))
+def test_every_pinned_migration_maps_a_committed_gallery_or_definition_to_its_digest_today(old):
+    assert old in SOURCES, f"{old} pins no committed gallery or definition. {MIGRATION_HINT}"
+    directory, inputs = SOURCES[old]
+    if directory.name in VIEW_BUILDERS and not any((directory / "src").glob("*/views/*")):
+        pytest.skip(f"{directory.name}: view assets not built; run make screenshots-check NAME={directory.name}")
+    # Today's rule leaves the lock out, so a relock never breaks this.
+    assert capture.input_digest(directory, inputs) == capture.MIGRATED_DIGESTS[old], (
+        f"{old} ({directory.name}) no longer maps to its digest. {MIGRATION_HINT}"
+    )
+
+
+def test_a_version_only_relock_keeps_a_pinned_gallery_fresh_and_its_pin_valid(tmp_path):
+    plugin = tmp_path / "heinzel-atlassian"
+    shutil.copytree(REPOSITORY / "plugins/heinzel-atlassian", plugin, ignore=shutil.ignore_patterns(".venv"))
+    lock = plugin / "requirements.lock"
+    # A security relock moves one pinned version, whatever it is today.
+    relocked, moved = re.subn(r"^(opentelemetry-api==\S+) ", r"\1.post1 ", lock.read_text(), flags=re.MULTILINE)
+    assert moved == 1
+    lock.write_text(relocked)
+    plan = capture.read_plan(plugin)
+    recorded = json.loads((plugin / capture.MANIFEST).read_text())["inputs_sha256"]
+    assert capture.input_digest(plugin, plan, legacy=True) != recorded  # the old rule would call it stale
+    assert capture.input_digest(plugin, plan) == capture.MIGRATED_DIGESTS[recorded]
+    assert capture.check_capture(plugin)["fresh"]

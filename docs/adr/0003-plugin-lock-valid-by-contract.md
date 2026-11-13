@@ -41,9 +41,11 @@ constraints. Plugins import `pydantic` and `rich` without declaring them, becaus
    dependency groups and the lock. It keeps the names of every declared and every locked distribution, and the locked
    version of every `heinzel*` distribution, because a new plugin dependency, direct or transitive and whatever its
    name, adds pages, sidebar entries or notices to the captured app. A relock that only moves versions of other
-   packages leaves the gallery fresh. For a plugin with a build hook it also keeps the hook file, the build requirements and their locked
+   packages leaves the gallery fresh; one that adds or drops a locked distribution (for example when a Core
+   dependency gains a requirement) needs a recapture. For a plugin with a build hook it also keeps the hook file, the build requirements and their locked
    versions, because they build the views. The gallery check fails if a published transcript renders the plugin's
-   own version. A relock alone needs no version bump, changelog section, recapture or release.
+   own version. A relock alone needs no version bump, changelog section or release, and no recapture unless the set of
+   locked distributions changes.
 6. **Security relock path.** Relock every affected plugin in one pull request; no bump, no recapture. Then bump a
    plugin only when the fixed version is not already forced for its users by Core or by the plugin's declared
    ranges:
