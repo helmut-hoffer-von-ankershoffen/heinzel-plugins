@@ -2,47 +2,14 @@ format = 1
 bootstrap = "docs/screenshot_fixture.py"
 browser_time = "2026-11-01T12:00:00Z"
 
-# showcase and the contract exist only in the documentation fixture.
-# App-terminal captures are terminal results, not feature UI.
-
-[[scenes]]
-name = "workflow-context"
-surface = "ui"
-route = "/contracts/meeting-notes"
-appearance = "light"
-caption = "Fictional Meeting notes contract: a meeting-summary input and Markdown output; no report has been generated."
-timeout_ms = 30000
-
-[[scenes.steps]]
-action = "wait"
-role = "heading"
-name = "Meeting notes"
-
-[scenes.viewport]
-width = 1280
-height = 650
-
-[[scenes]]
-name = "workflow-discovery"
-surface = "ui"
-route = "/contracts"
-appearance = "dark"
-caption = "Fictional Meeting notes in the Core workflow graph: discover the workflow before opening its details."
-timeout_ms = 30000
-
-[[scenes.steps]]
-action = "wait"
-text = "Meeting notes"
-
-[scenes.viewport]
-width = 1280
-height = 650
+# showcase is supplied only by the existing documentation fixture.
+# Its operations exercise the real Zoom adapter against fictional mail.
 
 [[scenes]]
 name = "meeting-decisions"
 surface = "ui"
 route = "/"
-caption = "Fictional Weekly sync in the app terminal: a Thursday decision and three next steps, parsed through the fixture-only requester."
+caption = "Fictional Weekly sync: a Thursday release decision and three named next steps, via the fixture-only requester and real Zoom parser."
 timeout_ms = 30000
 
 [[scenes.steps]]
@@ -57,7 +24,7 @@ height = 650
 name = "recent-meetings"
 surface = "ui"
 route = "/"
-caption = "Fictional October meeting list in the app terminal: find Weekly sync and Launch review through the fixture-only requester."
+caption = "Fictional October mailbox: find Weekly sync and Launch review through the fixture-only requester and real Zoom adapter."
 timeout_ms = 30000
 
 [[scenes.steps]]
@@ -72,7 +39,7 @@ height = 650
 name = "launch-decisions"
 surface = "ui"
 route = "/"
-caption = "Fictional Launch review in the app terminal: a ten-percent rollout decision and two owners, using a second meeting argument."
+caption = "Fictional Launch review: a ten-percent rollout decision and two named owners, using a second meeting argument in the native terminal."
 timeout_ms = 30000
 
 [[scenes.steps]]
@@ -94,3 +61,15 @@ name = "meeting-list-json"
 surface = "cli"
 caption = "Fictional October meetings as JSON: typed meeting metadata through the fixture-only requester, not verbatim transcripts."
 command = ["showcase", "ended", "--json"]
+
+[[scenes]]
+name = "workflow-context"
+surface = "ui"
+route = "/contracts/meeting-notes"
+caption = "Fictional Meeting notes contract: declares a meeting-summary input and Markdown output; no report has been generated."
+timeout_ms = 30000
+
+[[scenes.steps]]
+action = "wait"
+role = "heading"
+name = "Meeting notes"

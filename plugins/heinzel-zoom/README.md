@@ -112,25 +112,21 @@ Development and release commands: [repository guide](../../README.md).
 <!-- screenshots:start -->
 ## Screenshots
 
-<img src="docs/assets/screenshots/workflow-context.png" alt="Fictional Meeting notes contract: a meeting-summary input and Markdown output; no report has been generated." width="960">
+<img src="docs/assets/screenshots/meeting-decisions.png" alt="Fictional Weekly sync: a Thursday release decision and three named next steps, via the fixture-only requester and real Zoom parser." width="960">
 
-Fictional Meeting notes contract: a meeting-summary input and Markdown output; no report has been generated.
+Fictional Weekly sync: a Thursday release decision and three named next steps, via the fixture-only requester and real Zoom parser.
 
-<img src="docs/assets/screenshots/workflow-discovery.png" alt="Fictional Meeting notes in the Core workflow graph: discover the workflow before opening its details." width="960">
+<img src="docs/assets/screenshots/recent-meetings.png" alt="Fictional October mailbox: find Weekly sync and Launch review through the fixture-only requester and real Zoom adapter." width="960">
 
-Fictional Meeting notes in the Core workflow graph: discover the workflow before opening its details.
+Fictional October mailbox: find Weekly sync and Launch review through the fixture-only requester and real Zoom adapter.
 
-<img src="docs/assets/screenshots/meeting-decisions.png" alt="Fictional Weekly sync in the app terminal: a Thursday decision and three next steps, parsed through the fixture-only requester." width="960">
+<img src="docs/assets/screenshots/launch-decisions.png" alt="Fictional Launch review: a ten-percent rollout decision and two named owners, using a second meeting argument in the native terminal." width="960">
 
-Fictional Weekly sync in the app terminal: a Thursday decision and three next steps, parsed through the fixture-only requester.
+Fictional Launch review: a ten-percent rollout decision and two named owners, using a second meeting argument in the native terminal.
 
-<img src="docs/assets/screenshots/recent-meetings.png" alt="Fictional October meeting list in the app terminal: find Weekly sync and Launch review through the fixture-only requester." width="960">
+<img src="docs/assets/screenshots/workflow-context.png" alt="Fictional Meeting notes contract: declares a meeting-summary input and Markdown output; no report has been generated." width="960">
 
-Fictional October meeting list in the app terminal: find Weekly sync and Launch review through the fixture-only requester.
-
-<img src="docs/assets/screenshots/launch-decisions.png" alt="Fictional Launch review in the app terminal: a ten-percent rollout decision and two owners, using a second meeting argument." width="960">
-
-Fictional Launch review in the app terminal: a ten-percent rollout decision and two owners, using a second meeting argument.
+Fictional Meeting notes contract: declares a meeting-summary input and Markdown output; no report has been generated.
 
 <details>
 <summary>Command line</summary>

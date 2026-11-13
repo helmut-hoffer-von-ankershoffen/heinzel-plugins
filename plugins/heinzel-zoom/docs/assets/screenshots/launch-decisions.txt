@@ -9,20 +9,20 @@ Team roster
 M
 Mira
 · EM
+Home
 Today
-Today
-Doctor: 4 checks need attention
+Doctor: 7 checks need attention
 
-ai.access ai access, system.doctor installation, system.prerequisite system.runner: claude…
+ai.access ai access, system.credential backend, system.credential credential ai.access/api-key…
 
 Open
-v0.9.40
-Plugins changed, warning
+Ask about it
+v0.9.1
 Updates, off
+Daemon not installed, off
 0
 System health, warning
-?
-Daemon not installed, off
+No calendar connected, error
 Chat
 Terminal
 Demo complete
@@ -37,4 +37,3 @@ Release readiness
 The team checked the plan, owners and milestone.
 Source: https://us06web.zoom.us/meeting/summary/demo
 $
-Audio
