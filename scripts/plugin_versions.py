@@ -9,6 +9,8 @@ from pathlib import Path, PurePosixPath
 PLUGINS = "plugins"
 REVISION = re.compile(r"[0-9A-Za-z][0-9A-Za-z_./~^-]*")
 NOT_SHIPPED = ("tests", "docs", "media", "screenshots")
+# The hash lock and its record make the plugin's own CI reproducible; no wheel carries them (ADR 0003).
+TOOLING = ("requirements.lock", "plugin-lock.json")
 
 
 def _git(*arguments: str) -> str:
@@ -23,7 +25,12 @@ def _git(*arguments: str) -> str:
 
 def _shipped(path: str, plugin: str) -> bool:
     relative = PurePosixPath(path).relative_to(f"{PLUGINS}/{plugin}")
-    return relative.parts[0] not in NOT_SHIPPED and relative.suffix != ".md" and str(relative) != "pyproject.toml"
+    return (
+        relative.parts[0] not in NOT_SHIPPED
+        and relative.suffix != ".md"
+        and str(relative) != "pyproject.toml"
+        and str(relative) not in TOOLING
+    )
 
 
 def _pyproject(revision: str, plugin: str) -> str:

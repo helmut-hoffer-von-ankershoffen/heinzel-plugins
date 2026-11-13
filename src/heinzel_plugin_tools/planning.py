@@ -35,6 +35,13 @@ def source_digest(root: Path, plan: dict) -> str:
     return input_digest(root, {"bootstrap": plan.get("bootstrap")})
 
 
+def source_current(root: Path, plan: dict, recorded: object) -> bool:
+    """A definition's source digest is current under the same rule and migration as the gallery's (ADR 0003)."""
+    from heinzel_plugin_tools.capture import inputs_current
+
+    return inputs_current(root, {"bootstrap": plan.get("bootstrap")}, recorded)
+
+
 def validate_definition(root: Path, plan: dict) -> dict:
     """Require a source-bound agent definition and the exact current human-editable plan."""
     receipt = json.loads(safe_path(root, DEFINITION).read_text())
@@ -53,7 +60,7 @@ def validate_definition(root: Path, plan: dict) -> dict:
         or not isinstance(receipt.get("reviewer"), str)
         or not receipt["reviewer"].strip()
         or len(receipt["reviewer"]) > 80
-        or receipt.get("source_sha256") != source_digest(root, plan)
+        or not source_current(root, plan, receipt.get("source_sha256"))
         or receipt.get("plan_sha256") != plan_digest(plan)
         or receipt.get("story_sha256") != hashlib.sha256(story.encode()).hexdigest()
     ):

@@ -14,6 +14,8 @@ from heinzel_plugin_tools import cli
 pytestmark = pytest.mark.unit
 
 CORE_REQUIRES = ["pydantic>=2.11", "typer>=0.15"]
+LOCK = "pydantic==2.12.0 --hash=sha256:00\nrich==15.0.0 --hash=sha256:00\ntidal-tables==1.0 --hash=sha256:00\n"
+LOCK += "typer==0.16.0 \\\n    --hash=sha256:00\n"
 
 
 def core_wheel(path, *, name="heinzel", version="0.9.4", requires=CORE_REQUIRES):
@@ -35,6 +37,7 @@ def project(tmp_path):
             "dependencies": ["heinzel>=0.9.1,<0.10", "tidal-tables>=1"],
             "entry-points": {"heinzel.modules": {"harbor": "heinzel_harbor.module:Harbor"}},
         },
+        "tool": {"heinzel": {"plugin": {"requires": ["core:plugin-api@1"]}}},
         "dependency-groups": {
             "test": ["pytest>=9", {"include-group": "extra"}],
             "extra": ["freezegun>=1"],
@@ -48,14 +51,21 @@ def project(tmp_path):
 @pytest.fixture
 def commands(monkeypatch):
     recorded = []
-    monkeypatch.setattr(cli, "run", lambda command, **options: recorded.append((command, options)))
+
+    def run(command, **options):
+        recorded.append((command, options))
+        if "--output-file" in command:
+            Path(command[command.index("--output-file") + 1]).write_text(LOCK)
+
+    monkeypatch.setattr(cli, "run", run)
     return recorded
 
 
-def write_lock(project, core, **changes):
-    record = {"format": 1, "sdk": 1, "inputs": cli.dependency_inputs(project), "core": cli.core_metadata(str(core))}
+def write_lock(project, wheel, *, lock=LOCK, **changes):
+    version = cli.core_metadata(str(wheel))["version"]
+    record = {"format": 2, "sdk": 1, "inputs": cli.dependency_inputs(project), "core": {"version": version}}
     (project.directory / "plugin-lock.json").write_text(json.dumps(record | changes))
-    (project.directory / "requirements.lock").write_text("tidal-tables==1.0 --hash=sha256:00\n")
+    (project.directory / "requirements.lock").write_text(lock)
     return record
 
 
@@ -180,8 +190,17 @@ def test_locking_resolves_inputs_against_the_candidate_and_records_the_core(proj
     assert "--universal" in command and "--generate-hashes" in command
     assert command[command.index("--output-file") + 1] == str(project.directory / "requirements.lock")
     record = json.loads((project.directory / "plugin-lock.json").read_text())
-    assert record["inputs"] == cli.dependency_inputs(project)
-    assert record["core"]["version"] == "0.9.4"
+    assert record == {"format": 2, "sdk": 1, "inputs": cli.dependency_inputs(project), "core": {"version": "0.9.4"}}
+
+
+def test_locking_refuses_a_resolution_outside_the_declared_plugin_api(project, tmp_path, monkeypatch):
+    def run(command, **options):
+        Path(command[command.index("--output-file") + 1]).write_text(LOCK.replace("rich==15.0.0", "rich==16.0.0"))
+
+    monkeypatch.setattr(cli, "run", run)
+    with pytest.raises(ValueError, match=r"rich 16.0.0, outside core:plugin-api@1 \(rich 15\)"):
+        cli.lock(project, str(core_wheel(tmp_path / "heinzel-0.9.4-py3-none-any.whl")))
+    assert not (project.directory / "plugin-lock.json").exists()
 
 
 def test_locking_refuses_a_core_the_plugin_does_not_allow(project, tmp_path, commands):
@@ -215,21 +234,85 @@ def test_a_valid_lock_returns_its_record_and_checks_a_selected_core_against_it(p
     write_lock(project, wheel)
     assert cli.validate_lock(project, None)["core"]["version"] == "0.9.4"
     assert cli.validate_lock(project, str(wheel))["core"]["version"] == "0.9.4"
-    changed = core_wheel(tmp_path / "changed.whl", requires=[*CORE_REQUIRES, "extra-dependency>=1"])
-    with pytest.raises(ValueError, match="Core dependencies changed; relock only this consumer"):
-        cli.validate_lock(project, str(changed))
     newer = core_wheel(tmp_path / "newer.whl", version="0.10.0")
     with pytest.raises(ValueError, match="does not allow core 0.10.0"):
         cli.validate_lock(project, str(newer))
 
 
-def test_the_installed_core_must_match_the_locked_dependencies(project, tmp_path, monkeypatch):
+@pytest.mark.parametrize(
+    "requires",
+    [
+        [*CORE_REQUIRES, 'pyjwt[crypto]>=2.15; extra == "openai"'],  # a new extra no plugin installs
+        ["typer>=0.15,<1", "pydantic<3,>=2.12"],  # other text, still satisfied by the locked pins
+        [*CORE_REQUIRES, 'pywin32>=300; sys_platform == "win32"'],  # no supported target needs it
+    ],
+)
+def test_a_core_dependency_change_the_lock_satisfies_needs_no_relock(project, tmp_path, requires):
+    write_lock(project, core_wheel(tmp_path / "heinzel-0.9.4-py3-none-any.whl"))
+    changed = core_wheel(tmp_path / "heinzel-0.9.5-py3-none-any.whl", version="0.9.5", requires=requires)
+    assert cli.validate_lock(project, str(changed))["core"]["version"] == "0.9.4"
+
+
+@pytest.mark.parametrize(
+    ("requires", "message"),
+    [
+        (["pydantic>=2.11", "typer>=0.17"], r"needs typer>=0.17, but the heinzel-harbor lock pins 0.16.0"),
+        ([*CORE_REQUIRES, "opentelemetry-api>=1.45.2"], "needs opentelemetry-api, which the heinzel-harbor lock lacks"),
+        ([*CORE_REQUIRES, 'uvloop>=0.21; sys_platform == "linux"'], "needs uvloop, which the heinzel-harbor lock"),
+        (["pydantic>=3", "typer>=0.15"], r"needs pydantic>=3, but the heinzel-harbor lock pins 2.12.0"),
+    ],
+)
+def test_a_core_the_lock_actually_breaks_still_fails(project, tmp_path, requires, message):
+    write_lock(project, core_wheel(tmp_path / "heinzel-0.9.4-py3-none-any.whl"))
+    changed = core_wheel(tmp_path / "heinzel-0.9.5-py3-none-any.whl", version="0.9.5", requires=requires)
+    with pytest.raises(ValueError, match=f"{message}.*relock only this consumer"):
+        cli.validate_lock(project, str(changed))
+
+
+@pytest.mark.parametrize(
+    ("lock", "message"),
+    [
+        (LOCK.replace("rich==15.0.0", "rich==14.2.0"), r"rich 14.2.0, outside core:plugin-api@1 \(rich 15\)"),
+        (LOCK.replace("pydantic==2.12.0", "pydantic==3.0.0"), r"pydantic 3.0.0, outside core:plugin-api@1"),
+        (LOCK.replace("rich==15.0.0 --hash=sha256:00\n", ""), "lock has no rich, which core:plugin-api@1 provides"),
+        (LOCK.replace("tidal-tables==1.0", "tidal-tables>=1.0"), "must pin tidal-tables exactly"),
+    ],
+)
+def test_a_lock_outside_the_declared_plugin_api_fails_without_any_core(project, tmp_path, lock, message):
+    write_lock(project, core_wheel(tmp_path / "heinzel-0.9.4-py3-none-any.whl"), lock=lock)
+    with pytest.raises(ValueError, match=message):
+        cli.validate_lock(project, None)
+
+
+@pytest.mark.parametrize("requires", [[], ["core:plugin-api@9"], ["core:plugin-api@1", "core:plugin-api@2"]])
+def test_a_plugin_must_declare_exactly_one_known_plugin_api(project, tmp_path, requires):
+    write_lock(project, core_wheel(tmp_path / "heinzel-0.9.4-py3-none-any.whl"))
+    project.metadata["tool"]["heinzel"]["plugin"]["requires"] = requires
+    with pytest.raises(ValueError, match=r"exactly one known Core plugin API in requires \(core:plugin-api@1\)"):
+        cli.validate_lock(project, None)
+
+
+def test_a_format_1_record_stays_valid_and_its_dependency_list_is_ignored(project, tmp_path):
+    wheel = core_wheel(tmp_path / "heinzel-0.9.4-py3-none-any.whl")
+    write_lock(project, wheel, format=1, core={"version": "0.9.4", "dependencies": ["stale>=1"]})
+    changed = core_wheel(tmp_path / "heinzel-0.9.5-py3-none-any.whl", version="0.9.5", requires=["typer>=0.16"])
+    assert cli.validate_lock(project, str(changed))["format"] == 1
+    write_lock(project, wheel, format=3)
+    with pytest.raises(ValueError, match="dependencies changed"):
+        cli.validate_lock(project, None)
+
+
+def test_the_installed_core_must_satisfy_the_same_contract(project, tmp_path, monkeypatch):
     wheel = core_wheel(tmp_path / "heinzel-0.9.4-py3-none-any.whl")
     write_lock(project, wheel)
-    monkeypatch.setattr(cli.distributions, "requires", lambda name: list(CORE_REQUIRES))
+    monkeypatch.setattr(cli.distributions, "version", lambda name: "0.9.7")
+    monkeypatch.setattr(cli.distributions, "requires", lambda name: [*CORE_REQUIRES, 'extra-only>=1; extra == "x"'])
     cli.validate_installed_core(project)
-    monkeypatch.setattr(cli.distributions, "requires", lambda name: ["pydantic>=2.11"])
-    with pytest.raises(ValueError, match="Installed core dependencies changed"):
+    monkeypatch.setattr(cli.distributions, "requires", lambda name: ["pydantic>=2.13"])
+    with pytest.raises(ValueError, match="Core 0.9.7 needs pydantic>=2.13"):
+        cli.validate_installed_core(project)
+    monkeypatch.setattr(cli.distributions, "version", lambda name: "0.10.0")
+    with pytest.raises(ValueError, match="does not allow core 0.10.0"):
         cli.validate_installed_core(project)
 
 
@@ -260,14 +343,19 @@ def test_the_environment_is_built_from_hashes_then_core_then_the_plugin_without_
     assert str(wheel.resolve()) in commands[2][0]
 
 
-def test_an_existing_environment_is_reused(project, tmp_path, commands):
+def test_an_existing_environment_is_reused_and_tests_the_newest_released_core_not_the_lock_time_one(
+    project, tmp_path, commands, monkeypatch
+):
     wheel = core_wheel(tmp_path / "heinzel-0.9.4-py3-none-any.whl")
     write_lock(project, wheel)
     (project.directory / ".venv/bin").mkdir(parents=True)
     (project.directory / ".venv/bin/python").write_text("")
+    newest = core_wheel(tmp_path / "heinzel-0.9.9-py3-none-any.whl", version="0.9.9")
+    monkeypatch.setattr(cli, "released_core", lambda _: str(newest))
     cli.prepare_environment(project, None)
     assert ["uv", "venv"] not in [command[:2] for command, _ in commands]
-    assert any("heinzel==0.9.4" in command for command, _ in commands)
+    assert any(str(newest.resolve()) in command for command, _ in commands)
+    assert not any("heinzel==0.9.4" in command for command, _ in commands)
 
 
 def test_commands_run_only_from_the_plugins_own_environment(project):

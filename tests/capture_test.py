@@ -555,3 +555,132 @@ def test_detail_focus_rejects_unbounded_padding(owner, padding):
     plan_path.write_text(plan_path.read_text() + f'\n[scenes.focus]\nrole="region"\nname="Tides"\npadding={raw}\n')
     with pytest.raises(capture.CaptureError, match="focus padding"):
         capture.read_plan(owner)
+
+
+def with_dependencies(owner, dependencies='"heinzel>=0.9,<0.10", "httpx>=0.28"'):
+    path = owner / "pyproject.toml"
+    path.write_text(
+        path.read_text().replace(
+            'description="A fictional harbor."\n', f'description="A fictional harbor."\ndependencies=[{dependencies}]\n'
+        )
+    )
+    (owner / "requirements.lock").write_text("httpx==0.28.1 --hash=sha256:00\nhatchling==1.29.0 --hash=sha256:00\n")
+    (owner / "plugin-lock.json").write_text('{"format": 2}\n')
+
+
+def edit(path, old, new):
+    text = path.read_text()
+    assert old in text
+    path.write_text(text.replace(old, new))
+
+
+@pytest.mark.parametrize(
+    "change",
+    [
+        lambda owner: edit(owner / "requirements.lock", "httpx==0.28.1", "httpx==0.28.2"),  # a security relock
+        lambda owner: (owner / "plugin-lock.json").write_text('{"format": 2, "relocked": true}\n'),
+        lambda owner: edit(owner / "pyproject.toml", 'version="0.1.0"', 'version="0.1.1"'),  # a bump
+        lambda owner: edit(owner / "pyproject.toml", '"httpx>=0.28"', '"httpx>=0.28.2"'),  # a security floor
+        lambda owner: edit(owner / "requirements.lock", "hatchling==1.29.0", "hatchling==1.30.0"),  # no build hook
+    ],
+)
+def test_a_relock_bump_or_floor_leaves_the_gallery_fresh(owner, change):
+    with_dependencies(owner)
+    recorded(owner)
+    change(owner)
+    assert capture.check_capture(owner)["fresh"]
+
+
+@pytest.mark.parametrize(
+    "change",
+    [
+        lambda owner: edit(owner / "pyproject.toml", '"httpx>=0.28"', '"httpx>=0.28", "heinzel-lighthouse>=1"'),
+        lambda owner: (owner / "requirements.lock").write_text(
+            (owner / "requirements.lock").read_text() + "heinzel-lighthouse==1.0 --hash=sha256:00\n"
+        ),
+    ],
+)
+def test_a_new_dependency_or_locked_plugin_can_add_pages_so_it_makes_the_gallery_stale(owner, change):
+    with_dependencies(owner)
+    recorded(owner)
+    change(owner)
+    with pytest.raises(ValueError, match="stale"):
+        capture.check_capture(owner)
+
+
+@pytest.mark.parametrize(
+    "change",
+    [
+        lambda owner: edit(owner / "hatch_build.py", "views", "other views"),
+        lambda owner: edit(owner / "requirements.lock", "hatchling==1.29.0", "hatchling==1.30.0"),
+    ],
+)
+def test_a_build_hook_and_its_locked_build_tools_render_views_so_they_stay_inputs(owner, change):
+    with_dependencies(owner)
+    (owner / "hatch_build.py").write_text("# builds the views\n")
+    with (owner / "pyproject.toml").open("a") as target:
+        target.write('\n[build-system]\nrequires = ["hatchling>=1.29"]\n\n[tool.hatch.build.hooks.custom]\n')
+    recorded(owner)
+    change(owner)
+    with pytest.raises(ValueError, match="stale"):
+        capture.check_capture(owner)
+
+
+@pytest.mark.parametrize(
+    ("text", "renders"),
+    [("v0.1.0", True), ("0.1.0 ready", True), ("0.1.01", False), ("10.1.0", False), ("0.1.0.1", False)],
+)
+def test_a_transcript_may_not_render_the_plugin_version_the_digest_leaves_out(owner, text, renders):
+    shots = recorded(owner)
+    (owner / shots[0]["path"]).with_suffix(".txt").write_text(f"Harbor {text}\n")
+    if renders:
+        with pytest.raises(ValueError, match="renders the plugin version 0.1.0"):
+            capture.check_capture(owner)
+    else:
+        capture.unrendered_version(owner, "0.9.8")
+
+
+def test_a_plugin_version_equal_to_the_rendered_core_version_is_not_mistaken_for_the_plugin(owner):
+    shots = recorded(owner)
+    (owner / shots[0]["path"]).with_suffix(".txt").write_text("Heinzelmännchen v0.1.0\n")
+    capture.unrendered_version(owner, "0.1.0")
+    with pytest.raises(ValueError, match="renders the plugin version"):
+        capture.unrendered_version(owner, "0.9.8")
+
+
+def test_a_gallery_reviewed_under_the_old_digest_stays_fresh_only_while_it_matches(owner, monkeypatch):
+    with_dependencies(owner)
+    monkeypatch.setattr(capture, "input_digest", lambda root, plan, *, legacy=False: "old" if legacy else "new")
+    assert capture.inputs_current(owner, {}, "old") and capture.inputs_current(owner, {}, "new")
+    assert not capture.inputs_current(owner, {}, "older") and not capture.inputs_current(owner, {}, None)
+
+
+def test_a_pinned_migration_keeps_an_old_review_fresh_through_a_relock_but_not_a_source_change(owner, monkeypatch):
+    with_dependencies(owner)
+    plan = {"bootstrap": None}
+    old = capture.input_digest(owner, plan, legacy=True)
+    monkeypatch.setitem(capture.MIGRATED_DIGESTS, old, capture.input_digest(owner, plan))
+    edit(owner / "requirements.lock", "httpx==0.28.1", "httpx==0.28.2")
+    assert capture.input_digest(owner, plan, legacy=True) != old
+    assert capture.inputs_current(owner, plan, old)
+    assert planning.source_current(owner, plan, old)
+    edit(owner / "src/heinzel_harbor/__init__.py", "never", "still never")
+    assert not capture.inputs_current(owner, plan, old)
+
+
+def test_every_pinned_migration_matches_a_committed_gallery_or_definition_today():
+    root = Path(__file__).resolve().parents[1]
+    used = {}
+    for directory in sorted((root / "plugins").glob("*/")):
+        if not (directory / capture.MANIFEST).is_file():
+            continue
+        plan = capture.read_plan(directory)
+        used[json.loads((directory / capture.MANIFEST).read_text())["inputs_sha256"]] = capture.input_digest(
+            directory, plan
+        )
+        definition = directory / planning.DEFINITION
+        if definition.is_file():
+            source = capture.input_digest(directory, {"bootstrap": plan.get("bootstrap")})
+            used[json.loads(definition.read_text())["source_sha256"]] = source
+    for old, new in capture.MIGRATED_DIGESTS.items():
+        assert used.get(old) == new, old
