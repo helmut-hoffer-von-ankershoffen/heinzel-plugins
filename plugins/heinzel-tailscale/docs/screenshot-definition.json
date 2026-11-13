@@ -1,7 +1,7 @@
 {
   "format": 1,
-  "reviewer": "Codex feature-story agent",
-  "source_sha256": "cc4fa7e9c64305cb7e5313e2d901465ddbd3a285062fe02df16aea1cc36377f6",
-  "plan_sha256": "e9026f7479f013f04545b708fc116dc6ba0f4d0cf0e234771025c88a3d727b2f",
-  "story_sha256": "2de5616f57e15fee8738a346d01bc558a6c4c8fae4a9a13a2ffe9a76c46e9d21"
+  "reviewer": "Claude source-analysis agent (plugin source and capture.py)",
+  "source_sha256": "8affc9f6207f6e579435daf69bc772c38e2feebfb04829a9452c755a38433135",
+  "plan_sha256": "1f1fe2b01f478076c38aaac40080e64287b73f784dd8053c4a6792237cf327d3",
+  "story_sha256": "1f04d3649037f2dd8f56fbd0686161d769a83afe5f2ad5387483e339c1b77fdb"
 }
