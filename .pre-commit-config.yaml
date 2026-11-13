@@ -28,13 +28,13 @@ repos:
         entry: uv run --group tooling ruff format
         language: system
         types: [python]
-        exclude: ^plugins/
+        exclude: ^(plugins|tests/fixtures/historical_zoom_plugin)/
       - id: ruff-check
         name: ruff check
         entry: uv run --group tooling ruff check --fix
         language: system
         types: [python]
-        exclude: ^plugins/
+        exclude: ^(plugins|tests/fixtures/historical_zoom_plugin)/
       - id: confidentiality
         name: confidential terms
         entry: uv run --no-project --script scripts/check_confidentiality.py
@@ -64,7 +64,7 @@ repos:
           bash -c 'test -f pyproject.toml || exit 0; if [ "$HZ_TRUSTED_FOCUSED_PUSH" = 1 ]; then exec env -i PATH="$PATH" HOME="$HOME" UV_OFFLINE=1 HZ_TRUSTED_FOCUSED_PUSH=1 PRE_COMMIT_FROM_REF="$PRE_COMMIT_FROM_REF" PRE_COMMIT_TO_REF="$PRE_COMMIT_TO_REF" uv run --no-env-file --project "$PWD" --frozen --group tooling python scripts/focused_hook.py tooling; fi; exec make check-fast'
         language: system
         pass_filenames: false
-        exclude: ^plugins/
+        exclude: ^(plugins|tests/fixtures/historical_zoom_plugin)/
         stages: [pre-push]
       - id: owning-plugin-checks
         name: owning plugin lint and offline tests

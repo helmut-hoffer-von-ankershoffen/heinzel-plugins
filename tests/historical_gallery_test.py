@@ -12,6 +12,8 @@ from heinzel_plugin_tools._historical_galleries import MANIFESTS, PUBLIC_BASE, P
 
 pytestmark = pytest.mark.unit
 REPO = Path(__file__).resolve().parents[1]
+# The whole pre-relock Zoom plugin, frozen: the live plugin carries a current format-2 gallery.
+ZOOM_ORIGINAL = REPO / "tests/fixtures/historical_zoom_plugin"
 RECAPTURED = (
     "heinzel-clock",
     "heinzel-resource",
@@ -35,11 +37,12 @@ def file_hashes(folder):
 
 @pytest.mark.parametrize("plugin", sorted(MANIFESTS))
 def test_exact_authenticated_historical_gallery_integrity_is_read_only(plugin, monkeypatch):
-    folder = (
-        REPO / "tests/fixtures/historical_galleries" / plugin
-        if plugin in RECAPTURED
-        else REPO / "plugins" / plugin / capture.OUTPUT
-    )
+    if plugin == "heinzel-zoom":
+        folder = ZOOM_ORIGINAL / capture.OUTPUT
+    elif plugin in RECAPTURED:
+        folder = REPO / "tests/fixtures/historical_galleries" / plugin
+    else:
+        folder = REPO / "plugins" / plugin / capture.OUTPUT
     manifest_bytes = (folder / capture.MANIFEST.name).read_bytes()
     assert hashlib.sha256(manifest_bytes).hexdigest() == MANIFESTS[plugin]
     assert PUBLIC_BASE == "3be4b072ca2c78c6558298434319e30550e91a23"
@@ -55,7 +58,7 @@ def test_exact_authenticated_historical_gallery_integrity_is_read_only(plugin, m
 def historical(tmp_path):
     owner = tmp_path / "weather"
     shutil.copytree(
-        REPO / "plugins/heinzel-zoom",
+        ZOOM_ORIGINAL,
         owner,
         ignore=shutil.ignore_patterns("node_modules", ".venv", ".preview", "__pycache__"),
     )
@@ -163,7 +166,7 @@ def test_pinned_legacy_evidence_is_rejected_by_every_draft_or_admission_route(hi
     with pytest.raises(privacy.CaptureError, match="format is invalid"):
         actions[route]()
     assert file_hashes(folder) == before
-    assert (owner / capture.MANIFEST).read_bytes() == (REPO / "plugins/heinzel-zoom" / capture.MANIFEST).read_bytes()
+    assert (owner / capture.MANIFEST).read_bytes() == (ZOOM_ORIGINAL / capture.MANIFEST).read_bytes()
 
 
 def test_original_receipt_cannot_be_reused_after_constructing_a_format2_story_bundle(historical):

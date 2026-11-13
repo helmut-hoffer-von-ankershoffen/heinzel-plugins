@@ -30,6 +30,7 @@ audit = ["pip-audit==2.10.1", "pip-licenses==5.5.5"]
 
 [tool.ruff]
 line-length = 120
+extend-exclude = ["tests/fixtures/historical_zoom_plugin"] # frozen bytes of the pre-relock Zoom plugin
 [tool.ruff.lint]
 select = ["E", "F", "I", "B", "UP", "S"]
 [tool.ruff.lint.per-file-ignores]
@@ -38,6 +39,7 @@ select = ["E", "F", "I", "B", "UP", "S"]
 "tests/*.py" = ["S101"]
 [tool.pytest]
 testpaths = ["tests"]
+norecursedirs = ["historical_zoom_plugin"]
 addopts = ["--import-mode=importlib"]
 filterwarnings = ["error"]
 markers = ["unit: Isolated tooling behavior.", "integration: Processes and artifact contracts.", "e2e: Published author journey."]

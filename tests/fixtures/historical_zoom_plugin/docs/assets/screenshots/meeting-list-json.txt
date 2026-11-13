@@ -1,0 +1,48 @@
+[
+  {
+    "id": "sync",
+    "title": "Weekly sync",
+    "started_at": "2026-10-20T09:01:00Z",
+    "ended_at": "2026-10-20T09:31:00Z",
+    "participants": [
+      {
+        "name": "Mira Example",
+        "email": null
+      },
+      {
+        "name": "Jonas Example",
+        "email": null
+      },
+      {
+        "name": "Priya Example",
+        "email": null
+      }
+    ],
+    "conference_id": "81234567890",
+    "url": "https://us06web.zoom.us/meeting/summary/demo",
+    "has_transcript": true
+  },
+  {
+    "id": "launch",
+    "title": "Launch review",
+    "started_at": "2026-10-21T09:01:00Z",
+    "ended_at": "2026-10-21T09:31:00Z",
+    "participants": [
+      {
+        "name": "Mira Example",
+        "email": null
+      },
+      {
+        "name": "Jonas Example",
+        "email": null
+      },
+      {
+        "name": "Priya Example",
+        "email": null
+      }
+    ],
+    "conference_id": "81234567890",
+    "url": "https://us06web.zoom.us/meeting/summary/demo",
+    "has_transcript": true
+  }
+]

@@ -1,0 +1,10 @@
+Weekly sync — parsed meeting summary
+Quick recap
+Ship the reading list on Thursday after the phone checks pass.
+Next steps
+- Jonas Example will update the release notes.
+- Priya Example will check the phone crash reports.
+- Mira Example will review the ten-percent rollout.
+Release readiness
+The team checked the plan, owners and milestone.
+Source: https://us06web.zoom.us/meeting/summary/demo
