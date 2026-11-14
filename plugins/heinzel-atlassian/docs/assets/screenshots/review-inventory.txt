@@ -55,7 +55,8 @@ All contracts
 Weekly work review
 me:weekly-work-review
 by hand only
-v0.9.40
+v0.9.41
+Plugins changed, warning
 Updates, off
 0
 System health, error

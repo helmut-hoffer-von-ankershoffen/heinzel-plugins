@@ -84,17 +84,17 @@ def test_relative_path_entries_are_never_searched(fake_gws, tmp_path, monkeypatc
     planted.chmod(0o755)
     monkeypatch.chdir(tmp_path)
     monkeypatch.setenv("PATH", os.pathsep.join(["bin", "."]))
-    with pytest.raises(HeinzelError, match="not found on PATH"):
+    with pytest.raises(HeinzelError, match="looked on PATH"):
         GoogleSession(GoogleSettings(), fake_gws).executable()
 
 
 def test_without_gws_nothing_runs(fake_gws, tmp_path, monkeypatch):
     monkeypatch.setenv("PATH", str(tmp_path / "empty"))
-    with pytest.raises(HeinzelError, match="not found on PATH; install it: npm install -g @googleworkspace/cli"):
+    with pytest.raises(HeinzelError, match=r"looked on PATH.*Install it: npm install -g @googleworkspace/cli"):
         GoogleSession(GoogleSettings(), fake_gws).executable()
     plain = tmp_path / "gws"
     plain.write_text("", encoding="utf-8")  # a file, but not executable
-    with pytest.raises(HeinzelError, match=r"not found on google\.gws_path"):
+    with pytest.raises(HeinzelError, match=r"looked at .*gws, the path in google\.gws_path"):
         GoogleSession(GoogleSettings(gws_path=str(plain)), fake_gws).executable()
     assert fake_gws.runs == []
 
@@ -230,7 +230,7 @@ def test_an_error_printed_with_exit_zero_is_still_an_error(session, fake_gws):
 
 def test_without_any_absolute_path_entry_nothing_is_found(fake_gws, monkeypatch):
     monkeypatch.setenv("PATH", "")
-    with pytest.raises(HeinzelError, match="not found on PATH"):
+    with pytest.raises(HeinzelError, match="looked on PATH"):
         GoogleSession(GoogleSettings(), fake_gws).executable()
 
 
@@ -243,8 +243,88 @@ def test_the_version_is_checked_once_and_an_old_gws_is_refused(session, fake_gws
     with pytest.raises(HeinzelError, match=r"gws 0\.21\.9 is older than 0\.22\.0"):
         session.version()
     fake_gws.version = Process(0, b"something else")
-    with pytest.raises(HeinzelError, match="gave no version"):
+    with pytest.raises(HeinzelError, match="gave no gws version, so it is not the Google Workspace CLI"):
         session.version()
+
+
+GWS_0225 = b"gws 0.22.5\nThis is not an officially supported Google product.\n"
+"""What `gws --version` of gws 0.22.5 prints, both lines."""
+
+
+@pytest.mark.parametrize(
+    ("stdout", "shown"),
+    [(GWS_0225, "0.22.5"), (b"gws 0.22.0\n", "0.22.0"), (b"gws 1.3.0\nThis is not an officially supported\n", "1.3.0")],
+    ids=["0.22.5 with its notice", "the oldest", "an unknown newer one"],
+)
+def test_every_gws_from_the_minimum_on_is_accepted(session, fake_gws, stdout, shown):
+    fake_gws.version = Process(0, stdout)
+    assert session.version() == shown
+
+
+def test_a_gws_without_node_says_so_plainly(session, fake_gws, gws_path):
+    fake_gws.version = Process(127, b"", b"env: node: No such file or directory\n")
+    with pytest.raises(HeinzelError) as caught:
+        session.version()
+    assert str(caught.value) == (
+        f"gws at {gws_path} needs Node.js, and Heinzel could not find it. "
+        "Install Node.js (brew install node), then restart Heinzel. It said: env: node: No such file or directory"
+    )
+
+
+@pytest.mark.parametrize(
+    ("process", "said"),
+    [
+        (Process(None, b""), "but it gave no answer within 10 seconds. Run {} --version in a terminal to see why."),
+        (
+            Process(1, b"", b"boom\nmore"),
+            "but it failed to start (exit 1). Run {} --version in a terminal to see why. It said: boom",
+        ),
+        (Process(3, GWS_0225), "but it failed to start (exit 3). Run {} --version in a terminal to see why."),
+    ],
+    ids=["timeout", "an error", "a version with a failing exit"],
+)
+def test_a_gws_that_gives_no_version_names_where_and_what_next(session, fake_gws, gws_path, process, said):
+    fake_gws.version = process
+    with pytest.raises(HeinzelError) as caught:
+        session.version()
+    assert str(caught.value) == f"Heinzel found gws at {gws_path}, " + said.format(gws_path)
+
+
+@pytest.mark.parametrize("which", [0, 1], ids=["Apple silicon", "Intel"])
+def test_gws_is_found_where_homebrew_installs_it_under_a_launchd_path(fake_gws, no_homebrew, monkeypatch, which):
+    installed = Path(no_homebrew[which]) / "gws"
+    installed.parent.mkdir(parents=True)
+    installed.write_text("#!/bin/sh\n", encoding="utf-8")
+    installed.chmod(0o755)
+    monkeypatch.setenv("PATH", "/usr/bin:/bin:/usr/sbin:/sbin")
+    assert GoogleSession(GoogleSettings(), fake_gws).executable() == str(installed)
+
+
+def test_a_missing_gws_says_where_heinzel_looked(fake_gws, no_homebrew, monkeypatch):
+    monkeypatch.setenv("PATH", "/usr/bin:/bin")
+    with pytest.raises(HeinzelError) as caught:
+        GoogleSession(GoogleSettings(), fake_gws).executable()
+    assert str(caught.value) == (
+        f"Heinzel can't find the Google Workspace CLI (gws): it looked on PATH, in {no_homebrew[0]} or "
+        f"{no_homebrew[1]}. Install it: {_gws.INSTALL}."
+    )
+
+
+def test_gws_runs_with_its_own_directory_and_homebrew_after_path(no_homebrew):
+    env = _gws.run_environment("/opt/tools/bin/gws", {"PATH": "/usr/bin:relative::/bin", "HOME": "/home/ada"})
+    assert env == {"PATH": os.pathsep.join(["/usr/bin", "/bin", "/opt/tools/bin", *no_homebrew]), "HOME": "/home/ada"}
+
+
+def test_a_linked_gws_runs_with_both_its_directories(no_homebrew, tmp_path):
+    launcher = tmp_path / "lib" / "cli" / "run.js"
+    launcher.parent.mkdir(parents=True)
+    launcher.write_text("", encoding="utf-8")
+    link = tmp_path / "bin" / "gws"
+    link.parent.mkdir()
+    link.symlink_to(launcher)
+    env = _gws.run_environment(str(link), {"PATH": "/usr/bin"})
+    directories = [str(link.parent), str(launcher.resolve().parent)]
+    assert env["PATH"] == os.pathsep.join(["/usr/bin", *directories, *no_homebrew])
 
 
 def test_gws_gets_an_allowlisted_environment():
