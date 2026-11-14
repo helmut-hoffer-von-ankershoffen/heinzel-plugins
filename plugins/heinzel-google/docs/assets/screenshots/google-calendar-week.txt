@@ -15,7 +15,7 @@ Doctor: 4 checks need attention
 ai.access ai access, system.doctor installation, system.prerequisite system.runner: claude…
 
 Open
-v0.9.40
+v0.9.41
 Updates, off
 0
 System health, warning
@@ -25,21 +25,21 @@ Chat
 Calendar
 Calendar
 
-Calendar reminders are off or unavailable.
+Turn on Calendar reminders in Notification settings first.
 
 Now: nothing. Next: Launch readiness review in 15 min.
 
 TODAY · SAT 14 NOV
-01:25
-01:40
-02:10
+07:07
+07:22
+07:52
 Launch readiness review
 in 15 min
-02:25
-02:55
+08:07
+08:37
 Mira Example / Priya Example — one-on-one
-03:10
-03:40
+08:52
+09:22
 Rollout checkpoint
-Today
+Notification settings
 Audio

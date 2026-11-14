@@ -16,7 +16,7 @@ import pytest
 from heinzel import Config, Kernel, Module, ModuleRecord, Settings
 from heinzel.kernel import Origin, discover
 
-from heinzel_google import GoogleSession, GoogleSettings, Gws, Process
+from heinzel_google import GoogleSession, GoogleSettings, Gws, Process, _gws
 from heinzel_google._gws import config_dir
 
 DOC_ID = "1AbCdEfGhIjKlMnOpQrStUvWxYz"
@@ -142,6 +142,14 @@ def gws_config(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> Path:
     (directory / "credentials.enc").write_bytes(b"encrypted")
     monkeypatch.setenv("GOOGLE_WORKSPACE_CLI_CONFIG_DIR", str(directory))
     return directory
+
+
+@pytest.fixture(autouse=True)
+def no_homebrew(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> tuple[str, str]:
+    """Empty stand-ins for Homebrew's directories, so the host's own gws or node never answers a test."""
+    bins = (str(tmp_path / "homebrew-arm" / "bin"), str(tmp_path / "homebrew-intel" / "bin"))
+    monkeypatch.setattr(_gws, "HOMEBREW_BINS", bins)
+    return bins
 
 
 @pytest.fixture

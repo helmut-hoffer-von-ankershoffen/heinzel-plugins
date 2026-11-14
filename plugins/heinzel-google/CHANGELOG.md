@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.9.6
+
+Start gws when Heinzel runs as a background service: gws installed with npm under Homebrew needs `node`, which a short service PATH lacked, so the Calendar pane said gws gave no version. gws now runs with its own folder and Homebrew's (`/opt/homebrew/bin`, `/usr/local/bin`) after PATH, and Heinzel finds gws there too.
+Say plainly what is wrong when gws can't be found, can't start or gives no version: where Heinzel looked, and the one next step.
+
 ## 0.9.5
 
 Relock against Core 0.9.40. The mail-review and schedule journeys send from the personal conversation's Send button, which replaced Queue message in Core 0.9.40.

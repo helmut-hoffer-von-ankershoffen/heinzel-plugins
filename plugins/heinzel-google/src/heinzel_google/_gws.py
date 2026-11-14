@@ -78,7 +78,12 @@ LOGIN = login_command()
 LOGIN_WITH_MAIL = login_command(mail=True)
 INSTALL = "npm install -g @googleworkspace/cli (or set google.gws_path to the gws executable)"
 MIN_VERSION = (0, 22, 0)
-"""The oldest `gws` this plugin was written and tested against (ADR 0035): its JSON and exit codes are no contract."""
+"""The oldest `gws` this plugin was written and tested against (ADR 0035): its JSON and exit codes are no contract.
+
+There is no upper bound: a newer `gws` is used, and a change in its answers shows as that call's own error."""
+HOMEBREW_BINS = ("/opt/homebrew/bin", "/usr/local/bin")
+"""Where Homebrew puts `gws` (and the `node` its npm launcher needs) on Apple silicon and on Intel. They are searched
+after PATH because a service that launchd or the desktop app starts may run with a PATH that lacks them."""
 _VERSION = re.compile(r"\bgws (\d+)\.(\d+)\.(\d+)")
 PASSED = frozenset(
     {
@@ -101,6 +106,32 @@ def environment(source: Mapping[str, str] | None = None) -> dict[str, str]:
     """The environment `gws` runs with: the allowed variables of `source` (the current environment by default)."""
     variables = os.environ if source is None else source
     return {key: value for key, value in variables.items() if key in PASSED or key.startswith("LC_")}
+
+
+def search_path(path: str | None, *extra: str) -> list[str]:
+    """The absolute entries of `path`, then `extra` and `HOMEBREW_BINS`, once each.
+
+    A relative entry is dropped: it would let the working directory choose.
+    """
+    entries = [entry for entry in (path or "").split(os.pathsep) if entry and Path(entry).is_absolute()]
+    return list(dict.fromkeys([*entries, *extra, *HOMEBREW_BINS]))
+
+
+def run_environment(executable: str, source: Mapping[str, str] | None = None) -> dict[str, str]:
+    """`environment(source)` whose PATH also holds `executable`'s directories and `HOMEBREW_BINS`, after PATH.
+
+    `executable`'s directories are its own and the one it links to. npm installs `gws` as a link to a
+    `#!/usr/bin/env node` launcher, next to `node` (Homebrew: `/opt/homebrew/bin/gws`); under a short launchd PATH
+    that launcher can't find `node` and exits 127 before printing anything.
+    """
+    env = environment(source)
+    path = Path(executable)
+    try:
+        resolved = str(path.resolve(strict=True).parent)
+    except (OSError, RuntimeError):
+        resolved = str(path.parent)
+    env["PATH"] = os.pathsep.join(search_path(env.get("PATH"), str(path.parent), resolved))
+    return env
 
 
 SETUP = "hz setup google"
@@ -214,7 +245,7 @@ class Gws:
         Raises:
             OSError: If the executable can't be started.
         """
-        return self._run(executable, arguments, timeout, (environment(), NEUTRAL, MAX_BYTES))
+        return self._run(executable, arguments, timeout, (run_environment(executable), NEUTRAL, MAX_BYTES))
 
     def _run(
         self,
@@ -274,7 +305,7 @@ class Gws:
             OSError: If the executable can't be started.
         """
         process = subprocess.Popen(  # noqa: S603 - an argument list, the executable resolved to an absolute path
-            [executable, *arguments], env=environment(), cwd=NEUTRAL, start_new_session=True
+            [executable, *arguments], env=run_environment(executable), cwd=NEUTRAL, start_new_session=True
         )
         try:
             return process.wait(timeout)
@@ -366,9 +397,28 @@ def config_dir(source: Mapping[str, str] | None = None) -> Path:
 
 
 def _on_path(name: str) -> str | None:
-    """`name` on the absolute entries of PATH only: a relative entry would let the working directory choose."""
-    entries = [entry for entry in os.get_exec_path() if Path(entry).is_absolute()]
-    return shutil.which(name, path=os.pathsep.join(entries)) if entries else None
+    """`name` on the absolute entries of PATH, then in `HOMEBREW_BINS`."""
+    return shutil.which(name, path=os.pathsep.join(search_path(os.pathsep.join(os.get_exec_path()))))
+
+
+def _unversioned(executable: str, process: Process, limit: float) -> str:
+    """Why `gws --version` gave no version, for a person: what is wrong and the one next step."""
+    said = redact(process.stderr.decode(errors="replace").strip().splitlines()[0]) if process.stderr.strip() else ""
+    detail = f" It said: {said}" if said else ""
+    check = f"Run {executable} --version in a terminal to see why."
+    if process.exit_code is None:
+        return f"Heinzel found gws at {executable}, but it gave no answer within {limit:g} seconds. {check}"
+    if process.exit_code == 127 and "node" in said:  # noqa: PLR2004 - env: the interpreter is not found
+        return (
+            f"gws at {executable} needs Node.js, and Heinzel could not find it. "
+            f"Install Node.js (brew install node), then restart Heinzel.{detail}"
+        )
+    if process.exit_code != 0:
+        return f"Heinzel found gws at {executable}, but it failed to start (exit {process.exit_code}). {check}{detail}"
+    return (
+        f"The program at {executable} gave no gws version, so it is not the Google Workspace CLI. "
+        f"Install it: {INSTALL}."
+    )
 
 
 def _error(data: object) -> dict[str, Any]:
@@ -405,16 +455,19 @@ class GoogleSession:
         return self._settings.model_copy(deep=True)
 
     def executable(self) -> str:
-        """The absolute path of `gws`: `google.gws_path`, or `gws` on PATH.
+        """The absolute path of `gws`: `google.gws_path`, or `gws` on PATH, else where Homebrew installs it.
 
         Raises:
-            HeinzelError: If neither names an executable file, with the fix.
+            HeinzelError: If neither names an executable file: where Heinzel looked, and the fix.
         """
         configured = self._settings.gws_path
         found = configured if configured is not None else _on_path("gws")
         if found is None or not Path(found).is_file() or not os.access(found, os.X_OK):
-            where = f"google.gws_path ({configured})" if configured else "PATH"
-            msg = f"The Google Workspace CLI (gws) is not found on {where}; install it: {INSTALL}."
+            if configured:
+                where = f"at {configured}, the path in google.gws_path"
+            else:
+                where = f"on PATH, in {' or '.join(HOMEBREW_BINS)}"
+            msg = f"Heinzel can't find the Google Workspace CLI (gws): it looked {where}. Install it: {INSTALL}."
             raise HeinzelError(msg)
         return str(Path(found).absolute())  # symlinks stay: a launcher may need its own name
 
@@ -550,15 +603,15 @@ class GoogleSession:
             HeinzelError: If `gws` is missing, can't say its version, or is older than `MIN_VERSION`.
         """
         executable = self.executable()
+        limit = min(self._settings.timeout, 10.0)
         try:
-            process = self._gws.run(executable, ["--version"], min(self._settings.timeout, 10.0))
+            process = self._gws.run(executable, ["--version"], limit)
         except OSError as exc:
             msg = f"Could not start gws: {type(exc).__name__}; {INSTALL}."
             raise HeinzelError(msg) from None
-        found = _VERSION.search(process.stdout.decode(errors="replace"))
-        if process.exit_code != 0 or found is None:
-            msg = "gws --version gave no version this plugin understands; is gws the Google Workspace CLI?"
-            raise HeinzelError(msg)
+        found = _VERSION.search(process.stdout.decode(errors="replace")) if process.exit_code == 0 else None
+        if found is None:
+            raise HeinzelError(_unversioned(executable, process, limit))
         number = tuple(int(part) for part in found.groups())
         shown = ".".join(found.groups())
         if number < MIN_VERSION:
