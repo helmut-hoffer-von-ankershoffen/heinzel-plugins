@@ -233,11 +233,11 @@ class GoogleDocuments:
                 )
                 raise HeinzelError(msg) from error
             raise
-        items = data.get("files") or []
+        items = cast("object", data.get("files") or [])
         if not isinstance(items, list):
             msg = "Google Drive answered a search without a list of files."
             raise HeinzelError(msg)
-        hits: list[DocumentHit] = []  # type: ignore[valid-type]
+        hits: list[Any] = []  # DocumentHit exists only on Core 0.9.43 or later
         for item in cast("list[object]", items):
             if not isinstance(item, dict):
                 continue
