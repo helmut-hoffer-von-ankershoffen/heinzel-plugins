@@ -34,6 +34,10 @@ if sys.argv[1:] == ['auth','status','--json']:
  print(json.dumps({{'loggedIn':True,'authMethod':'claude.ai','apiProvider':'firstParty'}})); raise SystemExit
 if sys.argv[1:] == ['--version']:
  print('2.1.312 (Claude Code)'); raise SystemExit
+if sys.argv[1:] == ['--help']:
+ print('-p --output-format --safe-mode --restricted --strict-mcp-config --setting-sources'
+  ' --disable-slash-commands --no-session-persistence --permission-mode --tools'
+  ' --allowed-tools --json-schema'); raise SystemExit
 payload=json.load(sys.stdin)
 try: n=len(open({str(calls)!r}).read())
 except FileNotFoundError: n=0

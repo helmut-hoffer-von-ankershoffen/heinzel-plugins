@@ -39,14 +39,6 @@ MIGRATED_DIGESTS: dict[str, str] = {
     "de732cc7d7480bc72602985a097684d43325591e38d92fb2dd2ac89634ab39f2": (
         "ceeb3240bbdc03c060568f108031222ca61a845ac037ff96e6a707045899fd28"
     ),
-    # heinzel-slack gallery
-    "4435860e68ad76f26997679152d2700d55f9ad7b08cbab33fa66557836e49b6c": (
-        "920f79077bcedf69ee5783efaac52acba1eaa1e653fe7927c8df6e584d1323cc"
-    ),
-    # heinzel-slack definition
-    "5a0d5a055e649e2bdc229a06cf29159f871aee3249f1bfb2ec54aef8350a6588": (
-        "68db2a1dc1ae7de24a188d372a5b6e5f5cfa535decdf2b9e6fb313bc20460992"
-    ),
     # heinzel-tailscale gallery
     "9a20c109d44d267cb0279757b972471df5e4d24535a040e6f46c08c21963f8cc": (
         "56aca97a294d2aead22db387bca7307e82f2715e4c77b41a22a7154d51e130be"

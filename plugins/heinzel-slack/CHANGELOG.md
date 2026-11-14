@@ -2,6 +2,18 @@
 
 ## Unreleased
 
+## 0.3.0
+
+Slack as Core's `chat` capability, with the self channel of Core ADR 0160. `messages` reads a public channel the bot
+was invited to over a time window (paged, threads included, mentions shown as names, all text cleaned as untrusted);
+`post` posts with every mention and broadcast neutralised. `notify_self` and `ask_self` reach the owner in their own
+DM: a question carries one button per option and is answered by the owner's click (Socket Mode) or a typed reply
+(polled), bounded by its timeout, cancellable, and never leaving a socket open. Self-channel clicks are routed through
+the local store, so a click that reaches the approval listener still answers, and they never count as an approval.
+Slack's rate limits are waited out within bounds. The app manifest adds the scopes `channels:history`, `channels:read` and `im:history` and lets
+the owner type in the DM: reinstall the app from `hz slack manifest`. Reviewed notices and draft approvals are
+unchanged.
+
 ## 0.2.0
 
 Forget a request when its Heinzel is deleted for good (Core ADR 0148). The channel's new

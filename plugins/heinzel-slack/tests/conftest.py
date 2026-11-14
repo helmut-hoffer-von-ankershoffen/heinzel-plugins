@@ -3,6 +3,7 @@
 heinzel.testing brings the rest: every test is exactly one level and every test has its own HZ_STATE_DIR.
 """
 
+import threading
 from collections.abc import Callable
 from dataclasses import dataclass, field
 from datetime import UTC, datetime, timedelta
@@ -163,3 +164,68 @@ def rig(tmp_path) -> Rig:
     now = [T0]
     service.clock = lambda: now[0]
     return Rig(service, SlackChannel(service), slack, transport, now)
+
+
+class FakeWeb:
+    """A fake Slack Web API transport (`WebCall`): one handler per method, every call recorded, 429s on request."""
+
+    def __init__(self, handlers: dict[str, Callable[[dict[str, Any]], dict[str, Any]]] | None = None) -> None:
+        self.calls: list[tuple[str, dict[str, Any], bool]] = []
+        self.handlers: dict[str, Callable[[dict[str, Any]], dict[str, Any]]] = {
+            "auth.test": lambda _p: {
+                "ok": True,
+                "team_id": TEAM,
+                "user_id": "U0BOT0001",
+                "url": "https://acme.slack.com/",
+            },
+            "conversations.open": lambda _p: {"ok": True, "channel": {"id": DM}},
+            "chat.update": lambda _p: {"ok": True},
+            "conversations.replies": lambda _p: {"ok": True, "messages": []},
+            "conversations.history": lambda _p: {"ok": True, "messages": []},
+            **(handlers or {}),
+        }
+        self.limited: dict[str, list[float]] = {}
+        self.posted = 0
+        self._lock = threading.Lock()
+
+    def call(self, method: str, params: dict[str, Any], *, write: bool) -> dict[str, Any]:
+        from heinzel_slack._web import RateLimited
+
+        with self._lock:
+            self.calls.append((method, dict(params), write))
+            waits = self.limited.get(method)
+            if waits:
+                raise RateLimited(waits.pop(0))
+            if method == "chat.postMessage" and method not in self.handlers:
+                self.posted += 1
+                return {"ok": True, "ts": f"{1761912000 + self.posted}.000100", "channel": params["channel"]}
+        return self.handlers[method](params)
+
+    def made(self, method: str) -> list[dict[str, Any]]:
+        return [params for name, params, _ in self.calls if name == method]
+
+
+class FakeSocket:
+    """A fake Socket Mode listener: records start and stop; tests push payloads through `push`."""
+
+    def __init__(self, fail: bool = False) -> None:
+        self.handler: Callable[[dict[str, Any]], None] | None = None
+        self.started = 0
+        self.stopped = 0
+        self.fail = fail
+
+    def start(self, handler: Callable[[dict[str, Any]], None]) -> None:
+        from heinzel import HeinzelError
+
+        self.started += 1
+        if self.fail:
+            raise HeinzelError("Could not open Slack's Socket Mode connection")
+        self.handler = handler
+
+    def stop(self) -> None:
+        self.stopped += 1
+        self.handler = None
+
+    def push(self, payload: dict[str, Any]) -> None:
+        assert self.handler is not None, "nothing listens"
+        self.handler(payload)

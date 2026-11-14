@@ -58,6 +58,15 @@ class SlackSettings(ModuleSettings):
         json_schema_extra={"x-expert": True, "x-unit": "seconds"},
     )
 
+    poll_seconds: float = Field(
+        default=3.0,
+        ge=1,
+        le=60,
+        title="Reply check interval",
+        description="While a question waits, how often to look for a typed reply in its thread.",
+        json_schema_extra={"x-expert": True, "x-unit": "seconds"},
+    )
+
     ignored_in_project: ClassVar[frozenset[str]] = frozenset(
-        {"owner", "team", "approval_minutes", "timeout", "cli_path", "cli_profile", "bot_enabled"}
+        {"owner", "team", "approval_minutes", "timeout", "cli_path", "cli_profile", "bot_enabled", "poll_seconds"}
     )
