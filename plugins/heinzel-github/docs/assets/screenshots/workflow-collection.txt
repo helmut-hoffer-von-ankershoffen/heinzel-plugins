@@ -55,7 +55,7 @@ All contracts
 Weekly code review
 me:weekly-code-review
 by hand only
-v0.9.40
+v0.9.41
 Updates, off
 0
 System health, warning

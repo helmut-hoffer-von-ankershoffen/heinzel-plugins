@@ -2,6 +2,7 @@
 
 import json
 import os
+import re
 import signal
 import subprocess
 import time
@@ -36,7 +37,7 @@ def test_gh_gets_exactly_the_arguments_and_its_answer_comes_back(fake_gh_cli):
     assert not list(Path.home().glob("pwned"))
 
 
-def test_gh_sees_an_allowlisted_environment_pinned_to_the_host(fake_gh_cli, monkeypatch):
+def test_gh_sees_an_allowlisted_environment_pinned_to_the_host(fake_gh_cli, no_homebrew, monkeypatch):
     monkeypatch.setenv("HZ_CREDENTIAL_GITHUB_GITHUB_TOKEN", "made-up-secret")
     monkeypatch.setenv("GH_DEBUG", "api")
     monkeypatch.setenv("GODEBUG", "http2debug=2")
@@ -51,7 +52,8 @@ def test_gh_sees_an_allowlisted_environment_pinned_to_the_host(fake_gh_cli, monk
     assert env["GH_PROMPT_DISABLED"] == "1"
     assert env["GH_TOKEN"] == "made-up-gh-token"  # gh's own login, for gh
     assert env["LC_ALL"] == "C"
-    assert env["PATH"] == str(fake_gh_cli.bin)
+    bins = [str(fake_gh_cli.bin), str(fake_gh_cli.bin.resolve()), *no_homebrew]
+    assert env["PATH"] == os.pathsep.join(dict.fromkeys(bins))
     for name in ("HZ_CREDENTIAL_GITHUB_GITHUB_TOKEN", "GH_DEBUG", "GODEBUG", "AWS_SECRET_ACCESS_KEY"):
         assert name not in env
 
@@ -230,10 +232,11 @@ def test_a_huge_hosts_file_is_not_read_to_the_end(fake_gh_cli, monkeypatch):
     assert not gh().logged_in()
 
 
-def test_without_gh_on_the_path_it_is_missing_and_says_where_to_get_it(tmp_path, monkeypatch):
+def test_without_gh_on_the_path_it_is_missing_and_says_where_to_get_it(tmp_path, no_homebrew, monkeypatch):
     monkeypatch.setenv("PATH", str(tmp_path))
     assert gh().executable() is None
-    with pytest.raises(HeinzelError, match=r"not on PATH; install it from https://cli\.github\.com"):
+    looked = f"it looked on PATH and in {no_homebrew[0]} and {no_homebrew[1]}; install it from https://cli.github.com"
+    with pytest.raises(HeinzelError, match=re.escape(looked)):
         gh().run(call(), host="github.com", timeout=10)
 
 
@@ -242,3 +245,28 @@ def test_a_gh_that_cannot_start_is_a_clear_error(tmp_path, monkeypatch, install_
     monkeypatch.setenv("PATH", str(tmp_path / "bin"))
     with pytest.raises(HeinzelError, match="Could not start the GitHub CLI"):
         gh().version()
+
+
+LAUNCHD_DIRS = ("usr/bin", "bin", "usr/sbin", "sbin")
+"""The PATH a launchd service gets when its plist sets none (`/usr/bin:/bin:/usr/sbin:/sbin`), no Homebrew directory in
+it. The test uses empty stand-ins under its own directory: a CI runner may have a gh of its own in `/usr/bin`."""
+
+
+@pytest.mark.parametrize("which", [0, 1], ids=["Apple silicon", "Intel"])
+def test_gh_where_homebrew_installs_it_is_found_and_run_under_a_launchd_path(
+    fake_gh_cli, no_homebrew, monkeypatch, tmp_path, which
+):
+    """Homebrew links `bin/gh` to its Cellar; a service started by launchd has none of Homebrew's bins on PATH."""
+    link = Path(no_homebrew[which]) / "gh"
+    link.parent.mkdir(parents=True)
+    link.symlink_to(fake_gh_cli.bin / "gh")
+    launchd = [str(tmp_path / "launchd" / directory) for directory in LAUNCHD_DIRS]
+    for directory in launchd:
+        Path(directory).mkdir(parents=True)
+    monkeypatch.setenv("PATH", os.pathsep.join(launchd))
+    fake_gh_cli.answer(PATH, stdout="[]")
+    assert gh().executable() == str(link)
+    assert gh().run(call(), host="github.com", timeout=10).returncode == 0
+    child = fake_gh_cli.api_calls()[-1]["env"]["PATH"].split(os.pathsep)
+    assert child[:4] == launchd
+    assert {str(link.parent), str(fake_gh_cli.bin.resolve())} <= set(child)

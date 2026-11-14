@@ -70,6 +70,9 @@ FIXED = {
 }
 """Set for every call: never interactive, no pager, no colours, no update notices."""
 _PROXIES = frozenset({"HTTPS_PROXY", "HTTP_PROXY", "NO_PROXY", "ALL_PROXY"})
+HOMEBREW_BINS = ("/opt/homebrew/bin", "/usr/local/bin")
+"""Where Homebrew installs `gh` on Apple silicon and on Intel. Searched after `PATH`: a service that launchd or the
+desktop app starts runs with a short `PATH` (`/usr/bin:/bin:/usr/sbin:/sbin`) that lacks them."""
 _VERSION = re.compile(r"\bgh version v?(\d{1,4})\.(\d{1,4})\.(\d{1,6})")
 _HOST_KEY = re.compile(r"^([A-Za-z0-9.-]+):\s*$")
 _USER = re.compile(r"^[ \t]+user:[ \t]*['\"]?([A-Za-z0-9](?:[A-Za-z0-9-]{0,38}))['\"]?[ \t]*$")
@@ -102,6 +105,26 @@ class GhResult:
 def absolute_path(search: str) -> str:
     """`search`, a `PATH` value, with its relative entries (`.`, empty, `bin`) left out."""
     return os.pathsep.join(entry for entry in search.split(os.pathsep) if entry and Path(entry).is_absolute())
+
+
+def search_path(search: str, *extra: str) -> str:
+    """The absolute entries of `search`, then `extra` and `HOMEBREW_BINS`, each once."""
+    entries = [entry for entry in absolute_path(search).split(os.pathsep) if entry]
+    return os.pathsep.join(dict.fromkeys([*entries, *extra, *HOMEBREW_BINS]))
+
+
+def where_looked() -> str:
+    """Where `Gh.executable` looks for a program name, for a person."""
+    return f"on PATH and in {' and '.join(HOMEBREW_BINS)}"
+
+
+def own_directories(path: str) -> tuple[str, str]:
+    """The directory `path` is in and, for a link such as Homebrew's, the directory it links to."""
+    own = Path(path)
+    try:
+        return str(own.parent), str(own.resolve(strict=True).parent)
+    except (OSError, RuntimeError):
+        return str(own.parent), str(own.parent)
 
 
 def environment(host: str, source: Mapping[str, str] | None = None) -> dict[str, str]:
@@ -202,17 +225,19 @@ class Gh:
         self._versions: dict[str, tuple[int, int, int] | None] = {}
 
     def executable(self) -> str | None:
-        """The absolute path of `github.gh`, looked up on `PATH` when it is a name; None if there is none.
+        """The absolute path of `github.gh`, looked up on `PATH` and in `HOMEBREW_BINS`; None if there is none.
 
-        Relative `PATH` entries (`.`) are skipped, so a repository can't put its own `gh` first.
+        A name is looked up, an absolute path taken as it is. Relative `PATH` entries (`.`) are skipped, so a
+        repository can't put its own `gh` first.
         """
-        found = shutil.which(self._settings.gh, path=absolute_path(os.environ.get("PATH", os.defpath)))
+        found = shutil.which(self._settings.gh, path=search_path(os.environ.get("PATH", os.defpath)))
         return found if found is not None and Path(found).is_absolute() else None
 
     def _require(self) -> str:
         if (path := self.executable()) is None:
             msg = (
-                f"The GitHub CLI `{self._settings.gh}` is not on PATH; install it from {INSTALL}, then run "
+                f"Heinzel can't find the GitHub CLI `{self._settings.gh}`: it looked {where_looked()}; install it "
+                f"from {INSTALL}, then run "
                 f"`{login_fix(self._settings.host)}`."
             )
             raise HeinzelError(msg)
@@ -304,8 +329,16 @@ class Gh:
         return self._execute(path, args, timeout, host)
 
     def execution_environment(self, host: str) -> dict[str, str]:
-        """Return the allowlisted CLI environment; captured leases override it with their pinned credentials."""
-        return environment(host)
+        """Return the allowlisted CLI environment; captured leases override it with their pinned credentials.
+
+        Its `PATH` also holds gh's own directories and `HOMEBREW_BINS`, after `PATH`, so what gh starts (git, a
+        credential helper) is found under a launchd `PATH` too.
+        """
+        env = environment(host)
+        path = self.executable()
+        extra = own_directories(path) if path is not None else ()
+        env["PATH"] = search_path(env.get("PATH", ""), *extra)
+        return env
 
     def _execute(self, path: str, args: Sequence[str], timeout: float, host: str | None = None) -> GhResult:
         deadline = time.monotonic() + timeout
