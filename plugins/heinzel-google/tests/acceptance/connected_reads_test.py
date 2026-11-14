@@ -50,4 +50,9 @@ with MonkeyPatch.context() as patches:
         "HZ_TEST_KIND": kind,
     }
     result = subprocess.run([sys.executable, "-I", "-c", script], env=env, capture_output=True, timeout=90, check=False)
-    assert result.returncode == 0, result.stderr.decode(errors="replace")
+    logs = "".join(
+        f"\n--- {path.name}\n{path.read_text(errors='replace')[-4000:]}"
+        for path in sorted((tmp_path / "logs").rglob("*"))
+        if path.is_file()
+    )
+    assert result.returncode == 0, result.stderr.decode(errors="replace") + logs  # the refusal reason is in the log

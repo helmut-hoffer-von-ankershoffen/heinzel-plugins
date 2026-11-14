@@ -4,6 +4,8 @@ import json
 import re
 import subprocess
 import sys
+import threading
+import time
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
@@ -178,6 +180,16 @@ def _assert_connected_completed(client, session, model_calls):
         _assert_item_reference(model_calls.with_suffix(".input"))
 
 
+SLOT_SECONDS = 300  # the approved schedule's cadence; a turn must start and finish inside one wall-clock slot
+SLOT_MARGIN = 30  # more than one daemon tick, its restart and a slow runner need
+
+
+def _wait_for_slot_margin(waiter, clock=time.time):
+    """Core refuses a scheduled turn that outlives its slot, so start the tick where it cannot cross one."""
+    while SLOT_SECONDS - clock() % SLOT_SECONDS < SLOT_MARGIN:
+        waiter.wait(0.5)
+
+
 def _daemon_tick(kernel):
     current = kernel.resolve(CurrentUser)
     with current.local("daemon"):
@@ -327,6 +339,7 @@ def test_owner_reviewed_rolling_calendar_schedule_survives_daemon_restart(boot, 
             "approve-agent-schedule",
             expected=schedule,
         )
+        _wait_for_slot_margin(threading.Event())
         report = _daemon_tick(kernel)
         assert any(run.disposition == "rendered" for run in report.runs)
         assert len(calls) == 1
