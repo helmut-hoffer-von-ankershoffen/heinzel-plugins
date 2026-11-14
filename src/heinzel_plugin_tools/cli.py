@@ -25,6 +25,7 @@ from importlib import metadata as distributions
 from pathlib import Path
 
 from packaging.requirements import Requirement
+from packaging.specifiers import SpecifierSet
 from packaging.utils import canonicalize_name
 from packaging.version import Version
 
@@ -169,7 +170,21 @@ def core_metadata(source: str) -> dict:
     return {
         "version": metadata["Version"],
         "dependencies": sorted(str(Requirement(value)) for value in metadata.get_all("Requires-Dist", [])),
+        "requires_python": metadata["Requires-Python"],
     }
+
+
+def python_floor(requires_python: str | None) -> str:
+    """The `major.minor` Python a Core wheel needs, from its own Requires-Python: the one place the toolkit reads it."""
+    floors = [
+        Version(item.version)
+        for item in SpecifierSet(requires_python or "")
+        if item.operator in {">=", "~=", "=="} and not item.version.endswith("*")
+    ]
+    if not floors:
+        raise ValueError(f"The Core wheel declares no minimum Python (Requires-Python {requires_python!r})")
+    newest = max(floors)
+    return f"{newest.major}.{newest.minor}"
 
 
 def dependency_inputs(project: Project) -> list[str]:
@@ -240,7 +255,7 @@ def lock(project: Project, core: str | None = None) -> None:
                 str(override),
                 "--universal",
                 "--python-version",
-                "3.12",
+                python_floor(metadata["requires_python"]),
                 "--generate-hashes",
                 "--no-emit-package",
                 "heinzel",
@@ -258,24 +273,31 @@ def lock(project: Project, core: str | None = None) -> None:
 # What each Core plugin API number promises plugins besides the kernel API: the majors of the libraries plugins
 # import through Core without declaring them (ADR 0003). A new major of either is a new plugin API number.
 PLUGIN_API = {1: {"pydantic": 2, "rich": 15}}
+
+
 # A universal lock serves every supported target, so a Core requirement counts when any target needs it; the host that
 # runs the check never decides. Plugins install Core without extras.
-_TARGET = {
-    "python_version": "3.12",
-    "python_full_version": "3.12.0",
-    "implementation_name": "cpython",
-    "platform_python_implementation": "CPython",
-    "implementation_version": "3.12.0",
-    "os_name": "posix",
-    "platform_release": "",
-    "platform_version": "",
-    "extra": "",
-}
-LOCK_TARGETS = (
-    _TARGET | {"sys_platform": "darwin", "platform_system": "Darwin", "platform_machine": "arm64"},
-    _TARGET | {"sys_platform": "linux", "platform_system": "Linux", "platform_machine": "x86_64"},
-    _TARGET | {"sys_platform": "linux", "platform_system": "Linux", "platform_machine": "aarch64"},
-)
+def lock_targets(requires_python: str | None) -> tuple[dict[str, str], ...]:
+    """The environments a lock serves: the Python Core's own Requires-Python names, on each supported platform."""
+    floor = python_floor(requires_python)
+    target = {
+        "python_version": floor,
+        "python_full_version": f"{floor}.0",
+        "implementation_name": "cpython",
+        "platform_python_implementation": "CPython",
+        "implementation_version": f"{floor}.0",
+        "os_name": "posix",
+        "platform_release": "",
+        "platform_version": "",
+        "extra": "",
+    }
+    return (
+        target | {"sys_platform": "darwin", "platform_system": "Darwin", "platform_machine": "arm64"},
+        target | {"sys_platform": "linux", "platform_system": "Linux", "platform_machine": "x86_64"},
+        target | {"sys_platform": "linux", "platform_system": "Linux", "platform_machine": "aarch64"},
+    )
+
+
 LOCK_FORMATS = {1, 2}  # format 1 also records Core's dependency list, which is no longer compared
 
 
@@ -317,9 +339,10 @@ def check_contract(project: Project, pins: dict[str, list[Version]], core: dict 
         return
     if not supports_core(project, core["version"]):
         raise ValueError(f"{project.name} does not allow core {core['version']}")
+    targets = lock_targets(core["requires_python"])
     for value in core["dependencies"]:
         requirement = Requirement(value)
-        if requirement.marker and not any(requirement.marker.evaluate(target) for target in LOCK_TARGETS):
+        if requirement.marker and not any(requirement.marker.evaluate(target) for target in targets):
             continue  # an extra, or no supported target: `uv pip check` stays the backstop after installation
         versions = pins.get(canonicalize_name(requirement.name), [])
         if not versions:
@@ -357,6 +380,7 @@ def validate_installed_core(project: Project) -> None:
     installed = {
         "version": distributions.version("heinzel"),
         "dependencies": list(distributions.requires("heinzel") or []),
+        "requires_python": distributions.metadata("heinzel")["Requires-Python"],
     }
     check_contract(project, locked_versions(project), installed)
 
@@ -386,7 +410,7 @@ def prepare_environment(project: Project, core: str | None) -> Path:
     environment = project.directory / ".venv"
     interpreter = environment / "bin/python"
     if not interpreter.is_file():
-        run(["uv", "venv", "--python", "3.12", str(environment)])
+        run(["uv", "venv", "--python", python_floor(core_metadata(core)["requires_python"]), str(environment)])
     run(
         [
             "uv",
@@ -615,7 +639,7 @@ def acceptance(project: Project, core: str | None, *, wheel: Path | None = None)
     environment = project.directory / ".acceptance"
     interpreter = environment / "bin/python"
     if not interpreter.is_file():
-        run(["uv", "venv", "--python", "3.12", str(environment)])
+        run(["uv", "venv", "--python", python_floor(core_metadata(core)["requires_python"]), str(environment)])
     run(
         [
             "uv",

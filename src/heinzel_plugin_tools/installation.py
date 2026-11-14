@@ -73,7 +73,7 @@ def _probe_project(directory: Path, version: str) -> None:
     package.mkdir(parents=True, exist_ok=True)
     (directory / "pyproject.toml").write_text(
         '[project]\nname="heinzel-lifecycle-probe"\n'
-        f'version="{version}"\nrequires-python=">=3.12"\ndependencies=["heinzel"]\n'
+        f'version="{version}"\nrequires-python=">=3.15"\ndependencies=["heinzel"]\n'
         '[project.entry-points."heinzel.modules"]\nlifecycleprobe="heinzel_lifecycle_probe"\n'
         '[build-system]\nrequires=["hatchling"]\nbuild-backend="hatchling.build"\n'
     )

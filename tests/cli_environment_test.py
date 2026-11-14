@@ -18,8 +18,8 @@ LOCK = "pydantic==2.12.0 --hash=sha256:00\nrich==15.0.0 --hash=sha256:00\ntidal-
 LOCK += "typer==0.16.0 \\\n    --hash=sha256:00\n"
 
 
-def core_wheel(path, *, name="heinzel", version="0.9.4", requires=CORE_REQUIRES):
-    text = f"Metadata-Version: 2.1\nName: {name}\nVersion: {version}\n"
+def core_wheel(path, *, name="heinzel", version="0.9.4", requires=CORE_REQUIRES, python=">=3.15"):
+    text = f"Metadata-Version: 2.1\nName: {name}\nVersion: {version}\nRequires-Python: {python}\n"
     text += "".join(f"Requires-Dist: {value}\n" for value in requires)
     with zipfile.ZipFile(path, "w") as archive:
         archive.writestr(f"{name}-{version}.dist-info/METADATA", text)
@@ -97,6 +97,7 @@ def test_core_metadata_is_read_from_a_wheel_without_installing_it(tmp_path):
     assert cli.core_metadata(str(wheel)) == {
         "version": "0.9.4",
         "dependencies": sorted(str(Requirement(v)) for v in CORE_REQUIRES),
+        "requires_python": ">=3.15",
     }
 
 
@@ -316,6 +317,7 @@ def test_the_installed_core_must_satisfy_the_same_contract(project, tmp_path, mo
     write_lock(project, wheel)
     monkeypatch.setattr(cli.distributions, "version", lambda name: "0.9.7")
     monkeypatch.setattr(cli.distributions, "requires", lambda name: [*CORE_REQUIRES, 'extra-only>=1; extra == "x"'])
+    monkeypatch.setattr(cli.distributions, "metadata", lambda name: {"Requires-Python": ">=3.15"})
     cli.validate_installed_core(project)
     monkeypatch.setattr(cli.distributions, "requires", lambda name: ["pydantic>=2.13"])
     with pytest.raises(ValueError, match="Core 0.9.7 needs pydantic>=2.13"):
@@ -588,3 +590,41 @@ def test_a_composition_without_core_is_refused(tmp_path, project):
     plugin = wheel_for(member, tmp_path)
     with pytest.raises(ValueError, match="Read the core artifact before plugins"):
         cli.profile([member], plugin, tmp_path / "p.json", None, selected_wheels={member.name: plugin})
+
+
+@pytest.mark.parametrize(
+    ("requires", "floor"), [(">=3.15", "3.15"), (">=3.14,<4", "3.14"), (">=3.12", "3.12"), (">=3.13,>=3.15", "3.15")]
+)
+def test_the_python_floor_is_the_one_core_declares(requires, floor):
+    assert cli.python_floor(requires) == floor
+
+
+@pytest.mark.parametrize("requires", [None, "", "<4", "!=3.12"])
+def test_a_core_without_a_minimum_python_is_refused(requires):
+    with pytest.raises(ValueError, match="no minimum Python"):
+        cli.python_floor(requires)
+
+
+def test_environments_and_locks_use_the_python_core_requires_not_a_fixed_one(project, tmp_path, commands):
+    wheel = core_wheel(tmp_path / "heinzel-0.9.4-py3-none-any.whl", python=">=3.16")
+    write_lock(project, wheel)
+    cli.prepare_environment(project, str(wheel))
+    venv = commands[0][0]
+    assert venv[venv.index("--python") + 1] == "3.16"
+    assert not any("3.12" in part for command, _ in commands for part in command)
+    targets = cli.lock_targets(">=3.16")
+    assert {target["python_version"] for target in targets} == {"3.16"}
+    assert {target["python_full_version"] for target in targets} == {"3.16.0"}
+
+
+def test_locking_targets_the_python_core_requires(project, tmp_path, commands):
+    wheel = core_wheel(tmp_path / "heinzel-0.9.4-py3-none-any.whl", python=">=3.16")
+    cli.lock(project, str(wheel))
+    compile_command = commands[0][0]
+    assert compile_command[compile_command.index("--python-version") + 1] == "3.16"
+
+
+def test_a_core_requirement_only_for_older_pythons_does_not_count_against_the_lock(project, tmp_path):
+    wheel = core_wheel(tmp_path / "heinzel-0.9.4-py3-none-any.whl", requires=["old-only>=1; python_version < '3.15'"])
+    write_lock(project, wheel)
+    assert cli.validate_lock(project, str(wheel))["core"]["version"] == "0.9.4"
