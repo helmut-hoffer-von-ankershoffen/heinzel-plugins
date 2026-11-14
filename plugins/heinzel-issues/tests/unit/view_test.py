@@ -11,7 +11,7 @@ VIEW = Path(__file__).resolve().parents[2] / "src" / "heinzel_issues" / "views" 
 
 # A React stand-in: elements are plain objects, `useState` hands out preset values and records what is set.
 HARNESS = """
-import createView, { day, encodeFile, statusLine } from %(view)s;
+import createView, { day, encodeFile, sentAs, statusLine } from %(view)s;
 const preset = [], set = [], calls = [];
 const React = {
   createElement: (type, props, ...children) => ({ type, props: props || {}, children: children.flat() }),
@@ -45,7 +45,9 @@ const out = {};
 if (scenario.name === "send") {
   const file = scenario.file ? new File([scenario.file], "shot.txt", { type: "text/plain" }) : null;
   preset.push("Dark mode loses the focus ring", file, idle);
-  const tree = expand(Issues({ data: { ready: true, reports: [] }, submit }));
+  const data = { ready: true, reports: [], sender: "mira", labels: ["heinzel-issues"] };
+  const tree = expand(Issues({ data, submit }));
+  out.text = text(tree);
   out.chooser = all(tree, (node) => node.props.type === "file").length;
   await all(tree, (node) => node.type === "form")[0].props.onSubmit({ preventDefault() {} });
 } else if (scenario.name === "setup") {
@@ -63,6 +65,7 @@ if (scenario.name === "send") {
   row.props.onClick();
 } else if (scenario.name === "helpers") {
   out.day = [day("2026-11-07T08:33:55Z"), day(null), day("soon")];
+  out.sent = [sentAs("mira", ["heinzel-issues", "intake"]), sentAs("mira", [])];
   out.line = statusLine({ state: "working", status: "Being worked on" });
   out.encoded = await encodeFile(new File(["hello"], "note.txt"));
   out.large = await encodeFile({ name: "big.png", size: 3 * 1024 * 1024 }).catch((error) => error.message);
@@ -86,6 +89,7 @@ def render(tmp_path: Path, name: str, **scenario: object) -> dict:
 def test_the_form_sends_the_text_through_the_send_action(tmp_path):
     result = render(tmp_path, "send")
     assert result["calls"] == [["send", {"text": "Dark mode loses the focus ring"}]]
+    assert "under your login name mira, with the labels heinzel-issues." in result["text"]  # said before sending
     assert "" in result["set"]  # the text is cleared
     assert result["set"][-1]["failed"] is False
     assert result["set"][-1]["message"].startswith("Received.")
@@ -116,7 +120,8 @@ def test_setup_is_a_form_in_the_app_and_sends_only_what_was_filled_in(tmp_path):
     result = render(tmp_path, "setup", values=values, folder="~/old")
     assert "Issue tracking is not set up." in result["text"]
     assert "hz " not in result["text"]  # no terminal command anywhere
-    assert result["calls"] == [["connect", {"path": "~/Code/team-board"}]]
+    assert result["path"] == " ~/Code/team-board "
+    assert result["calls"] == [["connect", {"path": "~/Code/team-board", "labels": ""}]]  # empty clears the labels
     assert result["set"][-1] == {"busy": False, "message": "Issue tracking is set up.", "failed": False}
 
     values = {"path": "/board", "labels": "intake", "releases": "/harbor, /pier"}
@@ -168,6 +173,10 @@ def test_dates_marks_files_and_the_states_without_data(tmp_path):
     result = render(tmp_path, "helpers")
     assert result["day"] == ["7 Nov 2026", "", ""]
     assert result["line"] == "◐ Being worked on"
+    assert result["sent"] == [
+        "Sent to the tracker under your login name mira, with the labels heinzel-issues, intake.",
+        "Sent to the tracker under your login name mira.",
+    ]
     assert result["encoded"] == {"file_name": "note.txt", "file_data": "aGVsbG8="}
     assert result["large"] == "big.png is larger than 2 MiB."
     assert result["old"] == "Issues requires Heinzel plugin SDK 1"

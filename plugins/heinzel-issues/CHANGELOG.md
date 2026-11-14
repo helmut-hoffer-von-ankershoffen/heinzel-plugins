@@ -13,6 +13,11 @@ Everything works in the app now; no step needs a terminal.
   confirmation shows the file shortened. An older Heinzel offers text only.
 - More labels: `issues.beads.extra_labels` (the "More labels" field in the setup form) gives every new report further
   labels, so a team's intake queue sees it.
+- Your reports only: Issues lists and shows only items with the Issues label that were sent under your login name,
+  and changes only items with the Issues label. `list` and `show` are private operations now, so they need your
+  sign-in on the network interfaces.
+- What you type can never be read by the tracker program as an option: every value goes as `--name=value`.
+- The form says under which login name and with which labels a report is stored, before you send.
 - The view opens no terminal any more: the `hz setup issues` and `hz issues submit` buttons are gone, and messages
   the app shows name no command.
 

@@ -13,6 +13,10 @@ def now() -> str:
 
 
 def option(args: list[str], name: str) -> str | None:
+    """A flag's value, written `--name value` or `--name=value` as the real `bd` takes it."""
+    for arg in args:
+        if arg.startswith(f"{name}="):
+            return arg.split("=", 1)[1]
     return args[args.index(name) + 1] if name in args else None
 
 
@@ -22,7 +26,7 @@ def main(args: list[str]) -> int:
     if command == "create":
         row = {
             "id": f"demo-{len(rows) + 1}",
-            "title": rest[0],
+            "title": option(rest, "--title") or rest[0],
             "description": sys.stdin.read() if option(rest, "--body-file") == "-" else "",
             "status": "open",
             "labels": (option(rest, "--labels") or "").split(",") if option(rest, "--labels") else [],

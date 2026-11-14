@@ -23,10 +23,14 @@ def test_submit_work_finish_and_release(issues_kernel, folder, fake_bd, journey,
     journey(issues_kernel(folder, fake_bd), folder, fake_bd, tmp_path)
 
 
+def test_option_like_text_other_work_and_other_people_stay_out(issues_kernel, folder, fake_bd, probes):
+    probes(issues_kernel(folder, fake_bd), folder, fake_bd)
+
+
 def test_a_refusal_is_explained(issues_kernel, folder, fake_bd):
     result = CliRunner().invoke(build(issues_kernel(folder, fake_bd)), ["issues", "show", "demo-404"])
     assert result.exit_code != 0
-    assert "The tracker refused: Error: no issue found" in result.output
+    assert "There is no item demo-404." in result.output
 
 
 def test_a_malformed_id_never_reaches_the_tracker(issues_kernel, folder, fake_bd):

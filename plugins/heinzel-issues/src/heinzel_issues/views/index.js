@@ -17,6 +17,12 @@ export function rest(report) {
   return body.startsWith(title) ? body.slice(title.length).trim() : body;
 }
 
+/** Everything that is stored with a report besides what the person typed, said before they send. */
+export function sentAs(sender, labels) {
+  const tags = (labels || []).join(", ");
+  return `Sent to the tracker under your login name ${sender}${tags ? `, with the labels ${tags}` : ""}.`;
+}
+
 /** `7 Nov 2026`, or nothing while the moment is not known. */
 export function day(value) {
   const date = value ? new Date(value) : null;
@@ -51,9 +57,9 @@ export default function createView(sdk) {
     return h("p", { role: state.failed ? "alert" : "status", className: state.failed ? "hzi-bad" : "hzi-muted" }, state.message);
   }
 
-  function Setup({ submit, problem, folder }) {
+  function Setup({ submit, problem, folder, labels }) {
     const id = useId();
-    const [values, setValues] = useState({ path: folder || "", labels: "", releases: "" });
+    const [values, setValues] = useState({ path: folder || "", labels: (labels || []).join(", "), releases: "" });
     const [state, setState] = useState(idle);
     const field = (name, label, hint, required) => h("div", { className: "hzi-field" },
       h("label", { htmlFor: `${id}-${name}`, className: "hzi-label" }, label),
@@ -68,8 +74,8 @@ export default function createView(sdk) {
       event.preventDefault();
       if (!values.path.trim()) return;
       setState({ busy: true, message: "Checking the folder…", failed: false });
-      const sent = { path: values.path.trim() };
-      if (values.labels.trim()) sent.labels = values.labels.trim();
+      // Labels always go along: what the field says is the whole list, so emptying it clears them.
+      const sent = { path: values.path.trim(), labels: values.labels.trim() };
       if (values.releases.trim()) sent.releases = values.releases.trim();
       try {
         await submit("connect", sent);
@@ -93,7 +99,7 @@ export default function createView(sdk) {
     );
   }
 
-  function Composer({ submit }) {
+  function Composer({ submit, sender, labels }) {
     const id = useId();
     const [text, setText] = useState("");
     const [file, setFile] = useState(null);
@@ -127,6 +133,7 @@ export default function createView(sdk) {
         }),
         h("p", { id: `${id}-file-hint`, className: "hzi-muted hzi-hint" }, file ? `${file.name} will be sent with it.` : "A PNG or JPEG image or a text file, up to 2 MiB."),
       ),
+      sender && h("p", { className: "hzi-muted hzi-hint" }, sentAs(sender, labels)),
       h(Message, { state }),
       h("div", { className: "hzi-actions" },
         h(sdk.Button, { type: "submit", disabled: state.busy || !text.trim() }, state.busy ? "Sending…" : "Send"),
@@ -165,7 +172,7 @@ export default function createView(sdk) {
     if (!data) return h("p", { role: "status" }, "Issues cannot be shown here.");
     if (!data.ready) {
       return h("section", { "aria-label": "Issues", className: "hzi" },
-        h(Setup, { submit, problem: data.problem, folder: data.folder }),
+        h(Setup, { submit, problem: data.problem, folder: data.folder, labels: data.extra_labels }),
       );
     }
     const reports = data.reports || [];
@@ -173,7 +180,7 @@ export default function createView(sdk) {
       reports.length
         ? h("ul", { className: "hzi-list", "aria-label": "Your reports and requests" }, reports.map((report) => h(Item, { key: report.details?.id ?? report.title, report })))
         : h("p", { role: "status", className: "hzi-muted" }, "Nothing reported yet."),
-      h(Composer, { submit }),
+      h(Composer, { submit, sender: data.sender, labels: data.labels }),
     );
   };
 }

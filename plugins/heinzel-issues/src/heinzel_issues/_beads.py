@@ -6,6 +6,7 @@ shared database can hold other work that Issues does not show.
 """
 
 import builtins
+import getpass
 import json
 import mimetypes
 import os
@@ -23,6 +24,7 @@ from pydantic import BaseModel, ConfigDict, Field, ValidationError, field_valida
 
 from heinzel_issues._contract import Attachment, Task, TaskState, TrackerError
 
+REFUSED = "The tracker refused"
 TIMEOUT = 30
 """Seconds one `bd` call may take."""
 _ID = re.compile(r"^[A-Za-z0-9][A-Za-z0-9._-]{0,80}$")
@@ -40,6 +42,19 @@ STATES: Mapping[str, TaskState] = {
     "closed": TaskState.DONE,
 }
 """Beads' built-in statuses; anything else (a custom status) counts as received until someone maps it."""
+
+
+def reporter() -> str:
+    """Who sends from this computer, as Beads records the actor: the login name."""
+    try:
+        return getpass.getuser()
+    except (OSError, KeyError):
+        return "heinzel-issues"
+
+
+def flag(name: str, value: str) -> str:
+    """One `--name=value` token: text a person typed can never be read by `bd` as an option of its own."""
+    return f"{name}={value}"
 
 
 def state_of(status: str) -> TaskState:
@@ -158,6 +173,11 @@ class BeadsTracker:
             raise TrackerError(msg)
         return folder
 
+    @property
+    def label(self) -> str:
+        """The label that marks an item as a report sent through Issues."""
+        return self._settings.label
+
     def program(self) -> str:
         """The `bd` program to run.
 
@@ -168,7 +188,7 @@ class BeadsTracker:
         if found is None and self._settings.bd == "bd":
             found = next((path for path in FALLBACK_BD if os.access(path, os.X_OK)), None)
         if found is None:
-            msg = f"The {self._settings.bd} program is not installed: brew install beads, or set issues.beads.bd."
+            msg = "The Beads program is not installed on this computer; Issues needs it to reach the tracker."
             raise TrackerError(msg)
         return found
 
@@ -178,27 +198,34 @@ class BeadsTracker:
         Raises:
             TrackerError: If `bd` fails.
         """
-        row = self._one(
-            self.run(
-                [
-                    "create",
-                    title,
-                    "--body-file",
-                    "-",
-                    "--labels",
-                    ",".join(self._settings.labels),
-                    "--type",
-                    "task",
-                    "--json",
-                ],
-                stdin=body or title,
-            )
-        )
+        row = self._one(self.run(self.create_args(title, self._settings.labels, reporter()), stdin=body or title))
         if attachments:
             saved = [self.save_attachment(row.id, attachment) for attachment in attachments]
-            note = "\n".join(f"Attachment: {path}" for path in saved)
-            row = self._one(self.run(["update", row.id, "--append-notes", note, "--json"]))
+            note = "\n".join(f"{ATTACHMENT_NOTE}{path}" for path in saved)
+            row = self._one(self.run(["update", row.id, flag("--append-notes", note), "--json"]))
         return _task(row)
+
+    @staticmethod
+    def create_args(title: str, labels: Sequence[str], actor: str) -> builtins.list[str]:
+        """The `bd create` call for a report: the title and the actor only ever as the value of their own flag."""
+        return [
+            "create",
+            flag("--title", title),
+            "--body-file",
+            "-",
+            flag("--labels", ",".join(labels)),
+            "--type",
+            "task",
+            "--json",
+            flag("--actor", actor),
+        ]
+
+    def mine(self, row: "_Row") -> bool:
+        """Whether Issues may show the item: it carries the Issues label and this person sent it.
+
+        A shared database holds other work and other people's reports; neither is ever read out through Issues.
+        """
+        return self._settings.label in row.labels and row.created_by == reporter()
 
     def list(self) -> builtins.list[Task]:
         """Every item with the Issues label, done ones included, newest first.
@@ -208,20 +235,33 @@ class BeadsTracker:
         """
         return self._rows(["list", "--all", "--label", self._settings.label, "--sort", "created", "--json"])
 
+    def owned(self, task_id: str) -> "_Row":
+        """The item `task_id`, if it is one of this person's reports.
+
+        Raises:
+            TrackerError: If the id is malformed or unknown, it is not a report of this person, or `bd` fails.
+        """
+        if not _ID.fullmatch(task_id):
+            msg = f"{task_id!r} is not an item id."
+            raise TrackerError(msg)
+        try:
+            rows = [row for row in self.rows(["show", task_id, "--json"]) if self.mine(row)]
+        except TrackerError as error:
+            if not str(error).startswith(REFUSED):
+                raise
+            rows = []  # an unknown id and someone else's item read the same
+        if not rows:
+            msg = f"There is no item {task_id}."
+            raise TrackerError(msg)
+        return rows[0]
+
     def get(self, task_id: str) -> Task:
         """One item by id.
 
         Raises:
             TrackerError: If the id is malformed, unknown or `bd` fails.
         """
-        if not _ID.fullmatch(task_id):
-            msg = f"{task_id!r} is not an item id."
-            raise TrackerError(msg)
-        rows = self._rows(["show", task_id, "--json"])
-        if not rows:
-            msg = f"There is no item {task_id}."
-            raise TrackerError(msg)
-        return rows[0]
+        return _task(self.owned(task_id))
 
     def changes(self, since: datetime | None) -> builtins.list[Task]:
         """Items with the Issues label changed after `since`; all of them for None.
@@ -253,7 +293,7 @@ class BeadsTracker:
         return relative.as_posix()
 
     def _rows(self, args: builtins.list[str]) -> builtins.list[Task]:
-        tasks = [_task(row) for row in self.rows(args)]
+        tasks = [_task(row) for row in self.rows(args) if self.mine(row)]
         return sorted(tasks, key=lambda task: task.created_at, reverse=True)
 
     def row(self, args: builtins.list[str], stdin: str | None = None) -> _Row:
@@ -277,7 +317,7 @@ class BeadsTracker:
             data = json.loads(output)
             return _Row.model_validate(data[0] if isinstance(data, list) else data)
         except (json.JSONDecodeError, ValidationError, IndexError, KeyError):
-            msg = "The tracker did not confirm the new item; check it with bd list."
+            msg = "The tracker did not confirm the item; open Issues again in a moment to see it."
             raise TrackerError(msg) from None
 
     def run(self, args: builtins.list[str], stdin: str | None = None) -> str:
@@ -308,7 +348,7 @@ class BeadsTracker:
             raise TrackerError(msg) from None
         if done.returncode != 0:
             reason = (done.stderr.strip().splitlines() or ["no reason given"])[-1][:200]
-            msg = f"The tracker refused: {reason}"
+            msg = f"{REFUSED}: {reason}"
             raise TrackerError(msg)
         return done.stdout
 
@@ -317,13 +357,13 @@ def _parse(output: str) -> list[_Row]:
     try:
         data = json.loads(output or "[]")
     except json.JSONDecodeError:
-        msg = "The tracker answered with something that is not JSON; is bd up to date?"
+        msg = "The tracker answered in a way Issues cannot read; the Beads program may be out of date."
         raise TrackerError(msg) from None
     items = cast("list[object]", data if isinstance(data, list) else [data])
     try:
         return [_Row.model_validate(item) for item in items]
     except ValidationError:
-        msg = "The tracker answered in a shape Issues does not know; is bd up to date?"
+        msg = "The tracker answered in a shape Issues does not know; the Beads program may be out of date."
         raise TrackerError(msg) from None
 
 
@@ -385,9 +425,12 @@ class BeadsBoard:
 
     def create(self, project: str, title: str, body: str, reporter: str, labels: builtins.list[str]) -> Issue:
         """Open an item labelled `project` and `labels`, created by `reporter`."""
-        tags = ",".join(dict.fromkeys([project, *labels]))
-        args = ["create", title, "--body-file", "-", "--labels", tags, "--type", "task", "--json", "--actor", reporter]
-        return self._issue(self._call(self._beads.row, args, body or title))
+        tags = list(dict.fromkeys([project, *labels]))
+        for label in tags:
+            if not _LABEL.fullmatch(label):
+                msg = f"{label!r} cannot be a label."
+                raise HeinzelError(msg)
+        return self._issue(self._call(self._beads.row, self._beads.create_args(title, tags, reporter), body or title))
 
     def claim(self, key: str, actor: str) -> Issue:
         """Beads' atomic claim: assigned to `actor` and in progress, or refused if another actor holds it."""
@@ -395,11 +438,15 @@ class BeadsBoard:
 
     def transition(self, key: str, state: str, actor: str, note: str | None = None) -> Issue:
         """Set the Beads status `state`, appending `note` to the item's notes if given."""
-        return self._write(key, actor, ["update", key, "--status", state, *(["--append-notes", note] if note else [])])
+        if not _LABEL.fullmatch(state):
+            msg = f"{state!r} is not a Beads status."
+            raise HeinzelError(msg)
+        notes = [flag("--append-notes", note)] if note else []
+        return self._write(key, actor, ["update", key, "--status", state, *notes])
 
     def note(self, key: str, text: str, actor: str) -> Issue:
         """Append `text` to the item's notes."""
-        return self._write(key, actor, ["update", key, "--append-notes", text])
+        return self._write(key, actor, ["update", key, flag("--append-notes", text)])
 
     def attach(self, key: str, name: str, data: bytes, media_type: str, actor: str) -> FileRef:
         """Save the file next to the database, privately, and name it in the item's notes."""
@@ -408,21 +455,30 @@ class BeadsBoard:
             path = self._beads.save_attachment(key, Attachment(name=name, content=data))
         except (TrackerError, ValidationError) as error:
             raise HeinzelError(str(error)) from None
-        self._write(key, actor, ["update", key, "--append-notes", f"{ATTACHMENT_NOTE}{path}"])
+        self._write(key, actor, ["update", key, flag("--append-notes", f"{ATTACHMENT_NOTE}{path}")])
         return FileRef(name=Path(path).name, media_type=media_type, size=len(data), ref=path)
 
     def close(self, key: str, actor: str, reason: str) -> Issue:
         """Close the item, saying why."""
-        return self._write(key, actor, ["close", key, "--reason", reason])
+        return self._write(key, actor, ["close", key, flag("--reason", reason)])
 
     def _known(self, key: str) -> None:
+        """Only an item with the Issues label is ever changed; other work in the same database is never touched.
+
+        Raises:
+            HeinzelError: If the id is malformed, unknown or names other work in the same database.
+        """
         if not _ID.fullmatch(key):
             msg = f"{key!r} is not a Beads item id."
+            raise HeinzelError(msg)
+        rows = self._call(self._beads.rows, ["show", key, "--json"])
+        if not any(self._beads.label in row.labels for row in rows):
+            msg = f"There is no item {key}."
             raise HeinzelError(msg)
 
     def _write(self, key: str, actor: str, args: builtins.list[str]) -> Issue:
         self._known(key)
-        return self._issue(self._call(self._beads.row, [*args, "--json", "--actor", actor]))
+        return self._issue(self._call(self._beads.row, [*args, "--json", flag("--actor", actor)]))
 
     def _call[T](self, run: Callable[..., T], *args: object) -> T:
         try:

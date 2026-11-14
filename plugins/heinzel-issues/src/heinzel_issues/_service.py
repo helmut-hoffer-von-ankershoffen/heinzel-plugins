@@ -2,7 +2,6 @@
 
 import base64
 import binascii
-import getpass
 import json
 import logging
 import mimetypes
@@ -28,7 +27,7 @@ from heinzel import (
 )
 from pydantic import AwareDatetime, BaseModel, Field, JsonValue, ValidationError
 
-from heinzel_issues._beads import BeadsSettings, BeadsTracker, checked_label
+from heinzel_issues._beads import BeadsSettings, BeadsTracker, checked_label, reporter
 from heinzel_issues._contract import (
     STATE_LABELS,
     Attachment,
@@ -60,14 +59,6 @@ logger = logging.getLogger("heinzel_issues")
 def log_event(name: str, **fields: object) -> None:
     """One structured event: a stable `area.operation.step` name and fields, never what a person typed."""
     logger.info(name, extra={"event": name, **{key: value for key, value in fields.items() if value is not None}})
-
-
-def reporter() -> str:
-    """Who sends from this computer, as Beads records the actor: the login name."""
-    try:
-        return getpass.getuser()
-    except (OSError, KeyError):
-        return "heinzel-issues"
 
 
 class IssuesSettings(ModuleSettings):
@@ -130,6 +121,9 @@ class Reports(BaseModel):
     problem: str | None = Field(default=None, description="Why nothing can be shown, in plain words.")
     fix: str | None = Field(default=None, description="The one step that fixes it, e.g. hz setup issues.")
     folder: str | None = Field(default=None, description="The tracker folder in use or last tried, to set it up.")
+    sender: str = Field(default="", description="The name a new report is stored under: your login name.")
+    labels: list[str] = Field(default_factory=list[str], description="Every label a new report gets.")
+    extra_labels: list[str] = Field(default_factory=list[str], description="The further labels set up for reports.")
     reports: list[Report] = Field(default_factory=list[Report], description="Newest first.")
 
 
@@ -203,8 +197,8 @@ class IssuesService:
     def connect(self, editor: ConfigEditor, path: str, labels: str = "", releases: str = "") -> Reports:
         """Send reports to the Beads database in the folder `path`, after checking that it answers.
 
-        `labels` are further labels for every new report and `releases` are git clones whose tags are releases;
-        both are lists separated by commas or spaces, and an empty one keeps what is set.
+        `labels` are all the further labels for every new report (empty: none) and `releases` are git clones whose
+        tags are releases (empty: keep what is set); both are lists separated by commas or spaces.
 
         Raises:
             TrackerError: If the folder has no Beads database, `bd` does not answer, or a value is not valid.
@@ -215,7 +209,7 @@ class IssuesService:
             msg = f"{folder} has no Beads database (a .beads folder). Pick the folder that holds it."
             raise TrackerError(msg)
         try:
-            extra = [checked_label(label) for label in _words(labels)] or self.settings.beads.extra_labels
+            extra = [checked_label(label) for label in _words(labels)]
             beads = BeadsSettings.model_validate(
                 {**self.settings.beads.model_dump(), "path": folder, "extra_labels": extra}
             )
@@ -264,14 +258,20 @@ class IssuesService:
     def overview(self) -> Reports:
         """Every report and request, newest first; or the reason there are none to show."""
         self.refresh()
-        folder = str(self.settings.beads.path) if self.settings.beads.path else None
+        beads = self.settings.beads
+        about: dict[str, Any] = {
+            "folder": str(beads.path) if beads.path else None,
+            "sender": reporter(),
+            "labels": beads.labels,
+            "extra_labels": beads.extra_labels,
+        }
         if not self.enabled:
-            return Reports(ready=False, problem=NOT_SET_UP, fix=SETUP, folder=folder)
+            return Reports(ready=False, problem=NOT_SET_UP, fix=SETUP, **about)
         try:
             tasks = self.tracker().list()
         except TrackerError as error:
-            return Reports(ready=False, problem=str(error), fix=SETUP, folder=folder)
-        return Reports(ready=True, reports=[self.report(task) for task in tasks], folder=folder)
+            return Reports(ready=False, problem=str(error), fix=SETUP, **about)
+        return Reports(ready=True, reports=[self.report(task) for task in tasks], **about)
 
     def get(self, task_id: str) -> Report:
         """One report by its tracker id.

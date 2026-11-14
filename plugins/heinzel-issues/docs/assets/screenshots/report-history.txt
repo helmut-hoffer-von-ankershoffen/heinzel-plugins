@@ -48,5 +48,8 @@ Done
 Released in 0.9.27
 7 Nov 2026
 Report or request
+
+Sent to the tracker under your login name mira, with the labels heinzel-issues.
+
 Send
 Audio

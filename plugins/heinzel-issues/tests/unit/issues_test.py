@@ -340,10 +340,16 @@ def test_connect_checks_the_folder_before_it_saves_anything(tmp_path, fake_bd):
     assert found.settings.beads.labels == ["heinzel-issues", "owner-ask", "intake"]
 
     again = Editor()
-    found.connect(again, str(board))  # empty lists keep what is set
-    assert again.written["issues.beads"]["extra_labels"] == ["owner-ask", "intake"]
+    found.connect(again, str(board), "owner-ask")  # the labels are the whole list; empty clones keep what is set
+    assert again.written["issues.beads"]["extra_labels"] == ["owner-ask"]
+    overview = found.overview()
+    assert (overview.labels, overview.extra_labels) == (["heinzel-issues", "owner-ask"], ["owner-ask"])
+    assert overview.sender  # the login name a report is stored under, shown before sending
     assert "issues.releases" not in again.written
     assert [source.path for source in found.settings.releases] == [clone]
+    found.connect(again, str(board))  # an empty field clears the labels
+    assert again.written["issues.beads"]["extra_labels"] == []
+    assert found.settings.beads.labels == ["heinzel-issues"]
 
 
 def test_a_broken_bd_refuses_connect(tmp_path):

@@ -63,7 +63,8 @@ The same fictional reports and their plain states through the real CLI
 
 In the app, open **Issues**, enter the folder that holds the Beads database and press **Set up issue tracking**.
 Issues checks that the database answers before it saves anything, and works at once, without a restart. Under
-**More options** you can name more labels for every new report and git clones whose tags are releases.
+**More options** you can name more labels for every new report (emptying the field clears them) and git clones
+whose tags are releases.
 
 In a terminal, `hz setup issues` asks the same. Or set it directly:
 
@@ -105,7 +106,10 @@ never unbinds or replaces the tracker other plugins (GitHub, Atlassian) use.
 
 ## Privacy
 
-What you send stays in the tracker you chose. Issues stores only what it has already told you, under Heinzel's
+What you send stays in the tracker you chose. Each report is stored there with your login name on this computer and
+the labels that are set up; the form says both before you send. Issues shows and reads only the reports you sent
+under that login name: other work in the same database, and other people's reports, never appear, by list or by id.
+Reading and sending need your sign-in to the app; nothing is open on the network interfaces without it. Issues stores only what it has already told you, under Heinzel's
 state folder, readable by you only. Notices are local, like every Heinzel notice.
 
 ## Develop

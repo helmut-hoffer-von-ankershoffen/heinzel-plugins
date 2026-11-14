@@ -35,5 +35,8 @@ The footer clock jumps by a pixel every minute
 Weather shows yesterday's rain after waking up
 ✓ Released in 0.9.27 on 7 Nov 2026
 Report or request
+
+Sent to the tracker under your login name mira, with the labels heinzel-issues.
+
 Send
 Audio

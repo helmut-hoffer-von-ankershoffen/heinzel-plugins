@@ -93,7 +93,7 @@ def _fail(error: TrackerError) -> HeinzelError:
     return HeinzelError(str(error))
 
 
-@module.operation(name="list", render=_render, audience="everyday")
+@module.operation(name="list", private=True, render=_render, audience="everyday")
 def list_(service: IssuesService) -> Reports:
     """Show what you reported or requested: received, being worked on, or done and in which release."""
     return service.overview()
@@ -128,8 +128,8 @@ def submit(
 def connect(service: IssuesService, editor: ConfigEditor, path: str, labels: str = "", releases: str = "") -> Reports:
     """Set up issue tracking: send reports and requests to the Beads database in a folder on this computer.
 
-    `labels` are further labels for every new report, and `releases` are git clones whose tags are releases; both
-    are optional lists separated by commas.
+    `labels` are all the further labels for every new report (empty: none), and `releases` are git clones whose
+    tags are releases (empty: keep what is set); both are lists separated by commas.
 
     Raises:
         HeinzelError: If the folder has no Beads database or it does not answer; nothing is saved then.
@@ -140,9 +140,9 @@ def connect(service: IssuesService, editor: ConfigEditor, path: str, labels: str
         raise _fail(error) from None
 
 
-@module.operation(render=_render_one)
+@module.operation(private=True, render=_render_one)
 def show(service: IssuesService, id: str) -> Report:  # noqa: A002 - the tracker's word for it
-    """Show one report or request by its tracker id, with the tracker's details.
+    """Show one of your reports or requests by its tracker id, with the tracker's details.
 
     Raises:
         HeinzelError: If it cannot be read.

@@ -1,7 +1,7 @@
 {
   "format": 1,
-  "reviewer": "Codex feature-story agent",
-  "source_sha256": "1fd48f8249588fd0f84143117cbc5e98ab6812e80dc2f446a6e6c510ca3a07e7",
+  "reviewer": "fable-issues-story",
+  "source_sha256": "f69054b3ab966d5ca2aea6e080b3ebfd43c5d210379e3f8005829ce6da54860c",
   "plan_sha256": "e7395659d00a341e8c5fcf62a26cc2765e7812e405390baa9fe1ae815fab2710",
-  "story_sha256": "fd0f02db4ba339d99a041230a36c3c077cd336b941b3ed1b4b0e5fe7f7a0cf5e"
+  "story_sha256": "baac94e327f1dbec7633b9b7e4b9de5fb398f2d57c1d8f8a3ce68984bc511401"
 }

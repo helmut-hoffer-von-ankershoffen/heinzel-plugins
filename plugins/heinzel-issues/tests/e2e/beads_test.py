@@ -16,6 +16,16 @@ def test_submit_work_finish_and_release_with_real_beads(issues_kernel, real_bd, 
     journey(issues_kernel(folder, real_bd), folder, real_bd, tmp_path)
 
 
+def test_option_like_text_other_work_and_other_people_stay_out_with_real_beads(
+    issues_kernel, real_bd, bd_run, probes, tmp_path
+):
+    folder = tmp_path / "board"
+    folder.mkdir()
+    bd_run(["git", "init", "-q"], folder)
+    bd_run([real_bd, "init", "--prefix", "demo", "--stealth", "--skip-agents"], folder)
+    probes(issues_kernel(folder, real_bd), folder, real_bd)
+
+
 def test_the_tracker_contract_records_actors_and_refuses_a_held_claim_with_real_beads(real_bd, bd_run, tmp_path):
     folder = tmp_path / "board"
     folder.mkdir()

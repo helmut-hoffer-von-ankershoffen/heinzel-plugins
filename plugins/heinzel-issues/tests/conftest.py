@@ -7,8 +7,8 @@ from pathlib import Path
 
 import pytest
 from fastapi.testclient import TestClient
-from heinzel import Config, Kernel, ModuleRecord, Settings
-from heinzel.heads import api
+from heinzel import Config, HeinzelError, Kernel, ModuleRecord, Settings
+from heinzel.heads import api, web
 from heinzel.heads.cli import build
 from heinzel.kernel import Origin, discover
 from typer.testing import CliRunner
@@ -109,8 +109,8 @@ def _journey(kernel, folder, bd, tmp_path):
     assert task_id not in listed.stdout  # ids are for experts and --json only
 
     run([bd, "update", task_id, "--status", "in_progress"], folder)
-    client = TestClient(api.build(kernel), base_url="http://localhost")
-    working = client.get("/issues/list").json()["reports"][0]
+    client = _signed_in(kernel)
+    working = client.get("/api/issues/list").json()["reports"][0]
     assert working["status"] == "Being worked on"
     assert working["body"] == "The footer clock jumps\nIt moves by a pixel."
     assert working["attachments"] == ["shot.png"]
@@ -118,7 +118,7 @@ def _journey(kernel, folder, bd, tmp_path):
     assert working["history"][1]["at"] is not None  # Beads records when work started
 
     run([bd, "close", task_id, "--reason", "Fixed in #7"], folder)
-    done = client.get("/issues/list").json()["reports"][0]
+    done = client.get("/api/issues/list").json()["reports"][0]
     assert done["state"] == "done"
     assert done["release"]["version"] == "0.9.27"
     assert done["status"].startswith("Released in 0.9.27 on ")
@@ -129,6 +129,96 @@ def _journey(kernel, folder, bd, tmp_path):
 
     run([bd, "create", "Someone else's chore", "--json"], folder)
     assert len(json.loads(CliRunner().invoke(cli, ["issues", "list", "--json"]).stdout)["reports"]) == 1
+
+
+TOKEN = "t" * 43
+
+
+def _signed_in(kernel):
+    """The app's own client: the web head with its session token, as the Issues page calls it."""
+    client = TestClient(web.build(kernel, port=8000, token=TOKEN, static=None), base_url="http://127.0.0.1:8000")
+    client.headers["Authorization"] = f"Bearer {TOKEN}"
+    return client
+
+
+HOSTILE = [
+    "--title=Injected title",
+    "--file=/etc/passwd",
+    "--db=/tmp/elsewhere.db",
+    "-p0",
+    "--labels=other",
+    "--parent=demo-1\n--assignee=nobody",
+    "-- --force",
+]
+"""First lines that `bd` would read as options of its own if they were ever passed bare."""
+
+
+def _probes(kernel, folder, bd):
+    """What a reviewer tried against a real database: option-like text, other work, other people, no login."""
+    from heinzel_issues import BeadsBoard, IssuesService  # noqa: PLC0415 - after the plugin is importable
+
+    cli = build(kernel)
+    service = kernel.resolve(IssuesService)
+    board = BeadsBoard(service.settings.beads)
+    for text in HOSTILE:
+        through_the_board = service.submit(f"{text}\n{text}", board=board)
+        through_the_connector = service.submit(text)
+        assert through_the_board.title == through_the_connector.title == text.splitlines()[0]
+        assert through_the_board.body == f"{text}\n{text}"
+        board.note(through_the_board.details.id, text, "builder")
+        assert board.close(through_the_board.details.id, "builder", text).state == "closed"
+    rows = json.loads(run([bd, "list", "--all", "--json"], folder))
+    assert len(rows) == 2 * len(HOSTILE)  # one item each, nothing else was created or read in
+    assert {row["title"] for row in rows} == {text.splitlines()[0] for text in HOSTILE}
+    assert all(row["labels"] == ["heinzel-issues"] for row in rows)
+
+    def created(*args):
+        data = json.loads(run([bd, "create", *args, "--json"], folder))
+        return (data[0] if isinstance(data, list) else data)["id"]
+
+    private = created("--title=Private coordinator bead")
+    theirs = created("--title=Their report", "--labels=heinzel-issues", "--actor=someone-else")
+    for item in (private, theirs, "demo-404"):
+        shown = CliRunner().invoke(cli, ["issues", "show", item, "--json"])
+        assert shown.exit_code != 0
+        assert f"There is no item {item}." in shown.output  # other work, other people and no such id read the same
+        assert "Private" not in shown.output
+        assert "Their report" not in shown.output
+    listed = CliRunner().invoke(cli, ["issues", "list", "--json"]).stdout
+    assert "Private" not in listed
+    assert "Their report" not in listed
+    assert len(json.loads(listed)["reports"]) == 2 * len(HOSTILE)
+    for write in (
+        lambda: board.note(private, "x", "builder"),
+        lambda: board.claim(private, "builder"),
+        lambda: board.transition(private, "in_progress", "builder"),
+        lambda: board.attach(private, "a.txt", b"a", "text/plain", "builder"),
+        lambda: board.close(private, "builder", "x"),
+        lambda: board.transition(theirs, "--claim", "builder"),
+        lambda: board.create("heinzel-issues", "x", "x", "mira", ["--db=x"]),
+    ):
+        with pytest.raises(HeinzelError):
+            write()
+    assert json.loads(run([bd, "show", private, "--json"], folder))[0]["status"] == "open"
+
+    signed_in = _signed_in(kernel)
+    assert signed_in.get("/api/issues/list").status_code == 200
+    for anonymous in (
+        TestClient(api.build(kernel), base_url="http://localhost").get("/issues/list"),
+        TestClient(api.build(kernel), base_url="http://localhost").get(f"/issues/show?id={private}"),
+        TestClient(web.build(kernel, port=8000, token=TOKEN, static=None), base_url="http://127.0.0.1:8000").get(
+            "/api/issues/list"
+        ),
+    ):
+        assert anonymous.status_code != 200  # without a login nothing is read out
+        assert "reports" not in anonymous.text
+        assert "Private" not in anonymous.text
+
+
+@pytest.fixture
+def probes():
+    """The hostile inputs both the fake and the real `bd` must withstand."""
+    return _probes
 
 
 @pytest.fixture
