@@ -14,6 +14,7 @@ def test_installed_operation(tmp_path):
     environment = {key: value for key, value in os.environ.items() if not key.startswith("HZ_")}
     environment["HZ_PLUGINS_ENABLED"] = "true"
     environment.pop("PYTHONPATH", None)
+    environment["LOGNAME"] = "mira"  # the login name a report would be stored under, shown before sending
     for key in ("CONFIG_HOME", "DATA_DIR", "CACHE_DIR", "STATE_DIR", "LOG_DIR"):
         environment[f"HZ_{key}"] = str(tmp_path / key.lower())
     result = subprocess.run(
@@ -31,5 +32,8 @@ def test_installed_operation(tmp_path):
         "problem": "Issue tracking is not set up.",
         "fix": "hz setup issues",
         "folder": None,
+        "sender": "mira",
+        "labels": ["heinzel-issues"],
+        "extra_labels": [],
         "reports": [],
     }
