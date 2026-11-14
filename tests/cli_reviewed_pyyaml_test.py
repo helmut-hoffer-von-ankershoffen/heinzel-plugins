@@ -15,9 +15,9 @@ ROOT = Path(__file__).resolve().parents[1]
 BOOTSTRAP = """
 import sys
 if sys.argv[1] == "needed":
-    raise SystemExit({needed})
+    raise SystemExit({needed} if sys.argv[2:] in ([], ["3.15"]) else 1)
 if sys.argv[1] == "pins":
-    print('{{"name": "tidal-yaml", "version": "1.0", "source_sha256": "aa"}}')
+    print('{{"name": "tidal-yaml", "version": "1.0", "backend": ["tidal-backend==2 --hash=sha256:cc"]}}')
 """
 LOCK = (
     "pydantic==2.12.0 --hash=sha256:00\n"
@@ -110,6 +110,19 @@ def test_a_build_that_leaves_no_single_wheel_installs_nothing(tmp_path, lock, co
     with pytest.raises(ValueError, match="exactly one wheel"):
         cli.sync_locked(Path(sys.executable), lock, core_wheel(tmp_path / "heinzel-0.9.45-py3-none-any.whl"))
     assert not any(entry["command"][:2] == ["uv", "pip"] for entry in recorded)
+
+
+def test_a_lock_for_a_python_without_a_wheel_reads_only_that_source_with_cores_backend(tmp_path):
+    core = core_wheel(tmp_path / "heinzel-0.9.45-py3-none-any.whl")
+    options = cli.reviewed_source_options(core, "3.15", tmp_path)
+    assert options[:3] == ["--no-binary", "tidal-yaml", "--build-constraints"]
+    assert Path(options[3]).read_text() == "tidal-backend==2 --hash=sha256:cc\n"
+    assert options[4:] == ["--require-build-hashes"]
+
+
+def test_a_lock_for_a_python_with_a_wheel_or_an_older_core_stays_wheel_only(tmp_path):
+    assert cli.reviewed_source_options(core_wheel(tmp_path / "a.whl"), "3.14", tmp_path) == []
+    assert cli.reviewed_source_options(core_wheel(tmp_path / "b.whl", needed=None), "3.15", tmp_path) == []
 
 
 def test_the_toolkit_keeps_no_copy_of_a_core_pin():
