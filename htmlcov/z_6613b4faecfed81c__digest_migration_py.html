@@ -1,0 +1,205 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+    <title>Coverage for src/heinzel_plugin_tools/_digest_migration.py: 100%</title>
+    <link rel="icon" sizes="32x32" href="favicon_32_cb_c827f16f.png">
+    <link rel="stylesheet" href="style_cb_4667309f.css" type="text/css">
+    <script src="coverage_html_cb_54cfdca1.js" defer></script>
+</head>
+<body class="pyfile">
+<header>
+    <div class="content">
+        <h1>
+            <span class="text">Coverage for </span><b>src<span class="sep">/</span>heinzel_plugin_tools<span class="sep">/</span>_digest_migration.py</b>:
+            <span class="pc_cov">100%</span>
+        </h1>
+        <aside id="help_panel_wrapper">
+            <input id="help_panel_state" type="checkbox">
+            <label for="help_panel_state">
+                <img id="keyboard_icon" src="keybd_closed_cb_900cfef5.png" alt="Show/hide keyboard shortcuts">
+            </label>
+            <div id="help_panel">
+                <p class="legend">Shortcuts on this page</p>
+                <div class="keyhelp">
+                    <p>
+                        <kbd>r</kbd>
+                        <kbd>m</kbd>
+                        <kbd>x</kbd>
+                        <kbd>p</kbd>
+                        &nbsp; toggle line displays
+                    </p>
+                    <p>
+                        <kbd>j</kbd>
+                        <kbd>k</kbd>
+                        &nbsp; next/prev highlighted chunk
+                    </p>
+                    <p>
+                        <kbd>0</kbd> &nbsp; (zero) top of page
+                    </p>
+                    <p>
+                        <kbd>1</kbd> &nbsp; (one) first highlighted chunk
+                    </p>
+                    <p>
+                        <kbd>[</kbd>
+                        <kbd>]</kbd>
+                        &nbsp; prev/next file
+                    </p>
+                    <p>
+                        <kbd>u</kbd> &nbsp; up to the index
+                    </p>
+                    <p>
+                        <kbd>?</kbd> &nbsp; show/hide this help
+                    </p>
+                </div>
+            </div>
+        </aside>
+        <h2>
+            <span class="text">1 statements &nbsp;</span>
+            <button type="button" class="run button_toggle_run" value="run" data-shortcut="r" title="Toggle lines run">1<span class="text"> run</span></button>
+            <button type="button" class="mis show_mis button_toggle_mis" value="mis" data-shortcut="m" title="Toggle lines missing">0<span class="text"> missing</span></button>
+            <button type="button" class="exc show_exc button_toggle_exc" value="exc" data-shortcut="x" title="Toggle lines excluded">0<span class="text"> excluded</span></button>
+            <button type="button" class="par run show_par button_toggle_par" value="par" data-shortcut="p" title="Toggle lines partially run">0<span class="text"> partial</span></button>
+        </h2>
+        <p class="text">
+            <a id="prevFileLink" class="nav" href="z_6613b4faecfed81c___main___py.html">&#xab; prev</a> &nbsp; &nbsp;
+            <a id="indexLink" class="nav" href="index.html">&Hat; index</a> &nbsp; &nbsp;
+            <a id="nextFileLink" class="nav" href="z_6613b4faecfed81c__historical_galleries_py.html">&#xbb; next</a>
+            &nbsp; &nbsp; &nbsp;
+            <a class="nav" href="https://coverage.readthedocs.io/en/7.17.3">coverage.py v7.17.3</a>,
+            created at 2026-11-14 01:56 +0000
+        </p>
+        <aside class="hidden">
+            <button type="button" class="button_next_chunk" data-shortcut="j"></button>
+            <button type="button" class="button_prev_chunk" data-shortcut="k"></button>
+            <button type="button" class="button_top_of_page" data-shortcut="0"></button>
+            <button type="button" class="button_first_chunk" data-shortcut="1"></button>
+            <button type="button" class="button_prev_file" data-shortcut="["></button>
+            <button type="button" class="button_next_file" data-shortcut="]"></button>
+            <button type="button" class="button_to_index" data-shortcut="u"></button>
+            <button type="button" class="button_show_hide_help" data-shortcut="?"></button>
+        </aside>
+    </div>
+</header>
+<main id="source">
+    <p class="pln"><span class="n"><a id="t1" href="#t1">1</a></span><span class="t"><span class="str">&quot;&quot;&quot;Pinned old-to-new gallery input digests of this repository&#x27;s galleries at the ADR 0003 flip.</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t2" href="#t2">2</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t3" href="#t3">3</a></span><span class="t"><span class="str">Each key is a digest a gallery or screenshot definition was reviewed under while the locks, the plugin version and its</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t4" href="#t4">4</a></span><span class="t"><span class="str">dependency declarations were capture inputs; each value is the digest of the same source under the rule that leaves</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t5" href="#t5">5</a></span><span class="t"><span class="str">them out, computed at the flip while the old digest still matched. An entry keeps exactly that reviewed source</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t6" href="#t6">6</a></span><span class="t"><span class="str">current through a later relock, security floor or version bump; any change to what renders makes it stale.</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t7" href="#t7">7</a></span><span class="t"><span class="str">&quot;&quot;&quot;</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t8" href="#t8">8</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t9" href="#t9">9</a></span><span class="t"><span class="nam">MIGRATED_DIGESTS</span><span class="op">:</span> <span class="nam">dict</span><span class="op">[</span><span class="nam">str</span><span class="op">,</span> <span class="nam">str</span><span class="op">]</span> <span class="op">=</span> <span class="op">{</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t10" href="#t10">10</a></span><span class="t">    <span class="com"># heinzel-atlassian gallery</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t11" href="#t11">11</a></span><span class="t">    <span class="str">&quot;fe5d3c8bb141ea577545d88409f8d8f16e90e440d8f5bb09a9c43450944441d3&quot;</span><span class="op">:</span> <span class="op">(</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t12" href="#t12">12</a></span><span class="t">        <span class="str">&quot;6b3785dfcc4abfae67640d7ed9ea89d9229e517c77a708f01ae7e4d76cbf5e4a&quot;</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t13" href="#t13">13</a></span><span class="t">    <span class="op">)</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t14" href="#t14">14</a></span><span class="t">    <span class="com"># heinzel-atlassian definition</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t15" href="#t15">15</a></span><span class="t">    <span class="str">&quot;40ebcebf50a155f29c12e5e0a8744b8811bd9477a0435e312ad4359e1066fb6e&quot;</span><span class="op">:</span> <span class="op">(</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t16" href="#t16">16</a></span><span class="t">        <span class="str">&quot;6d78304bb66436239718b029021a08a88ab03470e8a14a6d5e583aaa78dccda5&quot;</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t17" href="#t17">17</a></span><span class="t">    <span class="op">)</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t18" href="#t18">18</a></span><span class="t">    <span class="com"># heinzel-clock gallery</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t19" href="#t19">19</a></span><span class="t">    <span class="str">&quot;f3ed7f7f640daabf6095e70e0e9466254d021214395136492f778aec1d74b0a4&quot;</span><span class="op">:</span> <span class="op">(</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t20" href="#t20">20</a></span><span class="t">        <span class="str">&quot;11edde3f40de9fdea2ba810879ef6d2365ffa1c0f8a2572015aa5af1c0294f46&quot;</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t21" href="#t21">21</a></span><span class="t">    <span class="op">)</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t22" href="#t22">22</a></span><span class="t">    <span class="com"># heinzel-clock definition</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t23" href="#t23">23</a></span><span class="t">    <span class="str">&quot;13230bb1b73f59c8da2bab49888185f97ac0384e309c346a62ec6be7d8e60513&quot;</span><span class="op">:</span> <span class="op">(</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t24" href="#t24">24</a></span><span class="t">        <span class="str">&quot;a4d03f61669a9f988d57ecd76ae46a82ddad8b33d837dc5eb7b755910a2dfb9a&quot;</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t25" href="#t25">25</a></span><span class="t">    <span class="op">)</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t26" href="#t26">26</a></span><span class="t">    <span class="com"># heinzel-example gallery</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t27" href="#t27">27</a></span><span class="t">    <span class="str">&quot;855bf3b5a71afd5ca72803e6de2a0920cdb229a90cd1dd6297525b336f353f47&quot;</span><span class="op">:</span> <span class="op">(</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t28" href="#t28">28</a></span><span class="t">        <span class="str">&quot;2954ef6e795d89a971c09cc4865b74b33db6c701700ddaaae1b019af51a144ec&quot;</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t29" href="#t29">29</a></span><span class="t">    <span class="op">)</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t30" href="#t30">30</a></span><span class="t">    <span class="com"># heinzel-example definition</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t31" href="#t31">31</a></span><span class="t">    <span class="str">&quot;50b56f504ae62164ad6841093f05abef327a6e4f5072af3d67ef62a31de2ea73&quot;</span><span class="op">:</span> <span class="op">(</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t32" href="#t32">32</a></span><span class="t">        <span class="str">&quot;5a2a38882576130e6147fbf1e368556b120b72f5ecc91d078eaec54556a62ca4&quot;</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t33" href="#t33">33</a></span><span class="t">    <span class="op">)</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t34" href="#t34">34</a></span><span class="t">    <span class="com"># heinzel-github gallery</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t35" href="#t35">35</a></span><span class="t">    <span class="str">&quot;fa6fe68cb794cf040f6bb7b3a86b354f6ba2587f5c2c704765cea06ad256c186&quot;</span><span class="op">:</span> <span class="op">(</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t36" href="#t36">36</a></span><span class="t">        <span class="str">&quot;a0ea2ffbe42179f934611d86c20067a196cae7b8f8151a58398263da39389973&quot;</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t37" href="#t37">37</a></span><span class="t">    <span class="op">)</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t38" href="#t38">38</a></span><span class="t">    <span class="com"># heinzel-github definition</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t39" href="#t39">39</a></span><span class="t">    <span class="str">&quot;4965336e7284ca3f776242e2244e65d4ead21d20c813f31041c249a07e4a7293&quot;</span><span class="op">:</span> <span class="op">(</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t40" href="#t40">40</a></span><span class="t">        <span class="str">&quot;82771c8bc5fa5c4e742d11ee3885b44c3870b9c09f83fd78dd14d69522363459&quot;</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t41" href="#t41">41</a></span><span class="t">    <span class="op">)</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t42" href="#t42">42</a></span><span class="t">    <span class="com"># heinzel-google gallery</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t43" href="#t43">43</a></span><span class="t">    <span class="str">&quot;c55e21d8b4058694bbf28bc39e754f38a6f1f2eb27091aa70622eb018c72c91d&quot;</span><span class="op">:</span> <span class="op">(</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t44" href="#t44">44</a></span><span class="t">        <span class="str">&quot;844a7a75738a418731ea4db1a3e298d2952cc8417c81e0855c58f6bd18c6c832&quot;</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t45" href="#t45">45</a></span><span class="t">    <span class="op">)</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t46" href="#t46">46</a></span><span class="t">    <span class="com"># heinzel-google definition</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t47" href="#t47">47</a></span><span class="t">    <span class="str">&quot;14628b19796d865fca67e901e4e58c42517ce9bc7970d748b80a5cb49bd28f05&quot;</span><span class="op">:</span> <span class="op">(</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t48" href="#t48">48</a></span><span class="t">        <span class="str">&quot;c0b1899272d8f720135dd5a3c8150ecd0486f5ecd846371d8ab2155959b1f522&quot;</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t49" href="#t49">49</a></span><span class="t">    <span class="op">)</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t50" href="#t50">50</a></span><span class="t">    <span class="com"># heinzel-issues gallery</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t51" href="#t51">51</a></span><span class="t">    <span class="str">&quot;9560d558bc9e6a7dc1b591ee1987c724342e1f129d58564a1a59d9e21899bc48&quot;</span><span class="op">:</span> <span class="op">(</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t52" href="#t52">52</a></span><span class="t">        <span class="str">&quot;143944e597cc5d7174dfe02a9d659a5ebe2745a7fdb4a336cc46bc82c3f1e939&quot;</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t53" href="#t53">53</a></span><span class="t">    <span class="op">)</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t54" href="#t54">54</a></span><span class="t">    <span class="com"># heinzel-issues definition</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t55" href="#t55">55</a></span><span class="t">    <span class="str">&quot;41bec2e172687aacb4b1c86a2ce3eb1751061e615157b722a43f525295dc4569&quot;</span><span class="op">:</span> <span class="op">(</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t56" href="#t56">56</a></span><span class="t">        <span class="str">&quot;3e56b25a5088c4164b5603d9284109b433e7c63adb76c00567c6cc913e1d41e4&quot;</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t57" href="#t57">57</a></span><span class="t">    <span class="op">)</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t58" href="#t58">58</a></span><span class="t">    <span class="com"># heinzel-resource gallery</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t59" href="#t59">59</a></span><span class="t">    <span class="str">&quot;f8a6b3873f8b67f3a9873c48ed5a9e5c7ae2e4a12c72ec09b7dde872ed27bd54&quot;</span><span class="op">:</span> <span class="op">(</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t60" href="#t60">60</a></span><span class="t">        <span class="str">&quot;d9b5a35b7d85564c8a6c6174195772e75927421ef403ca9c5fde019c7b7c8d7c&quot;</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t61" href="#t61">61</a></span><span class="t">    <span class="op">)</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t62" href="#t62">62</a></span><span class="t">    <span class="com"># heinzel-resource definition</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t63" href="#t63">63</a></span><span class="t">    <span class="str">&quot;de732cc7d7480bc72602985a097684d43325591e38d92fb2dd2ac89634ab39f2&quot;</span><span class="op">:</span> <span class="op">(</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t64" href="#t64">64</a></span><span class="t">        <span class="str">&quot;ceeb3240bbdc03c060568f108031222ca61a845ac037ff96e6a707045899fd28&quot;</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t65" href="#t65">65</a></span><span class="t">    <span class="op">)</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t66" href="#t66">66</a></span><span class="t">    <span class="com"># heinzel-slack gallery</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t67" href="#t67">67</a></span><span class="t">    <span class="str">&quot;4435860e68ad76f26997679152d2700d55f9ad7b08cbab33fa66557836e49b6c&quot;</span><span class="op">:</span> <span class="op">(</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t68" href="#t68">68</a></span><span class="t">        <span class="str">&quot;920f79077bcedf69ee5783efaac52acba1eaa1e653fe7927c8df6e584d1323cc&quot;</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t69" href="#t69">69</a></span><span class="t">    <span class="op">)</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t70" href="#t70">70</a></span><span class="t">    <span class="com"># heinzel-slack definition</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t71" href="#t71">71</a></span><span class="t">    <span class="str">&quot;5a0d5a055e649e2bdc229a06cf29159f871aee3249f1bfb2ec54aef8350a6588&quot;</span><span class="op">:</span> <span class="op">(</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t72" href="#t72">72</a></span><span class="t">        <span class="str">&quot;68db2a1dc1ae7de24a188d372a5b6e5f5cfa535decdf2b9e6fb313bc20460992&quot;</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t73" href="#t73">73</a></span><span class="t">    <span class="op">)</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t74" href="#t74">74</a></span><span class="t">    <span class="com"># heinzel-tailscale gallery</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t75" href="#t75">75</a></span><span class="t">    <span class="str">&quot;9a20c109d44d267cb0279757b972471df5e4d24535a040e6f46c08c21963f8cc&quot;</span><span class="op">:</span> <span class="op">(</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t76" href="#t76">76</a></span><span class="t">        <span class="str">&quot;56aca97a294d2aead22db387bca7307e82f2715e4c77b41a22a7154d51e130be&quot;</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t77" href="#t77">77</a></span><span class="t">    <span class="op">)</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t78" href="#t78">78</a></span><span class="t">    <span class="com"># heinzel-tailscale definition</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t79" href="#t79">79</a></span><span class="t">    <span class="str">&quot;87024d15213c3b3cb2a986ac028bf05a53c960c922b6402b9dc5ea50f220431d&quot;</span><span class="op">:</span> <span class="op">(</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t80" href="#t80">80</a></span><span class="t">        <span class="str">&quot;bdde94e472738cdf002d4d1f32f9db1662b8f96f5d2d2774bcf721e834cfff5e&quot;</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t81" href="#t81">81</a></span><span class="t">    <span class="op">)</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t82" href="#t82">82</a></span><span class="t">    <span class="com"># heinzel-theme gallery</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t83" href="#t83">83</a></span><span class="t">    <span class="str">&quot;956c896460db8ead6ba2b06b98384717d5b290d2de55326b75fc95b56a791e1d&quot;</span><span class="op">:</span> <span class="op">(</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t84" href="#t84">84</a></span><span class="t">        <span class="str">&quot;327740e7e230de935c858b11ef617aa4eb2b6aec3a08ccd2cb6538157e7aba19&quot;</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t85" href="#t85">85</a></span><span class="t">    <span class="op">)</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t86" href="#t86">86</a></span><span class="t">    <span class="com"># heinzel-theme definition</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t87" href="#t87">87</a></span><span class="t">    <span class="str">&quot;21a855cd8644a76635c5d7bf63e969dfc118da169fd80bdad7d65c4417403f11&quot;</span><span class="op">:</span> <span class="op">(</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t88" href="#t88">88</a></span><span class="t">        <span class="str">&quot;b07474f90bf3a509782cd494cb3fe578d83fb69cf9312018e50aa8660b02da3a&quot;</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t89" href="#t89">89</a></span><span class="t">    <span class="op">)</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t90" href="#t90">90</a></span><span class="t">    <span class="com"># heinzel-weather gallery</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t91" href="#t91">91</a></span><span class="t">    <span class="str">&quot;623b2fd453296f9728aaf23a97df73f5d826c7a239f0cd28617f5a3d4e3cf9eb&quot;</span><span class="op">:</span> <span class="op">(</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t92" href="#t92">92</a></span><span class="t">        <span class="str">&quot;d417ae01414d93dbc63a85f90f5acb6ec7bc23a7a2434e62d3482ba3985749e8&quot;</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t93" href="#t93">93</a></span><span class="t">    <span class="op">)</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t94" href="#t94">94</a></span><span class="t">    <span class="com"># heinzel-weather definition</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t95" href="#t95">95</a></span><span class="t">    <span class="str">&quot;6007f977c8dedbba4bb3255ff3c85f81e3a3027a569fbd0834d10c41d4da2449&quot;</span><span class="op">:</span> <span class="op">(</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t96" href="#t96">96</a></span><span class="t">        <span class="str">&quot;c03ddb944bc7bc905e1abaab0f7b99749d65917955670a37d4bc34ade437a63c&quot;</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t97" href="#t97">97</a></span><span class="t">    <span class="op">)</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t98" href="#t98">98</a></span><span class="t">    <span class="com"># heinzel-zoom gallery</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t99" href="#t99">99</a></span><span class="t">    <span class="str">&quot;cce74a37e74fdf7abec5b0315097e390a6328ae82319d85b750110ec157bcb2e&quot;</span><span class="op">:</span> <span class="op">(</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t100" href="#t100">100</a></span><span class="t">        <span class="str">&quot;a51f6a789d7050ec2f3ab6f00ce6d0e925cc53768f51e5f69b9233a6fe21ebcb&quot;</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t101" href="#t101">101</a></span><span class="t">    <span class="op">)</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t102" href="#t102">102</a></span><span class="t">    <span class="com"># heinzel-zoom definition</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t103" href="#t103">103</a></span><span class="t">    <span class="str">&quot;29f68236570785a8787752d5bb3ebd4c2c21e31f1813869c87538d0c3c6de154&quot;</span><span class="op">:</span> <span class="op">(</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t104" href="#t104">104</a></span><span class="t">        <span class="str">&quot;15ea60c6c3465c50c3413c80a3da4c11690a6cd0e0486ef180a0754b15a03dfa&quot;</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t105" href="#t105">105</a></span><span class="t">    <span class="op">)</span><span class="op">,</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run run2"><span class="n"><a id="t106" href="#t106">106</a></span><span class="t"><span class="op">}</span>&nbsp;</span><span class="r"></span></p>
+</main>
+<footer>
+    <div class="content">
+        <p>
+            <a class="nav" href="z_6613b4faecfed81c___main___py.html">&#xab; prev</a> &nbsp; &nbsp;
+            <a class="nav" href="index.html">&Hat; index</a> &nbsp; &nbsp;
+            <a class="nav" href="z_6613b4faecfed81c__historical_galleries_py.html">&#xbb; next</a>
+            &nbsp; &nbsp; &nbsp;
+            <a class="nav" href="https://coverage.readthedocs.io/en/7.17.3">coverage.py v7.17.3</a>,
+            created at 2026-11-14 01:56 +0000
+        </p>
+    </div>
+</footer>
+</body>
+</html>
