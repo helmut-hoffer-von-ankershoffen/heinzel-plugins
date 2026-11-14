@@ -3,11 +3,15 @@
 import json
 import tomllib
 
+import anyio
 import pytest
 from fastapi.testclient import TestClient
 from heinzel import Config, ListWidget
-from heinzel.heads import web
+from heinzel.heads import mcp, web
+from heinzel.heads.cli import build as build_cli
 from heinzel.kernel import user_config_dir
+from mcp import Client
+from typer.testing import CliRunner
 
 import heinzel_issues
 from heinzel_issues import IssuesService, today, watch
@@ -148,6 +152,40 @@ def test_the_app_sets_it_up_sends_a_file_and_shows_the_history_without_a_termina
 
     broken = ui.post("/api/issues/submit", headers=auth, json={"text": "x", "file_name": "a.png", "file_data": "%%"})
     assert "did not arrive whole" in broken.text
+
+
+TOOLS = {"issues_submit", "issues_list", "issues_show", "issues_connect"}
+
+
+def test_every_operation_is_a_command_and_a_tool_of_your_own_agent_only(issues_kernel, board, fake_bd):
+    kernel = issues_kernel(board, fake_bd)
+    cli = build_cli(kernel)
+    listed = CliRunner().invoke(cli, ["issues", "--help"])
+    assert listed.exit_code == 0, listed.output
+    for command in ("submit", "list"):
+        assert command in listed.output  # the everyday commands; show and connect are listed for experts
+    for command in ("submit", "list", "show", "connect"):
+        assert CliRunner().invoke(cli, ["issues", command, "--help"]).exit_code == 0
+
+    async def scenario():
+        # Over stdio your own agent started the server as you: it sends, lists, shows and sets up.
+        async with Client(mcp.build(kernel, transport="stdio")) as agent:
+            assert {tool.name for tool in (await agent.list_tools()).tools} >= TOOLS
+            sent = await agent.call_tool("issues_submit", {"text": "The footer clock jumps"})
+            assert not sent.is_error, sent.content
+            task_id = json.loads(sent.content[0].text)["details"]["id"]
+            reports = json.loads((await agent.call_tool("issues_list", {})).content[0].text)["reports"]
+            assert [report["title"] for report in reports] == ["The footer clock jumps"]
+            shown = await agent.call_tool("issues_show", {"id": task_id})
+            assert json.loads(shown.content[0].text)["status"] == "Received"
+            again = await agent.call_tool("issues_connect", {"path": str(board), "labels": "intake"})
+            assert not again.is_error, again.content
+            assert json.loads(again.content[0].text)["extra_labels"] == ["intake"]
+        # Over HTTP without a token nothing of Issues is a tool: reports are private.
+        async with Client(mcp.build(kernel, transport="http")) as anonymous:
+            assert not {tool.name for tool in (await anonymous.list_tools()).tools} & TOOLS
+
+    anyio.run(scenario)
 
 
 def test_a_broken_tracker_is_down_in_health(issues_kernel, board, tmp_path):
