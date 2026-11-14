@@ -4,7 +4,8 @@ from datetime import UTC, date, datetime, timedelta
 from pathlib import Path
 
 import pytest
-from heinzel import Settings
+from heinzel import Config, HeinzelError, Settings
+from heinzel.kernel import user_config_dir
 
 from heinzel_issues import (
     NOT_SET_UP,
@@ -20,8 +21,9 @@ from heinzel_issues import (
     released_text,
     state_of,
 )
+from heinzel_issues._beads import BeadsSettings
 from heinzel_issues._releases import references
-from heinzel_issues._service import read_attachment, title_of
+from heinzel_issues._service import history, read_attachment, title_of, upload
 
 pytestmark = pytest.mark.unit
 
@@ -264,3 +266,125 @@ def test_the_watch_is_quiet_first_then_notices_each_new_state_and_the_release(tm
 
 def test_the_watch_does_nothing_while_off(tmp_path):
     assert not IssuesService(IssuesSettings(), Settings(state_dir=tmp_path)).watch(Notices()).checked
+
+
+def write_config(text: str, load: bool = True) -> Config | None:
+    file = user_config_dir() / "config.toml"
+    file.parent.mkdir(parents=True, exist_ok=True)
+    file.write_text(text, encoding="utf-8")
+    return Config.load() if load else None
+
+
+def test_settings_saved_by_another_program_are_followed_without_a_restart(tmp_path):
+    config = write_config("[hz]\n")
+    found = IssuesService(IssuesSettings(), Settings(state_dir=tmp_path), config)
+    assert not found.overview().ready
+    assert not found.watch(Notices()).checked
+    write_config(f'[issues]\ntracker = "beads"\n[issues.beads]\npath = "{tmp_path}"\n')
+    result = found.overview()  # the daemon and the app each read the files again
+    assert found.enabled
+    assert result.folder == str(tmp_path)
+    assert "has no .beads database" in str(result.problem)
+    assert "hz " not in str(result.problem)  # the app shows this; it names no terminal command
+
+    write_config("[issues]\ntracker = 3\n[[[", load=False)  # a half-written file leaves the settings as they were
+    found.refresh()
+    assert found.settings.tracker == "beads"
+    write_config('[issues]\ntracker = ["no"]\n')
+    found.refresh()
+    assert found.settings.tracker == "beads"
+
+
+class Editor:
+    def __init__(self, fail=False):
+        self.written = {}
+        self.fail = fail
+
+    def write(self, key, value, scope="user"):
+        if self.fail:
+            raise HeinzelError("A higher-priority source sets it")
+        self.written[key] = value
+        return Path("config.toml")
+
+
+def test_connect_checks_the_folder_before_it_saves_anything(tmp_path, fake_bd):
+    found = IssuesService(IssuesSettings(beads=BeadsSettings(bd=fake_bd)), Settings(state_dir=tmp_path))
+    editor = Editor()
+    board = tmp_path / "board"
+    (board / ".beads").mkdir(parents=True)
+    clone = tmp_path / "harbor"
+    clone.mkdir()
+    refusals = [
+        (("relative/board",), "must be a full path"),
+        ((str(tmp_path / "nowhere"),), "has no Beads database"),
+        ((str(board), "Not A Label"), "That label cannot be used"),
+        ((str(board), "", "clones/harbor"), "A release clone must be a full path"),
+        ((str(board), "", str(tmp_path / "gone")), "is not a folder"),
+    ]
+    for arguments, words in refusals:
+        with pytest.raises(TrackerError, match=words):
+            found.connect(editor, *arguments)
+    assert editor.written == {}
+    assert not found.enabled
+
+    with pytest.raises(TrackerError, match="higher-priority"):
+        found.connect(Editor(fail=True), str(board))
+    assert not found.enabled
+
+    result = found.connect(editor, f" {board} ", "owner-ask, intake", f"{clone}")
+    assert result.ready
+    assert editor.written["issues.tracker"] == "beads"
+    assert editor.written["issues.beads"]["path"] == str(board)
+    assert editor.written["issues.beads"]["extra_labels"] == ["owner-ask", "intake"]
+    assert editor.written["issues.releases"] == [{"path": str(clone), "names": [], "ref": "origin/main", "tags": "v*"}]
+    assert found.settings.beads.labels == ["heinzel-issues", "owner-ask", "intake"]
+
+    again = Editor()
+    found.connect(again, str(board), "owner-ask")  # the labels are the whole list; empty clones keep what is set
+    assert again.written["issues.beads"]["extra_labels"] == ["owner-ask"]
+    overview = found.overview()
+    assert (overview.labels, overview.extra_labels) == (["heinzel-issues", "owner-ask"], ["owner-ask"])
+    assert overview.sender  # the login name a report is stored under, shown before sending
+    assert "issues.releases" not in again.written
+    assert [source.path for source in found.settings.releases] == [clone]
+    found.connect(again, str(board))  # an empty field clears the labels
+    assert again.written["issues.beads"]["extra_labels"] == []
+    assert found.settings.beads.labels == ["heinzel-issues"]
+
+
+def test_a_broken_bd_refuses_connect(tmp_path):
+    (tmp_path / ".beads").mkdir()
+    found = IssuesService(IssuesSettings(beads=BeadsSettings(bd=str(tmp_path / "no-bd"))), Settings(state_dir=tmp_path))
+    editor = Editor()
+    with pytest.raises(TrackerError, match="not installed"):
+        found.connect(editor, str(tmp_path))
+    assert editor.written == {}
+
+
+def test_labels_are_checked_and_the_issues_label_comes_first():
+    assert BeadsSettings(extra_labels=["owner-ask", "heinzel-issues"]).labels == ["heinzel-issues", "owner-ask"]
+    with pytest.raises(ValueError, match="a label is lowercase"):
+        BeadsSettings(extra_labels=["Owner Ask"])
+
+
+def test_history_is_the_plain_states_in_order():
+    task = Task(id="a", title="t", state=TaskState.RECEIVED, status="open", created_at=T0, updated_at=T0)
+    assert [(step.label, step.at) for step in history(task, None)] == [("Sent", T0)]
+    working = task.model_copy(update={"state": TaskState.WORKING})
+    assert [(step.label, step.at) for step in history(working, None)] == [("Sent", T0), ("Being worked on", None)]
+    later = T0 + timedelta(hours=1)
+    done = task.model_copy(update={"state": TaskState.DONE, "started_at": later, "closed_at": later})
+    steps = history(done, Release(version="0.9.27", date=date(2026, 11, 8)))
+    assert [step.label for step in steps] == ["Sent", "Being worked on", "Done", "Released in 0.9.27"]
+    assert steps[-1].at == datetime(2026, 11, 8, tzinfo=UTC)
+
+
+def test_a_file_from_the_app_follows_the_rules_of_a_file_from_disk():
+    assert upload("../shots/shot.png", "iVBORw0KGgpmYWtl").name == "shot.png"
+    assert upload(" ", "aGVsbG8=").name == "attachment"
+    with pytest.raises(TrackerError, match="did not arrive whole"):
+        upload("shot.png", "not base64!")
+    with pytest.raises(TrackerError, match="not a PNG or JPEG image or a text file"):
+        upload("blob.bin", "//79/A==")
+    with pytest.raises(TrackerError, match="larger than 5 MiB"):
+        upload("big.txt", "QUFB" * (5 * 1024 * 1024 // 3 + 1))

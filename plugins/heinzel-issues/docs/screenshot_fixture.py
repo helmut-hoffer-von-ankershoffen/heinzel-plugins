@@ -35,10 +35,15 @@ TASKS = [
         status="in_progress",
         created_at=at(6, 14),
         updated_at=at(7, 10),
+        started_at=at(7, 10),
     ),
     Task(
         id="demo-1",
         title="Weather shows yesterday's rain after waking up",
+        body="Weather shows yesterday's rain after waking up\n"
+        "After the lid was closed overnight, Today still said rain until I reloaded. A screenshot is attached.",
+        attachments=("today-rain.png",),
+        started_at=at(4, 11),
         state=TaskState.DONE,
         status="closed",
         created_at=at(4, 8),

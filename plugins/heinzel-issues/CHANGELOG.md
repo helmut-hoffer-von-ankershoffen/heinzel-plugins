@@ -1,5 +1,26 @@
 # Changelog
 
+## 0.2.0
+
+Everything works in the app now; no step needs a terminal.
+
+- Set up in the app: the Issues page asks for the folder with the Beads database, checks that it answers, and saves
+  it (`connect`). Nothing is saved when the check fails. The app and the daemon follow the saved settings at their
+  next use, without a restart.
+- Open a report to read what you sent, the files you sent with it and its history: Sent, Being worked on, Done,
+  Released in.
+- Send a screenshot or a text file with a report from the app (up to 2 MiB), with Heinzel 0.9.45 or newer; the
+  confirmation shows the file shortened. An older Heinzel offers text only.
+- More labels: `issues.beads.extra_labels` (the "More labels" field in the setup form) gives every new report further
+  labels, so a team's intake queue sees it.
+- Your reports only: Issues lists and shows only items with the Issues label that were sent under your login name,
+  and changes only items with the Issues label. `list` and `show` are private operations now, so they need your
+  sign-in on the network interfaces.
+- What you type can never be read by the tracker program as an option: every value goes as `--name=value`.
+- The form says under which login name and with which labels a report is stored, before you send.
+- The view opens no terminal any more: the `hz setup issues` and `hz issues submit` buttons are gone, and messages
+  the app shows name no command.
+
 ## 0.1.1
 
 Relock for Heinzel Core 0.9.40 (its AI extra adds pyjwt) and refresh the gallery.

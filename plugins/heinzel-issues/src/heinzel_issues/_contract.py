@@ -58,6 +58,8 @@ class Task(BaseModel):
     created_at: AwareDatetime = Field(description="When it was submitted.")
     updated_at: AwareDatetime = Field(description="When the tracker last changed it.")
     closed_at: AwareDatetime | None = Field(default=None, description="When it was done, if it is.")
+    started_at: AwareDatetime | None = Field(default=None, description="When someone started on it, if known.")
+    attachments: tuple[str, ...] = Field(default=(), description="The names of the files sent with it.")
     references: str = Field(
         default="",
         description="Tracker text written by whoever works on it (notes, links, close reason), where pull request "

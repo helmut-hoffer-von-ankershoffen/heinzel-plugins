@@ -15,14 +15,6 @@ MIGRATED_DIGESTS: dict[str, str] = {
     "50b56f504ae62164ad6841093f05abef327a6e4f5072af3d67ef62a31de2ea73": (
         "5a2a38882576130e6147fbf1e368556b120b72f5ecc91d078eaec54556a62ca4"
     ),
-    # heinzel-issues gallery
-    "9560d558bc9e6a7dc1b591ee1987c724342e1f129d58564a1a59d9e21899bc48": (
-        "143944e597cc5d7174dfe02a9d659a5ebe2745a7fdb4a336cc46bc82c3f1e939"
-    ),
-    # heinzel-issues definition
-    "41bec2e172687aacb4b1c86a2ce3eb1751061e615157b722a43f525295dc4569": (
-        "3e56b25a5088c4164b5603d9284109b433e7c63adb76c00567c6cc913e1d41e4"
-    ),
     # heinzel-resource gallery
     "f8a6b3873f8b67f3a9873c48ed5a9e5c7ae2e4a12c72ec09b7dde872ed27bd54": (
         "d9b5a35b7d85564c8a6c6174195772e75927421ef403ca9c5fde019c7b7c8d7c"
