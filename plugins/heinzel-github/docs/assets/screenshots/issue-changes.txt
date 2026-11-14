@@ -16,7 +16,7 @@ Doctor: 4 checks need attention
 ai.access ai access, system.doctor installation, system.prerequisite system.runner: claude…
 
 Open
-v0.9.40
+v0.9.41
 Plugins changed, warning
 Updates, off
 0

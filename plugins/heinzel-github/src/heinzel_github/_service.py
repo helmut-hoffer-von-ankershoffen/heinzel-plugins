@@ -6,7 +6,7 @@ from typing import Protocol
 from heinzel import Check, HeinzelError, Kernel, Login, Status, __version__
 
 from heinzel_github._client import GhClient, GhLoginError, said
-from heinzel_github._gh import INSTALL, MINIMUM_VERSION, Gh, login_fix, version_text
+from heinzel_github._gh import INSTALL, MINIMUM_VERSION, Gh, login_fix, version_text, where_looked
 from heinzel_github._models import GithubAbout, GithubSettings
 
 DISTRIBUTION = "heinzel-github"
@@ -64,7 +64,9 @@ class GithubService:
             return Check(
                 name="gh",
                 status=Status.DEGRADED,
-                detail=f"{name}, the GitHub CLI, is not on PATH; every read goes through it",
+                detail=(
+                    f"Heinzel can't find {name}, the GitHub CLI: it looked {where_looked()}; every read goes through it"
+                ),
                 fix=f"install gh ({INSTALL}), then {login_fix(host)}",
                 login=unknown,
             )

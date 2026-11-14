@@ -22,7 +22,7 @@ import pytest
 from heinzel import Config, HeinzelError, Kernel, Module, ModuleRecord, Settings
 from heinzel.kernel import Origin, discover
 
-from heinzel_github import Gh, GhResult
+from heinzel_github import Gh, GhResult, _gh
 
 TESTS = Path(__file__).parent
 FIXTURES = TESTS / "fixtures"
@@ -200,6 +200,14 @@ class FakeGhCli:
     def api_calls(self) -> list[dict[str, Any]]:
         """The `gh api` calls, without `gh --version`."""
         return [call for call in self.calls() if call["argv"][:1] == ["api"]]
+
+
+@pytest.fixture(autouse=True)
+def no_homebrew(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> tuple[str, str]:
+    """Empty stand-ins for Homebrew's directories, so the host's own gh never answers a test."""
+    bins = (str(tmp_path / "homebrew-arm" / "bin"), str(tmp_path / "homebrew-intel" / "bin"))
+    monkeypatch.setattr(_gh, "HOMEBREW_BINS", bins)
+    return bins
 
 
 def install_gh(directory: Path, shebang: str = sys.executable) -> Path:
