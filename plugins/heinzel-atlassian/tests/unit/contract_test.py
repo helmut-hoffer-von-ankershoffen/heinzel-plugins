@@ -6,7 +6,7 @@ import pytest
 from heinzel import CredentialLet, ProviderLet
 from heinzel.kernel import CAPABILITIES
 
-from heinzel_atlassian import AtlassianSettings, hosts, module
+from heinzel_atlassian import MULTI, AtlassianSettings, hosts, links, module
 
 pytestmark = pytest.mark.unit
 
@@ -49,3 +49,21 @@ def test_no_write_method_is_implemented(provider):
     capability = CAPABILITIES[provider.capability]
     writes = [name for name, mode in capability.methods.items() if mode == "write"]
     assert not [name for name in writes if hasattr(provider.factory, name)]
+
+
+def test_links_are_the_site_host_only_never_the_gateway(monkeypatch, tmp_path):
+    monkeypatch.setenv("PATH", str(tmp_path))  # no acli to ask for a site
+    assert links(AtlassianSettings()) == []
+    assert links(AtlassianSettings(site_url="https://acme.atlassian.net/wiki")) == ["acme.atlassian.net"]
+
+
+def test_only_the_documents_provider_declares_links_and_only_on_a_core_that_knows_them():
+    declared = {p.name: getattr(p, "links", None) for p in PROVIDERS}
+    assert declared["atlassian:tracker"] in (None, ())
+    assert declared["atlassian:documents"] == (links if MULTI else None)
+
+
+def test_confluence_does_not_search_until_acli_can():
+    from heinzel_atlassian import Confluence
+
+    assert not hasattr(Confluence, "search")

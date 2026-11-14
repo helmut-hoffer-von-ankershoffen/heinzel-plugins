@@ -7,8 +7,10 @@ configuration. Every read runs Atlassian's CLI `acli`, which owns authentication
 """
 
 from datetime import datetime
-from typing import Annotated
+from typing import Annotated, Any
+from urllib.parse import urlsplit
 
+import heinzel
 from heinzel import Check, HeinzelError
 from heinzel.kernel import CapabilityView
 from pydantic import AwareDatetime, Field, TypeAdapter, ValidationError
@@ -23,6 +25,9 @@ from heinzel_atlassian._service import AtlassianService
 from heinzel_atlassian._status import AtlassianStatus
 from heinzel_atlassian._work import Assigned, Epics, JiraWork, Snapshot, Watch
 
+MULTI = hasattr(heinzel, "DocumentHit")
+"""Whether Core routes documents by `links=` (0.9.43, ADR 0161); drop with the Core floor once it is out."""
+
 GATEWAY = "api.atlassian.com"
 """Atlassian's API gateway, which acli uses when it logged in with OAuth (`acli jira auth login --web`)."""
 
@@ -33,13 +38,26 @@ def hosts(settings: AtlassianSettings) -> list[str]:
     return [site, GATEWAY] if site else []
 
 
+def links(settings: AtlassianSettings) -> list[str]:
+    """The host of the Confluence site, which links to pages are opened on (never the API gateway); none without."""
+    site = settings.site_url or Acli(settings).site(settings)
+    host = urlsplit(site).hostname if site else None
+    return [host] if host else []
+
+
+def _provides_documents() -> None:
+    """Declare `documents`; `links=` only where Core's `provides` knows it (ADR 0161), else as before."""
+    extra: dict[str, Any] = {"links": links} if MULTI else {}
+    module.provides("documents", modes={"read"}, hosts=hosts, **extra)(Confluence)
+
+
 module.settings(AtlassianSettings)
 module.service(AtlassianService)
 module.service(Acli)
 module.service(JiraWork)
 module.service(JiraDrafts)
 module.provides("tracker", modes={"read"}, hosts=hosts)(Jira)
-module.provides("documents", modes={"read"}, hosts=hosts)(Confluence)
+_provides_documents()
 
 
 @module.operation
@@ -217,5 +235,6 @@ __all__ = [
     "JiraDrafts",
     "JiraWork",
     "hosts",
+    "links",
     "module",
 ]
