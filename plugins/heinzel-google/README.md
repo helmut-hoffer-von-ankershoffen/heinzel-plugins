@@ -183,6 +183,12 @@ Errors say what to do in plain words: no `gws` names the install; not signed in,
 permission says to run `hz setup google`; a disabled API says which; a file the account can't see says so.
 Token-shaped strings in anything `gws` says are redacted before it is shortened.
 
+### Search, and a known limit
+
+With Heinzelmännchen 0.9.43 or later, a search over your documents includes Google: Drive's full-text search (`fullText contains`) over Docs, Sheets and Slides, not trashed, best match first, at most 50 hits. A hit's snippet is the file's Drive description, if it has one, not an excerpt around the match.
+
+Known limit: the plugin asks Google only for the read-only Drive metadata grant (`drive.metadata.readonly`), and Google does not document whether that grant lets Drive match the text inside files. If Drive refuses, the search says "Google search needs broader Drive access" rather than asking you to sign in again, since signing in asks for the same grants; if Drive accepts the query but matches only names and descriptions, that is the limit. Reading a document and listing recent files are not affected. Broader access (`drive.readonly`, which can download any file) is not requested.
+
 Development and release commands: [repository guide](../../README.md).
 
 

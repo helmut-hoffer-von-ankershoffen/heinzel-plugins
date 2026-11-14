@@ -18,7 +18,7 @@ from heinzel import Document, HeinzelError, clean_text
 from pydantic import BaseModel
 
 from heinzel_google._docs import document_to_text
-from heinzel_google._gws import GoogleSession
+from heinzel_google._gws import SCOPE_REFUSED, GoogleSession
 from heinzel_google._models import DriveFile
 from heinzel_google._sheets import spreadsheet_to_text
 
@@ -92,7 +92,7 @@ class _FallbackHit(BaseModel):
     source: str | None = None
 
 
-DocumentHit: Any = getattr(heinzel, "DocumentHit", _FallbackHit)
+DocumentHit = getattr(heinzel, "DocumentHit", _FallbackHit)
 
 
 def drive_query(text: str) -> str:
@@ -207,11 +207,12 @@ class GoogleDocuments:
             revision=clean_text(str(revision)) if isinstance(revision, str | int) else None,
         )
 
-    def search(self, query: str, limit: int) -> list[Any]:
+    def search(self, query: str, limit: int) -> list[DocumentHit]:  # type: ignore[valid-type]
         """Docs, Sheets and Slides whose name or text contains `query`, best first, at most `limit` (1 to 50).
 
         Raises:
-            HeinzelError: If `query` is empty or too long, the sign-in is missing, or Google fails.
+            HeinzelError: If `query` is empty or too long, the sign-in is missing, Drive refuses to search file text
+                with the scopes Heinzel has, or Google fails.
         """
         q = drive_query(query)
         count = max(1, min(int(limit), MAX_HITS))
@@ -222,12 +223,21 @@ class GoogleDocuments:
             "supportsAllDrives": True,
             "includeItemsFromAllDrives": True,
         }
-        data, _size = self._session.get("Google Drive", DRIVE_LIST, params, "a search")
+        try:
+            data, _size = self._session.get("Google Drive", DRIVE_LIST, params, "a search")
+        except HeinzelError as error:
+            if SCOPE_REFUSED in str(error):  # signing in again asks for the same grants: say what is missing instead
+                msg = (
+                    "Google search needs broader Drive access than Heinzel asks for today: Drive refused to search "
+                    "the text of your files with the read-only metadata grant. Read and recent files still work."
+                )
+                raise HeinzelError(msg) from error
+            raise
         items = data.get("files") or []
         if not isinstance(items, list):
             msg = "Google Drive answered a search without a list of files."
             raise HeinzelError(msg)
-        hits: list[Any] = []
+        hits: list[DocumentHit] = []  # type: ignore[valid-type]
         for item in cast("list[object]", items):
             if not isinstance(item, dict):
                 continue
