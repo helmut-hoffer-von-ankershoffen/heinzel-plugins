@@ -196,8 +196,13 @@ def supports_core(project: Project, version: str) -> bool:
 
 def released_core(project: Project) -> str:
     """Find a compatible stable registry wheel so authors need no manual artifact download."""
-    with urllib.request.urlopen("https://pypi.org/pypi/heinzel/json", timeout=30) as response:  # noqa: S310
-        payload = json.loads(response.read(16 * 1024 * 1024))
+    try:
+        with urllib.request.urlopen("https://pypi.org/pypi/heinzel/json", timeout=30) as response:  # noqa: S310
+            payload = json.loads(response.read(16 * 1024 * 1024))
+    except OSError as error:
+        raise ValueError(
+            f"Cannot resolve the newest released core ({error}). Offline, pass CORE=<compatible-core-wheel>."
+        ) from error
     candidates = {
         Version(version): files
         for version, files in payload["releases"].items()
@@ -215,6 +220,7 @@ def lock(project: Project, core: str | None = None) -> None:
     core = core or released_core(project)
     metadata = core_metadata(core)
     inputs = dependency_inputs(project)
+    plugin_api(project)
     if not supports_core(project, metadata["version"]):
         raise ValueError(f"{project.name} does not allow core {metadata['version']}")
     with tempfile.TemporaryDirectory(prefix="hz-plugin-lock-") as temporary:
@@ -244,33 +250,115 @@ def lock(project: Project, core: str | None = None) -> None:
                 str(project.directory / "requirements.lock"),
             ]
         )
-    record = {"format": 1, "sdk": 1, "inputs": inputs, "core": metadata}
+    check_contract(project, locked_versions(project), metadata)
+    record = {"format": 2, "sdk": 1, "inputs": inputs, "core": {"version": metadata["version"]}}
     (project.directory / "plugin-lock.json").write_text(json.dumps(record, indent=2) + "\n")
 
 
+# What each Core plugin API number promises plugins besides the kernel API: the majors of the libraries plugins
+# import through Core without declaring them (ADR 0003). A new major of either is a new plugin API number.
+PLUGIN_API = {1: {"pydantic": 2, "rich": 15}}
+# A universal lock serves every supported target, so a Core requirement counts when any target needs it; the host that
+# runs the check never decides. Plugins install Core without extras.
+_TARGET = {
+    "python_version": "3.12",
+    "python_full_version": "3.12.0",
+    "implementation_name": "cpython",
+    "platform_python_implementation": "CPython",
+    "implementation_version": "3.12.0",
+    "os_name": "posix",
+    "platform_release": "",
+    "platform_version": "",
+    "extra": "",
+}
+LOCK_TARGETS = (
+    _TARGET | {"sys_platform": "darwin", "platform_system": "Darwin", "platform_machine": "arm64"},
+    _TARGET | {"sys_platform": "linux", "platform_system": "Linux", "platform_machine": "x86_64"},
+    _TARGET | {"sys_platform": "linux", "platform_system": "Linux", "platform_machine": "aarch64"},
+)
+LOCK_FORMATS = {1, 2}  # format 1 also records Core's dependency list, which is no longer compared
+
+
+def plugin_api(project: Project) -> int:
+    """The one Core plugin API this plugin declares in `[tool.heinzel.plugin] requires`."""
+    numbers = {
+        int(found.group(1))
+        for value in project.options.get("requires", [])
+        if (found := re.fullmatch(r"core:plugin-api@([0-9]+)", value))
+    }
+    if len(numbers) != 1 or next(iter(numbers)) not in PLUGIN_API:
+        known = ", ".join(f"core:plugin-api@{number}" for number in sorted(PLUGIN_API))
+        raise ValueError(f"{project.name} must declare exactly one known Core plugin API in requires ({known})")
+    return numbers.pop()
+
+
+def locked_versions(project: Project) -> dict[str, list[Version]]:
+    """Every exact pin of the owning hash lock by canonical name."""
+    try:
+        return vendor.lock_pins((project.directory / "requirements.lock").read_text())
+    except ValueError as error:
+        raise ValueError(f"{project.name}: {error}. Run: make lock NAME={project.name}") from error
+
+
+def check_contract(project: Project, pins: dict[str, list[Version]], core: dict | None) -> None:
+    """Refuse a lock outside the declared plugin API, or one the selected Core's own requirements would break."""
+    hint = f"make lock NAME={project.name} CORE=<compatible-core-wheel>"
+    api = plugin_api(project)
+    for library, major in PLUGIN_API[api].items():
+        versions = pins.get(library, [])
+        if not versions:
+            raise ValueError(f"{project.name} lock has no {library}, which core:plugin-api@{api} provides. Run: {hint}")
+        if outside := [version for version in versions if version.major != major]:
+            raise ValueError(
+                f"{project.name} lock pins {library} {outside[0]}, outside core:plugin-api@{api} ({library} {major}). "
+                "A new major is a new plugin API: keep the lock inside it or declare the new API"
+            )
+    if core is None:
+        return
+    if not supports_core(project, core["version"]):
+        raise ValueError(f"{project.name} does not allow core {core['version']}")
+    for value in core["dependencies"]:
+        requirement = Requirement(value)
+        if requirement.marker and not any(requirement.marker.evaluate(target) for target in LOCK_TARGETS):
+            continue  # an extra, or no supported target: `uv pip check` stays the backstop after installation
+        versions = pins.get(canonicalize_name(requirement.name), [])
+        if not versions:
+            raise ValueError(
+                f"Core {core['version']} needs {requirement.name}, which the {project.name} lock lacks; "
+                f"relock only this consumer. Run: {hint}"
+            )
+        if refused := [
+            version for version in versions if not requirement.specifier.contains(version, prereleases=True)
+        ]:
+            raise ValueError(
+                f"Core {core['version']} needs {requirement}, but the {project.name} lock pins {refused[0]}; "
+                f"relock only this consumer. Run: {hint}"
+            )
+
+
 def validate_lock(project: Project, core: str | None) -> dict:
+    """A lock is valid by contract (ADR 0003): unchanged inputs, the declared plugin API and the selected Core."""
     path = project.directory / "plugin-lock.json"
     hint = f"make lock NAME={project.name} CORE=<compatible-core-wheel>"
     if not path.is_file() or not (project.directory / "requirements.lock").is_file():
         raise ValueError(f"{project.name} needs its own dependency lock. Run: {hint}")
     record = json.loads(path.read_text())
-    if record["inputs"] != dependency_inputs(project):
+    if record.get("format") not in LOCK_FORMATS or record.get("inputs") != dependency_inputs(project):
         raise ValueError(f"{project.name} dependencies changed. Run: {hint}")
-    metadata = core_metadata(core) if core else record["core"]
-    if not supports_core(project, metadata["version"]):
-        raise ValueError(f"{project.name} does not allow core {metadata['version']}")
-    if metadata["dependencies"] != record["core"]["dependencies"]:
-        raise ValueError(f"Core dependencies changed; relock only this consumer. Run: {hint}")
+    if not supports_core(project, record["core"]["version"]):
+        raise ValueError(f"{project.name} does not allow core {record['core']['version']}")
+    check_contract(project, locked_versions(project), core_metadata(core) if core else None)
     return record
 
 
 def validate_installed_core(project: Project) -> None:
-    record = validate_lock(project, None)
-    dependencies = sorted(str(Requirement(value)) for value in distributions.requires("heinzel") or [])
-    if dependencies != record["core"]["dependencies"]:
-        raise ValueError(
-            f"Installed core dependencies changed; make lock NAME={project.name} CORE=<compatible-core-wheel>"
-        )
+    """The Core installed next to the plugin satisfies the same contract as a selected candidate wheel."""
+    validate_lock(project, None)
+    installed = {
+        "version": distributions.version("heinzel"),
+        "dependencies": list(distributions.requires("heinzel") or []),
+    }
+    check_contract(project, locked_versions(project), installed)
 
 
 def core_install_spec(core: str | None, version: str) -> str:
@@ -282,8 +370,18 @@ def core_install_spec(core: str | None, version: str) -> str:
     return str(Path(core).resolve())
 
 
+def tested_core(project: Project, core: str | None) -> str:
+    """The Core a plugin's own checks install: the selected candidate, else the newest released Core in range.
+
+    Never the lock-time Core: a lock stays valid across Core releases (ADR 0003), so it must keep proving that against
+    the Core users actually get. A lock the newest Core breaks fails here and is relocked, as tooling.
+    """
+    return core or released_core(project)
+
+
 def prepare_environment(project: Project, core: str | None) -> Path:
     """Authenticate the owning lock before installing core and this plugin without resolving new dependencies."""
+    core = tested_core(project, core)
     record = validate_lock(project, core)
     environment = project.directory / ".venv"
     interpreter = environment / "bin/python"
@@ -509,6 +607,7 @@ def preview(project: Project, core: str | None) -> None:
 def acceptance(project: Project, core: str | None, *, wheel: Path | None = None) -> None:
     """Install core and this plugin's wheel, then run only its mounted browser contract tests."""
     vendor.project(project.directory)
+    core = tested_core(project, core)
     record = validate_lock(project, core)
     if wheel is None:
         build(project)

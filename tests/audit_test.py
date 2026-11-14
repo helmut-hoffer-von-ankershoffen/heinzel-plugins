@@ -137,3 +137,49 @@ def test_vendored_license_requires_exact_case_sensitive_allowlist_expression(
     else:
         with pytest.raises(ValueError, match="Vendored upstream license"):
             audited("pytest")
+
+
+CLOSURE = {"versions": {}, "direct": ["httpx", "pydantic"], "core": ["pydantic", "opentelemetry-api"]}
+
+
+@pytest.mark.parametrize(
+    ("package", "case"),
+    [
+        ("opentelemetry-api", "core"),  # Core forces the fix with its release
+        ("pydantic", "core"),  # declared too, but Core already forces it
+        ("httpx", "declared"),
+        ("h11", "transitive"),  # reaches users only through httpx
+    ],
+)
+def test_each_vulnerable_package_gets_its_security_relock_case(package, case):
+    assert audit.security_case(package, CLOSURE) == case
+
+
+def test_the_audit_names_the_case_and_the_fix_for_every_finding(tmp_path, capsys):
+    report = tmp_path / "audit.json"
+    findings = [
+        {"name": "h11", "version": "0.14.0", "vulns": [{"id": "GHSA-1", "fix_versions": ["0.16.0"]}]},
+        {"name": "httpx", "version": "0.28.1", "vulns": []},
+    ]
+    report.write_text(json.dumps({"dependencies": findings}))
+    audit.report_cases(report, CLOSURE)
+    audit.report_cases(tmp_path / "absent.json", CLOSURE)
+    assert capsys.readouterr().out == (
+        "h11 0.14.0 (GHSA-1; fixed in 0.16.0): comes only through this plugin's dependencies: "
+        "add a direct floor (pkg>=fixed), patch bump\n"
+    )
+
+
+def test_a_failing_vulnerability_audit_still_fails_after_naming_the_cases(tmp_path, monkeypatch):
+    monkeypatch.chdir(tmp_path)
+    real = subprocess.run
+
+    def run(command, **options):
+        if command[:2] == [sys.executable, "-m"] and command[2] in {"piplicenses", "pip_audit"}:
+            return subprocess.CompletedProcess(command, 1 if command[2] == "pip_audit" else 0)
+        return real(command, **options)
+
+    monkeypatch.setattr(audit.subprocess, "run", run)
+    monkeypatch.setattr(sys, "argv", ["audit", sys.executable, "pytest"])
+    with pytest.raises(subprocess.CalledProcessError):
+        audit.main()

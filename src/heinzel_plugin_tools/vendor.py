@@ -531,6 +531,20 @@ def projection(root: Path) -> tuple[VerifiedInventory, dict[str, bytes]]:
     return VerifiedInventory(tuple(sorted(expected)), distribution, version, license_expression, licenses), expected
 
 
+def lock_pins(text: str) -> dict[str, list[Version]]:
+    """Every exact pin of a hash lock by canonical name; a universal lock may pin one name once per marker."""
+    pins: dict[str, list[Version]] = {}
+    for line in text.replace("\\\n", " ").splitlines():
+        if not re.match(r"[a-zA-Z0-9]", line):
+            continue
+        requirement = Requirement(line.split("--hash=", 1)[0].strip())
+        exact = [item.version for item in requirement.specifier if item.operator == "=="]
+        if len(exact) != 1:
+            raise ValueError(f"The lock must pin {requirement.name} exactly")
+        pins.setdefault(canonicalize_name(requirement.name), []).append(Version(exact[0]))
+    return pins
+
+
 def locked_upstream(root: Path, dependencies: list[str], distribution: str, version: str, sha256: str) -> None:
     """Bind a retained external dependency to the same wheel and upstream version."""
     name = canonicalize_name(distribution)

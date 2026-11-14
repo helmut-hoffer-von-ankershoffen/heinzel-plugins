@@ -199,3 +199,37 @@ def test_an_empty_unreleased_placeholder_above_the_new_section_passes(tmp_path, 
     (plugin / "CHANGELOG.md").write_text("# Changelog\n\n## Unreleased\n\n## 0.1.1\n\n- New.\n\n## 0.1.0\n\n- Old.\n")
     commit(tmp_path)
     assert versions.missing_changelogs("base") == []
+
+
+def relock(plugin, pin="1.0.1"):
+    (plugin / "requirements.lock").write_text(f"tidal-tables=={pin} --hash=sha256:00\n")
+    (plugin / "plugin-lock.json").write_text('{"format": 2}\n')
+
+
+def test_a_relock_alone_is_tooling_and_needs_no_bump(tmp_path, monkeypatch):
+    plugin = repository(tmp_path, monkeypatch)
+    relock(plugin)
+    commit(tmp_path)
+    assert versions.unbumped_changes("base") == []
+    assert versions.main(["check", "base"]) == 0
+
+
+def test_a_relock_alone_cannot_justify_a_release(tmp_path, monkeypatch):
+    plugin = repository(tmp_path, monkeypatch)
+    relock(plugin)
+    bump(plugin)
+    commit(tmp_path)
+    assert versions.unjustified_bumps("base") == ["heinzel-a"]
+
+
+def test_a_security_floor_ships_as_a_bumped_metadata_change(tmp_path, monkeypatch):
+    plugin = repository(tmp_path, monkeypatch)
+    floor = 'dependencies = ["tidal-tables>=1.0.1"]\n'
+    relock(plugin)
+    (plugin / "pyproject.toml").write_text(PROJECT.format(version="0.1.0", extra=floor))
+    commit(tmp_path)
+    assert versions.unbumped_changes("base") == ["heinzel-a"]
+    bump(plugin, extra=floor)
+    commit(tmp_path)
+    assert versions.unbumped_changes("base") == versions.unjustified_bumps("base") == []
+    assert versions.main(["check", "base"]) == 0

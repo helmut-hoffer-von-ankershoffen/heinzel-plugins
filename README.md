@@ -220,13 +220,26 @@ make lock NAME=<distribution> CORE=<compatible-built-core-wheel>
 make check NAME=<distribution> CORE=<compatible-built-core-wheel>
 ```
 
-Commit both `requirements.lock` and `plugin-lock.json`. Checks enforce the lock's hashes, refuse changed dependency
-inputs, and reject incompatible core metadata. Dependencies on concrete plugin implementations are rejected.
-Plugins can add ordinary runtime and development dependencies in their own `pyproject.toml`, then regenerate their
-own lock. This requires no core dependency change or sibling environment.
-Plugins may implement and consume public interfaces, capabilities and lets from the SDK or an implementation-free
-contract package. Provider selection happens through contracts and bindings. Declare versioned `requires` and
-`provides` contract identifiers in `[tool.heinzel.plugin]` so the planner also selects affected consumers.
+Commit both `requirements.lock` and `plugin-lock.json`. Checks enforce the lock's hashes and refuse changed
+dependency inputs. A lock is valid by contract ([ADR 0003](docs/adr/0003-plugin-lock-valid-by-contract.md)): the
+plugin declares one `core:plugin-api@N` (`@1` means pydantic 2 and rich 15) and a Core range; the lock must pin both
+libraries inside those majors and satisfy the tested Core's own requirements. Without `CORE=`, checks test the newest
+released Core in the range, not the one the lock was resolved against. A Core change the lock still satisfies needs
+no relock; one it breaks fails with the relock command. Dependencies on concrete plugin implementations are rejected.
+
+The lock is tooling, not shipped content and not a gallery input: a relock alone needs no version bump, changelog
+section or release, and no recapture unless it adds or drops a locked distribution. A security relock relocks every
+affected plugin in one pull request. It bumps a plugin (patch version and changelog section) only when the fixed version
+is not already forced for its users: raise the floor of a declared dependency, or add a direct floor for a vulnerable
+package that reaches users only through the plugin's own dependencies. A package that reaches users through Core is
+fixed by Core's release. The merge releases every bumped plugin in one pass, and the galleries stay fresh. `Audit plugin
+locks` audits every lock daily.
+
+Plugins can add ordinary runtime and development dependencies in their own `pyproject.toml`, then regenerate their own
+lock. This requires no core dependency change or sibling environment. Plugins may implement and consume public
+interfaces, capabilities and lets from the SDK or an implementation-free contract package. Provider selection happens
+through contracts and bindings. Declare versioned `requires` and `provides` contract identifiers in
+`[tool.heinzel.plugin]` so the planner also selects affected consumers.
 
 ```bash
 make plan BASE=origin/main

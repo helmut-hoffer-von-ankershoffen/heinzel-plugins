@@ -327,7 +327,8 @@ def test_vendor_stays_in_vulnerability_and_license_audit_without_external_instal
 
     def run(command, **options):
         if "-c" in command:
-            return subprocess.CompletedProcess(command, 0, stdout=json.dumps({"owner-package": "1.0.0"}))
+            closure = {"versions": {"owner-package": "1.0.0"}, "direct": [], "core": []}
+            return subprocess.CompletedProcess(command, 0, stdout=json.dumps(closure))
         if "pip_audit" in command:
             records.append(Path(command[command.index("-r") + 1]).read_text())
         return subprocess.CompletedProcess(command, 0)
@@ -602,7 +603,8 @@ def test_repository_root_cli_audit_executes_scanner_in_the_owning_project(vendor
         "Path(os.environ['AUDIT_RESULT']).write_text(Path(sys.argv[sys.argv.index('-r')+1]).read_text())\n"
     )
     interpreter = tmp_path / "owning-python"
-    interpreter.write_text(f'#!{sys.executable}\nprint(\'{{"owner-package":"1.0.0"}}\')\n')
+    closure = '{"versions": {"owner-package": "1.0.0"}, "direct": [], "core": []}'
+    interpreter.write_text(f"#!{sys.executable}\nprint('{closure}')\n")
     interpreter.chmod(0o755)
     result_file = tmp_path / "audited-requirements.txt"
     environment = {**os.environ, "PYTHONPATH": str(scanners), "AUDIT_RESULT": str(result_file)}

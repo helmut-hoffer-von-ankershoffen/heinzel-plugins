@@ -4,6 +4,8 @@ import copy
 import hashlib
 import json
 import os
+import re
+import shutil
 import sys
 from pathlib import Path
 from types import SimpleNamespace
@@ -555,3 +557,182 @@ def test_detail_focus_rejects_unbounded_padding(owner, padding):
     plan_path.write_text(plan_path.read_text() + f'\n[scenes.focus]\nrole="region"\nname="Tides"\npadding={raw}\n')
     with pytest.raises(capture.CaptureError, match="focus padding"):
         capture.read_plan(owner)
+
+
+def with_dependencies(owner, dependencies='"heinzel>=0.9,<0.10", "httpx>=0.28"'):
+    path = owner / "pyproject.toml"
+    path.write_text(
+        path.read_text().replace(
+            'description="A fictional harbor."\n', f'description="A fictional harbor."\ndependencies=[{dependencies}]\n'
+        )
+    )
+    (owner / "requirements.lock").write_text("httpx==0.28.1 --hash=sha256:00\nhatchling==1.29.0 --hash=sha256:00\n")
+    (owner / "plugin-lock.json").write_text('{"format": 2}\n')
+
+
+def edit(path, old, new):
+    text = path.read_text()
+    assert old in text
+    path.write_text(text.replace(old, new))
+
+
+@pytest.mark.parametrize(
+    "change",
+    [
+        lambda owner: edit(owner / "requirements.lock", "httpx==0.28.1", "httpx==0.28.2"),  # a security relock
+        lambda owner: (owner / "plugin-lock.json").write_text('{"format": 2, "relocked": true}\n'),
+        lambda owner: edit(owner / "pyproject.toml", 'version="0.1.0"', 'version="0.1.1"'),  # a bump
+        lambda owner: edit(owner / "pyproject.toml", '"httpx>=0.28"', '"httpx>=0.28.2"'),  # a security floor
+        lambda owner: edit(owner / "requirements.lock", "hatchling==1.29.0", "hatchling==1.30.0"),  # no build hook
+    ],
+)
+def test_a_relock_bump_or_floor_leaves_the_gallery_fresh(owner, change):
+    with_dependencies(owner)
+    recorded(owner)
+    change(owner)
+    assert capture.check_capture(owner)["fresh"]
+
+
+@pytest.mark.parametrize(
+    "change",
+    [
+        lambda owner: edit(owner / "pyproject.toml", '"httpx>=0.28"', '"httpx>=0.28", "heinzel-lighthouse>=1"'),
+        lambda owner: (owner / "requirements.lock").write_text(
+            (owner / "requirements.lock").read_text() + "heinzel-lighthouse==1.0 --hash=sha256:00\n"
+        ),
+        # A transitive plugin need not be named heinzel*: any new locked distribution may carry an entry point.
+        lambda owner: (owner / "requirements.lock").write_text(
+            (owner / "requirements.lock").read_text() + "harbor-lights==2.0 --hash=sha256:00\n"
+        ),
+        lambda owner: edit(owner / "requirements.lock", "hatchling==1.29.0", "hatchling-two==1.29.0"),
+    ],
+)
+def test_a_new_dependency_or_locked_plugin_can_add_pages_so_it_makes_the_gallery_stale(owner, change):
+    with_dependencies(owner)
+    recorded(owner)
+    change(owner)
+    with pytest.raises(ValueError, match="stale"):
+        capture.check_capture(owner)
+
+
+@pytest.mark.parametrize(
+    "change",
+    [
+        lambda owner: edit(owner / "hatch_build.py", "views", "other views"),
+        lambda owner: edit(owner / "requirements.lock", "hatchling==1.29.0", "hatchling==1.30.0"),
+    ],
+)
+def test_a_build_hook_and_its_locked_build_tools_render_views_so_they_stay_inputs(owner, change):
+    with_dependencies(owner)
+    (owner / "hatch_build.py").write_text("# builds the views\n")
+    with (owner / "pyproject.toml").open("a") as target:
+        target.write('\n[build-system]\nrequires = ["hatchling>=1.29"]\n\n[tool.hatch.build.hooks.custom]\n')
+    recorded(owner)
+    change(owner)
+    with pytest.raises(ValueError, match="stale"):
+        capture.check_capture(owner)
+
+
+@pytest.mark.parametrize(
+    ("text", "renders"),
+    [("v0.1.0", True), ("0.1.0 ready", True), ("0.1.01", False), ("10.1.0", False), ("0.1.0.1", False)],
+)
+def test_a_transcript_may_not_render_the_plugin_version_the_digest_leaves_out(owner, text, renders):
+    shots = recorded(owner)
+    (owner / shots[0]["path"]).with_suffix(".txt").write_text(f"Harbor {text}\n")
+    if renders:
+        with pytest.raises(ValueError, match="renders the plugin version 0.1.0"):
+            capture.check_capture(owner)
+    else:
+        capture.unrendered_version(owner, "0.9.8")
+
+
+def test_a_plugin_version_equal_to_the_rendered_core_version_is_not_mistaken_for_the_plugin(owner):
+    shots = recorded(owner)
+    (owner / shots[0]["path"]).with_suffix(".txt").write_text("Heinzelmännchen v0.1.0\n")
+    capture.unrendered_version(owner, "0.1.0")
+    with pytest.raises(ValueError, match="renders the plugin version"):
+        capture.unrendered_version(owner, "0.9.8")
+
+
+def test_a_gallery_reviewed_under_the_old_digest_stays_fresh_only_while_it_matches(owner, monkeypatch):
+    with_dependencies(owner)
+    monkeypatch.setattr(capture, "input_digest", lambda root, plan, *, legacy=False: "old" if legacy else "new")
+    assert capture.inputs_current(owner, {}, "old") and capture.inputs_current(owner, {}, "new")
+    assert not capture.inputs_current(owner, {}, "older") and not capture.inputs_current(owner, {}, None)
+
+
+def test_a_pinned_migration_keeps_an_old_review_fresh_through_a_relock_but_not_a_source_change(owner, monkeypatch):
+    with_dependencies(owner)
+    plan = {"bootstrap": None}
+    old = capture.input_digest(owner, plan, legacy=True)
+    monkeypatch.setitem(capture.MIGRATED_DIGESTS, old, capture.input_digest(owner, plan))
+    edit(owner / "requirements.lock", "httpx==0.28.1", "httpx==0.28.2")
+    assert capture.input_digest(owner, plan, legacy=True) != old
+    assert capture.inputs_current(owner, plan, old)
+    assert planning.source_current(owner, plan, old)
+    edit(owner / "src/heinzel_harbor/__init__.py", "never", "still never")
+    assert not capture.inputs_current(owner, plan, old)
+
+
+REPOSITORY = Path(__file__).resolve().parents[1]
+MIGRATION_HINT = (
+    "After a recapture, delete the entry from src/heinzel_plugin_tools/_digest_migration.py; never re-pin it."
+)
+# Plugins whose built view assets are capture inputs. A checkout without the build (tooling CI) cannot judge their
+# pinned entries; the pin test skips exactly these, visibly, and judges them where `make screenshots-check` ran.
+VIEW_BUILDERS = {"heinzel-clock", "heinzel-weather"}
+
+
+def builds_views(directory):
+    frontend = directory / "web/package.json"
+    return frontend.is_file() and "build" in json.loads(frontend.read_text()).get("scripts", {})
+
+
+def migration_sources():
+    """Every committed reviewed digest, with the plugin and capture inputs it was recorded for."""
+    found = {}
+    for directory in sorted((REPOSITORY / "plugins").glob("*/")):
+        if not (directory / capture.MANIFEST).is_file():
+            continue
+        plan = capture.read_plan(directory)
+        found[json.loads((directory / capture.MANIFEST).read_text())["inputs_sha256"]] = (directory, plan)
+        definition = directory / planning.DEFINITION
+        if definition.is_file():
+            source = {"bootstrap": plan.get("bootstrap")}
+            found[json.loads(definition.read_text())["source_sha256"]] = (directory, source)
+    return found
+
+
+SOURCES = migration_sources()
+
+
+def test_the_plugins_whose_pins_need_built_views_are_exactly_the_named_ones():
+    assert {directory.name for directory, _ in SOURCES.values() if builds_views(directory)} == VIEW_BUILDERS
+
+
+@pytest.mark.parametrize("old", sorted(capture.MIGRATED_DIGESTS))
+def test_every_pinned_migration_maps_a_committed_gallery_or_definition_to_its_digest_today(old):
+    assert old in SOURCES, f"{old} pins no committed gallery or definition. {MIGRATION_HINT}"
+    directory, inputs = SOURCES[old]
+    if directory.name in VIEW_BUILDERS and not any((directory / "src").glob("*/views/*")):
+        pytest.skip(f"{directory.name}: view assets not built; run make screenshots-check NAME={directory.name}")
+    # Today's rule leaves the lock out, so a relock never breaks this.
+    assert capture.input_digest(directory, inputs) == capture.MIGRATED_DIGESTS[old], (
+        f"{old} ({directory.name}) no longer maps to its digest. {MIGRATION_HINT}"
+    )
+
+
+def test_a_version_only_relock_keeps_a_pinned_gallery_fresh_and_its_pin_valid(tmp_path):
+    plugin = tmp_path / "heinzel-atlassian"
+    shutil.copytree(REPOSITORY / "plugins/heinzel-atlassian", plugin, ignore=shutil.ignore_patterns(".venv"))
+    lock = plugin / "requirements.lock"
+    # A security relock moves one pinned version, whatever it is today.
+    relocked, moved = re.subn(r"^(opentelemetry-api==\S+) ", r"\1.post1 ", lock.read_text(), flags=re.MULTILINE)
+    assert moved == 1
+    lock.write_text(relocked)
+    plan = capture.read_plan(plugin)
+    recorded = json.loads((plugin / capture.MANIFEST).read_text())["inputs_sha256"]
+    assert capture.input_digest(plugin, plan, legacy=True) != recorded  # the old rule would call it stale
+    assert capture.input_digest(plugin, plan) == capture.MIGRATED_DIGESTS[recorded]
+    assert capture.check_capture(plugin)["fresh"]

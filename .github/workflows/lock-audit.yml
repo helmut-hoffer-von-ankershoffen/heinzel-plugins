@@ -1,0 +1,57 @@
+name: Audit plugin locks
+
+# A lock is valid by contract (ADR 0003), so no Core change forces a relock any more. This standing audit makes a
+# lock with a known-vulnerable pin fail every day instead of waiting for a pull request that selects its plugin.
+
+on:
+  schedule:
+    - cron: "41 5 * * *"
+  workflow_dispatch:
+
+permissions: {}
+
+concurrency:
+  group: lock-audit
+  cancel-in-progress: true
+
+jobs:
+  plan:
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    outputs:
+      matrix: ${{ steps.plan.outputs.matrix }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e # v10.3.2
+      - id: plan
+        # A shared tooling path selects every plugin.
+        run: |
+          uv run --frozen --no-build --group tooling python scripts/plugins.py plan --changed scripts/plugins.py > plan.json
+          matrix="$(python -c 'import json; print(json.dumps({"include":json.load(open("plan.json"))["include"]}))')"
+          echo "matrix=$matrix" >> "$GITHUB_OUTPUT"
+  audit:
+    needs: plan
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.plan.outputs.matrix) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+    env:
+      PLUGIN_PRIVATE: ${{ github.event.repository.private }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e # v10.3.2
+        with:
+          enable-cache: true
+      - name: Audit the owning lock against the newest released Core in range
+        env:
+          PLUGIN: ${{ matrix.name }}
+        run: make audit NAME="$PLUGIN"

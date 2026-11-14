@@ -1,6 +1,6 @@
 # /// script
 # requires-python = ">=3.12"
-# dependencies = ["playwright==1.64.1", "rich==15.0.0", "tomlkit==0.15.2"]
+# dependencies = ["packaging==26.3", "playwright==1.64.1", "rich==15.0.0", "tomlkit==0.15.2"]
 # ///
 """Capture an owning plugin in an isolated demonstration profile; never run during catalog discovery."""
 
@@ -30,9 +30,14 @@ from datetime import datetime
 from pathlib import Path
 from urllib.parse import urlsplit
 
+from packaging.requirements import Requirement
+from packaging.utils import canonicalize_name
+
 if __package__ in {None, ""}:
     sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
+from heinzel_plugin_tools import vendor
+from heinzel_plugin_tools._digest_migration import MIGRATED_DIGESTS
 from heinzel_plugin_tools._presentation import OwningPrefix, owning_prefix, redact_doctor_hostname, redact_owning_prefix
 from heinzel_plugin_tools.privacy import (
     DRAFT,
@@ -347,9 +352,62 @@ def validate_browser_time(value: object) -> None:
         raise CaptureError("browser_time must be an ISO8601 date with a timezone") from None
 
 
-def input_digest(root: Path, plan: dict) -> str:
-    """Identify visual inputs while excluding generated metadata, captures and environment caches."""
+def build_hook(root: Path, metadata: dict) -> Path | None:
+    """The owning custom build hook, which renders views into the wheel with the locked build tools."""
+    hooks = metadata.get("tool", {}).get("hatch", {}).get("build", {}).get("hooks", {})
+    if "custom" not in hooks and not (root / "hatch_build.py").is_file():
+        return None
+    path = hooks.get("custom", {}).get("path", "hatch_build.py")
+    return root / path if isinstance(path, str) else root / "hatch_build.py"
+
+
+def rendered_metadata(root: Path, metadata: dict) -> Path | None:
+    """Reduce project metadata in place to what renders (ADR 0003); return the build hook, which renders too.
+
+    Dropped: the plugin's own version, version specifiers and test or tooling groups. Kept: the names of every
+    declared and every locked distribution, because a new plugin dependency, direct or transitive and whatever its
+    name, adds pages; the version of every locked `heinzel*` distribution; and for a plugin with a build hook the
+    build requirements and their locked versions, which build its views. A relock that only moves versions of other
+    packages leaves the digest unchanged.
+    """
+    project = metadata.setdefault("project", {})
+    project.pop("version", None)
+    project["dependencies"] = sorted(declared_name(value) for value in project.get("dependencies", []))
+    if "optional-dependencies" in project:
+        project["optional-dependencies"] = {
+            extra: sorted(declared_name(value) for value in values)
+            for extra, values in project["optional-dependencies"].items()
+        }
+    metadata.pop("dependency-groups", None)
+    hook = build_hook(root, metadata)
+    built = set()
+    if hook:
+        built = {declared_name(value) for value in metadata.get("build-system", {}).get("requires", [])}
+    else:
+        metadata.pop("build-system", None)
+    lock = root / "requirements.lock"
+    pins = vendor.lock_pins(lock.read_text()) if lock.is_file() and not lock.is_symlink() else {}
+    metadata["locked"] = sorted(
+        f"{name}=={version}" if name.startswith("heinzel") or name in built else name
+        for name, versions in pins.items()
+        for version in versions
+    )
+    return hook
+
+
+def declared_name(value: str) -> str:
+    return canonicalize_name(Requirement(value).name)
+
+
+def input_digest(root: Path, plan: dict, *, legacy: bool = False) -> str:
+    """Identify what renders, excluding generated metadata, captures, environment caches and dependency tooling.
+
+    The locks, the plugin's own version and its version specifiers never render, so a relock, a security floor or a
+    version bump leaves a gallery fresh (ADR 0003). `legacy` recomputes the digest galleries were reviewed under
+    before that rule, which also covered those inputs.
+    """
     metadata = project_data(root)
+    hook = None if legacy else rendered_metadata(root, metadata)
     tool = metadata.get("tool", {})
     owner = tool.get("heinzel", {})
     catalog = owner.get("catalog", {})
@@ -361,12 +419,14 @@ def input_digest(root: Path, plan: dict) -> str:
     if not tool:
         metadata.pop("tool", None)
     digest = hashlib.sha256(json.dumps([metadata, plan], sort_keys=True).encode())
-    paths = [root / "requirements.lock", root / "plugin-lock.json"]
+    paths = [root / "requirements.lock", root / "plugin-lock.json"] if legacy else []
     readme = root / "README.md"
     if readme.exists():
         paths.append(readme)
     if plan.get("bootstrap"):
         paths.append(root / plan["bootstrap"])
+    if hook:
+        paths.append(hook)
     for folder in (
         root / "src",
         root / "web",
@@ -398,6 +458,37 @@ def input_digest(root: Path, plan: dict) -> str:
     return digest.hexdigest()
 
 
+def unrendered_version(root: Path, core_version: object) -> None:
+    """The plugin's own version is no capture input (ADR 0003), so no published transcript may render it.
+
+    The app renders its Core version, so a plugin version equal to the captured Core version is indistinguishable.
+    """
+    version = project_data(root)["project"]["version"]
+    if version == core_version:
+        return
+    pattern = re.compile(rf"(?<![0-9.]){re.escape(version)}(?![0-9]|\.[0-9])")
+    for path in sorted(safe_path(root, OUTPUT).glob("*.txt")):
+        if pattern.search(path.read_text(errors="replace")):
+            raise CaptureError(
+                f"{path.name} renders the plugin version {version}, which is no capture input. "
+                "Keep the version out of the story's scenes"
+            )
+
+
+def inputs_current(root: Path, plan: dict, recorded: object) -> bool:
+    """A reviewed digest is current under today's rule, or under the pre-ADR-0003 rule while that still matches.
+
+    A gallery of this repository reviewed under the old rule also stays current through a later relock or bump via
+    its pinned old-to-new digest, recorded once at the flip.
+    """
+    current = input_digest(root, plan)
+    return isinstance(recorded, str) and (
+        recorded == current
+        or MIGRATED_DIGESTS.get(recorded) == current
+        or recorded == input_digest(root, plan, legacy=True)
+    )
+
+
 def check_capture(root: Path) -> dict:
     """Check freshness and complete gallery assets offline, without installing or running a plugin."""
     manifest_path = safe_path(root, MANIFEST)
@@ -408,10 +499,11 @@ def check_capture(root: Path) -> dict:
     plan = read_plan(root)
     manifest_bytes = manifest_path.read_bytes()
     manifest = json.loads(manifest_bytes)
-    if manifest.get("format") != 1 or manifest.get("inputs_sha256") != input_digest(root, plan):
+    if manifest.get("format") != 1 or not inputs_current(root, plan, manifest.get("inputs_sha256")):
         raise CaptureError(
             "Screenshots are stale. Run make screenshots, review the preview, and commit the updated gallery"
         )
+    unrendered_version(root, manifest.get("core_version"))
     expected = [
         {"path": (OUTPUT / f"{scene['name']}.png").as_posix(), "surface": scene["surface"], "caption": scene["caption"]}
         for scene in plan["scenes"]
@@ -757,7 +849,7 @@ def publish_draft(root: Path, receipt: Path | None = None) -> dict:
     definition = validate_definition(root, plan)
     bundle = json.loads(safe_path(folder, "review-input.json").read_text())
     validate_bundle(bundle, folder)
-    if bundle.get("inputs_sha256") != input_digest(root, plan) or bundle.get("definition") != definition:
+    if not inputs_current(root, plan, bundle.get("inputs_sha256")) or bundle.get("definition") != definition:
         raise CaptureError("Draft source inputs changed. Capture again before asking the agent to review")
     expected = [
         {"path": (OUTPUT / f"{scene['name']}.png").as_posix(), "surface": scene["surface"], "caption": scene["caption"]}
@@ -771,7 +863,7 @@ def publish_draft(root: Path, receipt: Path | None = None) -> dict:
     review = run_agent(root, bundle, receipt)
     # An independent agent may take minutes; recheck bytes and sources at the publication boundary.
     validate_bundle(bundle, folder)
-    if input_digest(root, plan) != bundle["inputs_sha256"] or validate_definition(root, plan) != definition:
+    if not inputs_current(root, plan, bundle["inputs_sha256"]) or validate_definition(root, plan) != definition:
         raise CaptureError("Source inputs changed during review. Capture and review again")
     metadata_path = safe_path(root, "pyproject.toml")
     original_metadata = metadata_path.read_text()

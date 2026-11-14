@@ -38,6 +38,7 @@ def test_capture_review_freshness_and_recovery_for_a_new_plugin(tmp_path):
         '[project.entry-points."heinzel.modules"]\nharbor="heinzel_harbor"\n'
         '[build-system]\nrequires=["hatchling>=1.29.0"]\nbuild-backend="hatchling.build"\n'
         '[dependency-groups]\ntest=["editables>=0.5","hatchling>=1.29.0"]\n'
+        '[tool.heinzel.plugin]\nrequires=["core:plugin-api@1"]\n'
     )
     (owner / "README.md").write_text("# Harbor\nA fictional useful greeting in Today and the CLI.\n")
     plan_path = owner / capture.PLAN
