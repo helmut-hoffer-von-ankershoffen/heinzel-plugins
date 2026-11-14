@@ -322,7 +322,7 @@ class Store:
     def forget(self, keys: Collection[str]) -> None:
         """Delete every row (request, audit, delivery) these keys name and scrub its old bytes (ADR 0148).
 
-        A key matches as in `matching`, so a draft that was stored but never posted is found too. Earlier UPDATEs
+        A key matches as in `matching`, so a draft that was stored but never posted is found too. Earlier updates
         leave stale copies of a row in free pages and WAL frames, so deleting is not enough: with `secure_delete`
         the freed pages are zeroed, VACUUM rewrites the file without any free page, and a TRUNCATE checkpoint
         copies the result back and empties the WAL. Idempotent; unknown keys still scrub.
