@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.9.7
+
+Sign in to Google from Heinzel, without a terminal: the plugin declares its sign-in (Heinzelmännchen ADR 0136), so `hz system connector connect google` runs `gws auth login` asking for exactly the grants needed. The first sign-in reads your Docs and calendar; mail only when you read mail from Google or allow it; a change only when you allow it; never Google Cloud access. Finish it on the computer Heinzel runs on.
+Errors about the sign-in are plain sentences that name `hz setup google`, without Google's scope addresses.
+Needs Heinzelmännchen 0.9.30 or later.
+
 ## 0.9.6
 
 Start gws when Heinzel runs as a background service: gws installed with npm under Homebrew needs `node`, which a short service PATH lacked, so the Calendar pane said gws gave no version. gws now runs with its own folder and Homebrew's (`/opt/homebrew/bin`, `/usr/local/bin`) after PATH, and Heinzel finds gws there too.

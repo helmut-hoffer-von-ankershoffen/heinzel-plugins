@@ -3,18 +3,18 @@
     "ref": "https://docs.google.com/document/d/launch-plan/edit",
     "name": "Launch plan",
     "kind": "document",
-    "modified_at": "2026-11-14T06:07:12Z"
+    "modified_at": "2026-11-14T07:49:52Z"
   },
   {
     "ref": "https://docs.google.com/spreadsheets/d/launch-metrics/edit",
     "name": "Launch metrics",
     "kind": "spreadsheet",
-    "modified_at": "2026-11-14T06:07:12Z"
+    "modified_at": "2026-11-14T07:49:52Z"
   },
   {
     "ref": "https://docs.google.com/document/d/launch-readiness/edit",
     "name": "Launch readiness checklist",
     "kind": "document",
-    "modified_at": "2026-11-14T06:07:12Z"
+    "modified_at": "2026-11-14T07:49:52Z"
   }
 ]

@@ -39,6 +39,7 @@ from heinzel_google._module import module
 from heinzel_google._selected_gws import describe_selection
 from heinzel_google._service import GoogleService
 from heinzel_google._setup import run_setup
+from heinzel_google._sign_in import GRANTS, GoogleSignIn
 
 DOCUMENT_HOSTS = [
     "www.googleapis.com",
@@ -183,6 +184,7 @@ __all__ = [
     "CALENDAR_HOSTS",
     "CALENDAR_WRITE_SCOPE",
     "DOCUMENT_HOSTS",
+    "GRANTS",
     "LOGIN",
     "LOGIN_WITH_MAIL",
     "MAIL_HOSTS",
@@ -198,6 +200,7 @@ __all__ = [
     "GoogleService",
     "GoogleSession",
     "GoogleSettings",
+    "GoogleSignIn",
     "Gws",
     "Process",
     "login_command",

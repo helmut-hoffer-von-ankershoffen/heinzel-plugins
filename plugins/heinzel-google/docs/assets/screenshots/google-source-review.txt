@@ -10,15 +10,13 @@ Mira
 · EM
 Today
 Today
-Doctor: 4 checks need attention
 
-ai.access ai access, system.doctor installation, system.prerequisite system.runner: claude…
+Loading…
 
-Open
 v0.9.41
 Updates, off
 0
-System health, warning
+System health, off
 15
 Daemon not installed, off
 Chat

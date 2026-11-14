@@ -2,6 +2,7 @@
 
 import json
 import sys
+import threading
 import time
 from pathlib import Path
 
@@ -162,3 +163,45 @@ def test_npm_gws_under_a_launchd_path_says_its_version_and_answers(npm_gws, monk
     assert session.executable() == npm_gws
     assert session.version() == "0.22.5"
     assert session.get("Google Drive", ("drive", "files", "get"), {"fileId": "x"}, "file x")[0] == {"id": "x"}
+
+
+CONSENT = "https://accounts.google.com/o/oauth2/auth?client_id=example&scope=x"
+
+
+def test_a_sign_in_hands_over_each_line_and_returns_the_exit_code(shell_stand_in):
+    script = shell_stand_in(f'echo "Open this URL in your browser to authenticate:"\necho "{CONSENT}" >&2\nexit 0')
+    lines: list[str] = []
+    code = Gws().sign_in(script, ["auth", "login"], lines.append, threading.Event(), 10.0)
+    assert code == 0
+    assert lines == ["Open this URL in your browser to authenticate:", CONSENT]  # stderr too
+
+
+def test_a_stopped_sign_in_is_killed_with_what_it_started(shell_stand_in, tmp_path):
+    marker = tmp_path / "child-alive"
+    script = shell_stand_in(f'echo "{CONSENT}"\n(sleep 2; touch {marker}) &\nwhile :; do sleep 1; done')
+    stop = threading.Event()
+    lines: list[str] = []
+
+    def line(text: str) -> None:
+        lines.append(text)
+        stop.set()  # the person cancelled after the page was shown
+
+    started = time.monotonic()
+    assert Gws().sign_in(script, [], line, stop, 30.0) is None
+    assert time.monotonic() - started < 5
+    time.sleep(2.5)
+    assert not marker.exists()  # its whole process group was stopped
+
+
+def test_a_sign_in_past_its_time_is_stopped(shell_stand_in):
+    assert (
+        Gws().sign_in(shell_stand_in("while :; do sleep 1; done"), [], lambda _: None, threading.Event(), 0.3) is None
+    )
+
+
+def test_a_sign_in_reads_only_so_much_of_its_output(shell_stand_in, monkeypatch):
+    monkeypatch.setattr(_gws, "SIGN_IN_OUTPUT", 20)
+    lines: list[str] = []
+    script = shell_stand_in("echo first-line-here\necho second-line-is-dropped\necho third")
+    assert Gws().sign_in(script, [], lines.append, threading.Event(), 10.0) == 0
+    assert lines == ["first-line-here"]

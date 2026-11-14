@@ -90,12 +90,13 @@ def test_a_requester_reads_events_through_the_bound_adapter(google_kernel, works
     assert event["attendees"] == [{"name": "Ada", "email": "ada@example.com"}]
 
 
-def test_not_signed_in_fails_with_the_exact_login_command(google_kernel, fake_gws):
+def test_not_signed_in_fails_with_the_short_sign_in(google_kernel, fake_gws):
     denied = {"error": {"code": 401, "message": "Access denied. No credentials provided.", "reason": "authError"}}
     fake_gws.on(("drive", "files", "get"), Process(2, json.dumps(denied).encode()))
     code, output = hz(google_kernel(BOUND, prep=prep()), "prep", "notes", DOC_ID)
     assert code != 0
-    assert "gws auth login --scopes" in str(output)
+    assert "hz setup google" in str(output)
+    assert "googleapis" not in str(output)
 
 
 def test_a_link_elsewhere_fails_without_running_gws(google_kernel, fake_gws):

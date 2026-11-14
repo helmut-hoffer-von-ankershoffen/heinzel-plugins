@@ -46,6 +46,13 @@ hz setup google         # finds gws, signs it in, binds documents, calendar and 
 hz system doctor        # finds gws, checks its version and its stored sign-in, from files; Google isn't contacted
 ```
 
+Heinzel can also run the sign-in itself, without a terminal: `hz system connector connect google` (and, in a later
+Heinzel, a Sign in to Google button) runs `gws auth login` asking for exactly what Heinzel needs. The first sign-in
+asks to read your Docs, Sheets, Slides, Drive file names and calendar; mail only when you read mail from Google or allow
+it (`--allow mail-read`); a change to your calendar, mail or Docs only when you allow it (`--allow calendar-write`,
+`mail-write`, `docs-write`). It never asks for Google Cloud access. Google sends the browser back to the computer
+Heinzel runs on, so finish the sign-in there. Heinzel never runs `gws auth status` and never reads gws's credentials.
+
 By hand, setup is:
 
 ```bash
@@ -72,7 +79,7 @@ the sign-in ask for `https://www.googleapis.com/auth/calendar.events` (create, m
 replaces `gmail.readonly`, and it can't delete mail for good). Heinzelmännchen writes only from confirmed write operations
 that show you what they will do and run after you confirm; your Heinzel only proposes them
 ([ADR 0059](https://github.com/helmut-hoffer-von-ankershoffen/heinzel/blob/main/docs/adr/0059-the-calendar-and-the-mail-write-through-hz-after-a-confirmation.md)). Without the
-scope, a write fails with the `gws auth login` that adds it.
+scope, a write fails and says to run `hz setup google` and allow the change.
 
 These are the narrowest read-only scopes for what the adapters do; `drive.metadata.readonly` lists and identifies files
 and never reads their contents (Google classes it as restricted, which matters only for published OAuth clients).
@@ -172,8 +179,8 @@ hz google files --days 3        # Docs and Sheets you can open that changed in t
 hz system capability list       # who reads what, through which adapter and hosts
 ```
 
-Errors say what to do: no `gws` names the install; not signed in or an expired sign-in names the exact
-`gws auth login` command above (doctor names `hz setup google`); a missing scope or a disabled API says which; a file the account can't see says so.
+Errors say what to do in plain words: no `gws` names the install; not signed in, an expired sign-in or a missing
+permission says to run `hz setup google`; a disabled API says which; a file the account can't see says so.
 Token-shaped strings in anything `gws` says are redacted before it is shortened.
 
 Development and release commands: [repository guide](../../README.md).
