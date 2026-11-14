@@ -214,3 +214,9 @@ def test_sign_out_is_gws_auth_logout(session, fake_gws, answer, said):
     fake_gws.on(("auth", "logout"), answer)
     assert provider(session, fake_gws).sign_out() == said
     assert fake_gws.runs[-1].arguments == ["auth", "logout"]
+
+
+def test_a_page_core_refuses_is_left_out_and_the_next_is_shown(session, fake_gws):
+    fake_gws.sign_in_lines = ["https://accounts.google.com/" + "x" * 5000, CONSENT]
+    outcome, seen = run(provider(session, fake_gws), DEFAULTS)
+    assert (outcome.state, seen) == ("succeeded", [SignInProgress(url=CONSENT, finish_on="host")])

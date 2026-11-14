@@ -218,9 +218,14 @@ class GoogleSignIn:
 
         def line(text: str) -> None:
             found = CONSENT.search(text)
-            if found and not shown.is_set():
-                shown.set()
-                progress(SignInProgress(url=found.group(0), finish_on="host"))
+            if found is None or shown.is_set():
+                return
+            try:  # an address Core refuses is left out, never printed in a thread's error
+                page = SignInProgress(url=found.group(0), finish_on="host")
+            except ValueError:
+                return
+            shown.set()
+            progress(page)
 
         try:
             code = self._gws.sign_in(
