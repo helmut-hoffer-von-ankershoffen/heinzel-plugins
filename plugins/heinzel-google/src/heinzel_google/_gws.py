@@ -18,7 +18,7 @@ import signal
 import subprocess
 import threading
 import time
-from collections.abc import Iterator, Mapping, Sequence
+from collections.abc import Callable, Iterator, Mapping, Sequence
 from dataclasses import dataclass
 from pathlib import Path
 from typing import IO, Any, cast
@@ -134,6 +134,12 @@ def run_environment(executable: str, source: Mapping[str, str] | None = None) ->
     return env
 
 
+SIGN_IN_OUTPUT = 65_536
+"""Bytes of `gws auth login`'s output looked at for its consent page; the rest is drained unread."""
+SIGN_IN_LINE = 8_192
+"""Bytes of one output line looked at: a consent page's address with its scopes fits."""
+SIGN_IN_POLL = 0.1
+"""Seconds between looks at whether a sign-in was stopped."""
 SETUP = "hz setup google"
 NOT_SIGNED_IN = "gws is not signed in to"
 
@@ -187,6 +193,26 @@ class _Capture:
     @property
     def draining(self) -> bool:
         return self._thread.is_alive()
+
+
+def _read_lines(stream: IO[bytes], on_line: Callable[[str], None]) -> None:
+    """Hand each line of `stream` to `on_line`, up to `SIGN_IN_OUTPUT` bytes in all; then read on without looking.
+
+    A line is read at most `SIGN_IN_LINE` + 1 bytes at a time, so memory stays bounded; a longer line is skipped
+    whole. If `on_line` fails, the rest is drained unread, so the writer never blocks.
+    """
+    seen, looking, skipping = 0, True, False
+    with stream:
+        while raw := stream.readline(SIGN_IN_LINE + 1):
+            seen += len(raw)
+            ended = raw.endswith(b"\n")
+            overlong = not ended and len(raw) > SIGN_IN_LINE
+            if looking and not skipping and not overlong and seen <= SIGN_IN_OUTPUT:
+                try:
+                    on_line(raw.decode(errors="replace").strip())
+                except Exception:  # noqa: BLE001 - stop looking, keep draining: a stuck pipe would hang gws
+                    looking = False
+            skipping = not ended and (overlong or skipping)
 
 
 def signal_group(pid: int, signum: signal.Signals) -> None:
@@ -296,6 +322,45 @@ class Gws:
         cut = len(out) > limit or stdout.draining
         return Process(exit_code, out[:limit], stderr.data(), truncated=cut)
 
+    def sign_in(
+        self,
+        executable: str,
+        arguments: Sequence[str],
+        on_line: Callable[[str], None],
+        stop: threading.Event,
+        timeout: float,
+    ) -> int | None:
+        """Run `gws auth login` without a terminal: each line it prints goes to `on_line`, nothing is kept.
+
+        Its standard input is empty and its two outputs are one pipe, read to `SIGN_IN_OUTPUT` bytes and then drained
+        unread. Its exit code; None if `stop` was set or `timeout` passed first, and then its process group is stopped.
+
+        Raises:
+            OSError: If the executable can't be started.
+        """
+        process = subprocess.Popen(  # noqa: S603 - an argument list, the executable resolved to an absolute path
+            [executable, *arguments],
+            stdin=subprocess.DEVNULL,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
+            env=run_environment(executable),
+            cwd=NEUTRAL,
+            start_new_session=True,
+        )
+        reader = threading.Thread(target=_read_lines, args=(cast("IO[bytes]", process.stdout), on_line), daemon=True)
+        reader.start()
+        deadline = time.monotonic() + timeout
+        try:
+            while not stop.is_set() and time.monotonic() < deadline:
+                try:
+                    return process.wait(SIGN_IN_POLL)
+                except subprocess.TimeoutExpired:
+                    continue
+            return None
+        finally:
+            _stop_and_reap(process)
+            reader.join(GRACE)
+
     def login(self, executable: str, arguments: Sequence[str], timeout: float) -> int | None:
         """Run `gws auth login` with the terminal, so the person sees its link and prompts; its exit code.
 
@@ -367,17 +432,12 @@ def _output(process: Process, api: str, subject: str, limit: float, *, writing: 
 
 
 def _unwritable(api: str, subject: str, said: str) -> str:
-    """The message for a write the sign-in's scopes don't allow, with the sign-in that adds the write scope."""
+    """The message for a write the sign-in doesn't allow, with the one short step that allows it."""
     capability = "mail" if api == "Gmail" else "calendar"
-    write = login_command(mail=api == "Gmail", write=frozenset({capability}))
-    # gws replaces the scopes it has: say how to keep the other capability's.
-    keep = (
-        f"add ,{CALENDAR_WRITE_SCOPE} if hz writes your calendar too"
-        if capability == "mail"
-        else f"add ,{MAIL_SCOPE} if you read mail from Google, or ,{MAIL_WRITE_SCOPE} if hz writes it"
+    return (
+        f"{api} refused {subject}: your Google sign-in lets Heinzel read your {capability} but not change it "
+        f"({said}). To allow changes, run {SETUP} and let Heinzel change your {capability}."
     )
-    said = f"gws's sign-in may read but not write {capability} ({said})"
-    return f"{api} refused {subject}: {said}. Sign in: {write} ({keep})"
 
 
 def _failed(subject: str, process: Process, code: object, said: str, *, writing: bool) -> str:
@@ -649,14 +709,15 @@ class GoogleSession:
         reasons = _reasons(error)
         if reasons & _RATE or code == 429:  # noqa: PLR2004 - Too Many Requests
             return f"{api}'s rate limit is reached for {subject} after {waits} retries: retry in a minute."
-        # Whether mail is read from Google isn't known here: outside Gmail, say how to keep Gmail's scope.
-        login = LOGIN_WITH_MAIL if api == "Gmail" else f"{LOGIN} (add ,{MAIL_SCOPE} if you read mail from Google)"
         if process.exit_code == 2 or code == 401:  # noqa: PLR2004 - gws's auth error, or Unauthorized
-            return f"{NOT_SIGNED_IN} Google, or its sign-in expired ({said}). Sign in: {login}"
+            return f"{NOT_SIGNED_IN} Google, or its sign-in expired ({said}). Sign in again: {SETUP}."
         if reasons & _SCOPE and writing:
             return _unwritable(api, subject, said)
         if reasons & _SCOPE:
-            return f"{api} refused {subject}: gws's sign-in lacks the read-only scope ({said}). Sign in: {login}"
+            return (
+                f"{api} refused {subject}: your Google sign-in doesn't give Heinzel permission to read it ({said}). "
+                f"Sign in again and allow it: {SETUP}."
+            )
         if reasons & _DISABLED:
             return f"{api} is not enabled in the Google Cloud project of gws's OAuth client ({said}); enable it there."
         if code == 404:  # noqa: PLR2004 - Not Found

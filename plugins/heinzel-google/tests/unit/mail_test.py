@@ -8,7 +8,7 @@ from email import message_from_bytes, policy
 import pytest
 from heinzel import HeinzelError, MailDraft, MailQuery, Window
 
-from heinzel_google import LOGIN_WITH_MAIL, Gmail, Process, _mail
+from heinzel_google import Gmail, Process, _mail
 from heinzel_google._mail import gmail_search, html_to_text
 
 pytestmark = pytest.mark.unit
@@ -196,7 +196,7 @@ def test_not_signed_in_for_gmail_names_the_login_with_its_scope(gmail, fake_gws)
     fake_gws.on(GET, Process(2, json.dumps({"error": {"code": 401, "reason": "authError"}}).encode()))
     with pytest.raises(HeinzelError) as caught:
         gmail.read("m1")
-    assert str(caught.value).endswith(LOGIN_WITH_MAIL)
+    assert str(caught.value).endswith("Sign in again: hz setup google.")
 
 
 def test_a_message_without_sender_or_body_and_with_repeated_headers(gmail, fake_gws):

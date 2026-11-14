@@ -144,7 +144,10 @@ def test_rate_limits_past_the_retries_say_when_to_retry(session, fake_gws):
     [
         (output({"error": {"code": 401, "message": "Access denied.", "reason": "authError"}}, 2), "not signed in"),
         (output({"error": {"code": 401, "message": "expired"}}, 1), "not signed in"),
-        (output({"error": {"code": 403, "errors": [{"reason": "insufficientPermissions"}]}}, 1), "lacks the read-only"),
+        (
+            output({"error": {"code": 403, "errors": [{"reason": "insufficientPermissions"}]}}, 1),
+            "doesn't give Heinzel permission to read it",
+        ),
         (output({"error": {"code": 403, "details": [{"reason": "SERVICE_DISABLED"}]}}, 1), "is not enabled"),
         (output({"error": {"code": 404}}, 1), "has no file x, or the signed-in account can't see it"),
         (output({"error": {"code": 403, "message": "no"}}, 1), "may lack access"),
@@ -158,9 +161,11 @@ def test_failures_say_what_to_do(session, fake_gws, process, expected):
     assert expected in failure(session)
 
 
-def test_not_signed_in_names_the_exact_login(session, fake_gws):
+def test_not_signed_in_names_the_short_sign_in(session, fake_gws):
     fake_gws.on(FILES, output({"error": {"code": 401, "reason": "authError"}}, 2))
-    assert f"Sign in: {LOGIN} (add ,{MAIL_SCOPE} if you read mail from Google)" in failure(session)
+    text = failure(session)
+    assert text.endswith("Sign in again: hz setup google.")
+    assert "googleapis" not in text
 
 
 def test_gws_text_is_cleaned_and_redacted_whole_before_it_is_cut(session, fake_gws):
@@ -397,14 +402,13 @@ def test_a_rate_limited_write_is_retried_because_google_refused_it(session, fake
     assert fake_gws.slept == [1.0]
 
 
-@pytest.mark.parametrize(("api", "scope"), [("Google Calendar", CALENDAR_WRITE_SCOPE), ("Gmail", MAIL_WRITE_SCOPE)])
-def test_a_write_without_the_write_scope_names_the_sign_in_that_adds_it(session, fake_gws, api, scope):
+@pytest.mark.parametrize(("api", "capability"), [("Google Calendar", "calendar"), ("Gmail", "mail")])
+def test_a_write_without_the_write_scope_names_the_short_step_that_allows_it(session, fake_gws, api, capability):
     fake_gws.on(INSERT, output({"error": {"code": 403, "errors": [{"reason": "insufficientPermissions"}]}}, 1))
     text = write_failure(session, api)
-    assert "may read but not write" in text
-    assert scope in text.split("Sign in: ")[1]
-    other = MAIL_SCOPE if scope == CALENDAR_WRITE_SCOPE else CALENDAR_WRITE_SCOPE
-    assert f"add ,{other}" in text  # gws replaces scopes: keep the other capability's
+    assert f"your Google sign-in lets Heinzel read your {capability} but not change it" in text
+    assert text.endswith(f"To allow changes, run hz setup google and let Heinzel change your {capability}.")
+    assert "googleapis" not in text
 
 
 def test_a_conflicting_write_says_to_read_again(session, fake_gws):

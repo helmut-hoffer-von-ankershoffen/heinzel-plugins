@@ -7,6 +7,7 @@ HZ_* variables.
 """
 
 import json
+import threading
 from collections.abc import Callable, Sequence
 from dataclasses import dataclass, field
 from pathlib import Path
@@ -69,6 +70,10 @@ class FakeGws(Gws):
     login_code: int | None = 0
     version: Process = field(default_factory=lambda: Process(0, b"gws 0.22.5\n"))
     logins: list[list[str]] = field(default_factory=list)
+    sign_in_lines: list[str] = field(default_factory=list)
+    """What the fake `gws auth login` prints when Heinzel signs it in."""
+    sign_in_code: int | None = 0
+    sign_ins: list[list[str]] = field(default_factory=list)
 
     def run(self, executable: str, arguments: Sequence[str], timeout: float) -> Process:
         run = Run(executable, list(arguments), timeout)
@@ -98,6 +103,20 @@ class FakeGws(Gws):
         if self.login_code == 0:
             (config_dir() / "credentials.enc").write_bytes(b"encrypted")
         return self.login_code
+
+    def sign_in(
+        self,
+        executable: str,
+        arguments: Sequence[str],
+        on_line: Callable[[str], None],
+        stop: threading.Event,
+        timeout: float,
+    ) -> int | None:
+        del executable, stop, timeout
+        self.sign_ins.append(list(arguments))
+        for line in self.sign_in_lines:
+            on_line(line)
+        return self.sign_in_code
 
     def on(self, command: tuple[str, ...], *answers: Process, page: str | None = None) -> None:
         """Answer runs of `command` (with page token `page`) with `answers` in turn, the last one from then on."""

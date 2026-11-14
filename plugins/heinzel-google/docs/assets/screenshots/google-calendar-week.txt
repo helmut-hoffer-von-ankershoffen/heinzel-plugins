@@ -30,16 +30,16 @@ Turn on Calendar reminders in Notification settings first.
 Now: nothing. Next: Launch readiness review in 15 min.
 
 TODAY · SAT 14 NOV
-07:07
-07:22
-07:52
+10:16
+10:31
+11:01
 Launch readiness review
 in 15 min
-08:07
-08:37
+11:16
+11:46
 Mira Example / Priya Example — one-on-one
-08:52
-09:22
+12:01
+12:31
 Rollout checkpoint
 Notification settings
 Audio

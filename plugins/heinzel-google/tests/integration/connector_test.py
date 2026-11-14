@@ -29,7 +29,7 @@ def test_signed_in_and_bound_it_is_connected_and_lists_its_tools(google_kernel, 
     connector = google(report)
     assert connector["state"] == "connected"
     assert connector["login"]["signed_in"] is True
-    assert connector["connect"] == ["hz setup google"]
+    assert connector["connect"] == ["hz system connector connect google", "hz setup google"]  # its own sign-in first
     assert {(t["capability"], t["method"]) for t in connector["tools"]} == {
         ("documents", "read"),
         ("calendar", "events"),
@@ -53,7 +53,7 @@ def test_signed_out_it_is_not_signed_in(google_kernel, fake_gws):
     fake_gws.sign_out()
     connector = google(hz(google_kernel(BOUND), "system", "connector", "list")[1])
     assert connector["state"] == "not-signed-in"
-    assert connector["connect"] == ["hz setup google"]
+    assert connector["connect"] == ["hz system connector connect google", "hz setup google"]  # its own sign-in first
 
 
 def test_the_live_test_names_the_signed_in_account(google_kernel, fake_gws):

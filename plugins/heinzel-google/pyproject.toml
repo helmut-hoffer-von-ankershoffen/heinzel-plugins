@@ -1,12 +1,12 @@
 [project]
 name = "heinzel-google"
-version = "0.9.6"
+version = "0.9.7"
 description = "Google Docs, Sheets, Slides, Drive, Calendar and Gmail: the documents, calendar and mail capabilities."
 readme = "README.md"
 license = "MIT"
 license-files = ["LICENSE"]
 requires-python = ">=3.12"
-dependencies = ["heinzel>=0.9.16,<0.10"]
+dependencies = ["heinzel>=0.9.30,<0.10"]
 
 [project.urls]
 Source = "https://github.com/helmut-hoffer-von-ankershoffen/heinzel-plugins/tree/main/plugins/heinzel-google"

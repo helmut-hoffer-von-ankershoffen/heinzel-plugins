@@ -70,10 +70,10 @@ def run_setup(  # noqa: PLR0913, PLR0917 - what the step is injected with
         return
     if signed_in and "mail" not in newly and not write:
         # Mail was bound before; whether that sign-in included Gmail's scope, gws's status doesn't say.
-        prompter.say(
-            f"If gws was signed in before mail was read from Google, it lacks Gmail's scope: {LOGIN_WITH_MAIL}"
-        )
-        if prompter.confirm("Sign gws in again with Gmail's scope? It opens your browser", default=False):
+        prompter.say("If gws was signed in before mail was read from Google, Google doesn't let it read your mail yet.")
+        if prompter.confirm(
+            "Sign in to Google again so Heinzel may read your mail? It opens your browser", default=False
+        ):
             code = gws.login(executable, LOGIN_WITH_MAIL.split()[1:], LOGIN_TIMEOUT)
             prompter.say("gws is signed in." if code == 0 else f"gws auth login did not finish (exit {code}).")
         return
@@ -83,7 +83,7 @@ def run_setup(  # noqa: PLR0913, PLR0917 - what the step is injected with
         why += f", and to change your {' and '.join(sorted(write))} once you confirm each change"
     elif not mail:
         why += " only"
-    prompter.say(f"Signing in asks Google for {why}: {login}")
+    prompter.say(f"Signing in asks Google for {why}.")
     if prompter.confirm("Sign gws in now? It opens your browser"):
         code = gws.login(executable, login.split()[1:], LOGIN_TIMEOUT)
         prompter.say("gws is signed in." if code == 0 else f"gws auth login did not finish (exit {code}).")
