@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.9.3
+
+Relock against Core 0.9.40, which adds uv to the Core runtime dependencies.
+
 ## 0.9.2
 
 Relock opentelemetry-api to 1.45.2 (CVE-2026-126360).
