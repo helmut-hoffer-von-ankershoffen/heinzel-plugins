@@ -40,11 +40,11 @@ MIGRATED_DIGESTS: dict[str, str] = {
         "82771c8bc5fa5c4e742d11ee3885b44c3870b9c09f83fd78dd14d69522363459"
     ),
     # heinzel-google gallery
-    "d4f75b1c9fa62f36d1668a94a403740cc27f89a7a69a7f05b1f231f7c6511679": (
-        "204fe653226b64633cfc5ba0b97f7c81b8b9a0028ceff6602f155a1cd352cfbf"
+    "c55e21d8b4058694bbf28bc39e754f38a6f1f2eb27091aa70622eb018c72c91d": (
+        "844a7a75738a418731ea4db1a3e298d2952cc8417c81e0855c58f6bd18c6c832"
     ),
     # heinzel-google definition
-    "828eb73ece74a7b99959089fa5f4ef8df79a8ae5b252386af0a3f8583ab75446": (
+    "14628b19796d865fca67e901e4e58c42517ce9bc7970d748b80a5cb49bd28f05": (
         "c0b1899272d8f720135dd5a3c8150ecd0486f5ecd846371d8ab2155959b1f522"
     ),
     # heinzel-issues gallery
@@ -64,12 +64,12 @@ MIGRATED_DIGESTS: dict[str, str] = {
         "ceeb3240bbdc03c060568f108031222ca61a845ac037ff96e6a707045899fd28"
     ),
     # heinzel-slack gallery
-    "6188c937d7e03095803a2cebb5ca018f952a967de52712701308ac07be79a348": (
-        "dcbcfbbdfbbe128daeb0ba8f12fbda6f43f51dc0f05aef03e6301bb6c5550982"
+    "4435860e68ad76f26997679152d2700d55f9ad7b08cbab33fa66557836e49b6c": (
+        "920f79077bcedf69ee5783efaac52acba1eaa1e653fe7927c8df6e584d1323cc"
     ),
     # heinzel-slack definition
-    "6657e0bf84705c1ed3e58b642b8f28acd5d4af66b03f6b8af407f6d0dcb48d39": (
-        "212bf39e9944e7a3353bde3d1affc3e7009bc193aa7963b7c5b7ab52b6ac5e38"
+    "5a0d5a055e649e2bdc229a06cf29159f871aee3249f1bfb2ec54aef8350a6588": (
+        "68db2a1dc1ae7de24a188d372a5b6e5f5cfa535decdf2b9e6fb313bc20460992"
     ),
     # heinzel-tailscale gallery
     "9a20c109d44d267cb0279757b972471df5e4d24535a040e6f46c08c21963f8cc": (
@@ -96,11 +96,11 @@ MIGRATED_DIGESTS: dict[str, str] = {
         "c03ddb944bc7bc905e1abaab0f7b99749d65917955670a37d4bc34ade437a63c"
     ),
     # heinzel-zoom gallery
-    "f3639c7339be01a8790726f9887933e4314ba05e7efc39e3eaff26ff00057a79": (
-        "e9cb751f1e183927796f9114622ed3c4066d7c89bd59f5c3aaff436ec8f15560"
+    "cce74a37e74fdf7abec5b0315097e390a6328ae82319d85b750110ec157bcb2e": (
+        "a51f6a789d7050ec2f3ab6f00ce6d0e925cc53768f51e5f69b9233a6fe21ebcb"
     ),
     # heinzel-zoom definition
-    "a554378db30fc70eb1c48381eb43a166359df6ef8f3fa77795061d76bb9d4fbe": (
-        "f1d94d40d30ba49ce23ce460dea0dd6a7955f5dd6d56b0ae22fcd585faf742fb"
+    "29f68236570785a8787752d5bb3ebd4c2c21e31f1813869c87538d0c3c6de154": (
+        "15ea60c6c3465c50c3413c80a3da4c11690a6cd0e0486ef180a0754b15a03dfa"
     ),
 }
