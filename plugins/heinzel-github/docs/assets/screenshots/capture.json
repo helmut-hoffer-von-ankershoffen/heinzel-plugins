@@ -1,11 +1,11 @@
 {
   "format": 1,
   "plugin": "heinzel-github",
-  "core_version": "0.9.40",
-  "inputs_sha256": "fa6fe68cb794cf040f6bb7b3a86b354f6ba2587f5c2c704765cea06ad256c186",
+  "core_version": "0.9.41",
+  "inputs_sha256": "ad1f33b581c37600de41ee3ff63d6075069803a4ec26d8b6abcf983125b82755",
   "images": {
-    "docs/assets/screenshots/workflow-collection.png": "542ca321d3b16fa4f3d5452c7e666d943be44eb1a73f5c9ae9e8cf4e8b48f780",
-    "docs/assets/screenshots/workflow-context.png": "dd5222aabc6d059744fd458291655779f9d9d4cbba631069a142ec5a81c8317d",
+    "docs/assets/screenshots/workflow-collection.png": "20d8bc0a129f6c3eb4d205b9172065d3e3c4f86b1d311e45c70e0879fd070de8",
+    "docs/assets/screenshots/workflow-context.png": "e0fd2cfc84147c4dfd13b095f8a86d4ee451273d9e373596b2085224c9bf732b",
     "docs/assets/screenshots/merged-work.png": "0baf90373abc10ed8a8a1f31909a78f6d4e9875d81b3157c4a0a79733c2218d8",
     "docs/assets/screenshots/issue-changes.png": "bc3311ff71e68815e7488de603f36a4246ef92b55ec598ad0d2f13b988fecdc5",
     "docs/assets/screenshots/merged-cli.png": "787d4a4a73a860dbf4b33fd849f9737e0a58e5495e3e94ea1104a0e60bdf7233",
@@ -15,18 +15,18 @@
     "format": 2,
     "source_story": {
       "path": "source-story.md",
-      "sha256": "f9576ce029866daf1d493640fef49d694566ecb40207be665cee96208b1d1d5c"
+      "sha256": "64652889140ce55c6653af1e7f459a842670a3f149f6ff2e1e38eb863476dc96"
     },
     "definition": {
       "format": 1,
       "reviewer": "Codex feature-story agent",
-      "source_sha256": "4965336e7284ca3f776242e2244e65d4ead21d20c813f31041c249a07e4a7293",
+      "source_sha256": "251108376ff584fc52a7c4877e27f63ab8399a5f1a74a6d48d6d78aa42e4b01e",
       "plan_sha256": "4b2f2733e91a815803ccfec3f3159a7b58900ad41be8c262d4b514b685420e07",
-      "story_sha256": "f9576ce029866daf1d493640fef49d694566ecb40207be665cee96208b1d1d5c"
+      "story_sha256": "64652889140ce55c6653af1e7f459a842670a3f149f6ff2e1e38eb863476dc96"
     },
     "plugin": "heinzel-github",
-    "core_version": "0.9.40",
-    "inputs_sha256": "fa6fe68cb794cf040f6bb7b3a86b354f6ba2587f5c2c704765cea06ad256c186",
+    "core_version": "0.9.41",
+    "inputs_sha256": "ad1f33b581c37600de41ee3ff63d6075069803a4ec26d8b6abcf983125b82755",
     "screenshots": [
       {
         "path": "docs/assets/screenshots/workflow-collection.png",
@@ -60,26 +60,26 @@
       }
     ],
     "images": {
-      "workflow-collection.png": "542ca321d3b16fa4f3d5452c7e666d943be44eb1a73f5c9ae9e8cf4e8b48f780",
-      "workflow-context.png": "dd5222aabc6d059744fd458291655779f9d9d4cbba631069a142ec5a81c8317d",
+      "workflow-collection.png": "20d8bc0a129f6c3eb4d205b9172065d3e3c4f86b1d311e45c70e0879fd070de8",
+      "workflow-context.png": "e0fd2cfc84147c4dfd13b095f8a86d4ee451273d9e373596b2085224c9bf732b",
       "merged-work.png": "0baf90373abc10ed8a8a1f31909a78f6d4e9875d81b3157c4a0a79733c2218d8",
       "issue-changes.png": "bc3311ff71e68815e7488de603f36a4246ef92b55ec598ad0d2f13b988fecdc5",
       "merged-cli.png": "787d4a4a73a860dbf4b33fd849f9737e0a58e5495e3e94ea1104a0e60bdf7233",
       "issues-json.png": "e3754138bf5a295204a0f986463e9a54dda6168697fa870ab9c3d41b3d7ff6bd"
     },
     "transcripts": {
-      "workflow-collection.txt": "6faa77606df9d45a8ae83ee5798d51e3f766c1b0136b4896d5e25a90f6bb7a83",
-      "workflow-context.txt": "941b49f0bfccd8be1cc22a6f3075bbb8145b5872c66829c8925195df8d02f985",
-      "merged-work.txt": "ba7f628f51968d826d702e3e435947c0b52b9e3f13e38f1f982a248fe00bc35c",
-      "issue-changes.txt": "c009947a7e48e82bad16a5eed886576348ca2512534d3f3f08732187c0babfa9",
+      "workflow-collection.txt": "7bf07efa8b0f774d9007a406516f67bf1bcaa9fcef38dd36f9547cf27f9dba7f",
+      "workflow-context.txt": "0b9e9a86afc4e88f06b53a70f0b68795450012744df2a9372a4df1d9f2a320fb",
+      "merged-work.txt": "0d862279437ae6aa785304a26a62ae804cd0d575519e8882c5d3436f01d198d1",
+      "issue-changes.txt": "4c876e06433160cff86fa6a9e8ed9ffd25c9b728afd1940edb51ef7952949846",
       "merged-cli.txt": "e4df52085e704c49ba37bd75f62656de48cd879405856220a53bcebb7efdebb4",
       "issues-json.txt": "a866c9bd0fe09d6dc1355428d53f5ce30511912b71452e84e925b65b89f104b0"
     },
-    "bundle_sha256": "4efb1fad51bc119f78107f01dade13ea2f145a89ddba92916a8bcbd92103997d"
+    "bundle_sha256": "8c95ccfe1d659ee412f5b9e38adc24dd2ec77216ad8bf4bdc05a918a420cb731"
   },
   "privacy_review": {
     "format": 1,
-    "bundle_sha256": "4efb1fad51bc119f78107f01dade13ea2f145a89ddba92916a8bcbd92103997d",
+    "bundle_sha256": "8c95ccfe1d659ee412f5b9e38adc24dd2ec77216ad8bf4bdc05a918a420cb731",
     "reviewer": "Codex privacy agent",
     "decision": "approve",
     "checked_images": [
