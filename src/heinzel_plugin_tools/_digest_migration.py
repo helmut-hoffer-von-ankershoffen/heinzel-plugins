@@ -7,14 +7,6 @@ current through a later relock, security floor or version bump; any change to wh
 """
 
 MIGRATED_DIGESTS: dict[str, str] = {
-    # heinzel-clock gallery
-    "f3ed7f7f640daabf6095e70e0e9466254d021214395136492f778aec1d74b0a4": (
-        "11edde3f40de9fdea2ba810879ef6d2365ffa1c0f8a2572015aa5af1c0294f46"
-    ),
-    # heinzel-clock definition
-    "13230bb1b73f59c8da2bab49888185f97ac0384e309c346a62ec6be7d8e60513": (
-        "a4d03f61669a9f988d57ecd76ae46a82ddad8b33d837dc5eb7b755910a2dfb9a"
-    ),
     # heinzel-example gallery
     "855bf3b5a71afd5ca72803e6de2a0920cdb229a90cd1dd6297525b336f353f47": (
         "2954ef6e795d89a971c09cc4865b74b33db6c701700ddaaae1b019af51a144ec"
