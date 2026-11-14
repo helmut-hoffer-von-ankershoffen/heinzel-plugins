@@ -123,3 +123,9 @@ def settled(state: str, action: str, draft: str, bound: str, at: datetime) -> tu
         {"type": "context", "elements": [{"type": "mrkdwn", "text": ending}]},
     ]
     return f"{state.split('_')[-1].capitalize()}: {plain(action, 120)}", blocks
+
+
+def withdrawn() -> tuple[str, list[Block]]:
+    """A request whose Heinzel was deleted for good: no draft, no action, no buttons, nothing left to answer."""
+    ending = ":wastebasket: *Withdrawn.* The Heinzel that asked was deleted; this can no longer be approved."
+    return "Withdrawn", [{"type": "section", "text": {"type": "mrkdwn", "text": ending}}]
