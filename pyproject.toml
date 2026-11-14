@@ -1,6 +1,6 @@
 [project]
 name = "heinzel-plugin-tools"
-version = "0.3.7"
+version = "0.4.0"
 requires-python = ">=3.12"
 description = "Independent development tools for Heinzelmännchen plugins."
 readme = "README.md"
