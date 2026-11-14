@@ -134,7 +134,7 @@ def test_a_typed_reply_in_the_thread_answers(rig):
                 {"ts": f"{T + 1}.000200", "user": OTHER, "text": "not me"},
                 {"ts": f"{T + 1}.000300", "user": OWNER, "bot_id": "B0X", "text": "a bot as me"},
                 {"ts": f"{T + 1}.000400", "user": OWNER, "subtype": "message_changed", "text": "edited"},
-                {"ts": f"{T + 1}.000500", "user": OWNER, "text": "Later, <@U0ADA0001>‮ please"},
+                {"ts": f"{T + 1}.000500", "user": OWNER, "text": "Later, <@U0ADA0001>\u202e please"},
             ]
         )
 

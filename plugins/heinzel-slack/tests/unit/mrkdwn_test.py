@@ -43,4 +43,4 @@ def test_inbound_links_groups_and_dates_read_as_text():
 
 
 def test_inbound_text_loses_invisible_and_bidirectional_characters():
-    assert readable("ok‮evil​\U000e0041", lambda _u: None) == "okevil"
+    assert readable("ok\u202eevil\u200b\U000e0041", lambda _u: None) == "okevil"

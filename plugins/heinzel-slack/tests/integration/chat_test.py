@@ -55,7 +55,8 @@ def test_messages_map_pages_threads_names_and_links():
             [{"ts": f"{T + 10}.000200", "user": "U0ADA0001", "text": "hi <@U0ADA0001> <!here>", "reply_count": 2,
               "thread_ts": f"{T + 10}.000200"}],
             [{"ts": f"{T - 5}.000000", "user": "U0ADA0001", "text": "before"},
-             {"ts": f"{T + 20}.000000", "bot_profile": {"name": "CI‮bot"}, "text": "built", "subtype": "bot_message"},
+             {"ts": f"{T + 20}.000000", "bot_profile": {"name": "CI\u202ebot"}, "text": "built",
+              "subtype": "bot_message"},
              {"ts": f"{T + 30}.000000", "user": "U0ADA0001", "subtype": "channel_join", "text": "joined"}],
         ),
         "conversations.replies": lambda _p: {"ok": True, "messages": [
