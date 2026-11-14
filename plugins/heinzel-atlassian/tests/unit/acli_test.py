@@ -2,7 +2,8 @@ import os
 
 import pytest
 
-from heinzel_atlassian._acli import environment, parse_version
+from heinzel_atlassian import AtlassianSettings
+from heinzel_atlassian._acli import environment, executable, parse_version, run_environment, where_looked
 
 pytestmark = pytest.mark.unit
 
@@ -50,3 +51,25 @@ def test_only_allowlisted_variables_and_no_colour_reach_acli():
         "NO_PROXY": "localhost",
         "NO_COLOR": "1",
     }
+
+
+def test_acli_runs_with_its_own_directory_and_homebrew_after_path(no_homebrew):
+    env = run_environment("/opt/tools/bin/acli", {"PATH": f"/usr/bin{os.pathsep}relative{os.pathsep}/bin"})
+    assert env["PATH"] == os.pathsep.join(["/usr/bin", "/bin", "/opt/tools/bin", *no_homebrew])
+
+
+def test_a_linked_acli_runs_with_both_its_directories(no_homebrew, tmp_path):
+    target = tmp_path / "Cellar" / "acli" / "bin" / "acli"
+    target.parent.mkdir(parents=True)
+    target.write_text("", encoding="utf-8")
+    link = tmp_path / "bin" / "acli"
+    link.parent.mkdir()
+    link.symlink_to(target)
+    env = run_environment(str(link), {"PATH": "/usr/bin"})
+    assert env["PATH"] == os.pathsep.join(["/usr/bin", str(link.parent), str(target.resolve().parent), *no_homebrew])
+
+
+def test_a_missing_acli_says_where_heinzel_looked(no_homebrew, monkeypatch):
+    monkeypatch.setenv("PATH", "/usr/bin:/bin")
+    assert executable(AtlassianSettings()) is None
+    assert where_looked() == f"on PATH and in {no_homebrew[0]} and {no_homebrew[1]}"

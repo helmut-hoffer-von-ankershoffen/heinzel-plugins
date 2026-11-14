@@ -6,7 +6,7 @@ from urllib.parse import urlsplit
 
 from heinzel import Check, HeinzelError, Kernel, Login, Status, __version__
 
-from heinzel_atlassian._acli import MINIMUM_VERSION, Acli, AcliTimeoutError
+from heinzel_atlassian._acli import MINIMUM_VERSION, Acli, AcliTimeoutError, where_looked
 from heinzel_atlassian._client import INSTALL, INSTALL_COMMAND, LOGIN, SITE_FIX, AcliClient, AcliLoginError, Product
 from heinzel_atlassian._models import AtlassianAbout, AtlassianSettings
 from heinzel_atlassian._status import AtlassianStatus, read
@@ -99,7 +99,10 @@ class AtlassianService:
             return Check(
                 name="acli",
                 status=Status.DEGRADED,
-                detail=f"{self._settings.acli}, Atlassian's CLI, is not on PATH; every read goes through it",
+                detail=(
+                    f"Heinzel can't find {self._settings.acli}, Atlassian's CLI: it looked {where_looked()}; "
+                    "every read goes through it"
+                ),
                 fix=f"install acli with `{INSTALL_COMMAND}` ({INSTALL}), then {LOGINS}",
                 login=Login(signed_in=False, command=INSTALL_COMMAND),
             )

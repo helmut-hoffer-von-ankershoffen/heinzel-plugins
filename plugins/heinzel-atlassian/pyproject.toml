@@ -1,6 +1,6 @@
 [project]
 name = "heinzel-atlassian"
-version = "0.9.5"
+version = "0.9.6"
 description = "Read Jira issues and Confluence pages through acli: the tracker and documents capabilities."
 readme = "README.md"
 license = "MIT"

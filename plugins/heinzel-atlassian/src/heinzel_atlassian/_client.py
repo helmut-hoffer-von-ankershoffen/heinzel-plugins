@@ -16,7 +16,7 @@ from urllib.parse import urlsplit
 
 from heinzel import HeinzelError, clean_text
 
-from heinzel_atlassian._acli import MAX_BYTES, MINIMUM_VERSION, Acli, AcliTimeoutError, Completed
+from heinzel_atlassian._acli import MAX_BYTES, MINIMUM_VERSION, Acli, AcliTimeoutError, Completed, where_looked
 from heinzel_atlassian._models import SITE_EXAMPLE, AtlassianSettings
 
 type Product = Literal["Jira", "Confluence"]
@@ -157,7 +157,10 @@ class AcliClient:
                 raise HeinzelError(msg)
             done = self._acli.run(args, self._timeout)
         except FileNotFoundError:
-            msg = f"acli, Atlassian's CLI, is not on PATH. Install it ({INSTALL}), then log in: {login}"
+            msg = (
+                f"Heinzel can't find acli, Atlassian's CLI: it looked {where_looked()}. Install it ({INSTALL}), "
+                f"then log in: {login}"
+            )
             raise HeinzelError(msg) from None
         except AcliTimeoutError:
             msg = f"acli did not answer for {subject} within {self._timeout:g} seconds and was stopped; " + (

@@ -127,7 +127,7 @@ def test_a_token_acli_prints_appears_in_no_output(atlassian_kernel, acli_on_path
 def test_without_acli_the_command_names_the_install_and_the_login(atlassian_kernel):
     code, output = hz(atlassian_kernel(BOUND, digest=digest()), "digest", "issues", "WID", SINCE, UNTIL)
     assert code != 0
-    assert "not on PATH" in str(output)
+    assert "looked on PATH" in str(output)
     assert "acli jira auth login" in str(output)
 
 
