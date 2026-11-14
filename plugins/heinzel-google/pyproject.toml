@@ -1,6 +1,6 @@
 [project]
 name = "heinzel-google"
-version = "0.9.4"
+version = "0.9.5"
 description = "Google Docs, Sheets, Slides, Drive, Calendar and Gmail: the documents, calendar and mail capabilities."
 readme = "README.md"
 license = "MIT"
@@ -145,12 +145,12 @@ highlights = [
 [[tool.heinzel.catalog.screenshots]]
 path = "docs/assets/screenshots/google-upcoming-review.png"
 surface = "ui"
-caption = "A fictional launch review shows as the next meeting in the footer, read through the Google calendar adapter."
+caption = "A fictional launch review shows as the next meeting in the footer calendar summary, read through the Google calendar adapter."
 
 [[tool.heinzel.catalog.screenshots]]
 path = "docs/assets/screenshots/google-calendar-week.png"
 surface = "ui"
-caption = "The real Core calendar reads a fictional launch week through the Google adapter; no Google account is contacted."
+caption = "The real Core calendar pane lists a fictional launch day's meetings through the Google adapter; no Google account is contacted."
 
 [[tool.heinzel.catalog.screenshots]]
 path = "docs/assets/screenshots/google-source-review.png"

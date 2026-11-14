@@ -65,3 +65,12 @@ class SlackChannel(NotificationChannel, ApprovalChannel):
     def settle(self, reference: str, outcome: Literal["approved", "declined", "expired", "superseded"]) -> None:
         """Close a request's message."""
         self._service.settle(reference, outcome)
+
+    def forget(self, request_id: str, reference: str | None) -> None:
+        """Delete every local copy of a request when its Heinzel is deleted (ADR 0148); offline, idempotent.
+
+        `request_id` is the one Core passed to `post`; `reference` the receipt's, or None when the post never got
+        one. Raises only when it cannot forget right now, so Core retries. A Core without this hook never calls it,
+        so the override needs no guard there.
+        """
+        self._service.forget(request_id, reference)

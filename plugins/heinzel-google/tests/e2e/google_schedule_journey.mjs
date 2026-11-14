@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import { join } from "node:path";
+import { openDetails, sendToHeinzel } from "./personal_conversation.mjs";
 
 const require = createRequire(process.argv[6]);
 const { chromium, webkit } = require("playwright-core");
@@ -22,8 +23,9 @@ try {
     await page.getByRole("tab", { name: "Chat", exact: true }).click();
   await page.getByLabel("Your message").fill("Read my selected source.");
   await page.getByRole("button", { name: "Create a Heinzel and take this message" }).click();
-  await page.getByRole("button", { name: "Queue message" }).click();
+  await sendToHeinzel(page);
   await page.getByText("Source inspected.").waitFor({ timeout: 30000 });
+  await openDetails(page);
   const terms = page.getByRole("region", { name: "Proposed Heinzel terms" });
   await terms.getByRole("button", { name: "Review these terms" }).click();
   await terms.getByRole("button", { name: "Confirm" }).click();
@@ -50,7 +52,7 @@ try {
   assert.deepEqual(violations, []);
   await panel.getByRole("button", { name: "Confirm" }).click();
   await panel.getByText(/Recorded state: approved/).waitFor();
-  const schedule = page.locator("details").filter({ has: page.getByText("Recurring Heinzel turns", { exact: true }) });
+  const schedule = page.locator('xpath=//details[summary[normalize-space()="Recurring Heinzel turns"]]');
   await schedule.getByText("Recurring Heinzel turns", { exact: true }).click();
   const consent = await schedule.getByRole("checkbox", { name: /Allow the separately approved calendar.events/ });
   assert.equal(await consent.isChecked(), false);
@@ -81,6 +83,7 @@ try {
   assert.equal(finished.deduplicated, true);
   await page.reload();
   await page.getByRole("tab", { name: "Chat", exact: true }).click();
+  await openDetails(page);
   await page
     .getByText(/Tool activity for this reply/)
     .nth(1)
@@ -90,7 +93,7 @@ try {
     .first()
     .waitFor({ timeout: 30000 });
   await page.getByLabel("Message your Heinzel").fill("Read my source and prepare a notification for my review.");
-  await page.getByRole("button", { name: "Queue message" }).click();
+  await sendToHeinzel(page);
   const drafts = page.getByRole("region", { name: "Notification drafts" });
   await drafts.getByText("The source was read; please review.", { exact: true }).waitFor({timeout: 30000});
   assert.match(await drafts.innerText(), /queued does not mean shown/i);
@@ -106,6 +109,7 @@ try {
   await panel.getByText(/Recorded state: revoked/).waitFor();
   await page.reload();
   await page.getByRole("tab", { name: "Chat", exact: true }).click();
+  await openDetails(page);
   await schedule.getByText("Recurring Heinzel turns", { exact: true }).click();
   await schedule.getByText(/stale · contract revision/).waitFor();
   assert.equal(await panel.evaluate((node) => node.scrollWidth > node.clientWidth), false);

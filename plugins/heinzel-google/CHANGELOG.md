@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.9.5
+
+Relock against Core 0.9.40. The mail-review and schedule journeys send from the personal conversation's Send button, which replaced Queue message in Core 0.9.40.
+
 ## 0.9.4
 
 Relock opentelemetry-api to 1.45.2 (CVE-2026-126360).

@@ -10,25 +10,45 @@ Mira
 · EM
 Today
 Today
-Doctor: 3 checks need attention
+Doctor: 4 checks need attention
 
-ai.access ai access, system.doctor installation, system.runner claude-code
+ai.access ai access, system.doctor installation, system.prerequisite system.runner: claude…
 
 Open
-Ask about it
-v0.9.16
+v0.9.40
 Updates, off
 0
 System health, warning
-Not in a meeting
-Next: Launch readiness review
-Fri 19:04
+16
 Daemon not installed, off
 Chat
 New chat
 Ask about your setup, your team's contracts or what to do next. The chat reads with hz and asks you before it changes anything.
 Your message
 Default
+Audio
 
-Up to $0.25 per message · this chat $0.00
-Runs your agent runner and may cost money: at most $0.25 per message, $2.00 per chat; this chat has cost $0.00. It reads with hz and asks you before it changes anything.
+Calendar
+
+Free for 16 min until Launch readiness review
+
+NOW
+
+Not in a meeting
+
+Free for 16 min
+
+NEXT
+
+Next: Launch readiness review
+in 16 min
+
+01:40–02:10 · 2 invited
+
+THEN
+
+02:25–02:55
+Mira Example / Priya Example — one-on-one
+03:10–03:40
+Rollout checkpoint
+Open calendar
