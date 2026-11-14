@@ -87,8 +87,19 @@ print(json.dumps({{'type':'result','subtype':'success','is_error':False,'permiss
 
 def _require_rendered(report):
     if not any(item.disposition == "rendered" for item in report.runs):
-        msg = "The helper did not render a run"
+        runs = "; ".join(f"{item.job} {item.disposition}: {item.error}" for item in report.runs) or "no runs"
+        msg = f"The helper did not render a run (paused={report.paused}, locked={report.locked}; {runs})"
         raise RuntimeError(msg)
+
+
+def _tick_unlocked(helper, kernel, waiter):
+    """One daemon tick; a tick another holder's lock refused ran nothing, so it is taken again."""
+    for _ in range(100):
+        report = helper(kernel)
+        if not report.locked:
+            return report
+        waiter.wait(0.1)
+    return report
 
 
 def _daemon_probe(kernel, boot, directory, notices, helper):
@@ -103,7 +114,7 @@ def _daemon_probe(kernel, boot, directory, notices, helper):
                     break
                 waiter.wait(0.05)
             json.loads(signal.read_text())
-            report = helper(kernel)
+            report = _tick_unlocked(helper, kernel, waiter)
             _require_rendered(report)
             previous = (directory / "model-calls").read_text()
             restarted = boot()

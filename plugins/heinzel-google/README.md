@@ -182,13 +182,13 @@ Development and release commands: [repository guide](../../README.md).
 <!-- screenshots:start -->
 ## Screenshots
 
-<img src="docs/assets/screenshots/google-upcoming-review.png" alt="A fictional launch review shows as the next meeting in the footer, read through the Google calendar adapter." width="960">
+<img src="docs/assets/screenshots/google-upcoming-review.png" alt="A fictional launch review shows as the next meeting in the footer calendar summary, read through the Google calendar adapter." width="960">
 
-A fictional launch review shows as the next meeting in the footer, read through the Google calendar adapter.
+A fictional launch review shows as the next meeting in the footer calendar summary, read through the Google calendar adapter.
 
-<img src="docs/assets/screenshots/google-calendar-week.png" alt="The real Core calendar reads a fictional launch week through the Google adapter; no Google account is contacted." width="960">
+<img src="docs/assets/screenshots/google-calendar-week.png" alt="The real Core calendar pane lists a fictional launch day&#x27;s meetings through the Google adapter; no Google account is contacted." width="960">
 
-The real Core calendar reads a fictional launch week through the Google adapter; no Google account is contacted.
+The real Core calendar pane lists a fictional launch day&#x27;s meetings through the Google adapter; no Google account is contacted.
 
 <img src="docs/assets/screenshots/google-source-review.png" alt="Inspect a fictional selected-source identity as the Google source review panel shows it." width="960">
 

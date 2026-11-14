@@ -6,9 +6,15 @@ name = "google-upcoming-review"
 surface = "ui"
 route = "/"
 appearance = "dark"
-caption = "A fictional launch review shows as the next meeting in the footer, read through the Google calendar adapter."
+caption = "A fictional launch review shows as the next meeting in the footer calendar summary, read through the Google calendar adapter."
 timeout_ms = 30000
 viewport = { width = 1280, height = 900 }
+
+[[scenes.steps]]
+action = "click"
+role = "button"
+name_regex = "^Calendar: .*Launch readiness review"
+within_role = "contentinfo"
 
 [[scenes.steps]]
 action = "wait"
@@ -19,19 +25,24 @@ name = "google-calendar-week"
 surface = "ui"
 route = "/"
 appearance = "light"
-caption = "The real Core calendar reads a fictional launch week through the Google adapter; no Google account is contacted."
+caption = "The real Core calendar pane lists a fictional launch day's meetings through the Google adapter; no Google account is contacted."
 timeout_ms = 30000
 viewport = { width = 1280, height = 900 }
 
 [[scenes.steps]]
 action = "wait"
-text = "Next: Launch readiness review"
+role = "button"
+name = "Ask about it"
+
+[[scenes.steps]]
+action = "wait"
+role = "button"
+name = "Open calendar"
 
 [[scenes.steps]]
 action = "click"
 role = "button"
-name_regex = "^Not in a meeting"
-within_role = "contentinfo"
+name = "Open calendar"
 
 [[scenes.steps]]
 action = "wait"

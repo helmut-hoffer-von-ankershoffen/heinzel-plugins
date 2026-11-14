@@ -10,19 +10,16 @@ Mira
 · EM
 Today
 Today
-Doctor: 3 checks need attention
+Doctor: 4 checks need attention
 
-ai.access ai access, system.doctor installation, system.runner claude-code
+ai.access ai access, system.doctor installation, system.prerequisite system.runner: claude…
 
 Open
-Ask about it
-v0.9.16
+v0.9.40
 Updates, off
 0
 System health, warning
-Not in a meeting
-Next: Launch readiness review
-Fri 19:04
+15
 Daemon not installed, off
 Chat
 Google source review
@@ -37,3 +34,5 @@ SHA-256: dfd144dacd68ad317917e280294d160bada46b434c363a98c611bb370b6bf594
 Direct native executable.
 
 The digest checks byte continuity; it does not authenticate the publisher. This review does not access your Google account or grant a read.
+
+Audio
