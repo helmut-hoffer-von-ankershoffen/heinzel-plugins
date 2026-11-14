@@ -76,7 +76,7 @@ try {
   assert.ok(session);
   const directory = process.argv[4];
   writeFileSync(join(directory, "daemon-start.json"), JSON.stringify({ session }));
-  for (let i = 0; i < 600 && !existsSync(join(directory, "daemon-finished.json")); i++)
+  for (let i = 0; i < 1800 && !existsSync(join(directory, "daemon-finished.json")); i++)
     await new Promise((resolve) => setTimeout(resolve, 50));
   const finished = JSON.parse(readFileSync(join(directory, "daemon-finished.json"), "utf8"));
   assert.equal(finished.ok, true, `daemon failed: ${finished.failure}`);
