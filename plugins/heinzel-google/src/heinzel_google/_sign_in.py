@@ -12,6 +12,7 @@ and Core's choice (`wanted`) asks for the default reads, what the bound capabili
 import re
 import threading
 from collections.abc import Callable, Iterable
+from typing import cast
 
 from heinzel import HeinzelError
 from heinzel.kernel import (
@@ -160,7 +161,9 @@ class GoogleSignIn:
 
     def _needed(self) -> set[str]:
         """The grants what is bound to Google reads with; mail only when the person chose Google for it."""
-        needed = {"docs-read"} if self._view.bound("documents") == "google" else set()
+        needed: set[str] = set()
+        if self._view.bound("documents") == "google":
+            needed.add("docs-read")
         if self._view.bound("calendar") == "google":
             needed.add("calendar-read")
         provider, how = self._view.binding("mail")
@@ -204,8 +207,8 @@ class GoogleSignIn:
             return SignInStatus(signed_in=False, grants=grants, problem=problem, live=True)
         except HeinzelError as exc:
             return SignInStatus(signed_in=True, grants=grants, problem=str(exc), live=True)
-        user = about.get("user")
-        email = user.get("emailAddress") if isinstance(user, dict) else None
+        user: object = about.get("user")
+        email = cast("dict[str, object]", user).get("emailAddress") if isinstance(user, dict) else None
         account = redact(email) if isinstance(email, str) else ""
         return SignInStatus(signed_in=True, account=account, grants=grants, live=True)
 
