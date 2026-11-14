@@ -2,6 +2,7 @@
 
 import json
 
+import heinzel
 import pytest
 from heinzel import Config, Kernel
 from heinzel.heads.cli import build
@@ -30,7 +31,8 @@ def test_signed_in_and_bound_it_is_connected_and_lists_its_tools(google_kernel, 
     assert connector["state"] == "connected"
     assert connector["login"]["signed_in"] is True
     assert connector["connect"] == ["hz system connector connect google", "hz setup google"]  # its own sign-in first
-    assert {(t["capability"], t["method"]) for t in connector["tools"]} == {
+    searching = {("documents", "search")} if hasattr(heinzel, "DocumentHit") else set()  # Core 0.9.43 and later
+    assert {(t["capability"], t["method"]) for t in connector["tools"]} - searching == {
         ("documents", "read"),
         ("calendar", "events"),
         ("calendar", "free_busy"),
