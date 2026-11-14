@@ -34,7 +34,7 @@ module = Module("clock", "World clock: what time it is for everyone on the team.
 
 module.nav(
     title="World clock",
-    icon="globe",
+    icon="clock",
     settings=NavSettings(sections=("clock",), group="preferences"),
     sidebar=Navigate(path="/?panel=clock:world-clock"),
 )
@@ -235,7 +235,7 @@ def primary_zone(times: list[ZoneTime]) -> StatusItem | None:
     first = times[0]
     return StatusItem(
         text=city(first.zone),
-        icon="globe",
+        icon="clock",
         live=LiveClock(zone=first.zone),
         presentation="value",
         footer_priority=1000,
@@ -251,7 +251,7 @@ def zones_ticker(times: list[ZoneTime]) -> StatusItem | None:
         return None
     return StatusItem(
         text="World clock",
-        icon="globe",
+        icon="clock",
         presentation="ticker",
         segments=[_detail(zone) for zone in times],
         effect=Navigate(path="/?panel=clock:world-clock"),
@@ -266,7 +266,7 @@ def working(times: list[ZoneTime]) -> int:
 module.action(
     "team-clock",
     label="World clock",
-    icon="globe",
+    icon="clock",
     effect=Navigate(path="/?panel=clock:world-clock"),
     source="clock",
     badge=working,
