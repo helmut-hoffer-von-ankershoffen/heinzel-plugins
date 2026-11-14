@@ -15,7 +15,7 @@ Doctor: 4 checks need attention
 ai.access ai access, system.doctor installation, system.prerequisite system.runner: claude…
 
 Open
-v0.9.41
+v0.9.42
 Updates, off
 0
 System health, warning
@@ -43,12 +43,12 @@ NEXT
 Next: Launch readiness review
 in 16 min
 
-10:31–11:01 · 2 invited
+15:30–16:00 · 2 invited
 
 THEN
 
-11:16–11:46
+16:15–16:45
 Mira Example / Priya Example — one-on-one
-12:01–12:31
+17:00–17:30
 Rollout checkpoint
 Open calendar

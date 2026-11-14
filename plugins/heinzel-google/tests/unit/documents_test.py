@@ -183,3 +183,83 @@ def test_recent_files_follow_pages_newest_first(session, fake_gws):
     fake_gws.json(("drive", "files", "list"), {"files": [file(2, modified="2026-10-21T08:00:00Z")]}, page="p2")
     found = Drive(session).recent(7, now=datetime(2026, 10, 24, tzinfo=UTC))
     assert [f.name for f in found] == ["File 1", "File 2"]
+
+
+def test_a_search_asks_drive_for_full_text_in_readable_types_only(session, fake_gws):
+    fake_gws.json(
+        ("drive", "files", "list"),
+        {
+            "files": [
+                {
+                    "id": DOC_ID,
+                    "name": "Plan\u202e",
+                    "mimeType": DOCUMENT,
+                    "description": "About\nthe plan",
+                    "modifiedTime": "2026-10-20T08:00:00Z",
+                },
+                {"id": SHEET_ID, "name": "Budget", "mimeType": SPREADSHEET},
+                {"id": f"{DOC_ID}9", "name": "Scan", "mimeType": "application/pdf"},
+                {"id": "bad id", "name": "x", "mimeType": DOCUMENT},
+            ]
+        },
+    )
+    hits = GoogleDocuments(session).search("it's a \\ plan", 10)
+    assert [(h.ref, h.url, h.title, h.snippet) for h in hits] == [
+        (f"https://docs.google.com/document/d/{DOC_ID}/edit",) * 2 + ("Plan", "About the plan"),
+        (f"https://docs.google.com/spreadsheets/d/{SHEET_ID}/edit",) * 2 + ("Budget", None),
+    ]
+    assert hits[0].updated_at == datetime(2026, 10, 20, 8, tzinfo=UTC)
+    assert hits[1].updated_at is None
+    run = fake_gws.api_runs[0]
+    assert run.command == ("drive", "files", "list")
+    assert run.params["q"].endswith("and trashed = false and fullText contains 'it\\'s a \\\\ plan'")
+    assert "application/vnd.google-apps.presentation" in run.params["q"]
+    assert run.params["pageSize"] == 10
+
+
+def test_a_search_honours_the_limit(session, fake_gws):
+    fake_gws.json(("drive", "files", "list"), {"files": [file(n) for n in range(5)]})
+    assert len(GoogleDocuments(session).search("plan", 2)) == 2
+    assert fake_gws.api_runs[0].params["pageSize"] == 2
+
+
+def test_a_search_without_matches_is_empty(session, fake_gws):
+    fake_gws.json(("drive", "files", "list"), {})
+    assert GoogleDocuments(session).search("nothing", 5) == []
+
+
+@pytest.mark.parametrize(("query", "message"), [("  \u202e ", "Give some text"), ("x" * 201, "longer than 200")])
+def test_a_bad_query_is_refused_before_any_request(session, fake_gws, query, message):
+    with pytest.raises(HeinzelError, match=message):
+        GoogleDocuments(session).search(query, 5)
+    assert fake_gws.api_runs == []
+
+
+def test_a_search_maps_google_errors_and_odd_answers(session, fake_gws):
+    fake_gws.json(("drive", "files", "list"), {"files": "nope"})
+    with pytest.raises(HeinzelError, match="without a list of files"):
+        GoogleDocuments(session).search("plan", 5)
+
+
+def test_a_search_failure_is_a_plain_error(session, fake_gws):
+    fake_gws.on(
+        ("drive", "files", "list"),
+        Process(1, json.dumps({"error": {"code": 403, "message": "no", "errors": [{"reason": "forbidden"}]}}).encode()),
+    )
+    with pytest.raises(HeinzelError, match="Google Drive"):
+        GoogleDocuments(session).search("plan", 5)
+
+
+def test_the_links_routing_declaration():
+    from heinzel_google._documents import LINK_HOSTS
+
+    assert LINK_HOSTS == ["docs.google.com", "drive.google.com"]
+    for host in LINK_HOSTS:
+        assert (
+            file_id_of(
+                f"https://{host}/open?id={DOC_ID}"
+                if host.startswith("drive")
+                else f"https://{host}/document/d/{DOC_ID}"
+            )
+            == DOC_ID
+        )
