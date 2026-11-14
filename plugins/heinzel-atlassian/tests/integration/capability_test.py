@@ -90,6 +90,7 @@ def test_a_requester_reads_a_page_through_the_bound_adapter(atlassian_kernel, si
     ref = f"{SITE}/wiki/spaces/WID/pages/123456/Widget+plan"
     code, document = hz(atlassian_kernel(BOUND, digest=digest()), "digest", "page", ref)
     assert code == 0, document
+    document.pop("source", None)  # ADR 0161 Core adds it (None here); earlier Core has no such field
     assert document == {
         "ref": ref,
         "title": "Widget plan",

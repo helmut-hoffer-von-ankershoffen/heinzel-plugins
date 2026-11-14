@@ -115,7 +115,7 @@ def plan(documents: Documents) -> Document:
   lists, tasks, links, tables, code blocks); images and macro settings are left out, image captions stay.
   `revision` is the page version.
 - **Not available through acli**: a search for pages updated in a window (acli 1.3 has `page view` but no page
-  search or CQL), so the `documents` capability stays `read(ref)` only, which is all it defines today.
+  search or CQL; search arrives once acli offers it), so the `documents` capability stays `read(ref)` only, which is all it defines today.
 
 ```bash
 hz atlassian info               # this plugin, its version, the site, acli's path and the commands it runs

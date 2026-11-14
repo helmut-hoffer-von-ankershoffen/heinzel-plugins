@@ -37,7 +37,7 @@ the packet the agent gets; nothing is spent
 hz heinzel wake me:weekly-work-review
 Run in terminal
 draft it now, at most 0.5 USD; the draft is saved under /demo-profile/data_dir/workflow/drafts/me-weekly-work-review
-v0.9.41
+v0.9.42
 Plugins changed, warning
 Updates, off
 0

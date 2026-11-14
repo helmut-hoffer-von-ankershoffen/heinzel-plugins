@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.9.7
+
+Say which web addresses Confluence opens: with several documents connectors active, Heinzel routes a Confluence page link to this plugin by the host of your site (never Atlassian's API gateway). Older Heinzel versions ignore it. Confluence search is not offered: acli 1.3 has no page search or CQL, and it arrives once acli offers it.
+
 ## 0.9.6
 
 Find acli when Heinzel runs as a background service: a service that launchd starts has a short PATH without Homebrew's folders, so Heinzel did not find acli, could not read the site acli is signed in to, and System health showed the Atlassian hosts as unknown. Heinzel now looks in Homebrew's folders (`/opt/homebrew/bin`, `/usr/local/bin`) after PATH, and acli runs with its own folder on PATH.

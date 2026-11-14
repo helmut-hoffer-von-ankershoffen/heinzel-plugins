@@ -55,7 +55,7 @@ All contracts
 Weekly work review
 me:weekly-work-review
 by hand only
-v0.9.41
+v0.9.42
 Plugins changed, warning
 Updates, off
 0
