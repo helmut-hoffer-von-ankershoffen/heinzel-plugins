@@ -884,14 +884,14 @@ def test_normal_setup_routes_its_derived_identity_to_every_presentation_save(har
     assert all(value is identity for value in observed)
 
 
-def _artifact_run(seen, *, build=0, wheel=True, install=0):
+def _artifact_run(seen, *, build=0, wheel=True, install=0, restore=0):
     def run(command, **options):
         seen.append(command[:3])
         if command[1] == "build":
             if wheel:
                 (Path(command[command.index("-o") + 1]) / "heinzel_harbor-0.1.0-py3-none-any.whl").write_bytes(b"")
             return subprocess.CompletedProcess(command, build)
-        return subprocess.CompletedProcess(command, install if "--reinstall" in command else 0)
+        return subprocess.CompletedProcess(command, install if "--reinstall" in command else restore)
 
     return run
 
@@ -925,3 +925,23 @@ def test_an_external_prepared_interpreter_is_used_as_it_is(harness, monkeypatch)
     monkeypatch.setattr(capture.subprocess, "run", lambda *a, **k: pytest.fail("no install"))
     with capture.installed_artifact(harness.owner, harness.interpreter, owning=False):
         pass
+
+
+def test_a_failed_restore_after_a_good_capture_fails_loudly(harness, monkeypatch):
+    seen = []
+    monkeypatch.setattr(capture.subprocess, "run", _artifact_run(seen, restore=1))
+    with (
+        pytest.raises(privacy.CaptureError, match="editable install was not restored"),
+        capture.installed_artifact(harness.owner, harness.interpreter, owning=True),
+    ):
+        pass
+
+
+def test_a_failed_restore_never_hides_the_capture_failure(harness, monkeypatch, capsys):
+    monkeypatch.setattr(capture.subprocess, "run", _artifact_run([], restore=1))
+    with (
+        pytest.raises(RuntimeError, match="scene failed"),
+        capture.installed_artifact(harness.owner, harness.interpreter, owning=True),
+    ):
+        raise RuntimeError("scene failed")
+    assert "not restored" in capsys.readouterr().err

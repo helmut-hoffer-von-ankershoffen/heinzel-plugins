@@ -306,19 +306,30 @@ class Store:
         with self._transaction() as db:
             self._audit(db, now, request_id[:64], "denied", reason)
 
-    def forget(self, keys: Collection[str]) -> list[Row]:
+    def matching(self, keys: Collection[str]) -> list[Row]:
+        """The requests these keys name: by id (the reference a post returned) or by the host's request id."""
+        wanted = sorted(set(keys))
+        if not wanted:
+            return []
+        marks = ",".join("?" * len(wanted))
+        with self._connect() as db:
+            found = db.execute(
+                f"SELECT * FROM requests WHERE id IN ({marks}) OR external IN ({marks})",  # noqa: S608 - only placeholders
+                (*wanted, *wanted),
+            ).fetchall()
+        return [_row(r) for r in found]
+
+    def forget(self, keys: Collection[str]) -> None:
         """Delete every row (request, audit, delivery) these keys name and scrub its old bytes (ADR 0148).
 
-        A key matches a request by its id (the reference a post returned) or by the host's request id, so a draft
-        that was stored but never posted is found too. Earlier UPDATEs leave stale copies of a row in free pages and
-        WAL frames, so deleting is not enough: with `secure_delete` the freed pages are zeroed, VACUUM rewrites the
-        file without them, and a TRUNCATE checkpoint copies the result back and empties the WAL. Idempotent; unknown
-        keys still scrub.
-
-        Returns the request rows deleted.
+        A key matches as in `matching`, so a draft that was stored but never posted is found too. Earlier UPDATEs
+        leave stale copies of a row in free pages and WAL frames, so deleting is not enough: with `secure_delete`
+        the freed pages are zeroed, VACUUM rewrites the file without any free page, and a TRUNCATE checkpoint
+        copies the result back and empties the WAL. Idempotent; unknown keys still scrub.
 
         Raises:
-            HeinzelError: If another connection kept the WAL from being emptied; calling again finishes the job.
+            HeinzelError: If free pages remain or another connection kept the WAL from being emptied; calling again
+                finishes the job.
         """
         with self._connect() as db:
             db.execute("PRAGMA secure_delete=ON")
@@ -328,11 +339,10 @@ class Store:
                 wanted = sorted(set(keys))
                 marks = ",".join("?" * len(wanted))
                 found = db.execute(
-                    f"SELECT * FROM requests WHERE id IN ({marks}) OR external IN ({marks})",  # noqa: S608 - only placeholders
+                    f"SELECT id FROM requests WHERE id IN ({marks}) OR external IN ({marks})",  # noqa: S608 - only placeholders
                     (*wanted, *wanted),
                 ).fetchall()
-                rows = [_row(r) for r in found]
-                ids = sorted({row.id for row in rows} | set(wanted))
+                ids = sorted({str(row[0]) for row in found} | set(wanted))
                 marks = ",".join("?" * len(ids))
                 db.execute(f"DELETE FROM requests WHERE id IN ({marks})", ids)  # noqa: S608 - only placeholders
                 db.execute(f"DELETE FROM audit WHERE request_id IN ({marks})", ids)  # noqa: S608 - only placeholders
@@ -343,11 +353,11 @@ class Store:
                 raise
             db.execute("COMMIT")
             db.execute("VACUUM")
+            (free,) = db.execute("PRAGMA freelist_count").fetchone()
             busy, *_ = db.execute("PRAGMA wal_checkpoint(TRUNCATE)").fetchone()
-        if busy:
+        if free or busy:
             msg = "Slack approval storage is in use; forgetting the request finishes on the next try"
             raise HeinzelError(msg)
-        return rows
 
     def audit(self, request_id: str) -> list[tuple[str, str]]:
         """The events of a request, oldest first, as (event, detail)."""

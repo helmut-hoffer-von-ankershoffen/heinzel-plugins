@@ -80,6 +80,7 @@ def test_forget_leaves_no_canary_in_any_file_of_the_state_dir(rig, tmp_path):
 
         after = _found(state)
         assert after == {name: set() for name in after}, after
+        assert holder.execute("PRAGMA freelist_count").fetchone() == (0,)  # VACUUM left no free page behind
         assert db_path.with_name("approvals.sqlite3-wal").stat().st_size == 0
         for gone in (ref, slot("req-lost")):
             assert rig.service.store.get(gone) is None
@@ -140,13 +141,53 @@ def test_forget_never_waits_on_or_fails_because_of_the_network(rig, monkeypatch)
     assert rig.service.store.get(ref) is None
 
 
-def test_a_decided_request_is_not_withdrawn_again(rig):
-    ref = rig.post().reference or ""
-    rig.service.handle(rig.click(ref))
-    updates = len(rig.slack.updates)
-    rig.channel.forget("req-1", ref)
-    assert rig.service.withdrawing == []
-    assert len(rig.slack.updates) == updates
+def _settled(rig) -> None:
+    for thread in rig.service.withdrawing:
+        thread.join(5)
+
+
+@pytest.mark.parametrize("answer", [None, "hz_approve", "hz_decline"])
+def test_cores_order_settle_superseded_then_forget_leaves_no_draft_in_slack(rig, answer):
+    ref = rig.post(preview=_planted(POSTED), request_id="req-core").reference or ""
+    if answer:
+        rig.service.handle(rig.click(ref, action=answer))
+    rig.channel.settle(ref, "superseded")  # Core settles first; Slack then shows the whole draft as replaced
+    assert POSTED["ascii"] in json.dumps(rig.slack.updates[-1])
+    rig.channel.forget("req-core", ref)
+    _settled(rig)
+    final = rig.slack.updates[-1]
+    assert final["ts"] == rig.slack.updates[0]["ts"]
+    assert final["text"] == "Withdrawn"
+    assert not any(text in json.dumps(final, ensure_ascii=False) for text in POSTED.values())
+    assert not any(b["type"] == "actions" for b in final["blocks"])
+    assert rig.service.store.matching({"req-core", ref}) == []
+    assert rig.service.store.audit(ref) == []
+
+
+def test_a_retry_after_a_busy_store_has_already_withdrawn(rig, monkeypatch):
+    ref = rig.post(preview=_draft(ASCII)).reference or ""
+    store = rig.service.store
+    real = store.forget
+
+    def busy_once(keys):
+        real(keys)
+        monkeypatch.setattr(store, "forget", real)
+        raise HeinzelError("Slack approval storage is in use")
+
+    monkeypatch.setattr(store, "forget", busy_once)
+    with pytest.raises(HeinzelError, match="in use"):
+        rig.channel.forget("req-1", ref)
+    rig.channel.forget("req-1", ref)  # the retry finishes the local job
+    _settled(rig)
+    assert [u["text"] for u in rig.slack.updates] == ["Withdrawn"]
+
+
+def test_finished_withdrawals_are_not_kept(rig):
+    for n in range(3):
+        ref = rig.post(request_id=f"req-{n}").reference or ""
+        rig.channel.forget(f"req-{n}", ref)
+        _settled(rig)
+    assert len(rig.service.withdrawing) == 1
 
 
 def test_forget_works_offline_with_the_bot_off_and_sends_nothing(rig, monkeypatch):

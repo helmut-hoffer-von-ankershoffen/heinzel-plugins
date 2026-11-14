@@ -901,16 +901,18 @@ def installed_artifact(root: Path, interpreter: Path, *, owning: bool) -> Iterat
         if made.returncode or len(wheels) != 1:
             raise CaptureError("The plugin wheel for capture could not be built. Run make build, then retry")
         install = ["uv", "pip", "install", "--python", str(interpreter), "--no-deps"]
+        editable = [*install, "--no-build-isolation", "--editable", str(root)]
         try:
             if subprocess.run([*install, "--reinstall", str(wheels[0])], capture_output=True, timeout=600).returncode:
                 raise CaptureError("The plugin wheel for capture could not be installed. Run make setup, then retry")
             yield
-        finally:
-            restored = subprocess.run(
-                [*install, "--no-build-isolation", "--editable", str(root)], capture_output=True, timeout=600
-            )
-            if restored.returncode:
+        except BaseException:
+            # The original failure wins; a failed restore is still said, never silently left behind.
+            if subprocess.run(editable, capture_output=True, timeout=600).returncode:
                 print("The editable install was not restored; run make setup.", file=sys.stderr, flush=True)
+            raise
+        if subprocess.run(editable, capture_output=True, timeout=600).returncode:
+            raise CaptureError("The editable install was not restored after capture. Run make setup, then retry")
 
 
 def capture(

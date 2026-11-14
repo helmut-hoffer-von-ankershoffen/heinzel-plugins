@@ -11,9 +11,9 @@ Ask about it
 Page
 Chat
 Chat
-text hz-01M7BMG4536AS3XTS1F5BJBXDK
+text hz-01M7BR52XPSQF6W4MRV34RT4E2
 
-About: text hz-01M7BMG4536AS3XTS1F5BJBXDK
+About: text hz-01M7BR52XPSQF6W4MRV34RT4E2
 
 Ran `Review exact channel posting account, destination, scope and full message`: The channel reported delivered. This does not approve the captured write.
 Your message

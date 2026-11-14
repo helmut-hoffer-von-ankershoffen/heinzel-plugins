@@ -45,3 +45,10 @@ condition = "AND"
 regexTarget = "secret"
 paths = ['^plugins/heinzel-slack/docs/assets/screenshots/review-slack-notice\.txt$']
 regexes = ['^f505880dfe5441c0eb4d906b1b69dcdcea7ff6c85e961865ce8e5b9dbafeff28$']
+
+[[rules.allowlists]]
+description = "Exact generated replay identifier for the reviewed Slack forget withdraw (ADR 0148) gallery notice"
+condition = "AND"
+regexTarget = "secret"
+paths = ['^plugins/heinzel-slack/docs/assets/screenshots/review-slack-notice\.txt$']
+regexes = ['^5aa5dea4a3af7e7ca3678a65d01d460bc8965fcd8a57fd6e4240d05ba3c48fd6$']

@@ -252,25 +252,27 @@ class SlackService:
         """Delete every local copy of a request, offline (ADR 0148); idempotent, unknown keys are a no-op.
 
         `request_id` is the host's id (stored as `external`, its row id is `slot(request_id)`), so a draft stored
-        before a post that never got a receipt is found too; `reference` is the receipt's, when there was one. An
-        open request is withdrawn in Slack afterwards, best effort, on a background thread: forgetting never waits
-        on the network and never fails because of it.
+        before a post that never got a receipt is found too; `reference` is the receipt's, when there was one. A
+        posted message is withdrawn in Slack, best effort, on a background thread, replacing even a settled one
+        that still shows the draft: forgetting never waits on the network and never fails because of it.
         """
         keys = {key for key in (request_id, slot(request_id) if request_id else "", reference) if key}
         if not keys or (self._store is None and not (self._directory / "approvals.sqlite3").exists()):
             return  # nothing was ever stored here; do not create the store just to forget
-        rows = self.store.forget(keys)
-        if not self.usable():
-            return
-        for row in rows:
-            if row.state in {"pending", "posting"} and row.message_ts:
-                where = (row.team, row.owner, row.channel, row.message_ts)
-                thread = threading.Thread(target=self._withdraw, args=where, name="slack-withdraw", daemon=True)
-                self.withdrawing.append(thread)
-                thread.start()
+        if self.usable():
+            # Decided before the delete, so a retry after a busy checkpoint has already withdrawn. Every posted
+            # message goes, whatever its state: settle has just re-rendered it with the full draft.
+            self.withdrawing = [thread for thread in self.withdrawing if thread.is_alive()]
+            for row in self.store.matching(keys):
+                if row.message_ts:
+                    where = (row.team, row.owner, row.channel, row.message_ts)
+                    thread = threading.Thread(target=self._withdraw, args=where, name="slack-withdraw", daemon=True)
+                    self.withdrawing.append(thread)
+                    thread.start()
+        self.store.forget(keys)
 
     def _withdraw(self, team: str, owner: str, channel: str, ts: str) -> None:
-        # Content-free: the local rows are gone, and nothing of the draft is sent again.
+        # Content-free: nothing of the draft is sent again, and the edit replaces the whole message.
         try:
             api = self._transport.api()
             if api.identity().team_id != team or api.open_dm(owner) != channel:

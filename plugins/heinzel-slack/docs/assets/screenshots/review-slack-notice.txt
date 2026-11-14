@@ -25,7 +25,7 @@ Daemon not installed, off
 Chat
 New chat
 
-About: text hz-01M7BMG4536AS3XTS1F5BJBXDK
+About: text hz-01M7BR52XPSQF6W4MRV34RT4E2
 
 Ask about your setup, your team's contracts or what to do next. The chat reads with hz and asks you before it changes anything.
 The Heinzel proposes
@@ -37,15 +37,15 @@ Review exact channel posting account, destination, scope and full message
 Exactly these arguments:
 
 {
-  "session_id": "hz-01M7BMG4536AS3XTS1F5BJBXDK",
+  "session_id": "hz-01M7BR52XPSQF6W4MRV34RT4E2",
   "request_id": "gallery-notice",
   "review": {
-    "session_id": "hz-01M7BMG4536AS3XTS1F5BJBXDK",
+    "session_id": "hz-01M7BR52XPSQF6W4MRV34RT4E2",
     "request_id": "gallery-notice",
-    "owner": "u-24ffb145532551ca35e4e2c930253304",
+    "owner": "u-9df55fdf5ee328562607cb4f46952523",
     "channel": "slack",
     "kind": "notice",
-    "binding_id": "12d737a65b233c3673546c8b9cba3dced8d9e0decf4a7c2428feb1bfdd0714b7",
+    "binding_id": "e13e99ee3847702d254dd7143f2ea387957a197ee5594bb4040baebec26f63ac",
     "target": {
       "account": "slack:T0DEMO0001:U0DEMO0001",
       "destination": "D0DEMO0001",
@@ -53,7 +53,7 @@ Exactly these arguments:
     },
     "actor": null,
     "notice": {
-      "key": "f505880dfe5441c0eb4d906b1b69dcdcea7ff6c85e961865ce8e5b9dbafeff28",
+      "key": "5aa5dea4a3af7e7ca3678a65d01d460bc8965fcd8a57fd6e4240d05ba3c48fd6",
       "helper": "Lotte",
       "title": "Weekly report is ready",
       "body": "Lotte finished the fictional reading-list rollout report. Mira can review it before the demo team meeting.",
