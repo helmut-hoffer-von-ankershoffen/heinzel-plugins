@@ -151,8 +151,8 @@ def requirements(project: Project, group: str) -> list[str]:
     return found
 
 
-def core_metadata(source: str) -> dict:
-    """Read dependency metadata from the selected built artifact; never import or build core."""
+def core_archive(source: str) -> zipfile.ZipFile:
+    """Open the selected built Core artifact, a local wheel or an explicit HTTPS one, within its size limit."""
     if source.startswith("https://"):
         with urllib.request.urlopen(source, timeout=60) as response:  # noqa: S310 - explicit HTTPS candidate artifact
             content = response.read(128 * 1024 * 1024 + 1)
@@ -160,9 +160,14 @@ def core_metadata(source: str) -> dict:
         content = Path(source).read_bytes()
     if len(content) > 128 * 1024 * 1024:
         raise ValueError("Core artifact exceeds its size limit")
+    return zipfile.ZipFile(io.BytesIO(content))
+
+
+def core_metadata(source: str) -> dict:
+    """Read dependency metadata from the selected built artifact; never import or build core."""
     from email.parser import Parser
 
-    with zipfile.ZipFile(io.BytesIO(content)) as archive:
+    with core_archive(source) as archive:
         name = next(name for name in archive.namelist() if name.endswith(".dist-info/METADATA"))
         metadata = Parser().parsestr(archive.read(name).decode())
     if canonicalize_name(metadata["Name"]) != "heinzel":
@@ -416,6 +421,65 @@ def ensure_python(environment: Path, floor: str) -> None:
         )
 
 
+# Core owns the reviewed PyYAML build for a Python without an upstream wheel: the source, its hash and the backend pins
+# are in this one standard-library file of the Core wheel. The toolkit runs it and keeps no copy of any of them.
+CORE_PYYAML_BOOTSTRAP = "heinzel/bootstrap_pyyaml.py"
+
+
+def without_requirement(text: str, name: str) -> str:
+    """A hash-pinned requirements text without the entries of one package; every other entry stays byte for byte."""
+    kept = []
+    for entry in re.split(r"(?<!\\)\n", text):
+        found = re.match(r"\s*([A-Za-z0-9][A-Za-z0-9._-]*)", entry)
+        if not found or canonicalize_name(found[1]) != canonicalize_name(name):
+            kept.append(entry)
+    return "\n".join(kept)
+
+
+def reviewed_build(interpreter: Path, lock: Path, core: str, directory: Path) -> tuple[str, Path] | None:
+    """Build the package Core's bootstrap owns when this interpreter has no upstream wheel of it; else nothing.
+
+    Core decides everything: whether its wheel ships a bootstrap, which package it builds, whether this Python needs
+    it, and whether the lock selects the reviewed source. A lock that selects another one is refused there.
+    """
+    with core_archive(core) as archive:
+        if CORE_PYYAML_BOOTSTRAP not in archive.namelist():
+            return None
+        bootstrap = directory / "bootstrap_pyyaml.py"
+        bootstrap.write_bytes(archive.read(CORE_PYYAML_BOOTSTRAP))
+    isolated = [str(interpreter), "-I", "-S", str(bootstrap)]
+    if subprocess.run([*isolated, "needed"], check=False, timeout=60).returncode:
+        return None
+    pins = subprocess.run([*isolated, "pins"], check=True, capture_output=True, text=True, timeout=60)
+    name = json.loads(pins.stdout)["name"]
+    if without_requirement(lock.read_text(), name) == lock.read_text():
+        return None
+    wheels = directory / "wheels"
+    run([*isolated, "build", "--requirements", str(lock), "--wheel-dir", str(wheels), "--python", str(interpreter)])
+    built = list(wheels.glob("*.whl"))
+    if len(built) != 1:
+        raise ValueError("Core's PyYAML bootstrap did not leave exactly one wheel")
+    return name, built[0]
+
+
+def sync_locked(interpreter: Path, lock: Path, core: str) -> None:
+    """Make the environment exactly the hash-pinned lock, with no source build outside Core's reviewed one."""
+    sync = ["uv", "pip", "sync", "--python", str(interpreter), "--require-hashes", "--no-build"]
+    with tempfile.TemporaryDirectory(prefix="hz-plugin-sync-") as temporary:
+        directory = Path(temporary)
+        reviewed = reviewed_build(interpreter, lock, core, directory)
+        if reviewed is None:
+            run([*sync, str(lock)])
+            return
+        name, wheel = reviewed
+        # The wheel is built here, so no lock can name its hash: Core's bootstrap checked the lock's source hash and
+        # the downloaded source against its reviewed pin instead. Everything else still installs under the hashes.
+        rest = directory / "requirements.lock"
+        rest.write_text(without_requirement(lock.read_text(), name))
+        run([*sync, str(rest)])
+        run(["uv", "pip", "install", "--python", str(interpreter), "--no-deps", "--no-build", str(wheel)])
+
+
 def prepare_environment(project: Project, core: str | None) -> Path:
     """Authenticate the owning lock before installing core and this plugin without resolving new dependencies."""
     core = tested_core(project, core)
@@ -426,18 +490,7 @@ def prepare_environment(project: Project, core: str | None) -> Path:
     ensure_python(environment, floor)
     if not interpreter.is_file():
         run(["uv", "venv", "--python", floor, str(environment)])
-    run(
-        [
-            "uv",
-            "pip",
-            "sync",
-            "--python",
-            str(interpreter),
-            "--require-hashes",
-            "--no-build",
-            str(project.directory / "requirements.lock"),
-        ]
-    )
+    sync_locked(interpreter, project.directory / "requirements.lock", core)
     selected = core_install_spec(core, record["core"]["version"])
     run(["uv", "pip", "install", "--python", str(interpreter), "--no-deps", "--no-build", selected])
     run(
@@ -657,18 +710,7 @@ def acceptance(project: Project, core: str | None, *, wheel: Path | None = None)
     ensure_python(environment, floor)
     if not interpreter.is_file():
         run(["uv", "venv", "--python", floor, str(environment)])
-    run(
-        [
-            "uv",
-            "pip",
-            "sync",
-            "--python",
-            str(interpreter),
-            "--require-hashes",
-            "--no-build",
-            str(project.directory / "requirements.lock"),
-        ]
-    )
+    sync_locked(interpreter, project.directory / "requirements.lock", core)
     wheels = (
         [wheel.resolve()]
         if wheel
