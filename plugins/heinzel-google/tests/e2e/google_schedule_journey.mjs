@@ -2,6 +2,7 @@ import assert from "node:assert/strict";
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
 import { createRequire } from "node:module";
 import { join } from "node:path";
+import { openDetails, sendToHeinzel } from "./personal_conversation.mjs";
 
 const require = createRequire(process.argv[6]);
 const { chromium, webkit } = require("playwright-core");
@@ -12,18 +13,6 @@ url.pathname = "/doctor";
 const browser = await (process.argv[3] === "webkit" ? webkit : chromium).launch({ headless: true });
 const context = await browser.newContext({ serviceWorkers: "block", viewport: { width: 390, height: 844 } });
 const page = await context.newPage();
-// Core 0.9.40 sends from the personal conversation's own form; the page chat also has a "Send" button.
-const sendToHeinzel = () =>
-  page
-    .locator("form")
-    .filter({ has: page.getByLabel("Message your Heinzel") })
-    .getByRole("button", { name: "Send", exact: true })
-    .click();
-// Core 0.9.40 keeps the terms, connected read, schedule and notification panels in the collapsed "Details".
-const openDetails = async () => {
-  const details = page.locator('xpath=//details[summary[normalize-space()="Details"]]');
-  if (!(await details.evaluate((node) => node.open))) await details.locator("summary").first().click();
-};
 try {
   await page.goto(url.href);
   await page.locator("#splash").waitFor({ state: "hidden", timeout: 30000 });
@@ -34,9 +23,9 @@ try {
     await page.getByRole("tab", { name: "Chat", exact: true }).click();
   await page.getByLabel("Your message").fill("Read my selected source.");
   await page.getByRole("button", { name: "Create a Heinzel and take this message" }).click();
-  await sendToHeinzel();
+  await sendToHeinzel(page);
   await page.getByText("Source inspected.").waitFor({ timeout: 30000 });
-  await openDetails();
+  await openDetails(page);
   const terms = page.getByRole("region", { name: "Proposed Heinzel terms" });
   await terms.getByRole("button", { name: "Review these terms" }).click();
   await terms.getByRole("button", { name: "Confirm" }).click();
@@ -94,7 +83,7 @@ try {
   assert.equal(finished.deduplicated, true);
   await page.reload();
   await page.getByRole("tab", { name: "Chat", exact: true }).click();
-  await openDetails();
+  await openDetails(page);
   await page
     .getByText(/Tool activity for this reply/)
     .nth(1)
@@ -104,7 +93,7 @@ try {
     .first()
     .waitFor({ timeout: 30000 });
   await page.getByLabel("Message your Heinzel").fill("Read my source and prepare a notification for my review.");
-  await sendToHeinzel();
+  await sendToHeinzel(page);
   const drafts = page.getByRole("region", { name: "Notification drafts" });
   await drafts.getByText("The source was read; please review.", { exact: true }).waitFor({timeout: 30000});
   assert.match(await drafts.innerText(), /queued does not mean shown/i);
@@ -120,7 +109,7 @@ try {
   await panel.getByText(/Recorded state: revoked/).waitFor();
   await page.reload();
   await page.getByRole("tab", { name: "Chat", exact: true }).click();
-  await openDetails();
+  await openDetails(page);
   await schedule.getByText("Recurring Heinzel turns", { exact: true }).click();
   await schedule.getByText(/stale · contract revision/).waitFor();
   assert.equal(await panel.evaluate((node) => node.scrollWidth > node.clientWidth), false);
