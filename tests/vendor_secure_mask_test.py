@@ -4,6 +4,7 @@ import ast
 import copy
 import json
 import shutil
+import tomllib
 import zipfile
 from pathlib import Path
 
@@ -193,13 +194,15 @@ def test_original_wheel_must_remain_the_pinned_upstream_archive(secured):
 
 def test_rebuilt_wheel_cannot_restore_the_original_weak_mask(secured):
     inventory, expected = vendor.projection(secured)
+    version = tomllib.loads((secured / "pyproject.toml").read_text())["project"]["version"]  # the plugin's own
     wheel = secured / "artifact.whl"
     with zipfile.ZipFile(wheel, "w") as archive:
         archive.writestr(
-            "heinzel_slack-0.1.0.dist-info/METADATA", "Metadata-Version: 2.4\nName: heinzel-slack\nVersion: 0.1.0\n"
+            f"heinzel_slack-{version}.dist-info/METADATA",
+            f"Metadata-Version: 2.4\nName: heinzel-slack\nVersion: {version}\n",
         )
         archive.writestr(
-            "heinzel_slack-0.1.0.dist-info/WHEEL",
+            f"heinzel_slack-{version}.dist-info/WHEEL",
             "Wheel-Version: 1.0\nGenerator: fixture\nRoot-Is-Purelib: true\nTag: py3-none-any\n",
         )
         for path, data in expected.items():
@@ -207,10 +210,11 @@ def test_rebuilt_wheel_cannot_restore_the_original_weak_mask(secured):
     assert vendor.verify_wheel(secured, wheel) == inventory
     with zipfile.ZipFile(wheel, "w") as archive:
         archive.writestr(
-            "heinzel_slack-0.1.0.dist-info/METADATA", "Metadata-Version: 2.4\nName: heinzel-slack\nVersion: 0.1.0\n"
+            f"heinzel_slack-{version}.dist-info/METADATA",
+            f"Metadata-Version: 2.4\nName: heinzel-slack\nVersion: {version}\n",
         )
         archive.writestr(
-            "heinzel_slack-0.1.0.dist-info/WHEEL",
+            f"heinzel_slack-{version}.dist-info/WHEEL",
             "Wheel-Version: 1.0\nGenerator: fixture\nRoot-Is-Purelib: true\nTag: py3-none-any\n",
         )
         for path, data in expected.items():
