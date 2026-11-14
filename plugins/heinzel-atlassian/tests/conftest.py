@@ -24,7 +24,7 @@ import pytest
 from heinzel import Config, Kernel, Module, ModuleRecord, Settings
 from heinzel.kernel import Origin, discover
 
-from heinzel_atlassian import Acli, Completed
+from heinzel_atlassian import Acli, Completed, _acli
 
 SITE = "https://acme.atlassian.net"
 FIXTURES = Path(__file__).parent / "fixtures"
@@ -226,6 +226,14 @@ class FakeAcli(Acli):
             "labels": list(labels),
         }
         return issue
+
+
+@pytest.fixture(autouse=True)
+def no_homebrew(tmp_path: Path, monkeypatch: pytest.MonkeyPatch) -> tuple[str, str]:
+    """Empty stand-ins for Homebrew's directories, so the host's own acli never answers a test."""
+    bins = (str(tmp_path / "homebrew-arm" / "bin"), str(tmp_path / "homebrew-intel" / "bin"))
+    monkeypatch.setattr(_acli, "HOMEBREW_BINS", bins)
+    return bins
 
 
 @pytest.fixture

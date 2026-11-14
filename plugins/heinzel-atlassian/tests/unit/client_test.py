@@ -66,7 +66,7 @@ def test_the_minimum_a_newer_or_an_unnamed_version_reads(reported):
 
 def test_a_missing_acli_names_the_install_and_the_login():
     text = message(Stub(error=FileNotFoundError("acli")))
-    assert "not on PATH" in text
+    assert "looked on PATH" in text
     assert "install-acli" in text
     assert text.endswith("acli jira auth login")
 

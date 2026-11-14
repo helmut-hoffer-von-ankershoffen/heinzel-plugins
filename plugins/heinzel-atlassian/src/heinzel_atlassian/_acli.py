@@ -49,6 +49,9 @@ ENVIRONMENT = (
 )
 """Variables acli gets from the caller's environment; also `LC_*`, `ACLI_*` and the proxy variables. `PATH` keeps
 its absolute entries only."""
+HOMEBREW_BINS = ("/opt/homebrew/bin", "/usr/local/bin")
+"""Where Homebrew installs `acli` on Apple silicon and on Intel. Searched after `PATH`: a service that launchd or the
+desktop app starts runs with a short `PATH` (`/usr/bin:/bin:/usr/sbin:/sbin`) that lacks them."""
 _PREFIXES = ("LC_", "ACLI_")
 _PROXIES = frozenset({"HTTPS_PROXY", "HTTP_PROXY", "NO_PROXY", "ALL_PROXY"})
 _VERSION = re.compile(r"\bacli version v?(\d{1,4})\.(\d{1,4})\.(\d{1,6})")
@@ -89,12 +92,40 @@ def absolute_path(search: str) -> str:
     return os.pathsep.join(entry for entry in search.split(os.pathsep) if entry and Path(entry).is_absolute())
 
 
-def executable(settings: AtlassianSettings) -> str | None:
-    """The absolute path of `atlassian.acli`, looked up on `PATH` when it is a name; None if there is none.
+def search_path(search: str, *extra: str) -> str:
+    """The absolute entries of `search`, then `extra` and `HOMEBREW_BINS`, each once."""
+    entries = [entry for entry in absolute_path(search).split(os.pathsep) if entry]
+    return os.pathsep.join(dict.fromkeys([*entries, *extra, *HOMEBREW_BINS]))
 
-    Relative `PATH` entries (`.`) are skipped, so a repository can't put its own `acli` first.
+
+def where_looked() -> str:
+    """Where `executable` looks for a program name, for a person."""
+    return f"on PATH and in {' and '.join(HOMEBREW_BINS)}"
+
+
+def run_environment(path: str, source: Mapping[str, str] | None = None) -> dict[str, str]:
+    """`environment(source)` whose `PATH` also holds acli's own directories and `HOMEBREW_BINS`, after `PATH`.
+
+    acli's directories are the one it is in and, for a link such as Homebrew's, the one it links to: what a launcher
+    there needs is found under a launchd `PATH` too.
     """
-    found = shutil.which(settings.acli, path=absolute_path(os.environ.get("PATH", os.defpath)))
+    env = environment(source)
+    own = Path(path)
+    try:
+        linked = str(own.resolve(strict=True).parent)
+    except (OSError, RuntimeError):
+        linked = str(own.parent)
+    env["PATH"] = search_path(env.get("PATH", ""), str(own.parent), linked)
+    return env
+
+
+def executable(settings: AtlassianSettings) -> str | None:
+    """The absolute path of `atlassian.acli`, looked up on `PATH` and in `HOMEBREW_BINS`; None if there is none.
+
+    A name is looked up, an absolute path taken as it is. Relative `PATH` entries (`.`) are skipped, so a repository
+    can't put its own `acli` first.
+    """
+    found = shutil.which(settings.acli, path=search_path(os.environ.get("PATH", os.defpath)))
     return found if found is not None and Path(found).is_absolute() else None
 
 
@@ -213,7 +244,7 @@ class Acli:
             stdout=subprocess.PIPE,
             stderr=subprocess.PIPE,
             cwd=Path.home(),
-            env=environment(),
+            env=run_environment(path),
             start_new_session=_POSIX,
         )
         readers = [
