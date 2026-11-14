@@ -103,11 +103,14 @@ GRANTS = (
 reads mail from Google or allows it, a write only when the person allows it."""
 FORBIDDEN = ("cloud-platform",)
 """Scope words never asked for: Heinzel has no use for the person's Google Cloud projects."""
-CONSENT = re.compile(r"https://accounts\.google\.com/\S+")
-"""Google's consent page, as `gws auth login` prints it."""
+CONSENT = re.compile(r"https://accounts\.google\.com/[!-~]+")
+"""Google's consent page, as `gws auth login` prints it: printable ASCII only, so no control, bidirectional or
+invisible character ever reaches the page that shows it."""
 NO_CLIENT = f"gws has no OAuth client yet, so it can't sign in. Give it one first: {CLIENT}."
 LIVE = 15.0
 """Seconds the live status's one read may take."""
+CHOSEN = frozenset({"configured", "default"})
+"""How mail must be bound to Google for Heinzel to need reading it: chosen, never only automatically."""
 LOGIN_TIMEOUT = 900.0
 """Seconds a sign-in may wait for the person's consent; Core stops it at the same limit."""
 
@@ -161,7 +164,7 @@ class GoogleSignIn:
         if self._view.bound("calendar") == "google":
             needed.add("calendar-read")
         provider, how = self._view.binding("mail")
-        if provider == "google" and how != "automatic":
+        if provider == "google" and how in CHOSEN:
             needed.add("mail-read")
         return needed
 

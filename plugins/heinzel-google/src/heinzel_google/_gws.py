@@ -196,16 +196,23 @@ class _Capture:
 
 
 def _read_lines(stream: IO[bytes], on_line: Callable[[str], None]) -> None:
-    """Hand each line of `stream` to `on_line`, at most `SIGN_IN_LINE` bytes of each, up to `SIGN_IN_OUTPUT` bytes.
+    """Hand each line of `stream` to `on_line`, up to `SIGN_IN_OUTPUT` bytes in all; then read on without looking.
 
-    After that it reads on without looking, so the writer never blocks.
+    A line is read at most `SIGN_IN_LINE` + 1 bytes at a time, so memory stays bounded; a longer line is skipped
+    whole. If `on_line` fails, the rest is drained unread, so the writer never blocks.
     """
-    seen = 0
+    seen, looking, skipping = 0, True, False
     with stream:
-        for raw in stream:
+        while raw := stream.readline(SIGN_IN_LINE + 1):
             seen += len(raw)
-            if seen <= SIGN_IN_OUTPUT:
-                on_line(raw[:SIGN_IN_LINE].decode(errors="replace").strip())
+            ended = raw.endswith(b"\n")
+            overlong = not ended and len(raw) > SIGN_IN_LINE
+            if looking and not skipping and not overlong and seen <= SIGN_IN_OUTPUT:
+                try:
+                    on_line(raw.decode(errors="replace").strip())
+                except Exception:  # noqa: BLE001 - stop looking, keep draining: a stuck pipe would hang gws
+                    looking = False
+            skipping = not ended and (overlong or skipping)
 
 
 def signal_group(pid: int, signum: signal.Signals) -> None:

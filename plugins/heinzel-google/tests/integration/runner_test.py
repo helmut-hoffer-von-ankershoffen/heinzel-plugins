@@ -4,6 +4,7 @@ import json
 import sys
 import threading
 import time
+import tracemalloc
 from pathlib import Path
 
 import pytest
@@ -205,3 +206,44 @@ def test_a_sign_in_reads_only_so_much_of_its_output(shell_stand_in, monkeypatch)
     script = shell_stand_in("echo first-line-here\necho second-line-is-dropped\necho third")
     assert Gws().sign_in(script, [], lines.append, threading.Event(), 10.0) == 0
     assert lines == ["first-line-here"]
+
+
+def test_a_sign_in_reads_nothing_from_standard_input(shell_stand_in):
+    lines: list[str] = []
+    started = time.monotonic()
+    code = Gws().sign_in(shell_stand_in('read x; echo "got:[$x]"'), [], lines.append, threading.Event(), 5.0)
+    assert code is not None
+    assert time.monotonic() - started < 3
+    assert lines == ["got:[]"]
+
+
+def test_one_huge_line_keeps_memory_bounded_and_is_skipped(shell_stand_in):
+    lines: list[str] = []
+    script = shell_stand_in("head -c 20000000 /dev/zero | tr '\\0' a\necho\necho after")
+    tracemalloc.start()
+    try:
+        code = Gws().sign_in(script, [], lines.append, threading.Event(), 60.0)
+        _, peak = tracemalloc.get_traced_memory()
+    finally:
+        tracemalloc.stop()
+    assert code == 0
+    assert peak < 5_000_000, peak
+    assert lines == []  # past SIGN_IN_OUTPUT nothing more is looked at
+
+
+def test_an_overlong_line_is_skipped_whole_and_the_next_one_read(shell_stand_in, monkeypatch):
+    monkeypatch.setattr(_gws, "SIGN_IN_LINE", 8)
+    lines: list[str] = []
+    script = shell_stand_in("printf 'https://accounts.google.com/long\\nshort\\n'")
+    assert Gws().sign_in(script, [], lines.append, threading.Event(), 10.0) == 0
+    assert lines == ["short"]
+
+
+def test_a_failing_line_handler_never_stalls_gws(shell_stand_in):
+    def broken(_: str) -> None:
+        raise RuntimeError
+
+    script = shell_stand_in(f'echo "{CONSENT}"\nhead -c 2000000 /dev/zero\nexit 0')
+    started = time.monotonic()
+    assert Gws().sign_in(script, [], broken, threading.Event(), 30.0) == 0  # the pipe is drained, gws ends
+    assert time.monotonic() - started < 10

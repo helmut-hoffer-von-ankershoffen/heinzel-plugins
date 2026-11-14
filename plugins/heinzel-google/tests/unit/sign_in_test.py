@@ -3,6 +3,7 @@
 import json
 import threading
 from dataclasses import dataclass, field
+from urllib.parse import urlsplit
 
 import pytest
 from heinzel.kernel import SignInLet, SignInProgress
@@ -220,3 +221,62 @@ def test_a_page_core_refuses_is_left_out_and_the_next_is_shown(session, fake_gws
     fake_gws.sign_in_lines = ["https://accounts.google.com/" + "x" * 5000, CONSENT]
     outcome, seen = run(provider(session, fake_gws), DEFAULTS)
     assert (outcome.state, seen) == ("succeeded", [SignInProgress(url=CONSENT, finish_on="host")])
+
+
+@pytest.mark.parametrize("junk", ["\x1b[31m", chr(0x202E), "\x07", chr(0x200B)], ids=["ANSI", "RLO", "BEL", "ZWSP"])
+def test_no_control_bidi_or_invisible_character_reaches_the_page(session, fake_gws, junk):
+    fake_gws.sign_in_lines = [f"{CONSENT}{junk}tail"]
+    _, seen = run(provider(session, fake_gws), DEFAULTS)
+    assert seen == [SignInProgress(url=CONSENT, finish_on="host")]
+
+
+@pytest.mark.parametrize(
+    "line",
+    [
+        "https://accounts.google.com.evil.example/o/oauth2/auth",
+        "https://accounts.google.com@evil.example/o",
+        "https://user@accounts.google.com/o",
+        "https://accounts.google.com:443@evil.example/o",
+        "https://accounts.google.com\\@evil.example/o",
+        "http://accounts.google.com/o",
+        "https://evil.example/?next=https://accounts.google.com/o",
+        "https://accounts" + chr(0xFF0E) + "google" + chr(0xFF0E) + "com/o",
+        "https://accounts.google.com%2eevil.example/o",
+        "HTTPS://ACCOUNTS.GOOGLE.COM/o",
+        "https://xaccounts.google.com/o",
+    ],
+)
+def test_a_spoofed_page_never_names_another_host(session, fake_gws, line):
+    fake_gws.sign_in_lines = [line]
+    _, seen = run(provider(session, fake_gws), DEFAULTS)
+    for page in seen:
+        parts = urlsplit(page.url)
+        assert (parts.scheme, parts.hostname, parts.username, parts.port) == (
+            "https",
+            "accounts.google.com",
+            None,
+            None,
+        )
+
+
+def test_what_gws_prints_is_never_echoed(session, fake_gws):
+    said = "ya29.a0FAKEFAKEFAKE refresh_token=1//0gFAKE"
+    fake_gws.sign_in_lines = [said, "error: " + said]
+    fake_gws.sign_in_code = 3
+    outcome, seen = run(provider(session, fake_gws), DEFAULTS)
+    assert seen == []
+    assert "FAKE" not in outcome.model_dump_json()
+
+
+@pytest.mark.parametrize("weird", [{"--full"}, {"cloud-platform"}, {"all"}, {"docs-read; rm -rf /"}, {"--scopes=x"}])
+def test_an_unknown_grant_asks_nothing(session, fake_gws, weird):
+    outcome, _ = run(provider(session, fake_gws), frozenset(weird))
+    assert (outcome.state, fake_gws.sign_ins) == ("failed", [])
+
+
+@pytest.mark.parametrize("how", ["configured", "automatic", "default", "off", "unbound"])
+def test_mail_is_needed_only_when_chosen_and_a_write_never(session, fake_gws, how):
+    bindings = dict.fromkeys(("documents", "calendar", "mail"), ("google", how))
+    needed = {s.grant.id for s in provider(session, fake_gws, **bindings).status(live=False).grants if s.needed}
+    assert not [grant for grant in needed if grant.endswith("-write")]
+    assert ("mail-read" in needed) == (how in {"configured", "default"})
