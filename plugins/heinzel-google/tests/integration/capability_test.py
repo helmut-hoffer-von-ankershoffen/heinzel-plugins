@@ -68,6 +68,7 @@ def workspace(fake_gws):
 def test_a_requester_reads_a_doc_through_the_bound_adapter(google_kernel, workspace, gws_path):
     code, document = hz(google_kernel(BOUND, prep=prep()), "prep", "notes", DOC_ID)
     assert code == 0, document
+    document.pop("source", None)  # Core 0.9.43 adds it
     assert document == {
         "ref": DOC_ID,
         "title": "1:1 notes",

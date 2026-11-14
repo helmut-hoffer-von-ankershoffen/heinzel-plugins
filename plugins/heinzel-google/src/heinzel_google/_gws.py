@@ -155,6 +155,8 @@ _SECRETS = re.compile(r"ya29\.[\w.-]+|1//[\w.-]{20,}|GOCSPX-[\w-]+|eyJ[\w-]{5,}\
 """Access tokens, refresh tokens, client secrets and JWTs, in case `gws` or Google ever echo one."""
 _RATE = frozenset({"rateLimitExceeded", "userRateLimitExceeded", "RATE_LIMIT_EXCEEDED", "quotaExceeded"})
 _SCOPE = frozenset({"insufficientPermissions", "ACCESS_TOKEN_SCOPE_INSUFFICIENT"})
+SCOPE_REFUSED = "doesn't give Heinzel permission to read it"
+"""The words of the refusal for a missing scope; a caller that must not say "sign in again" looks for them."""
 _DISABLED = frozenset({"accessNotConfigured", "SERVICE_DISABLED"})
 
 
@@ -715,7 +717,7 @@ class GoogleSession:
             return _unwritable(api, subject, said)
         if reasons & _SCOPE:
             return (
-                f"{api} refused {subject}: your Google sign-in doesn't give Heinzel permission to read it ({said}). "
+                f"{api} refused {subject}: your Google sign-in {SCOPE_REFUSED} ({said}). "
                 f"Sign in again and allow it: {SETUP}."
             )
         if reasons & _DISABLED:
