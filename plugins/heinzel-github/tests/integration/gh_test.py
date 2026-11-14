@@ -247,22 +247,26 @@ def test_a_gh_that_cannot_start_is_a_clear_error(tmp_path, monkeypatch, install_
         gh().version()
 
 
-LAUNCHD_PATH = "/usr/bin:/bin:/usr/sbin:/sbin"
-"""The PATH a launchd service gets when its plist sets none: no Homebrew directory in it."""
+LAUNCHD_DIRS = ("usr/bin", "bin", "usr/sbin", "sbin")
+"""The PATH a launchd service gets when its plist sets none (`/usr/bin:/bin:/usr/sbin:/sbin`), no Homebrew directory in
+it. The test uses empty stand-ins under its own directory: a CI runner may have a gh of its own in `/usr/bin`."""
 
 
 @pytest.mark.parametrize("which", [0, 1], ids=["Apple silicon", "Intel"])
 def test_gh_where_homebrew_installs_it_is_found_and_run_under_a_launchd_path(
-    fake_gh_cli, no_homebrew, monkeypatch, which
+    fake_gh_cli, no_homebrew, monkeypatch, tmp_path, which
 ):
     """Homebrew links `bin/gh` to its Cellar; a service started by launchd has none of Homebrew's bins on PATH."""
     link = Path(no_homebrew[which]) / "gh"
     link.parent.mkdir(parents=True)
     link.symlink_to(fake_gh_cli.bin / "gh")
-    monkeypatch.setenv("PATH", LAUNCHD_PATH)
+    launchd = [str(tmp_path / "launchd" / directory) for directory in LAUNCHD_DIRS]
+    for directory in launchd:
+        Path(directory).mkdir(parents=True)
+    monkeypatch.setenv("PATH", os.pathsep.join(launchd))
     fake_gh_cli.answer(PATH, stdout="[]")
     assert gh().executable() == str(link)
     assert gh().run(call(), host="github.com", timeout=10).returncode == 0
     child = fake_gh_cli.api_calls()[-1]["env"]["PATH"].split(os.pathsep)
-    assert child[:4] == LAUNCHD_PATH.split(":")
+    assert child[:4] == launchd
     assert {str(link.parent), str(fake_gh_cli.bin.resolve())} <= set(child)
