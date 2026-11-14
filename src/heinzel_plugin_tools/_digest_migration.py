@@ -31,14 +31,6 @@ MIGRATED_DIGESTS: dict[str, str] = {
     "50b56f504ae62164ad6841093f05abef327a6e4f5072af3d67ef62a31de2ea73": (
         "5a2a38882576130e6147fbf1e368556b120b72f5ecc91d078eaec54556a62ca4"
     ),
-    # heinzel-github gallery
-    "fa6fe68cb794cf040f6bb7b3a86b354f6ba2587f5c2c704765cea06ad256c186": (
-        "a0ea2ffbe42179f934611d86c20067a196cae7b8f8151a58398263da39389973"
-    ),
-    # heinzel-github definition
-    "4965336e7284ca3f776242e2244e65d4ead21d20c813f31041c249a07e4a7293": (
-        "82771c8bc5fa5c4e742d11ee3885b44c3870b9c09f83fd78dd14d69522363459"
-    ),
     # heinzel-google gallery
     "c55e21d8b4058694bbf28bc39e754f38a6f1f2eb27091aa70622eb018c72c91d": (
         "844a7a75738a418731ea4db1a3e298d2952cc8417c81e0855c58f6bd18c6c832"
