@@ -36,7 +36,12 @@ def test_no_credential_is_declared_because_acli_owns_authentication():
 @pytest.mark.parametrize("provider", PROVIDERS, ids=lambda p: p.name)
 def test_methods_of_the_declared_modes_match_the_protocol(provider):
     capability = CAPABILITIES[provider.capability]
-    served = [name for name, mode in capability.methods.items() if mode in provider.modes]
+    optional = getattr(capability, "optional_methods", frozenset())  # ADR 0161 Core; none before
+    served = [
+        name
+        for name, mode in capability.methods.items()
+        if mode in provider.modes and (name not in optional or hasattr(provider.factory, name))
+    ]
     assert served
     for name in served:
         implemented = inspect.signature(getattr(provider.factory, name), eval_str=True)
@@ -58,9 +63,12 @@ def test_links_are_the_site_host_only_never_the_gateway(monkeypatch, tmp_path):
 
 
 def test_only_the_documents_provider_declares_links_and_only_on_a_core_that_knows_them():
-    declared = {p.name: getattr(p, "links", None) for p in PROVIDERS}
-    assert declared["atlassian:tracker"] in (None, ())
-    assert declared["atlassian:documents"] == (links if MULTI else None)
+    by_name = {p.name: p for p in PROVIDERS}
+    tracker, documents = by_name["atlassian:tracker"], by_name["atlassian:documents"]
+    assert not getattr(tracker, "links", ())
+    assert getattr(tracker, "configured_links", None) is None
+    assert not getattr(documents, "links", ())  # a function of settings is kept as `configured_links`
+    assert getattr(documents, "configured_links", None) is (links if MULTI else None)
 
 
 def test_confluence_does_not_search_until_acli_can():
