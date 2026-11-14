@@ -196,3 +196,21 @@ def test_a_failed_installed_step_retains_its_exit_code_and_diagnostics(tmp_path,
         installation._run(["controlled-step"], cwd=tmp_path, env={})
     assert failure.value.code == 7
     assert capsys.readouterr().err == "Scoped repair needed\n"
+
+
+def test_verify_profile_creates_its_sdk_on_the_python_a_3_15_only_core_requires(tmp_path, monkeypatch):
+    core = tmp_path / "heinzel-1.0.0-py3-none-any.whl"
+    with zipfile.ZipFile(core, "w") as archive:
+        archive.writestr("heinzel-1.0.0.dist-info/METADATA", "Name: heinzel\nVersion: 1.0.0\nRequires-Python: >=3.15\n")
+    commands = []
+    monkeypatch.setattr(installation, "_run", lambda command, **_: commands.append(command))
+    monkeypatch.setattr(installation, "check_profile_format", lambda *_a, **_k: None)
+    monkeypatch.setattr(installation, "verify_managed_profile", lambda *_a: None)
+    installation.verify_profile(core, tmp_path / "profile.json")
+    venv = next(command for command in commands if command[:2] == ["uv", "venv"])
+    assert venv[venv.index("--python") + 1] == "3.15"
+
+
+def test_the_lifecycle_probe_keeps_the_wide_python_range_so_current_cores_still_install(tmp_path):
+    installation._probe_project(tmp_path, "1.0.0")
+    assert 'requires-python=">=3.12"' in (tmp_path / "pyproject.toml").read_text()

@@ -73,7 +73,7 @@ def _probe_project(directory: Path, version: str) -> None:
     package.mkdir(parents=True, exist_ok=True)
     (directory / "pyproject.toml").write_text(
         '[project]\nname="heinzel-lifecycle-probe"\n'
-        f'version="{version}"\nrequires-python=">=3.15"\ndependencies=["heinzel"]\n'
+        f'version="{version}"\nrequires-python=">=3.12"\ndependencies=["heinzel"]\n'
         '[project.entry-points."heinzel.modules"]\nlifecycleprobe="heinzel_lifecycle_probe"\n'
         '[build-system]\nrequires=["hatchling"]\nbuild-backend="hatchling.build"\n'
     )
@@ -208,7 +208,10 @@ def verify_profile(core: Path, profile: Path) -> None:
         root = Path(temporary).resolve()
         env = isolated_environment(root)
         sdk = root / "sdk"
-        _run(["uv", "venv", str(sdk)], cwd=root, env=env)
+        from heinzel_plugin_tools.cli import core_metadata, python_floor
+
+        floor = python_floor(core_metadata(str(core.resolve()))["requires_python"])
+        _run(["uv", "venv", "--python", floor, str(sdk)], cwd=root, env=env)
         interpreter = sdk / "bin/python"
         _run(["uv", "pip", "install", "--python", str(interpreter), str(core.resolve())], cwd=root, env=env)
         check_profile_format(interpreter, profile, env=env)

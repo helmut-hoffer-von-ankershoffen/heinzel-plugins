@@ -403,14 +403,29 @@ def tested_core(project: Project, core: str | None) -> str:
     return core or released_core(project)
 
 
+def ensure_python(environment: Path, floor: str) -> None:
+    """An environment made earlier on a Python older than Core needs fails here, not in a resolver error."""
+    config = environment / "pyvenv.cfg"
+    if not config.is_file():
+        return
+    found = re.search(r"^version(?:_info)?\s*=\s*(\d+)\.(\d+)", config.read_text(), re.MULTILINE)
+    if found and (int(found[1]), int(found[2])) < tuple(map(int, floor.split("."))):
+        raise ValueError(
+            f"{environment} uses Python {found[1]}.{found[2]}, but this Core needs Python {floor} or newer. "
+            f"Delete it (rm -rf {environment}) and run the command again."
+        )
+
+
 def prepare_environment(project: Project, core: str | None) -> Path:
     """Authenticate the owning lock before installing core and this plugin without resolving new dependencies."""
     core = tested_core(project, core)
     record = validate_lock(project, core)
     environment = project.directory / ".venv"
     interpreter = environment / "bin/python"
+    floor = python_floor(core_metadata(core)["requires_python"])
+    ensure_python(environment, floor)
     if not interpreter.is_file():
-        run(["uv", "venv", "--python", python_floor(core_metadata(core)["requires_python"]), str(environment)])
+        run(["uv", "venv", "--python", floor, str(environment)])
     run(
         [
             "uv",
@@ -638,8 +653,10 @@ def acceptance(project: Project, core: str | None, *, wheel: Path | None = None)
     selected = core_install_spec(core, record["core"]["version"])
     environment = project.directory / ".acceptance"
     interpreter = environment / "bin/python"
+    floor = python_floor(core_metadata(core)["requires_python"])
+    ensure_python(environment, floor)
     if not interpreter.is_file():
-        run(["uv", "venv", "--python", python_floor(core_metadata(core)["requires_python"]), str(environment)])
+        run(["uv", "venv", "--python", floor, str(environment)])
     run(
         [
             "uv",

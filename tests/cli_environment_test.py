@@ -628,3 +628,24 @@ def test_a_core_requirement_only_for_older_pythons_does_not_count_against_the_lo
     wheel = core_wheel(tmp_path / "heinzel-0.9.4-py3-none-any.whl", requires=["old-only>=1; python_version < '3.15'"])
     write_lock(project, wheel)
     assert cli.validate_lock(project, str(wheel))["core"]["version"] == "0.9.4"
+
+
+@pytest.mark.parametrize("recorded", ["3.12.4", "3.14.8"])
+def test_an_existing_environment_on_a_too_old_python_fails_up_front_with_a_clear_message(project, tmp_path, recorded):
+    wheel = core_wheel(tmp_path / "heinzel-0.9.4-py3-none-any.whl")
+    write_lock(project, wheel)
+    (project.directory / ".venv/bin").mkdir(parents=True)
+    (project.directory / ".venv/bin/python").write_text("")
+    (project.directory / ".venv/pyvenv.cfg").write_text(f"home = /x\nversion_info = {recorded}\n")
+    with pytest.raises(ValueError, match=r"Python 3\.1\d, but this Core needs Python 3\.15 or newer.*rm -rf"):
+        cli.prepare_environment(project, str(wheel))
+
+
+def test_an_existing_environment_on_the_required_python_is_kept(project, tmp_path, commands):
+    wheel = core_wheel(tmp_path / "heinzel-0.9.4-py3-none-any.whl")
+    write_lock(project, wheel)
+    (project.directory / ".venv/bin").mkdir(parents=True)
+    (project.directory / ".venv/bin/python").write_text("")
+    (project.directory / ".venv/pyvenv.cfg").write_text("version = 3.15.1\n")
+    cli.prepare_environment(project, str(wheel))
+    assert not any(command[:2] == ["uv", "venv"] for command, _ in commands)
