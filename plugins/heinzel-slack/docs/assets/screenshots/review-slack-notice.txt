@@ -15,17 +15,16 @@ Doctor: 7 checks need attention
 ai.access ai access, system.credential backend, system.credential credential slack/app-token…
 
 Open
-Ask about it
-v0.9.20
+v0.9.42
 Updates, off
 1
 System health, warning
-Calendar unavailable
+?
 Daemon not installed, off
 Chat
 New chat
 
-About: text hz-01M7BSPGC7W3YYDWD41E83N905
+About: text hz-01M7D6RS8PP00D1GGV409R9HYX
 
 Ask about your setup, your team's contracts or what to do next. The chat reads with hz and asks you before it changes anything.
 The Heinzel proposes
@@ -37,15 +36,15 @@ Review exact channel posting account, destination, scope and full message
 Exactly these arguments:
 
 {
-  "session_id": "hz-01M7BSPGC7W3YYDWD41E83N905",
+  "session_id": "hz-01M7D6RS8PP00D1GGV409R9HYX",
   "request_id": "gallery-notice",
   "review": {
-    "session_id": "hz-01M7BSPGC7W3YYDWD41E83N905",
+    "session_id": "hz-01M7D6RS8PP00D1GGV409R9HYX",
     "request_id": "gallery-notice",
-    "owner": "u-7699312223542150c53dd0310b0279f9",
+    "owner": "u-e81116386f4e91f80e4f5385781b4786",
     "channel": "slack",
     "kind": "notice",
-    "binding_id": "f7462b03e21d5214cda98d71eadc8d1fb7380bea0676867aa1b9a17dc5aa8439",
+    "binding_id": "ee8cb64eb2ce1403e0590182b6fd60bf012aced3569634b66004544a309e1830",
     "target": {
       "account": "slack:T0DEMO0001:U0DEMO0001",
       "destination": "D0DEMO0001",
@@ -53,7 +52,7 @@ Exactly these arguments:
     },
     "actor": null,
     "notice": {
-      "key": "0c8e9d2c5db598ff24e2532115942545f04d2b33522f88f033aef69e0441de9e",
+      "key": "f5108d8fd2f07fb7abfe4e9dd70d4be1fdf95fb8b899961bc7211453cb864ed4",
       "helper": "Lotte",
       "title": "Weekly report is ready",
       "body": "Lotte finished the fictional reading-list rollout report. Mira can review it before the demo team meeting.",
@@ -68,6 +67,4 @@ Confirm
 Decline
 Your message
 Default
-
-Up to $0.25 per message · this chat $0.00
-Runs your agent runner and may cost money: at most $0.25 per message, $2.00 per chat; this chat has cost $0.00. It reads with hz and asks you before it changes anything.
+Audio

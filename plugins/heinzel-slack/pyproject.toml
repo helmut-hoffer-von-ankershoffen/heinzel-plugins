@@ -1,7 +1,7 @@
 [project]
 name = "heinzel-slack"
-version = "0.2.0"
-description = "Tell the owner what needs them, and ask for approval of an exact draft, in their own Slack DM."
+version = "0.3.0"
+description = "Slack for Heinzelmännchen: notices, exact-draft approvals and questions in your own DM, and the chat capability."
 readme = "README.md"
 license = "MIT"
 license-files = ["LICENSE", "src/heinzel_slack/_vendor/slack_sdk/LICENSE"]
@@ -24,7 +24,7 @@ test = ["editables>=0.5", "pytest>=9.0.3,<10", "pytest-timeout>=2.4.0,<3", "ruff
 [tool.heinzel.plugin]
 layout = "collection"
 requires = ["core:plugin-api@1"]
-provides = []
+provides = ["chat:read", "chat:write"]
 
 [tool.mypy]
 strict = true
@@ -63,6 +63,7 @@ highlights = [
     "Notices with the reason, in your own Slack direct message",
     "Drafts shared with Approve and Decline, bound to the exact text",
     "Your own private Slack app: no bot shared with anyone, nothing hosted",
+    "Questions with options as buttons, and channels read and posted with mentions made inert",
 ]
 
 [[tool.heinzel.catalog.screenshots]]
@@ -73,7 +74,7 @@ caption = "Demo data: Mira reviews the fictional Slack account, destination, sco
 [[tool.heinzel.catalog.screenshots]]
 path = "docs/assets/screenshots/slack-notice-delivered.png"
 surface = "ui"
-caption = "Demo data: Core reports the fictional notice delivered to the local stand-in after Mira confirms; this does not approve a captured write."
+caption = "Demo data: after Confirm, Core's chat reports that the channel delivered the fictional notice; this does not approve a captured write."
 
 [[tool.heinzel.catalog.screenshots]]
 path = "docs/assets/screenshots/slack-draft-cli.png"

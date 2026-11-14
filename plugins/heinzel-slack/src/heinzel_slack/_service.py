@@ -30,9 +30,12 @@ from heinzel_slack._models import DECIDED, DraftStanding, State
 from heinzel_slack._settings import SlackSettings
 from heinzel_slack._slack import Listener, SlackApi, SlackRefused, Transport
 from heinzel_slack._store import Row, Store
+from heinzel_slack._web import obj, objs, text_of
 
 DISTRIBUTION = "heinzel-slack"
 CHANNEL = "slack"
+SELF_ACTION = "hz_self_"
+"""Prefix of a self-channel question button's `action_id` (ADR 0160); approvals use `hz_approve` and `hz_decline`."""
 Outcome = Literal["approved", "declined", "expired", "superseded"]
 
 
@@ -335,7 +338,28 @@ class SlackService:
         return listener
 
     def _on_payload(self, payload: dict[str, Any]) -> None:
-        self.handle(payload)
+        self.dispatch(payload)
+
+    def dispatch(self, payload: dict[str, Any]) -> None:
+        """Route one interactive payload from any listener: a self-channel click to the store, the rest to `handle`."""
+        click = self_click(payload)
+        if click is None:
+            self.handle(payload)
+        elif self.bot_active():
+            self.store.record_click(click, self.clock())
+
+    def require_owner(self) -> tuple[str, str]:
+        """The configured owner and workspace, for the self channel.
+
+        Raises:
+            HeinzelError: If the bot is disabled or the owner or workspace is not set.
+        """
+        self._require_bot()
+        owner, team = self._settings.owner, self._settings.team
+        if not owner or not team:
+            msg = "No Slack owner or workspace is set; run `hz setup slack`"
+            raise HeinzelError(msg)
+        return owner, team
 
     def handle(self, payload: object) -> Decided | Denied:
         """Treat one Slack interactive payload: decide it, record it, and mark the message answered."""
@@ -469,6 +493,26 @@ class SlackService:
             Check(name="auth.test", status=Status.UP, detail=f"workspace {clean_text(who.team)} ({who.team_id})"),
             Check(name="drafts go to", status=Status.UP, detail=shown),
         ]
+
+
+def self_click(payload: object) -> tuple[str, str, str, str, str] | None:
+    """A self-channel button click as (message ts, team, user, channel, value), or None for anything else.
+
+    Only ids and the button's value are kept; whose click it is and on which question is checked by the question.
+    """
+    data = obj(payload)
+    actions = objs(data.get("actions"))
+    if data.get("type") != "block_actions" or len(actions) != 1:
+        return None
+    action_id, value = text_of(actions[0].get("action_id")), text_of(actions[0].get("value"))
+    if action_id is None or not action_id.startswith(SELF_ACTION) or value is None:
+        return None
+    container = obj(data.get("container"))
+    ts, team = text_of(container.get("message_ts")), text_of(obj(data.get("team")).get("id"))
+    user, channel = text_of(obj(data.get("user")).get("id")), text_of(container.get("channel_id"))
+    if ts is None or team is None or user is None or channel is None:
+        return None
+    return ts, team, user, channel, value[:100]
 
 
 _DETAIL: dict[str, str] = {

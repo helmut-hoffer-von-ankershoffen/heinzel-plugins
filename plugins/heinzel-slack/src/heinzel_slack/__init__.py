@@ -22,6 +22,7 @@ from heinzel import (
 )
 from pydantic import JsonValue
 
+from heinzel_slack._adapter import HOSTS, SlackChatAdapter
 from heinzel_slack._channel import SlackChannel
 from heinzel_slack._decide import APPROVE, DECLINE
 from heinzel_slack._digest import MAX_DRAFT, check_draft, draft_digest
@@ -35,6 +36,7 @@ module.settings(SlackSettings)
 module.service(Transport)
 module.service(SlackService)
 module.service(SlackChannel)
+module.provides("chat", modes={"read", "write"}, hosts=HOSTS)(SlackChatAdapter)
 
 
 @module.operation(private=True)
@@ -171,6 +173,7 @@ __all__ = [
     "Listened",
     "SharedDraft",
     "SlackChannel",
+    "SlackChatAdapter",
     "SlackService",
     "SlackSettings",
     "Transport",

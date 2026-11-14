@@ -9,7 +9,9 @@ Slack as an extra notification channel and as a place to share a draft and get a
 
 - **A notice says why.** Every message carries "Why you are seeing this", because a nudge that cannot say why is noise.
 - **A draft is shared with Approve and Decline.** The answer is for the exact text you saw, and only you can give it.
-- **Your DM only.** It writes to your direct message with your own app. Never a channel, never anyone else.
+- **Your DM for you.** Notices, drafts and questions go to your direct message with your own app, nobody else.
+- **Chat for your Heinzels.** As Core's `chat` capability it reads channels its bot was invited to and posts there
+  for publish operations, every mention made inert; and it notifies and asks you in your DM, options as buttons.
 
 ```text
 Lotte has a draft for you
@@ -41,7 +43,9 @@ it does not grant reviewed-link delivery or remove its independent safeguards.
 3. **Your Slack member ID**: your profile, the three dots, "Copy member ID" (like `U01ABCDEF`), and your
    **workspace ID** (like `T01ABCDEF`), configured as `slack.owner` and `slack.team`. Both are required.
 4. **Two tokens from your app**, kept in the OS keychain by `hz`, never in a file or a repository:
-   - the **bot token** (`xoxb-...`, on *Install App*), scopes `chat:write`, `im:write`, `users:read`;
+   - the **bot token** (`xoxb-...`, on *Install App*), scopes `channels:history`, `channels:read`, `chat:write`,
+     `im:history`, `im:write`, `users:read` (see [Scopes](#scopes)); an app installed from an earlier manifest
+     needs the new manifest and a reinstall for the chat capability;
    - an **app-level token** (`xapp-...`, on *Basic Information*, scope `connections:write`) for Socket Mode.
 5. **Python 3.12+** (supplied by uv) and an internet connection to `slack.com`. No public address, no port to open.
 
@@ -105,13 +109,65 @@ your Slack account or the machine controls your approvals.
 | --- | --- |
 | **Browser session tokens** (community CLIs such as `slackcli` with `xoxc`/`xoxd`) | Acts as you, nothing to install, but it is an unofficial use of your login that Slack can break or forbid at any time, tokens die when you sign out, and it cannot receive button clicks. Approval would be a reaction or a typed reply, which cannot be bound to the exact bytes. Not a dependency for a product. |
 | **The official Slack CLI** (`slack`) | Builds and runs apps on Slack's platform and manages manifests; it has no way to post a message or receive a click for another tool. Useful for creating and installing the app during development. |
-| **A private Slack app** (this plugin): bot token for the Web API, Socket Mode for clicks, official `slack-sdk` | Supported by Slack, least privilege (three bot scopes, no user scope, no event subscriptions), signed identity of the clicker in every click, and no inbound address, so nothing is hosted. **Chosen.** |
+| **A private Slack app** (this plugin): bot token for the Web API, Socket Mode for clicks, official `slack-sdk` | Supported by Slack, least privilege (six bot scopes, no user scope, no event subscriptions), signed identity of the clicker in every click, and no inbound address, so nothing is hosted. **Chosen.** |
 
 Tenets weighed: P1 ("your identity over a bot identity") and ADR 0035 ("only what an ordinary employee may do, no admin-registered
 apps") against T3 and P2 (approval must be bound and verifiable) and distributability. The app here is yours alone, in
-your workspace, created by you, and it only ever writes to your own DM as a mailbox: it never posts as you and never to
-a shared channel. Anything published under your name later is a separate step with your identity. If you cannot install an
+your workspace, created by you, and it writes to your own DM as a mailbox. It never posts as you: when Core's `chat`
+capability posts to a channel the bot was invited to, it is the app speaking, for a publish operation Core gated. Anything published under your name later is a separate step with your identity. If you cannot install an
 app, the plugin reports so; it does not fall back to a browser session.
+
+## Chat capability and self channel
+
+The plugin provides Core's `chat` capability as the adapter `slack` (read and write; bind it with
+`[capabilities] chat = "slack"` when another chat adapter is installed too). It does not replace the ports below:
+reviewed helper notices and draft Approve/Decline stay on `SlackChannel`.
+
+- `messages(channel, window)` reads a public channel the bot was invited to, by id (`C...`) or `#name`: top-level
+  messages in the window and the replies in their threads, oldest first, paging until the window is covered. Text,
+  names and labels are untrusted data: mentions come back as names (`@Ada`, never `U...`), links as label and
+  address, and everything passes Core's `clean_text`. A reply in a thread started before the window is not found:
+  Slack's bot API lists replies per thread, not by time. Too many messages for one window ask for a narrower one.
+- `post(channel, text, thread=None)` posts as the app with every `&`, `<` and `>` escaped, so `<!channel>`,
+  `<!here>`, `<@U...>` and group mentions stay text, and bare `@here`, `@channel` and `@everyone` get a full-width
+  at sign. Unfurling and name linking are off. Text over Slack's 40,000 characters is refused, never cut.
+  Direct messages and group chats are out of the capability's scope.
+- `notify_self(text, thread=None, context=None)` posts to your DM with the app (`slack.owner`), as a reply in
+  `thread` when given; the returned `thread` continues the conversation. `context` is a short bold label.
+- `ask_self(question, options=(), timeout=..., thread=None, context=None, cancel=None)` posts the question with one
+  button per option and waits, up to `timeout` seconds, for your click (Socket Mode, the app-level token) or a
+  message you type in its thread, or for a top-level question in the DM after it (polled every
+  `slack.poll_seconds`, default 3). Only your own click or message counts. It returns the chosen option (also as
+  its text), your typed text (cleaned), or `timed_out`; a timeout or `cancel` never raises. Every exit closes the
+  socket, and the buttons are then taken off the message in the background. Without an app-level token, the
+  options are listed and a reply naming one chooses it. The timeout counts from the call; a Slack call under way
+  when it passes or `cancel` is set ends within its own limit (`slack.timeout` to connect or post, 5 s for a reply
+  read), and a rate-limited reply read is retried at the next check, never slept on. Two top-level questions open
+  at once both take your next top-level DM message as their answer; reply in a question's thread to answer just it.
+  Each waiting question holds one Socket Mode connection (Slack allows ten per app); beyond that, typed replies
+  still answer.
+
+Self-channel buttons have their own action ids (`hz_self_<n>`) and a per-question nonce; they are never an approval,
+a `ChannelApprovalReply` or a change to a `DraftStanding`. Socket Mode spreads one app's events over all its
+connections, so the approval listener may receive a question's click and an asking question an approval click: each
+listener routes self-channel clicks to the local store, where the waiting question reads them, and approval clicks to
+the approval checks above. Calls that hit Slack's rate limit wait for its `Retry-After` (at most 30 s per wait,
+60 s per call), then give up with an error; a lost post acknowledgement is reported as unknown and never retried.
+
+Core calls `notify_self` and `ask_self` itself (ADR 0160); operations cannot reach them through a handle.
+This needs a Core with ADR 0160 (0.9.43 or later). An older Core gets `messages` and `post` only.
+
+### Scopes
+
+| Scope | For |
+| --- | --- |
+| `chat:write` | Notices, drafts and questions in your DM; posts for the chat capability |
+| `im:write` | Opening your DM with the app |
+| `im:history` | Reading your typed answer to a question in that DM |
+| `channels:read` | Resolving a `#name` to a channel id |
+| `channels:history` | Reading messages of public channels the bot was invited to |
+| `users:read` | Showing names instead of member ids |
+| `connections:write` (app-level token) | Socket Mode: receiving button clicks without a public address |
 
 ## Ports
 
@@ -160,9 +216,9 @@ The in-memory Slack in `tests/conftest.py` is a labelled fake. `tests/e2e/live_t
 
 Demo data: Mira reviews the fictional Slack account, destination, scope and complete weekly-report notice before delivery.
 
-<img src="docs/assets/screenshots/slack-notice-delivered.png" alt="Demo data: Core reports the fictional notice delivered to the local stand-in after Mira confirms; this does not approve a captured write." width="960">
+<img src="docs/assets/screenshots/slack-notice-delivered.png" alt="Demo data: after Confirm, Core&#x27;s chat reports that the channel delivered the fictional notice; this does not approve a captured write." width="960">
 
-Demo data: Core reports the fictional notice delivered to the local stand-in after Mira confirms; this does not approve a captured write.
+Demo data: after Confirm, Core&#x27;s chat reports that the channel delivered the fictional notice; this does not approve a captured write.
 
 <details>
 <summary>Command line</summary>

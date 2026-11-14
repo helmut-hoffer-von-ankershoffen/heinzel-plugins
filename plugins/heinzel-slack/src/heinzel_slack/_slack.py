@@ -9,11 +9,12 @@ Both use the official `slack-sdk`, never a browser session. A token is only ever
 Slack's error code and nothing else.
 """
 
+import contextlib
 import re
 import threading
 from collections.abc import Callable
 from dataclasses import dataclass, field
-from typing import Any, Protocol
+from typing import TYPE_CHECKING, Any, Protocol
 
 from heinzel import ChannelTarget, Credentials, HeinzelError
 
@@ -26,6 +27,9 @@ from heinzel_slack._vendor.slack_sdk.socket_mode import SocketModeClient
 from heinzel_slack._vendor.slack_sdk.socket_mode.client import BaseSocketModeClient
 from heinzel_slack._vendor.slack_sdk.socket_mode.request import SocketModeRequest
 from heinzel_slack._vendor.slack_sdk.socket_mode.response import SocketModeResponse
+
+if TYPE_CHECKING:
+    from heinzel_slack._web import WebCall
 
 BOT_TOKEN = module.credential(
     "bot-token", purpose="bot token (xoxb-...) of your own Heinzelmännchen Slack app", service="slack"
@@ -98,7 +102,12 @@ class SlackUnknown(HeinzelError):
     """The request may or may not have reached Slack (timeout, dropped connection): never retry on its own."""
 
 
-def _fail(action: str, error: SlackApiError) -> SlackRefused:
+def refusal(action: str, error: SlackApiError) -> SlackRefused:
+    """A definite refusal for Slack's known error codes; any other answer raises `SlackUnknown` (never retried).
+
+    Raises:
+        SlackUnknown: If Slack's answer does not prove that nothing happened.
+    """
     code = str(error.response.get("error", "unknown")) if error.response is not None else "unknown"
     if code not in {
         "invalid_auth",
@@ -148,7 +157,7 @@ class WebApi:
         try:
             reply = self._client.auth_test(token=self._token)
         except SlackApiError as error:
-            raise _fail("auth.test", error) from None
+            raise refusal("auth.test", error) from None
         except Exception:  # noqa: BLE001 - never expose SDK or token-bearing transport errors
             raise HeinzelError("Slack identity could not be verified") from None
         team = reply.get("team_id")
@@ -163,7 +172,7 @@ class WebApi:
         try:
             reply = self._client.conversations_open(users=[user], token=self._token)
         except SlackApiError as error:
-            raise _fail("opening the direct message", error) from None
+            raise refusal("opening the direct message", error) from None
         except Exception:  # noqa: BLE001 - never expose SDK or token-bearing transport errors
             raise HeinzelError("Slack direct message could not be verified") from None
         data = reply.get("channel")
@@ -185,7 +194,7 @@ class WebApi:
                 token=self._token,
             )
         except SlackApiError as error:
-            raise _fail("the message", error) from None
+            raise refusal("the message", error) from None
         except Exception as error:  # noqa: BLE001 - the SDK raises transport errors of several types
             msg = f"Slack did not answer the message ({type(error).__name__}); it may or may not have been posted"
             raise SlackUnknown(msg) from None
@@ -214,7 +223,7 @@ class WebApi:
         try:
             self._client.chat_update(channel=channel, ts=ts, text=text, blocks=blocks, token=self._token)
         except SlackApiError as error:
-            raise _fail("the update", error) from None
+            raise refusal("the update", error) from None
         except Exception:  # noqa: BLE001 - never expose SDK or token-bearing transport errors
             raise HeinzelError("Slack did not confirm the message update") from None
 
@@ -256,6 +265,8 @@ class SocketListener:
         try:
             client.connect()
         except Exception as error:  # noqa: BLE001 - the SDK raises several types; none may carry the token
+            with contextlib.suppress(Exception):
+                client.close()  # a failed connect may have started the SDK's threads: never leave them running
             msg = f"Could not open Slack's Socket Mode connection ({type(error).__name__}); check the app-level token"
             raise HeinzelError(msg) from None
         with self._lock:
@@ -283,6 +294,19 @@ class Transport:
             HeinzelError: If the bot token is not stored.
         """
         return WebApi(self._credentials.require(BOT_TOKEN), self._settings.timeout)
+
+    def web(self, timeout: float | None = None) -> "WebCall":
+        """Any Web API method with the bot token (the chat capability's seam), each call bounded by `timeout`.
+
+        `timeout` defaults to `slack.timeout`; a shorter one never exceeds it.
+
+        Raises:
+            HeinzelError: If the bot token is not stored.
+        """
+        from heinzel_slack._web import SdkWeb  # noqa: PLC0415 - `_web` builds on this module
+
+        limit = self._settings.timeout if timeout is None else min(timeout, self._settings.timeout)
+        return SdkWeb(self._credentials.require(BOT_TOKEN), limit)
 
     def listener(self) -> Listener:
         """A Socket Mode listener with the app-level token.
