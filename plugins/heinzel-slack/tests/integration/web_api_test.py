@@ -200,7 +200,8 @@ def test_reviewed_post_pins_token_through_identity_dm_and_actual_http_mutation(s
     assert len([method for method, _ in seen if method == "chat.postMessage"]) == 1
     assert all(call["auth"] == "Bearer xoxb-pinned-sentinel" for _, call in seen)
     assert "xoxb-pinned-sentinel" not in repr(api)
-    assert api._client.retry_handlers == []
+    # The only handler closes an HTTP error response and never asks for a retry (sdk_web_test proves both).
+    assert [type(handler).__name__ for handler in api._client.retry_handlers] == ["CloseHttpError"]
 
 
 def test_new_credentials_for_another_account_refuse_without_posting(server):

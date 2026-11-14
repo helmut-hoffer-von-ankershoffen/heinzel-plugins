@@ -28,7 +28,14 @@ def test_installed_manifest(tmp_path):
     assert result.returncode == 0, result.stderr
     manifest = json.loads(json.loads(result.stdout))
     assert manifest["settings"]["socket_mode_enabled"] is True
-    assert manifest["oauth_config"]["scopes"]["bot"] == ["chat:write", "im:write", "users:read"]
+    assert manifest["oauth_config"]["scopes"]["bot"] == [
+        "channels:history",
+        "channels:read",
+        "chat:write",
+        "im:history",
+        "im:write",
+        "users:read",
+    ]
 
 
 def test_installed_kernel_discovers_both_channel_ports_without_credentials(tmp_path, monkeypatch):

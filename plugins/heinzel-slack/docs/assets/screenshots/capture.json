@@ -1,11 +1,11 @@
 {
   "format": 1,
   "plugin": "heinzel-slack",
-  "core_version": "0.9.20",
-  "inputs_sha256": "4435860e68ad76f26997679152d2700d55f9ad7b08cbab33fa66557836e49b6c",
+  "core_version": "0.9.42",
+  "inputs_sha256": "b2c8a7a7a762f27665ab0d037ea8d3402f18e712c6bd6d5c302cce4b792e7168",
   "images": {
-    "docs/assets/screenshots/review-slack-notice.png": "badbffcb31641aca53ee2f03a6f2d9be724710e9ae039a40244fe3674a8d56c0",
-    "docs/assets/screenshots/slack-notice-delivered.png": "dc0ba97d505a9f1b6a646e0b87f69939b1cc5fd497246678b1b4e7b338a8a78b",
+    "docs/assets/screenshots/review-slack-notice.png": "0932683a1bbc8614f8c463a3b1893b9ffb7af8ed7bb52551e5eb75360fc890a0",
+    "docs/assets/screenshots/slack-notice-delivered.png": "e7adaca12d00124dd3b2bd346bb0d2898516071244da918973337efed0553528",
     "docs/assets/screenshots/slack-draft-cli.png": "deafce0823dac89ac55bd82af30659c5ca89da2d8d20647351959bade3a5ef19",
     "docs/assets/screenshots/slack-draft-decision-cli.png": "c73817c1612ca1bcb357efcd31953186371538883b4d9c80d47f6cf0742fc410"
   },
@@ -13,18 +13,18 @@
     "format": 2,
     "source_story": {
       "path": "source-story.md",
-      "sha256": "bacc0854784abbd49d34ab0162bdeeb0ad46ea2c87bd287930be95922bcb8b71"
+      "sha256": "923a1a10b6221fc91e6811d69701658ef00744bcd51354724894da91d6fa1191"
     },
     "definition": {
       "format": 1,
       "reviewer": "Codex feature-story agent",
-      "source_sha256": "5a0d5a055e649e2bdc229a06cf29159f871aee3249f1bfb2ec54aef8350a6588",
-      "plan_sha256": "c81beb38f83dc32b8271f05edf06c7b5f8b5f5e0b209dc0edea2ad8b97b87336",
-      "story_sha256": "bacc0854784abbd49d34ab0162bdeeb0ad46ea2c87bd287930be95922bcb8b71"
+      "source_sha256": "cac91242735071b105f6c763aa5061178209cccc6d894c887913a502c27cc3c4",
+      "plan_sha256": "1b6bf8608b2ca568abc9043bdedc32e4dc48a79473b1e59a116075c3c348d9a1",
+      "story_sha256": "923a1a10b6221fc91e6811d69701658ef00744bcd51354724894da91d6fa1191"
     },
     "plugin": "heinzel-slack",
-    "core_version": "0.9.20",
-    "inputs_sha256": "4435860e68ad76f26997679152d2700d55f9ad7b08cbab33fa66557836e49b6c",
+    "core_version": "0.9.42",
+    "inputs_sha256": "b2c8a7a7a762f27665ab0d037ea8d3402f18e712c6bd6d5c302cce4b792e7168",
     "screenshots": [
       {
         "path": "docs/assets/screenshots/review-slack-notice.png",
@@ -34,7 +34,7 @@
       {
         "path": "docs/assets/screenshots/slack-notice-delivered.png",
         "surface": "ui",
-        "caption": "Demo data: Core reports the fictional notice delivered to the local stand-in after Mira confirms; this does not approve a captured write."
+        "caption": "Demo data: after Confirm, Core's chat reports that the channel delivered the fictional notice; this does not approve a captured write."
       },
       {
         "path": "docs/assets/screenshots/slack-draft-cli.png",
@@ -48,22 +48,22 @@
       }
     ],
     "images": {
-      "review-slack-notice.png": "badbffcb31641aca53ee2f03a6f2d9be724710e9ae039a40244fe3674a8d56c0",
-      "slack-notice-delivered.png": "dc0ba97d505a9f1b6a646e0b87f69939b1cc5fd497246678b1b4e7b338a8a78b",
+      "review-slack-notice.png": "0932683a1bbc8614f8c463a3b1893b9ffb7af8ed7bb52551e5eb75360fc890a0",
+      "slack-notice-delivered.png": "e7adaca12d00124dd3b2bd346bb0d2898516071244da918973337efed0553528",
       "slack-draft-cli.png": "deafce0823dac89ac55bd82af30659c5ca89da2d8d20647351959bade3a5ef19",
       "slack-draft-decision-cli.png": "c73817c1612ca1bcb357efcd31953186371538883b4d9c80d47f6cf0742fc410"
     },
     "transcripts": {
-      "review-slack-notice.txt": "87c150ce4d646c41bd17a4e54c478c96d7eb2d728ae8ed9dd004660a696db86a",
-      "slack-notice-delivered.txt": "79f151f520641a015b885efd82e26dc334cb6fbf006b9574fc76ba7b3296f675",
+      "review-slack-notice.txt": "2f013a63c9aa0c578425b1ab7a7b947bc463144bca9d2dbdab9b085f2cc0ffa2",
+      "slack-notice-delivered.txt": "b4f99b57ad0ae8183a3f58ab908386f50127b526e452d6aa264b32a37b2e50df",
       "slack-draft-cli.txt": "be3327018fe6adc629a085bf15b212eb24e321038d3cc9acdc18def44c2e96d1",
       "slack-draft-decision-cli.txt": "0bab28155fbc709895dee63143b93edbb1f07227635f1fb6e158f8568fd779fe"
     },
-    "bundle_sha256": "8e58e8030f25b40e6cc06bc50a441aeff2343e20035df0554bfd6a4b337704fd"
+    "bundle_sha256": "c42990cf65cdc299ec8e1443a73e9184ac302cbee697f5cd6d28f40d9a348af0"
   },
   "privacy_review": {
     "format": 1,
-    "bundle_sha256": "8e58e8030f25b40e6cc06bc50a441aeff2343e20035df0554bfd6a4b337704fd",
+    "bundle_sha256": "c42990cf65cdc299ec8e1443a73e9184ac302cbee697f5cd6d28f40d9a348af0",
     "reviewer": "Codex privacy agent",
     "decision": "approve",
     "checked_images": [
