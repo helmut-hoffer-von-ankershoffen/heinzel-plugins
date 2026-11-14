@@ -7,7 +7,7 @@ import pytest
 from heinzel import HeinzelError
 
 from heinzel_google import Drive, GoogleDocuments, Process
-from heinzel_google._documents import file_id_of
+from heinzel_google._documents import DocumentHit, file_id_of
 
 pytestmark = pytest.mark.unit
 
@@ -57,7 +57,7 @@ def test_other_references_are_refused(ref, message):
 def test_a_doc_is_read_as_text(session, fake_gws):
     fake_gws.doc(content=[{"paragraph": {"elements": [{"textRun": {"content": "Hi \u202eyou\n"}}]}}])
     document = GoogleDocuments(session).read(f"https://docs.google.com/document/d/{DOC_ID}/edit")
-    assert document.model_dump() == {
+    assert document.model_dump(exclude={"source"}) == {
         "ref": f"https://docs.google.com/document/d/{DOC_ID}/edit",
         "title": "Plan",
         "text": "Hi you\n",
@@ -263,3 +263,30 @@ def test_the_links_routing_declaration():
             )
             == DOC_ID
         )
+
+
+def test_a_search_refused_for_scope_does_not_say_to_sign_in_again(session, fake_gws):
+    fake_gws.on(
+        ("drive", "files", "list"),
+        Process(
+            1,
+            json.dumps(
+                {
+                    "error": {
+                        "code": 403,
+                        "message": "Insufficient Permission",
+                        "errors": [{"reason": "insufficientPermissions"}],
+                    }
+                }
+            ).encode(),
+        ),
+    )
+    with pytest.raises(HeinzelError, match="Google search needs broader Drive access") as caught:
+        GoogleDocuments(session).search("plan", 5)
+    assert "ign in again" not in str(caught.value)
+
+
+def test_search_is_annotated_with_the_hit_type():
+    import typing
+
+    assert typing.get_type_hints(GoogleDocuments.search)["return"] == list[DocumentHit]
