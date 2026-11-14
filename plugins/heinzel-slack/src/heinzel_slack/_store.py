@@ -11,7 +11,7 @@ import sqlite3
 import stat
 from collections.abc import Collection, Generator
 from dataclasses import dataclass
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
 from heinzel import HeinzelError
@@ -28,6 +28,10 @@ CREATE TABLE IF NOT EXISTS requests (
 );
 CREATE TABLE IF NOT EXISTS deliveries (
     key TEXT PRIMARY KEY, status TEXT NOT NULL, reference TEXT, at TEXT NOT NULL
+);
+CREATE TABLE IF NOT EXISTS self_clicks (
+    n INTEGER PRIMARY KEY AUTOINCREMENT, message_ts TEXT NOT NULL, team TEXT NOT NULL, user TEXT NOT NULL,
+    channel TEXT NOT NULL, value TEXT NOT NULL, at TEXT NOT NULL
 );
 CREATE TABLE IF NOT EXISTS audit (
     n INTEGER PRIMARY KEY AUTOINCREMENT, at TEXT NOT NULL, request_id TEXT NOT NULL,
@@ -195,6 +199,27 @@ class Store:
             )
             self._audit(db, row.created_at, row.id, "created", f"digest {row.bound[:12]}")
         return None
+
+    def record_click(self, click: tuple[str, str, str, str, str], now: datetime) -> None:
+        """Keep one self-channel button click (message ts, team, user, channel, value) for the question waiting on it.
+
+        Any listener of the app may receive it (Socket Mode spreads events over connections), so it goes here, where
+        the waiting question reads it. Clicks older than a day are dropped: nobody waits that long.
+        """
+        with self._transaction() as db:
+            db.execute("DELETE FROM self_clicks WHERE at<?", (_stamp(now - timedelta(days=1)),))
+            db.execute("INSERT INTO self_clicks (message_ts, team, user, channel, value, at) VALUES (?,?,?,?,?,?)",
+                       (*click, _stamp(now)))  # fmt: skip
+
+    def take_clicks(self, message_ts: str) -> list[tuple[str, str, str, str]]:
+        """Remove and return the stored clicks on one message, oldest first: (team, user, channel, value)."""
+        with self._transaction() as db:
+            found = db.execute(
+                "SELECT team, user, channel, value FROM self_clicks WHERE message_ts=? ORDER BY n", (message_ts,)
+            ).fetchall()
+            if found:
+                db.execute("DELETE FROM self_clicks WHERE message_ts=?", (message_ts,))
+        return [(str(a), str(b), str(c), str(d)) for a, b, c, d in found]
 
     def mark(self, request_id: str, state: str, now: datetime) -> bool:
         """Close an open request as `superseded`, `expired` or similar on the host's word; decided ones stay."""

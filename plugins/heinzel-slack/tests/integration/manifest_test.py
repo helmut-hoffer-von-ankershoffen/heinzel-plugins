@@ -10,12 +10,16 @@ pytestmark = pytest.mark.integration
 
 def test_manifest_is_minimal_and_needs_no_public_address():
     manifest = json.loads((files("heinzel_slack") / "manifest.json").read_text(encoding="utf-8"))
-    assert manifest["oauth_config"]["scopes"] == {"bot": ["chat:write", "im:write", "users:read"]}
+    assert manifest["oauth_config"]["scopes"] == {
+        "bot": ["channels:history", "channels:read", "chat:write", "im:history", "im:write", "users:read"]
+    }
     assert "user" not in manifest["oauth_config"]["scopes"]  # never acts as the person
     assert manifest["settings"]["socket_mode_enabled"] is True
     assert "request_url" not in json.dumps(manifest)
-    assert "event_subscriptions" not in manifest["settings"]  # replies and reactions are not even delivered
-    assert manifest["features"]["app_home"]["messages_tab_read_only_enabled"] is True
+    assert "event_subscriptions" not in manifest["settings"]  # nothing is pushed but button clicks
+    # The owner may type in the DM: a typed reply answers a self-channel question (read by polling, ADR 0160) and is
+    # never an approval, which only a button click on the exact draft gives.
+    assert manifest["features"]["app_home"]["messages_tab_read_only_enabled"] is False
 
 
 def test_no_operation_can_approve():
