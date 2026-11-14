@@ -141,3 +141,26 @@ def test_an_acli_found_through_a_relative_path_entry_does_not_count(acli_on_path
     with pytest.raises(FileNotFoundError):
         Acli(SETTINGS).run([*SEARCH, "--json"], 10)
     assert acli_on_path.calls == []
+
+
+LAUNCHD_PATH = "/usr/bin:/bin:/usr/sbin:/sbin"
+"""The PATH a launchd service gets when its plist sets none: no Homebrew directory in it."""
+
+
+@pytest.mark.parametrize("which", [0, 1], ids=["Apple silicon", "Intel"])
+def test_acli_where_homebrew_installs_it_is_found_and_run_under_a_launchd_path(
+    fake_acli, no_homebrew, monkeypatch, which
+):
+    """Homebrew links `bin/acli` to its Cellar; a service started by launchd has none of Homebrew's bins on PATH."""
+    cellar = Path(no_homebrew[which]).parent / "Cellar" / "acli" / "1.3.39-stable" / "bin"
+    cellar.mkdir(parents=True)
+    fake_acli.install(cellar)
+    link = Path(no_homebrew[which]) / "acli"
+    link.parent.mkdir(parents=True)
+    link.symlink_to(cellar / "acli")
+    monkeypatch.setenv("PATH", LAUNCHD_PATH)
+    fake_acli.answer("jira auth status", fake_acli.auth("authenticated"))
+    acli = Acli(SETTINGS)
+    assert acli.path() == str(link)
+    assert acli.site(SETTINGS) == "https://acme.atlassian.net"
+    assert fake_acli.calls[-1].args == ["jira", "auth", "status"]

@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.9.6
+
+Find acli when Heinzel runs as a background service: a service that launchd starts has a short PATH without Homebrew's folders, so Heinzel did not find acli, could not read the site acli is signed in to, and System health showed the Atlassian hosts as unknown. Heinzel now looks in Homebrew's folders (`/opt/homebrew/bin`, `/usr/local/bin`) after PATH, and acli runs with its own folder on PATH.
+Say where Heinzel looked when acli can't be found.
+
 ## 0.9.5
 
 Relock opentelemetry-api to 1.45.2 (CVE-2026-126360).

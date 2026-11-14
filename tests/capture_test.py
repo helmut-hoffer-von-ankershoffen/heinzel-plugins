@@ -724,8 +724,9 @@ def test_every_pinned_migration_maps_a_committed_gallery_or_definition_to_its_di
 
 
 def test_a_version_only_relock_keeps_a_pinned_gallery_fresh_and_its_pin_valid(tmp_path):
-    plugin = tmp_path / "heinzel-atlassian"
-    shutil.copytree(REPOSITORY / "plugins/heinzel-atlassian", plugin, ignore=shutil.ignore_patterns(".venv"))
+    # Any gallery still reviewed under a pinned migration; heinzel-atlassian's was recaptured and needs none.
+    plugin = tmp_path / "heinzel-example"
+    shutil.copytree(REPOSITORY / "plugins/heinzel-example", plugin, ignore=shutil.ignore_patterns(".venv"))
     lock = plugin / "requirements.lock"
     # A security relock moves one pinned version, whatever it is today.
     relocked, moved = re.subn(r"^(opentelemetry-api==\S+) ", r"\1.post1 ", lock.read_text(), flags=re.MULTILINE)
