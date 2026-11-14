@@ -106,7 +106,7 @@ def _tick_unlocked(helper, kernel, waiter):
     return report
 
 
-def _daemon_probe(kernel, boot, directory, notices, helper):
+def _daemon_probe(kernel, boot, directory, notices, helpers):
     result = {"failure": None, "deduplicated": False}
 
     def run():
@@ -118,12 +118,13 @@ def _daemon_probe(kernel, boot, directory, notices, helper):
                     break
                 waiter.wait(0.05)
             json.loads(signal.read_text())
-            report = _tick_unlocked(helper, kernel, waiter)
+            helpers["_wait_for_slot_margin"](waiter)
+            report = _tick_unlocked(helpers["_daemon_tick"], kernel, waiter)
             _require_rendered(report)
             previous = (directory / "model-calls").read_text()
             restarted = boot()
             restarted.bind(Notifications, notices)
-            helper(restarted)
+            helpers["_daemon_tick"](restarted)
             result["deduplicated"] = (directory / "model-calls").read_text() == previous
         except Exception as error:  # noqa: BLE001 - fixture diagnostics contain only fictional data
             result["failure"] = str(error)
@@ -177,7 +178,7 @@ def _exercise_mounted_registered_google_schedule(boot, tmp_path, monkeypatch, en
 
     server = threading.Thread(target=lambda: web.serve(kernel, port=0, browser=False, announce=announce), daemon=True)
     server.start()
-    worker, outcome = _daemon_probe(kernel, boot, tmp_path, notices, helpers["_daemon_tick"])
+    worker, outcome = _daemon_probe(kernel, boot, tmp_path, notices, helpers)
     try:
         assert ready.wait(15)
         token = parse_qs(urlsplit(urls[0]).fragment).get("token", [""])[0]
