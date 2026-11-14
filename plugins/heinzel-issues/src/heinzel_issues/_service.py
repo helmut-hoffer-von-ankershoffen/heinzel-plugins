@@ -1,5 +1,7 @@
 """Issues as a person sees them: what they sent, whether someone is on it, whether it is done and in which release."""
 
+import base64
+import binascii
 import getpass
 import json
 import logging
@@ -9,13 +11,24 @@ import tempfile
 import time
 from collections.abc import Callable, Mapping, Sequence
 from datetime import UTC, datetime, timedelta
+from datetime import time as Time
 from pathlib import Path
 from typing import Any
 
-from heinzel import HeinzelError, ModuleSettings, NoticeKind, Notifications, Settings, Tracker, clean_text
+from heinzel import (
+    Config,
+    ConfigEditor,
+    HeinzelError,
+    ModuleSettings,
+    NoticeKind,
+    Notifications,
+    Settings,
+    Tracker,
+    clean_text,
+)
 from pydantic import AwareDatetime, BaseModel, Field, JsonValue, ValidationError
 
-from heinzel_issues._beads import BeadsSettings, BeadsTracker
+from heinzel_issues._beads import BeadsSettings, BeadsTracker, checked_label
 from heinzel_issues._contract import (
     STATE_LABELS,
     Attachment,
@@ -29,6 +42,7 @@ from heinzel_issues._contract import (
 from heinzel_issues._releases import PullRequest, Release, ReleaseResolver, ReleaseSource, released_text
 
 NONE = "none"
+SECTION = "issues"
 SETUP = "hz setup issues"
 ROUTE = "/?panel=issues:requests"
 MAX_TEXT = 20_000
@@ -38,6 +52,8 @@ MAX_ATTACHMENT_BYTES = 5 * 1024 * 1024
 _KINDS = ((b"\x89PNG\r\n\x1a\n", "PNG image"), (b"\xff\xd8\xff", "JPEG image"))
 NOT_SET_UP = "Issue tracking is not set up."
 BUILTIN: Mapping[str, Factory] = {"beads": BeadsTracker.from_settings}
+NO_FILES = Config.empty()
+"""Settings built in code, as tests do: there is no file to read again."""
 logger = logging.getLogger("heinzel_issues")
 
 
@@ -85,10 +101,20 @@ class Details(BaseModel):
     pull_requests: list[PullRequest] = Field(description="Pull requests named in the tracker, with their release.")
 
 
+class Step(BaseModel):
+    """One moment in a report's history, in plain words."""
+
+    label: str = Field(description="Sent, Being worked on, Done, or Released in 0.9.27.")
+    at: AwareDatetime | None = Field(default=None, description="When it happened; none while it is not known.")
+
+
 class Report(BaseModel):
     """One report or request, in plain words."""
 
     title: str = Field(description="One line: what was sent.")
+    body: str = Field(default="", description="The full text as it was sent.")
+    attachments: list[str] = Field(default_factory=list[str], description="The names of the files sent with it.")
+    history: list[Step] = Field(default_factory=list[Step], description="What happened so far, oldest first.")
     state: TaskState = Field(description="received, working or done.")
     status: str = Field(description="Received, Being worked on, Done, or Released in 0.9.27 on 7 Nov 2026.")
     release: Release | None = Field(default=None, description="The release that shipped it; none until then.")
@@ -103,6 +129,7 @@ class Reports(BaseModel):
     ready: bool = Field(description="Whether a tracker is set up and answered.")
     problem: str | None = Field(default=None, description="Why nothing can be shown, in plain words.")
     fix: str | None = Field(default=None, description="The one step that fixes it, e.g. hz setup issues.")
+    folder: str | None = Field(default=None, description="The tracker folder in use or last tried, to set it up.")
     reports: list[Report] = Field(default_factory=list[Report], description="Newest first.")
 
 
@@ -137,9 +164,10 @@ class _Watch(BaseModel):
 class IssuesService:
     """Connects the configured tracker and the release lookup; nothing runs until it is asked."""
 
-    def __init__(self, settings: IssuesSettings, hz: Settings) -> None:
-        """Remember where the watch keeps what it has already seen."""
+    def __init__(self, settings: IssuesSettings, hz: Settings, config: Config = NO_FILES) -> None:
+        """Remember where the watch keeps what it has already seen, and which files hold the settings."""
         self.settings = settings
+        self._config = config
         self._watch_file = hz.state_dir / "issues" / "watch.json"
         self._tracker: TaskTracker | None = None
         self.resolver = ReleaseResolver(settings.releases)
@@ -150,6 +178,67 @@ class IssuesService:
     def enabled(self) -> bool:
         """Whether a tracker is chosen at all."""
         return self.settings.tracker != NONE
+
+    def use(self, settings: IssuesSettings) -> None:
+        """Work with `settings` from now on; the tracker and the release lookup are built again when they differ."""
+        if settings == self.settings:
+            return
+        self.settings = settings
+        self._tracker = None
+        self.resolver = ReleaseResolver(settings.releases)
+
+    def refresh(self) -> None:
+        """Follow the settings files as they are now, so setting Issues up in the app needs no restart.
+
+        The app and the daemon are separate programs; each sees the other's change at its next use. Settings built
+        in code (no file exists) and files that are invalid right now leave the current settings in place.
+        """
+        if not any(file.exists for file in self._config.files):
+            return
+        try:
+            self.use(self._config.reread().settings(IssuesSettings, SECTION))
+        except (HeinzelError, ValidationError):
+            return
+
+    def connect(self, editor: ConfigEditor, path: str, labels: str = "", releases: str = "") -> Reports:
+        """Send reports to the Beads database in the folder `path`, after checking that it answers.
+
+        `labels` are further labels for every new report and `releases` are git clones whose tags are releases;
+        both are lists separated by commas or spaces, and an empty one keeps what is set.
+
+        Raises:
+            TrackerError: If the folder has no Beads database, `bd` does not answer, or a value is not valid.
+        """
+        self.refresh()
+        folder = _folder(path, "The tracker folder")
+        if not (folder / ".beads").is_dir():
+            msg = f"{folder} has no Beads database (a .beads folder). Pick the folder that holds it."
+            raise TrackerError(msg)
+        try:
+            extra = [checked_label(label) for label in _words(labels)] or self.settings.beads.extra_labels
+            beads = BeadsSettings.model_validate(
+                {**self.settings.beads.model_dump(), "path": folder, "extra_labels": extra}
+            )
+        except ValueError as error:
+            msg = f"That label cannot be used: {str(error).splitlines()[-1].strip()}."
+            raise TrackerError(msg) from None
+        clones = [_folder(clone, "A release clone") for clone in _words(releases)]
+        for clone in clones:
+            if not clone.is_dir():
+                msg = f"{clone} is not a folder on this computer."
+                raise TrackerError(msg)
+        sources = [ReleaseSource(path=clone) for clone in clones] or self.settings.releases
+        BeadsTracker(beads).list()  # the database and the bd program answer, before anything is saved
+        try:
+            editor.write(f"{SECTION}.beads", beads.model_dump(mode="json", exclude_none=True))
+            if clones:
+                editor.write(f"{SECTION}.releases", [source.model_dump(mode="json") for source in sources])
+            editor.write(f"{SECTION}.tracker", "beads")
+        except HeinzelError as error:
+            raise TrackerError(str(error)) from None
+        self.use(self.settings.model_copy(update={"tracker": "beads", "beads": beads, "releases": sources}))
+        log_event("issues.connect.outcome", operation="connect", tracker="beads", outcome="ok")
+        return self.overview()
 
     def tracker(self) -> TaskTracker:
         """The configured connector.
@@ -174,13 +263,15 @@ class IssuesService:
 
     def overview(self) -> Reports:
         """Every report and request, newest first; or the reason there are none to show."""
+        self.refresh()
+        folder = str(self.settings.beads.path) if self.settings.beads.path else None
         if not self.enabled:
-            return Reports(ready=False, problem=NOT_SET_UP, fix=SETUP)
+            return Reports(ready=False, problem=NOT_SET_UP, fix=SETUP, folder=folder)
         try:
             tasks = self.tracker().list()
         except TrackerError as error:
-            return Reports(ready=False, problem=str(error), fix=SETUP)
-        return Reports(ready=True, reports=[self.report(task) for task in tasks])
+            return Reports(ready=False, problem=str(error), fix=SETUP, folder=folder)
+        return Reports(ready=True, reports=[self.report(task) for task in tasks], folder=folder)
 
     def get(self, task_id: str) -> Report:
         """One report by its tracker id.
@@ -188,10 +279,19 @@ class IssuesService:
         Raises:
             TrackerError: If it cannot be read.
         """
+        self.refresh()
         return self.report(self.tracker().get(task_id))
 
-    def submit(self, text: str, attachments: Sequence[Path] = (), board: Tracker | None = None) -> Report:
+    def submit(
+        self,
+        text: str,
+        attachments: Sequence[Path] = (),
+        board: Tracker | None = None,
+        uploads: Sequence[Attachment] = (),
+    ) -> Report:
         """Send a report or request to the tracker; for Beads through `board`, which implements Heinzel's `Tracker`.
+
+        `uploads` are files that arrive as content, as the app sends them, and follow the same rules as paths.
 
         Logs `issues.submit.start` and one `issues.submit.outcome` with the tracker, attachment count, outcome and
         duration; never the text.
@@ -199,11 +299,12 @@ class IssuesService:
         Raises:
             TrackerError: If the text is empty or too long, an attachment is refused, or the tracker fails.
         """
+        self.refresh()
         started = time.monotonic()
         fields: dict[str, object] = {"operation": "submit", "tracker": self.settings.tracker}
-        log_event("issues.submit.start", **fields, attachments=len(attachments))
+        log_event("issues.submit.start", **fields, attachments=len(attachments) + len(uploads))
         try:
-            report = self._submit(text, attachments, board)
+            report = self._submit(text, [*map(read_attachment, attachments), *uploads], board)
         except TrackerError:
             # No message: a tracker's refusal may quote what was typed.
             duration = round((time.monotonic() - started) * 1000)
@@ -213,7 +314,7 @@ class IssuesService:
         log_event("issues.submit.outcome", **fields, outcome="ok", duration_ms=duration, state=report.state.value)
         return report
 
-    def _submit(self, text: str, attachments: Sequence[Path], board: Tracker | None) -> Report:
+    def _submit(self, text: str, files: Sequence[Attachment], board: Tracker | None) -> Report:
         body = clean_text(text).strip()
         if not body:
             msg = "Say what happened or what you would like."
@@ -221,7 +322,6 @@ class IssuesService:
         if len(body) > MAX_TEXT:
             msg = f"That is {len(body)} characters; at most {MAX_TEXT} fit in one report."
             raise TrackerError(msg)
-        files = [read_attachment(path) for path in attachments]
         if len(files) > MAX_ATTACHMENTS:
             msg = f"At most {MAX_ATTACHMENTS} attachments fit in one report."
             raise TrackerError(msg)
@@ -230,7 +330,9 @@ class IssuesService:
         tracker = self.tracker()  # checks the folder and program before anything is written
         actor = reporter()
         try:
-            issue = board.create(self.settings.beads.label, title_of(body), body, actor, [])
+            issue = board.create(
+                self.settings.beads.label, title_of(body), body, actor, self.settings.beads.extra_labels
+            )
             for file in files:
                 media_type = mimetypes.guess_type(file.name)[0] or "text/plain"
                 board.attach(issue.key, file.name, file.content, media_type, actor)
@@ -243,6 +345,9 @@ class IssuesService:
         release = self.resolver.release(task.references) if task.state == TaskState.DONE else None
         return Report(
             title=task.title,
+            body=task.body,
+            attachments=list(task.attachments),
+            history=history(task, release),
             state=task.state,
             status=released_text(release) if release else STATE_LABELS[task.state],
             release=release,
@@ -264,6 +369,7 @@ class IssuesService:
         Raises:
             TrackerError: If the tracker fails; the daemon reports the run as failed.
         """
+        self.refresh()
         if not self.enabled:
             return Watched(checked=False)
         started = time.monotonic()
@@ -333,6 +439,45 @@ def _notify(notifications: Notifications, change: Change) -> bool:
     return notice is not None
 
 
+def history(task: Task, release: Release | None) -> list[Step]:
+    """What happened to a report so far, oldest first, in the words of its states."""
+    steps = [Step(label="Sent", at=task.created_at)]
+    if task.started_at is not None or task.state == TaskState.WORKING:
+        steps.append(Step(label=STATE_LABELS[TaskState.WORKING], at=task.started_at))
+    if task.state == TaskState.DONE:
+        steps.append(Step(label=STATE_LABELS[TaskState.DONE], at=task.closed_at))
+    if release is not None:
+        steps.append(Step(label=f"Released in {release.version}", at=datetime.combine(release.date, Time(), UTC)))
+    return steps
+
+
+def _words(text: str) -> list[str]:
+    return [word for word in text.replace(",", " ").split() if word]
+
+
+def _folder(text: str, what: str) -> Path:
+    folder = Path(clean_text(text).strip()).expanduser()
+    if not folder.is_absolute():
+        msg = f"{what} must be a full path, e.g. ~/Code/team-board."
+        raise TrackerError(msg)
+    return folder
+
+
+def upload(name: str, data: str) -> Attachment:
+    """A file the app sent as base64 text, under the same rules as a file from disk.
+
+    Raises:
+        TrackerError: If the text is not base64, or the file is too large or of another kind.
+    """
+    label = Path(clean_text(name).strip()).name or "attachment"
+    try:
+        content = base64.b64decode(data, validate=True)
+    except (binascii.Error, ValueError):
+        msg = f"{label} did not arrive whole; attach it again."
+        raise TrackerError(msg) from None
+    return checked_attachment(label, content)
+
+
 def title_of(text: str) -> str:
     """The first line of a report, shortened to one line of at most 80 characters."""
     line = next((line.strip() for line in text.splitlines() if line.strip()), text.strip())
@@ -356,13 +501,25 @@ def read_attachment(path: Path) -> Attachment:
     except OSError as error:
         msg = f"{path.name} cannot be read: {error.strerror}."
         raise TrackerError(msg) from None
+    return checked_attachment(path.name, content)
+
+
+def checked_attachment(name: str, content: bytes) -> Attachment:
+    """`content` as an attachment, if it is a PNG, a JPEG or UTF-8 text of at most 5 MiB.
+
+    Raises:
+        TrackerError: If it is too large or of another kind.
+    """
+    if len(content) > MAX_ATTACHMENT_BYTES:
+        msg = f"{name} is larger than 5 MiB."
+        raise TrackerError(msg)
     if not any(content.startswith(magic) for magic, _ in _KINDS):
         try:
             content.decode("utf-8")
         except UnicodeDecodeError:
-            msg = f"{path.name} is not a PNG or JPEG image or a text file."
+            msg = f"{name} is not a PNG or JPEG image or a text file."
             raise TrackerError(msg) from None
-    return Attachment(name=path.name, content=content)
+    return Attachment(name=name[:120], content=content)
 
 
 def _read(path: Path) -> _Watch:

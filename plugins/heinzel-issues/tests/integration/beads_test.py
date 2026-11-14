@@ -59,6 +59,6 @@ def test_off_by_default_everywhere(make_kernel):
     assert sent.exit_code != 0
     assert "not set up" in sent.output
     doctor = json.loads(CliRunner().invoke(build(kernel), ["system", "doctor", "--json"]).stdout)
-    assert {"name": "tracker", "status": "up", "detail": "off; turn it on with hz setup issues", "fix": ""} in doctor[
+    assert {"name": "tracker", "status": "up", "detail": "off; set it up on the Issues page", "fix": ""} in doctor[
         "checks"
     ]["issues"]

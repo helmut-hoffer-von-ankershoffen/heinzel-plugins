@@ -13,6 +13,8 @@ operations and maps the tracker's own statuses onto three states; everything els
 Each returns `Task`s: `id`, `title`, `body`, `state` (`received`, `working`, `done`), the tracker's own `status`,
 `created_at`, `updated_at`, `closed_at`, and `references`: text written by whoever works on the item (notes, links,
 close reason) where pull request numbers are found. Never put the submitter's own text in `references`.
+Optional: `started_at`, when someone started on it, and `attachments`, the names of the files sent with it; the
+opened report shows both, in its history and under what was sent.
 
 A connector raises `TrackerError` with a plain sentence that says what to do; Issues shows it as it is.
 

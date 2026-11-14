@@ -47,6 +47,18 @@ def state_of(status: str) -> TaskState:
     return STATES.get(status, TaskState.RECEIVED)
 
 
+def checked_label(value: str) -> str:
+    """A Beads label Issues may write.
+
+    Raises:
+        ValueError: If it has other characters or is too long.
+    """
+    if not _LABEL.fullmatch(value):
+        msg = "a label is lowercase letters, digits, ':', '_' or '-', at most 41 characters"
+        raise ValueError(msg)
+    return value
+
+
 class BeadsSettings(BaseModel):
     """Where the Beads database is and which items Issues owns."""
 
@@ -62,15 +74,28 @@ class BeadsSettings(BaseModel):
         title="Label",
         description="The label Issues gives what you submit, and the items it shows.",
     )
+    extra_labels: builtins.list[str] = Field(
+        default_factory=builtins.list[str],
+        max_length=8,
+        title="More labels",
+        description="Further labels every new report gets, e.g. the one a team's intake queue reads.",
+    )
     bd: str = Field(default="bd", title="bd command", description="The `bd` program, by name or full path.")
 
     @field_validator("label")
     @classmethod
     def _check_label(cls, value: str) -> str:
-        if not _LABEL.fullmatch(value):
-            msg = "a label is lowercase letters, digits, ':', '_' or '-', at most 41 characters"
-            raise ValueError(msg)
-        return value
+        return checked_label(value)
+
+    @field_validator("extra_labels")
+    @classmethod
+    def _check_labels(cls, value: builtins.list[str]) -> builtins.list[str]:
+        return [checked_label(label) for label in value]
+
+    @property
+    def labels(self) -> builtins.list[str]:
+        """Every label a new report gets: the Issues label first, each once."""
+        return list(dict.fromkeys([self.label, *self.extra_labels]))
 
 
 class _Row(BaseModel):
@@ -86,6 +111,7 @@ class _Row(BaseModel):
     created_at: datetime
     updated_at: datetime
     closed_at: datetime | None = None
+    started_at: datetime | None = None
     close_reason: str = ""
     external_ref: str = ""
     assignee: str | None = None
@@ -124,11 +150,11 @@ class BeadsTracker:
         """
         path = self._settings.path
         if path is None:
-            msg = "No tracker folder is set: run hz setup issues."
+            msg = "No tracker folder is set."
             raise TrackerError(msg)
         folder = path.expanduser()
         if not (folder / ".beads").is_dir():
-            msg = f"{folder} has no .beads database: run bd init there, or pick another folder with hz setup issues."
+            msg = f"{folder} has no .beads database; pick the folder that holds it."
             raise TrackerError(msg)
         return folder
 
@@ -154,7 +180,17 @@ class BeadsTracker:
         """
         row = self._one(
             self.run(
-                ["create", title, "--body-file", "-", "--labels", self._settings.label, "--type", "task", "--json"],
+                [
+                    "create",
+                    title,
+                    "--body-file",
+                    "-",
+                    "--labels",
+                    ",".join(self._settings.labels),
+                    "--type",
+                    "task",
+                    "--json",
+                ],
                 stdin=body or title,
             )
         )
@@ -302,12 +338,20 @@ def _task(row: _Row) -> Task:
         created_at=row.created_at,
         updated_at=row.updated_at,
         closed_at=row.closed_at,
+        started_at=row.started_at,
+        attachments=tuple(Path(ref).name for ref in attachment_refs(row.notes)),
         references=references,
     )
 
 
 ATTACHMENT_NOTE = "Attachment: "
 """How a note names a file saved next to the database."""
+
+
+def attachment_refs(notes: str) -> builtins.list[str]:
+    """The paths, relative to the tracker folder, of the files the notes name."""
+    lines = (line.strip() for line in notes.splitlines())
+    return [line.removeprefix(ATTACHMENT_NOTE).strip() for line in lines if line.startswith(ATTACHMENT_NOTE)]
 
 
 class BeadsBoard:
@@ -403,10 +447,7 @@ class BeadsBoard:
 
     def _files(self, notes: str) -> builtins.list[FileRef]:
         files: builtins.list[FileRef] = []
-        for line in notes.splitlines():
-            if not line.startswith(ATTACHMENT_NOTE):
-                continue
-            ref = line.removeprefix(ATTACHMENT_NOTE).strip()
+        for ref in attachment_refs(notes):
             media_type = mimetypes.guess_type(ref)[0] or "application/octet-stream"
             try:
                 size = (self._beads.folder / ref).stat().st_size

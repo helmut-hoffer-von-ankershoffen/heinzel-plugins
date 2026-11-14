@@ -20,7 +20,6 @@ from heinzel import (
     Navigate,
     Notifications,
     Prompter,
-    RunCommand,
     RunOperation,
     Status,
 )
@@ -48,7 +47,9 @@ from heinzel_issues._service import (
     IssuesSettings,
     Report,
     Reports,
+    Step,
     Watched,
+    upload,
 )
 
 module = Module("issues", "Report a problem or request something, and see when it is done and released.")
@@ -62,13 +63,12 @@ module.view(
     name="requests",
     source="list",
     title="Issues",
-    fallback="Issues cannot be shown here; run hz issues list.",
+    fallback="Issues cannot be shown here.",
     order=650,
     refresh=60,
     actions={
-        "setup": RunCommand(command=SETUP),
-        "send": RunOperation(operation="submit", inputs=("text",)),
-        "report": RunCommand(command="hz issues submit"),
+        "connect": RunOperation(operation="connect", inputs=("path", "labels", "releases")),
+        "send": RunOperation(operation="submit", inputs=("text", "file_name", "file_data")),
     },
 )
 
@@ -100,15 +100,42 @@ def list_(service: IssuesService) -> Reports:
 
 
 @module.operation(read_only=False, private=True, render=_render_one, audience="everyday")
-def submit(service: IssuesService, text: str, attachment: list[Path] | None = None) -> Report:
+def submit(
+    service: IssuesService,
+    text: str,
+    attachment: list[Path] | None = None,
+    file_name: str = "",
+    file_data: str = "",
+) -> Report:
     """Report a problem or request something; optional attachments are PNG, JPEG or text files.
+
+    The app sends one attached file as its name and base64 content (`file_name`, `file_data`); in a terminal,
+    name files with `--attachment`.
 
     Raises:
         HeinzelError: If it cannot be sent; the message says why.
     """
     try:
+        service.refresh()
+        uploads = [upload(file_name, file_data)] if file_data else []
         board = BeadsBoard(service.settings.beads) if service.settings.tracker == "beads" else None
-        return service.submit(text, attachment or [], board=board)
+        return service.submit(text, attachment or [], board=board, uploads=uploads)
+    except TrackerError as error:
+        raise _fail(error) from None
+
+
+@module.operation(read_only=False, private=True, render=_render)
+def connect(service: IssuesService, editor: ConfigEditor, path: str, labels: str = "", releases: str = "") -> Reports:
+    """Set up issue tracking: send reports and requests to the Beads database in a folder on this computer.
+
+    `labels` are further labels for every new report, and `releases` are git clones whose tags are releases; both
+    are optional lists separated by commas.
+
+    Raises:
+        HeinzelError: If the folder has no Beads database or it does not answer; nothing is saved then.
+    """
+    try:
+        return service.connect(editor, path, labels, releases)
     except TrackerError as error:
         raise _fail(error) from None
 
@@ -162,7 +189,7 @@ def today(result: Reports) -> ListWidget | None:
 def tracking(service: IssuesService) -> list[Check]:
     """Off is fine; a chosen tracker must answer."""
     if not service.enabled:
-        return [Check(name="tracker", status=Status.UP, detail="off; turn it on with hz setup issues")]
+        return [Check(name="tracker", status=Status.UP, detail="off; set it up on the Issues page")]
     result = service.overview()
     if not result.ready:
         return [Check(name="tracker", status=Status.DOWN, detail=str(result.problem), fix=SETUP)]
@@ -212,6 +239,7 @@ __all__ = [
     "ReleaseSource",
     "Report",
     "Reports",
+    "Step",
     "Task",
     "TaskState",
     "TaskTracker",

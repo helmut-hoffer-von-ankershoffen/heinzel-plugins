@@ -30,5 +30,6 @@ def test_installed_operation(tmp_path):
         "ready": False,
         "problem": "Issue tracking is not set up.",
         "fix": "hz setup issues",
+        "folder": None,
         "reports": [],
     }

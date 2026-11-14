@@ -1,6 +1,6 @@
 [project]
 name = "heinzel-issues"
-version = "0.1.1"
+version = "0.2.0"
 description = "Report a problem or request something, and see when it is done and released; needs a Beads database you can write to."
 readme = "README.md"
 license = "MIT"
@@ -73,6 +73,11 @@ highlights = [
 path = "docs/assets/screenshots/issues-page.png"
 surface = "ui"
 caption = "Three fictional reports: received, being worked on, and released in 0.9.27 — with a form to send another"
+
+[[tool.heinzel.catalog.screenshots]]
+path = "docs/assets/screenshots/report-history.png"
+surface = "ui"
+caption = "A fictional report opened: what was sent, the file sent with it, and its history up to the release"
 
 [[tool.heinzel.catalog.screenshots]]
 path = "docs/assets/screenshots/today-open-reports.png"

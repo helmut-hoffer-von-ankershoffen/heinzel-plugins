@@ -110,13 +110,19 @@ def _journey(kernel, folder, bd, tmp_path):
 
     run([bd, "update", task_id, "--status", "in_progress"], folder)
     client = TestClient(api.build(kernel), base_url="http://localhost")
-    assert client.get("/issues/list").json()["reports"][0]["status"] == "Being worked on"
+    working = client.get("/issues/list").json()["reports"][0]
+    assert working["status"] == "Being worked on"
+    assert working["body"] == "The footer clock jumps\nIt moves by a pixel."
+    assert working["attachments"] == ["shot.png"]
+    assert [step["label"] for step in working["history"]] == ["Sent", "Being worked on"]
+    assert working["history"][1]["at"] is not None  # Beads records when work started
 
     run([bd, "close", task_id, "--reason", "Fixed in #7"], folder)
     done = client.get("/issues/list").json()["reports"][0]
     assert done["state"] == "done"
     assert done["release"]["version"] == "0.9.27"
     assert done["status"].startswith("Released in 0.9.27 on ")
+    assert [step["label"] for step in done["history"]] == ["Sent", "Being worked on", "Done", "Released in 0.9.27"]
 
     shown = CliRunner().invoke(cli, ["issues", "show", task_id, "--json"])
     assert json.loads(shown.stdout)["details"]["pull_requests"][0]["number"] == 7

@@ -46,11 +46,13 @@ def main(args: list[str]) -> int:
                 if row.get("assignee") not in {None, "", actor}:
                     print(f"Error: {rest[0]} is already claimed by {row['assignee']}", file=sys.stderr)
                     return 1
-                row.update(assignee=actor, status="in_progress")
+                row.update(assignee=actor, status="in_progress", started_at=now())
             if notes := option(rest, "--append-notes"):
                 row["notes"] = f"{row['notes']}\n{notes}" if row.get("notes") else notes
             if status := option(rest, "--status"):
                 row["status"] = status
+                if status == "in_progress":
+                    row.setdefault("started_at", now())
             row["updated_at"] = now()
         if command == "close":
             row.update(status="closed", close_reason=option(rest, "--reason") or "", closed_at=now(), updated_at=now())
