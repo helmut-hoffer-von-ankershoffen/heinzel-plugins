@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.9.8
+
+Search your Google Docs, Sheets and Slides from Heinzel: the documents adapter finds files whose name or text contains your words (Drive full-text search, trashed files left out), with the title, link and, when Drive has one, a short description. It reads only; no new Google grant is needed.
+A Docs, Sheets, Slides or Drive link now goes to Google when other document sources, such as Confluence, are connected too. Search and link routing need Heinzelmännchen 0.9.43 or later; on older versions everything else works as before.
+
 ## 0.9.7
 
 Sign in to Google from Heinzel, without a terminal: the plugin declares its sign-in (Heinzelmännchen ADR 0136), so `hz system connector connect google` runs `gws auth login` asking for exactly the grants needed. The first sign-in reads your Docs and calendar; mail only when you read mail from Google or allow it; a change only when you allow it; never Google Cloud access. Finish it on the computer Heinzel runs on.

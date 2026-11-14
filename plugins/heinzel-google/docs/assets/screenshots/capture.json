@@ -1,14 +1,14 @@
 {
   "format": 1,
   "plugin": "heinzel-google",
-  "core_version": "0.9.41",
-  "inputs_sha256": "7acba29dd1bc59929673cfee4b3acb829c69a97958870db992d9f851b42f17da",
+  "core_version": "0.9.42",
+  "inputs_sha256": "10cd582ce99faa6262b63514524a214f0f61ca72fd5f21a98dc3adc8d461381a",
   "images": {
-    "docs/assets/screenshots/google-upcoming-review.png": "361f7d068937655964f5febe71f370aa8d34edde351a92d43019a9226be1c393",
-    "docs/assets/screenshots/google-calendar-week.png": "50975fadeeb7cd3a0ee7f19f752117bfb95e5c3d19046e7616f7d2ef4fc0cd54",
-    "docs/assets/screenshots/google-source-review.png": "63d7f25659b4ce2d6cea036905761a2b6ca47841d806e69041e51e654c92c753",
-    "docs/assets/screenshots/launch-files-json.png": "24d0d6cb1e3f368b3c263e506a87f80f7c84cd6b83feba1ff4db2f77bbc3a811",
-    "docs/assets/screenshots/launch-files-week.png": "bb60e480bc89eb163df3505bef0ae2f290acec16ac209ce4940049b1f7f68ba7",
+    "docs/assets/screenshots/google-upcoming-review.png": "b3f22dd5cc088c9e4c8ba150227c77504bef0bed319976b88afae8fa1fca2410",
+    "docs/assets/screenshots/google-calendar-week.png": "d8b775d58452b28061417de2ff40b6289b041a409ca6c9f13647c657f3d34aaf",
+    "docs/assets/screenshots/google-source-review.png": "449a05c3bc62362c3b60eafefee9025e03cdde144ac95f52e487a2fed2f35ad7",
+    "docs/assets/screenshots/launch-files-json.png": "d90496859d71576e46c6cbee16ba5db21416f2943a733be1e72d96dc284b3028",
+    "docs/assets/screenshots/launch-files-week.png": "83b14bde8f0071853113f0616987517d00945f401709a44878da5333f3ef7292",
     "docs/assets/screenshots/launch-plan.png": "a8f723cff386597587a28aa1a76dc6e59b72b40665107629cda30dc1c060fe09",
     "docs/assets/screenshots/launch-metrics.png": "694361694713cb2bb4b3e9a89ec50004ab36120233ed8dbe615466cd5ae09a62",
     "docs/assets/screenshots/mail-content.png": "ceef4e8ed3b08a9d3b787467049c7e8e45effbbdfcaacee0508b023d51691cd4"
@@ -17,18 +17,18 @@
     "format": 2,
     "source_story": {
       "path": "source-story.md",
-      "sha256": "623d5246d50087711bf83879e0f41f6b1d13c06c60f94ea4ce817b2fabf15798"
+      "sha256": "d97b02a270cb86ff5090a431ecd78965cbfff40476cd48682d71114766ce6e6a"
     },
     "definition": {
       "format": 1,
       "reviewer": "Codex feature-story agent",
-      "source_sha256": "d2cdf00d224c56ee2b956e3fda285d31aa641e5defa13a5542fca387aa2abd7a",
+      "source_sha256": "14c9b6a4a20f9b749aacb343329dd34c0346add55b171038719ba462a6aca876",
       "plan_sha256": "007f39c2829e3307c325d9ef0dccb1c01a5e14f9020024c7b9e43473da8de052",
-      "story_sha256": "623d5246d50087711bf83879e0f41f6b1d13c06c60f94ea4ce817b2fabf15798"
+      "story_sha256": "d97b02a270cb86ff5090a431ecd78965cbfff40476cd48682d71114766ce6e6a"
     },
     "plugin": "heinzel-google",
-    "core_version": "0.9.41",
-    "inputs_sha256": "7acba29dd1bc59929673cfee4b3acb829c69a97958870db992d9f851b42f17da",
+    "core_version": "0.9.42",
+    "inputs_sha256": "10cd582ce99faa6262b63514524a214f0f61ca72fd5f21a98dc3adc8d461381a",
     "screenshots": [
       {
         "path": "docs/assets/screenshots/google-upcoming-review.png",
@@ -72,30 +72,30 @@
       }
     ],
     "images": {
-      "google-upcoming-review.png": "361f7d068937655964f5febe71f370aa8d34edde351a92d43019a9226be1c393",
-      "google-calendar-week.png": "50975fadeeb7cd3a0ee7f19f752117bfb95e5c3d19046e7616f7d2ef4fc0cd54",
-      "google-source-review.png": "63d7f25659b4ce2d6cea036905761a2b6ca47841d806e69041e51e654c92c753",
-      "launch-files-json.png": "24d0d6cb1e3f368b3c263e506a87f80f7c84cd6b83feba1ff4db2f77bbc3a811",
-      "launch-files-week.png": "bb60e480bc89eb163df3505bef0ae2f290acec16ac209ce4940049b1f7f68ba7",
+      "google-upcoming-review.png": "b3f22dd5cc088c9e4c8ba150227c77504bef0bed319976b88afae8fa1fca2410",
+      "google-calendar-week.png": "d8b775d58452b28061417de2ff40b6289b041a409ca6c9f13647c657f3d34aaf",
+      "google-source-review.png": "449a05c3bc62362c3b60eafefee9025e03cdde144ac95f52e487a2fed2f35ad7",
+      "launch-files-json.png": "d90496859d71576e46c6cbee16ba5db21416f2943a733be1e72d96dc284b3028",
+      "launch-files-week.png": "83b14bde8f0071853113f0616987517d00945f401709a44878da5333f3ef7292",
       "launch-plan.png": "a8f723cff386597587a28aa1a76dc6e59b72b40665107629cda30dc1c060fe09",
       "launch-metrics.png": "694361694713cb2bb4b3e9a89ec50004ab36120233ed8dbe615466cd5ae09a62",
       "mail-content.png": "ceef4e8ed3b08a9d3b787467049c7e8e45effbbdfcaacee0508b023d51691cd4"
     },
     "transcripts": {
-      "google-upcoming-review.txt": "c0f6c5f04ef68ce658a314a946119446978bb0025dc06ad138c01045c027a723",
-      "google-calendar-week.txt": "208ed89da3819bf2b77ca0bda435476ca4aab1cbb254bbf229785a9c6fae72c9",
-      "google-source-review.txt": "61221aee570f8e8dc37bf1662e6de30fbc7fedcaa73ac14e89ba926923042910",
-      "launch-files-json.txt": "2d9ffae0c43b9617e264d1a414f6625a2eea1a12650de095756dfe5aec086940",
-      "launch-files-week.txt": "65ef9dc574b2d625a027abc861b0ecb768fb6d11ebb85b02e2625dd183c73acd",
+      "google-upcoming-review.txt": "a6e148d79f08a75a7e20a369d9bd08b68f284e14020d1afc8827af27f27aeed3",
+      "google-calendar-week.txt": "15e99e36af09617872e1546b71e38e1895d32eee3fa7b767b58a822c24e3a77b",
+      "google-source-review.txt": "abd43fd75c9de31071fa9ec37a2e8cf4669c50632aa81b6924fc26a60ab23c37",
+      "launch-files-json.txt": "65728c3929c452376bd8ceff3114729e7724b6587879a176308fec7d91df83ec",
+      "launch-files-week.txt": "bea99b32109a04dc2e08e45d3f7db8643646699041e348cb22c38d6478209166",
       "launch-plan.txt": "a7ded47e8432d800d520488f35d85f613b09609b4041a074ae8a13aaa7c37d91",
       "launch-metrics.txt": "d3f2f19f3a5f470e2c567dd65d8333fdba8fb653a2346a31cfa8b9c008545a04",
       "mail-content.txt": "57cda012c3d61d21aa3e387c296ebce6483c114b169bb416d5296d4af344a813"
     },
-    "bundle_sha256": "6c9779a66d018a8b6f0db9802f499bc9f9ff1fc86026e600c2145c0e0438d64f"
+    "bundle_sha256": "09a3ec06d8066c18bdf37eb812a5ea1231e16e5715fdc2694d45035748501ff1"
   },
   "privacy_review": {
     "format": 1,
-    "bundle_sha256": "6c9779a66d018a8b6f0db9802f499bc9f9ff1fc86026e600c2145c0e0438d64f",
+    "bundle_sha256": "09a3ec06d8066c18bdf37eb812a5ea1231e16e5715fdc2694d45035748501ff1",
     "reviewer": "Codex privacy agent",
     "decision": "approve",
     "checked_images": [

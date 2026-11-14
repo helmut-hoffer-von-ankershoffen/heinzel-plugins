@@ -11,7 +11,7 @@ operations, after the person confirmed them, and need the write scopes `hz setup
 """
 
 from pathlib import Path
-from typing import Annotated
+from typing import Annotated, Any
 
 import heinzel
 import heinzel.kernel as kernel_contracts
@@ -20,7 +20,7 @@ from heinzel.kernel import CapabilityView
 from pydantic import Field
 
 from heinzel_google._calendar import GoogleCalendar
-from heinzel_google._documents import Drive, GoogleDocuments
+from heinzel_google._documents import LINK_HOSTS, Drive, GoogleDocuments
 from heinzel_google._gws import (
     CALENDAR_WRITE_SCOPE,
     LOGIN,
@@ -90,7 +90,9 @@ if (
             from heinzel_google._draft_append import GoogleDraftAppends
 
             module.service(GoogleDraftAppends)
-module.provides("documents", modes={"read"}, hosts=DOCUMENT_HOSTS)(GoogleDocuments)
+_links: dict[str, Any] = {"links": LINK_HOSTS} if hasattr(heinzel, "DocumentHit") else {}
+"""Core 0.9.43 (ADR 0161) routes a document link by host with `links`; an older Core does not know it and gets none."""
+module.provides("documents", modes={"read"}, hosts=DOCUMENT_HOSTS, **_links)(GoogleDocuments)
 module.provides("calendar", modes={"read", "write"}, hosts=CALENDAR_HOSTS)(GoogleCalendar)
 module.provides("mail", modes={"read", "write"}, hosts=MAIL_HOSTS)(Gmail)
 

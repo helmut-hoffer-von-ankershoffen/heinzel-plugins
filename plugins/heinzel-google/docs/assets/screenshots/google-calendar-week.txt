@@ -15,7 +15,7 @@ Doctor: 4 checks need attention
 ai.access ai access, system.doctor installation, system.prerequisite system.runner: claude…
 
 Open
-v0.9.41
+v0.9.42
 Updates, off
 0
 System health, warning
@@ -30,16 +30,16 @@ Turn on Calendar reminders in Notification settings first.
 Now: nothing. Next: Launch readiness review in 15 min.
 
 TODAY · SAT 14 NOV
-10:16
-10:31
-11:01
+15:15
+15:30
+16:00
 Launch readiness review
 in 15 min
-11:16
-11:46
+16:15
+16:45
 Mira Example / Priya Example — one-on-one
-12:01
-12:31
+17:00
+17:30
 Rollout checkpoint
 Notification settings
 Audio

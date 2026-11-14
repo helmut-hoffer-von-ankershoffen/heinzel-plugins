@@ -13,7 +13,9 @@ from datetime import UTC, datetime, timedelta
 from typing import Any, cast
 from urllib.parse import parse_qs, urlsplit
 
+import heinzel
 from heinzel import Document, HeinzelError, clean_text
+from pydantic import BaseModel
 
 from heinzel_google._docs import document_to_text
 from heinzel_google._gws import GoogleSession
@@ -67,6 +69,48 @@ def _slides_text(data: dict[str, Any]) -> str:
         ]
         parts.append(f"## Slide {number}\n{''.join(lines).strip()}")
     return "\n\n".join(parts)
+
+
+MAX_QUERY = 200
+"""Characters of a search query."""
+MAX_HITS = 50
+"""Most hits one search returns."""
+MAX_SNIPPET = 200
+"""Characters of a hit's snippet."""
+LINK_HOSTS = ["docs.google.com", "drive.google.com"]
+"""Hosts of the web addresses `read` accepts (Docs, Sheets, Slides and Drive links); routes a link to this adapter."""
+
+
+class _FallbackHit(BaseModel):
+    """A search hit on a Core that has no `DocumentHit` yet (same fields)."""
+
+    ref: str
+    title: str
+    url: str | None = None
+    snippet: str | None = None
+    updated_at: datetime | None = None
+    source: str | None = None
+
+
+DocumentHit: Any = getattr(heinzel, "DocumentHit", _FallbackHit)
+
+
+def drive_query(text: str) -> str:
+    """The Drive `q` for a full-text search of the types `read` handles, not trashed, escaped.
+
+    Raises:
+        HeinzelError: If `text` is empty or too long.
+    """
+    words = " ".join(clean_text(text).split())
+    if not words:
+        msg = "Give some text to search for."
+        raise HeinzelError(msg)
+    if len(words) > MAX_QUERY:
+        msg = f"The text to search for is longer than {MAX_QUERY} characters."
+        raise HeinzelError(msg)
+    types = " or ".join(f"mimeType = '{mime}'" for mime in KINDS)
+    escaped = words.replace("\\", "\\\\").replace("'", "\\'")
+    return f"({types}) and trashed = false and fullText contains '{escaped}'"
 
 
 def _line(value: object) -> str:
@@ -163,6 +207,50 @@ class GoogleDocuments:
             revision=clean_text(str(revision)) if isinstance(revision, str | int) else None,
         )
 
+    def search(self, query: str, limit: int) -> list[Any]:
+        """Docs, Sheets and Slides whose name or text contains `query`, best first, at most `limit` (1 to 50).
+
+        Raises:
+            HeinzelError: If `query` is empty or too long, the sign-in is missing, or Google fails.
+        """
+        q = drive_query(query)
+        count = max(1, min(int(limit), MAX_HITS))
+        params: dict[str, object] = {
+            "q": q,
+            "pageSize": count,
+            "fields": "files(id,name,mimeType,description,modifiedTime)",
+            "supportsAllDrives": True,
+            "includeItemsFromAllDrives": True,
+        }
+        data, _size = self._session.get("Google Drive", DRIVE_LIST, params, "a search")
+        items = data.get("files") or []
+        if not isinstance(items, list):
+            msg = "Google Drive answered a search without a list of files."
+            raise HeinzelError(msg)
+        hits: list[Any] = []
+        for item in cast("list[object]", items):
+            if not isinstance(item, dict):
+                continue
+            found = cast("dict[str, Any]", item)
+            kind = KINDS.get(str(found.get("mimeType")))
+            file_id = found.get("id")
+            if kind is None or not isinstance(file_id, str) or not _ID.fullmatch(file_id):
+                continue
+            url = f"{EDITORS[kind]}{file_id}/edit"
+            snippet = _line(found.get("description"))[:MAX_SNIPPET]
+            hits.append(
+                DocumentHit(
+                    ref=url,
+                    title=_line(found.get("name")),
+                    url=url,
+                    snippet=snippet or None,
+                    updated_at=_modified(found.get("modifiedTime")),
+                )
+            )
+            if len(hits) == count:
+                break
+        return hits
+
     def _metadata(self, file_id: str) -> dict[str, Any]:
         return self._session.get(
             "Google Drive",
@@ -211,6 +299,13 @@ class Drive:
                 if file is not None:
                     found.append(file)
         return found
+
+
+def _modified(value: object) -> datetime | None:
+    try:
+        return datetime.fromisoformat(str(value)).astimezone(UTC) if value else None
+    except ValueError:
+        return None
 
 
 def _file(item: dict[str, Any]) -> DriveFile | None:
