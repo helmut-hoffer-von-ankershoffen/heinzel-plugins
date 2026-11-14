@@ -15,11 +15,11 @@ Doctor: 4 checks need attention
 ai.access ai access, system.doctor installation, system.prerequisite system.runner: claude…
 
 Open
-v0.9.40
+v0.9.41
 Updates, off
 0
 System health, warning
-16
+15
 Daemon not installed, off
 Chat
 New chat
@@ -30,25 +30,25 @@ Audio
 
 Calendar
 
-Free for 16 min until Launch readiness review
+Free for 15 min until Launch readiness review
 
 NOW
 
 Not in a meeting
 
-Free for 16 min
+Free for 15 min
 
 NEXT
 
 Next: Launch readiness review
-in 16 min
+in 15 min
 
-01:40–02:10 · 2 invited
+07:22–07:52 · 2 invited
 
 THEN
 
-02:25–02:55
+08:07–08:37
 Mira Example / Priya Example — one-on-one
-03:10–03:40
+08:52–09:22
 Rollout checkpoint
 Open calendar

@@ -3,6 +3,7 @@
 import json
 import sys
 import time
+from pathlib import Path
 
 import pytest
 
@@ -123,3 +124,41 @@ def test_login_runs_with_the_terminal_and_returns_its_exit_code(shell_stand_in):
 def test_a_login_that_ignores_sigterm_is_killed(shell_stand_in, monkeypatch):
     monkeypatch.setattr(_gws, "GRACE", 0.3)
     assert Gws().login(shell_stand_in("trap '' TERM\nwhile :; do sleep 1; done"), [], 2.0) is None
+
+
+LAUNCHD_PATH = "/usr/bin:/bin:/usr/sbin:/sbin"
+"""The PATH a launchd service gets when its plist sets none: no Homebrew directory in it."""
+
+
+@pytest.fixture
+def npm_gws(no_homebrew, tmp_path):
+    """gws as npm installs it under Homebrew: a link in Homebrew's bin to a `#!/usr/bin/env node` launcher, with
+    `node` in that bin. The stand-in `node` runs the launcher with Python; it prints what gws 0.22.5 prints."""
+    directory = Path(no_homebrew[0])
+    directory.mkdir(parents=True)
+    node = directory / "node"
+    node.write_text(f'#!/bin/sh\nexec {sys.executable} "$@"\n', encoding="utf-8")
+    node.chmod(0o755)
+    launcher = tmp_path / "homebrew-arm" / "lib" / "node_modules" / "cli" / "run.js"
+    launcher.parent.mkdir(parents=True)
+    launcher.write_text(
+        "#!/usr/bin/env node\nimport sys\n"
+        'if sys.argv[1:] == ["--version"]:\n'
+        '    print("gws 0.22.5")\n'
+        '    print("This is not an officially supported Google product.")\n'
+        "else:\n"
+        '    print(\'{"id": "x"}\')\n',
+        encoding="utf-8",
+    )
+    launcher.chmod(0o755)
+    (directory / "gws").symlink_to(launcher)
+    return str(directory / "gws")
+
+
+@pytest.mark.parametrize("configured", [True, False], ids=["google.gws_path", "found by Heinzel"])
+def test_npm_gws_under_a_launchd_path_says_its_version_and_answers(npm_gws, monkeypatch, configured):
+    monkeypatch.setenv("PATH", LAUNCHD_PATH)
+    session = GoogleSession(GoogleSettings(gws_path=npm_gws if configured else None), Gws())
+    assert session.executable() == npm_gws
+    assert session.version() == "0.22.5"
+    assert session.get("Google Drive", ("drive", "files", "get"), {"fileId": "x"}, "file x")[0] == {"id": "x"}
