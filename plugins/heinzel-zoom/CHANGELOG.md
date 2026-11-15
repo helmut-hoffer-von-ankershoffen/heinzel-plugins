@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.9.4
+
+Requires Python 3.15; relocked.
+
 ## 0.9.3
 
 Relock against Core 0.9.40, which adds uv to the Core runtime dependencies.

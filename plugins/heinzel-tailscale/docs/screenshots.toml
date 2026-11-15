@@ -7,7 +7,7 @@ name = "sharing-ready"
 surface = "ui"
 route = "/"
 appearance = "dark"
-caption = "Turn private sharing on; the switch reads On with Copy link and Open — fictional local Tailscale demo"
+caption = "Sharing On with Copy link and Open (fictional demo); the capture tool hides the share link as [authentication link hidden]"
 timeout_ms = 30000
 
 [[scenes.steps]]

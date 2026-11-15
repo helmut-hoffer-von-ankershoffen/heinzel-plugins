@@ -2,9 +2,9 @@
   "format": 1,
   "plugin": "heinzel-issues",
   "core_version": "0.9.42",
-  "inputs_sha256": "df95a9d4a53cb16aa0a3572bc04b88332dfbb102fdf4ff439bb1d309ecf099a2",
+  "inputs_sha256": "f06fd015644c8abc25fd2e7fa0c0811efa1dbf11c132cbffd4d3e706bd927da2",
   "images": {
-    "docs/assets/screenshots/issues-page.png": "4172860cdbf81d5b9b907a47a73641889cefcd3bcc185b43bd9d46815c09f126",
+    "docs/assets/screenshots/issues-page.png": "52aa07fc87cc1d5fa6f98553b2fcbe4325ec6202d5be00aeb41ef59b38e02313",
     "docs/assets/screenshots/report-history.png": "7605e12edddcf1dc7524c801850c6138605b430853a3aa81ff46064b8cde0691",
     "docs/assets/screenshots/today-open-reports.png": "f7e36260487c7a30574122f5a6705732edee045cd720d0b7717fc4b307ead56e",
     "docs/assets/screenshots/cli-list.png": "e8a2c412a35760cf9eb4725826c6b6ac075d532ddc910392a48e23af56b563bc"
@@ -17,14 +17,14 @@
     },
     "definition": {
       "format": 1,
-      "reviewer": "fable-issues-story",
-      "source_sha256": "f69054b3ab966d5ca2aea6e080b3ebfd43c5d210379e3f8005829ce6da54860c",
+      "reviewer": "story-confirm-sonnet",
+      "source_sha256": "363f51d952da71231fae5492c95fecf298b27981c64eb7008d3dbb980be411c1",
       "plan_sha256": "e7395659d00a341e8c5fcf62a26cc2765e7812e405390baa9fe1ae815fab2710",
       "story_sha256": "baac94e327f1dbec7633b9b7e4b9de5fb398f2d57c1d8f8a3ce68984bc511401"
     },
     "plugin": "heinzel-issues",
     "core_version": "0.9.42",
-    "inputs_sha256": "df95a9d4a53cb16aa0a3572bc04b88332dfbb102fdf4ff439bb1d309ecf099a2",
+    "inputs_sha256": "f06fd015644c8abc25fd2e7fa0c0811efa1dbf11c132cbffd4d3e706bd927da2",
     "screenshots": [
       {
         "path": "docs/assets/screenshots/issues-page.png",
@@ -48,7 +48,7 @@
       }
     ],
     "images": {
-      "issues-page.png": "4172860cdbf81d5b9b907a47a73641889cefcd3bcc185b43bd9d46815c09f126",
+      "issues-page.png": "52aa07fc87cc1d5fa6f98553b2fcbe4325ec6202d5be00aeb41ef59b38e02313",
       "report-history.png": "7605e12edddcf1dc7524c801850c6138605b430853a3aa81ff46064b8cde0691",
       "today-open-reports.png": "f7e36260487c7a30574122f5a6705732edee045cd720d0b7717fc4b307ead56e",
       "cli-list.png": "e8a2c412a35760cf9eb4725826c6b6ac075d532ddc910392a48e23af56b563bc"
@@ -59,12 +59,12 @@
       "today-open-reports.txt": "530b3b464fd7c0d108890cb6c4b44a076913134d933868e6c93aadb66e4144e0",
       "cli-list.txt": "d0eac2c0b1b435cac45b7f7052b732fe1e8f619035e7778e11b8f6e6101ff08f"
     },
-    "bundle_sha256": "89e1f1751c8683837e61b7ee48b26b60e15ed4991e2de7fab1dbc096281a2668"
+    "bundle_sha256": "6f21e27941340b18a3503ba7fc6db0df728f91a71f846e64fc6a67fde6b6bda4"
   },
   "privacy_review": {
     "format": 1,
-    "bundle_sha256": "89e1f1751c8683837e61b7ee48b26b60e15ed4991e2de7fab1dbc096281a2668",
-    "reviewer": "fable-issues-story",
+    "bundle_sha256": "6f21e27941340b18a3503ba7fc6db0df728f91a71f846e64fc6a67fde6b6bda4",
+    "reviewer": "privacy-review-opus",
     "decision": "approve",
     "checked_images": [
       "issues-page.png",

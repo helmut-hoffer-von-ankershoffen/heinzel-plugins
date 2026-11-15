@@ -1,11 +1,11 @@
 [project]
 name = "heinzel-tailscale"
-version = "0.9.7"
+version = "0.9.8"
 description = "Share the authenticated web app privately through Tailscale Serve: a Heinzelmännchen plugin."
 readme = "README.md"
 license = "MIT"
 license-files = ["LICENSE"]
-requires-python = ">=3.12"
+requires-python = ">=3.15"
 dependencies = ["heinzel>=0.9.16,<0.10", "httpx>=0.28"]
 
 [project.urls]
@@ -125,7 +125,7 @@ show_missing = true
 [tool.pyright]
 typeCheckingMode = "strict"
 include = ["src"]
-pythonVersion = "3.12"
+pythonVersion = "3.15"
 
 [tool.hatch.build.targets.sdist]
 exclude = [".venv", ".acceptance", ".preview", "dist", "web/node_modules", "**/__pycache__", ".pytest_cache", ".mypy_cache", ".coverage*"]
@@ -142,7 +142,7 @@ highlights = [
 [[tool.heinzel.catalog.screenshots]]
 path = "docs/assets/screenshots/sharing-ready.png"
 surface = "ui"
-caption = "Turn private sharing on; the switch reads On with Copy link and Open — fictional local Tailscale demo"
+caption = "Sharing On with Copy link and Open (fictional demo); the capture tool hides the share link as [authentication link hidden]"
 
 [[tool.heinzel.catalog.screenshots]]
 path = "docs/assets/screenshots/sharing-request-cli.png"

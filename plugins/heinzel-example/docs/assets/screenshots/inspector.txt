@@ -16,7 +16,7 @@ Today
 Notifications
 1 unread
 Example is ready
-18:31
+02:01
 All notifications
 Example is ready
 Open
@@ -25,7 +25,7 @@ Example value
 42
 
 Ask about it
-v0.9.40
+v0.9.42
 Updates, off
 0
 System health, warning

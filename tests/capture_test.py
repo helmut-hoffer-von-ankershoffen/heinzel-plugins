@@ -723,8 +723,8 @@ def test_every_pinned_migration_maps_a_committed_gallery_or_definition_to_its_di
     )
 
 
-def test_a_version_only_relock_keeps_a_pinned_gallery_fresh_and_its_pin_valid(tmp_path):
-    # Any gallery still reviewed under a pinned migration; heinzel-atlassian's was recaptured and needs none.
+def test_a_version_only_relock_keeps_a_recaptured_gallery_fresh_without_any_pin(tmp_path):
+    # Every gallery is recorded under the current rule (locks and versions are not capture inputs): no pin is needed.
     plugin = tmp_path / "heinzel-example"
     shutil.copytree(REPOSITORY / "plugins/heinzel-example", plugin, ignore=shutil.ignore_patterns(".venv"))
     lock = plugin / "requirements.lock"
@@ -734,6 +734,6 @@ def test_a_version_only_relock_keeps_a_pinned_gallery_fresh_and_its_pin_valid(tm
     lock.write_text(relocked)
     plan = capture.read_plan(plugin)
     recorded = json.loads((plugin / capture.MANIFEST).read_text())["inputs_sha256"]
-    assert capture.input_digest(plugin, plan, legacy=True) != recorded  # the old rule would call it stale
-    assert capture.input_digest(plugin, plan) == capture.MIGRATED_DIGESTS[recorded]
+    assert capture.input_digest(plugin, plan) == recorded
+    assert recorded not in capture.MIGRATED_DIGESTS
     assert capture.check_capture(plugin)["fresh"]

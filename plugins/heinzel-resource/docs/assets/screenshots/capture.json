@@ -1,12 +1,12 @@
 {
   "format": 1,
   "plugin": "heinzel-resource",
-  "core_version": "0.9.40",
-  "inputs_sha256": "f8a6b3873f8b67f3a9873c48ed5a9e5c7ae2e4a12c72ec09b7dde872ed27bd54",
+  "core_version": "0.9.42",
+  "inputs_sha256": "fa6a60ff72317ce51a1e14bdeaf2e72854c681048f724c9a02915661dd6fbe95",
   "images": {
     "docs/assets/screenshots/resources-pane.png": "d15c0820649ac81806dcf3aa01c566f3293517a7963f0ddbffefe2e1f92c155f",
-    "docs/assets/screenshots/today-resources.png": "793558429938926ac06162cb04a3877ecf6473d590b9dfa9bcdf67a428968a14",
-    "docs/assets/screenshots/phone-resources.png": "b1107cdd2326dda7fa9de6f47e507673d7e8e67c0852e815579755c8d9e78dcb",
+    "docs/assets/screenshots/today-resources.png": "7a1323661336f9d97eed689971204b40d98107f694b3c1f0ba55ade927fe9688",
+    "docs/assets/screenshots/phone-resources.png": "2765dc202d4ba4623c6be1be46f59996068975b37b7b60bc7678278327bcc150",
     "docs/assets/screenshots/cli-resources.png": "3d8012cf0ff56ee191ad3c8616855bc514e3a6692621c7248f8a72b554a96073",
     "docs/assets/screenshots/terminal-resources.png": "9ad9c39cf1b7f573247a01eb440852e50e7b37ca9e0623f26e4cb0bb60272f91",
     "docs/assets/screenshots/terminal-resources-json.png": "6b54eaf4d3892e7b9d4a19297706d408a2a0f9baaf9204bc6098bfc4c3477edc"
@@ -19,14 +19,14 @@
     },
     "definition": {
       "format": 1,
-      "reviewer": "Codex feature-story agent",
-      "source_sha256": "de732cc7d7480bc72602985a097684d43325591e38d92fb2dd2ac89634ab39f2",
+      "reviewer": "story-confirm-sonnet",
+      "source_sha256": "263100c67ea93b4397da3bf7be6566dccba2fcd7d397bd7b69550bf6e4b5db6d",
       "plan_sha256": "9b38b6511c80349092e39d17c5dc81a84501935e568267c8df18b45ee3fd2db4",
       "story_sha256": "dfe702951b9671b81af7aceeb938a90ca1c6e5b4aec4724d5a07427db794864b"
     },
     "plugin": "heinzel-resource",
-    "core_version": "0.9.40",
-    "inputs_sha256": "f8a6b3873f8b67f3a9873c48ed5a9e5c7ae2e4a12c72ec09b7dde872ed27bd54",
+    "core_version": "0.9.42",
+    "inputs_sha256": "fa6a60ff72317ce51a1e14bdeaf2e72854c681048f724c9a02915661dd6fbe95",
     "screenshots": [
       {
         "path": "docs/assets/screenshots/resources-pane.png",
@@ -61,26 +61,26 @@
     ],
     "images": {
       "resources-pane.png": "d15c0820649ac81806dcf3aa01c566f3293517a7963f0ddbffefe2e1f92c155f",
-      "today-resources.png": "793558429938926ac06162cb04a3877ecf6473d590b9dfa9bcdf67a428968a14",
-      "phone-resources.png": "b1107cdd2326dda7fa9de6f47e507673d7e8e67c0852e815579755c8d9e78dcb",
+      "today-resources.png": "7a1323661336f9d97eed689971204b40d98107f694b3c1f0ba55ade927fe9688",
+      "phone-resources.png": "2765dc202d4ba4623c6be1be46f59996068975b37b7b60bc7678278327bcc150",
       "cli-resources.png": "3d8012cf0ff56ee191ad3c8616855bc514e3a6692621c7248f8a72b554a96073",
       "terminal-resources.png": "9ad9c39cf1b7f573247a01eb440852e50e7b37ca9e0623f26e4cb0bb60272f91",
       "terminal-resources-json.png": "6b54eaf4d3892e7b9d4a19297706d408a2a0f9baaf9204bc6098bfc4c3477edc"
     },
     "transcripts": {
-      "resources-pane.txt": "a4da4e36246f2e04cbea8e87b0801e3450f07c01cab8e948a203227bb1fe7a05",
-      "today-resources.txt": "756de0133b4a865eb87d5847f2cdf7ee1eb2456a5bd0a782786dd1d7697b1eb5",
-      "phone-resources.txt": "899cc26be72fcb15a7557a124cde4a2547f2db168d155e1481c0412983d36e00",
+      "resources-pane.txt": "d89022bbcbd0ce154a271f7f8cabf7a6d0707a21e74e303d3206fb55ece30ec8",
+      "today-resources.txt": "ede07a668b6180b00e5273e08fd69e96addbe83b731913fa4075301fb6f348e2",
+      "phone-resources.txt": "a1d462b23ca71376d2c9645301abbd21bb16ee7e68fe0212e6246c0466829536",
       "cli-resources.txt": "ddef8a589eb34e18d3fd06ab545c884ebcc82923f5270bb88a6fcfc2ae8272a7",
-      "terminal-resources.txt": "96e42b48b12ed33dc5e68dade4decde0aeab5154ad997dbf5b4985d87b0276f5",
-      "terminal-resources-json.txt": "4fadad1f41c130ce77f210cb97d73cc35bc4caecf27c01d278177d7b435a1b46"
+      "terminal-resources.txt": "11710047df8701cf74eece471ee09226a0473f3aa4dcc778daf4ac8b0c9ba195",
+      "terminal-resources-json.txt": "5a4ef792762f1212d3eff2b72069c4b50485d39569b7a5f01fd5e4f7bc51bc3a"
     },
-    "bundle_sha256": "18c5695742c61e8d81c3fddc962a392639e26a8e9a9aa7d6de17522a9aba2612"
+    "bundle_sha256": "a571854da0acf7212ae15eb3d9bc076ea4b32c0074ffddeb2b002685e391888e"
   },
   "privacy_review": {
     "format": 1,
-    "bundle_sha256": "18c5695742c61e8d81c3fddc962a392639e26a8e9a9aa7d6de17522a9aba2612",
-    "reviewer": "Codex privacy agent",
+    "bundle_sha256": "a571854da0acf7212ae15eb3d9bc076ea4b32c0074ffddeb2b002685e391888e",
+    "reviewer": "privacy-review-opus",
     "decision": "approve",
     "checked_images": [
       "resources-pane.png",

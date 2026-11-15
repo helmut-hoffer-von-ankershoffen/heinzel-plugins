@@ -10,9 +10,9 @@ Open
 Page
 Chat
 Chat
-text hz-01M7D6RS8PP00D1GGV409R9HYX
+text hz-01M7EBW2CWNR217FYJHS2VSH0E
 
-About: text hz-01M7D6RS8PP00D1GGV409R9HYX
+About: text hz-01M7EBW2CWNR217FYJHS2VSH0E
 
 Ran `Review exact channel posting account, destination, scope and full message`: The channel reported delivered. This does not approve the captured write.
 Your message

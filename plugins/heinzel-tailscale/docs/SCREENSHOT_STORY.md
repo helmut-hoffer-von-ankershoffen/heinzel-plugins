@@ -19,7 +19,7 @@ Capture in this order with shared isolated fixture state. The existing plan alre
 
 `docs/screenshot_fixture.py` supplies a fictional `workstation.tail-example.ts.net` node, a loopback-only LocalAPI, and an unrelated example service. It uses the plugin's real sharing operations and checks that the unrelated service remains unchanged. Its bootstrap is for an explicit capture only; it was inspected, not run. The fixture does not establish real Tailscale login, remote access, or phone pairing.
 
-Normal presentation fictionalization is explicitly limited to verified owning-interpreter paths becoming `/demo-profile/.venv`, and only the verified whole hostname detail in the genuine Doctor row becoming `demo-host`. These mappings change no SDK health status or remaining detail and establish no privacy acceptance. Unknown identities still fail, and independent review must inspect every image and transcript.
+Normal presentation fictionalization is explicitly limited to verified owning-interpreter paths becoming `/demo-profile/.venv`, and only the verified whole hostname detail in the genuine Doctor row becoming `demo-host`. The capture tool also replaces the authenticated share link the ready pane shows with the text `[authentication link hidden]`, because that link can carry a login token; the app itself shows the link. These mappings change no SDK health status or remaining detail and establish no privacy acceptance. Unknown identities still fail, and independent review must inspect every image and transcript.
 
 ## Privacy pitfalls
 

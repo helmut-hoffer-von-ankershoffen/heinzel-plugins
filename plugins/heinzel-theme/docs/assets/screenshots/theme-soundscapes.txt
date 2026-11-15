@@ -13,7 +13,7 @@ Today
 
 Loading…
 
-v0.9.40
+v0.9.42
 Updates, off
 0
 System health, off
@@ -57,7 +57,7 @@ Web server
 Appearance
 
 First-party
-v0.9.40
+v0.9.42
 
 Mode
 
@@ -91,11 +91,21 @@ Audio visualisation
 
 Heinzel shows how its music sounds. Nothing is recorded or uploaded; music in a frame, such as YouTube, is seen only after you share the tab or use the microphone.
 
+Heinzel's own sound
+Shown without asking: it is analysed in this page and never leaves it.
+Microphone or shared audio
+Only after you choose it in the Audio pane and your browser asks you. Choose Off there to stop at once.
+System audio
+Desktop app only, and only when you press Use system audio; it asks every time.
 Audio visualisation
 Spectrum
 Bars in the right rail that rise and glow with the music.
 Aurora
 Soft ribbons of light under the whole window.
+Halo
+A ring of rays around one Heinzel above the player, growing with each band.
+Swarm
+Three Heinzels above the player jump, sway and nod with the music.
 
 Expert mode
 

@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.9.11
+
+Requires Python 3.15; relocked.
+
 ## 0.9.10
 
 Use the clock icon for World Clock navigation, the sidebar ticker, the footer clock and the action: the globe now means the browser. This replaces the globe icon of 0.9.6.

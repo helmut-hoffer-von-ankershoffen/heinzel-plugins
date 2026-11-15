@@ -1,15 +1,15 @@
 {
   "format": 1,
   "plugin": "heinzel-weather",
-  "core_version": "0.9.40",
-  "inputs_sha256": "623b2fd453296f9728aaf23a97df73f5d826c7a239f0cd28617f5a3d4e3cf9eb",
+  "core_version": "0.9.42",
+  "inputs_sha256": "4252a544a76e16f4e1bde36324d7dbe7f1c62978e59b716315ba3597df01919d",
   "images": {
-    "docs/assets/screenshots/today-weather.png": "4a94d72ac344f672145e38ae9cc59a3e415da6ba1d0e59183039e7f249a74e0d",
+    "docs/assets/screenshots/today-weather.png": "15b3b442dc499afaa7425e9a431de54cbcb7efa49d408bf81f27787190b848b7",
     "docs/assets/screenshots/weather-detail.png": "48b0f5d60b70332d9f141eb38d086ac5f95277fe3524e3f7f594a37dc8e56a02",
-    "docs/assets/screenshots/weather-page.png": "824988fd313ab7e498ef7ff4507df24efcd2f557c91ca12020cb4209bb72a10d",
-    "docs/assets/screenshots/phone-weather.png": "20c5d81076e215c11f2b4e81ad44dd84e16736bd1af45de0b5a55e4e996d8f1f",
-    "docs/assets/screenshots/cli-weather.png": "484830edb2191b98b6ce1f87db67a3dde7aae99d62fd9830e371802b894ac410",
-    "docs/assets/screenshots/cli-forecast.png": "9668310cfd1c5fda1ca1c847505c4b195e99b5b3bd1ebc175d7689562069d52b"
+    "docs/assets/screenshots/weather-page.png": "b0a6bad33186349c4549938b1cc48a636dc73bba5069b58c233f0dc5f26d7a72",
+    "docs/assets/screenshots/phone-weather.png": "4f37c67fbe03e04227f7a56535652d3b952265c7d4e7214de0c38be2bca04e86",
+    "docs/assets/screenshots/cli-weather.png": "ce802d7f5da8708888c2ab5fd6f7b129e532253fc6bb13b3362897facea9499f",
+    "docs/assets/screenshots/cli-forecast.png": "0161e2f4e434f9be30011993348c3c896062f2220ab9e91c72220535a6b336ea"
   },
   "review_bundle": {
     "format": 2,
@@ -19,14 +19,14 @@
     },
     "definition": {
       "format": 1,
-      "reviewer": "Codex feature-story agent",
-      "source_sha256": "6007f977c8dedbba4bb3255ff3c85f81e3a3027a569fbd0834d10c41d4da2449",
+      "reviewer": "story-confirm-sonnet",
+      "source_sha256": "5cbb5cbe79287ba8465fa5334f10e89cb6b96650ccc56b98c2a368e3b0d42968",
       "plan_sha256": "8193f5441521021b827c26326a1f6474ffabe4521b2ae41907ba6f34fca2bb4c",
       "story_sha256": "c07b4572295f22c61ab27f054419811b86248f43af64850f47b07e73a63eb242"
     },
     "plugin": "heinzel-weather",
-    "core_version": "0.9.40",
-    "inputs_sha256": "623b2fd453296f9728aaf23a97df73f5d826c7a239f0cd28617f5a3d4e3cf9eb",
+    "core_version": "0.9.42",
+    "inputs_sha256": "4252a544a76e16f4e1bde36324d7dbe7f1c62978e59b716315ba3597df01919d",
     "screenshots": [
       {
         "path": "docs/assets/screenshots/today-weather.png",
@@ -60,27 +60,27 @@
       }
     ],
     "images": {
-      "today-weather.png": "4a94d72ac344f672145e38ae9cc59a3e415da6ba1d0e59183039e7f249a74e0d",
+      "today-weather.png": "15b3b442dc499afaa7425e9a431de54cbcb7efa49d408bf81f27787190b848b7",
       "weather-detail.png": "48b0f5d60b70332d9f141eb38d086ac5f95277fe3524e3f7f594a37dc8e56a02",
-      "weather-page.png": "824988fd313ab7e498ef7ff4507df24efcd2f557c91ca12020cb4209bb72a10d",
-      "phone-weather.png": "20c5d81076e215c11f2b4e81ad44dd84e16736bd1af45de0b5a55e4e996d8f1f",
-      "cli-weather.png": "484830edb2191b98b6ce1f87db67a3dde7aae99d62fd9830e371802b894ac410",
-      "cli-forecast.png": "9668310cfd1c5fda1ca1c847505c4b195e99b5b3bd1ebc175d7689562069d52b"
+      "weather-page.png": "b0a6bad33186349c4549938b1cc48a636dc73bba5069b58c233f0dc5f26d7a72",
+      "phone-weather.png": "4f37c67fbe03e04227f7a56535652d3b952265c7d4e7214de0c38be2bca04e86",
+      "cli-weather.png": "ce802d7f5da8708888c2ab5fd6f7b129e532253fc6bb13b3362897facea9499f",
+      "cli-forecast.png": "0161e2f4e434f9be30011993348c3c896062f2220ab9e91c72220535a6b336ea"
     },
     "transcripts": {
-      "today-weather.txt": "dd106198ac350ffcff6284a18bb6d4db201f370c692e22ecf27a05efc468298d",
-      "weather-detail.txt": "3ff2b124c83ebda5614ee6aaa519279cfe7a03a9bf65f7480ad33048aea8fa41",
-      "weather-page.txt": "8f1bb1b86cabe258a272cc74d66e72265042641e3e026a191a093a547b3ba45e",
-      "phone-weather.txt": "20bd7cda501e4c8d1975c250e8f801eda706e0fb92fcd7080a80b47a55214d41",
-      "cli-weather.txt": "985b4545fbbfabab55580d7b33265441d9d536525078ad7a982daacef3e9e0bc",
-      "cli-forecast.txt": "0ec198e73b6c5fbcf0cf33f1db62605cbe088661339fbb96305f259b6440ada3"
+      "today-weather.txt": "2daf316d0e9aba5dbcf945ae9f1595715e609121d01ae5be3ef54b8a3f63c9b7",
+      "weather-detail.txt": "cbd0025cd2e86fc0a0f300bc93fd67811709260cbc0fa14fd03656ee721a547a",
+      "weather-page.txt": "3074e4bb3675b742e3d4ebd02ed766c29a12db6c92a0a959e8ce4a9c21ca076e",
+      "phone-weather.txt": "3bedef3843dca4e076e7e16aefc9bc1ea416ffe1600895fbe36444cbbfc946fd",
+      "cli-weather.txt": "0f387661658d7a3664e9b1341fd545008e8cf0a0c8ddbf1ea09523174da96562",
+      "cli-forecast.txt": "a2980fbbbb6b162ebedb8126e37639ec43f33edb99b1996e1a6ec0127970b42f"
     },
-    "bundle_sha256": "5dc378472edf3852b4640a5448aab4fb4cd04d82ddef56928eab74e18cb4a020"
+    "bundle_sha256": "400ad60c857ce2723cb06eaaf9ba52ea5306f2af5b4c865c9d170b63f3b5fcda"
   },
   "privacy_review": {
     "format": 1,
-    "bundle_sha256": "5dc378472edf3852b4640a5448aab4fb4cd04d82ddef56928eab74e18cb4a020",
-    "reviewer": "Codex privacy agent",
+    "bundle_sha256": "400ad60c857ce2723cb06eaaf9ba52ea5306f2af5b4c865c9d170b63f3b5fcda",
+    "reviewer": "privacy-review-opus",
     "decision": "approve",
     "checked_images": [
       "today-weather.png",

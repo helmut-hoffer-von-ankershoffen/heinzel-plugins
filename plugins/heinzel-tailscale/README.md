@@ -56,9 +56,9 @@ Development and release commands: [repository guide](../../README.md).
 <!-- screenshots:start -->
 ## Screenshots
 
-<img src="docs/assets/screenshots/sharing-ready.png" alt="Turn private sharing on; the switch reads On with Copy link and Open — fictional local Tailscale demo" width="960">
+<img src="docs/assets/screenshots/sharing-ready.png" alt="Sharing On with Copy link and Open (fictional demo); the capture tool hides the share link as [authentication link hidden]" width="960">
 
-Turn private sharing on; the switch reads On with Copy link and Open — fictional local Tailscale demo
+Sharing On with Copy link and Open (fictional demo); the capture tool hides the share link as [authentication link hidden]
 
 <img src="docs/assets/screenshots/sharing-off.png" alt="Turn private sharing off explicitly — fictional local Tailscale demo" width="960">
 

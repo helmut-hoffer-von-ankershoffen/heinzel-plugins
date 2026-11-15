@@ -1,11 +1,11 @@
 [project]
 name = "heinzel-clock"
-version = "0.9.10"
+version = "0.9.11"
 description = "What time it is for everyone on the team: a Heinzelmännchen plugin."
 readme = "README.md"
 license = "MIT"
 license-files = ["LICENSE"]
-requires-python = ">=3.12"
+requires-python = ">=3.15"
 dependencies = ["heinzel>=0.9.16,<0.10"]
 
 [project.urls]
@@ -127,7 +127,7 @@ show_missing = true
 [tool.pyright]
 typeCheckingMode = "strict"
 include = ["src"]
-pythonVersion = "3.12"
+pythonVersion = "3.15"
 
 [tool.hatch.build.targets.sdist]
 exclude = [".venv", ".acceptance", ".preview", "dist", "web/node_modules", "**/__pycache__", ".pytest_cache", ".mypy_cache", ".coverage*"]
