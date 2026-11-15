@@ -77,12 +77,14 @@ def test_a_python_without_a_wheel_gets_cores_build_and_everything_else_under_has
     cli.sync_locked(interpreter, lock, core_wheel(tmp_path / "heinzel-0.9.45-py3-none-any.whl"))
     build, sync, install = (entry["command"] for entry in recorded)
     # Core's file, run isolated on the environment's own interpreter, checks the lock before it builds
-    assert build[:3] == [str(interpreter), "-I", "-S"] and Path(build[3]).name == "bootstrap_pyyaml.py"
+    assert build[:3] == [str(interpreter), "-I", "-S"]
+    assert Path(build[3]).name == "bootstrap_pyyaml.py"
     assert build[4:] == ["build", "--requirements", str(lock), "--wheel-dir", build[8], "--python", str(interpreter)]
     assert sync[:7] == ["uv", "pip", "sync", "--python", str(interpreter), "--require-hashes", "--no-build"]
     assert recorded[1]["synced"] == REST
     assert install[:7] == ["uv", "pip", "install", "--python", str(interpreter), "--no-deps", "--no-build"]
-    assert Path(install[7]).name == "tidal_yaml-1.0-py3-none-any.whl" and len(install) == 8
+    assert Path(install[7]).name == "tidal_yaml-1.0-py3-none-any.whl"
+    assert len(install) == 8
     assert lock.read_text() == LOCK  # the plugin's own lock is never rewritten
 
 
@@ -107,8 +109,9 @@ def test_otherwise_the_whole_lock_syncs_under_hashes_and_nothing_is_built(tmp_pa
 def test_a_build_that_leaves_no_single_wheel_installs_nothing(tmp_path, lock, commands, built):
     recorded, wheels = commands
     wheels[:] = built
+    core = core_wheel(tmp_path / "heinzel-0.9.45-py3-none-any.whl")
     with pytest.raises(ValueError, match="exactly one wheel"):
-        cli.sync_locked(Path(sys.executable), lock, core_wheel(tmp_path / "heinzel-0.9.45-py3-none-any.whl"))
+        cli.sync_locked(Path(sys.executable), lock, core)
     assert not any(entry["command"][:2] == ["uv", "pip"] for entry in recorded)
 
 

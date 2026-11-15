@@ -681,3 +681,11 @@ def test_an_https_core_is_downloaded_once_however_many_times_it_is_read(tmp_path
     cli.core_metadata("https://example.org/core.whl")
     cli.core_bootstrap("https://example.org/core.whl", tmp_path, Path("python"))
     assert requested == ["https://example.org/core.whl"]
+
+
+@pytest.mark.parametrize("name", ["core.txt", "core"])
+def test_a_local_core_must_be_a_wheel_file(tmp_path, name):
+    other = tmp_path / name
+    other.write_text("not a wheel")
+    with pytest.raises(ValueError, match="built Heinzel core wheel"):
+        cli.core_archive(str(other))

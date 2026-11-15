@@ -163,7 +163,13 @@ def core_archive(source: str) -> zipfile.ZipFile:
 
     An HTTPS artifact is downloaded once per run, however many times its metadata and bootstrap are read.
     """
-    content = _https_core(source) if source.startswith("https://") else Path(source).read_bytes()
+    if source.startswith("https://"):
+        content = _https_core(source)
+    else:
+        local = Path(source).resolve(strict=True)  # a Core artifact is a wheel file the author named, nothing else
+        if local.suffix != ".whl" or not local.is_file():
+            raise ValueError(f"Select a built Heinzel core wheel, not {source}")
+        content = local.read_bytes()
     if len(content) > 128 * 1024 * 1024:
         raise ValueError("Core artifact exceeds its size limit")
     return zipfile.ZipFile(io.BytesIO(content))
