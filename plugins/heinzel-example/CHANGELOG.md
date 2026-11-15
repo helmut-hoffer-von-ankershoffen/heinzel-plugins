@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.5.3
+
+Requires Python 3.15; relocked.
+
 ## 0.5.2
 
 Relock opentelemetry-api to 1.45.2 (CVE-2026-126360).

@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.2.1
+
+Requires Python 3.15; relocked.
+
 ## 0.2.0
 
 Everything works in the app now; no step needs a terminal.

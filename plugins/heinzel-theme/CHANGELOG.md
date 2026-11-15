@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.6
+
+Requires Python 3.15; relocked.
+
 ## 0.1.5
 
 Relock for Heinzel Core 0.9.40 (its AI extra adds pyjwt) and refresh the gallery.

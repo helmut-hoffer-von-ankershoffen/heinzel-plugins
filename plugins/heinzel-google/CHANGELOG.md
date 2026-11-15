@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.9.9
+
+Requires Python 3.15; relocked.
+
 ## 0.9.8
 
 Search your Google Docs, Sheets and Slides from Heinzel: the documents adapter finds files whose name or text contains your words (Drive full-text search, trashed files left out), with the title, link and, when Drive has one, a short description. It reads only and asks for no new Google grant. Whether Drive matches the text inside files under today's read-only Drive grant is not yet proven; if Drive refuses, the search says it needs broader Drive access (see the README).

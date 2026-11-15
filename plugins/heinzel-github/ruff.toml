@@ -1,0 +1,4 @@
+extend = "pyproject.toml"
+# Python 3.15 code, linted as 3.13 on purpose: from 3.14 on ruff treats annotations as lazy and wants typing-only imports
+# in TYPE_CHECKING blocks (breaks pydantic and typer annotations read at runtime). Adopt that style in one deliberate pass.
+target-version = "py313"

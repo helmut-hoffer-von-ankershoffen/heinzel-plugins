@@ -1,35 +1,35 @@
 {
   "format": 1,
   "plugin": "heinzel-tailscale",
-  "core_version": "0.9.40",
-  "inputs_sha256": "9a20c109d44d267cb0279757b972471df5e4d24535a040e6f46c08c21963f8cc",
+  "core_version": "0.9.42",
+  "inputs_sha256": "81d6f705001cad4fbf5fcf5f9627d969959c5adb7be0133c1c2e3f609d74b68f",
   "images": {
-    "docs/assets/screenshots/sharing-ready.png": "f4580591b620308e61992fb8f1c34b551ee047d882de6426179680d76149169e",
-    "docs/assets/screenshots/sharing-request-cli.png": "a6b88baaafe20ff9d8f0af618aefec954f1408f3af38c6b2edae7b1f2d9a432a",
-    "docs/assets/screenshots/sharing-off.png": "2857509036b8ef726839a8fbe5d65ceb19cfe26d760a397cd3a3337339ed42d6",
+    "docs/assets/screenshots/sharing-ready.png": "609a339166fd09acc64002f9529f869ebb0e3861987ba3bf94633eb515825b4e",
+    "docs/assets/screenshots/sharing-request-cli.png": "86ce27d4ac40dbd1e0dbf397ea61ce5b3dade6799a3219a50b408fd5fe0f0b33",
+    "docs/assets/screenshots/sharing-off.png": "398daf92c44530dd18052d5916f0e7a34d1d1dc6161ed8a2a31f606c928ec6ac",
     "docs/assets/screenshots/sharing-off-cli.png": "592011836c508fac6809305cbc29752484a4be2cc32546e31dffbc369ee0c774"
   },
   "review_bundle": {
     "format": 2,
     "source_story": {
       "path": "source-story.md",
-      "sha256": "82bf96a1bfe41adeba0ca1b3c271816ddb82d809425a63cf0ea1fb5e3f6ef1b7"
+      "sha256": "4b335f221043033a22e95a8a48511c54a40e56ff36196a46d9eaa301bc50a8a8"
     },
     "definition": {
       "format": 1,
-      "reviewer": "Codex feature-story agent",
-      "source_sha256": "87024d15213c3b3cb2a986ac028bf05a53c960c922b6402b9dc5ea50f220431d",
-      "plan_sha256": "1f1fe2b01f478076c38aaac40080e64287b73f784dd8053c4a6792237cf327d3",
-      "story_sha256": "82bf96a1bfe41adeba0ca1b3c271816ddb82d809425a63cf0ea1fb5e3f6ef1b7"
+      "reviewer": "story-confirm-sonnet",
+      "source_sha256": "20d7977f7ff18635b121be49a0050d2adf738c0573fc669bc5cac7573a03d316",
+      "plan_sha256": "7cff472608aa79e38f9d9e2f4cf924446b79f4d9026d577a62c891db43124ce0",
+      "story_sha256": "4b335f221043033a22e95a8a48511c54a40e56ff36196a46d9eaa301bc50a8a8"
     },
     "plugin": "heinzel-tailscale",
-    "core_version": "0.9.40",
-    "inputs_sha256": "9a20c109d44d267cb0279757b972471df5e4d24535a040e6f46c08c21963f8cc",
+    "core_version": "0.9.42",
+    "inputs_sha256": "81d6f705001cad4fbf5fcf5f9627d969959c5adb7be0133c1c2e3f609d74b68f",
     "screenshots": [
       {
         "path": "docs/assets/screenshots/sharing-ready.png",
         "surface": "ui",
-        "caption": "Turn private sharing on; the switch reads On with Copy link and Open \u2014 fictional local Tailscale demo"
+        "caption": "Sharing On with Copy link and Open (fictional demo); the capture tool hides the share link as [authentication link hidden]"
       },
       {
         "path": "docs/assets/screenshots/sharing-request-cli.png",
@@ -48,23 +48,23 @@
       }
     ],
     "images": {
-      "sharing-ready.png": "f4580591b620308e61992fb8f1c34b551ee047d882de6426179680d76149169e",
-      "sharing-request-cli.png": "a6b88baaafe20ff9d8f0af618aefec954f1408f3af38c6b2edae7b1f2d9a432a",
-      "sharing-off.png": "2857509036b8ef726839a8fbe5d65ceb19cfe26d760a397cd3a3337339ed42d6",
+      "sharing-ready.png": "609a339166fd09acc64002f9529f869ebb0e3861987ba3bf94633eb515825b4e",
+      "sharing-request-cli.png": "86ce27d4ac40dbd1e0dbf397ea61ce5b3dade6799a3219a50b408fd5fe0f0b33",
+      "sharing-off.png": "398daf92c44530dd18052d5916f0e7a34d1d1dc6161ed8a2a31f606c928ec6ac",
       "sharing-off-cli.png": "592011836c508fac6809305cbc29752484a4be2cc32546e31dffbc369ee0c774"
     },
     "transcripts": {
-      "sharing-ready.txt": "c9e329788fd8a746da0e5bf61d45ae58b5868099b62e47818572a3ea882303d2",
-      "sharing-request-cli.txt": "cec06487993aa66d2f291740d29bcdf94abfafef7db13ac22156dd11a121c6b7",
-      "sharing-off.txt": "6fd68a005ac126204435095850dc44f43d39ad67c978cf8c99523c3b98f56155",
+      "sharing-ready.txt": "cef56d533749591725e1e85766aa9859f4d43c52bd2e392e830e1e24e3eabe1a",
+      "sharing-request-cli.txt": "a6016dcf0776ebff7dc8d1d05fb4643100d5718c5ac6cb823c263792dc4143b1",
+      "sharing-off.txt": "650539c81a020ddbba65fa1ca1a39c935a1befaaf2ce88c4f879eb5a3fe79abd",
       "sharing-off-cli.txt": "cf49c8bdefcb23c7b464e229ae6e18bbd8f639abb0121bf570e3e30b631fc8b0"
     },
-    "bundle_sha256": "4ce886fc2e95280e81005c63d49889fd59b1bee34808a5b2bff684859f1ba989"
+    "bundle_sha256": "f0120690761aa31dd29807289777ed6b9c9101e0a0c87c973ae0434b229313bf"
   },
   "privacy_review": {
     "format": 1,
-    "bundle_sha256": "4ce886fc2e95280e81005c63d49889fd59b1bee34808a5b2bff684859f1ba989",
-    "reviewer": "Codex privacy agent",
+    "bundle_sha256": "f0120690761aa31dd29807289777ed6b9c9101e0a0c87c973ae0434b229313bf",
+    "reviewer": "privacy-review-opus",
     "decision": "approve",
     "checked_images": [
       "sharing-ready.png",

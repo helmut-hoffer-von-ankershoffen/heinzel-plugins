@@ -1,11 +1,11 @@
 [project]
 name = "heinzel-slack"
-version = "0.3.0"
+version = "0.3.1"
 description = "Slack for Heinzelmännchen: notices, exact-draft approvals and questions in your own DM, and the chat capability."
 readme = "README.md"
 license = "MIT"
 license-files = ["LICENSE", "src/heinzel_slack/_vendor/slack_sdk/LICENSE"]
-requires-python = ">=3.12"
+requires-python = ">=3.15"
 dependencies = ["heinzel>=0.9.20,<0.10", "slack-sdk==3.46.0"]
 
 [project.entry-points."heinzel.modules"]
@@ -34,7 +34,7 @@ plugins = ["pydantic.mypy"]
 [tool.pyright]
 typeCheckingMode = "strict"
 include = ["src"]
-pythonVersion = "3.12"
+pythonVersion = "3.15"
 
 [tool.pytest]
 testpaths = ["tests"]

@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+## 0.3.1
+
+Requires Python 3.15; relocked.
+
 ## 0.3.0
 
 Slack as Core's `chat` capability, with the self channel of Core ADR 0160. `messages` reads a public channel the bot

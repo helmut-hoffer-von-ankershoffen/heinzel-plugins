@@ -19,7 +19,7 @@ v0.9.42
 Updates, off
 0
 System health, warning
-15
+16
 Daemon not installed, off
 Chat
 New chat
@@ -30,25 +30,25 @@ Audio
 
 Calendar
 
-Free for 15 min until Launch readiness review
+Free for 16 min until Launch readiness review
 
 NOW
 
 Not in a meeting
 
-Free for 15 min
+Free for 16 min
 
 NEXT
 
 Next: Launch readiness review
-in 15 min
+in 16 min
 
-19:37–20:07 · 2 invited
+02:20–02:50 · 2 invited
 
 THEN
 
-20:22–20:52
+03:05–03:35
 Mira Example / Priya Example — one-on-one
-21:07–21:37
+03:50–04:20
 Rollout checkpoint
 Open calendar

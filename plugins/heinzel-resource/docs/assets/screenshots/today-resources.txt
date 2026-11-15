@@ -18,7 +18,7 @@ Ask about it
 
 Nothing needs you right now. Ask anything below.
 
-v0.9.40
+v0.9.42
 Updates, off
 0
 System health, warning

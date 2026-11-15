@@ -1,7 +1,7 @@
 {
   "format": 1,
-  "reviewer": "fable-issues-story",
-  "source_sha256": "f69054b3ab966d5ca2aea6e080b3ebfd43c5d210379e3f8005829ce6da54860c",
+  "reviewer": "story-confirm-sonnet",
+  "source_sha256": "363f51d952da71231fae5492c95fecf298b27981c64eb7008d3dbb980be411c1",
   "plan_sha256": "e7395659d00a341e8c5fcf62a26cc2765e7812e405390baa9fe1ae815fab2710",
   "story_sha256": "baac94e327f1dbec7633b9b7e4b9de5fb398f2d57c1d8f8a3ce68984bc511401"
 }

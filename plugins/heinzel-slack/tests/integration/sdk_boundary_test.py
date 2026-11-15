@@ -62,6 +62,7 @@ def test_unsupported_proxy_is_refused_before_sdk_construction(monkeypatch, caplo
 @pytest.fixture
 def http_transport(monkeypatch):
     seen = []
+    responses = []  # the SDK never closes them; Python 3.15 warns when one is collected unclosed
 
     def open_https(_self, request):
         seen.append(request)
@@ -70,13 +71,16 @@ def http_transport(monkeypatch):
         body = {"ok": True, "url": TICKET, "team_id": "T0TEAM001", "user_id": "U0BOT0001", "team": "Example"}
         response = addinfourl(io.BytesIO(json.dumps(body).encode()), headers, request.full_url, 200)
         response.msg = "OK"
+        responses.append(response)
         return response
 
     monkeypatch.setattr(urllib.request.HTTPSHandler, "https_open", open_https)
     monkeypatch.setattr(urllib.request, "proxy_bypass", lambda _host: False)
     # A direct or explicit snapshot must not ask urllib to discover late OS/env proxies.
     monkeypatch.setattr(urllib.request, "getproxies", lambda: pytest.fail("late proxy discovery"))
-    return seen
+    yield seen
+    for response in responses:
+        response.close()
 
 
 @pytest.mark.parametrize("proxy", [None, "http://proxy.example.invalid:8080"])
