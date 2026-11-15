@@ -18,6 +18,7 @@ def calls() -> None:
 """
 
 
+@pytest.mark.timeout(60)  # a cold mypy on a loaded runner needs more than the integration default of 15 s
 @pytest.mark.parametrize("checker", ["mypy", "pyright"])
 @pytest.mark.parametrize("valid", [True, False])
 def test_relocated_sdk_types_accept_valid_calls_and_reject_wrong_arguments(tmp_path, checker, valid):
@@ -56,7 +57,7 @@ def test_relocated_sdk_types_accept_valid_calls_and_reject_wrong_arguments(tmp_p
             str(consumer),
         ]
     result = subprocess.run(  # noqa: S603 - fixed checkers with a generated non-executable consumer fixture
-        command, capture_output=True, text=True, check=False, timeout=30
+        command, capture_output=True, text=True, check=False, timeout=55
     )
     if valid:
         assert result.returncode == 0, result.stdout + result.stderr
