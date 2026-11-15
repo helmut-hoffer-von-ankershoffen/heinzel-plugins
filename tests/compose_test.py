@@ -154,3 +154,17 @@ def test_legacy_sdk_is_refused_before_any_provider_restoration_or_acceptance(tmp
         compose(core, destination, "https://example.test/release")
     assert failure.value.code == 2
     assert not (destination / "standard.json").exists()
+
+
+def test_the_acceptance_environment_uses_the_python_the_core_requires(tmp_path):
+    core_python = runpy.run_path(str(Path(__file__).parents[1] / "scripts/compose.py"))["core_python"]
+    core = tmp_path / "heinzel-0.9.45-py3-none-any.whl"
+    with zipfile.ZipFile(core, "w") as archive:
+        archive.writestr(
+            "heinzel-0.9.45.dist-info/METADATA", "Name: heinzel\nVersion: 0.9.45\nRequires-Python: >=3.15\n"
+        )
+    assert core_python(core) == ["--python", ">=3.15"]
+    plain = tmp_path / "heinzel-0.9.1-py3-none-any.whl"
+    with zipfile.ZipFile(plain, "w") as archive:
+        archive.writestr("heinzel-0.9.1.dist-info/METADATA", "Name: heinzel\nVersion: 0.9.1\n")
+    assert core_python(plain) == []
