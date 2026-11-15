@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-    <title>Coverage for src/heinzel_plugin_tools/installation.py: 90%</title>
+    <title>Coverage for src/heinzel_plugin_tools/installation.py: 97%</title>
     <link rel="icon" sizes="32x32" href="favicon_32_cb_c827f16f.png">
     <link rel="stylesheet" href="style_cb_4667309f.css" type="text/css">
     <script src="coverage_html_cb_54cfdca1.js" defer></script>
@@ -12,7 +12,7 @@
     <div class="content">
         <h1>
             <span class="text">Coverage for </span><b>src<span class="sep">/</span>heinzel_plugin_tools<span class="sep">/</span>installation.py</b>:
-            <span class="pc_cov">90%</span>
+            <span class="pc_cov">97%</span>
         </h1>
         <aside id="help_panel_wrapper">
             <input id="help_panel_state" type="checkbox">
@@ -55,9 +55,9 @@
             </div>
         </aside>
         <h2>
-            <span class="text">109 statements &nbsp;</span>
-            <button type="button" class="run button_toggle_run" value="run" data-shortcut="r" title="Toggle lines run">99<span class="text"> run</span></button>
-            <button type="button" class="mis show_mis button_toggle_mis" value="mis" data-shortcut="m" title="Toggle lines missing">10<span class="text"> missing</span></button>
+            <span class="text">111 statements &nbsp;</span>
+            <button type="button" class="run button_toggle_run" value="run" data-shortcut="r" title="Toggle lines run">110<span class="text"> run</span></button>
+            <button type="button" class="mis show_mis button_toggle_mis" value="mis" data-shortcut="m" title="Toggle lines missing">1<span class="text"> missing</span></button>
             <button type="button" class="exc show_exc button_toggle_exc" value="exc" data-shortcut="x" title="Toggle lines excluded">0<span class="text"> excluded</span></button>
             <button type="button" class="par run show_par button_toggle_par" value="par" data-shortcut="p" title="Toggle lines partially run">3<span class="text"> partial</span></button>
         </h2>
@@ -67,7 +67,7 @@
             <a id="nextFileLink" class="nav" href="z_6613b4faecfed81c_planning_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.17.3">coverage.py v7.17.3</a>,
-            created at 2026-11-14 23:21 +0000
+            created at 2026-11-15 00:44 +0000
         </p>
         <aside class="hidden">
             <button type="button" class="button_next_chunk" data-shortcut="j"></button>
@@ -288,15 +288,18 @@
     <p class="pln"><span class="n"><a id="t204" href="#t204">204</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
     <p class="run"><span class="n"><a id="t205" href="#t205">205</a></span><span class="t"><span class="key">def</span> <span class="nam">verify_profile</span><span class="op">(</span><span class="nam">core</span><span class="op">:</span> <span class="nam">Path</span><span class="op">,</span> <span class="nam">profile</span><span class="op">:</span> <span class="nam">Path</span><span class="op">)</span> <span class="op">-&gt;</span> <span class="key">None</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
     <p class="pln"><span class="n"><a id="t206" href="#t206">206</a></span><span class="t">    <span class="str">&quot;&quot;&quot;Check a public profile command through the same installed SDK and managed lifecycle used by publication.&quot;&quot;&quot;</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t207" href="#t207">207</a></span><span class="t">    <span class="key">with</span> <span class="nam">tempfile</span><span class="op">.</span><span class="nam">TemporaryDirectory</span><span class="op">(</span><span class="nam">prefix</span><span class="op">=</span><span class="str">&quot;hz-profile-sdk-&quot;</span><span class="op">)</span> <span class="key">as</span> <span class="nam">temporary</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t208" href="#t208">208</a></span><span class="t">        <span class="nam">root</span> <span class="op">=</span> <span class="nam">Path</span><span class="op">(</span><span class="nam">temporary</span><span class="op">)</span><span class="op">.</span><span class="nam">resolve</span><span class="op">(</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t209" href="#t209">209</a></span><span class="t">        <span class="nam">env</span> <span class="op">=</span> <span class="nam">isolated_environment</span><span class="op">(</span><span class="nam">root</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t210" href="#t210">210</a></span><span class="t">        <span class="nam">sdk</span> <span class="op">=</span> <span class="nam">root</span> <span class="op">/</span> <span class="str">&quot;sdk&quot;</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t211" href="#t211">211</a></span><span class="t">        <span class="nam">_run</span><span class="op">(</span><span class="op">[</span><span class="str">&quot;uv&quot;</span><span class="op">,</span> <span class="str">&quot;venv&quot;</span><span class="op">,</span> <span class="nam">str</span><span class="op">(</span><span class="nam">sdk</span><span class="op">)</span><span class="op">]</span><span class="op">,</span> <span class="nam">cwd</span><span class="op">=</span><span class="nam">root</span><span class="op">,</span> <span class="nam">env</span><span class="op">=</span><span class="nam">env</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t212" href="#t212">212</a></span><span class="t">        <span class="nam">interpreter</span> <span class="op">=</span> <span class="nam">sdk</span> <span class="op">/</span> <span class="str">&quot;bin/python&quot;</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t213" href="#t213">213</a></span><span class="t">        <span class="nam">_run</span><span class="op">(</span><span class="op">[</span><span class="str">&quot;uv&quot;</span><span class="op">,</span> <span class="str">&quot;pip&quot;</span><span class="op">,</span> <span class="str">&quot;install&quot;</span><span class="op">,</span> <span class="str">&quot;--python&quot;</span><span class="op">,</span> <span class="nam">str</span><span class="op">(</span><span class="nam">interpreter</span><span class="op">)</span><span class="op">,</span> <span class="nam">str</span><span class="op">(</span><span class="nam">core</span><span class="op">.</span><span class="nam">resolve</span><span class="op">(</span><span class="op">)</span><span class="op">)</span><span class="op">]</span><span class="op">,</span> <span class="nam">cwd</span><span class="op">=</span><span class="nam">root</span><span class="op">,</span> <span class="nam">env</span><span class="op">=</span><span class="nam">env</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t214" href="#t214">214</a></span><span class="t">        <span class="nam">check_profile_format</span><span class="op">(</span><span class="nam">interpreter</span><span class="op">,</span> <span class="nam">profile</span><span class="op">,</span> <span class="nam">env</span><span class="op">=</span><span class="nam">env</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
-    <p class="mis show_mis"><span class="n"><a id="t215" href="#t215">215</a></span><span class="t">        <span class="nam">verify_managed_profile</span><span class="op">(</span><span class="nam">interpreter</span><span class="op">,</span> <span class="nam">profile</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t207" href="#t207">207</a></span><span class="t">    <span class="key">with</span> <span class="nam">tempfile</span><span class="op">.</span><span class="nam">TemporaryDirectory</span><span class="op">(</span><span class="nam">prefix</span><span class="op">=</span><span class="str">&quot;hz-profile-sdk-&quot;</span><span class="op">)</span> <span class="key">as</span> <span class="nam">temporary</span><span class="op">:</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t208" href="#t208">208</a></span><span class="t">        <span class="nam">root</span> <span class="op">=</span> <span class="nam">Path</span><span class="op">(</span><span class="nam">temporary</span><span class="op">)</span><span class="op">.</span><span class="nam">resolve</span><span class="op">(</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t209" href="#t209">209</a></span><span class="t">        <span class="nam">env</span> <span class="op">=</span> <span class="nam">isolated_environment</span><span class="op">(</span><span class="nam">root</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t210" href="#t210">210</a></span><span class="t">        <span class="nam">sdk</span> <span class="op">=</span> <span class="nam">root</span> <span class="op">/</span> <span class="str">&quot;sdk&quot;</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t211" href="#t211">211</a></span><span class="t">        <span class="key">from</span> <span class="nam">heinzel_plugin_tools</span><span class="op">.</span><span class="nam">cli</span> <span class="key">import</span> <span class="nam">core_metadata</span><span class="op">,</span> <span class="nam">python_floor</span>&nbsp;</span><span class="r"></span></p>
+    <p class="pln"><span class="n"><a id="t212" href="#t212">212</a></span><span class="t">&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t213" href="#t213">213</a></span><span class="t">        <span class="nam">floor</span> <span class="op">=</span> <span class="nam">python_floor</span><span class="op">(</span><span class="nam">core_metadata</span><span class="op">(</span><span class="nam">str</span><span class="op">(</span><span class="nam">core</span><span class="op">.</span><span class="nam">resolve</span><span class="op">(</span><span class="op">)</span><span class="op">)</span><span class="op">)</span><span class="op">[</span><span class="str">&quot;requires_python&quot;</span><span class="op">]</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t214" href="#t214">214</a></span><span class="t">        <span class="nam">_run</span><span class="op">(</span><span class="op">[</span><span class="str">&quot;uv&quot;</span><span class="op">,</span> <span class="str">&quot;venv&quot;</span><span class="op">,</span> <span class="str">&quot;--python&quot;</span><span class="op">,</span> <span class="nam">floor</span><span class="op">,</span> <span class="nam">str</span><span class="op">(</span><span class="nam">sdk</span><span class="op">)</span><span class="op">]</span><span class="op">,</span> <span class="nam">cwd</span><span class="op">=</span><span class="nam">root</span><span class="op">,</span> <span class="nam">env</span><span class="op">=</span><span class="nam">env</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t215" href="#t215">215</a></span><span class="t">        <span class="nam">interpreter</span> <span class="op">=</span> <span class="nam">sdk</span> <span class="op">/</span> <span class="str">&quot;bin/python&quot;</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t216" href="#t216">216</a></span><span class="t">        <span class="nam">_run</span><span class="op">(</span><span class="op">[</span><span class="str">&quot;uv&quot;</span><span class="op">,</span> <span class="str">&quot;pip&quot;</span><span class="op">,</span> <span class="str">&quot;install&quot;</span><span class="op">,</span> <span class="str">&quot;--python&quot;</span><span class="op">,</span> <span class="nam">str</span><span class="op">(</span><span class="nam">interpreter</span><span class="op">)</span><span class="op">,</span> <span class="nam">str</span><span class="op">(</span><span class="nam">core</span><span class="op">.</span><span class="nam">resolve</span><span class="op">(</span><span class="op">)</span><span class="op">)</span><span class="op">]</span><span class="op">,</span> <span class="nam">cwd</span><span class="op">=</span><span class="nam">root</span><span class="op">,</span> <span class="nam">env</span><span class="op">=</span><span class="nam">env</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t217" href="#t217">217</a></span><span class="t">        <span class="nam">check_profile_format</span><span class="op">(</span><span class="nam">interpreter</span><span class="op">,</span> <span class="nam">profile</span><span class="op">,</span> <span class="nam">env</span><span class="op">=</span><span class="nam">env</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
+    <p class="run"><span class="n"><a id="t218" href="#t218">218</a></span><span class="t">        <span class="nam">verify_managed_profile</span><span class="op">(</span><span class="nam">interpreter</span><span class="op">,</span> <span class="nam">profile</span><span class="op">)</span>&nbsp;</span><span class="r"></span></p>
 </main>
 <footer>
     <div class="content">
@@ -306,7 +309,7 @@
             <a class="nav" href="z_6613b4faecfed81c_planning_py.html">&#xbb; next</a>
             &nbsp; &nbsp; &nbsp;
             <a class="nav" href="https://coverage.readthedocs.io/en/7.17.3">coverage.py v7.17.3</a>,
-            created at 2026-11-14 23:21 +0000
+            created at 2026-11-15 00:44 +0000
         </p>
     </div>
 </footer>
