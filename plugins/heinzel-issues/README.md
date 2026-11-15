@@ -6,15 +6,16 @@ no ids, no pull requests, unless you ask for the details.
 
 It is not installed, bundled or recommended by default: it needs a Beads database you can write to (today the
 private management repository). Add it with `hz system plugin add issues --confirm`.
-Until a tracker is set up it only shows **Issue tracking is not set up** with a setup button, never an error.
+Until a tracker is set up the Issues page shows **Issue tracking is not set up** with a short form, never an error.
+Everything after that happens in the app; no step needs a terminal.
 
 ## Use it
 
 - **In the app:** open **Issues** in the sidebar. The list shows each report with its state as a word and a mark
   (○ Received, ◐ Being worked on, ✓ Done), never colour alone. Type what happened or what you would like and
-  press **Send**; the app shows what it will send and asks first. With a Heinzel older than 0.9.30 the view offers
-  **Report or request** instead, which opens `hz issues submit` in the app's terminal. Your open reports also appear
-  on Today.
+  press **Send**; the app shows what it will send and asks first. With Heinzel 0.9.45 or newer you can add a
+  screenshot or a text file (PNG, JPEG or text, up to 2 MiB). Select a report to read what you sent and its history:
+  Sent, Being worked on, Done, Released in. Your open reports also appear on Today.
 - **In a terminal:**
 
   ```sh
@@ -28,7 +29,7 @@ Until a tracker is set up it only shows **Issue tracking is not set up** with a 
 - **Notices:** every five minutes the daemon looks for changes and tells you when a report is being worked on, is
   done, and when it is released. The first check after turning Issues on only remembers what is there.
 
-When nothing is set up, the app says **Issue tracking is not set up** with one button, **Set up issue tracking**;
+When nothing is set up, the app says **Issue tracking is not set up** and asks for the tracker folder;
 `hz issues list` says the same and names `hz setup issues`.
 
 <!-- screenshots:start -->
@@ -37,6 +38,10 @@ When nothing is set up, the app says **Issue tracking is not set up** with one b
 <img src="docs/assets/screenshots/issues-page.png" alt="Three fictional reports: received, being worked on, and released in 0.9.27 — with a form to send another" width="960">
 
 Three fictional reports: received, being worked on, and released in 0.9.27 — with a form to send another
+
+<img src="docs/assets/screenshots/report-history.png" alt="A fictional report opened: what was sent, the file sent with it, and its history up to the release" width="960">
+
+A fictional report opened: what was sent, the file sent with it, and its history up to the release
 
 <img src="docs/assets/screenshots/today-open-reports.png" alt="Your open fictional reports and requests on Today, in dark mode; done ones leave the list" width="960">
 
@@ -56,7 +61,12 @@ The same fictional reports and their plain states through the real CLI
 
 ## Set it up
 
-`hz setup issues` asks where reports go and, optionally, a git clone whose tags are releases. Or set it directly:
+In the app, open **Issues**, enter the folder that holds the Beads database and press **Set up issue tracking**.
+Issues checks that the database answers before it saves anything, and works at once, without a restart. Under
+**More options** you can name more labels for every new report (emptying the field clears them) and git clones
+whose tags are releases.
+
+In a terminal, `hz setup issues` asks the same. Or set it directly:
 
 ```toml
 [issues]
@@ -65,6 +75,7 @@ tracker = "beads"
 [issues.beads]
 path = "~/Code/team-board"   # the folder with the .beads database
 label = "heinzel-issues"      # what Issues gives each report, and the items it shows
+extra_labels = ["intake"]     # optional: more labels for every new report, e.g. the one your team's queue reads
 
 [[issues.releases]]
 path = "~/Code/harbor"        # a clone on this computer; read, never fetched
@@ -95,7 +106,10 @@ never unbinds or replaces the tracker other plugins (GitHub, Atlassian) use.
 
 ## Privacy
 
-What you send stays in the tracker you chose. Issues stores only what it has already told you, under Heinzel's
+What you send stays in the tracker you chose. Each report is stored there with your login name on this computer and
+the labels that are set up; the form says both before you send. Issues shows and reads only the reports you sent
+under that login name: other work in the same database, and other people's reports, never appear, by list or by id.
+Reading and sending need your sign-in to the app; nothing is open on the network interfaces without it. Issues stores only what it has already told you, under Heinzel's
 state folder, readable by you only. Notices are local, like every Heinzel notice.
 
 ## Develop

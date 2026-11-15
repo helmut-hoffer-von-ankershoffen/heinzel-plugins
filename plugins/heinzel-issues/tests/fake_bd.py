@@ -13,6 +13,10 @@ def now() -> str:
 
 
 def option(args: list[str], name: str) -> str | None:
+    """A flag's value, written `--name value` or `--name=value` as the real `bd` takes it."""
+    for arg in args:
+        if arg.startswith(f"{name}="):
+            return arg.split("=", 1)[1]
     return args[args.index(name) + 1] if name in args else None
 
 
@@ -22,7 +26,7 @@ def main(args: list[str]) -> int:
     if command == "create":
         row = {
             "id": f"demo-{len(rows) + 1}",
-            "title": rest[0],
+            "title": option(rest, "--title") or rest[0],
             "description": sys.stdin.read() if option(rest, "--body-file") == "-" else "",
             "status": "open",
             "labels": (option(rest, "--labels") or "").split(",") if option(rest, "--labels") else [],
@@ -46,11 +50,13 @@ def main(args: list[str]) -> int:
                 if row.get("assignee") not in {None, "", actor}:
                     print(f"Error: {rest[0]} is already claimed by {row['assignee']}", file=sys.stderr)
                     return 1
-                row.update(assignee=actor, status="in_progress")
+                row.update(assignee=actor, status="in_progress", started_at=now())
             if notes := option(rest, "--append-notes"):
                 row["notes"] = f"{row['notes']}\n{notes}" if row.get("notes") else notes
             if status := option(rest, "--status"):
                 row["status"] = status
+                if status == "in_progress":
+                    row.setdefault("started_at", now())
             row["updated_at"] = now()
         if command == "close":
             row.update(status="closed", close_reason=option(rest, "--reason") or "", closed_at=now(), updated_at=now())

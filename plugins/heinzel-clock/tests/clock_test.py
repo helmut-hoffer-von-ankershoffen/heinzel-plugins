@@ -199,7 +199,7 @@ TIMES = [
 def test_the_status_item_ticks_in_the_primary_zone_and_lists_the_others():
     item = primary_zone(TIMES)
     assert item is not None
-    assert (item.text, item.icon, item.live) == ("Lisbon", "globe", LiveClock(zone="Europe/Lisbon"))
+    assert (item.text, item.icon, item.live) == ("Lisbon", "clock", LiveClock(zone="Europe/Lisbon"))
     from heinzel import DetailLine
 
     first = "Lisbon" if "badge" in DetailLine.model_fields else "Lisbon (Primary)"
@@ -257,7 +257,7 @@ def test_the_plugin_declares_its_settings_and_existing_panel_navigation():
     (navigation,) = [let for let in module.lets if isinstance(let, NavLet)]
     assert navigation.settings.sections == ("clock",)
     assert navigation.settings.group == "preferences"
-    assert navigation.icon == "globe"
+    assert navigation.icon == "clock"
     assert navigation.sidebar == Navigate(path="/?panel=clock:world-clock")
 
 

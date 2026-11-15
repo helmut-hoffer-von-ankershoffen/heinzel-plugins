@@ -1,34 +1,40 @@
 {
   "format": 1,
   "plugin": "heinzel-issues",
-  "core_version": "0.9.40",
-  "inputs_sha256": "9560d558bc9e6a7dc1b591ee1987c724342e1f129d58564a1a59d9e21899bc48",
+  "core_version": "0.9.42",
+  "inputs_sha256": "df95a9d4a53cb16aa0a3572bc04b88332dfbb102fdf4ff439bb1d309ecf099a2",
   "images": {
-    "docs/assets/screenshots/issues-page.png": "125ac0640ed2891c6cdb52a50227c89b55690e8fc8bd00f0df3b6fd57c87a346",
-    "docs/assets/screenshots/today-open-reports.png": "00225ca61fe97c9bca7d7820096641e755ad46de4a9e3de847e612b6b7e36772",
+    "docs/assets/screenshots/issues-page.png": "4172860cdbf81d5b9b907a47a73641889cefcd3bcc185b43bd9d46815c09f126",
+    "docs/assets/screenshots/report-history.png": "7605e12edddcf1dc7524c801850c6138605b430853a3aa81ff46064b8cde0691",
+    "docs/assets/screenshots/today-open-reports.png": "f7e36260487c7a30574122f5a6705732edee045cd720d0b7717fc4b307ead56e",
     "docs/assets/screenshots/cli-list.png": "e8a2c412a35760cf9eb4725826c6b6ac075d532ddc910392a48e23af56b563bc"
   },
   "review_bundle": {
     "format": 2,
     "source_story": {
       "path": "source-story.md",
-      "sha256": "bc938bcecbb3f0c2154608d06a97013fbf201eb1e5c6dd48fefeeb517ff1b734"
+      "sha256": "baac94e327f1dbec7633b9b7e4b9de5fb398f2d57c1d8f8a3ce68984bc511401"
     },
     "definition": {
       "format": 1,
-      "reviewer": "Codex feature-story agent",
-      "source_sha256": "41bec2e172687aacb4b1c86a2ce3eb1751061e615157b722a43f525295dc4569",
-      "plan_sha256": "a9e9eda80fef929ef437c2198b1b13fb00fb5c38b227f6a12f0728b64148c3c1",
-      "story_sha256": "bc938bcecbb3f0c2154608d06a97013fbf201eb1e5c6dd48fefeeb517ff1b734"
+      "reviewer": "fable-issues-story",
+      "source_sha256": "f69054b3ab966d5ca2aea6e080b3ebfd43c5d210379e3f8005829ce6da54860c",
+      "plan_sha256": "e7395659d00a341e8c5fcf62a26cc2765e7812e405390baa9fe1ae815fab2710",
+      "story_sha256": "baac94e327f1dbec7633b9b7e4b9de5fb398f2d57c1d8f8a3ce68984bc511401"
     },
     "plugin": "heinzel-issues",
-    "core_version": "0.9.40",
-    "inputs_sha256": "9560d558bc9e6a7dc1b591ee1987c724342e1f129d58564a1a59d9e21899bc48",
+    "core_version": "0.9.42",
+    "inputs_sha256": "df95a9d4a53cb16aa0a3572bc04b88332dfbb102fdf4ff439bb1d309ecf099a2",
     "screenshots": [
       {
         "path": "docs/assets/screenshots/issues-page.png",
         "surface": "ui",
         "caption": "Three fictional reports: received, being worked on, and released in 0.9.27 \u2014 with a form to send another"
+      },
+      {
+        "path": "docs/assets/screenshots/report-history.png",
+        "surface": "ui",
+        "caption": "A fictional report opened: what was sent, the file sent with it, and its history up to the release"
       },
       {
         "path": "docs/assets/screenshots/today-open-reports.png",
@@ -42,24 +48,27 @@
       }
     ],
     "images": {
-      "issues-page.png": "125ac0640ed2891c6cdb52a50227c89b55690e8fc8bd00f0df3b6fd57c87a346",
-      "today-open-reports.png": "00225ca61fe97c9bca7d7820096641e755ad46de4a9e3de847e612b6b7e36772",
+      "issues-page.png": "4172860cdbf81d5b9b907a47a73641889cefcd3bcc185b43bd9d46815c09f126",
+      "report-history.png": "7605e12edddcf1dc7524c801850c6138605b430853a3aa81ff46064b8cde0691",
+      "today-open-reports.png": "f7e36260487c7a30574122f5a6705732edee045cd720d0b7717fc4b307ead56e",
       "cli-list.png": "e8a2c412a35760cf9eb4725826c6b6ac075d532ddc910392a48e23af56b563bc"
     },
     "transcripts": {
-      "issues-page.txt": "96bd8005b659c985975912f2a3718a7eba44e47ecfd33e82611b8c30ebb0b789",
-      "today-open-reports.txt": "d6a17ef954a5c16527a8c8451403f524d8ddc2de043600d37f4069c1b017de2b",
+      "issues-page.txt": "4e32e4e6bbcd79d9c69b679b75de3a51130bc0e01a66473d1c26e2ebc32d2cca",
+      "report-history.txt": "8464fe38ca16fca424081cc011998033d16ffe8b3494dd40f9d2c3311f02ea15",
+      "today-open-reports.txt": "530b3b464fd7c0d108890cb6c4b44a076913134d933868e6c93aadb66e4144e0",
       "cli-list.txt": "d0eac2c0b1b435cac45b7f7052b732fe1e8f619035e7778e11b8f6e6101ff08f"
     },
-    "bundle_sha256": "ffe11fefdaae72e72839c04ba72e50aff1667475d85f6e62073e303e5101b4f7"
+    "bundle_sha256": "89e1f1751c8683837e61b7ee48b26b60e15ed4991e2de7fab1dbc096281a2668"
   },
   "privacy_review": {
     "format": 1,
-    "bundle_sha256": "ffe11fefdaae72e72839c04ba72e50aff1667475d85f6e62073e303e5101b4f7",
-    "reviewer": "Codex privacy agent",
+    "bundle_sha256": "89e1f1751c8683837e61b7ee48b26b60e15ed4991e2de7fab1dbc096281a2668",
+    "reviewer": "fable-issues-story",
     "decision": "approve",
     "checked_images": [
       "issues-page.png",
+      "report-history.png",
       "today-open-reports.png",
       "cli-list.png"
     ],

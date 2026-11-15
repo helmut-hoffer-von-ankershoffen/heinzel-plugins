@@ -3,11 +3,15 @@
 import json
 import tomllib
 
+import anyio
 import pytest
 from fastapi.testclient import TestClient
-from heinzel import ListWidget
-from heinzel.heads import web
+from heinzel import Config, ListWidget
+from heinzel.heads import mcp, web
+from heinzel.heads.cli import build as build_cli
 from heinzel.kernel import user_config_dir
+from mcp import Client
+from typer.testing import CliRunner
 
 import heinzel_issues
 from heinzel_issues import IssuesService, today, watch
@@ -75,10 +79,16 @@ def test_health_today_and_the_view_follow_the_tracker(issues_kernel, board, fake
     view = next(entry for entry in views if entry["id"] == "issues:requests")
     assert view["problem"] is None
     assert view["source"]["path"] == "/issues/list"
-    assert set(view["actions"]) == {"setup", "send", "report"}
+    assert set(view["actions"]) == {"connect", "send"}  # nothing opens a terminal
+    assert not [effect for effect in view["actions"].values() if effect["kind"] == "command"]
+    assert "hz " not in view["fallback"]
     send = view["actions"]["send"]
-    assert (send["kind"], send["operation"], send["inputs"]) == ("operation", "submit", ["text"])
+    assert (send["kind"], send["operation"]) == ("operation", "submit")
+    assert send["inputs"] == ["text", "file_name", "file_data"]
     assert send["call"] is not None  # system.ui accepted the typed input of a private mutation
+    connect = view["actions"]["connect"]
+    assert (connect["operation"], connect["inputs"]) == ("connect", ["path", "labels", "releases"])
+    assert connect["call"] is not None
     assert any(style.endswith("style.css") for style in view["styles"])
     sent = ui.post(
         "/api/issues/submit",
@@ -87,6 +97,95 @@ def test_health_today_and_the_view_follow_the_tracker(issues_kernel, board, fake
     )
     assert sent.status_code == 200, sent.text
     assert sent.json()["status"] == "Received"
+
+
+def test_the_app_sets_it_up_sends_a_file_and_shows_the_history_without_a_terminal(
+    make_kernel, tmp_path, fake_bd, bd_run
+):
+    board = tmp_path / "board"
+    (board / ".beads").mkdir(parents=True)
+    file = user_config_dir() / "config.toml"
+    file.parent.mkdir(parents=True, exist_ok=True)
+    file.write_text(f"[issues.beads]\nbd = {json.dumps(fake_bd)}\n", encoding="utf-8")
+    kernel = make_kernel(builtins=True, config=Config.load(), issues=heinzel_issues.module)
+    token = "t" * 43
+    ui = TestClient(web.build(kernel, port=8000, token=token, static=None), base_url="http://127.0.0.1:8000")
+    auth = {"Authorization": f"Bearer {token}"}
+    before = ui.get("/api/issues/list", headers=auth).json()
+    assert (before["ready"], before["problem"]) == (False, "Issue tracking is not set up.")
+
+    refused = ui.post("/api/issues/connect", headers=auth, json={"path": str(tmp_path / "nowhere")})
+    assert refused.status_code != 200
+    assert "has no Beads database" in refused.text
+    assert "tracker" not in config()["issues"]  # nothing was saved
+
+    connected = ui.post("/api/issues/connect", headers=auth, json={"path": str(board), "labels": "owner-ask"})
+    assert connected.status_code == 200, connected.text
+    assert connected.json()["ready"] is True
+    saved = config()["issues"]
+    assert saved["tracker"] == "beads"
+    assert saved["beads"]["path"] == str(board)
+    assert saved["beads"]["extra_labels"] == ["owner-ask"]
+    assert ui.get("/api/issues/list", headers=auth).json()["ready"] is True  # at once, without a restart
+
+    text = "The footer clock jumps\nIt moves by a pixel."
+    sent = ui.post(
+        "/api/issues/submit",
+        headers=auth,
+        json={"text": text, "file_name": "shot.png", "file_data": "iVBORw0KGgpmYWtl"},
+    )
+    assert sent.status_code == 200, sent.text
+    task_id = sent.json()["details"]["id"]
+    row = json.loads((board / ".beads" / "fake.json").read_text())[0]
+    assert row["labels"] == ["heinzel-issues", "owner-ask"]  # the team's intake queue sees it
+    assert (board / ".beads" / "attachments" / task_id / "shot.png").read_bytes().startswith(b"\x89PNG")
+
+    bd_run([fake_bd, "update", task_id, "--status", "in_progress"], board)
+    report = ui.get("/api/issues/list", headers=auth).json()["reports"][0]
+    assert report["body"] == text
+    assert report["attachments"] == ["shot.png"]
+    assert [step["label"] for step in report["history"]] == ["Sent", "Being worked on"]
+    bd_run([fake_bd, "close", task_id, "--reason", "done"], board)
+    report = ui.get("/api/issues/list", headers=auth).json()["reports"][0]
+    assert [step["label"] for step in report["history"]] == ["Sent", "Being worked on", "Done"]
+    assert report["history"][-1]["at"] is not None
+
+    broken = ui.post("/api/issues/submit", headers=auth, json={"text": "x", "file_name": "a.png", "file_data": "%%"})
+    assert "did not arrive whole" in broken.text
+
+
+TOOLS = {"issues_submit", "issues_list", "issues_show", "issues_connect"}
+
+
+def test_every_operation_is_a_command_and_a_tool_of_your_own_agent_only(issues_kernel, board, fake_bd):
+    kernel = issues_kernel(board, fake_bd)
+    cli = build_cli(kernel)
+    listed = CliRunner().invoke(cli, ["issues", "--help"])
+    assert listed.exit_code == 0, listed.output
+    for command in ("submit", "list"):
+        assert command in listed.output  # the everyday commands; show and connect are listed for experts
+    for command in ("submit", "list", "show", "connect"):
+        assert CliRunner().invoke(cli, ["issues", command, "--help"]).exit_code == 0
+
+    async def scenario():
+        # Over stdio your own agent started the server as you: it sends, lists, shows and sets up.
+        async with Client(mcp.build(kernel, transport="stdio")) as agent:
+            assert {tool.name for tool in (await agent.list_tools()).tools} >= TOOLS
+            sent = await agent.call_tool("issues_submit", {"text": "The footer clock jumps"})
+            assert not sent.is_error, sent.content
+            task_id = json.loads(sent.content[0].text)["details"]["id"]
+            reports = json.loads((await agent.call_tool("issues_list", {})).content[0].text)["reports"]
+            assert [report["title"] for report in reports] == ["The footer clock jumps"]
+            shown = await agent.call_tool("issues_show", {"id": task_id})
+            assert json.loads(shown.content[0].text)["status"] == "Received"
+            again = await agent.call_tool("issues_connect", {"path": str(board), "labels": "intake"})
+            assert not again.is_error, again.content
+            assert json.loads(again.content[0].text)["extra_labels"] == ["intake"]
+        # Over HTTP without a token nothing of Issues is a tool: reports are private.
+        async with Client(mcp.build(kernel, transport="http")) as anonymous:
+            assert not {tool.name for tool in (await anonymous.list_tools()).tools} & TOOLS
+
+    anyio.run(scenario)
 
 
 def test_a_broken_tracker_is_down_in_health(issues_kernel, board, tmp_path):

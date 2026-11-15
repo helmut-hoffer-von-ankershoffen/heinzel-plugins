@@ -21,6 +21,34 @@ name_regex = "^Dismiss Doctor"
 optional = true
 
 [[scenes]]
+name = "report-history"
+surface = "ui"
+route = "/?panel=issues:requests"
+appearance = "light"
+caption = "A fictional report opened: what was sent, the file sent with it, and its history up to the release"
+
+[[scenes.steps]]
+action = "wait"
+role = "list"
+name = "Your reports and requests"
+
+[[scenes.steps]]
+action = "click"
+role = "button"
+name_regex = "^Dismiss Doctor"
+optional = true
+
+[[scenes.steps]]
+action = "click"
+role = "button"
+name_regex = "^Weather shows yesterday's rain"
+
+[[scenes.steps]]
+action = "wait"
+role = "list"
+name = "History"
+
+[[scenes]]
 name = "today-open-reports"
 surface = "ui"
 route = "/"

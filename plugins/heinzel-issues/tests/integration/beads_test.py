@@ -23,10 +23,14 @@ def test_submit_work_finish_and_release(issues_kernel, folder, fake_bd, journey,
     journey(issues_kernel(folder, fake_bd), folder, fake_bd, tmp_path)
 
 
+def test_option_like_text_other_work_and_other_people_stay_out(issues_kernel, folder, fake_bd, probes):
+    probes(issues_kernel(folder, fake_bd), folder, fake_bd)
+
+
 def test_a_refusal_is_explained(issues_kernel, folder, fake_bd):
     result = CliRunner().invoke(build(issues_kernel(folder, fake_bd)), ["issues", "show", "demo-404"])
     assert result.exit_code != 0
-    assert "The tracker refused: Error: no issue found" in result.output
+    assert "There is no item demo-404." in result.output
 
 
 def test_a_malformed_id_never_reaches_the_tracker(issues_kernel, folder, fake_bd):
@@ -59,6 +63,6 @@ def test_off_by_default_everywhere(make_kernel):
     assert sent.exit_code != 0
     assert "not set up" in sent.output
     doctor = json.loads(CliRunner().invoke(build(kernel), ["system", "doctor", "--json"]).stdout)
-    assert {"name": "tracker", "status": "up", "detail": "off; turn it on with hz setup issues", "fix": ""} in doctor[
+    assert {"name": "tracker", "status": "up", "detail": "off; set it up on the Issues page", "fix": ""} in doctor[
         "checks"
     ]["issues"]

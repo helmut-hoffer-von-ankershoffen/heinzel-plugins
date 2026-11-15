@@ -7,14 +7,6 @@ current through a later relock, security floor or version bump; any change to wh
 """
 
 MIGRATED_DIGESTS: dict[str, str] = {
-    # heinzel-clock gallery
-    "f3ed7f7f640daabf6095e70e0e9466254d021214395136492f778aec1d74b0a4": (
-        "11edde3f40de9fdea2ba810879ef6d2365ffa1c0f8a2572015aa5af1c0294f46"
-    ),
-    # heinzel-clock definition
-    "13230bb1b73f59c8da2bab49888185f97ac0384e309c346a62ec6be7d8e60513": (
-        "a4d03f61669a9f988d57ecd76ae46a82ddad8b33d837dc5eb7b755910a2dfb9a"
-    ),
     # heinzel-example gallery
     "855bf3b5a71afd5ca72803e6de2a0920cdb229a90cd1dd6297525b336f353f47": (
         "2954ef6e795d89a971c09cc4865b74b33db6c701700ddaaae1b019af51a144ec"
@@ -22,14 +14,6 @@ MIGRATED_DIGESTS: dict[str, str] = {
     # heinzel-example definition
     "50b56f504ae62164ad6841093f05abef327a6e4f5072af3d67ef62a31de2ea73": (
         "5a2a38882576130e6147fbf1e368556b120b72f5ecc91d078eaec54556a62ca4"
-    ),
-    # heinzel-issues gallery
-    "9560d558bc9e6a7dc1b591ee1987c724342e1f129d58564a1a59d9e21899bc48": (
-        "143944e597cc5d7174dfe02a9d659a5ebe2745a7fdb4a336cc46bc82c3f1e939"
-    ),
-    # heinzel-issues definition
-    "41bec2e172687aacb4b1c86a2ce3eb1751061e615157b722a43f525295dc4569": (
-        "3e56b25a5088c4164b5603d9284109b433e7c63adb76c00567c6cc913e1d41e4"
     ),
     # heinzel-resource gallery
     "f8a6b3873f8b67f3a9873c48ed5a9e5c7ae2e4a12c72ec09b7dde872ed27bd54": (
