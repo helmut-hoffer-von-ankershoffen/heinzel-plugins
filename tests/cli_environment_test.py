@@ -26,6 +26,13 @@ def core_wheel(path, *, name="heinzel", version="0.9.4", requires=CORE_REQUIRES,
     return path
 
 
+@pytest.fixture(autouse=True)
+def fresh_https_core_cache():
+    cli._https_core.cache_clear()
+    yield
+    cli._https_core.cache_clear()
+
+
 @pytest.fixture
 def project(tmp_path):
     directory = tmp_path / "plugins/heinzel-harbor"
@@ -649,3 +656,28 @@ def test_an_existing_environment_on_the_required_python_is_kept(project, tmp_pat
     (project.directory / ".venv/pyvenv.cfg").write_text("version = 3.15.1\n")
     cli.prepare_environment(project, str(wheel))
     assert not any(command[:2] == ["uv", "venv"] for command, _ in commands)
+
+
+def test_an_https_core_is_downloaded_once_however_many_times_it_is_read(tmp_path, monkeypatch):
+    wheel = core_wheel(tmp_path / "heinzel-0.9.4-py3-none-any.whl")
+    requested = []
+
+    class Response:
+        def __init__(self, body):
+            self.body = body
+
+        def read(self, _limit):
+            return self.body
+
+        def __enter__(self):
+            return self
+
+        def __exit__(self, *_):
+            return False
+
+    monkeypatch.setattr(
+        cli.urllib.request, "urlopen", lambda url, timeout: requested.append(url) or Response(wheel.read_bytes())
+    )
+    cli.core_metadata("https://example.org/core.whl")
+    cli.core_bootstrap("https://example.org/core.whl", tmp_path, Path("python"))
+    assert requested == ["https://example.org/core.whl"]

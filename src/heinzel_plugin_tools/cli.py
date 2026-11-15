@@ -6,6 +6,7 @@
 
 import argparse
 import ast
+import functools
 import hashlib
 import io
 import json
@@ -151,13 +152,18 @@ def requirements(project: Project, group: str) -> list[str]:
     return found
 
 
+@functools.cache
+def _https_core(source: str) -> bytes:
+    with urllib.request.urlopen(source, timeout=60) as response:  # noqa: S310 - explicit HTTPS candidate artifact
+        return response.read(128 * 1024 * 1024 + 1)
+
+
 def core_archive(source: str) -> zipfile.ZipFile:
-    """Open the selected built Core artifact, a local wheel or an explicit HTTPS one, within its size limit."""
-    if source.startswith("https://"):
-        with urllib.request.urlopen(source, timeout=60) as response:  # noqa: S310 - explicit HTTPS candidate artifact
-            content = response.read(128 * 1024 * 1024 + 1)
-    else:
-        content = Path(source).read_bytes()
+    """Open the selected built Core artifact, a local wheel or an explicit HTTPS one, within its size limit.
+
+    An HTTPS artifact is downloaded once per run, however many times its metadata and bootstrap are read.
+    """
+    content = _https_core(source) if source.startswith("https://") else Path(source).read_bytes()
     if len(content) > 128 * 1024 * 1024:
         raise ValueError("Core artifact exceeds its size limit")
     return zipfile.ZipFile(io.BytesIO(content))
@@ -270,7 +276,7 @@ def reviewed_source_options(core: str, floor: str, directory: Path) -> list[str]
     """Resolver options for a target Python without an upstream wheel of the package Core's bootstrap owns.
 
     Only that package may be read from its source distribution, and only with Core's hash-pinned backend, so the lock
-    still records the registry hashes, the reviewed source among them. Every other package stays wheel-only.
+    still records the registry hashes, the reviewed source among them. Every other package resolves as before.
     """
     bootstrap = core_bootstrap(core, directory, Path(sys.executable))
     if bootstrap is None or subprocess.run([*bootstrap, "needed", floor], check=False, timeout=60).returncode:

@@ -2,15 +2,68 @@
 
 import json
 import os
+import re
 import shutil
 import subprocess
 import sys
+import zipfile
 from pathlib import Path
 
 import pytest
 
 pytestmark = pytest.mark.e2e
 ROOT = Path(__file__).resolve().parents[2]
+
+
+def sync_locked_environment(uv, interpreter, core, directory, environment):
+    """Install the hash-pinned lock; a Python without an upstream PyYAML wheel gets Core's reviewed build instead."""
+    lock = ROOT / "requirements.lock"
+    sync = [uv, "pip", "sync", "--offline", "--python", str(interpreter), "--require-hashes", "--no-build"]
+    with zipfile.ZipFile(core) as archive:
+        shipped = "heinzel/bootstrap_pyyaml.py" in archive.namelist()
+        if shipped:
+            (directory / "bootstrap_pyyaml.py").write_bytes(archive.read("heinzel/bootstrap_pyyaml.py"))
+    bootstrap = [str(interpreter), "-I", "-S", str(directory / "bootstrap_pyyaml.py")]
+    if (
+        not shipped
+        or subprocess.run(  # noqa: S603 - Core's own file, run isolated on the environment's interpreter
+            [*bootstrap, "needed"], check=False, timeout=30
+        ).returncode
+    ):
+        subprocess.run(sync + [str(lock)], env=environment, check=True, capture_output=True, text=True, timeout=30)  # noqa: S603
+        return
+    pins = subprocess.run([*bootstrap, "pins"], check=True, capture_output=True, text=True, timeout=30)  # noqa: S603
+    name = json.loads(pins.stdout)["name"]
+    entries = re.split(r"(?<!\\)\n", lock.read_text())
+    kept = [entry for entry in entries if not re.match(rf"\s*{name}\b", entry, re.IGNORECASE)]
+    rest = directory / "requirements-without-source-build.lock"
+    rest.write_text("\n".join(kept))
+    wheels = directory / "reviewed-wheels"
+    subprocess.run(  # noqa: S603 - Core's reviewed bootstrap builds the one package it owns, hash-checked there
+        [*bootstrap, "build", "--requirements", str(lock), "--wheel-dir", str(wheels), "--python", str(interpreter)],
+        check=True,
+        capture_output=True,
+        text=True,
+        timeout=300,
+    )
+    subprocess.run(sync + [str(rest)], env=environment, check=True, capture_output=True, text=True, timeout=30)  # noqa: S603
+    subprocess.run(  # noqa: S603
+        [
+            uv,
+            "pip",
+            "install",
+            "--python",
+            str(interpreter),
+            "--no-deps",
+            "--no-build",
+            *map(str, wheels.glob("*.whl")),
+        ],
+        env=environment,
+        check=True,
+        capture_output=True,
+        text=True,
+        timeout=30,
+    )
 
 
 def test_installed_channel_and_host_require_exact_human_consent_and_owner_reply(tmp_path):
@@ -40,22 +93,12 @@ def test_installed_channel_and_host_require_exact_human_consent_and_owner_reply(
             str(built),
         ],
         [uv, "venv", "--python", sys.executable, str(interpreter.parent.parent)],
-        [
-            uv,
-            "pip",
-            "sync",
-            "--offline",
-            "--python",
-            str(interpreter),
-            "--require-hashes",
-            "--no-build",
-            str(ROOT / "requirements.lock"),
-        ],
     ]
     for command in commands:
         subprocess.run(  # noqa: S603 - fixed executable and fixture paths, never a shell
             command, env=environment, check=True, capture_output=True, text=True, timeout=30
         )
+    sync_locked_environment(uv, interpreter, core, tmp_path, environment)
     fixture_wheel = next(built.glob("heinzel_slack_capture_fixture-*.whl"))
     subprocess.run(  # noqa: S603 - the selected local test artifacts are passed as argv operands
         [
