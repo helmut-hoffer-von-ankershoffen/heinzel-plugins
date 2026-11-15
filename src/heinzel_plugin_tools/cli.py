@@ -6,6 +6,7 @@
 
 import argparse
 import ast
+import functools
 import hashlib
 import io
 import json
@@ -25,6 +26,7 @@ from importlib import metadata as distributions
 from pathlib import Path
 
 from packaging.requirements import Requirement
+from packaging.specifiers import SpecifierSet
 from packaging.utils import canonicalize_name
 from packaging.version import Version
 
@@ -150,18 +152,34 @@ def requirements(project: Project, group: str) -> list[str]:
     return found
 
 
-def core_metadata(source: str) -> dict:
-    """Read dependency metadata from the selected built artifact; never import or build core."""
+@functools.cache
+def _https_core(source: str) -> bytes:
+    with urllib.request.urlopen(source, timeout=60) as response:  # noqa: S310 - explicit HTTPS candidate artifact
+        return response.read(128 * 1024 * 1024 + 1)
+
+
+def core_archive(source: str) -> zipfile.ZipFile:
+    """Open the selected built Core artifact, a local wheel or an explicit HTTPS one, within its size limit.
+
+    An HTTPS artifact is downloaded once per run, however many times its metadata and bootstrap are read.
+    """
     if source.startswith("https://"):
-        with urllib.request.urlopen(source, timeout=60) as response:  # noqa: S310 - explicit HTTPS candidate artifact
-            content = response.read(128 * 1024 * 1024 + 1)
+        content = _https_core(source)
     else:
-        content = Path(source).read_bytes()
+        local = Path(source).resolve(strict=True)  # a Core artifact is a wheel file the author named, nothing else
+        if local.suffix != ".whl" or not local.is_file():
+            raise ValueError(f"Select a built Heinzel core wheel, not {source}")
+        content = local.read_bytes()
     if len(content) > 128 * 1024 * 1024:
         raise ValueError("Core artifact exceeds its size limit")
+    return zipfile.ZipFile(io.BytesIO(content))
+
+
+def core_metadata(source: str) -> dict:
+    """Read dependency metadata from the selected built artifact; never import or build core."""
     from email.parser import Parser
 
-    with zipfile.ZipFile(io.BytesIO(content)) as archive:
+    with core_archive(source) as archive:
         name = next(name for name in archive.namelist() if name.endswith(".dist-info/METADATA"))
         metadata = Parser().parsestr(archive.read(name).decode())
     if canonicalize_name(metadata["Name"]) != "heinzel":
@@ -169,7 +187,21 @@ def core_metadata(source: str) -> dict:
     return {
         "version": metadata["Version"],
         "dependencies": sorted(str(Requirement(value)) for value in metadata.get_all("Requires-Dist", [])),
+        "requires_python": metadata["Requires-Python"],
     }
+
+
+def python_floor(requires_python: str | None) -> str:
+    """The `major.minor` Python a Core wheel needs, from its own Requires-Python: the one place the toolkit reads it."""
+    floors = [
+        Version(item.version)
+        for item in SpecifierSet(requires_python or "")
+        if item.operator in {">=", "~=", "=="} and not item.version.endswith("*")
+    ]
+    if not floors:
+        raise ValueError(f"The Core wheel declares no minimum Python (Requires-Python {requires_python!r})")
+    newest = max(floors)
+    return f"{newest.major}.{newest.minor}"
 
 
 def dependency_inputs(project: Project) -> list[str]:
@@ -215,6 +247,52 @@ def released_core(project: Project) -> str:
     raise ValueError("No compatible released core is available. Pass CORE=<candidate-core-wheel>.")
 
 
+# Core owns the reviewed PyYAML build for a Python without an upstream wheel: the source, its hash and the backend pins
+# are in this one standard-library file of the Core wheel. The toolkit runs it and keeps no copy of any of them.
+CORE_PYYAML_BOOTSTRAP = "heinzel/bootstrap_pyyaml.py"
+
+
+def without_requirement(text: str, name: str) -> str:
+    """A hash-pinned requirements text without the entries of one package; every other entry stays byte for byte."""
+    kept = []
+    for entry in re.split(r"(?<!\\)\n", text):
+        found = re.match(r"\s*([A-Za-z0-9][A-Za-z0-9._-]*)", entry)
+        if not found or canonicalize_name(found[1]) != canonicalize_name(name):
+            kept.append(entry)
+    return "\n".join(kept)
+
+
+def core_bootstrap(core: str, directory: Path, interpreter: Path) -> list[str] | None:
+    """The command that runs Core's own bootstrap file, isolated, on one interpreter; nothing for a Core without it."""
+    with core_archive(core) as archive:
+        if CORE_PYYAML_BOOTSTRAP not in archive.namelist():
+            return None
+        bootstrap = directory / "bootstrap_pyyaml.py"
+        bootstrap.write_bytes(archive.read(CORE_PYYAML_BOOTSTRAP))
+    return [str(interpreter), "-I", "-S", str(bootstrap)]
+
+
+def bootstrap_pins(bootstrap: list[str]) -> dict:
+    """What Core reviewed, asked of Core each time: the package, and the hash-pinned backend that may build it."""
+    pins = subprocess.run([*bootstrap, "pins"], check=True, capture_output=True, text=True, timeout=60)
+    return json.loads(pins.stdout)
+
+
+def reviewed_source_options(core: str, floor: str, directory: Path) -> list[str]:
+    """Resolver options for a target Python without an upstream wheel of the package Core's bootstrap owns.
+
+    Only that package may be read from its source distribution, and only with Core's hash-pinned backend, so the lock
+    still records the registry hashes, the reviewed source among them. Every other package resolves as before.
+    """
+    bootstrap = core_bootstrap(core, directory, Path(sys.executable))
+    if bootstrap is None or subprocess.run([*bootstrap, "needed", floor], check=False, timeout=60).returncode:
+        return []
+    pins = bootstrap_pins(bootstrap)
+    constraints = directory / "build-constraints.txt"
+    constraints.write_text("\n".join(pins["backend"]) + "\n")
+    return ["--no-binary", pins["name"], "--build-constraints", str(constraints), "--require-build-hashes"]
+
+
 def lock(project: Project, core: str | None = None) -> None:
     """Resolve one portable dependency lock against a compatible candidate, keeping its wheel path out of the lock."""
     core = core or released_core(project)
@@ -230,6 +308,7 @@ def lock(project: Project, core: str | None = None) -> None:
         override = directory / "core.in"
         location = Path(core).resolve().as_uri() if Path(core).is_file() else core
         override.write_text(f"heinzel @ {location}\n")
+        floor = python_floor(metadata["requires_python"])
         run(
             [
                 "uv",
@@ -240,7 +319,8 @@ def lock(project: Project, core: str | None = None) -> None:
                 str(override),
                 "--universal",
                 "--python-version",
-                "3.12",
+                floor,
+                *reviewed_source_options(core, floor, directory),
                 "--generate-hashes",
                 "--no-emit-package",
                 "heinzel",
@@ -258,24 +338,31 @@ def lock(project: Project, core: str | None = None) -> None:
 # What each Core plugin API number promises plugins besides the kernel API: the majors of the libraries plugins
 # import through Core without declaring them (ADR 0003). A new major of either is a new plugin API number.
 PLUGIN_API = {1: {"pydantic": 2, "rich": 15}}
+
+
 # A universal lock serves every supported target, so a Core requirement counts when any target needs it; the host that
 # runs the check never decides. Plugins install Core without extras.
-_TARGET = {
-    "python_version": "3.12",
-    "python_full_version": "3.12.0",
-    "implementation_name": "cpython",
-    "platform_python_implementation": "CPython",
-    "implementation_version": "3.12.0",
-    "os_name": "posix",
-    "platform_release": "",
-    "platform_version": "",
-    "extra": "",
-}
-LOCK_TARGETS = (
-    _TARGET | {"sys_platform": "darwin", "platform_system": "Darwin", "platform_machine": "arm64"},
-    _TARGET | {"sys_platform": "linux", "platform_system": "Linux", "platform_machine": "x86_64"},
-    _TARGET | {"sys_platform": "linux", "platform_system": "Linux", "platform_machine": "aarch64"},
-)
+def lock_targets(requires_python: str | None) -> tuple[dict[str, str], ...]:
+    """The environments a lock serves: the Python Core's own Requires-Python names, on each supported platform."""
+    floor = python_floor(requires_python)
+    target = {
+        "python_version": floor,
+        "python_full_version": f"{floor}.0",
+        "implementation_name": "cpython",
+        "platform_python_implementation": "CPython",
+        "implementation_version": f"{floor}.0",
+        "os_name": "posix",
+        "platform_release": "",
+        "platform_version": "",
+        "extra": "",
+    }
+    return (
+        target | {"sys_platform": "darwin", "platform_system": "Darwin", "platform_machine": "arm64"},
+        target | {"sys_platform": "linux", "platform_system": "Linux", "platform_machine": "x86_64"},
+        target | {"sys_platform": "linux", "platform_system": "Linux", "platform_machine": "aarch64"},
+    )
+
+
 LOCK_FORMATS = {1, 2}  # format 1 also records Core's dependency list, which is no longer compared
 
 
@@ -317,9 +404,10 @@ def check_contract(project: Project, pins: dict[str, list[Version]], core: dict 
         return
     if not supports_core(project, core["version"]):
         raise ValueError(f"{project.name} does not allow core {core['version']}")
+    targets = lock_targets(core["requires_python"])
     for value in core["dependencies"]:
         requirement = Requirement(value)
-        if requirement.marker and not any(requirement.marker.evaluate(target) for target in LOCK_TARGETS):
+        if requirement.marker and not any(requirement.marker.evaluate(target) for target in targets):
             continue  # an extra, or no supported target: `uv pip check` stays the backstop after installation
         versions = pins.get(canonicalize_name(requirement.name), [])
         if not versions:
@@ -357,6 +445,7 @@ def validate_installed_core(project: Project) -> None:
     installed = {
         "version": distributions.version("heinzel"),
         "dependencies": list(distributions.requires("heinzel") or []),
+        "requires_python": distributions.metadata("heinzel")["Requires-Python"],
     }
     check_contract(project, locked_versions(project), installed)
 
@@ -379,26 +468,68 @@ def tested_core(project: Project, core: str | None) -> str:
     return core or released_core(project)
 
 
+def ensure_python(environment: Path, floor: str) -> None:
+    """An environment made earlier on a Python older than Core needs fails here, not in a resolver error."""
+    config = environment / "pyvenv.cfg"
+    if not config.is_file():
+        return
+    found = re.search(r"^version(?:_info)?\s*=\s*(\d+)\.(\d+)", config.read_text(), re.MULTILINE)
+    if found and (int(found[1]), int(found[2])) < tuple(map(int, floor.split("."))):
+        raise ValueError(
+            f"{environment} uses Python {found[1]}.{found[2]}, but this Core needs Python {floor} or newer. "
+            f"Delete it (rm -rf {environment}) and run the command again."
+        )
+
+
+def reviewed_build(interpreter: Path, lock: Path, core: str, directory: Path) -> tuple[str, Path] | None:
+    """Build the package Core's bootstrap owns when this interpreter has no upstream wheel of it; else nothing.
+
+    Core decides everything: whether its wheel ships a bootstrap, which package it builds, whether this Python needs
+    it, and whether the lock selects the reviewed source. A lock that selects another one is refused there.
+    """
+    isolated = core_bootstrap(core, directory, interpreter)
+    if isolated is None or subprocess.run([*isolated, "needed"], check=False, timeout=60).returncode:
+        return None
+    name = bootstrap_pins(isolated)["name"]
+    if without_requirement(lock.read_text(), name) == lock.read_text():
+        return None
+    wheels = directory / "wheels"
+    run([*isolated, "build", "--requirements", str(lock), "--wheel-dir", str(wheels), "--python", str(interpreter)])
+    built = list(wheels.glob("*.whl"))
+    if len(built) != 1:
+        raise ValueError("Core's PyYAML bootstrap did not leave exactly one wheel")
+    return name, built[0]
+
+
+def sync_locked(interpreter: Path, lock: Path, core: str) -> None:
+    """Make the environment exactly the hash-pinned lock, with no source build outside Core's reviewed one."""
+    sync = ["uv", "pip", "sync", "--python", str(interpreter), "--require-hashes", "--no-build"]
+    with tempfile.TemporaryDirectory(prefix="hz-plugin-sync-") as temporary:
+        directory = Path(temporary)
+        reviewed = reviewed_build(interpreter, lock, core, directory)
+        if reviewed is None:
+            run([*sync, str(lock)])
+            return
+        name, wheel = reviewed
+        # The wheel is built here, so no lock can name its hash: Core's bootstrap checked the lock's source hash and
+        # the downloaded source against its reviewed pin instead. Everything else still installs under the hashes.
+        rest = directory / "requirements.lock"
+        rest.write_text(without_requirement(lock.read_text(), name))
+        run([*sync, str(rest)])
+        run(["uv", "pip", "install", "--python", str(interpreter), "--no-deps", "--no-build", str(wheel)])
+
+
 def prepare_environment(project: Project, core: str | None) -> Path:
     """Authenticate the owning lock before installing core and this plugin without resolving new dependencies."""
     core = tested_core(project, core)
     record = validate_lock(project, core)
     environment = project.directory / ".venv"
     interpreter = environment / "bin/python"
+    floor = python_floor(core_metadata(core)["requires_python"])
+    ensure_python(environment, floor)
     if not interpreter.is_file():
-        run(["uv", "venv", "--python", "3.12", str(environment)])
-    run(
-        [
-            "uv",
-            "pip",
-            "sync",
-            "--python",
-            str(interpreter),
-            "--require-hashes",
-            "--no-build",
-            str(project.directory / "requirements.lock"),
-        ]
-    )
+        run(["uv", "venv", "--python", floor, str(environment)])
+    sync_locked(interpreter, project.directory / "requirements.lock", core)
     selected = core_install_spec(core, record["core"]["version"])
     run(["uv", "pip", "install", "--python", str(interpreter), "--no-deps", "--no-build", selected])
     run(
@@ -614,20 +745,11 @@ def acceptance(project: Project, core: str | None, *, wheel: Path | None = None)
     selected = core_install_spec(core, record["core"]["version"])
     environment = project.directory / ".acceptance"
     interpreter = environment / "bin/python"
+    floor = python_floor(core_metadata(core)["requires_python"])
+    ensure_python(environment, floor)
     if not interpreter.is_file():
-        run(["uv", "venv", "--python", "3.12", str(environment)])
-    run(
-        [
-            "uv",
-            "pip",
-            "sync",
-            "--python",
-            str(interpreter),
-            "--require-hashes",
-            "--no-build",
-            str(project.directory / "requirements.lock"),
-        ]
-    )
+        run(["uv", "venv", "--python", floor, str(environment)])
+    sync_locked(interpreter, project.directory / "requirements.lock", core)
     wheels = (
         [wheel.resolve()]
         if wheel
