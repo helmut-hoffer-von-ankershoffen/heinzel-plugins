@@ -36,7 +36,7 @@ def test_no_credential_is_declared_because_acli_owns_authentication():
 @pytest.mark.parametrize("provider", PROVIDERS, ids=lambda p: p.name)
 def test_methods_of_the_declared_modes_match_the_protocol(provider):
     capability = CAPABILITIES[provider.capability]
-    optional = getattr(capability, "optional_methods", frozenset())  # ADR 0161 Core; none before
+    optional = getattr(capability, "optional", frozenset())  # ADR 0161 Core; none before
     served = [
         name
         for name, mode in capability.methods.items()
