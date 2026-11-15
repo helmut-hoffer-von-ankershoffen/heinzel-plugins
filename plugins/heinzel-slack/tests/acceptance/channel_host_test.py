@@ -1,11 +1,13 @@
 """Real installed source capture and host confirmation use only fictional external Slack/document transports."""
 
+import io
 import json
 import os
 import re
 import shutil
 import subprocess
 import sys
+import urllib.request
 import zipfile
 from pathlib import Path
 
@@ -19,7 +21,12 @@ def sync_locked_environment(uv, interpreter, core, directory, environment):
     """Install the hash-pinned lock; a Python without an upstream PyYAML wheel gets Core's reviewed build instead."""
     lock = ROOT / "requirements.lock"
     sync = [uv, "pip", "sync", "--offline", "--python", str(interpreter), "--require-hashes", "--no-build"]
-    with zipfile.ZipFile(core) as archive:
+    if core.startswith("https://"):  # CI selects the released Core by its URL
+        with urllib.request.urlopen(core, timeout=60) as response:  # noqa: S310 - the explicit HTTPS Core artifact
+            content = response.read()
+    else:
+        content = Path(core).read_bytes()
+    with zipfile.ZipFile(io.BytesIO(content)) as archive:
         shipped = "heinzel/bootstrap_pyyaml.py" in archive.namelist()
         if shipped:
             (directory / "bootstrap_pyyaml.py").write_bytes(archive.read("heinzel/bootstrap_pyyaml.py"))
