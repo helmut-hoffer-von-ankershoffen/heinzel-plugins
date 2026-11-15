@@ -8,6 +8,8 @@ import argparse
 import hashlib
 import os
 import shutil
+import zipfile
+from email.parser import Parser
 from pathlib import Path
 from urllib.parse import urlsplit
 
@@ -17,6 +19,17 @@ from packaging.version import Version
 from heinzel_plugin_tools.cli import ROOT, acceptance, profile, projects, run, validate_lock, write_accepted_profile
 from heinzel_plugin_tools.installation import check_profile_format, isolated_environment, verify_managed_profile
 from heinzel_plugin_tools.publishing import fetch_bytes, restore, tag_revision
+
+
+def core_python(core: Path) -> list[str]:
+    """`--python` with the core wheel's Requires-Python, so the acceptance environment has a Python the core supports.
+
+    Empty when the wheel declares none: uv's default interpreter then serves, as before.
+    """
+    with zipfile.ZipFile(core) as wheel:
+        name = next(n for n in wheel.namelist() if n.endswith(".dist-info/METADATA"))
+        requires = Parser().parsestr(wheel.read(name).decode()).get("Requires-Python")
+    return ["--python", requires.strip()] if requires and requires.strip() else []
 
 
 def compose(core: Path, destination: Path, base_url: str | None, *, core_sha256: str | None = None) -> None:
@@ -35,7 +48,7 @@ def compose(core: Path, destination: Path, base_url: str | None, *, core_sha256:
     unchanged()
     environment = destination / "acceptance"
     isolated = isolated_environment(destination / "acceptance-state")
-    run(["uv", "venv", "--clear", str(environment)], env=isolated)
+    run(["uv", "venv", "--clear", *core_python(core), str(environment)], env=isolated)
     interpreter = environment / "bin/python"
     unchanged()
     run(["uv", "pip", "install", "--python", str(interpreter), str(core)], env=isolated)
