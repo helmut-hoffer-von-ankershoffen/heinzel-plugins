@@ -72,6 +72,9 @@ if (scenario.name === "send") {
   out.old = (() => { try { createView({ abi: 2 }); } catch (error) { return error.message; } })();
   out.loading = text(expand(Issues({ loading: true })));
   out.missing = text(expand(Issues({})));
+  out.shells = [Issues({ loading: true }), Issues({}), Issues({ data: { ready: false } }),
+    Issues({ data: { ready: true, reports: [] } })].map((node) =>
+      [node.type, node.props.className, node.props["aria-label"]]);
 }
 console.log(JSON.stringify({ calls, set: set.map((value) => value instanceof File ? "file" : value), ...out }));
 """
@@ -182,3 +185,4 @@ def test_dates_marks_files_and_the_states_without_data(tmp_path):
     assert result["old"] == "Issues requires Heinzel plugin SDK 1"
     assert result["loading"] == "Loading…"
     assert result["missing"] == "Issues cannot be shown here."
+    assert result["shells"] == [["section", "hzi", "Issues"]] * 4
