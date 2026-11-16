@@ -14,8 +14,9 @@ Everything after that happens in the app; no step needs a terminal.
 - **In the app:** open **Issues** in the sidebar. The list shows each report with its state as a word and a mark
   (○ Received, ◐ Being worked on, ✓ Done), never colour alone. Type what happened or what you would like and
   press **Send**; the app shows what it will send and asks first. With Heinzel 0.9.45 or newer you can add a
-  screenshot or a text file (PNG, JPEG or text, up to 2 MiB). Select a report to read what you sent and its history:
-  Sent, Being worked on, Done, Released in. Your open reports also appear on Today.
+  screenshot or a text file (PNG, JPEG or text, up to 2 MiB). Filter by status or sort by date or title. Select a
+  report to read what you sent, its dates and history: Sent, Being worked on, Done, Released in. You can close a new
+  Beads report you created. Your open reports also appear on Today.
 - **In a terminal:**
 
   ```sh
@@ -106,11 +107,13 @@ never unbinds or replaces the tracker other plugins (GitHub, Atlassian) use.
 
 ## Privacy
 
-What you send stays in the tracker you chose. Each report is stored there with your login name on this computer and
-the labels that are set up; the form says both before you send. Issues shows and reads only the reports you sent
-under that login name: other work in the same database, and other people's reports, never appear, by list or by id.
-Reading and sending need your sign-in to the app; nothing is open on the network interfaces without it. Issues stores only what it has already told you, under Heinzel's
-state folder, readable by you only. Notices are local, like every Heinzel notice.
+What you send stays in the tracker you chose. New Beads reports carry the authenticated workspace identity and the
+configured labels. For Beads, Issues lists, reads or closes reports created by that identity. Reports created by older
+versions remain visible to the installation owner under the old local login, but cannot be closed from Issues; they
+are not reassigned. The current workspace sign-in identifies the installation owner, so devices sharing that sign-in
+share the same identity; it does not yet distinguish individual people. Tracker administrators with direct database
+access can modify the board independently of Issues. Reading and sending need your sign-in to the app. Issues stores
+only what it has already told you, under Heinzel's state folder, readable by you only. Notices are local.
 
 ## Develop
 

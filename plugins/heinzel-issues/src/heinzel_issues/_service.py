@@ -38,6 +38,7 @@ from heinzel_issues._contract import (
     TrackerError,
     connectors,
 )
+from heinzel_issues._identity import access
 from heinzel_issues._releases import PullRequest, Release, ReleaseResolver, ReleaseSource, released_text
 
 NONE = "none"
@@ -107,9 +108,11 @@ class Report(BaseModel):
     attachments: list[str] = Field(default_factory=list[str], description="The names of the files sent with it.")
     history: list[Step] = Field(default_factory=list[Step], description="What happened so far, oldest first.")
     state: TaskState = Field(description="received, working or done.")
+    can_close: bool = Field(default=False, description="Whether the authenticated creator can close this report.")
     status: str = Field(description="Received, Being worked on, Done, or Released in 0.9.27 on 7 Nov 2026.")
     release: Release | None = Field(default=None, description="The release that shipped it; none until then.")
     submitted_at: AwareDatetime = Field(description="When it was sent.")
+    updated_at: AwareDatetime | None = Field(default=None, description="When the tracker last changed it, if known.")
     done_at: AwareDatetime | None = Field(default=None, description="When it was done.")
     details: Details = Field(description="For experts and agents only; the app and the table leave it out.")
 
@@ -121,7 +124,7 @@ class Reports(BaseModel):
     problem: str | None = Field(default=None, description="Why nothing can be shown, in plain words.")
     fix: str | None = Field(default=None, description="The one step that fixes it, e.g. hz setup issues.")
     folder: str | None = Field(default=None, description="The tracker folder in use or last tried, to set it up.")
-    sender: str = Field(default="", description="The name a new report is stored under: your login name.")
+    sender: str = Field(default="", description="The tracker identity under which a new report is stored.")
     labels: list[str] = Field(default_factory=list[str], description="Every label a new report gets.")
     extra_labels: list[str] = Field(default_factory=list[str], description="The further labels set up for reports.")
     reports: list[Report] = Field(default_factory=list[Report], description="Newest first.")
@@ -204,6 +207,8 @@ class IssuesService:
             TrackerError: If the folder has no Beads database, `bd` does not answer, or a value is not valid.
         """
         self.refresh()
+        if not access().can_write:
+            raise TrackerError("This credential cannot change issue tracking.")
         folder = _folder(path, "The tracker folder")
         if not (folder / ".beads").is_dir():
             msg = f"{folder} has no Beads database (a .beads folder). Pick the folder that holds it."
@@ -261,7 +266,7 @@ class IssuesService:
         beads = self.settings.beads
         about: dict[str, Any] = {
             "folder": str(beads.path) if beads.path else None,
-            "sender": reporter(),
+            "sender": access().actor if self.settings.tracker == "beads" else reporter(),
             "labels": beads.labels,
             "extra_labels": beads.extra_labels,
         }
@@ -282,6 +287,14 @@ class IssuesService:
         self.refresh()
         return self.report(self.tracker().get(task_id))
 
+    def close(self, task_id: str) -> Report:
+        """Close the authenticated creator's own new Beads report."""
+        self.refresh()
+        tracker = self.tracker()
+        if self.settings.tracker != "beads" or not isinstance(tracker, BeadsTracker):
+            raise TrackerError("Closing is not available for this tracker.")
+        return self.report(tracker.close_own(task_id))
+
     def submit(
         self,
         text: str,
@@ -300,6 +313,8 @@ class IssuesService:
             TrackerError: If the text is empty or too long, an attachment is refused, or the tracker fails.
         """
         self.refresh()
+        if self.settings.tracker == "beads" and not access().can_write:
+            raise TrackerError("This credential cannot submit a report.")
         started = time.monotonic()
         fields: dict[str, object] = {"operation": "submit", "tracker": self.settings.tracker}
         log_event("issues.submit.start", **fields, attachments=len(attachments) + len(uploads))
@@ -328,17 +343,20 @@ class IssuesService:
         if board is None or self.settings.tracker != "beads":
             return self.report(self.tracker().submit(title_of(body), body, files))
         tracker = self.tracker()  # checks the folder and program before anything is written
-        actor = reporter()
+        actor = access().actor
         try:
             issue = board.create(
                 self.settings.beads.label, title_of(body), body, actor, self.settings.beads.extra_labels
             )
+            if not isinstance(tracker, BeadsTracker):
+                raise TrackerError("The Beads tracker is unavailable.")
+            tracker.created(issue.key, actor)  # confirm the exact creator before writing attachments
             for file in files:
                 media_type = mimetypes.guess_type(file.name)[0] or "text/plain"
                 board.attach(issue.key, file.name, file.content, media_type, actor)
         except HeinzelError as error:
             raise TrackerError(str(error)) from None
-        return self.report(tracker.get(issue.key))
+        return self.report(tracker.created(issue.key, actor))
 
     def report(self, task: Task) -> Report:
         """A task in plain words, with its release once it shipped."""
@@ -349,9 +367,11 @@ class IssuesService:
             attachments=list(task.attachments),
             history=history(task, release),
             state=task.state,
+            can_close=task.can_close,
             status=released_text(release) if release else STATE_LABELS[task.state],
             release=release,
             submitted_at=task.created_at,
+            updated_at=task.updated_at,
             done_at=task.closed_at,
             details=Details(
                 tracker=self.settings.tracker,
@@ -406,14 +426,22 @@ class IssuesService:
             if not first and (before is None or before.state != task.state or before.release != version):
                 found.append(_change(task_id, report))
             state.seen[task_id] = _Seen(state=task.state, release=version, references=task.references, title=task.title)
-        for task_id, seen in state.seen.items():
-            if task_id in changed or seen.state != TaskState.DONE or seen.release is not None:
+        pending = {
+            task_id
+            for task_id, seen in state.seen.items()
+            if task_id not in changed and seen.state == TaskState.DONE and seen.release is None
+        }
+        visible = {task.id: task for task in self.tracker().list()} if pending else {}
+        for task_id in pending:
+            task = visible.get(task_id)
+            if task is None or task.state != TaskState.DONE:
                 continue
-            release = self.resolver.release(seen.references)
+            seen = state.seen[task_id]
+            release = self.resolver.release(task.references)
             if release is not None:
                 seen.release = release.version
                 status = released_text(release)
-                found.append(Change(title=seen.title, status=status, key=f"issues:{task_id}:release:{release.version}"))
+                found.append(Change(title=task.title, status=status, key=f"issues:{task_id}:release:{release.version}"))
         state.checked_at = now
         _write(self._watch_file, state)
         noticed = sum(1 for change in found if notifications is not None and _notify(notifications, change))

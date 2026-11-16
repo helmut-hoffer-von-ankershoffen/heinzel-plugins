@@ -1,36 +1,33 @@
 ## Audience
-People who want a simple way to report a problem or request an improvement and follow it through to a release, provided they have access to a writable Beads database.
+
+People who want to report a problem or request an improvement and follow its progress. Sending requires a configured writable tracker.
 
 ## Outcome
-Show how Issues turns a report into a small, understandable journey: received, being worked on, done, and released. Make the writable tracker prerequisite clear, and show that the same reports are available in the app and CLI.
+
+Show how to find a report, read its history, and check progress in Issues, Today, or the CLI. The view also exposes status filtering and sorting, so the overview should show both controls.
 
 ## Scenes
-1. **Issues page, light:** Three fictional reports span the three states; the released report and the composer make both follow-up and reporting visible.
-2. **Report history, light:** Open the fictional weather report to show its description, attachment name, and progress through release. This is a meaningful expanded state of the same view, not a duplicate capture.
-3. **Today, dark:** Show the two open fictional reports in the Core-rendered widget; the completed report is absent.
-4. **CLI list:** Show the same fictional reports and plain-language statuses using the actual `issues list` operation.
 
-The existing plan already tells this story, so its scenes and bootstrap are retained. The light and dark appearances must actually be applied during capture.
+1. **Issues page, light.** Show the status filter, sort control, three fictional reports with sent dates, and the composer. The fixture represents received, being worked on, and released in 0.9.27.
+2. **Report history, light.** Open the fictional weather report. Show its description, attachment name, progress through release, and the report ID and last-updated date when visible in the expanded state.
+3. **Today, dark.** Show the two open fictional reports in the Core-rendered widget. The completed weather report should be absent.
+4. **CLI list.** Run the real Issues list command against this same fictional tracker and show the reports and their statuses.
 
 ## Fictional fixtures
-`docs/screenshot_fixture.py` supplies an in-memory tracker with three fictional tasks, a fictional attachment name and a temporary release clone containing the fictional 0.9.27 release. It does not use a Beads database. Its `Demo.submit` deliberately refuses sends, so captures must not claim that a report was submitted successfully. The fixture creates its temporary clone only during explicit capture; it was not run for this plan.
 
-## Privacy pitfalls
-Normal presentation fictionalization maps verified owning-interpreter paths to `/demo-profile/.venv`, and only the verified whole hostname detail in the genuine Doctor row to `demo-host`. These mappings change no SDK health status or remaining detail and establish no privacy acceptance. Unknown identities still fail, and independent review must inspect every image and transcript.
+The screenshot fixture supplies three in-memory tasks, the fictional attachment name today-rain.png, and a temporary Git history containing the fictional 0.9.27 release. It does not contact Beads. The fixture refuses submission and does not implement closing reports. These scenes establish presentation and navigation. Successful submission, creator-only closing, and account isolation require separate evidence.
 
-The composer displays the local login and configured labels (`src/heinzel_issues/views/index.js`, `sentAs`; `src/heinzel_issues/_service.py`, `overview`). Treat an unexpected sender, label, path, hostname, account, notification, or other identifying detail as a capture failure; do not assume the fictional task data sanitizes surrounding Core UI. Dismiss Doctor only where the existing optional step finds it, and inspect any remaining content. Never use forged HTML or recast terminal output as feature UI.
+## Privacy checks
+
+Review every full image and transcript. The composer should describe the authenticated workspace identity without rendering its opaque principal ID. Inspect surrounding Core UI and console text for unexpected account names, identifying labels, hostnames, local paths, credentials, notifications, or real report content. Only the existing verified presentation mappings for temporary interpreter paths and the Doctor hostname detail are expected. Check the appearance and all visible content after the optional Doctor dismissal.
 
 ## Acceptance criteria
-- Capture the genuine Issues view and its expanded report, the genuine Today widget, and the real CLI result using the declared route and fixture. Reject duplicate captures and caption-only variations.
-- Verify all three statuses and the fictional release in the Issues view; verify the opened report's body, attachment name and history; verify Today contains open reports and excludes the done report.
-- Verify the CLI result reflects the fixture, with no claim that a real tracker was contacted. Each caption identifies demo or fictional data.
-- Verify light and dark appearances visually, and independently inspect every image and transcript for privacy before publication. Unknown identities fail review.
-- The editable TOML below has been checked against the supplied field and action rules by inspection; no parser, product code, capture, or network call was run, so runtime capture and parser validation remain outstanding.
+
+Use the declared route and fixture for the genuine panel, expanded report, Today widget, and CLI. Check the filter and sort controls, the three statuses and release, the opened report details, and exclusion of the completed item from Today. Verify the actual light and dark appearances. Check that each caption identifies fictional data and that the four captures document distinct states or surfaces. Capture approval requires a separate image and transcript review.
 
 ## Source-bound UI surface inventory
-- `pyproject.toml`, `[project.entry-points."heinzel.modules"]`: the declared plugin entry point is `issues = "heinzel_issues"`. `src/heinzel_issues/_contract.py`, `ENTRY_POINTS` and connector loading, also define an extension group for external tracker connectors; no external provider interface is supplied here.
-- `src/heinzel_issues/__init__.py`, `module.nav`, `module.action` and `module.view`: the genuine Issues feature view is `requests`, backed by `list`; `src/heinzel_issues/_service.py`, `ROUTE`, declares `/?panel=issues:requests`. `src/heinzel_issues/views/index.js` implements the list, expanded history, composer and unconfigured setup form. `connect` and `send` invoke declared operations through Core confirmation; the provided fixture cannot demonstrate a successful send.
-- `src/heinzel_issues/__init__.py`, `today`: Core renders a Today list widget for up to eight open reports, with navigation to the Issues view. The `watch` job can produce local notifications; the supplied fixture and plan do not establish a captured notification state.
-- `src/heinzel_issues/__init__.py`, `list`, `submit`, `connect`, and `show`: operations expose CLI results and may also contribute Core operation and confirmation surfaces. `setup` contributes a Core setup flow and `tracking` contributes health/Doctor checks. These are not evidence that Issues is terminal-only. No channel, info, or footer contribution is declared in the supplied module.
-- The Beads connector invokes a local provider (`src/heinzel_issues/_beads.py`); no external provider UI is declared. `docs/CONTRACT.md` describes possible third-party connectors, not screens available in this source.
-- `README.md` says normal app sending works after setup, while the screenshot fixture expressly disables sending. It also says reports are limited to the local login; the in-memory fixture returns its fixed tasks directly and does not prove that privacy boundary. These differences must remain visible in review, rather than being treated as acceptance evidence.
+
+- The pyproject module entry point loads heinzel_issues. The module registers Issues navigation and the requests view, backed by the list operation and rendered by views/index.js. The renderer also owns the tracker setup form, composer, filter and sort controls, report history, and eligible creator-close action.
+- The module registers list, show, submit, close, and connect operations for app and CLI use, with Core operation surfaces where declared. Setup and tracking add Core onboarding and Doctor checks.
+- The Today contribution renders open reports. The watcher may deliver local notifications. The plan does not capture notifications or setup and makes no claim about an external tracker interface.
+- The Beads connector scopes new reports by authenticated principal, with installation-owner-only legacy reads. Current Core sessions on one installation resolve to the same owner. The fixed in-memory rows do not exercise those access checks or real tracker behavior.

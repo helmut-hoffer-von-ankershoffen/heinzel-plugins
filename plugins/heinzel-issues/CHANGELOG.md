@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.2.3
+
+- Filter and sort reports, see sent and updated dates, and close your own new Beads reports.
+- Bind new Beads reports to the authenticated workspace identity. Earlier reports remain visible to the workspace
+  owner; they are not reassigned and cannot be closed from Issues.
+
 ## 0.2.2
 
 - Give the Issues sidebar consistent horizontal spacing, including on narrow screens.

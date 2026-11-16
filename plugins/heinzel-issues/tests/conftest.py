@@ -155,14 +155,19 @@ HOSTILE = [
 
 def _probes(kernel, folder, bd):
     """What a reviewer tried against a real database: option-like text, other work, other people, no login."""
+    from heinzel import CurrentUser  # noqa: PLC0415 - after the plugin is importable
+
     from heinzel_issues import BeadsBoard, IssuesService  # noqa: PLC0415 - after the plugin is importable
+    from heinzel_issues._identity import authenticated  # noqa: PLC0415 - after the plugin is importable
 
     cli = build(kernel)
     service = kernel.resolve(IssuesService)
     board = BeadsBoard(service.settings.beads)
+    current = kernel.resolve(CurrentUser)
     for text in HOSTILE:
-        through_the_board = service.submit(f"{text}\n{text}", board=board)
-        through_the_connector = service.submit(text)
+        with current.local("cli"), authenticated(current):
+            through_the_board = service.submit(f"{text}\n{text}", board=board)
+            through_the_connector = service.submit(text)
         assert through_the_board.title == through_the_connector.title == text.splitlines()[0]
         assert through_the_board.body == f"{text}\n{text}"
         board.note(through_the_board.details.id, text, "builder")

@@ -3,13 +3,79 @@
 import json
 
 import pytest
-from heinzel import Config
+from heinzel import CallIdentity, Config, CurrentUser, Principal
 from heinzel.heads.cli import build
 from typer.testing import CliRunner
 
 import heinzel_issues
+from heinzel_issues import IssuesService, TrackerError
+from heinzel_issues._beads import reporter
+from heinzel_issues._identity import authenticated
 
 pytestmark = pytest.mark.integration
+
+
+def test_authenticated_creators_are_separated_and_only_the_creator_closes(issues_kernel, folder, fake_bd, bd_run):
+    kernel = issues_kernel(folder, fake_bd)
+    service = kernel.resolve(IssuesService)
+    current = kernel.resolve(CurrentUser)
+    owner = current.owner()
+    other = Principal("u-" + "a" * 32)
+
+    def identity(principal):
+        return CallIdentity(principal, "web-session", "fixture", "hz-web", frozenset({"private:read", "private:write"}))
+
+    with current.using(identity(owner)), authenticated(current):
+        own = service.submit("First fictional report")
+        assert own.can_close
+    read_only = CallIdentity(owner, "web-device", "fixture", "hz-web", frozenset({"private:read"}))
+    with current.using(read_only), authenticated(current):
+        assert not service.get(own.details.id).can_close
+        with pytest.raises(TrackerError, match="cannot close"):
+            service.close(own.details.id)
+        with pytest.raises(TrackerError, match="cannot submit"):
+            service.submit("Another fictional report")
+    with current.using(identity(other)), authenticated(current):
+        assert service.overview().reports == []
+        with pytest.raises(TrackerError, match="There is no item"):
+            service.get(own.details.id)
+        with pytest.raises(TrackerError, match="There is no item"):
+            service.close(own.details.id)
+        theirs = service.submit("Second fictional report")
+    with current.using(identity(owner)), authenticated(current):
+        assert [r.details.id for r in service.overview().reports] == [own.details.id]
+        with pytest.raises(TrackerError, match="There is no item"):
+            service.close(theirs.details.id)
+        closed = service.close(own.details.id)
+        assert closed.state == "done" and not closed.can_close
+    assert json.loads(bd_run([fake_bd, "show", theirs.details.id, "--json"], folder))[0]["status"] == "open"
+
+
+def test_owner_can_read_legacy_report_but_cannot_close_it(issues_kernel, folder, fake_bd, bd_run):
+    kernel = issues_kernel(folder, fake_bd)
+    service = kernel.resolve(IssuesService)
+    current = kernel.resolve(CurrentUser)
+    created = json.loads(
+        bd_run(
+            [fake_bd, "create", "--title=Legacy fixture", "--labels=heinzel-issues", f"--actor={reporter()}", "--json"],
+            folder,
+        )
+    )
+    task_id = created["id"] if isinstance(created, dict) else created[0]["id"]
+    with current.local("cli"), authenticated(current):
+        assert not service.get(task_id).can_close
+        with pytest.raises(TrackerError, match="There is no item"):
+            service.close(task_id)
+
+
+def test_close_is_available_through_the_authenticated_cli(issues_kernel, folder, fake_bd):
+    cli = build(issues_kernel(folder, fake_bd))
+    sent = CliRunner().invoke(cli, ["issues", "submit", "A fictional report", "--json"])
+    assert sent.exit_code == 0, sent.output
+    task_id = json.loads(sent.stdout)["details"]["id"]
+    closed = CliRunner().invoke(cli, ["issues", "close", task_id, "--json"])
+    assert closed.exit_code == 0, closed.output
+    assert json.loads(closed.stdout)["state"] == "done"
 
 
 @pytest.fixture
@@ -66,3 +132,35 @@ def test_off_by_default_everywhere(make_kernel):
     assert {"name": "tracker", "status": "up", "detail": "off; set it up on the Issues page", "fix": ""} in doctor[
         "checks"
     ]["issues"]
+
+
+def test_close_rejects_prefix_and_duplicate_rows(issues_kernel, folder, fake_bd, monkeypatch):
+    kernel = issues_kernel(folder, fake_bd)
+    service = kernel.resolve(IssuesService)
+    current = kernel.resolve(CurrentUser)
+    with current.local("cli"), authenticated(current):
+        report = service.submit("Fictional report")
+        tracker = service.tracker()
+        row = tracker.owned(report.details.id)
+        monkeypatch.setattr(tracker, "rows", lambda _args: [row])
+        with pytest.raises(TrackerError, match="There is no item"):
+            tracker.close_own(report.details.id[:-1])
+        monkeypatch.setattr(tracker, "rows", lambda _args: [row, row])
+        with pytest.raises(TrackerError, match="There is no item"):
+            tracker.close_own(report.details.id)
+
+
+def test_legacy_row_cannot_confirm_new_creator(issues_kernel, folder, fake_bd, bd_run):
+    kernel = issues_kernel(folder, fake_bd)
+    service = kernel.resolve(IssuesService)
+    current = kernel.resolve(CurrentUser)
+    created = json.loads(
+        bd_run(
+            [fake_bd, "create", "--title=Legacy fixture", "--labels=heinzel-issues", f"--actor={reporter()}", "--json"],
+            folder,
+        )
+    )
+    task_id = created["id"] if isinstance(created, dict) else created[0]["id"]
+    with current.local("cli"), authenticated(current):
+        with pytest.raises(TrackerError, match="confirm the report owner"):
+            service.tracker().created(task_id, current.context().principal.id)

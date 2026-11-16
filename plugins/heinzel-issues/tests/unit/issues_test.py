@@ -4,7 +4,7 @@ from datetime import UTC, date, datetime, timedelta
 from pathlib import Path
 
 import pytest
-from heinzel import Config, HeinzelError, Settings
+from heinzel import Config, CurrentUser, HeinzelError, Settings
 from heinzel.kernel import user_config_dir
 
 from heinzel_issues import (
@@ -22,12 +22,20 @@ from heinzel_issues import (
     state_of,
 )
 from heinzel_issues._beads import BeadsSettings
+from heinzel_issues._identity import authenticated
 from heinzel_issues._releases import references
 from heinzel_issues._service import history, read_attachment, title_of, upload
 
 pytestmark = pytest.mark.unit
 
 T0 = datetime(2026, 11, 7, 9, 0, tzinfo=UTC)
+
+
+@pytest.fixture(autouse=True)
+def caller(tmp_path):
+    current = CurrentUser(tmp_path / "identity")
+    with current.local("cli"), authenticated(current):
+        yield
 
 
 @pytest.mark.parametrize(
@@ -105,8 +113,7 @@ def test_unmerged_or_untagged_work_has_no_release():
 
 def test_every_pull_request_must_ship_and_the_latest_release_counts():
     git = FakeGit(
-        {1: "a", 2: "b"},
-        {"a": ["v0.9.20 2026-11-01T00:00:00+00:00"], "b": ["v0.9.27 2026-11-07T00:00:00+00:00"]},
+        {1: "a", 2: "b"}, {"a": ["v0.9.20 2026-11-01T00:00:00+00:00"], "b": ["v0.9.27 2026-11-07T00:00:00+00:00"]}
     )
     assert resolver(git).release("#1 and #2").version == "0.9.27"
     assert resolver(FakeGit({1: "a"}, {"a": ["v0.9.20 2026-11-01T00:00:00+00:00"]})).release("#1 and #2") is None
@@ -388,3 +395,21 @@ def test_a_file_from_the_app_follows_the_rules_of_a_file_from_disk():
         upload("blob.bin", "//79/A==")
     with pytest.raises(TrackerError, match="larger than 5 MiB"):
         upload("big.txt", "QUFB" * (5 * 1024 * 1024 // 3 + 1))
+
+
+def test_watch_does_not_announce_release_for_no_longer_visible_report(tmp_path):
+    tracker = FakeTracker()
+    tracker.submit("Private fictional report", "Private fictional report")
+    tracker.move("t-1", TaskState.DONE, "Fixed in #562")
+    git = FakeGit({}, {})
+    issues = service(tmp_path, tracker, git)
+    issues.clock = lambda: T0
+    notices = Notices()
+    issues.watch(notices)
+    del tracker.tasks["t-1"]
+    git.merged[562] = "abc"
+    git.tags["abc"] = ["v0.9.27 2026-11-07T10:00:00+01:00"]
+    issues.resolver = ReleaseResolver([CORE], git=git)
+    issues.clock = lambda: T0 + timedelta(hours=1)
+    assert issues.watch(notices).changes == []
+    assert notices.sent == []

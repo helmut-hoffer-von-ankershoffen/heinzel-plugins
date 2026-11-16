@@ -11,7 +11,7 @@ VIEW = Path(__file__).resolve().parents[2] / "src" / "heinzel_issues" / "views" 
 
 # A React stand-in: elements are plain objects, `useState` hands out preset values and records what is set.
 HARNESS = """
-import createView, { day, encodeFile, sentAs, statusLine } from %(view)s;
+import createView, { day, encodeFile, orderedReports, sentAs, statusLine } from %(view)s;
 const preset = [], set = [], calls = [];
 const React = {
   createElement: (type, props, ...children) => ({ type, props: props || {}, children: children.flat() }),
@@ -44,7 +44,7 @@ const submit = async (action, values) => {
 const out = {};
 if (scenario.name === "send") {
   const file = scenario.file ? new File([scenario.file], "shot.txt", { type: "text/plain" }) : null;
-  preset.push("Dark mode loses the focus ring", file, idle);
+  preset.push("all", "newest", "Dark mode loses the focus ring", file, idle);
   const data = { ready: true, reports: [], sender: "mira", labels: ["heinzel-issues"] };
   const tree = expand(Issues({ data, submit }));
   out.text = text(tree);
@@ -57,16 +57,29 @@ if (scenario.name === "send") {
   out.path = all(tree, (node) => node.type === "input")[0].props.value;
   await all(tree, (node) => node.type === "form")[0].props.onSubmit({ preventDefault() {} });
 } else if (scenario.name === "open") {
-  preset.push(scenario.open);
+  preset.push("all", "newest", scenario.open);
   const tree = expand(Issues({ data: { ready: true, reports: [scenario.report] }, submit }));
   const row = all(tree, (node) => node.props.className === "hzi-row")[0];
   out.expanded = row.props["aria-expanded"];
   out.text = text(all(tree, (node) => node.type === "li")[0]);
   row.props.onClick();
+} else if (scenario.name === "close") {
+  preset.push("all", "newest", true, idle);
+  const tree = expand(Issues({ data: { ready: true, reports: [scenario.report] }, submit }));
+  const button = all(tree, (node) => node.type === "button" && text(node) === "Close report");
+  out.closeCount = button.length;
+  if (button.length) await button[0].props.onClick();
 } else if (scenario.name === "helpers") {
   out.day = [day("2026-11-07T08:33:55Z"), day(null), day("soon")];
   out.sent = [sentAs("mira", ["heinzel-issues", "intake"]), sentAs("mira", [])];
   out.line = statusLine({ state: "working", status: "Being worked on" });
+  const items = [
+    {title: "Zebra", state: "done", submitted_at: "2026-01-02T00:00:00Z"},
+    {title: "Apple", state: "received", submitted_at: "2026-01-01T00:00:00Z"},
+    {title: "Birch", state: "done", submitted_at: "2026-01-03T00:00:00Z"},
+  ];
+  out.ordered = [orderedReports(items, "all", "newest"), orderedReports(items, "done", "oldest"),
+    orderedReports(items, "all", "title")].map((list) => list.map((item) => item.title));
   out.encoded = await encodeFile(new File(["hello"], "note.txt"));
   out.large = await encodeFile({ name: "big.png", size: 3 * 1024 * 1024 }).catch((error) => error.message);
   out.old = (() => { try { createView({ abi: 2 }); } catch (error) { return error.message; } })();
@@ -145,6 +158,8 @@ REPORT = {
     "body": "The footer clock jumps\nIt moves by a pixel.",
     "state": "done",
     "status": "Released in 0.9.27 on 7 Nov 2026",
+    "submitted_at": "2026-11-05T09:00:00Z",
+    "updated_at": "2026-11-06T10:00:00Z",
     "attachments": ["shot.png"],
     "history": [
         {"label": "Sent", "at": "2026-11-05T09:00:00Z"},
@@ -168,14 +183,27 @@ def test_a_report_opens_to_what_was_sent_and_its_history(tmp_path):
         assert words in opened["text"]
     assert "Released in 0.9.27" in opened["text"]
     assert opened["text"].count("The footer clock jumps") == 1  # the title is not repeated in what was sent
-    assert "demo-1" not in opened["text"]  # the tracker's id stays behind the view
+    assert "Reference: demo-1" in opened["text"]
+    assert "Last updated: 6 Nov 2026" in opened["text"]
     assert opened["set"] == [False]
+
+
+def test_only_closable_report_offers_the_close_action(tmp_path):
+    report = {**REPORT, "can_close": True}
+    result = render(tmp_path, "close", report=report)
+    assert result["closeCount"] == 1
+    assert result["calls"] == [["close", {"id": report["details"]["id"]}]]
+    assert result["set"][-1]["message"] == "Report closed."
+    assert render(tmp_path, "close", report={**report, "can_close": False})["closeCount"] == 0
+    refused = render(tmp_path, "close", report=report, fail="Cancelled")
+    assert refused["set"][-1] == {"busy": False, "failed": True, "message": "Cancelled"}
 
 
 def test_dates_marks_files_and_the_states_without_data(tmp_path):
     result = render(tmp_path, "helpers")
     assert result["day"] == ["7 Nov 2026", "", ""]
     assert result["line"] == "◐ Being worked on"
+    assert result["ordered"] == [["Birch", "Zebra", "Apple"], ["Zebra", "Birch"], ["Apple", "Birch", "Zebra"]]
     assert result["sent"] == [
         "Sent to the tracker under your login name mira, with the labels heinzel-issues, intake.",
         "Sent to the tracker under your login name mira.",

@@ -19,7 +19,7 @@ Being worked on
 
 Nothing needs you right now. Ask anything below.
 
-v0.9.48
+v0.9.50
 Updates, off
 0
 System health, warning
@@ -27,16 +27,32 @@ System health, warning
 Daemon not installed, off
 Chat
 Issues
+Status
+All statuses
+Received
+Being worked on
+Done
+Sort
+Newest first
+Oldest first
+Title
 Add a dark theme to the printed agenda
+Sent 8 Nov 2026
 ○ Received
 The footer clock jumps by a pixel every minute
+Sent 6 Nov 2026
 ◐ Being worked on
 Weather shows yesterday's rain after waking up
+Sent 4 Nov 2026
 ✓ Released in 0.9.27 on 7 Nov 2026
 
 After the lid was closed overnight, Today still said rain until I reloaded. A screenshot is attached.
 
 Sent with: today-rain.png
+
+Reference: demo-1
+
+Last updated: 5 Nov 2026
 
 Sent
 4 Nov 2026
@@ -51,7 +67,7 @@ Screenshot or file (optional)
 
 A PNG or JPEG image or a text file, up to 2 MiB.
 
-Sent to the tracker under your login name mira, with the labels heinzel-issues.
+Sent to the tracker under your authenticated workspace identity, with the labels heinzel-issues.
 
 Send
 Audio
