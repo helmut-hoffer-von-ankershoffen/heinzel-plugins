@@ -16,8 +16,19 @@ ROOT = Path(__file__).resolve().parents[2]
 
 @pytest.mark.timeout(600)
 def test_installed_resource_meters(tmp_path):
-    environment = dict(os.environ)
-    environment["HZ_PLUGINS_ENABLED"] = "true"
+    environment = {key: value for key, value in os.environ.items() if key in {"PATH", "LANG", "LC_ALL", "TMPDIR"}}
+    environment |= {
+        "HOME": str(tmp_path),
+        "XDG_CONFIG_HOME": str(tmp_path / "xdg-config"),
+        "HZ_CONFIG_HOME": str(tmp_path / "config"),
+        "HZ_DATA_DIR": str(tmp_path / "data"),
+        "HZ_CACHE_DIR": str(tmp_path / "cache"),
+        "HZ_STATE_DIR": str(tmp_path / "state"),
+        "HZ_LOG_DIR": str(tmp_path / "log"),
+        "HZ_SYSTEM_DAEMON__UNIT_DIR": str(tmp_path / "units"),
+        "HZ_SYSTEM_CREDENTIAL__BACKEND": "environment",
+        "HZ_PLUGINS_ENABLED": "true",
+    }
     backend = subprocess.Popen(
         [sys.executable, "-m", "heinzel", "ui", "--no-browser", "--port", "0"],
         env=environment,

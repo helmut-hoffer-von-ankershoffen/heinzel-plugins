@@ -15,6 +15,14 @@ try {
     await page.setViewportSize({width,height:900});
     await page.evaluate(async () => {await document.fonts.ready; await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));});
     const more = page.getByRole("button",{name:"More status items",exact:true});
+    // Splash completion does not mean asynchronous status loading and footer measurement have finished.
+    // Only this item's overflow placement justifies opening More; an absent item is not overflow.
+    await page.waitForFunction(() => {
+      const visible = (node) => node && node.getBoundingClientRect().width > 0 && getComputedStyle(node).visibility === "visible";
+      const control = document.querySelector('[data-footer-content="resource:machine"] button');
+      const overflow = document.querySelector('[data-footer-part="resource:machine"][data-footer-hidden="overflow"]');
+      return visible(control) || (overflow && visible(document.querySelector('button[aria-label="More status items"]')));
+    });
     if (!await control.isVisible()) await more.click();
     await control.waitFor({state:"visible"});
     assert.match(await control.getAttribute("aria-label"), /CPU.*Memory.*Load/);
