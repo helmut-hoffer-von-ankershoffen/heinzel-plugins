@@ -76,7 +76,14 @@ try {
   assert.ok(box && box.y >= 0 && box.y + box.height <= 844, "last location is visible after scrolling");
   // The other workspace panels also follow the page, and switching preserves their contents.
   await page.getByRole("tab", { name: "Chat", exact: true }).click();
-  const composer = page.getByRole("textbox", { name: "Your message" });
+  const chat = page.getByRole("complementary", { name: "Chat", exact: true });
+  const name = chat.getByLabel("What do you call it?");
+  const composer = chat.getByRole("textbox", { name: /^Message / });
+  await name.or(composer).waitFor();
+  if (await name.isVisible()) {
+    await name.fill("Clock test Heinzel");
+    await chat.getByRole("button", { name: "Start", exact: true }).click();
+  }
   await composer.scrollIntoViewIfNeeded();
   await composer.tap();
   await composer.fill("Draft remains available");
