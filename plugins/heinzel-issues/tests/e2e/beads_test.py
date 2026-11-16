@@ -1,11 +1,29 @@
 """The same journey against a real temporary Beads database, when `bd` is installed."""
 
+import json
+
 import pytest
 from heinzel import HeinzelError
+from heinzel.heads.cli import build
+from typer.testing import CliRunner
 
 from heinzel_issues import BeadsBoard, BeadsSettings
 
 pytestmark = pytest.mark.e2e
+
+
+def test_a_creator_can_close_a_report_in_real_beads(issues_kernel, real_bd, bd_run, tmp_path):
+    folder = tmp_path / "board"
+    folder.mkdir()
+    bd_run(["git", "init", "-q"], folder)
+    bd_run([real_bd, "init", "--prefix", "demo", "--stealth", "--skip-agents"], folder)
+    cli = build(issues_kernel(folder, real_bd))
+    sent = CliRunner().invoke(cli, ["issues", "submit", "A fictional report", "--json"])
+    assert sent.exit_code == 0, sent.output
+    task_id = json.loads(sent.stdout)["details"]["id"]
+    closed = CliRunner().invoke(cli, ["issues", "close", task_id, "--json"])
+    assert closed.exit_code == 0, closed.output
+    assert json.loads(closed.stdout)["state"] == "done"
 
 
 def test_submit_work_finish_and_release_with_real_beads(issues_kernel, real_bd, bd_run, journey, tmp_path):

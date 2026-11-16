@@ -55,6 +55,7 @@ class Task(BaseModel):
     body: str = Field(default="", description="The full text as submitted.")
     state: TaskState = Field(description="Received, being worked on, or done.")
     status: str = Field(description="The tracker's own status word, for experts only.")
+    can_close: bool = Field(default=False, description="Whether the authenticated creator can close this report.")
     created_at: AwareDatetime = Field(description="When it was submitted.")
     updated_at: AwareDatetime = Field(description="When the tracker last changed it.")
     closed_at: AwareDatetime | None = Field(default=None, description="When it was done, if it is.")

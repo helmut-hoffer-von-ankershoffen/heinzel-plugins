@@ -12,6 +12,7 @@ from pathlib import Path
 from heinzel import (
     Check,
     ConfigEditor,
+    CurrentUser,
     HeinzelError,
     Kernel,
     ListEntry,
@@ -28,15 +29,8 @@ from rich.table import Table
 from rich.text import Text
 
 from heinzel_issues._beads import BeadsBoard, BeadsSettings, BeadsTracker, state_of
-from heinzel_issues._contract import (
-    ENTRY_POINTS,
-    STATE_LABELS,
-    Attachment,
-    Task,
-    TaskState,
-    TaskTracker,
-    TrackerError,
-)
+from heinzel_issues._contract import ENTRY_POINTS, STATE_LABELS, Attachment, Task, TaskState, TaskTracker, TrackerError
+from heinzel_issues._identity import authenticated
 from heinzel_issues._releases import Release, ReleaseResolver, ReleaseSource, released_text
 from heinzel_issues._service import (
     NONE,
@@ -69,6 +63,7 @@ module.view(
     actions={
         "connect": RunOperation(operation="connect", inputs=("path", "labels", "releases")),
         "send": RunOperation(operation="submit", inputs=("text", "file_name", "file_data")),
+        "close": RunOperation(operation="close", inputs=("id",)),
     },
 )
 
@@ -94,14 +89,16 @@ def _fail(error: TrackerError) -> HeinzelError:
 
 
 @module.operation(name="list", private=True, render=_render, audience="everyday")
-def list_(service: IssuesService) -> Reports:
+def list_(service: IssuesService, current: CurrentUser) -> Reports:
     """Show what you reported or requested: received, being worked on, or done and in which release."""
-    return service.overview()
+    with authenticated(current):
+        return service.overview()
 
 
 @module.operation(read_only=False, private=True, render=_render_one, audience="everyday")
 def submit(
     service: IssuesService,
+    current: CurrentUser,
     text: str,
     attachment: list[Path] | None = None,
     file_name: str = "",
@@ -119,13 +116,16 @@ def submit(
         service.refresh()
         uploads = [upload(file_name, file_data)] if file_data else []
         board = BeadsBoard(service.settings.beads) if service.settings.tracker == "beads" else None
-        return service.submit(text, attachment or [], board=board, uploads=uploads)
+        with authenticated(current):
+            return service.submit(text, attachment or [], board=board, uploads=uploads)
     except TrackerError as error:
         raise _fail(error) from None
 
 
 @module.operation(read_only=False, private=True, render=_render)
-def connect(service: IssuesService, editor: ConfigEditor, path: str, labels: str = "", releases: str = "") -> Reports:
+def connect(
+    service: IssuesService, editor: ConfigEditor, current: CurrentUser, path: str, labels: str = "", releases: str = ""
+) -> Reports:
     """Set up issue tracking: send reports and requests to the Beads database in a folder on this computer.
 
     `labels` are all the further labels for every new report (empty: none), and `releases` are git clones whose
@@ -135,30 +135,43 @@ def connect(service: IssuesService, editor: ConfigEditor, path: str, labels: str
         HeinzelError: If the folder has no Beads database or it does not answer; nothing is saved then.
     """
     try:
-        return service.connect(editor, path, labels, releases)
+        with authenticated(current):
+            return service.connect(editor, path, labels, releases)
     except TrackerError as error:
         raise _fail(error) from None
 
 
 @module.operation(private=True, render=_render_one)
-def show(service: IssuesService, id: str) -> Report:  # noqa: A002 - the tracker's word for it
+def show(service: IssuesService, current: CurrentUser, id: str) -> Report:  # noqa: A002 - the tracker's word for it
     """Show one of your reports or requests by its tracker id, with the tracker's details.
 
     Raises:
         HeinzelError: If it cannot be read.
     """
     try:
-        return service.get(id)
+        with authenticated(current):
+            return service.get(id)
+    except TrackerError as error:
+        raise _fail(error) from None
+
+
+@module.operation(read_only=False, private=True, render=_render_one, audience="everyday")
+def close(service: IssuesService, current: CurrentUser, id: str) -> Report:  # noqa: A002 - the tracker's word
+    """Close a report created by the currently authenticated workspace identity."""
+    try:
+        with authenticated(current):
+            return service.close(id)
     except TrackerError as error:
         raise _fail(error) from None
 
 
 @module.job(schedule="*/5 * * * *", name="watch", timeout="2m")
-def watch(service: IssuesService, kernel: Kernel) -> JsonValue:
+def watch(service: IssuesService, kernel: Kernel, current: CurrentUser) -> JsonValue:
     """Every five minutes, notice when a report is being worked on, is done, or is released."""
     notifications = kernel.resolve(Notifications) if kernel.provides(Notifications) else None
     try:
-        return service.watch(notifications).model_dump(mode="json")
+        with authenticated(current):
+            return service.watch(notifications).model_dump(mode="json")
     except TrackerError as error:
         raise _fail(error) from None
 
@@ -186,11 +199,12 @@ def today(result: Reports) -> ListWidget | None:
 
 
 @module.health
-def tracking(service: IssuesService) -> list[Check]:
+def tracking(service: IssuesService, current: CurrentUser) -> list[Check]:
     """Off is fine; a chosen tracker must answer."""
     if not service.enabled:
         return [Check(name="tracker", status=Status.UP, detail="off; set it up on the Issues page")]
-    result = service.overview()
+    with authenticated(current):
+        result = service.overview()
     if not result.ready:
         return [Check(name="tracker", status=Status.DOWN, detail=str(result.problem), fix=SETUP)]
     detail = f"{service.settings.tracker}: {len(result.reports)} reports and requests"

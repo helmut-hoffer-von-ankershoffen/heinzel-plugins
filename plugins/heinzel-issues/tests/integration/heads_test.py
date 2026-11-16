@@ -6,7 +6,7 @@ import tomllib
 import anyio
 import pytest
 from fastapi.testclient import TestClient
-from heinzel import Config, ListWidget
+from heinzel import Config, CurrentUser, ListWidget
 from heinzel.heads import mcp, web
 from heinzel.heads.cli import build as build_cli
 from heinzel.kernel import user_config_dir
@@ -15,6 +15,7 @@ from typer.testing import CliRunner
 
 import heinzel_issues
 from heinzel_issues import IssuesService, today, watch
+from heinzel_issues._identity import authenticated
 
 pytestmark = pytest.mark.integration
 
@@ -60,18 +61,25 @@ def board(tmp_path):
 def test_health_today_and_the_view_follow_the_tracker(issues_kernel, board, fake_bd, bd_run):
     kernel = issues_kernel(board, fake_bd)
     service = kernel.resolve(IssuesService)
-    assert today(service.overview()) is None  # nothing sent yet
-    report = service.submit("The footer clock jumps")
-    widget = today(service.overview())
+    current = kernel.resolve(CurrentUser)
+    with current.local("cli"), authenticated(current):
+        assert today(service.overview()) is None  # nothing sent yet
+        report = service.submit("The footer clock jumps")
+        widget = today(service.overview())
     assert isinstance(widget, ListWidget)
     assert widget.items[0].text == "The footer clock jumps"
     assert widget.items[0].detail == "Received"
     bd_run([fake_bd, "close", report.details.id, "--reason", "Fixed in #7"], board)
-    assert today(service.overview()) is None  # all done
+    with current.local("cli"), authenticated(current):
+        assert today(service.overview()) is None  # all done
 
-    checks = heinzel_issues.tracking(service)
+    with current.local("cli"):
+        checks = heinzel_issues.tracking(service, current)
     assert checks[0].status == "up"
     assert checks[0].detail == "beads: 1 reports and requests"
+    doctor = CliRunner().invoke(build_cli(kernel), ["system", "doctor", "--json"])
+    assert doctor.exit_code == 0, doctor.output
+    assert json.loads(doctor.stdout)["checks"]["issues"][0]["status"] == "up"
 
     token = "t" * 43
     ui = TestClient(web.build(kernel, port=8000, token=token, static=None), base_url="http://127.0.0.1:8000")
@@ -79,7 +87,7 @@ def test_health_today_and_the_view_follow_the_tracker(issues_kernel, board, fake
     view = next(entry for entry in views if entry["id"] == "issues:requests")
     assert view["problem"] is None
     assert view["source"]["path"] == "/issues/list"
-    assert set(view["actions"]) == {"connect", "send"}  # nothing opens a terminal
+    assert set(view["actions"]) == {"connect", "send", "close"}  # nothing opens a terminal
     assert not [effect for effect in view["actions"].values() if effect["kind"] == "command"]
     assert "hz " not in view["fallback"]
     send = view["actions"]["send"]
@@ -145,8 +153,12 @@ def test_the_app_sets_it_up_sends_a_file_and_shows_the_history_without_a_termina
     assert report["body"] == text
     assert report["attachments"] == ["shot.png"]
     assert [step["label"] for step in report["history"]] == ["Sent", "Being worked on"]
-    bd_run([fake_bd, "close", task_id, "--reason", "done"], board)
+    assert report["can_close"] is True
+    assert ui.post("/api/issues/close", json={"id": task_id}).status_code != 200
+    closed = ui.post("/api/issues/close", headers=auth, json={"id": task_id})
+    assert closed.status_code == 200, closed.text
     report = ui.get("/api/issues/list", headers=auth).json()["reports"][0]
+    assert report["can_close"] is False
     assert [step["label"] for step in report["history"]] == ["Sent", "Being worked on", "Done"]
     assert report["history"][-1]["at"] is not None
 
@@ -189,8 +201,11 @@ def test_every_operation_is_a_command_and_a_tool_of_your_own_agent_only(issues_k
 
 
 def test_a_broken_tracker_is_down_in_health(issues_kernel, board, tmp_path):
-    service = issues_kernel(board, str(tmp_path / "no-bd")).resolve(IssuesService)
-    check = heinzel_issues.tracking(service)[0]
+    kernel = issues_kernel(board, str(tmp_path / "no-bd"))
+    service = kernel.resolve(IssuesService)
+    current = kernel.resolve(CurrentUser)
+    with current.local("cli"):
+        check = heinzel_issues.tracking(service, current)[0]
     assert check.status == "down"
     assert check.fix == "hz setup issues"
 
@@ -207,13 +222,17 @@ class Notices:
 def test_the_watch_job_notices_state_changes(issues_kernel, board, fake_bd, bd_run, monkeypatch):
     kernel = issues_kernel(board, fake_bd)
     service = kernel.resolve(IssuesService)
-    report = service.submit("The footer clock jumps")
+    current = kernel.resolve(CurrentUser)
+    with current.local("cli"), authenticated(current):
+        report = service.submit("The footer clock jumps")
     notices = Notices()
     monkeypatch.setattr(kernel, "provides", lambda _type: True)
     monkeypatch.setattr(kernel, "resolve", lambda _type: notices)
-    assert watch(service, kernel)["checked"] is True
+    with current.local("daemon"):
+        assert watch(service, kernel, current)["checked"] is True
     bd_run([fake_bd, "update", report.details.id, "--status", "in_progress"], board)
-    result = watch(service, kernel)
+    with current.local("daemon"):
+        result = watch(service, kernel, current)
     assert result["noticed"] == 1
     assert notices.sent == ["Being worked on: The footer clock jumps"]
     assert json.loads(json.dumps(result))["changes"][0]["status"] == "Being worked on"

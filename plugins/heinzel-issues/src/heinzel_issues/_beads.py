@@ -23,6 +23,7 @@ from heinzel import HeinzelError, Issue, Window
 from pydantic import BaseModel, ConfigDict, Field, ValidationError, field_validator
 
 from heinzel_issues._contract import Attachment, Task, TaskState, TrackerError
+from heinzel_issues._identity import access
 
 REFUSED = "The tracker refused"
 TIMEOUT = 30
@@ -198,11 +199,21 @@ class BeadsTracker:
         Raises:
             TrackerError: If `bd` fails.
         """
-        row = self._one(self.run(self.create_args(title, self._settings.labels, reporter()), stdin=body or title))
+        caller = access()
+        if not caller.can_write:
+            raise TrackerError("This credential cannot submit a report.")
+        row = self._one(self.run(self.create_args(title, self._settings.labels, caller.actor), stdin=body or title))
+        if row.created_by != caller.actor or self._settings.label not in row.labels:
+            raise TrackerError("The tracker did not confirm the report owner.")
         if attachments:
             saved = [self.save_attachment(row.id, attachment) for attachment in attachments]
             note = "\n".join(f"{ATTACHMENT_NOTE}{path}" for path in saved)
-            row = self._one(self.run(["update", row.id, flag("--append-notes", note), "--json"]))
+            task_id = row.id
+            row = self._one(
+                self.run(["update", task_id, flag("--append-notes", note), "--json", flag("--actor", caller.actor)])
+            )
+            if row.id != task_id or row.created_by != caller.actor or self._settings.label not in row.labels:
+                raise TrackerError("The tracker did not confirm the report owner.")
         return _task(row)
 
     @staticmethod
@@ -225,7 +236,10 @@ class BeadsTracker:
 
         A shared database holds other work and other people's reports; neither is ever read out through Issues.
         """
-        return self._settings.label in row.labels and row.created_by == reporter()
+        current = access()
+        return self._settings.label in row.labels and (
+            row.created_by == current.actor or (current.legacy_owner and row.created_by == reporter())
+        )
 
     def list(self) -> builtins.list[Task]:
         """Every item with the Issues label, done ones included, newest first.
@@ -245,15 +259,23 @@ class BeadsTracker:
             msg = f"{task_id!r} is not an item id."
             raise TrackerError(msg)
         try:
-            rows = [row for row in self.rows(["show", task_id, "--json"]) if self.mine(row)]
+            rows = self.rows(["show", task_id, "--json"])
+            rows = [row for row in rows if row.id == task_id and self.mine(row)]
         except TrackerError as error:
             if not str(error).startswith(REFUSED):
                 raise
             rows = []  # an unknown id and someone else's item read the same
-        if not rows:
+        if len(rows) != 1:
             msg = f"There is no item {task_id}."
             raise TrackerError(msg)
         return rows[0]
+
+    def created(self, task_id: str, actor: str) -> Task:
+        """Confirm a newly created row belongs to this call's authenticated actor."""
+        row = self.owned(task_id)
+        if row.created_by != actor:
+            raise TrackerError("The tracker did not confirm the report owner.")
+        return _task(row)
 
     def get(self, task_id: str) -> Task:
         """One item by id.
@@ -262,6 +284,27 @@ class BeadsTracker:
             TrackerError: If the id is malformed, unknown or `bd` fails.
         """
         return _task(self.owned(task_id))
+
+    def close_own(self, task_id: str) -> Task:
+        """Close a new report only when the authenticated principal created it.
+
+        Legacy OS-user rows remain readable by the installation owner but are never closed here.
+        """
+        caller = access()
+        actor = caller.actor
+        if not caller.can_write:
+            raise TrackerError("This credential cannot close a report.")
+        row = self.owned(task_id)
+        if row.created_by != actor:
+            raise TrackerError(f"There is no item {task_id}.")
+        if row.status == "closed":
+            return _task(row)
+        closed = self._one(
+            self.run(["close", task_id, "--reason=Closed by requester", "--json", flag("--actor", actor)])
+        )
+        if closed.id != task_id or closed.created_by != actor or not self.mine(closed) or closed.status != "closed":
+            raise TrackerError("The tracker did not confirm the report was closed.")
+        return _task(closed)
 
     def changes(self, since: datetime | None) -> builtins.list[Task]:
         """Items with the Issues label changed after `since`; all of them for None.
@@ -375,6 +418,7 @@ def _task(row: _Row) -> Task:
         body=row.description,
         state=state_of(row.status),
         status=row.status,
+        can_close=access().can_write and row.created_by == access().actor and row.status != "closed",
         created_at=row.created_at,
         updated_at=row.updated_at,
         closed_at=row.closed_at,

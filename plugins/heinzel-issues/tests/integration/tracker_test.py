@@ -5,12 +5,13 @@ import logging
 from datetime import UTC, datetime, timedelta
 
 import pytest
-from heinzel import Config, HeinzelError, Issue, Module, Tracker, Window
+from heinzel import Config, CurrentUser, HeinzelError, Issue, Module, Tracker, Window
 from heinzel.heads.cli import build
 from typer.testing import CliRunner
 
 import heinzel_issues
 from heinzel_issues import BeadsBoard, BeadsSettings, IssuesService
+from heinzel_issues._identity import authenticated
 
 pytestmark = pytest.mark.integration
 
@@ -100,12 +101,15 @@ def test_submit_goes_through_the_tracker_and_logs_without_the_text(issues_kernel
 
 
 def test_a_failed_submit_and_watch_log_their_outcome(issues_kernel, board, tmp_path, caplog):
-    service = issues_kernel(board, str(tmp_path / "no-bd")).resolve(IssuesService)
+    kernel = issues_kernel(board, str(tmp_path / "no-bd"))
+    service = kernel.resolve(IssuesService)
+    current = kernel.resolve(CurrentUser)
     caplog.set_level(logging.INFO, logger="heinzel_issues")
-    with pytest.raises(heinzel_issues.TrackerError):
-        service.submit("Secret words")
-    with pytest.raises(heinzel_issues.TrackerError):
-        service.watch(None)
+    with current.local("cli"), authenticated(current):
+        with pytest.raises(heinzel_issues.TrackerError):
+            service.submit("Secret words")
+        with pytest.raises(heinzel_issues.TrackerError):
+            service.watch(None)
     outcomes = [(r.event, r.outcome) for r in caplog.records if r.event.endswith(".outcome")]
     assert outcomes == [("issues.submit.outcome", "failed"), ("issues.watch.outcome", "failed")]
     assert "Secret" not in caplog.text

@@ -20,7 +20,8 @@ export function rest(report) {
 /** Everything that is stored with a report besides what the person typed, said before they send. */
 export function sentAs(sender, labels) {
   const tags = (labels || []).join(", ");
-  return `Sent to the tracker under your login name ${sender}${tags ? `, with the labels ${tags}` : ""}.`;
+  const identity = /^u-[0-9a-f]{32}$/.test(sender) ? "your authenticated workspace identity" : `your login name ${sender}`;
+  return `Sent to the tracker under ${identity}${tags ? `, with the labels ${tags}` : ""}.`;
 }
 
 /** `7 Nov 2026`, or nothing while the moment is not known. */
@@ -28,6 +29,16 @@ export function day(value) {
   const date = value ? new Date(value) : null;
   if (!date || Number.isNaN(date.getTime())) return "";
   return date.toLocaleDateString("en-GB", { day: "numeric", month: "short", year: "numeric" });
+}
+
+/** Filter and order reports without changing the server's result. */
+export function orderedReports(reports, state, order) {
+  const selected = state === "all" ? reports : reports.filter((report) => report.state === state);
+  return [...selected].sort((a, b) => {
+    if (order === "title") return (a.title || "").localeCompare(b.title || "");
+    const difference = (Date.parse(a.submitted_at) || 0) - (Date.parse(b.submitted_at) || 0);
+    return order === "oldest" ? difference : -difference;
+  });
 }
 
 /** A chosen file as the `send` action takes it: its name and base64 content. Refuses one over 2 MiB. */
@@ -141,9 +152,10 @@ export default function createView(sdk) {
     );
   }
 
-  function Item({ report }) {
+  function Item({ report, submit }) {
     const id = useId();
     const [open, setOpen] = useState(false);
+    const [state, setState] = useState(idle);
     const history = report.history || [];
     const files = report.attachments || [];
     return h("li", { className: "hzi-item" },
@@ -151,12 +163,30 @@ export default function createView(sdk) {
         type: "button", className: "hzi-row", "aria-expanded": open, "aria-controls": `${id}-detail`,
         onClick: () => setOpen(!open),
       },
-        h("span", { className: "hzi-title" }, report.title),
+        h("span", { className: "hzi-row-main" },
+          h("span", { className: "hzi-title" }, report.title),
+          report.submitted_at && h("span", { className: "hzi-muted hzi-date" }, `Sent ${day(report.submitted_at)}`),
+        ),
         h("span", { className: `hzi-state hzi-${report.state}` }, statusLine(report)),
       ),
       open && h("div", { id: `${id}-detail`, className: "hzi-detail" },
         rest(report) && h("p", { className: "hzi-body" }, rest(report)),
         files.length > 0 && h("p", { className: "hzi-muted" }, `Sent with: ${files.join(", ")}`),
+        report.details?.id && h("p", { className: "hzi-muted hzi-id" }, `Reference: ${report.details.id}`),
+        report.updated_at && h("p", { className: "hzi-muted hzi-id" }, `Last updated: ${day(report.updated_at)}`),
+        report.can_close && report.details?.id && h(sdk.Button, {
+          type: "button", disabled: state.busy,
+          onClick: async () => {
+            setState({ busy: true, message: null, failed: false });
+            try {
+              await submit("close", { id: report.details.id });
+              setState({ busy: false, message: "Report closed.", failed: false });
+            } catch (error) {
+              setState({ busy: false, message: error?.message || "The report could not be closed.", failed: true });
+            }
+          },
+        }, state.busy ? "Closing…" : "Close report"),
+        h(Message, { state }),
         h("ol", { className: "hzi-history", "aria-label": "History" }, history.map((step) =>
           h("li", { key: step.label },
             h("span", null, step.label),
@@ -164,6 +194,28 @@ export default function createView(sdk) {
           ),
         )),
       ),
+    );
+  }
+
+  function ReportList({ reports, submit }) {
+    const id = useId();
+    const [state, setState] = useState("all");
+    const [order, setOrder] = useState("newest");
+    const selected = orderedReports(reports, state, order);
+    return h("div", { className: "hzi-reports" },
+      h("div", { className: "hzi-toolbar" },
+        h("label", { htmlFor: `${id}-filter` }, "Status"),
+        h("select", { id: `${id}-filter`, className: "hzi-select", value: state, onChange: (event) => setState(event.target.value) },
+          h("option", { value: "all" }, "All statuses"), h("option", { value: "received" }, "Received"),
+          h("option", { value: "working" }, "Being worked on"), h("option", { value: "done" }, "Done")),
+        h("label", { htmlFor: `${id}-sort` }, "Sort"),
+        h("select", { id: `${id}-sort`, className: "hzi-select", value: order, onChange: (event) => setOrder(event.target.value) },
+          h("option", { value: "newest" }, "Newest first"), h("option", { value: "oldest" }, "Oldest first"),
+          h("option", { value: "title" }, "Title")),
+      ),
+      selected.length
+        ? h("ul", { className: "hzi-list", "aria-label": "Your reports and requests" }, selected.map((report) => h(Item, { key: report.details?.id ?? report.title, report, submit })))
+        : h("p", { role: "status", className: "hzi-muted" }, reports.length ? "No reports match this status." : "Nothing reported yet."),
     );
   }
 
@@ -179,9 +231,7 @@ export default function createView(sdk) {
     }
     const reports = data.reports || [];
     return h("section", { "aria-label": "Issues", className: "hzi" },
-      reports.length
-        ? h("ul", { className: "hzi-list", "aria-label": "Your reports and requests" }, reports.map((report) => h(Item, { key: report.details?.id ?? report.title, report })))
-        : h("p", { role: "status", className: "hzi-muted" }, "Nothing reported yet."),
+      h(ReportList, { reports, submit }),
       h(Composer, { submit, sender: data.sender, labels: data.labels }),
     );
   };
