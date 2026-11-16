@@ -168,8 +168,10 @@ export default function createView(sdk) {
   }
 
   return function Issues({ data, loading, submit }) {
-    if (loading && !data) return h("p", { role: "status", className: "hzi-muted" }, "Loading…");
-    if (!data) return h("p", { role: "status" }, "Issues cannot be shown here.");
+    if (loading && !data) return h("section", { "aria-label": "Issues", className: "hzi" },
+      h("p", { role: "status", className: "hzi-muted" }, "Loading…"));
+    if (!data) return h("section", { "aria-label": "Issues", className: "hzi" },
+      h("p", { role: "status" }, "Issues cannot be shown here."));
     if (!data.ready) {
       return h("section", { "aria-label": "Issues", className: "hzi" },
         h(Setup, { submit, problem: data.problem, folder: data.folder, labels: data.extra_labels }),

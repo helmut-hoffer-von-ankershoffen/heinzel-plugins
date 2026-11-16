@@ -1,7 +1,7 @@
 {
   "format": 1,
-  "reviewer": "story-confirm-sonnet",
-  "source_sha256": "363f51d952da71231fae5492c95fecf298b27981c64eb7008d3dbb980be411c1",
+  "reviewer": "Codex feature-story agent",
+  "source_sha256": "7995f53006228602126367c8baebcc3ebc8cf6687491115548b10644b83dbd34",
   "plan_sha256": "e7395659d00a341e8c5fcf62a26cc2765e7812e405390baa9fe1ae815fab2710",
-  "story_sha256": "baac94e327f1dbec7633b9b7e4b9de5fb398f2d57c1d8f8a3ce68984bc511401"
+  "story_sha256": "cde58d3390e97256ffea4d887479e45c6a2c4ab6571a380cb53feb5242a5a616"
 }
