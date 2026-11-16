@@ -14,67 +14,79 @@ pytestmark = pytest.mark.e2e
 ROOT = Path(__file__).resolve().parents[2]
 
 
-@pytest.mark.timeout(600)
-def test_installed_resource_meters(tmp_path):
+def backend_environment(directory):
     environment = {key: value for key, value in os.environ.items() if key in {"PATH", "LANG", "LC_ALL", "TMPDIR"}}
-    environment |= {
-        "HOME": str(tmp_path),
-        "XDG_CONFIG_HOME": str(tmp_path / "xdg-config"),
-        "HZ_CONFIG_HOME": str(tmp_path / "config"),
-        "HZ_DATA_DIR": str(tmp_path / "data"),
-        "HZ_CACHE_DIR": str(tmp_path / "cache"),
-        "HZ_STATE_DIR": str(tmp_path / "state"),
-        "HZ_LOG_DIR": str(tmp_path / "log"),
-        "HZ_SYSTEM_DAEMON__UNIT_DIR": str(tmp_path / "units"),
-        "HZ_SYSTEM_CREDENTIAL__BACKEND": "environment",
-        "HZ_PLUGINS_ENABLED": "true",
-    }
-    backend = subprocess.Popen(
+    paths = {"HOME": ".", "XDG_CONFIG_HOME": "xdg-config", "HZ_SYSTEM_DAEMON__UNIT_DIR": "units"}
+    paths.update(
+        {
+            f"HZ_{key}": folder
+            for key, folder in (
+                ("CONFIG_HOME", "config"),
+                ("DATA_DIR", "data"),
+                ("CACHE_DIR", "cache"),
+                ("STATE_DIR", "state"),
+                ("LOG_DIR", "log"),
+            )
+        }
+    )
+    environment.update({key: str(directory / folder) for key, folder in paths.items()})
+    return environment | {"HZ_SYSTEM_CREDENTIAL__BACKEND": "environment", "HZ_PLUGINS_ENABLED": "true"}
+
+
+def ready_url(backend):
+    assert backend.stdout is not None
+    deadline = time.monotonic() + 60
+    transcript = []
+    while backend.poll() is None and time.monotonic() < deadline:
+        readable, _, _ = select.select([backend.stdout], [], [], 1)
+        if not readable:
+            continue
+        line = backend.stdout.readline()
+        transcript.append(line)
+        if found := re.search(r"http://127\.0\.0\.1:\d+/[^\s]*#token=[A-Za-z0-9_-]+", line):
+            return found.group()
+    pytest.fail("Backend did not announce its URL: " + "".join(transcript))
+
+
+@pytest.fixture
+def meter_url(tmp_path):
+    with subprocess.Popen(
         [sys.executable, "-m", "heinzel", "ui", "--no-browser", "--port", "0"],
-        env=environment,
+        env=backend_environment(tmp_path),
         cwd=tmp_path,
         stdout=subprocess.PIPE,
         stderr=subprocess.STDOUT,
         text=True,
-    )
-    transcript = []
-    try:
-        deadline = time.monotonic() + 60
-        url = ""
-        assert backend.stdout is not None
-        while time.monotonic() < deadline and backend.poll() is None:
-            if select.select([backend.stdout], [], [], 1)[0]:
-                line = backend.stdout.readline()
-                transcript.append(line)
-                found = re.search(r"http://127\.0\.0\.1:\d+/[^\s]*#token=[A-Za-z0-9_-]+", line)
-                if found:
-                    url = found.group()
-                    break
-        assert url, "".join(transcript)
-        result = subprocess.run(
-            [
-                "uv",
-                "run",
-                "--no-project",
-                "--script",
-                str(ROOT / "web/build.py"),
-                "exec",
-                "node",
-                str(ROOT / "tests/browser/meters.mjs"),
-                url,
-            ],
-            cwd=ROOT,
-            capture_output=True,
-            text=True,
-            check=False,
-            timeout=300,
-        )
-        assert result.returncode == 0, result.stdout + result.stderr
-    finally:
-        backend.terminate()
+    ) as backend:
         try:
-            backend.wait(timeout=30)
-        except subprocess.TimeoutExpired:
-            backend.kill()
-            backend.wait(timeout=30)
-        backend.stdout.close()
+            yield ready_url(backend)
+        finally:
+            backend.terminate()
+            try:
+                backend.wait(timeout=30)
+            except subprocess.TimeoutExpired:
+                backend.kill()
+                backend.wait(timeout=30)
+
+
+@pytest.mark.timeout(600)
+def test_installed_resource_meters(meter_url):
+    result = subprocess.run(
+        [
+            "uv",
+            "run",
+            "--no-project",
+            "--script",
+            str(ROOT / "web/build.py"),
+            "exec",
+            "node",
+            str(ROOT / "tests/browser/meters.mjs"),
+            meter_url,
+        ],
+        cwd=ROOT,
+        capture_output=True,
+        text=True,
+        check=False,
+        timeout=300,
+    )
+    assert result.returncode == 0, result.stdout + result.stderr
