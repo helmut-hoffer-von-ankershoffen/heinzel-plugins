@@ -433,15 +433,17 @@ class IssuesService:
         }
         visible = {task.id: task for task in self.tracker().list()} if pending else {}
         for task_id in pending:
-            task = visible.get(task_id)
-            if task is None or task.state != TaskState.DONE:
+            visible_task = visible.get(task_id)
+            if visible_task is None or visible_task.state != TaskState.DONE:
                 continue
             seen = state.seen[task_id]
-            release = self.resolver.release(task.references)
+            release = self.resolver.release(visible_task.references)
             if release is not None:
                 seen.release = release.version
                 status = released_text(release)
-                found.append(Change(title=task.title, status=status, key=f"issues:{task_id}:release:{release.version}"))
+                found.append(
+                    Change(title=visible_task.title, status=status, key=f"issues:{task_id}:release:{release.version}")
+                )
         state.checked_at = now
         _write(self._watch_file, state)
         noticed = sum(1 for change in found if notifications is not None and _notify(notifications, change))

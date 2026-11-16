@@ -10,7 +10,7 @@ from heinzel import CurrentUser
 from heinzel_issues._contract import TrackerError
 
 if TYPE_CHECKING:
-    from collections.abc import Iterator
+    from collections.abc import Generator
 
 
 @dataclass(frozen=True, slots=True)
@@ -34,7 +34,7 @@ def access() -> Access:
 
 
 @contextmanager
-def authenticated(current: CurrentUser) -> "Iterator[None]":
+def authenticated(current: CurrentUser) -> "Generator[None]":
     """Snapshot the authenticated host context for this call and restore it on exit."""
     context = current.context()
     legacy = context.principal == current.owner() and context.authentication in {
