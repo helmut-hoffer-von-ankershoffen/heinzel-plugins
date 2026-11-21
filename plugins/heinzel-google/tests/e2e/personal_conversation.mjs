@@ -103,8 +103,8 @@ const quirkRestyled = (node) => {
   if (rect.width === 0 || rect.height === 0) return false;
   const color = node.style.color;
   node.style.color = "rgb(1, 2, 3)";
-  getComputedStyle(node).color;
+  void getComputedStyle(node).color;
   node.style.color = color;
-  getComputedStyle(node).color;
+  void getComputedStyle(node).color;
   return true;
 };
