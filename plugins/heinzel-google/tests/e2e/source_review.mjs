@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { createRequire } from "node:module";
 import { readFileSync } from "node:fs";
+import { closeSetup } from "./personal_conversation.mjs";
 
 const [url, engine, corePackage, executable] = process.argv.slice(2);
 const require = createRequire(corePackage);
@@ -11,10 +12,7 @@ const context = await browser.newContext({ serviceWorkers: "block", viewport: { 
 const page = await context.newPage();
 try {
   await page.goto(url);
-  await page.locator("#splash").waitFor({ state: "hidden", timeout: 30000 });
-  const setup = page.getByRole("dialog");
-  await setup.waitFor({ state: "visible", timeout: 5000 }).catch(() => {});
-  if (await setup.isVisible().catch(() => false)) await setup.getByRole("button", { name: "Close setup" }).click();
+  await closeSetup(page);
   await page.getByRole("button", { name: "Google source review" }).click();
   const panel = page.getByRole("region", { name: "Google source review", exact: true });
   await panel.waitFor();

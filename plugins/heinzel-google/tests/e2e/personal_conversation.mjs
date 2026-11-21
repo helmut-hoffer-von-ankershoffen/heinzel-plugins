@@ -1,3 +1,6 @@
+import { readFileSync } from "node:fs";
+import { createRequire } from "node:module";
+
 // Core 0.9.53 personal conversation controls shared by the mounted Google journeys, as Core's own chat journeys
 // (web/e2e/chat-ready.mjs) drive them: the first start names the Heinzel, its page holds the reviews beside its chat.
 
@@ -108,3 +111,27 @@ const quirkRestyled = (node) => {
   void getComputedStyle(node).color;
   return true;
 };
+
+/** The phone-sized browser a journey runs in, at /doctor: `urlArgument` and `engine` are the app's URL and the engine. */
+export async function openJourney(urlArgument, engine, corePackage) {
+  const require = createRequire(corePackage);
+  const { chromium, webkit } = require("playwright-core");
+  const axe = readFileSync(require.resolve("axe-core/axe.min.js"), "utf8");
+  const url = new URL(urlArgument);
+  const token = url.hash.match(/(?:^#|&)token=([^&]+)/)?.[1] ?? "";
+  url.pathname = "/doctor";
+  const browser = await (engine === "webkit" ? webkit : chromium).launch({ headless: true });
+  const context = await browser.newContext({ serviceWorkers: "block", viewport: { width: 390, height: 844 } });
+  return { axe, browser, context, page: await context.newPage(), token, url };
+}
+
+/** Say what failed and what the page showed, without the session token. */
+export async function reportFailure(page, token, error) {
+  const message = error instanceof Error ? (error.stack ?? error.message) : String(error);
+  const visible = await page
+    .locator("body")
+    .innerText()
+    .catch(() => "");
+  process.stderr.write(`${`${message}\n${visible}`.replaceAll(decodeURIComponent(token), "<redacted-session>")}\n`);
+  process.exitCode = 1;
+}

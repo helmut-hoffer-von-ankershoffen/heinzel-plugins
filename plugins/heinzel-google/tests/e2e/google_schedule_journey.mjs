@@ -1,18 +1,17 @@
 import assert from "node:assert/strict";
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
-import { createRequire } from "node:module";
 import { join } from "node:path";
-import { closeSetup, openChat, openDetails, sendMessage, startConversation } from "./personal_conversation.mjs";
+import {
+  closeSetup,
+  openChat,
+  openDetails,
+  openJourney,
+  reportFailure,
+  sendMessage,
+  startConversation,
+} from "./personal_conversation.mjs";
 
-const require = createRequire(process.argv[6]);
-const { chromium, webkit } = require("playwright-core");
-const axe = readFileSync(require.resolve("axe-core/axe.min.js"), "utf8");
-const url = new URL(process.argv[2]);
-const token = url.hash.match(/(?:^#|&)token=([^&]+)/)?.[1] ?? "";
-url.pathname = "/doctor";
-const browser = await (process.argv[3] === "webkit" ? webkit : chromium).launch({ headless: true });
-const context = await browser.newContext({ serviceWorkers: "block", viewport: { width: 390, height: 844 } });
-const page = await context.newPage();
+const { axe, browser, context, page, token, url } = await openJourney(process.argv[2], process.argv[3], process.argv[6]);
 try {
   await page.goto(url.href);
   await closeSetup(page);
@@ -108,13 +107,7 @@ try {
   assert.equal(await panel.evaluate((node) => node.scrollWidth > node.clientWidth), false);
   console.log(JSON.stringify({ accepted: true }));
 } catch (error) {
-  const message = error instanceof Error ? (error.stack ?? error.message) : String(error);
-  const visible = await page
-    .locator("body")
-    .innerText()
-    .catch(() => "");
-  process.stderr.write(`${message}\n${visible}`.replaceAll(decodeURIComponent(token), "<redacted-session>") + "\n");
-  process.exitCode = 1;
+  await reportFailure(page, token, error);
 } finally {
   await context.close();
   await browser.close();
