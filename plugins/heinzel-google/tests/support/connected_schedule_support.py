@@ -39,7 +39,7 @@ if sys.argv[1:] == ['--version']:
 if sys.argv[1:] == ['--help']:
  print('-p --output-format --safe-mode --restricted --strict-mcp-config --setting-sources'
   ' --disable-slash-commands --no-session-persistence --permission-mode --tools'
-  ' --allowed-tools --json-schema'); raise SystemExit
+  ' --allowed-tools --json-schema --model'); raise SystemExit
 payload=json.load(sys.stdin)
 try: n=len(open({str(calls)!r}).read())
 except FileNotFoundError: n=0
@@ -50,7 +50,7 @@ if n in (0,2):
  args={{'expected_revision':0,'contract':'Inspect my selected source.','timeout_seconds':30}} if n == 0 else {{}}
  wire={{'kind':'tool','name':'use_tool','arguments':{{'name':name,'arguments':args}},'text':None}}
 else:
- name=next(t['name'] for t in payload['tools'] if t['name'] != 'use_tool')
+ name=next(t['name'] for t in payload['tools'] if t['name'] != 'use_tool' and not t['name'].startswith('mcp__'))
  wire={{'kind':'tool','name':name,'arguments':{{'report':'Source inspected.'}},'text':None}}
 print(json.dumps({{'type':'result','subtype':'success','is_error':False,'permission_denials':[],'structured_output':wire}}))
 """,

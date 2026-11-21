@@ -1,7 +1,7 @@
 import assert from "node:assert/strict";
 import { readFileSync } from "node:fs";
 import { createRequire } from "node:module";
-import { openDetails, sendToHeinzel } from "./personal_conversation.mjs";
+import { closeSetup, openChat, openDetails, sendMessage, startConversation } from "./personal_conversation.mjs";
 
 const require = createRequire(process.argv[4]);
 const { chromium, webkit } = require("playwright-core");
@@ -14,14 +14,9 @@ const context = await browser.newContext({ serviceWorkers: "block", viewport: { 
 const page = await context.newPage();
 try {
   await page.goto(url.href);
-  await page.locator("#splash").waitFor({ state: "hidden", timeout: 30000 });
-  const setup = page.getByRole("dialog");
-  await setup.waitFor({ state: "visible", timeout: 5000 }).catch(() => {});
-  if (await setup.isVisible().catch(() => false)) await setup.getByRole("button", { name: "Close setup" }).click();
-  if (!(await page.getByLabel("Your message").isVisible())) await page.getByRole("tab", { name: "Chat", exact: true }).click();
-  await page.getByLabel("Your message").fill("Inspect my selected source.");
-  await page.getByRole("button", { name: "Create a Heinzel and take this message" }).click();
-  await sendToHeinzel(page);
+  await closeSetup(page);
+  await startConversation(page);
+  await sendMessage(page, "Inspect my selected source.");
   await page.getByText("Source inspected.").waitFor({ timeout: 30000 });
   await openDetails(page);
   const panel = page.getByRole("region", { name: "Connected read review" });
@@ -37,8 +32,7 @@ try {
   assert.deepEqual(await panel.evaluate(async node => (await window.axe.run(node)).violations.map(({id}) => id)), []);
   await panel.getByRole("button", { name: "Confirm" }).click();
   await panel.getByText(/Recorded state: approved/).waitFor();
-  await page.getByLabel("Message your Heinzel").fill("Inspect now.");
-  await sendToHeinzel(page);
+  await sendMessage(page, "Inspect now.");
   await page.getByText("Source inspected.").nth(1).waitFor({ timeout: 30000 });
   await page.getByText(/Tool activity for this reply/).nth(1).click();
   await page.getByText(/connected_read · completed/).first().waitFor();
