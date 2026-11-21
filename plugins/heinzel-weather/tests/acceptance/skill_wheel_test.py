@@ -52,7 +52,18 @@ def test_built_installed_wheel_discovers_the_actual_skill(tmp_path):
         assert "heinzel_weather/skills/weather-trend/SKILL.md" in archive.namelist()
     target = tmp_path / "installed"
     installed = subprocess.run(
-        [uv, "pip", "install", "--offline", "--no-deps", "--target", str(target), str(wheel)],
+        [
+            uv,
+            "pip",
+            "install",
+            "--python",
+            sys.executable,
+            "--offline",
+            "--no-deps",
+            "--target",
+            str(target),
+            str(wheel),
+        ],
         capture_output=True,
         text=True,
         check=False,
