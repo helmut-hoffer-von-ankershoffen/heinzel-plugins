@@ -21,9 +21,9 @@ module.service(SharingActions)
 
 
 @module.operation(private=True)
-def status(service: Sharing) -> SharingState:
-    """Show private sharing readiness without changing Tailscale or configuration."""
-    return service.status()
+def status(service: SharingActions) -> SharingState:
+    """Show private sharing readiness; a web owner first moves hz's own mapping from another hz port to itself."""
+    return service.heal()
 
 
 @module.operation(private=True, read_only=False)

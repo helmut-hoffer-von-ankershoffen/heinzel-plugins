@@ -1,12 +1,13 @@
 """Read actual sharing state and compose one explicit action from existing configuration and conditional Serve APIs."""
 
+import logging
 from typing import TYPE_CHECKING, cast
 from urllib.parse import urlsplit
 
 from heinzel import Config, ConfigEditor, HeinzelError, Settings
 
 from heinzel_tailscale._cli import TailscaleCli
-from heinzel_tailscale._localapi import ServeStore
+from heinzel_tailscale._localapi import Connection, ServeStore
 from heinzel_tailscale._lock import SharingLock
 from heinzel_tailscale._mapping import Mapping, SharingProblemError
 from heinzel_tailscale._models import SharingIntent, SharingState, TailscaleSettings
@@ -16,6 +17,7 @@ if TYPE_CHECKING:
     from pydantic import JsonValue
 
 
+_LOG = logging.getLogger(__name__)
 SIGN_IN = "Sign in to Tailscale, then try again."
 
 
@@ -241,6 +243,7 @@ class SharingActions:
         self.store = store
         self.editor = editor
         self.lock = lock
+        self._moves: set[tuple[int, int]] = set()
 
     def enable(self) -> SharingState:
         """Configure private sharing after fresh conflict checks; readiness is confirmed only by a web owner.
@@ -256,13 +259,7 @@ class SharingActions:
             planned = snapshot.config
             old = choices.intent
             owned = old is not None and old.phase in {"owned", "disabling"}
-            if old is not None and owned:
-                previous = intent_mapping(old)
-                if previous.origin != mapping.origin:
-                    msg = "The sharing origin changed; switch its previous request off before enabling the new origin."
-                    raise HeinzelError(msg)
-                if previous.backend_port != mapping.backend_port:
-                    planned = previous.disable(planned)
+            planned, retired = _moved(old, mapping, planned) if old is not None and owned else (planned, None)
             if not owned and mapping.has_handler(planned):
                 msg = (
                     f"Tailscale already shares this app at {mapping.origin}, and hz did not set that up, "
@@ -293,7 +290,12 @@ class SharingActions:
                 msg = "A higher-priority configuration source prevents applying the origin; Serve was not changed."
                 raise HeinzelError(msg)
             if planned != snapshot.config:
-                self.store.write(connection, snapshot, planned)
+                try:
+                    self.store.write(connection, snapshot, planned)
+                except HeinzelError:
+                    if old is not None and owned:
+                        self._keep(old, connection)
+                    raise
             if not mapping.matches(self.store.read(connection).config):
                 msg = (
                     "hz could not confirm that sharing is set up in Tailscale. "
@@ -301,8 +303,54 @@ class SharingActions:
                 )
                 raise HeinzelError(msg)
             self.editor.write("tailscale.intent", intent.model_copy(update={"phase": "owned"}))
+            if retired is not None:
+                self.editor.change_list("hz.ui_allowed_origins", remove=(retired,))
             self.sharing.readiness.apply_origins(self.sharing.origins())
             return self.sharing.status()
+
+    def _keep(self, old: SharingIntent, connection: Connection) -> None:
+        """A move that left hz's own mapping exactly in place keeps it owned, so Try again can still move it."""
+        try:
+            if intent_mapping(old).matches(self.store.read(connection).config):
+                self.editor.write("tailscale.intent", old)
+        except HeinzelError:
+            # Unknown outcome: the saved request stays as written and status asks to check Tailscale Serve.
+            _LOG.warning("tailscale.enable.keep", extra={"plugin": "heinzel-tailscale", "outcome": "error"})
+
+    def heal(self) -> SharingState:
+        """Report status; a web owner first moves hz's own mapping that still forwards to another hz port to itself.
+
+        This is the startup self-heal: the first status read of a restarted hz on a new port does what Try again (or
+        switching off and on) does, without a click. It never touches a handler hz did not set, a switched-off request
+        or a call from the CLI or MCP. It tries once per move; if that fails, the status says so and Try again stays.
+        """
+        state = self.sharing.status()
+        old = self.sharing.choices().intent
+        port = self.sharing.readiness.runtime.port
+        if (
+            port is None
+            or old is None
+            or not old.enabled
+            or old.phase != "owned"
+            or not state.mapped
+            or state.target != f"http://127.0.0.1:{old.backend_port}"
+            or old.backend_port == port
+            or not self.sharing.readiness.web_owner()
+            or (old.backend_port, port) in self._moves
+        ):
+            return state
+        # One automatic attempt per move and process; after a failure, Try again is the way, never a refresh loop.
+        self._moves.add((old.backend_port, port))
+        fields = {"operation": "status", "step": "move", "plugin": "heinzel-tailscale", "port": port}
+        try:
+            moved = self.enable()
+        except HeinzelError as error:
+            _LOG.warning(
+                "tailscale.status.move", extra={**fields, "outcome": "error", "error": str(error).splitlines()[0][:200]}
+            )
+            return self.sharing.status()
+        _LOG.info("tailscale.status.move", extra={**fields, "outcome": "ok", "previous_port": old.backend_port})
+        return moved
 
     def disable(self) -> SharingState:
         """Stop only hz's still-matching mapping, preserving unrelated services and manually approved origins.
@@ -350,6 +398,22 @@ class SharingActions:
                 self.editor.write("tailscale.intent", intent.model_copy(update={"added_origin": False}))
             self.sharing.readiness.apply_origins(self.sharing.origins())
             return self.sharing.status()
+
+
+def _moved(old: SharingIntent, mapping: Mapping, config: dict[str, object]) -> tuple[dict[str, object], str | None]:
+    """Plan moving hz's own mapping to a new port or address, as switching off and on does.
+
+    Returns:
+        The configuration without the previous mapping, and the origin hz added for it that is no longer used.
+
+    Raises:
+        HeinzelError: If the previous address now points at a handler hz did not set; it is never replaced.
+    """
+    previous = intent_mapping(old)
+    if previous == mapping:
+        return config, None
+    retired = previous.origin if previous.origin != mapping.origin and old.added_origin else None
+    return previous.disable(config), retired
 
 
 def intent_mapping(intent: SharingIntent) -> Mapping:

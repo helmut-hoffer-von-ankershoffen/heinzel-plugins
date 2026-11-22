@@ -16,7 +16,9 @@ shows your choice; its one status line says *Turning on…* until the authentica
 active origin policy and matching Serve configuration, then shows the URL. A short cause with **Try again** appears
 when something needs you; the full explanation is under **Details**. From the CLI or stdio MCP it saves the same
 request, and the web app finishes it on its next status read by loading the origin your configuration already allows.
-Status reads never change Tailscale Serve or your configuration.
+Status reads never replay a switched-off request. One exception keeps sharing working when hz restarts on another
+port: the authenticated web app's first status read moves hz's own mapping to its actual port, once, as **Try
+again** or switching off and on does. It never replaces a handler hz did not set.
 
 ```sh
 hz tailscale status --json

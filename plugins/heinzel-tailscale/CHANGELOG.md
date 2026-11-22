@@ -1,5 +1,11 @@
 # Changelog
 
+## 0.9.9
+
+**Try again** now moves sharing that still forwards to an earlier hz port (or address) to this hz, as switching
+off and on did, and the web app does it once by itself on its first status read after a restart. A handler hz did
+not set is never replaced; a failed move keeps hz's own mapping, so Try again still works.
+
 ## 0.9.8
 
 Requires Python 3.15; relocked.
