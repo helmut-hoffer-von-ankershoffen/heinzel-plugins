@@ -53,9 +53,9 @@ repos:
         language: system
         pass_filenames: false
         always_run: true
-      - id: owner-identity-unpushed
-        name: every unpushed commit is the owner's
-        entry: python3 scripts/check_owner_identity.py --unpushed
+      - id: owner-identity-pre-push
+        name: every commit being pushed is the owner's
+        entry: python3 scripts/check_owner_identity.py --pre-push
         language: system
         pass_filenames: false
         always_run: true
