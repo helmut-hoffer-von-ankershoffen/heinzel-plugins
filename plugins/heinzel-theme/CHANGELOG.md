@@ -1,6 +1,6 @@
 # Changelog
 
-## Unreleased
+## 0.1.7
 
 Add the Singularity soundscape (YouTube video `AvtStYuO79Y`), the default of Core 0.9.55 and later; older Cores
 still offer it and keep `off` as their default.
