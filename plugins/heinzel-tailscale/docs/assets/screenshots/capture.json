@@ -1,11 +1,11 @@
 {
   "format": 1,
   "plugin": "heinzel-tailscale",
-  "core_version": "0.9.42",
-  "inputs_sha256": "81d6f705001cad4fbf5fcf5f9627d969959c5adb7be0133c1c2e3f609d74b68f",
+  "core_version": "0.9.54",
+  "inputs_sha256": "a35417f7ab452be1cde9afd5a4a06fd9008697dd3716da13404536b09222384f",
   "images": {
-    "docs/assets/screenshots/sharing-ready.png": "609a339166fd09acc64002f9529f869ebb0e3861987ba3bf94633eb515825b4e",
-    "docs/assets/screenshots/sharing-request-cli.png": "86ce27d4ac40dbd1e0dbf397ea61ce5b3dade6799a3219a50b408fd5fe0f0b33",
+    "docs/assets/screenshots/sharing-ready.png": "ebf585a039ccf28ea5d689d2984cb719de02c18fff036780b294819a4df97ae4",
+    "docs/assets/screenshots/sharing-request-cli.png": "fe42b74c881eaeab12ad04f3b212768d77586ca9634af19ad490960238051cd5",
     "docs/assets/screenshots/sharing-off.png": "398daf92c44530dd18052d5916f0e7a34d1d1dc6161ed8a2a31f606c928ec6ac",
     "docs/assets/screenshots/sharing-off-cli.png": "592011836c508fac6809305cbc29752484a4be2cc32546e31dffbc369ee0c774"
   },
@@ -17,14 +17,14 @@
     },
     "definition": {
       "format": 1,
-      "reviewer": "story-confirm-sonnet",
-      "source_sha256": "20d7977f7ff18635b121be49a0050d2adf738c0573fc669bc5cac7573a03d316",
+      "reviewer": "story-confirm-opus-tailscale-stale-port",
+      "source_sha256": "2f308b16ab4b3f507040c00fe4f483fea484332c79e33f4f208363866985434f",
       "plan_sha256": "7cff472608aa79e38f9d9e2f4cf924446b79f4d9026d577a62c891db43124ce0",
       "story_sha256": "4b335f221043033a22e95a8a48511c54a40e56ff36196a46d9eaa301bc50a8a8"
     },
     "plugin": "heinzel-tailscale",
-    "core_version": "0.9.42",
-    "inputs_sha256": "81d6f705001cad4fbf5fcf5f9627d969959c5adb7be0133c1c2e3f609d74b68f",
+    "core_version": "0.9.54",
+    "inputs_sha256": "a35417f7ab452be1cde9afd5a4a06fd9008697dd3716da13404536b09222384f",
     "screenshots": [
       {
         "path": "docs/assets/screenshots/sharing-ready.png",
@@ -48,23 +48,23 @@
       }
     ],
     "images": {
-      "sharing-ready.png": "609a339166fd09acc64002f9529f869ebb0e3861987ba3bf94633eb515825b4e",
-      "sharing-request-cli.png": "86ce27d4ac40dbd1e0dbf397ea61ce5b3dade6799a3219a50b408fd5fe0f0b33",
+      "sharing-ready.png": "ebf585a039ccf28ea5d689d2984cb719de02c18fff036780b294819a4df97ae4",
+      "sharing-request-cli.png": "fe42b74c881eaeab12ad04f3b212768d77586ca9634af19ad490960238051cd5",
       "sharing-off.png": "398daf92c44530dd18052d5916f0e7a34d1d1dc6161ed8a2a31f606c928ec6ac",
       "sharing-off-cli.png": "592011836c508fac6809305cbc29752484a4be2cc32546e31dffbc369ee0c774"
     },
     "transcripts": {
-      "sharing-ready.txt": "cef56d533749591725e1e85766aa9859f4d43c52bd2e392e830e1e24e3eabe1a",
-      "sharing-request-cli.txt": "a6016dcf0776ebff7dc8d1d05fb4643100d5718c5ac6cb823c263792dc4143b1",
-      "sharing-off.txt": "650539c81a020ddbba65fa1ca1a39c935a1befaaf2ce88c4f879eb5a3fe79abd",
+      "sharing-ready.txt": "06fceaac1aaae805ee47ba2deef1e8959aded91e4e7e9e78028cdf4881547973",
+      "sharing-request-cli.txt": "62377175c58a2dc39c917918f7865b7602c80b91b2e76f3a12c971a084670495",
+      "sharing-off.txt": "38a863ca580d4298fe4ac9f4e5dc43c604cdffca8155401262fb253a1d94285f",
       "sharing-off-cli.txt": "cf49c8bdefcb23c7b464e229ae6e18bbd8f639abb0121bf570e3e30b631fc8b0"
     },
-    "bundle_sha256": "f0120690761aa31dd29807289777ed6b9c9101e0a0c87c973ae0434b229313bf"
+    "bundle_sha256": "c73ab892e3faf25182f617550d0be8790f4cffefc7b7456b91cd40d9cda39aa5"
   },
   "privacy_review": {
     "format": 1,
-    "bundle_sha256": "f0120690761aa31dd29807289777ed6b9c9101e0a0c87c973ae0434b229313bf",
-    "reviewer": "privacy-review-opus",
+    "bundle_sha256": "c73ab892e3faf25182f617550d0be8790f4cffefc7b7456b91cd40d9cda39aa5",
+    "reviewer": "Claude Sonnet 5.5 screenshot reviewer",
     "decision": "approve",
     "checked_images": [
       "sharing-ready.png",

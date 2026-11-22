@@ -277,17 +277,115 @@ def test_a_new_bound_port_replaces_only_the_previous_exact_owned_target(setup):
     assert store.writes == 2
 
 
-def test_external_origin_change_requires_disabling_the_previous_owned_request(setup):
+def test_external_origin_change_moves_hz_own_mapping_as_off_and_on_would(setup):
     fresh, store = setup
     command(fresh(), "enable")
+    edit(fresh(), "tailscale.https_port", 9443)
+    moved = command(fresh(), "enable")
+    assert moved["origin"] == f"{ORIGIN}:9443"
+    assert Mapping.for_node(DNS, 8737, 9443).matches(store.config)
+    assert not Mapping.for_node(DNS, 8737).has_handler(store.config)
+    assert "443" not in store.config["TCP"]
+    assert store.writes == 2
+    assert saved()["hz"]["ui_allowed_origins"] == [f"{ORIGIN}:9443"]  # The origin it added for 443 is gone.
+
+
+def test_external_origin_change_never_replaces_a_handler_hz_did_not_set(setup):
+    fresh, store = setup
+    command(fresh(), "enable")
+    store.config["Web"][f"{DNS[:-1]}:443"]["Handlers"]["/"] = {"Proxy": "http://127.0.0.1:3000"}
     edit(fresh(), "tailscale.https_port", 9443)
     before = copy.deepcopy(store.config)
     result = CliRunner().invoke(build(fresh()), ["tailscale", "enable", "--json"])
     assert result.exit_code == 1
-    assert "previous request off" in result.output
+    assert "points somewhere else" in result.output
     assert store.config == before
     assert store.writes == 1
-    assert saved()["hz"]["ui_allowed_origins"] == [ORIGIN]
+
+
+def stale(fresh, store, port=51045):
+    """The owner's state: hz's own mapping forwards to a backend that ran on another port before."""
+    response = client(fresh(), port=port).post("/api/tailscale/enable", json={}, headers=AUTH)
+    assert response.status_code == 200, response.text
+    assert Mapping.for_node(DNS, port).matches(store.config)
+    assert store.writes == 1
+
+
+def test_try_again_points_a_stale_port_mapping_at_this_hz(setup):
+    fresh, store = setup
+    stale(fresh, store)
+    web_client = client(fresh(), port=8737)
+    response = web_client.post("/api/tailscale/enable", json={}, headers=AUTH)
+    assert response.status_code == 200, response.text
+    assert response.json()["state"] == "ready"
+    assert response.json()["target"] == "http://127.0.0.1:8737"
+    assert Mapping.for_node(DNS, 8737).matches(store.config)
+    assert saved()["tailscale"]["intent"]["backend_port"] == 8737
+
+
+def test_startup_status_read_moves_a_stale_port_mapping_without_a_click(setup, caplog):
+    fresh, store = setup
+    stale(fresh, store)
+    with caplog.at_level("INFO", logger="heinzel_tailscale._service"):
+        status = client(fresh(), port=8737).get("/api/tailscale/status", headers=AUTH)
+    assert status.status_code == 200, status.text
+    assert status.json()["state"] == "ready"
+    assert status.json()["summary"] is None
+    assert Mapping.for_node(DNS, 8737).matches(store.config)
+    assert store.writes == 2
+    assert [r.outcome for r in caplog.records if r.message == "tailscale.status.move"] == ["ok"]
+    assert client(fresh(), port=8737).get("/api/tailscale/status", headers=AUTH).json()["state"] == "ready"
+    assert store.writes == 2  # Once moved, reads change nothing.
+
+
+def test_cli_status_never_moves_a_stale_port_mapping(setup):
+    fresh, store = setup
+    stale(fresh, store)
+    assert command(fresh(), "status")["target"] == "http://127.0.0.1:51045"
+    assert store.writes == 1
+
+
+def test_startup_and_try_again_never_replace_another_apps_handler(setup):
+    fresh, store = setup
+    stale(fresh, store)
+    store.config["Web"][f"{DNS[:-1]}:443"]["Handlers"]["/"] = {"Proxy": "http://127.0.0.1:3000"}
+    before = copy.deepcopy(store.config)
+    web_client = client(fresh(), port=8737)
+    status = web_client.get("/api/tailscale/status", headers=AUTH)
+    assert status.status_code == 200, status.text
+    assert status.json()["state"] == "blocked"
+    retried = web_client.post("/api/tailscale/enable", json={}, headers=AUTH)
+    assert retried.status_code != 200
+    assert "points somewhere else" in retried.text
+    assert store.config == before
+    assert store.writes == 1
+
+
+def test_a_failed_move_keeps_the_plain_words_and_try_again(setup, caplog):
+    fresh, store = setup
+    stale(fresh, store)
+    store.concurrent = True
+    web_client = client(fresh(), port=8737)
+    with caplog.at_level("INFO", logger="heinzel_tailscale._service"):
+        status = web_client.get("/api/tailscale/status", headers=AUTH)
+    assert status.status_code == 200, status.text
+    assert status.json()["summary"] == "Set up for another hz port. Try again to move it."
+    assert "forwards to hz on port 51045, but this hz runs on port 8737" in status.json()["message"]
+    assert [r.outcome for r in caplog.records if r.message == "tailscale.status.move"] == ["error"]
+    writes = store.writes
+    again = web_client.get("/api/tailscale/status", headers=AUTH)
+    assert again.json()["summary"] == "Set up for another hz port. Try again to move it."
+    assert store.writes == writes  # One automatic attempt; refreshes never loop on a failing write.
+    retried = web_client.post("/api/tailscale/enable", json={}, headers=AUTH)
+    assert retried.status_code != 200
+    assert "nothing was overwritten" in retried.text
+    assert Mapping.for_node(DNS, 51045).matches(store.config)
+    assert saved()["tailscale"]["intent"]["backend_port"] == 51045  # Still hz's own, so a later Try again moves it.
+    store.concurrent = False
+    healed = web_client.post("/api/tailscale/enable", json={}, headers=AUTH)
+    assert healed.status_code == 200, healed.text
+    assert healed.json()["state"] == "ready"
+    assert Mapping.for_node(DNS, 8737).matches(store.config)
 
 
 def test_disable_preserves_other_services_and_manually_configured_origins(setup):

@@ -29,6 +29,12 @@ class SharingReadiness:
         """Whether an authenticated web call reached the very listener the mapping forwards to."""
         if self.runtime.port is None or self.runtime.port != mapping.backend_port:
             return False
+        return self.web_owner()
+
+    def web_owner(self) -> bool:
+        """Whether this call is an authenticated browser call to a process that hosts a bound web listener."""
+        if self.runtime.port is None:
+            return False
         try:
             return self.user.context().authentication in {"web-session", "web-device"}
         except HeinzelError:
