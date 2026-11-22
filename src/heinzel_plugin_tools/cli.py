@@ -247,52 +247,6 @@ def released_core(project: Project) -> str:
     raise ValueError("No compatible released core is available. Pass CORE=<candidate-core-wheel>.")
 
 
-# Core owns the reviewed PyYAML build for a Python without an upstream wheel: the source, its hash and the backend pins
-# are in this one standard-library file of the Core wheel. The toolkit runs it and keeps no copy of any of them.
-CORE_PYYAML_BOOTSTRAP = "heinzel/bootstrap_pyyaml.py"
-
-
-def without_requirement(text: str, name: str) -> str:
-    """A hash-pinned requirements text without the entries of one package; every other entry stays byte for byte."""
-    kept = []
-    for entry in re.split(r"(?<!\\)\n", text):
-        found = re.match(r"\s*([A-Za-z0-9][A-Za-z0-9._-]*)", entry)
-        if not found or canonicalize_name(found[1]) != canonicalize_name(name):
-            kept.append(entry)
-    return "\n".join(kept)
-
-
-def core_bootstrap(core: str, directory: Path, interpreter: Path) -> list[str] | None:
-    """The command that runs Core's own bootstrap file, isolated, on one interpreter; nothing for a Core without it."""
-    with core_archive(core) as archive:
-        if CORE_PYYAML_BOOTSTRAP not in archive.namelist():
-            return None
-        bootstrap = directory / "bootstrap_pyyaml.py"
-        bootstrap.write_bytes(archive.read(CORE_PYYAML_BOOTSTRAP))
-    return [str(interpreter), "-I", "-S", str(bootstrap)]
-
-
-def bootstrap_pins(bootstrap: list[str]) -> dict:
-    """What Core reviewed, asked of Core each time: the package, and the hash-pinned backend that may build it."""
-    pins = subprocess.run([*bootstrap, "pins"], check=True, capture_output=True, text=True, timeout=60)
-    return json.loads(pins.stdout)
-
-
-def reviewed_source_options(core: str, floor: str, directory: Path) -> list[str]:
-    """Resolver options for a target Python without an upstream wheel of the package Core's bootstrap owns.
-
-    Only that package may be read from its source distribution, and only with Core's hash-pinned backend, so the lock
-    still records the registry hashes, the reviewed source among them. Every other package resolves as before.
-    """
-    bootstrap = core_bootstrap(core, directory, Path(sys.executable))
-    if bootstrap is None or subprocess.run([*bootstrap, "needed", floor], check=False, timeout=60).returncode:
-        return []
-    pins = bootstrap_pins(bootstrap)
-    constraints = directory / "build-constraints.txt"
-    constraints.write_text("\n".join(pins["backend"]) + "\n")
-    return ["--no-binary", pins["name"], "--build-constraints", str(constraints), "--require-build-hashes"]
-
-
 def lock(project: Project, core: str | None = None) -> None:
     """Resolve one portable dependency lock against a compatible candidate, keeping its wheel path out of the lock."""
     core = core or released_core(project)
@@ -320,7 +274,6 @@ def lock(project: Project, core: str | None = None) -> None:
                 "--universal",
                 "--python-version",
                 floor,
-                *reviewed_source_options(core, floor, directory),
                 "--generate-hashes",
                 "--no-emit-package",
                 "heinzel",
@@ -481,42 +434,9 @@ def ensure_python(environment: Path, floor: str) -> None:
         )
 
 
-def reviewed_build(interpreter: Path, lock: Path, core: str, directory: Path) -> tuple[str, Path] | None:
-    """Build the package Core's bootstrap owns when this interpreter has no upstream wheel of it; else nothing.
-
-    Core decides everything: whether its wheel ships a bootstrap, which package it builds, whether this Python needs
-    it, and whether the lock selects the reviewed source. A lock that selects another one is refused there.
-    """
-    isolated = core_bootstrap(core, directory, interpreter)
-    if isolated is None or subprocess.run([*isolated, "needed"], check=False, timeout=60).returncode:
-        return None
-    name = bootstrap_pins(isolated)["name"]
-    if without_requirement(lock.read_text(), name) == lock.read_text():
-        return None
-    wheels = directory / "wheels"
-    run([*isolated, "build", "--requirements", str(lock), "--wheel-dir", str(wheels), "--python", str(interpreter)])
-    built = list(wheels.glob("*.whl"))
-    if len(built) != 1:
-        raise ValueError("Core's PyYAML bootstrap did not leave exactly one wheel")
-    return name, built[0]
-
-
-def sync_locked(interpreter: Path, lock: Path, core: str) -> None:
-    """Make the environment exactly the hash-pinned lock, with no source build outside Core's reviewed one."""
-    sync = ["uv", "pip", "sync", "--python", str(interpreter), "--require-hashes", "--no-build"]
-    with tempfile.TemporaryDirectory(prefix="hz-plugin-sync-") as temporary:
-        directory = Path(temporary)
-        reviewed = reviewed_build(interpreter, lock, core, directory)
-        if reviewed is None:
-            run([*sync, str(lock)])
-            return
-        name, wheel = reviewed
-        # The wheel is built here, so no lock can name its hash: Core's bootstrap checked the lock's source hash and
-        # the downloaded source against its reviewed pin instead. Everything else still installs under the hashes.
-        rest = directory / "requirements.lock"
-        rest.write_text(without_requirement(lock.read_text(), name))
-        run([*sync, str(rest)])
-        run(["uv", "pip", "install", "--python", str(interpreter), "--no-deps", "--no-build", str(wheel)])
+def sync_locked(interpreter: Path, lock: Path) -> None:
+    """Make the environment exactly the hash-pinned lock; every package installs from a hashed wheel."""
+    run(["uv", "pip", "sync", "--python", str(interpreter), "--require-hashes", "--no-build", str(lock)])
 
 
 def prepare_environment(project: Project, core: str | None) -> Path:
@@ -529,7 +449,7 @@ def prepare_environment(project: Project, core: str | None) -> Path:
     ensure_python(environment, floor)
     if not interpreter.is_file():
         run(["uv", "venv", "--python", floor, str(environment)])
-    sync_locked(interpreter, project.directory / "requirements.lock", core)
+    sync_locked(interpreter, project.directory / "requirements.lock")
     selected = core_install_spec(core, record["core"]["version"])
     run(["uv", "pip", "install", "--python", str(interpreter), "--no-deps", "--no-build", selected])
     run(
@@ -749,7 +669,7 @@ def acceptance(project: Project, core: str | None, *, wheel: Path | None = None)
     ensure_python(environment, floor)
     if not interpreter.is_file():
         run(["uv", "venv", "--python", floor, str(environment)])
-    sync_locked(interpreter, project.directory / "requirements.lock", core)
+    sync_locked(interpreter, project.directory / "requirements.lock")
     wheels = (
         [wheel.resolve()]
         if wheel

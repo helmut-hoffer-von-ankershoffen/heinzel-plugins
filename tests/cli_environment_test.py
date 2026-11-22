@@ -679,7 +679,8 @@ def test_an_https_core_is_downloaded_once_however_many_times_it_is_read(tmp_path
         cli.urllib.request, "urlopen", lambda url, timeout: requested.append(url) or Response(wheel.read_bytes())
     )
     cli.core_metadata("https://example.org/core.whl")
-    cli.core_bootstrap("https://example.org/core.whl", tmp_path, Path("python"))
+    with cli.core_archive("https://example.org/core.whl"):
+        pass
     assert requested == ["https://example.org/core.whl"]
 
 

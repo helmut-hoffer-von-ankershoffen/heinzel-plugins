@@ -59,7 +59,6 @@ def test_acceptance_uses_the_supplied_wheel_and_refuses_changed_bytes(project, t
     (project.directory / "tests/acceptance").mkdir(parents=True)
     monkeypatch.setattr(cli, "validate_lock", lambda *_: {"core": {"version": "0.9.1"}})
     monkeypatch.setattr(cli, "core_metadata", lambda _: {"version": "0.9.1", "requires_python": ">=3.15"})
-    monkeypatch.setattr(cli, "core_bootstrap", lambda *_: None)  # the invented Core ships no bootstrap
     monkeypatch.setattr(cli, "build", lambda *_: pytest.fail("Prebuilt acceptance must not rebuild"))
     calls = []
 
@@ -83,7 +82,6 @@ def test_mislabeled_wheel_is_refused_before_installation(project, tmp_path, monk
     artifact = wheel(tmp_path / "heinzel_unforeseen-1.0.0-py3-none-any.whl", name="another-provider")
     monkeypatch.setattr(cli, "validate_lock", lambda *_: {"core": {"version": "0.9.1"}})
     monkeypatch.setattr(cli, "core_metadata", lambda _: {"version": "0.9.1", "requires_python": ">=3.15"})
-    monkeypatch.setattr(cli, "core_bootstrap", lambda *_: None)  # the invented Core ships no bootstrap
     calls = []
     monkeypatch.setattr(cli, "run", lambda command, **_: calls.append(command))
     with pytest.raises(ValueError, match="metadata differs"):

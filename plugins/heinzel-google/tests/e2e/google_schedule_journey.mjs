@@ -1,29 +1,22 @@
 import assert from "node:assert/strict";
 import { existsSync, readFileSync, writeFileSync } from "node:fs";
-import { createRequire } from "node:module";
 import { join } from "node:path";
-import { openDetails, sendToHeinzel } from "./personal_conversation.mjs";
+import {
+  closeSetup,
+  openChat,
+  openDetails,
+  openJourney,
+  reportFailure,
+  sendMessage,
+  startConversation,
+} from "./personal_conversation.mjs";
 
-const require = createRequire(process.argv[6]);
-const { chromium, webkit } = require("playwright-core");
-const axe = readFileSync(require.resolve("axe-core/axe.min.js"), "utf8");
-const url = new URL(process.argv[2]);
-const token = url.hash.match(/(?:^#|&)token=([^&]+)/)?.[1] ?? "";
-url.pathname = "/doctor";
-const browser = await (process.argv[3] === "webkit" ? webkit : chromium).launch({ headless: true });
-const context = await browser.newContext({ serviceWorkers: "block", viewport: { width: 390, height: 844 } });
-const page = await context.newPage();
+const { axe, browser, context, page, token, url } = await openJourney(process.argv[2], process.argv[3], process.argv[6]);
 try {
   await page.goto(url.href);
-  await page.locator("#splash").waitFor({ state: "hidden", timeout: 30000 });
-  const setup = page.getByRole("dialog");
-  await setup.waitFor({ state: "visible", timeout: 5000 }).catch(() => {});
-  if (await setup.isVisible().catch(() => false)) await setup.getByRole("button", { name: "Close setup" }).click();
-  if (!(await page.getByLabel("Your message").isVisible()))
-    await page.getByRole("tab", { name: "Chat", exact: true }).click();
-  await page.getByLabel("Your message").fill("Read my selected source.");
-  await page.getByRole("button", { name: "Create a Heinzel and take this message" }).click();
-  await sendToHeinzel(page);
+  await closeSetup(page);
+  await startConversation(page);
+  await sendMessage(page, "Read my selected source.");
   await page.getByText("Source inspected.").waitFor({ timeout: 30000 });
   await openDetails(page);
   const terms = page.getByRole("region", { name: "Proposed Heinzel terms" });
@@ -82,7 +75,7 @@ try {
   assert.equal(finished.ok, true, `daemon failed: ${finished.failure}`);
   assert.equal(finished.deduplicated, true);
   await page.reload();
-  await page.getByRole("tab", { name: "Chat", exact: true }).click();
+  await openChat(page);
   await openDetails(page);
   await page
     .getByText(/Tool activity for this reply/)
@@ -92,8 +85,7 @@ try {
     .getByText(/connected_read · completed/)
     .first()
     .waitFor({ timeout: 30000 });
-  await page.getByLabel("Message your Heinzel").fill("Read my source and prepare a notification for my review.");
-  await sendToHeinzel(page);
+  await sendMessage(page, "Read my source and prepare a notification for my review.");
   const drafts = page.getByRole("region", { name: "Notification drafts" });
   await drafts.getByText("The source was read; please review.", { exact: true }).waitFor({timeout: 30000});
   assert.match(await drafts.innerText(), /queued does not mean shown/i);
@@ -108,20 +100,14 @@ try {
   await panel.getByRole("button", { name: "Revoke this grant" }).click();
   await panel.getByText(/Recorded state: revoked/).waitFor();
   await page.reload();
-  await page.getByRole("tab", { name: "Chat", exact: true }).click();
+  await openChat(page);
   await openDetails(page);
   await schedule.getByText("Recurring Heinzel turns", { exact: true }).click();
   await schedule.getByText(/stale · contract revision/).waitFor();
   assert.equal(await panel.evaluate((node) => node.scrollWidth > node.clientWidth), false);
   console.log(JSON.stringify({ accepted: true }));
 } catch (error) {
-  const message = error instanceof Error ? (error.stack ?? error.message) : String(error);
-  const visible = await page
-    .locator("body")
-    .innerText()
-    .catch(() => "");
-  process.stderr.write(`${message}\n${visible}`.replaceAll(decodeURIComponent(token), "<redacted-session>") + "\n");
-  process.exitCode = 1;
+  await reportFailure(page, token, error);
 } finally {
   await context.close();
   await browser.close();
