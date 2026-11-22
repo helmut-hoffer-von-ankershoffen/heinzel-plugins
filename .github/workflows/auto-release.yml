@@ -1,8 +1,9 @@
 name: Release bumped plugins
 
-# After a green main, release every plugin whose version has no tag yet, so app composition never finds a version that
-# was never released (ADR 0114). Dark until the repository variable RELEASE_CHANNELS is set; until then it only lists
-# what it would release. Each release goes through the reviewed Release one plugin workflow.
+# After a green main, release every plugin whose version has no tag yet and is not on PyPI yet, so a version bump is
+# published when it merges and app composition never finds a version that was never released (ADR 0114; owner decision
+# 2026-11-22: CI publishes on merge). Each release goes through the reviewed Release one plugin workflow (trusted
+# publishing); a plugin whose release is already running is skipped, so a release is never dispatched twice.
 
 on:
   workflow_run: # zizmor: ignore[dangerous-triggers] the job admits only a green push to this repository's main
@@ -36,27 +37,22 @@ jobs:
       # A workflow_run checks out the default branch's tip, never the triggering ref, and runs only when that tip is
       # the commit that just went green. Release one plugin builds main's tip too, so both see the same commit. If main
       # has moved on, the newer commit's own green run releases what is still untagged.
-      - name: Dispatch a release for each version without a tag
+      - name: Dispatch a release for each version not released yet
         env:
-          CHANNELS: ${{ vars.RELEASE_CHANNELS }}
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
         run: |
-          plugins="$(python3 scripts/plugin_versions.py unreleased)"
+          plugins="$(python3 scripts/plugin_versions.py unreleased --skip-published)"
           if [ -z "$plugins" ]; then
             echo "Every plugin version is released."
             exit 0
           fi
-          if [ "$CHANNELS" != edge ] && [ "$CHANNELS" != stable ]; then
-            echo "::warning::Not activated: app composition fails until these versions are released: ${plugins//$'\n'/ }"
-            exit 0
-          fi
-          active="$(gh run list --workflow release.yml --json status \
-            --jq 'map(select(.status != "completed")) | length')"
-          if [ "$active" != 0 ]; then
-            echo "A plugin release is running; the next green main picks up the rest."
-            exit 0
-          fi
+          active="$(gh run list --workflow release.yml --limit 100 --json status,displayTitle \
+            --jq '.[] | select(.status != "completed") | .displayTitle')"
           while read -r plugin; do
+            if grep -qxF "Release $plugin" <<< "$active"; then
+              echo "A release of $plugin is running already."
+              continue
+            fi
             gh workflow run release.yml --ref main -f plugin="$plugin" -f publish=true
           done <<< "$plugins"

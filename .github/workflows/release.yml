@@ -1,4 +1,5 @@
 name: Release one plugin
+run-name: Release ${{ inputs.plugin }}
 on:
   workflow_dispatch:
     inputs:

@@ -74,6 +74,17 @@ def test_auto_release_runs_only_trusted_code_from_a_green_main_tip():
     assert job["permissions"] == {"contents": "read", "actions": "write"}
 
 
+def test_auto_release_publishes_every_merged_bump_and_never_twice():
+    """Owner 2026-11-22: CI publishes a plugin when its bump merges; no channel switch keeps it dark."""
+    text = (ROOT / ".github/workflows/auto-release.yml").read_text()
+    run = yaml.safe_load(text)["jobs"]["release"]["steps"][-1]["run"]
+    assert "RELEASE_CHANNELS" not in text
+    assert "plugin_versions.py unreleased --skip-published" in run
+    assert 'grep -qxF "Release $plugin"' in run and "gh workflow run release.yml --ref main" in run
+    release = yaml.safe_load((ROOT / ".github/workflows/release.yml").read_text())
+    assert release["run-name"] == "Release ${{ inputs.plugin }}"
+
+
 def test_every_release_body_comes_from_the_changelog_notes():
     for name in ("compose", "release"):
         workflow = yaml.safe_load((ROOT / ".github/workflows" / f"{name}.yml").read_text())
