@@ -1,6 +1,7 @@
 """The gate guard fails a pull request that changes a guarded gate input, unless the owner labelled it."""
 
 import importlib.util
+import os
 import subprocess
 import sys
 from pathlib import Path
@@ -141,6 +142,9 @@ def test_the_job_blocks_and_sections_are_read_exactly():
 
 
 def test_git_reads_this_checkout_and_absent_files(tmp_path, monkeypatch):
+    # A git hook runs the tests with GIT_DIR and friends set: they would point git at the real repository.
+    for name in [name for name in os.environ if name.startswith("GIT_")]:
+        monkeypatch.delenv(name)
     identity = ["-c", "user.name=t", "-c", "user.email=t@example.invalid"]
     (tmp_path / "a.txt").write_text("one\n", encoding="utf-8")
     for args in (["init", "-q"], ["add", "a.txt"], [*identity, "commit", "-qm", "c"]):
