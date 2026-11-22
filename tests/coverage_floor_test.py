@@ -72,6 +72,7 @@ def test_a_shortfall_fails_as_not_met_with_its_reason(tmp_path, capsys, case):
     "case",
     [
         (None, "the Tooling coverage job passed but left no coverage-total artifact"),
+        ("", "the Tooling coverage job passed but left no coverage-total artifact"),
         ("eighty", "not a percentage"),
         ("101", "not a percentage"),
     ],
