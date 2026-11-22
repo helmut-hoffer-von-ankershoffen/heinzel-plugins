@@ -23,6 +23,8 @@ jobs:
     permissions:
       contents: write
       pull-requests: write
+    outputs:
+      uncovered: ${{ steps.uncovered.outputs.files }} # the Coverage floor job names them in its verdict
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -32,8 +34,13 @@ jobs:
           python-version: "3.14"
       - name: Measure the shared developer toolkit
         run: uv run --frozen --no-build --group tooling --extra checks coverage run -m pytest tests -q
-      - name: Record the total for the merge gate
+      - name: Record the total for the Coverage floor job
         run: uv run --frozen --no-build --group tooling --extra checks coverage report --format=total --precision=2 > coverage-total.txt
+      - id: uncovered
+        name: Name the least covered files for the Coverage floor verdict
+        run: |
+          uv run --frozen --no-build --group tooling --extra checks coverage report --sort=-miss --skip-covered --skip-empty --show-missing > coverage-files.txt || true
+          { echo 'files<<COVERAGE_EOF'; sed -n '3,14p' coverage-files.txt | grep -v '^-' | cut -c1-300 || true; echo 'COVERAGE_EOF'; } >> "$GITHUB_OUTPUT"
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
         with:
           name: coverage-total
@@ -189,10 +196,41 @@ jobs:
         with:
           name: ${{ matrix.name }}
           path: ${{ matrix.path }}/dist/*
+  # The coverage floor, judged inside this run (scripts/coverage_floor.py): the run tests the pull request's merge
+  # commit, so there is no stale tested base and no separate check. Its verdict names measured vs required percent,
+  # the scope and the least covered files; a broken judge says TOOL ERROR. CI OK requires it.
+  coverage-floor:
+    name: Coverage floor
+    if: ${{ !cancelled() }}
+    needs: [coverage]
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    outputs:
+      verdict: ${{ steps.judge.outputs.verdict }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - name: Download the total this run's Tooling coverage job measured
+        if: needs.coverage.result == 'success' || needs.coverage.result == 'failure'
+        uses: actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333 # v8.0.2
+        with:
+          name: coverage-total
+          path: ${{ runner.temp }}/coverage-total
+      - id: judge
+        name: Judge the coverage floor of this run's merge commit
+        if: ${{ !cancelled() }} # also after a failed download: the judge names a missing total
+        env:
+          COVERAGE_RESULT: ${{ needs.coverage.result }}
+          COVERAGE_TOTAL: ${{ runner.temp }}/coverage-total/coverage-total.txt
+          UNCOVERED: ${{ needs.coverage.outputs.uncovered }}
+        run: python3 -I scripts/coverage_floor.py
   ok:
     name: CI OK
     if: always()
-    needs: [policy, plan, plugin, coverage, screenshots]
+    needs: [policy, plan, plugin, coverage, coverage-floor, screenshots]
     runs-on: ubuntu-latest
     steps:
       - env:
@@ -200,5 +238,9 @@ jobs:
           PLAN: ${{ needs.plan.result }}
           PLUGIN: ${{ needs.plugin.result }}
           COVERAGE: ${{ needs.coverage.result }}
+          FLOOR: ${{ needs.coverage-floor.result }}
+          FLOOR_VERDICT: ${{ needs.coverage-floor.outputs.verdict }}
           SCREENSHOTS: ${{ needs.screenshots.result }}
-        run: test "$POLICY" = success && test "$PLAN" = success && test "$COVERAGE" = success && { test "$SCREENSHOTS" = success || test "$SCREENSHOTS" = skipped; } && { test "$PLUGIN" = success || test "$PLUGIN" = skipped; }
+        run: |
+          if [ "$FLOOR" != success ]; then echo "::error::Coverage floor ended with ${FLOOR:-no result}: ${FLOOR_VERDICT:-no verdict}"; fi
+          test "$POLICY" = success && test "$PLAN" = success && test "$COVERAGE" = success && test "$FLOOR" = success && { test "$SCREENSHOTS" = success || test "$SCREENSHOTS" = skipped; } && { test "$PLUGIN" = success || test "$PLUGIN" = skipped; }
