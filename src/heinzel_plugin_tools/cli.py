@@ -907,6 +907,8 @@ def capture_plugin(
     open_preview: bool = False,
     draft_only: bool = False,
     prepared_python: Path | None = None,
+    verify: bool = False,
+    strict_images: bool = False,
 ) -> int:
     """Record the owning gallery with on-demand pinned browser tooling and clean machine output."""
     command = [
@@ -929,6 +931,8 @@ def capture_plugin(
         (headed, "--headed"),
         (open_preview, "--open"),
         (draft_only, "--draft"),
+        (verify, "--verify"),
+        (strict_images, "--strict-images"),
     ):
         if enabled:
             command.append(flag)
@@ -1240,10 +1244,18 @@ def screenshot_main(arguments: list[str], *, check: bool = False) -> int:
     parser.add_argument("--open", action="store_true", help="Open the local contact sheet after a successful capture")
     parser.add_argument("--headed", action="store_true", help="Show the capture browser for debugging scenes")
     parser.add_argument("--draft", action="store_true", help="Capture privately into .preview without publishing")
+    parser.add_argument(
+        "--verify",
+        action="store_true",
+        help="CI: capture privately again and fail when a scene's rendered text differs from the committed gallery",
+    )
+    parser.add_argument("--strict-images", action="store_true", help="With --verify: image bytes must be identical too")
     args = parser.parse_args(arguments)
     try:
-        if sum((bool(check or args.check), args.init, args.draft)) > 1:
-            raise CaptureError("Choose one screenshot mode: --init, --check, --draft or capture")
+        if sum((bool(check or args.check), args.init, args.draft, args.verify)) > 1:
+            raise CaptureError("Choose one screenshot mode: --init, --check, --draft, --verify or capture")
+        if args.strict_images and not args.verify:
+            raise CaptureError("--strict-images needs --verify")
         inventory = projects()
         if args.all:
             if not (check or args.check):
@@ -1279,6 +1291,8 @@ def screenshot_main(arguments: list[str], *, check: bool = False) -> int:
                 open_preview=args.open,
                 draft_only=args.draft,
                 prepared_python=args.prepared_python,
+                verify=args.verify,
+                strict_images=args.strict_images,
             )
         print(json.dumps(result) if args.json else f"✓ {project.name}: {result.get('plan', 'screenshots are fresh')}")
         return 0

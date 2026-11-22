@@ -12,6 +12,7 @@ import os
 import re
 import socket
 import stat
+import sys
 from pathlib import Path
 
 DRAFT = Path(".preview/screenshots/draft")
@@ -118,10 +119,36 @@ def _confidentiality_module():
     return module
 
 
+def terms_required() -> bool:
+    """In CI the terms must be configured (as the policy job requires them), unless CONFIDENTIALITY_REQUIRED=false."""
+    return os.environ.get("GITHUB_ACTIONS") == "true" and os.environ.get("CONFIDENTIALITY_REQUIRED") != "false"
+
+
+_WARNED: list[bool] = []
+
+
 def confidential_patterns() -> list[re.Pattern[str]]:
-    """The configured confidential terms as the commit hook matches them; none when no terms are configured."""
+    """The configured confidential terms as the commit hook matches them.
+
+    Without terms the guard cannot scan for them: CI fails (`terms_required`), a local run warns once on stderr.
+    """
     module = _confidentiality_module()
-    return module.patterns(module.load_terms()) if module else []
+    terms = module.load_terms() if module else []
+    if not terms:
+        if terms_required():
+            raise CaptureError(
+                "No confidential terms are configured, so the screenshot guard would scan for none. "
+                "Set CONFIDENTIAL_TERMS from the repository secret (or CONFIDENTIALITY_REQUIRED=false where none exist)"
+            )
+        if not _WARNED:
+            _WARNED.append(True)
+            print(
+                "warning: no confidential terms are configured (CONFIDENTIAL_TERMS or "
+                "~/.config/heinzel-dev/confidential-terms); the screenshot guard checks everything else",
+                file=sys.stderr,
+            )
+        return []
+    return module.patterns(terms)
 
 
 def _private_ip(text: str) -> bool:

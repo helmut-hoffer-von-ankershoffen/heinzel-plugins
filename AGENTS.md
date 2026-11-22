@@ -13,7 +13,8 @@ Each directory in `plugins/` is an independent project. Read README.md for ownin
   owning protected workflow.
 - After an interface change: `make screenshots NAME=<owner> OPEN=1`. The plan is the hand-edited
   `docs/screenshot-definition.json`; capture is deterministic (Playwright, fixture scenes, fictional data, text
-  guards) and never calls an agent. Offline freshness: `make screenshots-check NAME=<owner>`
+  guards) and never calls an agent. Offline freshness: `make screenshots-check NAME=<owner>`; CI re-captures
+  each changed plugin (`make screenshots-verify NAME=<owner>`) and fails on changed scene text
   ([guide](docs/SCREENSHOT_AUTHORING.md)).
 
 ## Rules

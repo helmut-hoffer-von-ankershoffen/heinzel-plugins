@@ -52,6 +52,7 @@ OUTPUT = Path("docs/assets/screenshots")
 MANIFEST = OUTPUT / "capture.json"
 MAX_IMAGE = 500 * 1024
 MAX_SCENES = 8
+CLOCK_READING = re.compile(r"(?<![\d:])\d{1,2}:\d{2}(?::\d{2})?(?![\d:])")
 IGNORED = {"node_modules", "__pycache__", ".venv", "dist", ".git", ".acceptance", ".preview"}
 
 
@@ -1222,6 +1223,55 @@ def capture(
     return publish_draft(root)
 
 
+def verify(
+    root: Path, *, core: str | None, headed: bool, prepared_python: Path | None = None, strict_images: bool = False
+) -> dict:
+    """CI's re-capture: capture privately again and compare with the committed gallery, scene by scene.
+
+    The local digest covers only UI inputs, so a displayed string that comes from plugin Python or metadata, or a
+    Core change, can leave a committed gallery behind; a fresh deterministic capture against the plugin's locked Core
+    shows it. The rendered text of every scene (its transcript) must be identical, except clock readings (hh:mm),
+    which fixtures may anchor on the real time. Image bytes are compared and listed; they gate with `strict_images`,
+    since antialiasing differs between runs and fonts between operating systems.
+    """
+    root = root.resolve()
+    check_capture(root)
+    command = regenerate_command(root)
+    capture(root, core=core, headed=headed, draft_only=True, prepared_python=prepared_python)
+    plan = read_plan(root)
+    folder = safe_path(root, DRAFT)
+    manifest = json.loads(safe_path(root, MANIFEST).read_text())
+    draft = json.loads(safe_path(folder, DRAFT_MANIFEST).read_text())
+    texts, images = [], []
+    for scene in plan["scenes"]:
+        name = scene["name"]
+        fresh = safe_path(folder, f"{name}.txt").read_text()
+        committed = safe_path(root, OUTPUT / f"{name}.txt").read_text()
+        if CLOCK_READING.sub("hh:mm", fresh) != CLOCK_READING.sub("hh:mm", committed):
+            texts.append(f"{name}.txt")
+        if safe_path(folder, f"{name}.png").read_bytes() != safe_path(root, OUTPUT / f"{name}.png").read_bytes():
+            images.append(f"{name}.png")
+    report = {
+        "ok": not texts and not (strict_images and images),
+        "plugin": manifest["plugin"],
+        "screenshots": expected_shots(plan),
+        "preview": str(folder / "index.html"),
+        "verified": True,
+        "transcripts_differ": texts,
+        "images_differ": images,
+        "core_version": draft["core_version"],
+        "recorded_core_version": manifest["core_version"],
+    }
+    if not report["ok"]:
+        differ = ", ".join(texts + (images if strict_images else []))
+        raise StaleGallery(
+            f"{manifest['plugin']}: a fresh capture against Core {draft['core_version']} differs from the committed "
+            f"gallery ({differ}). Run {command} and commit the regenerated gallery",
+            command,
+        )
+    return report
+
+
 def main() -> int:
     """Offer a readable human workflow and a stable JSON result for agents."""
     parser = argparse.ArgumentParser(description=__doc__)
@@ -1232,20 +1282,34 @@ def main() -> int:
     parser.add_argument("--headed", action="store_true")
     parser.add_argument("--draft", action="store_true")
     parser.add_argument("--open", action="store_true")
+    parser.add_argument("--verify", action="store_true")
+    parser.add_argument("--strict-images", action="store_true")
     args = parser.parse_args()
     try:
-        report = capture(
-            args.project.resolve(),
-            core=args.core,
-            headed=args.headed,
-            draft_only=args.draft,
-            prepared_python=args.prepared_python,
+        report = (
+            verify(
+                args.project.resolve(),
+                core=args.core,
+                headed=args.headed,
+                prepared_python=args.prepared_python,
+                strict_images=args.strict_images,
+            )
+            if args.verify
+            else capture(
+                args.project.resolve(),
+                core=args.core,
+                headed=args.headed,
+                draft_only=args.draft,
+                prepared_python=args.prepared_python,
+            )
         )
         if args.json:
             print(json.dumps(report))
         else:
             outcome = (
-                "private draft captures ready"
+                "scenes re-captured; the committed gallery matches"
+                if report.get("verified")
+                else "private draft captures ready"
                 if report.get("draft")
                 else "screenshots published to the gallery, catalog metadata and README; review the diff"
             )
@@ -1260,9 +1324,10 @@ def main() -> int:
     except Exception as error:  # The subprocess boundary must preserve the JSON result even if a browser adapter fails.
         message = safe_failure_message(error)
         if args.json:
-            print(
-                json.dumps({"ok": False, "error": message, "next": "Review docs/screenshot-definition.json and retry"})
-            )
+            failure = {"ok": False, "error": message, "next": "Review docs/screenshot-definition.json and retry"}
+            if isinstance(error, StaleGallery):
+                failure |= {"stale": True, "command": error.command, "next": error.command}
+            print(json.dumps(failure))
         print(f"Capture failed: {message}", file=sys.stderr)
         return 1
 

@@ -1,5 +1,6 @@
 """A whole capture runs scene by scene in an isolated profile, deterministically and without any agent."""
 
+import hashlib
 import json
 import os
 import signal
@@ -881,3 +882,39 @@ def test_a_failed_restore_never_hides_the_capture_failure(harness, monkeypatch, 
     ):
         raise RuntimeError("scene failed")
     assert "not restored" in capsys.readouterr().err
+
+
+def test_verify_recaptures_and_passes_when_every_scene_renders_the_same_text(harness):
+    record(harness)
+    report = capture.verify(harness.owner, core=None, headed=False, prepared_python=harness.interpreter)
+    assert report["ok"] and report["transcripts_differ"] == [] and report["images_differ"] == []
+
+
+def test_verify_fails_naming_the_command_when_displayed_text_changed_outside_the_ui_inputs(harness):
+    """The reviewer's probe: a label from plugin Python changes; the digest stays, the re-capture catches it."""
+    record(harness)
+    (harness.interpreter.parent / "hz").write_text('#!/bin/sh\necho "Ahoy, Mira!"\n')
+    assert capture.check_capture(harness.owner)["fresh"], "the narrow local digest does not see this change"
+    with pytest.raises(privacy.StaleGallery, match=r"differs from the committed gallery \(cli.txt\)") as stale:
+        capture.verify(harness.owner, core=None, headed=False, prepared_python=harness.interpreter)
+    assert stale.value.command == "make screenshots NAME=heinzel-harbor"
+
+
+def test_verify_lists_image_differences_and_gates_them_only_when_strict(harness):
+    record(harness)
+    harness.settings["png"] = PNG + b"other-font-rendering"
+    report = capture.verify(harness.owner, core=None, headed=False, prepared_python=harness.interpreter)
+    assert report["ok"] and len(report["images_differ"]) == 3
+    with pytest.raises(privacy.StaleGallery):
+        capture.verify(harness.owner, core=None, headed=False, prepared_python=harness.interpreter, strict_images=True)
+
+
+def test_verify_ignores_clock_readings_but_not_labels(harness):
+    record(harness)
+    (harness.interpreter.parent / "hz").write_text('#!/bin/sh\necho "Hello, Mira! 10:22"\n')
+    transcript = harness.owner / capture.OUTPUT / "cli.txt"
+    transcript.write_text("Hello, Mira! 02:01\n")
+    manifest = json.loads((harness.owner / capture.MANIFEST).read_text())
+    manifest["transcripts"]["cli.txt"] = hashlib.sha256(transcript.read_bytes()).hexdigest()
+    (harness.owner / capture.MANIFEST).write_text(json.dumps(manifest))
+    assert capture.verify(harness.owner, core=None, headed=False, prepared_python=harness.interpreter)["ok"]

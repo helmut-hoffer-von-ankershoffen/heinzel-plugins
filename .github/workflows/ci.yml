@@ -31,6 +31,8 @@ jobs:
         with:
           python-version: "3.14"
       - name: Measure the shared developer toolkit
+        env:
+          CONFIDENTIALITY_REQUIRED: 'false' # fictional fixtures only; the guard's CI requirement has its own tests
         run: uv run --frozen --no-build --group tooling --extra checks coverage run -m pytest tests -q
       - name: Record the total for the merge gate
         run: uv run --frozen --no-build --group tooling --extra checks coverage report --format=total --precision=2 > coverage-total.txt
@@ -119,6 +121,7 @@ jobs:
       - name: Capture a new unknown plugin, detect staleness, fail a scene and recover
         env:
           HZ_CAPTURE_E2E: '1'
+          CONFIDENTIALITY_REQUIRED: 'false' # a synthetic fictional plugin
         run: uv run --frozen --with playwright==1.64.1 --group tooling pytest tests/capture_e2e_test.py -q
   plugin:
     permissions:
@@ -133,6 +136,9 @@ jobs:
     timeout-minutes: 15
     env:
       PLUGIN_PRIVATE: ${{ github.event.repository.private }}
+      # The screenshot guards scan for the confidential terms; without them they fail here instead of scanning none.
+      CONFIDENTIAL_TERMS: ${{ secrets.CONFIDENTIAL_TERMS }}
+      CONFIDENTIALITY_REQUIRED: ${{ github.event_name != 'pull_request' || (github.event.pull_request.head.repo.full_name == github.repository && github.actor != 'dependabot[bot]') }}
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
@@ -189,6 +195,38 @@ jobs:
         with:
           name: ${{ matrix.name }}
           path: ${{ matrix.path }}/dist/*
+  gallery:
+    # The local digest covers only UI inputs; this re-capture against the plugin's locked Core catches displayed text
+    # that comes from plugin Python, metadata or Core. Deterministic (Playwright, fixtures), no agent.
+    # Not yet required by CI OK: the committed galleries predate Core 0.9.54 (its first-Heinzel panel covers the
+    # captures; the slack and google definitions no longer run). It turns required once those are fixed.
+    name: Screenshot gallery re-capture
+    permissions:
+      contents: read
+    needs: plan
+    if: needs.plan.outputs.selected == 'True'
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.plan.outputs.matrix) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    env:
+      CONFIDENTIAL_TERMS: ${{ secrets.CONFIDENTIAL_TERMS }}
+      CONFIDENTIALITY_REQUIRED: ${{ github.event_name != 'pull_request' || (github.event.pull_request.head.repo.full_name == github.repository && github.actor != 'dependabot[bot]') }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e # v10.3.2
+        with:
+          enable-cache: true
+      - name: Re-capture against the locked Core and compare every scene's text with the committed gallery
+        if: hashFiles(format('{0}/docs/screenshot-definition.json', matrix.path)) != ''
+        env:
+          PLUGIN: ${{ matrix.name }}
+        run: |
+          uv run --frozen --with playwright==1.64.1 --group tooling playwright install --with-deps chromium
+          make screenshots-verify NAME="$PLUGIN"
   ok:
     name: CI OK
     if: always()

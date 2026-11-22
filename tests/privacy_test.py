@@ -153,3 +153,24 @@ def test_the_screenshot_path_never_invokes_an_agent():
         source = (root / name).read_text().lower()
         found = [word for word in banned if word in source]
         assert not found, f"{name} mentions {found}"
+
+
+def test_ci_refuses_to_scan_without_confidential_terms(monkeypatch):
+    monkeypatch.delenv("CONFIDENTIAL_TERMS", raising=False)
+    monkeypatch.setenv("CONFIDENTIAL_TERMS_FILE", "/nonexistent")
+    monkeypatch.setenv("GITHUB_ACTIONS", "true")
+    monkeypatch.delenv("CONFIDENTIALITY_REQUIRED", raising=False)
+    with pytest.raises(privacy.CaptureError, match="No confidential terms are configured"):
+        privacy.scan_text("A fictional harbor")
+    monkeypatch.setenv("CONFIDENTIALITY_REQUIRED", "false")
+    privacy.scan_text("A fictional harbor")
+
+
+def test_a_local_run_without_terms_warns_once_and_scans_the_rest(monkeypatch, capsys):
+    monkeypatch.delenv("CONFIDENTIAL_TERMS", raising=False)
+    monkeypatch.setenv("CONFIDENTIAL_TERMS_FILE", "/nonexistent")
+    monkeypatch.delenv("GITHUB_ACTIONS", raising=False)
+    monkeypatch.setattr(privacy, "_WARNED", [])
+    privacy.scan_text("A fictional harbor")
+    privacy.scan_text("A fictional harbor")
+    assert capsys.readouterr().err.count("no confidential terms are configured") == 1

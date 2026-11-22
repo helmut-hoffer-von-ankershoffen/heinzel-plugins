@@ -148,6 +148,18 @@ the gallery stale. The owning checks and the `owning-plugin-checks` hook verify 
 fails with the exact command to run (`make screenshots NAME=<plugin>`), never by starting an agent or a browser.
 In a Heinzel worktree `sm check` regenerates a stale gallery and `sm ship` takes it into the shipped commit.
 
+The narrow local digest cannot see displayed text that comes from plugin Python, metadata or Core. CI therefore
+re-captures the gallery of every plugin a pull request changes against the Core version the plugin's lock pins
+(`make screenshots-verify NAME=<plugin>`) and fails when any scene renders different text than its committed
+transcript, naming `make screenshots NAME=<plugin>`. (The job reports but is not yet required: the committed
+galleries predate Core 0.9.54, whose first-Heinzel panel the capture does not dismiss yet.) Image bytes are compared and listed too, but they do not gate:
+two captures differ in antialiasing and cursor pixels even on one machine, and fonts differ between operating
+systems (`--strict-images` makes them gate). Clock readings (hh:mm) are not compared, since fixtures may anchor
+their data on the real time; set `browser_time` to fix the browser's clock.
+
+In CI the guards fail when no confidential terms are configured, instead of scanning for none; a local run without
+terms warns once and checks everything else.
+
 The toolkit's dedicated CI journey creates a new unknown plugin, captures real Today and terminal output against an
 installed released SDK, publishes, detects staleness, fails a scene, and recovers. It also proves authentication
 presentation is removed before both success and failure image saves. Ordinary offline checks neither import a
