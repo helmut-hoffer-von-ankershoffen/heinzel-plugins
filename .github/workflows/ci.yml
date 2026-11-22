@@ -227,10 +227,63 @@ jobs:
           COVERAGE_TOTAL: ${{ runner.temp }}/coverage-total/coverage-total.txt
           UNCOVERED: ${{ needs.coverage.outputs.uncovered }}
         run: python3 -I scripts/coverage_floor.py
+  # Sonar's overall-code ratings (scripts/sonar_ratings.py): the SonarCloud check judges new code; this keeps
+  # reliability, security and maintainability of the whole project at A. CI OK requires it on pull requests.
+  sonar-ratings:
+    name: Sonar ratings
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    outputs:
+      verdict: ${{ steps.judge.outputs.verdict }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - id: judge
+        name: Overall reliability, security and maintainability are rated A
+        run: python3 -I scripts/sonar_ratings.py
+  # The gate guard (scripts/gate_guard.py, main's copy): a pull request that changes the coverage, floor, Sonar or
+  # CI OK jobs, their scripts or pyproject's coverage and pytest sections needs the owner's label gate-change-approved.
+  gate-guard:
+    name: Gate guard
+    if: github.event_name == 'pull_request'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+      pull-requests: read # the pull request's labels
+      issues: read # who added the label, and when
+      actions: read # when this run started
+    outputs:
+      verdict: ${{ steps.judge.outputs.verdict }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - id: judge
+        name: Guarded gate inputs are unchanged, or the owner approved the change
+        env:
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          # the base is the test merge's first parent: main as it is merged into, not the PR's older base
+          BASE_SHA="$(git rev-parse HEAD^1)"
+          export BASE_SHA
+          # main's copy judges, so a pull request can't loosen the guard that judges it; a first guard runs its own
+          if git cat-file -e "$BASE_SHA:scripts/gate_guard.py" 2>/dev/null; then
+            git show "$BASE_SHA:scripts/gate_guard.py" > "$RUNNER_TEMP/gate_guard.py"
+          else
+            cp scripts/gate_guard.py "$RUNNER_TEMP/gate_guard.py"
+          fi
+          python3 -I "$RUNNER_TEMP/gate_guard.py"
   ok:
     name: CI OK
     if: always()
-    needs: [policy, plan, plugin, coverage, coverage-floor, screenshots]
+    needs: [policy, plan, plugin, coverage, coverage-floor, sonar-ratings, gate-guard, screenshots]
     runs-on: ubuntu-latest
     steps:
       - env:
@@ -240,7 +293,16 @@ jobs:
           COVERAGE: ${{ needs.coverage.result }}
           FLOOR: ${{ needs.coverage-floor.result }}
           FLOOR_VERDICT: ${{ needs.coverage-floor.outputs.verdict }}
+          SONAR: ${{ needs.sonar-ratings.result }}
+          SONAR_VERDICT: ${{ needs.sonar-ratings.outputs.verdict }}
+          GUARD: ${{ needs.gate-guard.result }}
+          GUARD_VERDICT: ${{ needs.gate-guard.outputs.verdict }}
+          EVENT: ${{ github.event_name }}
           SCREENSHOTS: ${{ needs.screenshots.result }}
         run: |
           if [ "$FLOOR" != success ]; then echo "::error::Coverage floor ended with ${FLOOR:-no result}: ${FLOOR_VERDICT:-no verdict}"; fi
-          test "$POLICY" = success && test "$PLAN" = success && test "$COVERAGE" = success && test "$FLOOR" = success && { test "$SCREENSHOTS" = success || test "$SCREENSHOTS" = skipped; } && { test "$PLUGIN" = success || test "$PLUGIN" = skipped; }
+          # Sonar ratings and the gate guard judge pull requests; a push to main or a dispatch skips them
+          pr_only() { test "$1" = success || { test "$1" = skipped && test "$EVENT" != pull_request; }; }
+          pr_only "$SONAR" || echo "::error::Sonar ratings ended with ${SONAR:-no result}: ${SONAR_VERDICT:-no verdict}"
+          pr_only "$GUARD" || echo "::error::Gate guard ended with ${GUARD:-no result}: ${GUARD_VERDICT:-no verdict}"
+          pr_only "$SONAR" && pr_only "$GUARD" && test "$POLICY" = success && test "$PLAN" = success && test "$COVERAGE" = success && test "$FLOOR" = success && { test "$SCREENSHOTS" = success || test "$SCREENSHOTS" = skipped; } && { test "$PLUGIN" = success || test "$PLUGIN" = skipped; }
