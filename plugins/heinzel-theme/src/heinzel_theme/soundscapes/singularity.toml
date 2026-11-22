@@ -1,0 +1,9 @@
+# Singularity, a stream on YouTube (ADR 0058): the default soundscape from Core 0.9.55 on, played only after Play.
+# By default, played in YouTube's privacy-enhanced player; nothing of YouTube loads until you press Play.
+name = "singularity"
+title = "Singularity"
+kind = "stream"
+
+[stream]
+provider = "youtube"
+video = "AvtStYuO79Y"
