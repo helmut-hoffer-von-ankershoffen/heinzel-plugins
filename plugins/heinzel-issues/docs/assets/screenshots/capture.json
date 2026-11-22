@@ -1,84 +1,18 @@
 {
-  "format": 1,
+  "format": 2,
   "plugin": "heinzel-issues",
   "core_version": "0.9.50",
-  "inputs_sha256": "2a9c862a9ff5ae6d3d3e7e3de7afae2e59ebf06e05be3f9e7ee7e141ef20189e",
+  "inputs_sha256": "c93416362d8788ba163d6c6e1d763ada24c8da3e31f552fe8d17dccb2aaef61e",
   "images": {
     "docs/assets/screenshots/issues-page.png": "ffa3b1fd6a41a37baab4cddc12b2565edb72a0d6f9d024bd73d650c18cc56ecb",
     "docs/assets/screenshots/report-history.png": "426aed8ef238701fd660b34d8ac7875b16dd592627ed70646c923b3c09cd9ffc",
     "docs/assets/screenshots/today-open-reports.png": "b791365b4fc0750d8d1a174a14fa217e4d30782474d676e0af995c5bdf9ff124",
     "docs/assets/screenshots/cli-list.png": "e8a2c412a35760cf9eb4725826c6b6ac075d532ddc910392a48e23af56b563bc"
   },
-  "review_bundle": {
-    "format": 2,
-    "source_story": {
-      "path": "source-story.md",
-      "sha256": "0cea3289f35784a2c9d02cb6d86721d347a28d9d58612ed6bab7a93f74d6664d"
-    },
-    "definition": {
-      "format": 1,
-      "reviewer": "direct_ci_review",
-      "source_sha256": "51557e7a837b44d11c5f63d2e7a469ab5725ad86f0a50e9ece410404590b71c2",
-      "plan_sha256": "e7395659d00a341e8c5fcf62a26cc2765e7812e405390baa9fe1ae815fab2710",
-      "story_sha256": "0cea3289f35784a2c9d02cb6d86721d347a28d9d58612ed6bab7a93f74d6664d"
-    },
-    "plugin": "heinzel-issues",
-    "core_version": "0.9.50",
-    "inputs_sha256": "2a9c862a9ff5ae6d3d3e7e3de7afae2e59ebf06e05be3f9e7ee7e141ef20189e",
-    "screenshots": [
-      {
-        "path": "docs/assets/screenshots/issues-page.png",
-        "surface": "ui",
-        "caption": "Three fictional reports: received, being worked on, and released in 0.9.27 \u2014 with a form to send another"
-      },
-      {
-        "path": "docs/assets/screenshots/report-history.png",
-        "surface": "ui",
-        "caption": "A fictional report opened: what was sent, the file sent with it, and its history up to the release"
-      },
-      {
-        "path": "docs/assets/screenshots/today-open-reports.png",
-        "surface": "ui",
-        "caption": "Your open fictional reports and requests on Today, in dark mode; done ones leave the list"
-      },
-      {
-        "path": "docs/assets/screenshots/cli-list.png",
-        "surface": "cli",
-        "caption": "The same fictional reports and their plain states through the real CLI"
-      }
-    ],
-    "images": {
-      "issues-page.png": "ffa3b1fd6a41a37baab4cddc12b2565edb72a0d6f9d024bd73d650c18cc56ecb",
-      "report-history.png": "426aed8ef238701fd660b34d8ac7875b16dd592627ed70646c923b3c09cd9ffc",
-      "today-open-reports.png": "b791365b4fc0750d8d1a174a14fa217e4d30782474d676e0af995c5bdf9ff124",
-      "cli-list.png": "e8a2c412a35760cf9eb4725826c6b6ac075d532ddc910392a48e23af56b563bc"
-    },
-    "transcripts": {
-      "issues-page.txt": "d43891f477e558d8b5db612d517e13b632a4dcef8c1d7176f501a70fa987825f",
-      "report-history.txt": "9735e880d995743c1bccb21a6cb26dfd92ed74870a12414cb02ef0091ee1ecdd",
-      "today-open-reports.txt": "9fe2ed3e454985852718e8fcf383ca9c90e126af14d0eb79baed003052316577",
-      "cli-list.txt": "d0eac2c0b1b435cac45b7f7052b732fe1e8f619035e7778e11b8f6e6101ff08f"
-    },
-    "bundle_sha256": "436d2b0a627a9dfedf69ac82373933447d43aef69df6176050f3c0194cc5275f"
-  },
-  "privacy_review": {
-    "format": 1,
-    "bundle_sha256": "436d2b0a627a9dfedf69ac82373933447d43aef69df6176050f3c0194cc5275f",
-    "reviewer": "direct_ci_review",
-    "decision": "approve",
-    "checked_images": [
-      "cli-list.png",
-      "issues-page.png",
-      "report-history.png",
-      "today-open-reports.png"
-    ],
-    "checks": {
-      "tokens_absent": true,
-      "personal_data_absent": true,
-      "feature_relevant": true,
-      "multiple_ui_scenes": true,
-      "captions_accurate": true
-    },
-    "findings": []
+  "transcripts": {
+    "issues-page.txt": "d43891f477e558d8b5db612d517e13b632a4dcef8c1d7176f501a70fa987825f",
+    "report-history.txt": "9735e880d995743c1bccb21a6cb26dfd92ed74870a12414cb02ef0091ee1ecdd",
+    "today-open-reports.txt": "9fe2ed3e454985852718e8fcf383ca9c90e126af14d0eb79baed003052316577",
+    "cli-list.txt": "d0eac2c0b1b435cac45b7f7052b732fe1e8f619035e7778e11b8f6e6101ff08f"
   }
 }

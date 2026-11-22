@@ -1,7 +1,85 @@
 {
   "format": 1,
-  "reviewer": "direct_ci_review",
-  "source_sha256": "51557e7a837b44d11c5f63d2e7a469ab5725ad86f0a50e9ece410404590b71c2",
-  "plan_sha256": "e7395659d00a341e8c5fcf62a26cc2765e7812e405390baa9fe1ae815fab2710",
-  "story_sha256": "0cea3289f35784a2c9d02cb6d86721d347a28d9d58612ed6bab7a93f74d6664d"
+  "bootstrap": "docs/screenshot_fixture.py",
+  "browser_time": "2026-11-08T10:00:00Z",
+  "scenes": [
+    {
+      "name": "issues-page",
+      "surface": "ui",
+      "route": "/?panel=issues:requests",
+      "appearance": "light",
+      "caption": "Three fictional reports: received, being worked on, and released in 0.9.27 — with a form to send another",
+      "steps": [
+        {
+          "action": "wait",
+          "role": "list",
+          "name": "Your reports and requests"
+        },
+        {
+          "action": "click",
+          "role": "button",
+          "name_regex": "^Dismiss Doctor",
+          "optional": true
+        }
+      ]
+    },
+    {
+      "name": "report-history",
+      "surface": "ui",
+      "route": "/?panel=issues:requests",
+      "appearance": "light",
+      "caption": "A fictional report opened: what was sent, the file sent with it, and its history up to the release",
+      "steps": [
+        {
+          "action": "wait",
+          "role": "list",
+          "name": "Your reports and requests"
+        },
+        {
+          "action": "click",
+          "role": "button",
+          "name_regex": "^Dismiss Doctor",
+          "optional": true
+        },
+        {
+          "action": "click",
+          "role": "button",
+          "name_regex": "^Weather shows yesterday's rain"
+        },
+        {
+          "action": "wait",
+          "role": "list",
+          "name": "History"
+        }
+      ]
+    },
+    {
+      "name": "today-open-reports",
+      "surface": "ui",
+      "route": "/",
+      "appearance": "dark",
+      "caption": "Your open fictional reports and requests on Today, in dark mode; done ones leave the list",
+      "steps": [
+        {
+          "action": "wait",
+          "text": "Your reports and requests"
+        },
+        {
+          "action": "click",
+          "role": "button",
+          "name_regex": "^Dismiss Doctor",
+          "optional": true
+        }
+      ]
+    },
+    {
+      "name": "cli-list",
+      "surface": "cli",
+      "caption": "The same fictional reports and their plain states through the real CLI",
+      "command": [
+        "issues",
+        "list"
+      ]
+    }
+  ]
 }

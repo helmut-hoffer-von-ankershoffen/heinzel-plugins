@@ -1,7 +1,122 @@
 {
   "format": 1,
-  "reviewer": "story-confirm-sonnet",
-  "source_sha256": "bd76864fb43ba8a61fa4aaf430cb65f9bb408ef23002591dbae0a6d89f2b36d3",
-  "plan_sha256": "1b6bf8608b2ca568abc9043bdedc32e4dc48a79473b1e59a116075c3c348d9a1",
-  "story_sha256": "923a1a10b6221fc91e6811d69701658ef00744bcd51354724894da91d6fa1191"
+  "bootstrap": "docs/screenshot_fixture.py",
+  "browser_time": "2026-11-02T10:00:00+01:00",
+  "scenes": [
+    {
+      "name": "review-slack-notice",
+      "surface": "ui",
+      "route": "/",
+      "appearance": "light",
+      "caption": "Demo data: Mira reviews the fictional Slack account, destination, scope and complete weekly-report notice before delivery.",
+      "timeout_ms": 20000,
+      "viewport": {
+        "width": 1440,
+        "height": 1700
+      },
+      "steps": [
+        {
+          "action": "click",
+          "role": "button",
+          "name": "New chat: switch chats"
+        },
+        {
+          "action": "click",
+          "role": "button",
+          "within_role": "dialog",
+          "name_regex": "^text hz-[0-9A-HJKMNP-TV-Z]{26}\\b"
+        },
+        {
+          "action": "wait",
+          "role": "heading",
+          "name": "The Heinzel proposes"
+        },
+        {
+          "action": "wait",
+          "text": "Review exact channel posting account, destination, scope and full message"
+        },
+        {
+          "action": "wait",
+          "role": "button",
+          "name": "Confirm"
+        },
+        {
+          "action": "wait",
+          "role": "button",
+          "name": "Decline"
+        }
+      ],
+      "focus": {
+        "role": "region",
+        "name": "The Heinzel proposes"
+      }
+    },
+    {
+      "name": "slack-notice-delivered",
+      "surface": "ui",
+      "route": "/",
+      "appearance": "dark",
+      "caption": "Demo data: after Confirm, Core's chat reports that the channel delivered the fictional notice; this does not approve a captured write.",
+      "timeout_ms": 20000,
+      "viewport": {
+        "width": 900,
+        "height": 560
+      },
+      "steps": [
+        {
+          "action": "click",
+          "role": "tab",
+          "name": "Chat"
+        },
+        {
+          "action": "click",
+          "role": "button",
+          "name": "New chat: switch chats"
+        },
+        {
+          "action": "click",
+          "role": "button",
+          "within_role": "dialog",
+          "name_regex": "^text hz-[0-9A-HJKMNP-TV-Z]{26}\\b"
+        },
+        {
+          "action": "wait",
+          "role": "heading",
+          "name": "The Heinzel proposes"
+        },
+        {
+          "action": "wait",
+          "text": "Review exact channel posting account, destination, scope and full message"
+        },
+        {
+          "action": "click",
+          "role": "button",
+          "within_role": "region",
+          "name": "Confirm"
+        },
+        {
+          "action": "wait",
+          "text": "Ran `Review exact channel posting account, destination, scope and full message`: The channel reported delivered. This does not approve the captured write."
+        }
+      ]
+    },
+    {
+      "name": "slack-draft-cli",
+      "surface": "cli",
+      "command": [
+        "showcase",
+        "share"
+      ],
+      "caption": "Demo data: the fictional weekly-report draft and printed button labels, rendered in the terminal from Slack message blocks."
+    },
+    {
+      "name": "slack-draft-decision-cli",
+      "surface": "cli",
+      "command": [
+        "showcase",
+        "answers"
+      ],
+      "caption": "Demo data: fictional clicks exercise the real decision code; Mira's exact approval records one reply while invalid attempts are refused."
+    }
+  ]
 }

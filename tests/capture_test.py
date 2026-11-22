@@ -1,6 +1,5 @@
 """Screenshot authoring stays isolated, repeatable, reviewable and usable from agents."""
 
-import copy
 import hashlib
 import json
 import os
@@ -12,7 +11,7 @@ from types import SimpleNamespace
 
 import pytest
 
-from heinzel_plugin_tools import capture, cli, planning, privacy
+from heinzel_plugin_tools import capture, cli, privacy
 
 pytestmark = pytest.mark.unit
 
@@ -31,65 +30,58 @@ def owner(tmp_path):
 def recorded(owner):
     capture.write_default_plan(owner)
     plan = capture.read_plan(owner)
-    shots = []
-    for scene in plan["scenes"]:
-        path = capture.OUTPUT / f"{scene['name']}.png"
-        (owner / path).parent.mkdir(parents=True, exist_ok=True)
-        (owner / path).write_bytes(b"\x89PNG\r\n\x1a\nfictional-test-capture")
-        shots.append({"path": path.as_posix(), "surface": scene["surface"], "caption": scene["caption"]})
+    shots = capture.expected_shots(plan)
+    for shot in shots:
+        (owner / shot["path"]).parent.mkdir(parents=True, exist_ok=True)
+        (owner / shot["path"]).write_bytes(b"\x89PNG\r\n\x1a\nfictional-test-capture")
+        (owner / shot["path"]).with_suffix(".txt").write_text("Fictional screenshot test transcript\n")
     with (owner / "pyproject.toml").open("a") as target:
         for shot in shots:
             target.write("\n[[tool.heinzel.catalog.screenshots]]\n")
             for key, value in shot.items():
                 target.write(f"{key} = {json.dumps(value)}\n")
-    definition = planning.record_definition(
-        owner,
-        plan,
-        "# Synthetic test story\nTwo useful UI cases and one CLI result; no external credentials.",
-        reviewer="Synthetic test source-analysis agent",
-    )
-    transcripts = {}
-    for shot in shots:
-        path = (owner / shot["path"]).with_suffix(".txt")
-        path.write_text("Fictional screenshot test transcript\n")
-        transcripts[path.name] = hashlib.sha256(path.read_bytes()).hexdigest()
-    (owner / capture.OUTPUT / privacy.SOURCE_STORY).write_bytes((owner / planning.STORY).read_bytes())
-    bundle = {
+    manifest = {
         "format": 2,
-        "source_story": {"path": privacy.SOURCE_STORY, "sha256": definition["story_sha256"]},
         "plugin": "heinzel-harbor",
         "core_version": "0.9.8",
-        "definition": definition,
-        "inputs_sha256": capture.input_digest(owner, plan),
-        "screenshots": shots,
-        "images": {Path(s["path"]).name: hashlib.sha256((owner / s["path"]).read_bytes()).hexdigest() for s in shots},
-        "transcripts": transcripts,
-    }
-    bundle["bundle_sha256"] = privacy.bundle_digest(bundle)
-    review = {
-        "format": 1,
-        "bundle_sha256": bundle["bundle_sha256"],
-        "reviewer": "Synthetic test privacy agent",
-        "decision": "approve",
-        "checked_images": sorted(bundle["images"]),
-        "checks": dict.fromkeys(privacy.CHECKS, True),
-        "findings": [],
-    }
-    manifest = {
-        "format": 1,
-        "plugin": bundle["plugin"],
-        "core_version": bundle["core_version"],
         "inputs_sha256": capture.input_digest(owner, plan),
         "images": {s["path"]: hashlib.sha256((owner / s["path"]).read_bytes()).hexdigest() for s in shots},
-        "review_bundle": bundle,
-        "privacy_review": review,
+        "transcripts": {
+            f"{scene['name']}.txt": hashlib.sha256(
+                (owner / capture.OUTPUT / f"{scene['name']}.txt").read_bytes()
+            ).hexdigest()
+            for scene in plan["scenes"]
+        },
     }
     (owner / capture.MANIFEST).write_text(json.dumps(manifest))
     (owner / "README.md").write_text(capture.readme_gallery("", shots))
     (owner / capture.OUTPUT / "index.html").write_text(
-        capture.preview_document(bundle["plugin"], plan["scenes"], bundle["core_version"])
+        capture.preview_document("heinzel-harbor", plan["scenes"], "0.9.8")
     )
     return shots
+
+
+def draft_of(owner):
+    """A private draft holding the published gallery's bytes, as a capture leaves it."""
+    plan = capture.read_plan(owner)
+    folder = owner / privacy.DRAFT
+    folder.mkdir(parents=True)
+    for scene in plan["scenes"]:
+        for extension in ("png", "txt"):
+            name = f"{scene['name']}.{extension}"
+            (folder / name).write_bytes((owner / capture.OUTPUT / name).read_bytes())
+    draft = {
+        "format": 1,
+        "plugin": "heinzel-harbor",
+        "core_version": "0.9.8",
+        "inputs_sha256": capture.input_digest(owner, plan),
+        "images": {
+            f"{s['name']}.png": hashlib.sha256((folder / f"{s['name']}.png").read_bytes()).hexdigest()
+            for s in plan["scenes"]
+        },
+    }
+    (folder / capture.DRAFT_MANIFEST).write_text(json.dumps(draft))
+    return folder
 
 
 def test_default_plan_uses_the_declared_module_and_never_imports_plugin_code(owner):
@@ -132,8 +124,7 @@ def test_scene_plan_rejects_unsafe_or_unusable_routes_and_actions(owner, mutatio
     else:
         data["scenes"][0]["steps"] = [{"action": "evaluate", "script": "alert(1)"}]
     (owner / capture.PLAN).parent.mkdir(parents=True)
-    (owner / capture.PLAN).write_text("format=1\n")
-    monkeypatch.setattr(capture.tomllib, "loads", lambda _: copy.deepcopy(data))
+    (owner / capture.PLAN).write_text(json.dumps(data))
     with pytest.raises(ValueError, match="Scene|scene|gallery"):
         capture.read_plan(owner)
 
@@ -153,17 +144,59 @@ def test_demo_profile_cannot_inherit_normal_credentials_or_state(owner, monkeypa
     assert os.environ["GH_TOKEN"].startswith("not-a-real-")
 
 
-def test_offline_checks_detect_source_changes_without_running_or_installing_code(owner):
+def test_offline_checks_detect_ui_changes_without_running_or_installing_code(owner):
     recorded(owner)
     report = capture.check_capture(owner)
     assert report["ok"] and report["fresh"] and len(report["screenshots"]) == 3
-    cache = owner / "src/heinzel_harbor/__pycache__/temporary.pyc"
-    cache.parent.mkdir()
-    cache.write_bytes(b"ignored cache")
-    assert capture.check_capture(owner)["fresh"]
     source = owner / "src/heinzel_harbor/__init__.py"
-    source.write_text(source.read_text() + "# Changed interface\n")
-    with pytest.raises(ValueError, match="stale.*make screenshots"):
+    source.write_text(source.read_text() + "# Changed logic, no UI input\n")
+    assert capture.check_capture(owner)["fresh"]
+    view = owner / "src/heinzel_harbor/views/index.js"
+    view.parent.mkdir()
+    view.write_text("export const tide = 1;\n")
+    with pytest.raises(privacy.StaleGallery, match="stale.*make screenshots NAME=heinzel-harbor") as stale:
+        capture.check_capture(owner)
+    assert stale.value.command == "make screenshots NAME=heinzel-harbor"
+
+
+@pytest.mark.parametrize(
+    ("relative", "stale"),
+    [
+        ("src/heinzel_harbor/views/app.css", True),
+        ("src/heinzel_harbor/static/logo.svg", True),
+        ("src/heinzel_harbor/themes/harbor.toml", True),
+        ("web/src/App.tsx", True),
+        ("docs/screenshot_fixture.py", True),
+        ("src/heinzel_harbor/logic.py", False),
+        ("src/heinzel_harbor/data.toml", False),
+        ("web/src/App.test.tsx", False),
+        ("web/e2e/journey.mjs", False),
+        ("tests/view_test.py", False),
+        ("docs/NOTES.md", False),
+        ("requirements.lock", False),
+    ],
+)
+def test_only_ui_inputs_make_the_gallery_stale(owner, relative, stale):
+    capture.write_default_plan(owner)
+    plan_path = owner / capture.PLAN
+    plan = json.loads(plan_path.read_text())
+    (owner / "docs/screenshot_fixture.py").write_text("# fictional fixture\n")
+    plan["bootstrap"] = "docs/screenshot_fixture.py"
+    plan_path.write_text(json.dumps(plan))
+    before = capture.input_digest(owner, capture.read_plan(owner))
+    path = owner / relative
+    path.parent.mkdir(parents=True, exist_ok=True)
+    path.write_text(path.read_text() + "changed\n" if path.exists() else "new\n")
+    assert (capture.input_digest(owner, capture.read_plan(owner)) != before) is stale
+
+
+def test_a_caption_edit_in_the_definition_makes_the_gallery_stale(owner):
+    recorded(owner)
+    plan_path = owner / capture.PLAN
+    plan = json.loads(plan_path.read_text())
+    plan["scenes"][0]["caption"] = "A new caption for the fictional harbor"
+    plan_path.write_text(json.dumps(plan))
+    with pytest.raises(privacy.StaleGallery):
         capture.check_capture(owner)
 
 
@@ -179,21 +212,17 @@ def test_checks_report_missing_captures_before_preparing_an_environment(owner, m
     capture.write_default_plan(owner)
     project = cli.Project(owner, "heinzel-harbor", "0.1.0", capture.project_data(owner))
     monkeypatch.setattr(cli, "prepare_environment", lambda *_: pytest.fail("check must be offline"))
-    with pytest.raises(ValueError, match="No capture manifest.*make screenshots"):
+    with pytest.raises(ValueError, match="no capture manifest.*make screenshots"):
         cli.check(project, None, fast=True)
 
 
-def test_freshness_check_builds_view_assets_first_because_the_digest_covers_them(owner, monkeypatch):
+def test_freshness_check_never_builds_runs_or_reviews(owner, monkeypatch):
     recorded(owner)
     (owner / "web").mkdir()
     (owner / "web/package.json").write_text(json.dumps({"scripts": {"build": "vite build"}}))
     project = cli.Project(owner, "heinzel-harbor", "0.1.0", capture.project_data(owner))
-    order = []
-    monkeypatch.setattr(cli, "run", lambda command, **_: order.append(("build", command[-3:])))
-    monkeypatch.setattr(capture, "check_capture", lambda root: order.append(("check", root)) or {"fresh": True})
-    assert cli.check_screenshots(project) == {"fresh": True}
-    assert [step for step, _ in order] == ["build", "check"]
-    assert order[0][1][1:] == ["run", "build"]
+    monkeypatch.setattr(cli, "run", lambda *_a, **_k: pytest.fail("the freshness check must not build"))
+    assert cli.check_screenshots(project)["fresh"]
 
 
 def test_agent_check_has_clean_json_for_success_and_actionable_stale_results(owner, monkeypatch, capsys):
@@ -203,11 +232,27 @@ def test_agent_check_has_clean_json_for_success_and_actionable_stale_results(own
     monkeypatch.setattr(sys, "argv", ["hz-plugin", "screenshots-check", "harbor", "--json"])
     assert cli.main() == 0
     assert json.loads(capsys.readouterr().out)["fresh"]
-    (owner / "src/heinzel_harbor/new.py").write_text("# changed\n")
+    (owner / "src/heinzel_harbor/new.py").write_text("# changed logic only\n")
+    assert cli.main() == 0
+    capsys.readouterr()
+    (owner / "src/heinzel_harbor/new.css").write_text("main { color: teal; }\n")
     assert cli.main() == 1
     failure = json.loads(capsys.readouterr().out)
-    assert not failure["ok"] and "stale" in failure["error"]
-    assert "screenshots" in failure["next"]
+    assert not failure["ok"] and "stale" in failure["error"] and failure["stale"] is True
+    assert failure["command"] == failure["next"] == "make screenshots NAME=heinzel-harbor"
+
+
+def test_check_all_lists_every_stale_gallery_with_its_command(owner, monkeypatch, capsys):
+    recorded(owner)
+    project = cli.Project(owner, "heinzel-harbor", "0.1.0", capture.project_data(owner))
+    monkeypatch.setattr(cli, "projects", lambda: [project])
+    monkeypatch.setattr(sys, "argv", ["hz-plugin", "screenshots-check", "--all", "--json"])
+    assert cli.main() == 0
+    assert json.loads(capsys.readouterr().out) == {"ok": True, "fresh": ["heinzel-harbor"], "stale": [], "failed": []}
+    (owner / "src/heinzel_harbor/new.css").write_text("main { color: teal; }\n")
+    assert cli.main() == 1
+    report = json.loads(capsys.readouterr().out)
+    assert [item["command"] for item in report["stale"]] == ["make screenshots NAME=heinzel-harbor"]
 
 
 def test_agent_capture_passes_paths_and_options_as_individual_arguments(owner, monkeypatch):
@@ -273,32 +318,40 @@ def test_browser_journey_is_required_for_tooling_changes_and_ordinary_plugin_edi
     assert not cli.plan(["plugins/heinzel-harbor/src/view.py"], [], root)["tooling"]
 
 
-def test_freshness_binds_reviewed_transcripts_and_all_receipt_fields(owner):
+def test_freshness_binds_transcripts_and_scans_them_again(owner):
     shots = recorded(owner)
     transcript = (owner / shots[0]["path"]).with_suffix(".txt")
-    transcript.write_text("Changed after the independent review")
-    with pytest.raises(ValueError, match="artifacts changed"):
+    transcript.write_text("Changed after capture")
+    with pytest.raises(ValueError, match="transcript artifacts changed"):
         capture.check_capture(owner)
 
 
-@pytest.mark.parametrize("change", ["reject", "missing-image", "wrong-digest", "incomplete-checks", "extra-field"])
-def test_offline_check_never_accepts_unreviewed_or_partial_receipts(owner, change):
+def test_the_offline_check_refuses_a_committed_transcript_with_a_secret(owner):
+    shots = recorded(owner)
+    transcript = (owner / shots[0]["path"]).with_suffix(".txt")
+    transcript.write_text("token ghp_" + "q" * 36 + "\n")
+    manifest = json.loads((owner / capture.MANIFEST).read_text())
+    manifest["transcripts"][transcript.name] = hashlib.sha256(transcript.read_bytes()).hexdigest()
+    (owner / capture.MANIFEST).write_text(json.dumps(manifest))
+    with pytest.raises(ValueError, match="credential"):
+        capture.check_capture(owner)
+
+
+@pytest.mark.parametrize("change", ["old-format", "missing-transcript", "extra-field", "other-plugin"])
+def test_offline_check_refuses_a_manifest_that_does_not_describe_the_gallery(owner, change):
     recorded(owner)
     path = owner / capture.MANIFEST
     manifest = json.loads(path.read_text())
-    review = manifest["privacy_review"]
-    if change == "reject":
-        review["decision"] = "reject"
-    elif change == "missing-image":
-        review["checked_images"].pop()
-    elif change == "wrong-digest":
-        review["bundle_sha256"] = "a" * 64
-    elif change == "incomplete-checks":
-        review["checks"].pop("feature_relevant")
+    if change == "old-format":
+        manifest["format"] = 1
+    elif change == "missing-transcript":
+        manifest["transcripts"].popitem()
+    elif change == "extra-field":
+        manifest["privacy_review"] = {"decision": "approve"}
     else:
-        review["extra"] = True
+        manifest["plugin"] = "heinzel-other"
     path.write_text(json.dumps(manifest))
-    with pytest.raises(ValueError, match="agent|review|receipt"):
+    with pytest.raises(ValueError, match="manifest|names another plugin"):
         capture.check_capture(owner)
 
 
@@ -316,22 +369,32 @@ def test_capture_files_cannot_follow_parent_or_leaf_symlinks(owner, tmp_path, re
 def test_publication_rejects_linked_target_before_writing_any_gallery(owner, tmp_path):
     shots = recorded(owner)
     target = owner / capture.OUTPUT
-    bundle = json.loads((owner / capture.MANIFEST).read_text())["review_bundle"]
-    folder = owner / privacy.DRAFT
-    folder.mkdir(parents=True)
-    for path in target.iterdir():
-        if path.suffix in {".png", ".txt"} or path.name == privacy.SOURCE_STORY:
-            (folder / path.name).write_bytes(path.read_bytes())
-    privacy.prepare_review(folder, bundle)
-    receipt = folder / "privacy-review.json"
-    receipt.write_text(json.dumps(json.loads((owner / capture.MANIFEST).read_text())["privacy_review"]))
+    draft_of(owner)
     external = tmp_path / "external-file"
     external.write_text("Do not overwrite")
     (target / Path(shots[0]["path"]).name).unlink()
     (target / Path(shots[0]["path"]).name).symlink_to(external)
     with pytest.raises(ValueError, match="symbolic links"):
-        capture.publish_draft(owner, receipt)
+        capture.publish_draft(owner)
     assert external.read_text() == "Do not overwrite"
+
+
+def test_a_fresh_draft_publishes_without_any_review_and_checks_fresh(owner):
+    recorded(owner)
+    (owner / capture.MANIFEST).unlink()
+    draft_of(owner)
+    report = capture.publish_draft(owner)
+    assert report["fresh"] and set(json.loads((owner / capture.MANIFEST).read_text())) == capture.MANIFEST_KEYS
+
+
+def test_a_draft_with_an_unsafe_transcript_publishes_nothing(owner):
+    recorded(owner)
+    folder = draft_of(owner)
+    (folder / "cli.txt").write_text("Signed in as someone@realmail.de\n")
+    before = (owner / capture.MANIFEST).read_bytes()
+    with pytest.raises(ValueError, match="personal identity"):
+        capture.publish_draft(owner)
+    assert (owner / capture.MANIFEST).read_bytes() == before
 
 
 def test_generated_readme_gallery_is_owned_escaped_and_does_not_make_itself_stale(owner):
@@ -410,15 +473,7 @@ def test_gallery_publication_rolls_back_without_deleting_the_previous_gallery(ow
     old = {path.name: path.read_bytes() for path in target.iterdir()}
     metadata_before = (owner / "pyproject.toml").read_bytes()
     readme_before = (owner / "README.md").read_bytes()
-    bundle = json.loads((owner / capture.MANIFEST).read_text())["review_bundle"]
-    receipt = json.loads((owner / capture.MANIFEST).read_text())["privacy_review"]
-    folder = owner / privacy.DRAFT
-    folder.mkdir(parents=True)
-    for filename in [*bundle["images"], *bundle["transcripts"], privacy.SOURCE_STORY]:
-        (folder / filename).write_bytes((target / filename).read_bytes())
-    privacy.prepare_review(folder, bundle)
-    receipt_path = folder / "test-review.json"
-    receipt_path.write_text(json.dumps(receipt))
+    draft_of(owner)
     if phase == "before-swap":
         rename = Path.rename
 
@@ -437,54 +492,10 @@ def test_gallery_publication_rolls_back_without_deleting_the_previous_gallery(ow
         monkeypatch.setattr(capture, "check_capture", failed_check)
         expected = ValueError
     with pytest.raises(expected, match="Synthetic failure"):
-        capture.publish_draft(owner, receipt_path)
+        capture.publish_draft(owner)
     assert {path.name: path.read_bytes() for path in target.iterdir()} == old
     assert (owner / "pyproject.toml").read_bytes() == metadata_before
     assert (owner / "README.md").read_bytes() == readme_before
-
-
-def test_private_draft_canonicalization_preserves_images_and_requires_review_of_new_text_bytes(owner):
-    recorded(owner)
-    manifest = json.loads((owner / capture.MANIFEST).read_text())
-    bundle = manifest["review_bundle"]
-    folder = owner / privacy.DRAFT
-    folder.mkdir(parents=True)
-    (folder / privacy.SOURCE_STORY).write_bytes((owner / capture.OUTPUT / privacy.SOURCE_STORY).read_bytes())
-    original_images = {}
-    for filename in bundle["images"]:
-        data = (owner / capture.OUTPUT / filename).read_bytes()
-        (folder / filename).write_bytes(data)
-        original_images[filename] = data
-    for filename in bundle["transcripts"]:
-        data = b"Fictional transcript   \r\nTable row\t\r\n\r\n"
-        (folder / filename).write_bytes(data)
-        bundle["transcripts"][filename] = hashlib.sha256(data).hexdigest()
-    bundle["bundle_sha256"] = privacy.bundle_digest(bundle)
-    original_digest = bundle["bundle_sha256"]
-    (folder / "review-input.json").write_text(json.dumps(bundle))
-    (folder / "index.html").write_text("<html>Safe fictional gallery</html>")
-    (folder / "privacy-review.json").write_text(json.dumps({"decision": "approve", "bundle_sha256": original_digest}))
-    with pytest.raises(ValueError, match="canonical whitespace"):
-        privacy.validate_bundle(bundle, folder)
-    report = privacy.canonicalize_draft(folder)
-    updated = json.loads((folder / "review-input.json").read_text())
-    assert report["review_required"]
-    assert report["bundle_sha256"] != original_digest
-    assert not (folder / "privacy-review.json").exists()
-    assert (folder / "index.html").read_bytes().endswith(b"\n")
-    for filename in updated["transcripts"]:
-        assert (folder / filename).read_bytes() == b"Fictional transcript\nTable row\n"
-    assert all((folder / filename).read_bytes() == data for filename, data in original_images.items())
-    privacy.validate_bundle(updated, folder)
-    repeated = privacy.canonicalize_draft(folder)
-    assert repeated["changed_transcripts"] == []
-    assert repeated["review_required"]
-
-
-def test_canonicalization_refuses_to_rebind_tampered_images_or_modify_public_galleries(owner):
-    recorded(owner)
-    with pytest.raises(ValueError, match="private screenshot draft"):
-        privacy.canonicalize_draft(owner / capture.OUTPUT)
 
 
 def test_generated_text_matches_end_of_file_and_trailing_whitespace_hook_contract():
@@ -553,8 +564,9 @@ def test_offline_freshness_requires_the_exact_safe_contact_sheet(owner, change):
 def test_detail_focus_rejects_unbounded_padding(owner, padding):
     capture.write_default_plan(owner)
     plan_path = owner / capture.PLAN
-    raw = json.dumps(padding).lower() if isinstance(padding, bool) else json.dumps(padding)
-    plan_path.write_text(plan_path.read_text() + f'\n[scenes.focus]\nrole="region"\nname="Tides"\npadding={raw}\n')
+    plan = json.loads(plan_path.read_text())
+    plan["scenes"][0]["focus"] = {"role": "region", "name": "Tides", "padding": padding}
+    plan_path.write_text(json.dumps(plan))
     with pytest.raises(capture.CaptureError, match="focus padding"):
         capture.read_plan(owner)
 
@@ -584,53 +596,15 @@ def edit(path, old, new):
         lambda owner: edit(owner / "pyproject.toml", 'version="0.1.0"', 'version="0.1.1"'),  # a bump
         lambda owner: edit(owner / "pyproject.toml", '"httpx>=0.28"', '"httpx>=0.28.2"'),  # a security floor
         lambda owner: edit(owner / "requirements.lock", "hatchling==1.29.0", "hatchling==1.30.0"),  # no build hook
+        lambda owner: edit(owner / "pyproject.toml", '"httpx>=0.28"', '"httpx>=0.28", "heinzel-lighthouse>=1"'),
+        lambda owner: (owner / "hatch_build.py").write_text("# builds the views\n"),
     ],
 )
-def test_a_relock_bump_or_floor_leaves_the_gallery_fresh(owner, change):
+def test_a_relock_bump_floor_or_dependency_leaves_the_gallery_fresh(owner, change):
     with_dependencies(owner)
     recorded(owner)
     change(owner)
     assert capture.check_capture(owner)["fresh"]
-
-
-@pytest.mark.parametrize(
-    "change",
-    [
-        lambda owner: edit(owner / "pyproject.toml", '"httpx>=0.28"', '"httpx>=0.28", "heinzel-lighthouse>=1"'),
-        lambda owner: (owner / "requirements.lock").write_text(
-            (owner / "requirements.lock").read_text() + "heinzel-lighthouse==1.0 --hash=sha256:00\n"
-        ),
-        # A transitive plugin need not be named heinzel*: any new locked distribution may carry an entry point.
-        lambda owner: (owner / "requirements.lock").write_text(
-            (owner / "requirements.lock").read_text() + "harbor-lights==2.0 --hash=sha256:00\n"
-        ),
-        lambda owner: edit(owner / "requirements.lock", "hatchling==1.29.0", "hatchling-two==1.29.0"),
-    ],
-)
-def test_a_new_dependency_or_locked_plugin_can_add_pages_so_it_makes_the_gallery_stale(owner, change):
-    with_dependencies(owner)
-    recorded(owner)
-    change(owner)
-    with pytest.raises(ValueError, match="stale"):
-        capture.check_capture(owner)
-
-
-@pytest.mark.parametrize(
-    "change",
-    [
-        lambda owner: edit(owner / "hatch_build.py", "views", "other views"),
-        lambda owner: edit(owner / "requirements.lock", "hatchling==1.29.0", "hatchling==1.30.0"),
-    ],
-)
-def test_a_build_hook_and_its_locked_build_tools_render_views_so_they_stay_inputs(owner, change):
-    with_dependencies(owner)
-    (owner / "hatch_build.py").write_text("# builds the views\n")
-    with (owner / "pyproject.toml").open("a") as target:
-        target.write('\n[build-system]\nrequires = ["hatchling>=1.29"]\n\n[tool.hatch.build.hooks.custom]\n')
-    recorded(owner)
-    change(owner)
-    with pytest.raises(ValueError, match="stale"):
-        capture.check_capture(owner)
 
 
 @pytest.mark.parametrize(
@@ -655,85 +629,23 @@ def test_a_plugin_version_equal_to_the_rendered_core_version_is_not_mistaken_for
         capture.unrendered_version(owner, "0.9.8")
 
 
-def test_a_gallery_reviewed_under_the_old_digest_stays_fresh_only_while_it_matches(owner, monkeypatch):
-    with_dependencies(owner)
-    monkeypatch.setattr(capture, "input_digest", lambda root, plan, *, legacy=False: "old" if legacy else "new")
-    assert capture.inputs_current(owner, {}, "old") and capture.inputs_current(owner, {}, "new")
-    assert not capture.inputs_current(owner, {}, "older") and not capture.inputs_current(owner, {}, None)
-
-
-def test_a_pinned_migration_keeps_an_old_review_fresh_through_a_relock_but_not_a_source_change(owner, monkeypatch):
-    with_dependencies(owner)
-    plan = {"bootstrap": None}
-    old = capture.input_digest(owner, plan, legacy=True)
-    monkeypatch.setitem(capture.MIGRATED_DIGESTS, old, capture.input_digest(owner, plan))
-    edit(owner / "requirements.lock", "httpx==0.28.1", "httpx==0.28.2")
-    assert capture.input_digest(owner, plan, legacy=True) != old
-    assert capture.inputs_current(owner, plan, old)
-    assert planning.source_current(owner, plan, old)
-    edit(owner / "src/heinzel_harbor/__init__.py", "never", "still never")
-    assert not capture.inputs_current(owner, plan, old)
-
-
 REPOSITORY = Path(__file__).resolve().parents[1]
-MIGRATION_HINT = (
-    "After a recapture, delete the entry from src/heinzel_plugin_tools/_digest_migration.py; never re-pin it."
-)
-# Plugins whose built view assets are capture inputs. A checkout without the build (tooling CI) cannot judge their
-# pinned entries; the pin test skips exactly these, visibly, and judges them where `make screenshots-check` ran.
-VIEW_BUILDERS = {"heinzel-clock", "heinzel-weather"}
 
 
-def builds_views(directory):
-    frontend = directory / "web/package.json"
-    return frontend.is_file() and "build" in json.loads(frontend.read_text()).get("scripts", {})
-
-
-def migration_sources():
-    """Every committed reviewed digest, with the plugin and capture inputs it was recorded for."""
-    found = {}
+def test_every_committed_gallery_is_fresh_under_the_ui_input_rule():
+    """No pins and no migration: each committed gallery's digest is today's digest of its UI inputs."""
     for directory in sorted((REPOSITORY / "plugins").glob("*/")):
-        if not (directory / capture.MANIFEST).is_file():
-            continue
-        plan = capture.read_plan(directory)
-        found[json.loads((directory / capture.MANIFEST).read_text())["inputs_sha256"]] = (directory, plan)
-        definition = directory / planning.DEFINITION
-        if definition.is_file():
-            source = {"bootstrap": plan.get("bootstrap")}
-            found[json.loads(definition.read_text())["source_sha256"]] = (directory, source)
-    return found
+        if (directory / capture.MANIFEST).is_file():
+            plan = capture.read_plan(directory)
+            recorded = json.loads((directory / capture.MANIFEST).read_text())["inputs_sha256"]
+            assert capture.input_digest(directory, plan) == recorded, f"run make screenshots NAME={directory.name}"
 
 
-SOURCES = migration_sources()
-
-
-def test_the_plugins_whose_pins_need_built_views_are_exactly_the_named_ones():
-    assert {directory.name for directory, _ in SOURCES.values() if builds_views(directory)} == VIEW_BUILDERS
-
-
-@pytest.mark.parametrize("old", sorted(capture.MIGRATED_DIGESTS))
-def test_every_pinned_migration_maps_a_committed_gallery_or_definition_to_its_digest_today(old):
-    assert old in SOURCES, f"{old} pins no committed gallery or definition. {MIGRATION_HINT}"
-    directory, inputs = SOURCES[old]
-    if directory.name in VIEW_BUILDERS and not any((directory / "src").glob("*/views/*")):
-        pytest.skip(f"{directory.name}: view assets not built; run make screenshots-check NAME={directory.name}")
-    # Today's rule leaves the lock out, so a relock never breaks this.
-    assert capture.input_digest(directory, inputs) == capture.MIGRATED_DIGESTS[old], (
-        f"{old} ({directory.name}) no longer maps to its digest. {MIGRATION_HINT}"
-    )
-
-
-def test_a_version_only_relock_keeps_a_recaptured_gallery_fresh_without_any_pin(tmp_path):
-    # Every gallery is recorded under the current rule (locks and versions are not capture inputs): no pin is needed.
+def test_a_version_only_relock_keeps_a_committed_gallery_fresh(tmp_path):
     plugin = tmp_path / "heinzel-example"
     shutil.copytree(REPOSITORY / "plugins/heinzel-example", plugin, ignore=shutil.ignore_patterns(".venv"))
     lock = plugin / "requirements.lock"
-    # A security relock moves one pinned version, whatever it is today.
     relocked, moved = re.subn(r"^(opentelemetry-api==\S+) ", r"\1.post1 ", lock.read_text(), flags=re.MULTILINE)
     assert moved == 1
     lock.write_text(relocked)
-    plan = capture.read_plan(plugin)
-    recorded = json.loads((plugin / capture.MANIFEST).read_text())["inputs_sha256"]
-    assert capture.input_digest(plugin, plan) == recorded
-    assert recorded not in capture.MIGRATED_DIGESTS
     assert capture.check_capture(plugin)["fresh"]

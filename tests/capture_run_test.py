@@ -1,4 +1,4 @@
-"""A whole capture runs scene by scene in an isolated profile, leaves a reviewable private draft, and cleans up."""
+"""A whole capture runs scene by scene in an isolated profile, deterministically and without any agent."""
 
 import json
 import os
@@ -6,12 +6,13 @@ import signal
 import subprocess
 import sys
 import time
+import tomllib
 import types
 from pathlib import Path
 
 import pytest
 
-from heinzel_plugin_tools import capture, planning, privacy
+from heinzel_plugin_tools import capture, privacy
 
 pytestmark = pytest.mark.unit
 
@@ -31,6 +32,7 @@ done
 exec "$(dirname "$0")/hz" "$@"
 """
 HZ = '#!/bin/sh\necho "Hello, Mira!"\n'
+AGENTS = {"codex", "claude"}
 
 
 class FakeError(Exception):
@@ -86,10 +88,12 @@ class FakeLocator:
 
 class FakePage:
     viewport_size = {"width": 1280, "height": 900}
+    url = "about:blank"
 
     def __init__(self, browser):
         self.log, self.failures, self.boxes = browser.log, browser.failures, browser.boxes
         self.text, self.pre_height, self.png = browser.text, browser.pre_height, browser.png
+        self.page_title = browser.title
         self.clock = types.SimpleNamespace(set_fixed_time=lambda value: self.log.append(("clock", str(value))))
         self.keyboard = types.SimpleNamespace(
             press=lambda key: self.log.append(("press", key)), type=lambda text: self.log.append(("type", text))
@@ -112,9 +116,14 @@ class FakePage:
 
     def goto(self, url):
         self.log.append(("goto", url))
+        self.url = url.split("#", 1)[0]
 
     def evaluate(self, script, argument=None):
         self.log.append(("evaluate", argument))
+        return None
+
+    def title(self):
+        return self.page_title
 
     def wait_for_function(self, script):
         self.log.append(("wait_for_function",))
@@ -144,6 +153,7 @@ class FakeBrowser:
         self.log, self.failures = log, failures
         self.boxes, self.text = settings["boxes"], settings["text"]
         self.pre_height, self.png = settings["pre_height"], settings["png"]
+        self.title = settings.get("title", "Heinzel")
 
     def new_page(self, **options):
         self.log.append(("page", options["viewport"], options["reduced_motion"]))
@@ -182,6 +192,7 @@ def harness(tmp_path, monkeypatch):
         installs=[],
         browsers=[],
         pid_file=bin_directory / "backend.pid",
+        commands=[],
     )
 
     def launch(headless):
@@ -233,19 +244,11 @@ def harness(tmp_path, monkeypatch):
     for name, module in modules.items():
         monkeypatch.setitem(sys.modules, name, module)
 
-    def define(root, *, refresh=False):
-        return planning.record_definition(
-            root,
-            capture.read_plan(root),
-            "# Fictional story\nA harbor greeting in the app and a terminal result; no external credentials.",
-            reviewer="Synthetic source-analysis agent",
-        )
-
-    monkeypatch.setattr(planning, "ensure_definition", define)
-    monkeypatch.setattr(privacy.shutil, "which", lambda name: None)  # never start a real reviewing agent
     real_run = subprocess.run
 
     def run(command, **options):
+        state.commands.append(command)
+        assert Path(str(command[0])).name not in AGENTS, "the screenshot path must never start an agent"
         if command[1:4] == ["-m", "playwright", "install"]:
             state.installs.append(command)
             return subprocess.CompletedProcess(command, 0)
@@ -260,6 +263,11 @@ def harness(tmp_path, monkeypatch):
             pass
 
 
+def as_definition(text):
+    """Write a scene plan in TOML for readability; the definition file is its JSON."""
+    return json.dumps(tomllib.loads(text))
+
+
 def record(state, **options):
     return capture.capture(state.owner, core=None, headed=False, prepared_python=state.interpreter, **options)
 
@@ -272,19 +280,34 @@ def backend_is_running(state):
     return True
 
 
-def test_a_draft_capture_records_every_scene_into_a_reviewable_private_bundle(harness):
+def test_a_draft_capture_records_every_scene_privately(harness):
     report = record(harness, draft_only=True)
     folder = harness.owner / capture.DRAFT
-    assert report["ok"] is True and report["review_required"] is True and report["fresh"] is False
+    assert report["ok"] is True and report["fresh"] is False and report["draft"] == str(folder)
     assert [shot["surface"] for shot in report["screenshots"]] == ["ui", "ui", "cli"]
-    bundle = json.loads((folder / "review-input.json").read_text())
-    privacy.validate_bundle(bundle, folder)
-    assert bundle["plugin"] == "heinzel-harbor" and bundle["core_version"] == "0.9.8"
-    assert (folder / "REVIEW.md").is_file() and (folder / "review.schema.json").is_file()
+    draft = json.loads((folder / capture.DRAFT_MANIFEST).read_text())
+    assert draft["plugin"] == "heinzel-harbor" and draft["core_version"] == "0.9.8"
+    assert not (folder / "REVIEW.md").exists() and not (folder / "review.schema.json").exists()
     assert (folder / "cli.txt").read_text() == "Hello, Mira!\n"
     assert (folder / "ui.txt").read_text() == "Harbor greeting: Hello, Mira!\n"
-    assert all((folder / name).read_bytes().startswith(PNG) for name in bundle["images"])
+    assert all((folder / name).read_bytes().startswith(PNG) for name in draft["images"])
     assert not (harness.owner / capture.OUTPUT).exists(), "A draft must not touch the public gallery"
+
+
+def test_a_whole_capture_starts_no_agent_process(harness, monkeypatch):
+    popened = []
+    real_popen = capture.subprocess.Popen
+
+    def popen(command, *args, **kwargs):
+        popened.append(command)
+        assert Path(str(command[0])).name not in AGENTS
+        return real_popen(command, *args, **kwargs)
+
+    monkeypatch.setattr(capture.subprocess, "Popen", popen)
+    monkeypatch.setattr(capture.shutil, "which", lambda name: pytest.fail(f"looked up {name}"))
+    assert record(harness)["fresh"] is True
+    started = [Path(str(command[0])).name for command in harness.commands + popened]
+    assert started and not AGENTS & set(started)
 
 
 def test_the_isolated_backend_is_always_reaped(harness):
@@ -369,7 +392,7 @@ def test_a_rich_plan_exercises_every_step_kind_and_a_focused_clip(harness):
     plan = harness.owner / capture.PLAN
     plan.parent.mkdir()
     plan.write_text(
-        """format = 1
+        as_definition("""format = 1
 browser_time = "2026-11-02T10:00:00+01:00"
 
 [[scenes]]
@@ -405,7 +428,7 @@ name = "cli"
 surface = "cli"
 command = ["tides", "list"]
 caption = "hz tides list, fictional data"
-"""
+""")
     )
     theme = harness.owner / "src/heinzel_harbor/themes"
     theme.mkdir()
@@ -427,7 +450,7 @@ def test_a_focused_scene_whose_target_is_not_visible_is_refused(harness):
     plan = harness.owner / capture.PLAN
     plan.parent.mkdir()
     plan.write_text(
-        """format = 1
+        as_definition("""format = 1
 
 [[scenes]]
 name = "one"
@@ -445,7 +468,7 @@ name = "cli"
 surface = "cli"
 command = ["tides"]
 caption = "hz tides, fictional data"
-"""
+""")
     )
     with pytest.raises(privacy.CaptureError, match="focused view is not visible"):
         record(harness, draft_only=True)
@@ -455,7 +478,7 @@ def test_a_focused_clip_is_centered_and_kept_inside_the_viewport(harness):
     plan = harness.owner / capture.PLAN
     plan.parent.mkdir()
     plan.write_text(
-        """format = 1
+        as_definition("""format = 1
 
 [[scenes]]
 name = "one"
@@ -473,7 +496,7 @@ name = "cli"
 surface = "cli"
 command = ["tides"]
 caption = "hz tides, fictional data"
-"""
+""")
     )
     harness.settings["boxes"]["region:Tides"] = {"x": 1200, "y": 10, "width": 300, "height": 200}
     record(harness, draft_only=True)
@@ -481,65 +504,34 @@ caption = "hz tides, fictional data"
     assert clip == {"x": 1280 - 380, "y": 0, "width": 380, "height": 280}
 
 
-def test_a_complete_capture_publishes_only_after_an_exact_bundle_approval(harness, tmp_path):
-    report = capture.capture(
-        harness.owner, core=None, headed=False, draft_only=True, prepared_python=harness.interpreter
-    )
-    assert report["review_required"]
-    bundle = json.loads((harness.owner / capture.DRAFT / "review-input.json").read_text())
-    receipt = tmp_path / "receipt.json"
-    review = {
-        "format": 1,
-        "bundle_sha256": bundle["bundle_sha256"],
-        "reviewer": "Synthetic privacy agent",
-        "decision": "approve",
-        "checked_images": sorted(bundle["images"]),
-        "checks": dict.fromkeys(privacy.CHECKS, True),
-        "findings": [],
-    }
-    receipt.write_text(json.dumps(review))
-    published = capture.publish_draft(harness.owner, receipt)
-    assert published["fresh"] is True and published["privacy_reviewed"] is True
-    assert published["reviewed_by"] == "Synthetic privacy agent"
+def test_a_complete_capture_publishes_deterministically_and_checks_fresh(harness):
+    published = record(harness)
+    assert published["fresh"] is True
     assert capture.check_capture(harness.owner)["ok"] is True
-    assert (harness.owner / capture.OUTPUT / privacy.SOURCE_STORY).read_bytes() == (
-        harness.owner / capture.DRAFT / privacy.SOURCE_STORY
-    ).read_bytes()
+    assert (harness.owner / capture.PLAN).is_file(), "the default definition is written with the first gallery"
     assert "<!-- screenshots:start -->" in (harness.owner / "README.md").read_text()
     catalog = capture.project_data(harness.owner)["tool"]["heinzel"]["catalog"]["screenshots"]
     assert [shot["path"] for shot in catalog] == [f"docs/assets/screenshots/{n}.png" for n in ("ui", "terminal", "cli")]
+    manifest = json.loads((harness.owner / capture.MANIFEST).read_text())
+    assert manifest["format"] == 2 and "privacy_review" not in manifest
 
 
-def test_a_receipt_for_different_bytes_publishes_nothing(harness, tmp_path):
-    capture.capture(harness.owner, core=None, headed=False, draft_only=True, prepared_python=harness.interpreter)
-    bundle = json.loads((harness.owner / capture.DRAFT / "review-input.json").read_text())
-    receipt = tmp_path / "receipt.json"
-    receipt.write_text(
-        json.dumps(
-            {
-                "format": 1,
-                "bundle_sha256": "0" * 64,
-                "reviewer": "Synthetic privacy agent",
-                "decision": "approve",
-                "checked_images": sorted(bundle["images"]),
-                "checks": dict.fromkeys(privacy.CHECKS, True),
-                "findings": [],
-            }
-        )
-    )
-    original = (harness.owner / "pyproject.toml").read_text()
-    with pytest.raises(privacy.CaptureError, match="does not match these captures"):
-        capture.publish_draft(harness.owner, receipt)
-    assert (harness.owner / "pyproject.toml").read_text() == original
+def test_a_page_title_or_url_with_private_data_stops_the_capture(harness):
+    harness.settings["text"] = "Harbor greeting"
+    harness.settings["title"] = "Inbox of someone@realmail.de"
+    with pytest.raises(privacy.CaptureError, match="personal identity"):
+        record(harness)
     assert not (harness.owner / capture.OUTPUT).exists()
 
 
-def test_a_draft_goes_stale_when_the_plan_changes_after_capture(harness):
-    capture.capture(harness.owner, core=None, headed=False, draft_only=True, prepared_python=harness.interpreter)
-    plan = harness.owner / capture.PLAN
-    plan.write_text(plan.read_text().replace("isolated demonstration profile", "changed caption", 1))
-    with pytest.raises(privacy.CaptureError, match="definition is stale"):
-        capture.publish_draft(harness.owner, None)
+def test_a_draft_goes_stale_when_the_definition_changes_after_capture(harness):
+    record(harness, draft_only=True)
+    plan = capture.read_plan(harness.owner)
+    plan["scenes"][0]["caption"] = "A changed caption for the fictional harbor"
+    (harness.owner / capture.PLAN).parent.mkdir(parents=True, exist_ok=True)
+    (harness.owner / capture.PLAN).write_text(json.dumps(plan))
+    with pytest.raises(privacy.StaleGallery, match="UI inputs changed"):
+        capture.publish_draft(harness.owner)
     assert not (harness.owner / capture.OUTPUT).exists()
 
 
@@ -606,7 +598,7 @@ def test_the_command_line_prints_a_human_summary_and_opens_the_contact_sheet(har
     )
     assert capture.main() == 0
     out = capsys.readouterr().out
-    assert "3 private captures ready for independent review." in out
+    assert "3 private draft captures ready." in out
     assert "make screenshots-check NAME=heinzel-harbor" in out
     assert opened == [(harness.owner / capture.DRAFT / "index.html").as_uri()]
 
@@ -633,24 +625,6 @@ def test_a_failed_command_line_run_returns_safe_json_and_status_one(harness, mon
     report = json.loads(captured.out)
     assert report["ok"] is False and "CLI scene failed" in report["error"]
     assert "Capture failed:" in captured.err
-
-
-def test_the_command_line_publishes_a_supplied_receipt(harness, monkeypatch, capsys, tmp_path):
-    seen = []
-    monkeypatch.setattr(
-        capture,
-        "publish_draft",
-        lambda root, receipt: (
-            seen.append((root, receipt))
-            or {"plugin": "heinzel-harbor", "screenshots": [], "preview": str(root / "index.html")}
-        ),
-    )
-    monkeypatch.setattr(
-        sys, "argv", ["capture", "--project", str(harness.owner), "--review-receipt", str(tmp_path / "r.json")]
-    )
-    assert capture.main() == 0
-    assert seen == [(harness.owner.resolve(), tmp_path / "r.json")]
-    assert "approved gallery, catalog metadata and README are ready" in capsys.readouterr().out
 
 
 def test_a_backend_that_never_prints_its_address_is_reported_and_reaped(harness):
@@ -741,7 +715,7 @@ def test_normal_capture_imports_leave_owned_vendor_source_inventory_unchanged(ha
     )
     plan = harness.owner / capture.PLAN
     capture.write_default_plan(harness.owner)
-    plan.write_text(plan.read_text().replace("format = 1", 'format = 1\nbootstrap = "docs/fixture.py"', 1))
+    plan.write_text(json.dumps(json.loads(plan.read_text()) | {"bootstrap": "docs/fixture.py"}))
     harness.interpreter = Path(sys.executable)
     monkeypatch.setattr(capture, "prepared_version", lambda *_args: "0.9.16")
     original_environment = capture.demo_environment
@@ -796,44 +770,6 @@ def test_installed_cli_capture_uses_owning_isolated_python_without_writing_bytec
     env = capture.demo_environment(tmp_path / "demo", interpreter)
     assert capture.hz(interpreter, ["fictional", "--json"], env, tmp_path) == "Fictional result\n"
     assert sorted(path.relative_to(vendor) for path in vendor.rglob("*")) == before
-
-
-def test_normal_capture_supplies_exact_analyzed_story_in_the_self_contained_review_bundle(harness):
-    from heinzel_plugin_tools import planning
-
-    record(harness, draft_only=True)
-    folder = harness.owner / capture.DRAFT
-    bundle = json.loads((folder / "review-input.json").read_text())
-    assert bundle["format"] == 2
-    assert bundle["source_story"] == {"path": privacy.SOURCE_STORY, "sha256": bundle["definition"]["story_sha256"]}
-    assert (folder / privacy.SOURCE_STORY).read_bytes() == (harness.owner / planning.STORY).read_bytes()
-    assert privacy.SOURCE_STORY in (folder / "REVIEW.md").read_text()
-
-
-def test_story_changed_by_agent_is_refused_again_before_publication(harness, monkeypatch):
-    record(harness, draft_only=True)
-    folder = harness.owner / capture.DRAFT
-    original_metadata = (harness.owner / "pyproject.toml").read_bytes()
-
-    def review(_root, bundle, _receipt):
-        (folder / privacy.SOURCE_STORY).write_text(
-            "Substituted evidence after independent review must never publish.\n"
-        )
-        return {
-            "format": 1,
-            "bundle_sha256": privacy.bundle_digest(bundle),
-            "reviewer": "Synthetic independent agent",
-            "decision": "approve",
-            "checked_images": list(bundle["images"]),
-            "checks": dict.fromkeys(privacy.CHECKS, True),
-            "findings": [],
-        }
-
-    monkeypatch.setattr(capture, "run_agent", review)
-    with pytest.raises(privacy.CaptureError, match="evidence changed"):
-        capture.publish_draft(harness.owner)
-    assert not (harness.owner / capture.OUTPUT).exists()
-    assert (harness.owner / "pyproject.toml").read_bytes() == original_metadata
 
 
 def test_external_prepared_python_keeps_existing_scans_without_owning_prefix_authority(harness, monkeypatch):

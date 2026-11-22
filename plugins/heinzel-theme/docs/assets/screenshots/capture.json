@@ -1,8 +1,8 @@
 {
-  "format": 1,
+  "format": 2,
   "plugin": "heinzel-theme",
   "core_version": "0.9.42",
-  "inputs_sha256": "38de7a8e2244673bd63114b1eb7bfe45d5956a79945ad21990a5a017fe4b7980",
+  "inputs_sha256": "d6a766585d67071636eb4abb99e7bf472145203b809863f88b89e1dddf02b761",
   "images": {
     "docs/assets/screenshots/theme-light.png": "20485460c0cd97f025122f85ce2d5850046bc203a713950eb33abbf216b9db18",
     "docs/assets/screenshots/theme-dark.png": "37e1af60757bf1bd08e23ced1cdf7769d6e02d35c5af51ee035d48b1c3090103",
@@ -10,84 +10,11 @@
     "docs/assets/screenshots/theme-cli.png": "2ebc7271bafa972d57b82a6278d25aee8901031963a3342297a50658f653e015",
     "docs/assets/screenshots/soundscapes-cli.png": "1307852a559700adac312deaf632275461688a8136b7768777b141afe9a4df46"
   },
-  "review_bundle": {
-    "format": 2,
-    "source_story": {
-      "path": "source-story.md",
-      "sha256": "63dd3f1259e10fd6ce79356740b96e14194ff1bb56d97e52c85aa684c44ffb33"
-    },
-    "definition": {
-      "format": 1,
-      "reviewer": "story-confirm-sonnet",
-      "source_sha256": "44a74ff85162889dc5074ff56582ee1777c5544dd96b1fa2d517575f0431b4f4",
-      "plan_sha256": "1b258aa7bc78674d2237109fdde1f37a00eb478621ffeea449d8b293f5c4a16b",
-      "story_sha256": "63dd3f1259e10fd6ce79356740b96e14194ff1bb56d97e52c85aa684c44ffb33"
-    },
-    "plugin": "heinzel-theme",
-    "core_version": "0.9.42",
-    "inputs_sha256": "38de7a8e2244673bd63114b1eb7bfe45d5956a79945ad21990a5a017fe4b7980",
-    "screenshots": [
-      {
-        "path": "docs/assets/screenshots/theme-light.png",
-        "surface": "ui",
-        "caption": "A fictional Launch review contract, its configuration and run commands, in the applied Heinzelm\u00e4nnchen light theme."
-      },
-      {
-        "path": "docs/assets/screenshots/theme-dark.png",
-        "surface": "ui",
-        "caption": "The same fictional Launch review contract in the applied Heinzelm\u00e4nnchen dark theme."
-      },
-      {
-        "path": "docs/assets/screenshots/theme-soundscapes.png",
-        "surface": "ui",
-        "caption": "Demo profile: browse the three optional YouTube soundscapes in appearance settings."
-      },
-      {
-        "path": "docs/assets/screenshots/theme-cli.png",
-        "surface": "cli",
-        "caption": "Demo profile: list available themes and identify Heinzelm\u00e4nnchen from the CLI."
-      },
-      {
-        "path": "docs/assets/screenshots/soundscapes-cli.png",
-        "surface": "cli",
-        "caption": "Demo profile: list Claude FM, Die Heinzelm\u00e4nnchen and Hyper Focus without starting playback."
-      }
-    ],
-    "images": {
-      "theme-light.png": "20485460c0cd97f025122f85ce2d5850046bc203a713950eb33abbf216b9db18",
-      "theme-dark.png": "37e1af60757bf1bd08e23ced1cdf7769d6e02d35c5af51ee035d48b1c3090103",
-      "theme-soundscapes.png": "afc93072ea3f736a4b553ba1959f5ac25f523b650df198e546e14e44377f9590",
-      "theme-cli.png": "2ebc7271bafa972d57b82a6278d25aee8901031963a3342297a50658f653e015",
-      "soundscapes-cli.png": "1307852a559700adac312deaf632275461688a8136b7768777b141afe9a4df46"
-    },
-    "transcripts": {
-      "theme-light.txt": "4fae6bbc0badca7c838bb6684a4b88d5e93f78e6c3f3eb13e9a4b1b00a60e861",
-      "theme-dark.txt": "c5f7a044c9f727930619685c055202fbb5341f8088b4ae5b874ff92ffe41acaa",
-      "theme-soundscapes.txt": "c1cd317da24a6284ae69701f0b1da911de4966b890958e64fdf3730a41b3d679",
-      "theme-cli.txt": "36d653efa87eeec3a67c92ac4c27069a4697714578a9cd172bda926c27fdfa1f",
-      "soundscapes-cli.txt": "2ca2445881fd6893242b1be527a70a7791f0f2edf486c7a51c893f2cb41f6369"
-    },
-    "bundle_sha256": "a1a296f7d4b3607ca7d7cb836a590304acb086e3b4c15278edfd47ba75f0a3ea"
-  },
-  "privacy_review": {
-    "format": 1,
-    "bundle_sha256": "a1a296f7d4b3607ca7d7cb836a590304acb086e3b4c15278edfd47ba75f0a3ea",
-    "reviewer": "privacy-review-opus",
-    "decision": "approve",
-    "checked_images": [
-      "theme-light.png",
-      "theme-dark.png",
-      "theme-soundscapes.png",
-      "theme-cli.png",
-      "soundscapes-cli.png"
-    ],
-    "checks": {
-      "tokens_absent": true,
-      "personal_data_absent": true,
-      "feature_relevant": true,
-      "multiple_ui_scenes": true,
-      "captions_accurate": true
-    },
-    "findings": []
+  "transcripts": {
+    "theme-light.txt": "4fae6bbc0badca7c838bb6684a4b88d5e93f78e6c3f3eb13e9a4b1b00a60e861",
+    "theme-dark.txt": "c5f7a044c9f727930619685c055202fbb5341f8088b4ae5b874ff92ffe41acaa",
+    "theme-soundscapes.txt": "c1cd317da24a6284ae69701f0b1da911de4966b890958e64fdf3730a41b3d679",
+    "theme-cli.txt": "36d653efa87eeec3a67c92ac4c27069a4697714578a9cd172bda926c27fdfa1f",
+    "soundscapes-cli.txt": "2ca2445881fd6893242b1be527a70a7791f0f2edf486c7a51c893f2cb41f6369"
   }
 }

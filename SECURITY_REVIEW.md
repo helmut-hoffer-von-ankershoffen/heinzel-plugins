@@ -39,8 +39,8 @@ SDK-install findings above required code fixes; installation findings require a 
 | Google Docs HTTP strings | Preserved Markdown link text; the converter makes no HTTP request. |
 | Tailscale HTTP | Parsed loopback endpoint or Unix-domain socket, with no inherited proxy or redirects. The socket transport does not cross the network. |
 | Weather fake HTTP | Local test fixture bound to the constant `127.0.0.1`; the printed URL is not a production remote transport. |
-| Screenshot capture launcher | The plugin name is validated to start with a letter or digit before it becomes an argument. `--core`, `--python` and `--review-receipt` are developer-selected local paths, made absolute, and each follows its own flag as a separate argument. No shell is used. The plan and story files are data and never become command arguments. |
-| Review agent invocation | The `codex exec` vector is fixed. Image and schema paths come from the toolkit-written private draft folder, and a supplied receipt is only parsed, then accepted solely if it matches the exact bundle hashes. |
+| Screenshot capture launcher | The plugin name is validated to start with a letter or digit before it becomes an argument. `--core` and `--python` are developer-selected local paths, made absolute, and each follows its own flag as a separate argument. No shell is used. The definition is parsed as bounded JSON and validated before anything runs. |
+| Screenshot privacy guards | Deterministic text guards (credentials, non-example emails, private paths, hostnames and IPs, configured confidential terms) run over page text, title, URL, transcripts and captions. No agent or model is invoked anywhere in the screenshot path; a test refuses `codex`/`claude` in it. |
 | Capture bootstrap fixtures | Documentation-only fictional constants and loopback-only servers, executed only by an explicit capture inside a disposable profile. The Tailscale fixture's token-like constant is a fixed placeholder. |
 | Capture session link | The loopback application URL is matched with a fixed `127.0.0.1` pattern and redacted before any image or text is saved. |
 

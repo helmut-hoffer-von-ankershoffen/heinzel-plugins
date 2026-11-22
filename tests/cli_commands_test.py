@@ -601,7 +601,7 @@ def test_a_scaffold_whose_capture_fails_keeps_the_plugin_and_names_the_retry(col
     monkeypatch.setattr(cli, "capture_plugin", lambda *a, **k: 1)
     with pytest.raises(ValueError, match="hz-plugin screenshots heinzel-quay"):
         cli.scaffold("quay", None, None, None, "minimal")
-    assert (collection / "plugins/heinzel-quay/docs/screenshots.toml").is_file()
+    assert (collection / "plugins/heinzel-quay/docs/screenshot-definition.json").is_file()
 
 
 def test_capture_runs_the_pinned_tool_with_only_the_requested_options(collection, monkeypatch):
@@ -613,18 +613,18 @@ def test_capture_runs_the_pinned_tool_with_only_the_requested_options(collection
         headed=True,
         open_preview=True,
         draft_only=True,
-        review_receipt=Path("receipt.json"),
         prepared_python=Path("python"),
     )
     command, options = seen[0]
     assert status == 4 and options["cwd"] == collection / "plugins/heinzel-harbor"
-    assert {"--headed", "--open", "--draft", "--core", "--python", "--review-receipt"} <= set(command)
+    assert {"--headed", "--open", "--draft", "--core", "--python"} <= set(command)
+    assert "--review-receipt" not in command
     assert "--json" not in command
     script = command.index("--script")
     assert command[:script] == ["uv", "run", "--quiet", "--no-project", "--no-cache"]
     assert command[script + 2 : script + 4] == ["--project", str(collection / "plugins/heinzel-harbor")]
     assert command[command.index("--core") + 1] == "candidate.whl"
-    assert Path(command[command.index("--review-receipt") + 1]).is_absolute()
+    assert Path(command[command.index("--python") + 1]).is_absolute()
 
 
 @pytest.mark.parametrize(
@@ -667,7 +667,7 @@ def test_screenshot_modes_are_mutually_exclusive(collection, monkeypatch, capsys
     status, out, _ = screenshots(monkeypatch, capsys, "harbor", "--init", "--check", "--json")
     assert status == 1
     assert "Choose one screenshot mode" in json.loads(out)["error"]
-    status, _, err = screenshots(monkeypatch, capsys, "harbor", "--draft", "--review-receipt", "r.json")
+    status, _, err = screenshots(monkeypatch, capsys, "harbor", "--draft", "--init")
     assert status == 1 and "Choose one screenshot mode" in err
 
 
@@ -686,14 +686,10 @@ def test_the_screenshot_check_mode_reports_freshness_offline(collection, monkeyp
     assert status == 1 and out == "" and err.startswith("Screenshot check failed:")
 
 
-def test_the_screenshot_plan_mode_asks_for_a_fresh_definition(collection, monkeypatch, capsys):
-    from heinzel_plugin_tools import planning
-
-    seen = []
-    monkeypatch.setattr(planning, "ensure_definition", lambda directory, refresh: seen.append((directory, refresh)))
-    status, out, _ = screenshots(monkeypatch, capsys, "harbor", "--plan", "--json")
-    assert status == 0 and seen == [(collection / "plugins/heinzel-harbor", True)]
-    assert json.loads(out)["next"] == "hz-plugin screenshots heinzel-harbor --open"
+@pytest.mark.parametrize("retired", ["--plan", "--generate", "--review-receipt"])
+def test_the_agent_modes_are_gone(collection, monkeypatch, capsys, retired):
+    with pytest.raises(SystemExit):
+        screenshots(monkeypatch, capsys, "harbor", retired)
 
 
 def test_a_screenshot_capture_hands_over_to_the_capture_tool(collection, monkeypatch, capsys):

@@ -110,9 +110,14 @@ def test_group_writable_environment_is_not_a_redaction_authority(environment):
 class TextPage:
     """Execute the real presentation JavaScript against text-node fixtures, never manufactured product UI."""
 
+    url = "http://127.0.0.1:8123/doctor"
+
     def __init__(self, texts):
         self.texts = texts
         self.saved = False
+
+    def title(self):
+        return "Heinzel"
 
     def evaluate(self, script, argument):
         node = shutil.which("node")

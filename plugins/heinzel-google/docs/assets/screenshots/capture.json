@@ -1,8 +1,8 @@
 {
-  "format": 1,
+  "format": 2,
   "plugin": "heinzel-google",
   "core_version": "0.9.42",
-  "inputs_sha256": "b9c9e38e164604e30d636582e1fdbf7b465938ac50207610289e5b89385ba27b",
+  "inputs_sha256": "983968c41a24caecf1b9194ba396785f03a4b9ccb1edd2c1c42c93087c0cab83",
   "images": {
     "docs/assets/screenshots/google-upcoming-review.png": "4bddce73cde8751224b6526d5da58f52a37af8cda66bc0f67fbc38c5c0fc738d",
     "docs/assets/screenshots/google-calendar-week.png": "78e1cbcb9baaf5189b06ec59d8221466ce428a6d8bbde899a872d0e3fbaf6c68",
@@ -13,108 +13,14 @@
     "docs/assets/screenshots/launch-metrics.png": "694361694713cb2bb4b3e9a89ec50004ab36120233ed8dbe615466cd5ae09a62",
     "docs/assets/screenshots/mail-content.png": "ceef4e8ed3b08a9d3b787467049c7e8e45effbbdfcaacee0508b023d51691cd4"
   },
-  "review_bundle": {
-    "format": 2,
-    "source_story": {
-      "path": "source-story.md",
-      "sha256": "25b4828e541accac139dc9b281aaebeae09692729045da08ca95759373728d04"
-    },
-    "definition": {
-      "format": 1,
-      "reviewer": "story-confirm-sonnet",
-      "source_sha256": "9bc75b3746e420465781f596f6f6a93e313a7720c28ed1ce6064aac92e5ab5f5",
-      "plan_sha256": "007f39c2829e3307c325d9ef0dccb1c01a5e14f9020024c7b9e43473da8de052",
-      "story_sha256": "25b4828e541accac139dc9b281aaebeae09692729045da08ca95759373728d04"
-    },
-    "plugin": "heinzel-google",
-    "core_version": "0.9.42",
-    "inputs_sha256": "b9c9e38e164604e30d636582e1fdbf7b465938ac50207610289e5b89385ba27b",
-    "screenshots": [
-      {
-        "path": "docs/assets/screenshots/google-upcoming-review.png",
-        "surface": "ui",
-        "caption": "A fictional launch review shows as the next meeting in the footer calendar summary, read through the Google calendar adapter."
-      },
-      {
-        "path": "docs/assets/screenshots/google-calendar-week.png",
-        "surface": "ui",
-        "caption": "The real Core calendar pane lists a fictional launch day's meetings through the Google adapter; no Google account is contacted."
-      },
-      {
-        "path": "docs/assets/screenshots/google-source-review.png",
-        "surface": "ui",
-        "caption": "Inspect a fictional selected-source identity as the Google source review panel shows it."
-      },
-      {
-        "path": "docs/assets/screenshots/launch-files-json.png",
-        "surface": "cli",
-        "caption": "Inspect a three-day launch-file query as structured data \u2014 actual Google operation, fictional Workspace replies."
-      },
-      {
-        "path": "docs/assets/screenshots/launch-files-week.png",
-        "surface": "cli",
-        "caption": "Try a seven-day file query \u2014 fictional replies demonstrate invocation, not verified server-side filtering."
-      },
-      {
-        "path": "docs/assets/screenshots/launch-plan.png",
-        "surface": "cli",
-        "caption": "Read a fictional Google Doc through the real adapter; this showcase command exists only in the documentation fixture."
-      },
-      {
-        "path": "docs/assets/screenshots/launch-metrics.png",
-        "surface": "cli",
-        "caption": "Read a fictional Sheet through the real adapter; this showcase command exists only in the documentation fixture."
-      },
-      {
-        "path": "docs/assets/screenshots/mail-content.png",
-        "surface": "cli",
-        "caption": "Read a fictional message through the real Gmail adapter; this showcase command exists only in the documentation fixture."
-      }
-    ],
-    "images": {
-      "google-upcoming-review.png": "4bddce73cde8751224b6526d5da58f52a37af8cda66bc0f67fbc38c5c0fc738d",
-      "google-calendar-week.png": "78e1cbcb9baaf5189b06ec59d8221466ce428a6d8bbde899a872d0e3fbaf6c68",
-      "google-source-review.png": "449a05c3bc62362c3b60eafefee9025e03cdde144ac95f52e487a2fed2f35ad7",
-      "launch-files-json.png": "e18d7942f555f2ad583b401f9617a6d8d2b3e9d672f02956e4cb4c801471fc26",
-      "launch-files-week.png": "e7ee51cd8cdc0ee5120c0b1831ea3c595663d1df352a8b22e3e6df8ed1660e64",
-      "launch-plan.png": "a8f723cff386597587a28aa1a76dc6e59b72b40665107629cda30dc1c060fe09",
-      "launch-metrics.png": "694361694713cb2bb4b3e9a89ec50004ab36120233ed8dbe615466cd5ae09a62",
-      "mail-content.png": "ceef4e8ed3b08a9d3b787467049c7e8e45effbbdfcaacee0508b023d51691cd4"
-    },
-    "transcripts": {
-      "google-upcoming-review.txt": "ec2958dccf5b3b199e58cc98fba19d910b2869752258784163d75cc827dd147a",
-      "google-calendar-week.txt": "a474a2d474bb6143c5ef5276006be59577062f52da8c5899d21f063394bf8506",
-      "google-source-review.txt": "abd43fd75c9de31071fa9ec37a2e8cf4669c50632aa81b6924fc26a60ab23c37",
-      "launch-files-json.txt": "f75ca9b4aac88f8a030a38309ef730c53bc85cba2696c741f8ad4fe89d66a86a",
-      "launch-files-week.txt": "0fdb862112fbae77b2afa7f953e533e9a699dfb7813ae07a5e04c5cbce7eb12f",
-      "launch-plan.txt": "a7ded47e8432d800d520488f35d85f613b09609b4041a074ae8a13aaa7c37d91",
-      "launch-metrics.txt": "d3f2f19f3a5f470e2c567dd65d8333fdba8fb653a2346a31cfa8b9c008545a04",
-      "mail-content.txt": "57cda012c3d61d21aa3e387c296ebce6483c114b169bb416d5296d4af344a813"
-    },
-    "bundle_sha256": "b45b84accb30d13c7909980f53f50e93f1b4c4374739e6beed1f6baee6397dbb"
-  },
-  "privacy_review": {
-    "format": 1,
-    "bundle_sha256": "b45b84accb30d13c7909980f53f50e93f1b4c4374739e6beed1f6baee6397dbb",
-    "reviewer": "privacy-review-opus",
-    "decision": "approve",
-    "checked_images": [
-      "google-upcoming-review.png",
-      "google-calendar-week.png",
-      "google-source-review.png",
-      "launch-files-json.png",
-      "launch-files-week.png",
-      "launch-plan.png",
-      "launch-metrics.png",
-      "mail-content.png"
-    ],
-    "checks": {
-      "tokens_absent": true,
-      "personal_data_absent": true,
-      "feature_relevant": true,
-      "multiple_ui_scenes": true,
-      "captions_accurate": true
-    },
-    "findings": []
+  "transcripts": {
+    "google-upcoming-review.txt": "ec2958dccf5b3b199e58cc98fba19d910b2869752258784163d75cc827dd147a",
+    "google-calendar-week.txt": "a474a2d474bb6143c5ef5276006be59577062f52da8c5899d21f063394bf8506",
+    "google-source-review.txt": "abd43fd75c9de31071fa9ec37a2e8cf4669c50632aa81b6924fc26a60ab23c37",
+    "launch-files-json.txt": "f75ca9b4aac88f8a030a38309ef730c53bc85cba2696c741f8ad4fe89d66a86a",
+    "launch-files-week.txt": "0fdb862112fbae77b2afa7f953e533e9a699dfb7813ae07a5e04c5cbce7eb12f",
+    "launch-plan.txt": "a7ded47e8432d800d520488f35d85f613b09609b4041a074ae8a13aaa7c37d91",
+    "launch-metrics.txt": "d3f2f19f3a5f470e2c567dd65d8333fdba8fb653a2346a31cfa8b9c008545a04",
+    "mail-content.txt": "57cda012c3d61d21aa3e387c296ebce6483c114b169bb416d5296d4af344a813"
   }
 }

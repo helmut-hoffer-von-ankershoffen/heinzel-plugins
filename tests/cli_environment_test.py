@@ -455,7 +455,7 @@ def test_a_recorded_gallery_is_checked_before_the_environment_is_prepared(projec
     monkeypatch.setattr(cli, "prepare_environment", lambda *a: order.append("environment"))
     monkeypatch.setattr(cli, "run", lambda *a, **k: None)
     (project.directory / "docs").mkdir()
-    (project.directory / "docs/screenshots.toml").write_text("")
+    (project.directory / "docs/screenshot-definition.json").write_text("{}")
     cli.check(project, None, fast=True)
     assert order == ["screenshots", "environment"]
 

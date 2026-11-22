@@ -1,7 +1,93 @@
 {
   "format": 1,
-  "reviewer": "story-confirm-sonnet",
-  "source_sha256": "44a74ff85162889dc5074ff56582ee1777c5544dd96b1fa2d517575f0431b4f4",
-  "plan_sha256": "1b258aa7bc78674d2237109fdde1f37a00eb478621ffeea449d8b293f5c4a16b",
-  "story_sha256": "63dd3f1259e10fd6ce79356740b96e14194ff1bb56d97e52c85aa684c44ffb33"
+  "bootstrap": "docs/screenshot_fixture.py",
+  "scenes": [
+    {
+      "name": "theme-light",
+      "surface": "ui",
+      "route": "/contracts/launch-review",
+      "caption": "A fictional Launch review contract, its configuration and run commands, in the applied Heinzelmännchen light theme.",
+      "theme": "heinzelmaennchen",
+      "appearance": "light",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "reduced_motion": "reduce",
+      "steps": [
+        {
+          "action": "wait",
+          "role": "heading",
+          "name": "Launch review"
+        }
+      ]
+    },
+    {
+      "name": "theme-dark",
+      "surface": "ui",
+      "route": "/contracts/launch-review",
+      "caption": "The same fictional Launch review contract in the applied Heinzelmännchen dark theme.",
+      "theme": "heinzelmaennchen",
+      "appearance": "dark",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "reduced_motion": "reduce",
+      "steps": [
+        {
+          "action": "wait",
+          "role": "heading",
+          "name": "Launch review"
+        }
+      ]
+    },
+    {
+      "name": "theme-soundscapes",
+      "surface": "ui",
+      "route": "/?settings=appearance",
+      "caption": "Demo profile: browse the three optional YouTube soundscapes in appearance settings.",
+      "theme": "heinzelmaennchen",
+      "appearance": "light",
+      "viewport": {
+        "width": 1440,
+        "height": 1000
+      },
+      "reduced_motion": "reduce",
+      "steps": [
+        {
+          "action": "wait",
+          "text": "Claude FM"
+        },
+        {
+          "action": "wait",
+          "text": "Hyper Focus"
+        },
+        {
+          "action": "wait",
+          "text": "Die Heinzelmännchen"
+        }
+      ]
+    },
+    {
+      "name": "theme-cli",
+      "surface": "cli",
+      "caption": "Demo profile: list available themes and identify Heinzelmännchen from the CLI.",
+      "command": [
+        "system",
+        "theme",
+        "list"
+      ]
+    },
+    {
+      "name": "soundscapes-cli",
+      "surface": "cli",
+      "caption": "Demo profile: list Claude FM, Die Heinzelmännchen and Hyper Focus without starting playback.",
+      "command": [
+        "system",
+        "sound",
+        "list"
+      ]
+    }
+  ]
 }

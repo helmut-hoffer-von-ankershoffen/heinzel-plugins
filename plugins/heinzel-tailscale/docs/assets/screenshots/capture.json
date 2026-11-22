@@ -1,84 +1,18 @@
 {
-  "format": 1,
+  "format": 2,
   "plugin": "heinzel-tailscale",
   "core_version": "0.9.54",
-  "inputs_sha256": "a35417f7ab452be1cde9afd5a4a06fd9008697dd3716da13404536b09222384f",
+  "inputs_sha256": "730d723720a92e3fab881232fc72b12f813c217ef513cc4a07605b81a9e32db2",
   "images": {
     "docs/assets/screenshots/sharing-ready.png": "ebf585a039ccf28ea5d689d2984cb719de02c18fff036780b294819a4df97ae4",
     "docs/assets/screenshots/sharing-request-cli.png": "fe42b74c881eaeab12ad04f3b212768d77586ca9634af19ad490960238051cd5",
     "docs/assets/screenshots/sharing-off.png": "398daf92c44530dd18052d5916f0e7a34d1d1dc6161ed8a2a31f606c928ec6ac",
     "docs/assets/screenshots/sharing-off-cli.png": "592011836c508fac6809305cbc29752484a4be2cc32546e31dffbc369ee0c774"
   },
-  "review_bundle": {
-    "format": 2,
-    "source_story": {
-      "path": "source-story.md",
-      "sha256": "4b335f221043033a22e95a8a48511c54a40e56ff36196a46d9eaa301bc50a8a8"
-    },
-    "definition": {
-      "format": 1,
-      "reviewer": "story-confirm-opus-tailscale-stale-port",
-      "source_sha256": "2f308b16ab4b3f507040c00fe4f483fea484332c79e33f4f208363866985434f",
-      "plan_sha256": "7cff472608aa79e38f9d9e2f4cf924446b79f4d9026d577a62c891db43124ce0",
-      "story_sha256": "4b335f221043033a22e95a8a48511c54a40e56ff36196a46d9eaa301bc50a8a8"
-    },
-    "plugin": "heinzel-tailscale",
-    "core_version": "0.9.54",
-    "inputs_sha256": "a35417f7ab452be1cde9afd5a4a06fd9008697dd3716da13404536b09222384f",
-    "screenshots": [
-      {
-        "path": "docs/assets/screenshots/sharing-ready.png",
-        "surface": "ui",
-        "caption": "Sharing On with Copy link and Open (fictional demo); the capture tool hides the share link as [authentication link hidden]"
-      },
-      {
-        "path": "docs/assets/screenshots/sharing-request-cli.png",
-        "surface": "cli",
-        "caption": "Then hz tailscale status --json: mapped to the web app port; the CLI cannot see the web listener, so it says apply-required \u2014 fictional demo"
-      },
-      {
-        "path": "docs/assets/screenshots/sharing-off.png",
-        "surface": "ui",
-        "caption": "Turn private sharing off explicitly \u2014 fictional local Tailscale demo"
-      },
-      {
-        "path": "docs/assets/screenshots/sharing-off-cli.png",
-        "surface": "cli",
-        "caption": "Then hz tailscale status --json after switching off: not mapped; the target shows the default port 8737 \u2014 fictional local Tailscale demo"
-      }
-    ],
-    "images": {
-      "sharing-ready.png": "ebf585a039ccf28ea5d689d2984cb719de02c18fff036780b294819a4df97ae4",
-      "sharing-request-cli.png": "fe42b74c881eaeab12ad04f3b212768d77586ca9634af19ad490960238051cd5",
-      "sharing-off.png": "398daf92c44530dd18052d5916f0e7a34d1d1dc6161ed8a2a31f606c928ec6ac",
-      "sharing-off-cli.png": "592011836c508fac6809305cbc29752484a4be2cc32546e31dffbc369ee0c774"
-    },
-    "transcripts": {
-      "sharing-ready.txt": "06fceaac1aaae805ee47ba2deef1e8959aded91e4e7e9e78028cdf4881547973",
-      "sharing-request-cli.txt": "62377175c58a2dc39c917918f7865b7602c80b91b2e76f3a12c971a084670495",
-      "sharing-off.txt": "38a863ca580d4298fe4ac9f4e5dc43c604cdffca8155401262fb253a1d94285f",
-      "sharing-off-cli.txt": "cf49c8bdefcb23c7b464e229ae6e18bbd8f639abb0121bf570e3e30b631fc8b0"
-    },
-    "bundle_sha256": "c73ab892e3faf25182f617550d0be8790f4cffefc7b7456b91cd40d9cda39aa5"
-  },
-  "privacy_review": {
-    "format": 1,
-    "bundle_sha256": "c73ab892e3faf25182f617550d0be8790f4cffefc7b7456b91cd40d9cda39aa5",
-    "reviewer": "Claude Sonnet 5.5 screenshot reviewer",
-    "decision": "approve",
-    "checked_images": [
-      "sharing-ready.png",
-      "sharing-request-cli.png",
-      "sharing-off.png",
-      "sharing-off-cli.png"
-    ],
-    "checks": {
-      "tokens_absent": true,
-      "personal_data_absent": true,
-      "feature_relevant": true,
-      "multiple_ui_scenes": true,
-      "captions_accurate": true
-    },
-    "findings": []
+  "transcripts": {
+    "sharing-ready.txt": "06fceaac1aaae805ee47ba2deef1e8959aded91e4e7e9e78028cdf4881547973",
+    "sharing-request-cli.txt": "62377175c58a2dc39c917918f7865b7602c80b91b2e76f3a12c971a084670495",
+    "sharing-off.txt": "38a863ca580d4298fe4ac9f4e5dc43c604cdffca8155401262fb253a1d94285f",
+    "sharing-off-cli.txt": "cf49c8bdefcb23c7b464e229ae6e18bbd8f639abb0121bf570e3e30b631fc8b0"
   }
 }

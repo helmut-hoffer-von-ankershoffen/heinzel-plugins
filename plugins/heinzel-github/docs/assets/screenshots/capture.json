@@ -1,8 +1,8 @@
 {
-  "format": 1,
+  "format": 2,
   "plugin": "heinzel-github",
   "core_version": "0.9.42",
-  "inputs_sha256": "18fabfad3015f45e39ca88fa13fa9bb37e17f56f3e9e66b549162cd39884e094",
+  "inputs_sha256": "13e898e43b36363b276b8c8267a09463ca6682062f85bec1c7e119b44f0c00f8",
   "images": {
     "docs/assets/screenshots/workflow-collection.png": "8d71f9c242a8265a315a11006af86bfd21f41ab18d5cd8edc668c89fc4c73a8d",
     "docs/assets/screenshots/workflow-context.png": "2407f5b0dbfdf2d23895961f6c33af353f0d007b1651cdb342ad92433740435e",
@@ -11,92 +11,12 @@
     "docs/assets/screenshots/merged-cli.png": "787d4a4a73a860dbf4b33fd849f9737e0a58e5495e3e94ea1104a0e60bdf7233",
     "docs/assets/screenshots/issues-json.png": "e3754138bf5a295204a0f986463e9a54dda6168697fa870ab9c3d41b3d7ff6bd"
   },
-  "review_bundle": {
-    "format": 2,
-    "source_story": {
-      "path": "source-story.md",
-      "sha256": "64652889140ce55c6653af1e7f459a842670a3f149f6ff2e1e38eb863476dc96"
-    },
-    "definition": {
-      "format": 1,
-      "reviewer": "story-confirm-sonnet",
-      "source_sha256": "650cdaaf893882cf88076b77a29b477874e20e4f409416ab3a5409b19f6e4c3c",
-      "plan_sha256": "4b2f2733e91a815803ccfec3f3159a7b58900ad41be8c262d4b514b685420e07",
-      "story_sha256": "64652889140ce55c6653af1e7f459a842670a3f149f6ff2e1e38eb863476dc96"
-    },
-    "plugin": "heinzel-github",
-    "core_version": "0.9.42",
-    "inputs_sha256": "18fabfad3015f45e39ca88fa13fa9bb37e17f56f3e9e66b549162cd39884e094",
-    "screenshots": [
-      {
-        "path": "docs/assets/screenshots/workflow-collection.png",
-        "surface": "ui",
-        "caption": "The fictional weekly code review in the Core workflow graph and contracts list"
-      },
-      {
-        "path": "docs/assets/screenshots/workflow-context.png",
-        "surface": "ui",
-        "caption": "Fictional weekly review declares merged-work and issue inputs; no report was generated"
-      },
-      {
-        "path": "docs/assets/screenshots/merged-work.png",
-        "surface": "ui",
-        "caption": "Fictional merged pull requests in the app terminal, using a fixture-only requester and the real adapter"
-      },
-      {
-        "path": "docs/assets/screenshots/issue-changes.png",
-        "surface": "ui",
-        "caption": "Fictional issue changes, owners and states in the app terminal, using a fixture-only requester"
-      },
-      {
-        "path": "docs/assets/screenshots/merged-cli.png",
-        "surface": "cli",
-        "caption": "Read fictional merged work in the shell with a fixture-only requester and the real adapter"
-      },
-      {
-        "path": "docs/assets/screenshots/issues-json.png",
-        "surface": "cli",
-        "caption": "Fictional issue results as JSON for scripts and agents, using a fixture-only requester"
-      }
-    ],
-    "images": {
-      "workflow-collection.png": "8d71f9c242a8265a315a11006af86bfd21f41ab18d5cd8edc668c89fc4c73a8d",
-      "workflow-context.png": "2407f5b0dbfdf2d23895961f6c33af353f0d007b1651cdb342ad92433740435e",
-      "merged-work.png": "0baf90373abc10ed8a8a1f31909a78f6d4e9875d81b3157c4a0a79733c2218d8",
-      "issue-changes.png": "bc3311ff71e68815e7488de603f36a4246ef92b55ec598ad0d2f13b988fecdc5",
-      "merged-cli.png": "787d4a4a73a860dbf4b33fd849f9737e0a58e5495e3e94ea1104a0e60bdf7233",
-      "issues-json.png": "e3754138bf5a295204a0f986463e9a54dda6168697fa870ab9c3d41b3d7ff6bd"
-    },
-    "transcripts": {
-      "workflow-collection.txt": "1ceaa17dd0c524475add03a07896d3c51c531c0ea2a9d408c7eb19d4dc122901",
-      "workflow-context.txt": "126046e987c956072c8cf7de9806f59d8c7b886038b9001fd85b16bbfb329ae6",
-      "merged-work.txt": "c3d9eccdb181ea1ba8482d12aa9ebb2277c45c93f49a97d7bbe3ad11ea3ae61f",
-      "issue-changes.txt": "689484e31972830887f4e7fc500bbe335e0241d8fa4bf324a7be9f23796f6bf1",
-      "merged-cli.txt": "e4df52085e704c49ba37bd75f62656de48cd879405856220a53bcebb7efdebb4",
-      "issues-json.txt": "a866c9bd0fe09d6dc1355428d53f5ce30511912b71452e84e925b65b89f104b0"
-    },
-    "bundle_sha256": "3e363e6d607df9e08049ce52a75baab073b0563b85bb20808e2ecef359535745"
-  },
-  "privacy_review": {
-    "format": 1,
-    "bundle_sha256": "3e363e6d607df9e08049ce52a75baab073b0563b85bb20808e2ecef359535745",
-    "reviewer": "privacy-review-opus",
-    "decision": "approve",
-    "checked_images": [
-      "workflow-collection.png",
-      "workflow-context.png",
-      "merged-work.png",
-      "issue-changes.png",
-      "merged-cli.png",
-      "issues-json.png"
-    ],
-    "checks": {
-      "tokens_absent": true,
-      "personal_data_absent": true,
-      "feature_relevant": true,
-      "multiple_ui_scenes": true,
-      "captions_accurate": true
-    },
-    "findings": []
+  "transcripts": {
+    "workflow-collection.txt": "1ceaa17dd0c524475add03a07896d3c51c531c0ea2a9d408c7eb19d4dc122901",
+    "workflow-context.txt": "126046e987c956072c8cf7de9806f59d8c7b886038b9001fd85b16bbfb329ae6",
+    "merged-work.txt": "c3d9eccdb181ea1ba8482d12aa9ebb2277c45c93f49a97d7bbe3ad11ea3ae61f",
+    "issue-changes.txt": "689484e31972830887f4e7fc500bbe335e0241d8fa4bf324a7be9f23796f6bf1",
+    "merged-cli.txt": "e4df52085e704c49ba37bd75f62656de48cd879405856220a53bcebb7efdebb4",
+    "issues-json.txt": "a866c9bd0fe09d6dc1355428d53f5ce30511912b71452e84e925b65b89f104b0"
   }
 }

@@ -1,7 +1,109 @@
 {
   "format": 1,
-  "reviewer": "story-confirm-sonnet",
-  "source_sha256": "650cdaaf893882cf88076b77a29b477874e20e4f409416ab3a5409b19f6e4c3c",
-  "plan_sha256": "4b2f2733e91a815803ccfec3f3159a7b58900ad41be8c262d4b514b685420e07",
-  "story_sha256": "64652889140ce55c6653af1e7f459a842670a3f149f6ff2e1e38eb863476dc96"
+  "bootstrap": "docs/screenshot_fixture.py",
+  "browser_time": "2026-11-01T00:00:00Z",
+  "scenes": [
+    {
+      "name": "workflow-collection",
+      "surface": "ui",
+      "route": "/contracts",
+      "appearance": "light",
+      "caption": "The fictional weekly code review in the Core workflow graph and contracts list",
+      "timeout_ms": 30000,
+      "steps": [
+        {
+          "action": "wait",
+          "text": "Weekly code review"
+        }
+      ],
+      "viewport": {
+        "width": 1440,
+        "height": 960
+      }
+    },
+    {
+      "name": "workflow-context",
+      "surface": "ui",
+      "route": "/contracts/weekly-code-review",
+      "appearance": "dark",
+      "caption": "Fictional weekly review declares merged-work and issue inputs; no report was generated",
+      "timeout_ms": 30000,
+      "steps": [
+        {
+          "action": "wait",
+          "role": "heading",
+          "name": "Weekly code review"
+        }
+      ],
+      "viewport": {
+        "width": 1280,
+        "height": 800
+      }
+    },
+    {
+      "name": "merged-work",
+      "surface": "ui",
+      "route": "/",
+      "appearance": "light",
+      "caption": "Fictional merged pull requests in the app terminal, using a fixture-only requester and the real adapter",
+      "timeout_ms": 30000,
+      "steps": [
+        {
+          "action": "terminal",
+          "command": [
+            "showcase",
+            "merged",
+            "acme/widgets"
+          ]
+        }
+      ],
+      "viewport": {
+        "width": 1280,
+        "height": 650
+      }
+    },
+    {
+      "name": "issue-changes",
+      "surface": "ui",
+      "route": "/",
+      "appearance": "dark",
+      "caption": "Fictional issue changes, owners and states in the app terminal, using a fixture-only requester",
+      "timeout_ms": 30000,
+      "steps": [
+        {
+          "action": "terminal",
+          "command": [
+            "showcase",
+            "issues",
+            "acme/widgets"
+          ]
+        }
+      ],
+      "viewport": {
+        "width": 1280,
+        "height": 650
+      }
+    },
+    {
+      "name": "merged-cli",
+      "surface": "cli",
+      "caption": "Read fictional merged work in the shell with a fixture-only requester and the real adapter",
+      "command": [
+        "showcase",
+        "merged",
+        "acme/widgets"
+      ]
+    },
+    {
+      "name": "issues-json",
+      "surface": "cli",
+      "caption": "Fictional issue results as JSON for scripts and agents, using a fixture-only requester",
+      "command": [
+        "showcase",
+        "issues",
+        "acme/widgets",
+        "--json"
+      ]
+    }
+  ]
 }

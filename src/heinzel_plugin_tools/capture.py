@@ -16,7 +16,6 @@ import re
 import shlex
 import shutil
 import signal
-import socket
 import subprocess
 import sys
 import tempfile
@@ -30,32 +29,25 @@ from datetime import datetime
 from pathlib import Path
 from urllib.parse import urlsplit
 
-from packaging.requirements import Requirement
-from packaging.utils import canonicalize_name
-
 if __package__ in {None, ""}:
     sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from heinzel_plugin_tools import vendor
-from heinzel_plugin_tools._digest_migration import MIGRATED_DIGESTS
 from heinzel_plugin_tools._presentation import OwningPrefix, owning_prefix, redact_doctor_hostname, redact_owning_prefix
+from heinzel_plugin_tools.planning import DEFINITION, load_definition, write_definition
 from heinzel_plugin_tools.privacy import (
     DRAFT,
-    SOURCE_STORY,
     CaptureError,
+    StaleGallery,
     atomic_text,
-    bundle_digest,
     canonical_text,
-    prepare_review,
-    run_agent,
+    confidential_patterns,
+    page_text,
+    regular_bytes,
     safe_path,
-    story_bytes,
-    validate_bundle,
-    validate_historical_gallery,
-    validate_review,
+    scan_text,
 )
 
-PLAN = Path("docs/screenshots.toml")
+PLAN = DEFINITION
 OUTPUT = Path("docs/assets/screenshots")
 MANIFEST = OUTPUT / "capture.json"
 MAX_IMAGE = 500 * 1024
@@ -122,26 +114,10 @@ def default_plan(root: Path) -> dict:
     return {"format": 1, "scenes": scenes}
 
 
-def toml_value(value: object) -> str:
-    """Encode only the bounded data shapes used by editable screenshot plans."""
-    if isinstance(value, dict):
-        return "{" + ", ".join(f"{json.dumps(key)} = {toml_value(item)}" for key, item in value.items()) + "}"
-    if isinstance(value, list):
-        return "[" + ", ".join(toml_value(item) for item in value) + "]"
-    return json.dumps(value, ensure_ascii=False)
-
-
 def write_default_plan(root: Path, *, preset: str | None = None) -> None:
-    """Write a concise editable plan once; preserve the author's existing scene choices."""
-    path = safe_path(root, PLAN)
-    if path.exists():
+    """Write a starter definition once; preserve the author's existing scene choices."""
+    if safe_path(root, PLAN).exists():
         return
-    lines = [
-        "# Real UI and CLI captures. Run make screenshots; open the generated index.html to review.",
-        "# UI steps use accessible roles/labels: click, fill, press, wait. Commands are hz arguments, never shell.",
-        "format = 1",
-        "",
-    ]
     scenes = default_plan(root)["scenes"]
     if preset:
         module = next(iter(project_data(root)["project"]["entry-points"]["heinzel.modules"]))
@@ -153,19 +129,13 @@ def write_default_plan(root: Path, *, preset: str | None = None) -> None:
                 if step["action"] == "terminal":
                     step["command"] = command
         scenes.sort(key=lambda scene: (scene.get("name") != "terminal", scene["surface"] == "cli"))
-    for scene in scenes:
-        lines.append("[[scenes]]")
-        lines.extend(f"{key} = {toml_value(value)}" for key, value in scene.items())
-        lines.append("")
-    path.parent.mkdir(parents=True, exist_ok=True)
-    path.write_text("\n".join(lines))
+    write_definition(root, {"format": 1, "scenes": scenes})
 
 
 def read_plan(root: Path) -> dict:
     """Validate bounded scenes and accessible user actions before running anything."""
-    path = safe_path(root, PLAN)
-    data = tomllib.loads(path.read_text()) if path.exists() else default_plan(root)
-    return validate_plan(root, data)
+    data = load_definition(root)
+    return validate_plan(root, default_plan(root) if data is None else data)
 
 
 def validate_plan(root: Path, data: dict) -> dict:
@@ -179,14 +149,12 @@ def validate_plan(root: Path, data: dict) -> dict:
         or not isinstance(scenes, list)
         or not 3 <= len(scenes) <= MAX_SCENES
     ):
-        raise CaptureError(
-            "docs/screenshots.toml needs format = 1 and three to eight scenes, including at least two UI and one CLI"
-        )
+        raise CaptureError(f'{PLAN} needs "format": 1 and three to eight scenes, including at least two UI and one CLI')
     validate_browser_time(data.get("browser_time"))
     names = set()
     for scene in scenes:
         if not isinstance(scene, dict):
-            raise CaptureError("Each screenshot scene must be a TOML table")
+            raise CaptureError("Each screenshot scene must be a JSON object")
         if set(scene) - {
             "name",
             "surface",
@@ -260,7 +228,7 @@ def validate_plan(root: Path, data: dict) -> dict:
                 raise CaptureError(f"Scene {name}: use at most 24 accessible UI steps")
             for step in steps:
                 if not isinstance(step, dict):
-                    raise CaptureError(f"Scene {name}: each step must be a TOML table")
+                    raise CaptureError(f"Scene {name}: each step must be a JSON object")
                 if step.get("action") not in ("click", "hover", "fill", "press", "wait", "terminal", "wait-webgl"):
                     raise CaptureError(f"Scene {name}: steps support click, fill, press and wait")
                 if set(step) - {
@@ -352,109 +320,63 @@ def validate_browser_time(value: object) -> None:
         raise CaptureError("browser_time must be an ISO8601 date with a timezone") from None
 
 
-def build_hook(root: Path, metadata: dict) -> Path | None:
-    """The owning custom build hook, which renders views into the wheel with the locked build tools."""
-    hooks = metadata.get("tool", {}).get("hatch", {}).get("build", {}).get("hooks", {})
-    if "custom" not in hooks and not (root / "hatch_build.py").is_file():
-        return None
-    path = hooks.get("custom", {}).get("path", "hatch_build.py")
-    return root / path if isinstance(path, str) else root / "hatch_build.py"
+UI_FOLDERS = ("src", "web", "assets", "static", "templates", "resources")
+UI_SUFFIXES = {
+    ".js", ".mjs", ".cjs", ".jsx", ".ts", ".tsx", ".vue", ".svelte", ".css", ".scss", ".html", ".svg",
+    ".png", ".jpg", ".jpeg", ".gif", ".webp", ".ico", ".woff", ".woff2", ".ttf", ".otf",
+}  # fmt: skip
+NOT_RENDERED = {"tests", "test", "e2e", "__tests__"}
 
 
-def rendered_metadata(root: Path, metadata: dict) -> Path | None:
-    """Reduce project metadata in place to what renders (ADR 0003); return the build hook, which renders too.
-
-    Dropped: the plugin's own version, version specifiers and test or tooling groups. Kept: the names of every
-    declared and every locked distribution, because a new plugin dependency, direct or transitive and whatever its
-    name, adds pages; the version of every locked `heinzel*` distribution; and for a plugin with a build hook the
-    build requirements and their locked versions, which build its views. A relock that only moves versions of other
-    packages leaves the digest unchanged.
-    """
-    project = metadata.setdefault("project", {})
-    project.pop("version", None)
-    project["dependencies"] = sorted(declared_name(value) for value in project.get("dependencies", []))
-    if "optional-dependencies" in project:
-        project["optional-dependencies"] = {
-            extra: sorted(declared_name(value) for value in values)
-            for extra, values in project["optional-dependencies"].items()
-        }
-    metadata.pop("dependency-groups", None)
-    hook = build_hook(root, metadata)
-    built = set()
-    if hook:
-        built = {declared_name(value) for value in metadata.get("build-system", {}).get("requires", [])}
-    else:
-        metadata.pop("build-system", None)
-    lock = root / "requirements.lock"
-    pins = vendor.lock_pins(lock.read_text()) if lock.is_file() and not lock.is_symlink() else {}
-    metadata["locked"] = sorted(
-        f"{name}=={version}" if name.startswith("heinzel") or name in built else name
-        for name, versions in pins.items()
-        for version in versions
-    )
-    return hook
+def candidate_files(root: Path) -> list[str]:
+    """The plugin's relative files: what git tracks or would track (built output is ignored), else a walk."""
+    try:
+        listed = subprocess.run(
+            ["git", "-C", str(root), "ls-files", "-z", "--cached", "--others", "--exclude-standard", "--", "."],
+            capture_output=True,
+            check=False,
+            timeout=60,
+        )
+    except (OSError, subprocess.TimeoutExpired):
+        listed = None
+    if listed is not None and listed.returncode == 0:
+        return sorted({name for name in listed.stdout.decode().split("\0") if name})
+    found = []
+    for current, directories, filenames in os.walk(root, followlinks=False):
+        directories[:] = sorted(name for name in directories if name not in IGNORED)
+        found.extend((Path(current) / name).relative_to(root).as_posix() for name in filenames)
+    return sorted(found)
 
 
-def declared_name(value: str) -> str:
-    return canonicalize_name(Requirement(value).name)
-
-
-def input_digest(root: Path, plan: dict, *, legacy: bool = False) -> str:
-    """Identify what renders, excluding generated metadata, captures, environment caches and dependency tooling.
-
-    The locks, the plugin's own version and its version specifiers never render, so a relock, a security floor or a
-    version bump leaves a gallery fresh (ADR 0003). `legacy` recomputes the digest galleries were reviewed under
-    before that rule, which also covered those inputs.
-    """
-    metadata = project_data(root)
-    hook = None if legacy else rendered_metadata(root, metadata)
-    tool = metadata.get("tool", {})
-    owner = tool.get("heinzel", {})
-    catalog = owner.get("catalog", {})
-    catalog.pop("screenshots", None)
-    if not catalog:
-        owner.pop("catalog", None)
-    if not owner:
-        tool.pop("heinzel", None)
-    if not tool:
-        metadata.pop("tool", None)
-    digest = hashlib.sha256(json.dumps([metadata, plan], sort_keys=True).encode())
-    paths = [root / "requirements.lock", root / "plugin-lock.json"] if legacy else []
-    readme = root / "README.md"
-    if readme.exists():
-        paths.append(readme)
+def ui_inputs(root: Path, plan: dict) -> list[str]:
+    """What a capture renders (ADR 0003, as narrowed for deterministic capture): the definition, its fixture
+    bootstrap, the plugin's theme declarations and its web, static and view assets. Python logic, metadata, locks,
+    tests and documentation are no capture input, so editing them never makes the gallery stale."""
+    selected = set()  # the definition itself enters the digest as its parsed scenes, in `input_digest`
     if plan.get("bootstrap"):
-        paths.append(root / plan["bootstrap"])
-    if hook:
-        paths.append(hook)
-    for folder in (
-        root / "src",
-        root / "web",
-        root / "assets",
-        root / "static",
-        root / "templates",
-        root / "resources",
-    ):
-        for current, directories, filenames in os.walk(folder, followlinks=False):
-            if any((Path(current) / name).is_symlink() for name in directories if name not in IGNORED):
-                raise CaptureError("Capture inputs must not contain linked directories")
-            directories[:] = sorted(name for name in directories if name not in IGNORED)
-            paths.extend(Path(current) / name for name in sorted(filenames) if not name.endswith(".pyc"))
-    for path in sorted(paths):
-        if not path.is_file():
+        selected.add(Path(plan["bootstrap"]).as_posix())
+    for name in candidate_files(root):
+        parts = Path(name).parts
+        if len(parts) < 2 or parts[0] not in UI_FOLDERS or set(parts) & (IGNORED | NOT_RENDERED):
+            continue
+        if re.search(r"\.(?:test|spec|stories)\.[^.]+$", parts[-1]):
+            continue
+        suffix = Path(name).suffix.lower()
+        if suffix in UI_SUFFIXES or (parts[0] == "src" and "themes" in parts and suffix == ".toml"):
+            selected.add(name)
+    return sorted(selected)
+
+
+def input_digest(root: Path, plan: dict) -> str:
+    """Identify exactly the UI inputs of a gallery (`ui_inputs`), each by path and content."""
+    digest = hashlib.sha256(json.dumps(plan, sort_keys=True, separators=(",", ":")).encode())
+    for name in ui_inputs(root, plan):
+        path = root / name
+        if not path.is_file() and not path.is_symlink():
             continue
         if path.is_symlink() or not path.resolve().is_relative_to(root.resolve()):
             raise CaptureError("Capture inputs must be regular files inside the owning plugin")
-        content = path.read_bytes()
-        if path == root / "README.md":
-            content = (
-                re.sub(r"<!-- screenshots:start -->.*?<!-- screenshots:end -->", "", content.decode(), flags=re.S)
-                .strip()
-                .encode()
-            )
-        if path == root / "README.md" and not content:
-            continue
-        digest.update(path.relative_to(root).as_posix().encode() + b"\0" + content)
+        digest.update(name.encode() + b"\0" + path.read_bytes() + b"\0")
     return digest.hexdigest()
 
 
@@ -476,97 +398,98 @@ def unrendered_version(root: Path, core_version: object) -> None:
 
 
 def inputs_current(root: Path, plan: dict, recorded: object) -> bool:
-    """A reviewed digest is current under today's rule, or under the pre-ADR-0003 rule while that still matches.
-
-    A gallery of this repository reviewed under the old rule also stays current through a later relock or bump via
-    its pinned old-to-new digest, recorded once at the flip.
-    """
-    current = input_digest(root, plan)
-    return isinstance(recorded, str) and (
-        recorded == current
-        or MIGRATED_DIGESTS.get(recorded) == current
-        or recorded == input_digest(root, plan, legacy=True)
-    )
+    """The recorded digest is the digest of today's UI inputs."""
+    return isinstance(recorded, str) and recorded == input_digest(root, plan)
 
 
-def check_capture(root: Path) -> dict:
-    """Check freshness and complete gallery assets offline, without installing or running a plugin."""
-    manifest_path = safe_path(root, MANIFEST)
-    if not manifest_path.is_file():
-        raise CaptureError(
-            "No capture manifest yet. Run make screenshots (or hz-plugin screenshots <name>), then review it"
-        )
-    plan = read_plan(root)
-    manifest_bytes = manifest_path.read_bytes()
-    manifest = json.loads(manifest_bytes)
-    if manifest.get("format") != 1 or not inputs_current(root, plan, manifest.get("inputs_sha256")):
-        raise CaptureError(
-            "Screenshots are stale. Run make screenshots, review the preview, and commit the updated gallery"
-        )
-    unrendered_version(root, manifest.get("core_version"))
-    expected = [
+def regenerate_command(root: Path) -> str:
+    """The exact command that regenerates this plugin's gallery."""
+    return f"make screenshots NAME={project_data(root)['project']['name']}"
+
+
+def expected_shots(plan: dict) -> list[dict]:
+    """The catalog entries of a definition, in order: path, surface and the caption the definition gives."""
+    return [
         {"path": (OUTPUT / f"{scene['name']}.png").as_posix(), "surface": scene["surface"], "caption": scene["caption"]}
         for scene in plan["scenes"]
     ]
+
+
+MANIFEST_KEYS = {"format", "plugin", "core_version", "inputs_sha256", "images", "transcripts"}
+
+
+def check_capture(root: Path) -> dict:
+    """Check freshness and complete gallery assets offline, without installing or running a plugin or an agent."""
+    command = regenerate_command(root)
+    name = project_data(root)["project"]["name"]
+    if not safe_path(root, PLAN).is_file():
+        raise CaptureError(
+            f"No screenshot definition ({PLAN}). Run hz-plugin screenshots {name} --init, edit it, then {command}"
+        )
+    manifest_path = safe_path(root, MANIFEST)
+    if not manifest_path.is_file():
+        raise StaleGallery(f"{name}: no capture manifest yet. Run {command}", command)
+    plan = read_plan(root)
+    manifest = json.loads(manifest_path.read_text())
+    if not isinstance(manifest, dict) or manifest.get("format") != 2 or set(manifest) != MANIFEST_KEYS:
+        raise StaleGallery(f"{name}: the gallery manifest predates deterministic capture. Run {command}", command)
+    if manifest.get("plugin") != name:
+        raise CaptureError(f"{MANIFEST} names another plugin. Run {command}")
+    if not inputs_current(root, plan, manifest.get("inputs_sha256")):
+        raise StaleGallery(
+            f"{name}: screenshots are stale (the definition, its fixture or a UI asset changed). Run {command} "
+            "and commit the regenerated gallery",
+            command,
+        )
+    unrendered_version(root, manifest.get("core_version"))
+    expected = expected_shots(plan)
     actual = project_data(root).get("tool", {}).get("heinzel", {}).get("catalog", {}).get("screenshots")
     if actual != expected:
-        raise CaptureError("Catalog screenshots differ from the capture plan. Run make screenshots to update them")
-    for shot in expected:
-        path = root / shot["path"]
-        if path.is_symlink() or not path.resolve().is_relative_to(root.resolve()):
-            raise CaptureError("Gallery images must stay inside their owning plugin")
-        content = path.read_bytes()
-        if not content.startswith(b"\x89PNG\r\n\x1a\n") or len(content) > MAX_IMAGE:
-            raise CaptureError(f"{shot['path']}: expected a PNG smaller than 500 KiB; re-run make screenshots")
-        if hashlib.sha256(content).hexdigest() != manifest.get("images", {}).get(shot["path"]):
-            raise CaptureError(
-                f"{shot['path']}: capture changed; re-run make screenshots instead of editing generated images"
-            )
-    from heinzel_plugin_tools.planning import validate_definition
-
-    definition = validate_definition(root, plan)
-    bundle = manifest.get("review_bundle", {})
-    historical = isinstance(bundle, dict) and bundle.get("format") == 1
-    if historical:
-        validate_historical_gallery(manifest_bytes, safe_path(root, OUTPUT), project_data(root)["project"]["name"])
-    else:
-        validate_bundle(bundle, safe_path(root, OUTPUT))
-    if bundle.get("definition") != definition:
-        raise CaptureError("Gallery source-analysis definition differs from the reviewed captures")
+        raise StaleGallery(f"{name}: catalog screenshots differ from the definition. Run {command}", command)
+    images = manifest.get("images")
+    transcripts = manifest.get("transcripts")
     if (
-        bundle.get("plugin") != project_data(root)["project"]["name"]
-        or manifest.get("plugin") != bundle["plugin"]
-        or manifest.get("core_version") != bundle["core_version"]
-        or bundle.get("inputs_sha256") != manifest["inputs_sha256"]
-        or bundle.get("screenshots") != expected
-        or bundle.get("images") != {Path(shot["path"]).name: manifest["images"][shot["path"]] for shot in expected}
+        not isinstance(images, dict)
+        or not isinstance(transcripts, dict)
+        or set(images) != {shot["path"] for shot in expected}
+        or set(transcripts) != {f"{scene['name']}.txt" for scene in plan["scenes"]}
     ):
-        raise CaptureError("Gallery has no current exact-bundle privacy review. Run make screenshots")
-    if not historical:
-        validate_review(bundle, manifest.get("privacy_review", {}))
+        raise StaleGallery(f"{name}: the gallery manifest differs from the definition's scenes. Run {command}", command)
+    for shot in expected:
+        content = safe_path(root, shot["path"]).read_bytes() if safe_path(root, shot["path"]).is_file() else b""
+        if not content.startswith(b"\x89PNG\r\n\x1a\n") or len(content) > MAX_IMAGE:
+            raise CaptureError(f"{shot['path']}: expected a PNG smaller than 500 KiB; re-run {command}")
+        if hashlib.sha256(content).hexdigest() != images[shot["path"]]:
+            raise CaptureError(f"{shot['path']}: capture changed; re-run {command} instead of editing generated images")
+    terms = confidential_patterns()
+    for filename, digest in transcripts.items():
+        path = safe_path(root, OUTPUT / filename)
+        data = path.read_bytes() if path.is_file() else b""
+        if hashlib.sha256(data).hexdigest() != digest:
+            raise CaptureError(f"{OUTPUT / filename}: transcript artifacts changed; re-run {command}")
+        scan_text(data.decode("utf-8", errors="replace"), terms=terms)
+    for shot in expected:
+        scan_text(shot["caption"], terms=terms)
     readme = safe_path(root, "README.md")
     if not readme.is_file():
-        raise CaptureError("The generated README gallery is missing. Republish the approved capture draft")
+        raise StaleGallery(f"{name}: the generated README gallery is missing. Run {command}", command)
     readme_text = readme.read_text()
     if readme_text != readme_gallery(readme_text, expected):
-        raise CaptureError("The generated README gallery differs from the reviewed captions and image order")
+        raise StaleGallery(f"{name}: the README gallery differs from the definition's captions. Run {command}", command)
     contact_sheet = safe_path(root, OUTPUT / "index.html")
     if not contact_sheet.is_file() or contact_sheet.read_text() != preview_document(
-        bundle["plugin"], plan["scenes"], bundle["core_version"]
+        name, plan["scenes"], str(manifest["core_version"])
     ):
-        raise CaptureError("The published contact sheet differs from its reviewed captions and SDK provenance")
+        raise StaleGallery(f"{name}: the contact sheet differs from the definition's captions. Run {command}", command)
     return {
         "ok": True,
-        "plugin": project_data(root)["project"]["name"],
+        "plugin": name,
         "screenshots": expected,
         "preview": str(root / OUTPUT / "index.html"),
         "manifest": str(root / MANIFEST),
         "plan": str(root / PLAN),
         "fresh": True,
-        "privacy_reviewed": True,
-        "review_bundle_format": bundle["format"],
-        "source_story_bundle_reviewed": not historical,
-        "reviewed_by": manifest["privacy_review"]["reviewer"],
+        "inputs": ui_inputs(root, plan),
     }
 
 
@@ -620,7 +543,7 @@ def hz(interpreter: Path, args: list[str], env: dict, cwd: Path) -> str:
     if result.returncode:
         raise CaptureError("A screenshot CLI scene failed. Inspect its command in the editable scene plan")
     if len(result.stdout) > 256 * 1024:
-        raise CaptureError("CLI capture is too long; choose a narrower command in docs/screenshots.toml")
+        raise CaptureError("CLI capture is too long; choose a narrower command in docs/screenshot-definition.json")
     return result.stdout
 
 
@@ -713,29 +636,6 @@ def preview_document(name: str, scenes: list[dict], core: str) -> str:
     )
 
 
-def scan_text(value: str) -> None:
-    """Stop recognizable credentials and host identity before any publication step."""
-    patterns = [
-        r"(?:[?#&](?:access_)?token=)[A-Za-z0-9_-]+",
-        r"Bearer\s+[A-Za-z0-9._-]{12,}",
-        r"gh[pousr]_[A-Za-z0-9]{16,}",
-        r"sk-(?:proj-)?[A-Za-z0-9_-]{20,}",
-        r"-----BEGIN (?:RSA |EC |OPENSSH )?PRIVATE KEY-----",
-    ]
-    if any(re.search(pattern, value, re.I) for pattern in patterns):
-        raise CaptureError("Capture text contains a possible credential; use fictional fixtures before reviewing again")
-    if re.search(
-        r"(?:/Users/|/home/|/private/var/folders/|/var/folders/|/private/tmp/|/tmp/|[A-Za-z]:\\Users\\)[^\s/\\]+", value
-    ) or any(
-        not email.lower().endswith(("@example.com", ".example", "@example.org", "@example.test"))
-        for email in re.findall(r"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}", value)
-    ):
-        raise CaptureError("Capture text contains private paths or personal identity; use fictional demonstration data")
-    private = [str(Path.home()), socket.gethostname()]
-    if any(part not in {"localhost", "demo-workstation"} and len(part) > 3 and part in value for part in private):
-        raise CaptureError("Capture text contains host-specific information; replace it with a fictional fixture")
-
-
 def redact_auth_presentation(page, tokens: tuple[str, ...] = (), private_paths: tuple[str, ...] = ()) -> None:
     """Hide session/authentication presentation before successful or diagnostic image saves."""
     page.evaluate(
@@ -788,16 +688,13 @@ def safe_screenshot(
         redact_owning_prefix(page, owning_interpreter_prefix)
     redact_auth_presentation(page, tokens, private_paths)
     body = page.locator("body").inner_text()
-    forms = page.locator("input,textarea").evaluate_all("els => els.map(el => el.value).join('\\n')")
-    scan_text(body + "\n" + forms)
+    scan_text(page_text(page))
     page.screenshot(path=str(path), animations="disabled", clip=clip)
     return body
 
 
 def safe_failure_message(error: Exception) -> str:
     """Keep arbitrary provider/browser exception text out of human and machine output."""
-    if isinstance(error, tomllib.TOMLDecodeError):
-        return "The editable screenshot plan has invalid TOML. Check docs/screenshots.toml syntax"
     if isinstance(error, CaptureError):
         message = str(error)
         try:
@@ -838,33 +735,37 @@ def readme_gallery(text: str, shots: list[dict]) -> str:
     return text.rstrip() + "\n\n" + block + "\n"
 
 
-def publish_draft(root: Path, receipt: Path | None = None) -> dict:
-    """Publish only a complete fresh bundle approved by an independent privacy and quality agent."""
-    import tomlkit
+DRAFT_MANIFEST = "draft.json"
 
-    from heinzel_plugin_tools.planning import validate_definition
+
+def publish_draft(root: Path) -> dict:
+    """Publish a complete fresh draft: deterministic guards again, then gallery, catalog, README, contact sheet."""
+    import tomlkit
 
     folder = safe_path(root, DRAFT)
     plan = read_plan(root)
-    definition = validate_definition(root, plan)
-    bundle = json.loads(safe_path(folder, "review-input.json").read_text())
-    validate_bundle(bundle, folder)
-    if not inputs_current(root, plan, bundle.get("inputs_sha256")) or bundle.get("definition") != definition:
-        raise CaptureError("Draft source inputs changed. Capture again before asking the agent to review")
-    expected = [
-        {"path": (OUTPUT / f"{scene['name']}.png").as_posix(), "surface": scene["surface"], "caption": scene["caption"]}
-        for scene in plan["scenes"]
-    ]
-    if bundle.get("screenshots") != expected:
-        raise CaptureError("Draft captions differ from the current scene plan. Capture again")
-    for filename in bundle["transcripts"]:
-        scan_text(safe_path(folder, filename).read_text())
-    scan_text(story_bytes(folder, SOURCE_STORY).decode("utf-8"))
-    review = run_agent(root, bundle, receipt)
-    # An independent agent may take minutes; recheck bytes and sources at the publication boundary.
-    validate_bundle(bundle, folder)
-    if not inputs_current(root, plan, bundle["inputs_sha256"]) or validate_definition(root, plan) != definition:
-        raise CaptureError("Source inputs changed during review. Capture and review again")
+    draft = json.loads(safe_path(folder, DRAFT_MANIFEST).read_text())
+    if not inputs_current(root, plan, draft.get("inputs_sha256")):
+        raise StaleGallery(
+            "Draft UI inputs changed since capture. Capture again: " + regenerate_command(root),
+            regenerate_command(root),
+        )
+    expected = expected_shots(plan)
+    names = [scene["name"] for scene in plan["scenes"]]
+    terms = confidential_patterns()
+    images, transcripts = {}, {}
+    for name in names:
+        image = regular_bytes(safe_path(folder, f"{name}.png"), MAX_IMAGE)
+        if not image.startswith(b"\x89PNG\r\n\x1a\n") or len(image) > MAX_IMAGE:
+            raise CaptureError(f"{name}.png: expected a PNG smaller than 500 KiB")
+        text = regular_bytes(safe_path(folder, f"{name}.txt"), 256 * 1024).decode("utf-8", errors="replace")
+        scan_text(text, terms=terms)
+        if hashlib.sha256(image).hexdigest() != draft.get("images", {}).get(f"{name}.png"):
+            raise CaptureError("Draft images changed after capture. Capture again")
+        images[(OUTPUT / f"{name}.png").as_posix()] = hashlib.sha256(image).hexdigest()
+        transcripts[f"{name}.txt"] = hashlib.sha256(text.encode()).hexdigest()
+    for shot in expected:
+        scan_text(shot["caption"], terms=terms)
     metadata_path = safe_path(root, "pyproject.toml")
     original_metadata = metadata_path.read_text()
     readme_path = safe_path(root, "README.md")
@@ -877,22 +778,25 @@ def publish_draft(root: Path, receipt: Path | None = None) -> dict:
     if target.exists():
         for artifact in target.rglob("*"):
             safe_path(root, artifact.relative_to(root))
+    plugin = project_data(root)["project"]["name"]
     manifest = {
-        "format": 1,
-        "plugin": bundle["plugin"],
-        "core_version": bundle["core_version"],
-        "inputs_sha256": bundle["inputs_sha256"],
-        "images": {shot["path"]: bundle["images"][Path(shot["path"]).name] for shot in expected},
-        "review_bundle": bundle,
-        "privacy_review": review,
+        "format": 2,
+        "plugin": plugin,
+        "core_version": draft["core_version"],
+        "inputs_sha256": draft["inputs_sha256"],
+        "images": images,
+        "transcripts": transcripts,
     }
+    definition = safe_path(root, PLAN)
+    original_definition = definition.read_text() if definition.exists() else None
     with tempfile.TemporaryDirectory(prefix=".gallery-stage-", dir=target.parent) as temporary:
         staging = Path(temporary) / "screenshots"
         staging.mkdir()
-        for filename in [*bundle["images"], *bundle["transcripts"], SOURCE_STORY]:
-            shutil.copyfile(safe_path(folder, filename), staging / filename)
-        # Regenerate the contact sheet from reviewed captions, never copy unreviewed supplier HTML.
-        (staging / "index.html").write_text(preview_document(bundle["plugin"], plan["scenes"], bundle["core_version"]))
+        for name in names:
+            for extension in ("png", "txt"):
+                shutil.copyfile(safe_path(folder, f"{name}.{extension}"), staging / f"{name}.{extension}")
+        # The contact sheet is regenerated from the definition's captions, never copied.
+        (staging / "index.html").write_text(preview_document(plugin, plan["scenes"], draft["core_version"]))
         (staging / "capture.json").write_text(json.dumps(manifest, indent=2) + "\n")
         backup = Path(temporary) / "previous"
         moved = False
@@ -904,6 +808,8 @@ def publish_draft(root: Path, receipt: Path | None = None) -> dict:
                 moved = True
             staging.rename(target)
             installed = True
+            if original_definition is None:
+                write_definition(root, plan)
             atomic_text(metadata_path, tomlkit.dumps(document))
             atomic_text(readme_path, updated_readme)
             return check_capture(root)
@@ -917,6 +823,8 @@ def publish_draft(root: Path, receipt: Path | None = None) -> dict:
                 readme_path.unlink(missing_ok=True)
             else:
                 atomic_text(readme_path, original_readme)
+            if original_definition is None:
+                definition.unlink(missing_ok=True)
             raise
 
 
@@ -1016,17 +924,12 @@ def capture(
     from rich.terminal_theme import MONOKAI
     from rich.text import Text
 
-    from heinzel_plugin_tools.planning import STORY, ensure_definition, validate_definition
-
     root = root.resolve()
-    definition = ensure_definition(root)
     plan = read_plan(root)
     metadata = project_data(root)
     name = metadata["project"]["name"]
     if not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._-]*", name):
         raise CaptureError("The plugin name must start with a letter or digit and contain no option-like text")
-    if not (root / PLAN).exists():
-        write_default_plan(root)
     print(f"Preparing {name}; your normal app and credentials stay separate.", file=sys.stderr, flush=True)
     prepare = [
         "uv",
@@ -1092,13 +995,18 @@ def capture(
                     if "Executable doesn't exist" not in str(error):
                         raise
                     print("Installing the capture browser once…", file=sys.stderr, flush=True)
-                    subprocess.run(
+                    installed = subprocess.run(
                         [sys.executable, "-m", "playwright", "install", "chromium"],
                         stdout=sys.stderr,
                         stderr=sys.stderr,
-                        check=True,
+                        check=False,
                         timeout=600,
                     )
+                    if installed.returncode:
+                        raise CaptureError(
+                            "No capture browser, and installing it failed. Run: uv run --with playwright==1.64.1 "
+                            f"playwright install chromium, then {regenerate_command(root)}"
+                        ) from None
                     browser = playwright.chromium.launch(headless=not headed)
                 try:
                     for scene in plan["scenes"]:
@@ -1289,44 +1197,27 @@ def capture(
             for extension in ("png", "txt"):
                 shutil.copyfile(work / f"{scene['name']}.{extension}", folder / f"{scene['name']}.{extension}")
         (folder / "index.html").write_text(preview_document(name, plan["scenes"], version))
-        evidence = story_bytes(root, STORY)
-        if (
-            validate_definition(root, plan) != definition
-            or hashlib.sha256(evidence).hexdigest() != definition["story_sha256"]
-        ):
-            raise CaptureError("Source story changed during capture; define and capture again")
-        scan_text(evidence.decode("utf-8"))
-        (folder / SOURCE_STORY).write_bytes(evidence)
-        bundle = {
-            "format": 2,
-            "source_story": {"path": SOURCE_STORY, "sha256": definition["story_sha256"]},
-            "definition": definition,
+        draft = {
+            "format": 1,
             "plugin": name,
             "core_version": version,
             "inputs_sha256": input_digest(root, plan),
-            "screenshots": shots,
             "images": {
                 f"{scene['name']}.png": hashlib.sha256((folder / f"{scene['name']}.png").read_bytes()).hexdigest()
                 for scene in plan["scenes"]
             },
-            "transcripts": {
-                f"{scene['name']}.txt": hashlib.sha256((folder / f"{scene['name']}.txt").read_bytes()).hexdigest()
-                for scene in plan["scenes"]
-            },
         }
-        bundle["bundle_sha256"] = bundle_digest(bundle)
-        prepare_review(folder, bundle)
+        atomic_text(folder / DRAFT_MANIFEST, json.dumps(draft, indent=2) + "\n")
     if draft_only:
         return {
             "ok": True,
             "plugin": name,
             "screenshots": shots,
             "fresh": False,
-            "review_required": True,
             "preview": str(folder / "index.html"),
             "draft": str(folder),
             "plan": str(root / PLAN),
-            "next": "Review REVIEW.md with an independent agent, then use --review-receipt <file>",
+            "next": f"open the contact sheet, then {regenerate_command(root)} to publish",
         }
     return publish_draft(root)
 
@@ -1340,28 +1231,23 @@ def main() -> int:
     parser.add_argument("--json", action="store_true")
     parser.add_argument("--headed", action="store_true")
     parser.add_argument("--draft", action="store_true")
-    parser.add_argument("--review-receipt", type=Path)
     parser.add_argument("--open", action="store_true")
     args = parser.parse_args()
     try:
-        report = (
-            publish_draft(args.project.resolve(), args.review_receipt)
-            if args.review_receipt
-            else capture(
-                args.project.resolve(),
-                core=args.core,
-                headed=args.headed,
-                draft_only=args.draft,
-                prepared_python=args.prepared_python,
-            )
+        report = capture(
+            args.project.resolve(),
+            core=args.core,
+            headed=args.headed,
+            draft_only=args.draft,
+            prepared_python=args.prepared_python,
         )
         if args.json:
             print(json.dumps(report))
         else:
             outcome = (
-                "private captures ready for independent review"
-                if report.get("review_required")
-                else "approved gallery, catalog metadata and README are ready"
+                "private draft captures ready"
+                if report.get("draft")
+                else "screenshots published to the gallery, catalog metadata and README; review the diff"
             )
             print(f"✓ {report['plugin']}: {len(report['screenshots'])} {outcome}.")
             print(
@@ -1374,7 +1260,9 @@ def main() -> int:
     except Exception as error:  # The subprocess boundary must preserve the JSON result even if a browser adapter fails.
         message = safe_failure_message(error)
         if args.json:
-            print(json.dumps({"ok": False, "error": message, "next": "Review docs/screenshots.toml and retry"}))
+            print(
+                json.dumps({"ok": False, "error": message, "next": "Review docs/screenshot-definition.json and retry"})
+            )
         print(f"Capture failed: {message}", file=sys.stderr)
         return 1
 

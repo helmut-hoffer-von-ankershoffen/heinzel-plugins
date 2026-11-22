@@ -11,9 +11,10 @@ Each directory in `plugins/` is an independent project. Read README.md for ownin
   `make tooling-check` checks shared tooling only.
 - Release: `make release NAME=<owner>` previews; after a reviewed merge, `make publish NAME=<owner>` dispatches the
   owning protected workflow.
-- After an interface change: `make screenshots NAME=<owner> OPEN=1`. Define a source-bound feature story before
-  capture (`hz-plugin screenshots <owner> --plan`; offline freshness: `--check --json`). An independent agent
-  inspects every image and transcript before gallery/README publication ([guide](docs/SCREENSHOT_AUTHORING.md)).
+- After an interface change: `make screenshots NAME=<owner> OPEN=1`. The plan is the hand-edited
+  `docs/screenshot-definition.json`; capture is deterministic (Playwright, fixture scenes, fictional data, text
+  guards) and never calls an agent. Offline freshness: `make screenshots-check NAME=<owner>`
+  ([guide](docs/SCREENSHOT_AUTHORING.md)).
 
 ## Rules
 
@@ -31,4 +32,4 @@ Each directory in `plugins/` is an independent project. Read README.md for ownin
 - Set exactly one level marker per pytest file.
 - Use conventional commits and pull requests. Review nontrivial changes.
 - Public sources contain only fictional names.
-- Never manufacture an approval receipt to bypass a screenshot review.
+- Never weaken a screenshot guard to let a capture through; change the fixture instead.

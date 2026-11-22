@@ -1,7 +1,179 @@
 {
   "format": 1,
-  "reviewer": "story-confirm-sonnet",
-  "source_sha256": "6b5bdaf2312c1595bc5e58c8ae08aa81c26b52653f5848dc0912ede000d9c7c5",
-  "plan_sha256": "4d0c875dbba40b93030be59a181c6535f9b1a6e8b5c47c451e12d4701e2bbba3",
-  "story_sha256": "d86adea75a80c32b85df3b64ccb79f4b4c0eae063b81704b17862fc61b01bffa"
+  "bootstrap": "docs/screenshot_fixture.py",
+  "browser_time": "2026-10-26T15:30:00Z",
+  "scenes": [
+    {
+      "name": "world-clock",
+      "surface": "ui",
+      "route": "/?panel=clock:world-clock",
+      "appearance": "light",
+      "caption": "Find overlap across Berlin, New York and Los Angeles with the World Clock — fictional demonstration time",
+      "reduced_motion": "no-preference",
+      "steps": [
+        {
+          "action": "wait",
+          "text": "Zones at work now"
+        },
+        {
+          "action": "wait",
+          "text": "2/3"
+        },
+        {
+          "action": "click",
+          "role": "button",
+          "name_regex": "^Dismiss Doctor",
+          "optional": true
+        },
+        {
+          "action": "wait",
+          "role": "region",
+          "name": "World clock"
+        },
+        {
+          "action": "wait-webgl"
+        }
+      ]
+    },
+    {
+      "name": "team-overview",
+      "surface": "ui",
+      "route": "/",
+      "appearance": "dark",
+      "caption": "Fictional team working hours at a glance: the Today count and the primary footer clock",
+      "steps": [
+        {
+          "action": "wait",
+          "text": "2/3"
+        },
+        {
+          "action": "click",
+          "role": "button",
+          "name_regex": "^Dismiss Doctor",
+          "optional": true
+        },
+        {
+          "action": "click",
+          "role": "button",
+          "name": "Close the chat",
+          "within_role": "complementary"
+        },
+        {
+          "action": "hover",
+          "role": "button",
+          "name_regex": "^World clock: Berlin"
+        },
+        {
+          "action": "hover",
+          "role": "button",
+          "name_regex": "^Berlin",
+          "within_role": "contentinfo"
+        },
+        {
+          "action": "hover",
+          "role": "region",
+          "name": "Today"
+        }
+      ]
+    },
+    {
+      "name": "footer-detail",
+      "surface": "ui",
+      "route": "/",
+      "caption": "Inspect all configured time zones from the primary footer clock — fictional demonstration data",
+      "steps": [
+        {
+          "action": "wait",
+          "text": "2/3"
+        },
+        {
+          "action": "click",
+          "role": "button",
+          "name_regex": "^Dismiss Doctor",
+          "optional": true
+        },
+        {
+          "action": "click",
+          "role": "button",
+          "name_regex": "^Berlin",
+          "within_role": "contentinfo"
+        },
+        {
+          "action": "wait",
+          "text": "Ends in 1h 30m"
+        }
+      ],
+      "focus": {
+        "role": "region",
+        "name_regex": "^Berlin"
+      }
+    },
+    {
+      "name": "phone-world-clock",
+      "surface": "ui",
+      "route": "/?panel=clock:world-clock",
+      "caption": "The globe and three fictional team clocks on a phone — fixed demonstration time",
+      "reduced_motion": "no-preference",
+      "steps": [
+        {
+          "action": "wait",
+          "text": "2/3"
+        },
+        {
+          "action": "click",
+          "role": "button",
+          "name_regex": "^Dismiss Doctor",
+          "optional": true
+        },
+        {
+          "action": "wait",
+          "role": "region",
+          "name": "World clock"
+        },
+        {
+          "action": "wait-webgl"
+        },
+        {
+          "action": "hover",
+          "role": "region",
+          "name": "World clock"
+        }
+      ],
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "terminal-current",
+      "surface": "cli",
+      "caption": "CLI: fictional demo team at 15:30 UTC: Berlin and New York are within working hours; Los Angeles starts in 30 minutes.",
+      "command": [
+        "clock",
+        "--at",
+        "2026-10-26T15:30:00Z"
+      ]
+    },
+    {
+      "name": "terminal-overlap",
+      "surface": "cli",
+      "caption": "CLI preview with --at: at 16:30 UTC all three fictional demo zones are within working hours.",
+      "command": [
+        "clock",
+        "--at",
+        "2026-10-26T16:30:00Z"
+      ]
+    },
+    {
+      "name": "cli-json",
+      "surface": "cli",
+      "caption": "Structured clock data for the fictional team at the fixed demonstration time.",
+      "command": [
+        "clock",
+        "--at",
+        "2026-10-26T15:30:00Z",
+        "--json"
+      ]
+    }
+  ]
 }

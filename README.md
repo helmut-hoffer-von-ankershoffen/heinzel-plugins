@@ -185,12 +185,14 @@ Restart after rebuilding loaded view assets; Ctrl-C stops the preview.
 
 ## Capture your plugin
 
-`make screenshots NAME=<plugin> OPEN=1` first asks an agent to define a useful story from the owning source,
-then captures the real UI and CLI with fictional fixtures. An independent agent reviews every image and transcript
-before gallery assets, catalog metadata and the owning README update. Missing review preserves the private draft.
-Use `hz-plugin screenshots <plugin> --plan` to edit the story first, `--draft --open` for a private preview, and
-`--check --json` for offline freshness. New collection plugins use this same workflow.
-See [Screenshot authoring](docs/SCREENSHOT_AUTHORING.md) for editable scenes, prepared interpreters and exact review receipts.
+Each plugin's `docs/screenshot-definition.json` is its hand-edited screenshot plan: scenes, captions and an optional
+fixture bootstrap. `make screenshots NAME=<plugin> OPEN=1` captures the real UI and CLI deterministically with
+Playwright against those fixture scenes, with fictional data only, and publishes the gallery, catalog metadata and
+README block. No AI is involved: deterministic guards refuse any capture whose page text, title, URL, transcript or
+caption contains a credential, a real email, a private path, hostname or IP, or a confidential term, and the pull
+request diff shows the images for the normal review. `make screenshots-check NAME=<plugin>` checks freshness offline;
+only the definition, its fixture and the plugin's UI assets are freshness inputs. See
+[Screenshot authoring](docs/SCREENSHOT_AUTHORING.md) for scenes, guards and prepared interpreters.
 
 ## Add a plugin
 
