@@ -30,7 +30,9 @@ def configured_terms() -> str:
 
 def command(argv: list[str], *, cwd: Path, capture: bool = False, timeout: int = 900):
     try:
-        return subprocess.run(argv, cwd=cwd, text=True, capture_output=capture, timeout=timeout, check=False)
+        return subprocess.run(
+            argv, cwd=cwd, text=True, stdout=subprocess.PIPE if capture else None, timeout=timeout, check=False
+        )
     except (OSError, subprocess.TimeoutExpired) as error:
         raise CaptureError(
             "Canonical Linux capture needs a running Docker engine and the pinned public image"
@@ -82,9 +84,23 @@ def run(args) -> dict:
             project,
             symlinks=True,
             ignore=shutil.ignore_patterns(
-                ".git", ".venv", "node_modules", "__pycache__", ".preview", ".acceptance", ".pytest_cache", "dist"
+                ".git",
+                ".venv",
+                "node_modules",
+                "__pycache__",
+                ".preview",
+                ".acceptance",
+                ".pytest_cache",
+                "dist",
+                ".env",
+                ".env.*",
+                ".netrc",
+                ".npmrc",
+                ".pypirc",
             ),
         )
+        for directory in ("home", "cache", "python", "bootstrap"):
+            (work / directory).mkdir()
         runtime = work / "runtime"
         package = Path(__file__).resolve().parent
         shutil.copytree(package, runtime / "src/heinzel_plugin_tools", ignore=shutil.ignore_patterns("__pycache__"))
@@ -125,6 +141,10 @@ def run(args) -> dict:
                     container,
                     "--platform",
                     PLATFORM,
+                    "--user",
+                    f"{os.getuid()}:{os.getgid()}",
+                    "--hostname",
+                    "demo-host",
                     "--ipc=private",
                     "--shm-size=1g",
                     "--mount",
@@ -133,6 +153,12 @@ def run(args) -> dict:
                     "/capture/project",
                     "--env",
                     "LANG=C.UTF-8",
+                    "--env",
+                    "HOME=/capture/home",
+                    "--env",
+                    "UV_CACHE_DIR=/capture/cache",
+                    "--env",
+                    "UV_PYTHON_INSTALL_DIR=/capture/python",
                     "--env",
                     "LC_ALL=C.UTF-8",
                     "--env",
@@ -148,8 +174,9 @@ def run(args) -> dict:
                     IMAGE,
                     "-c",
                     "import os,subprocess,sys; "
+                    "os.environ['PATH']='/capture/bootstrap/bin:'+os.environ['PATH']; "
                     "subprocess.run([sys.executable, '-m', 'pip', 'install', '--quiet', "
-                    "'--no-cache-dir', 'uv==0.13.7'], check=True); "
+                    "'--no-cache-dir', '--target', '/capture/bootstrap', 'uv==0.13.7'], check=True); "
                     "os.execvp(sys.argv[1], sys.argv[1:])",
                     *child,
                 ],

@@ -796,6 +796,7 @@ def test_canonical_linux_runs_exact_image_without_host_state_and_keeps_all_text(
     wheel.write_bytes(b"fictional wheel")
     (owner / ".venv").mkdir()
     (owner / ".venv/host-secret").write_text("not an input")
+    (owner / ".env").write_text("host-only")
     before = (owner / capture.MANIFEST).read_bytes()
     calls = []
     monkeypatch.setattr(capture_linux, "configured_terms", lambda: "fictional-private-term\n")
@@ -807,12 +808,17 @@ def test_canonical_linux_runs_exact_image_without_host_state_and_keeps_all_text(
             return SimpleNamespace(returncode=0)
         assert argv[1:3] == ["run", "--rm"]
         assert capture_linux.IMAGE in argv
+        assert argv[argv.index("--hostname") + 1] == "demo-host"
+        assert argv[argv.index("--user") + 1] == f"{os.getuid()}:{os.getgid()}"
+        assert "HOME=/capture/home" in argv and "UV_CACHE_DIR=/capture/cache" in argv
+        assert (cwd / "home").is_dir() and (cwd / "bootstrap").is_dir()
         assert argv[argv.index("--platform") + 1] == "linux/amd64"
         assert str(owner) not in " ".join(argv)
         assert "fictional-private-term" not in " ".join(argv)
         assert not any("docker.sock" in item or "/Applications" in item for item in argv)
         assert "--verify" in argv and "--container-worker" in argv
         assert not (cwd / "project/.venv").exists()
+        assert not (cwd / "project/.env").exists()
         assert (cwd / "core" / wheel.name).read_bytes() == wheel.read_bytes()
         folder = draft_of(cwd / "project")
         (folder / "index.html").write_text("Fictional contact sheet")

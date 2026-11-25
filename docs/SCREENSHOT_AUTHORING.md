@@ -205,7 +205,7 @@ inexpensive portable freshness check and does not start Docker.
 
 The source is copied into a disposable directory without development environments, Node modules or Git
 metadata. No host application directory, credential directory, Docker socket or host tool directory is
-mounted into the worker. The worker uses UTC and C.UTF-8, the pinned browser image, and the owning locked
+mounted into the worker. The worker uses the fictional hostname demo-host, UTC and C.UTF-8, the pinned browser image, and the owning locked
 Core/plugin environment. The only external policy supplied is the configured confidential-term list;
 missing terms refuse canonical capture on authors' machines as well as CI. Terms never appear in command
 arguments or an image layer. All scene text and the existing privacy scans remain required. Images
@@ -213,3 +213,9 @@ can still differ in rasterization; `--strict-images` additionally compares their
 
 The advanced explicit `--python` path is an environment diagnostic, not canonical release-gallery proof.
 It retains its caller-selected runtime; use the ordinary commands above for publication or CI comparison.
+
+The worker runs with the author's/CI runner's numeric UID and GID, so its scratch files remain removable
+on rootful Linux Docker as well as Docker Desktop. Its HOME, Python downloads and caches are private to
+the run. Fork/Dependabot runs without external confidential terms refuse this proof; private dependencies
+that require credentials also refuse rather than mounting credentials. Use a separately prepared `--python`
+environment with `--headed` only for noncanonical interactive diagnostics.
