@@ -1,6 +1,7 @@
 """A retry never moves an existing tag or overwrites differently identified published artifacts."""
 
 import hashlib
+import json
 import subprocess
 
 import pytest
@@ -17,7 +18,8 @@ REPOSITORY = "example/plugins"
 def test_a_preexisting_wrong_tag_blocks_both_plugin_and_composition_publication(tmp_path, monkeypatch, tag):
     wheel = tmp_path / "artifact.whl"
     wheel.write_bytes(b"checked artifact")
-    monkeypatch.setattr(publisher, "api", lambda *a, **k: {"object": {"type": "commit", "sha": "b" * 40}})
+    wrong = {"ref": f"refs/tags/{tag}", "object": {"type": "commit", "sha": "b" * 40}}
+    monkeypatch.setattr(publisher, "api", lambda *a, **k: wrong)
     with pytest.raises(ValueError, match="built commit"):
         publisher.publish(REPOSITORY, tag, REVISION, [wheel], pypi=True)
 
@@ -30,7 +32,7 @@ def test_annotated_tags_are_peeled_before_comparison(monkeypatch):
         return (
             {"object": {"type": "commit", "sha": REVISION}}
             if "/git/tags/" in path
-            else {"object": {"type": "tag", "sha": "c" * 40}}
+            else {"ref": "refs/tags/plugin/v1.0.0", "object": {"type": "tag", "sha": "c" * 40}}
         )
 
     monkeypatch.setattr(publisher, "api", api)
@@ -45,11 +47,91 @@ def test_missing_tag_is_created_at_exact_build_revision(monkeypatch):
         calls.append((path, data))
         if len(calls) == 1:
             return None
-        return {"object": {"type": "commit", "sha": REVISION}}
+        return {"ref": "refs/tags/plugin/v1.0.0", "object": {"type": "commit", "sha": REVISION}}
 
     monkeypatch.setattr(publisher, "api", api)
     publisher.exact_tag(REPOSITORY, "plugin/v1.0.0", REVISION)
     assert calls[1][1] == {"ref": "refs/tags/plugin/v1.0.0", "sha": REVISION}
+
+
+@pytest.mark.parametrize(
+    ("created", "early", "final", "error"),
+    [
+        ("exact", ["missing", "exact"], ["missing", "exact"], None),
+        ("wrong-ref", [], [], "did not confirm creation"),
+        ("wrong-commit", [], [], "did not confirm creation"),
+        ("exact", ["missing"] * 5, [], "HTTP 404"),
+        ("exact", ["forbidden"], [], "HTTP 403"),
+        ("exact", ["wrong-ref"], [], "different tag ref"),
+        ("exact", ["exact"], ["missing"] * 5, "HTTP 404"),
+        ("exact", ["exact"], ["wrong-ref"], "different tag ref"),
+        ("exact", ["exact"], ["wrong-commit"], "built commit"),
+    ],
+)
+def test_app_publication_requires_bounded_exact_tag_readbacks(tmp_path, monkeypatch, created, early, final, error):
+    tag = "app-v0.9.55"
+    root = f"repos/{REPOSITORY}"
+    profile = tmp_path / "standard.json"
+    profile.write_bytes(b"verified app profile")
+    reads = iter(["missing", *early, *final])
+    release = {"id": 7, "tag_name": tag, "draft": True, "assets": []}
+    writes, backoff = [], []
+
+    def reference(answer):
+        return {
+            "ref": "refs/tags/other" if answer == "wrong-ref" else f"refs/tags/{tag}",
+            "object": {"type": "commit", "sha": "b" * 40 if answer == "wrong-commit" else REVISION},
+        }
+
+    def execute(command, *, input=None, **_):
+        if command[:3] == ["gh", "release", "upload"]:
+            assert "--clobber" not in command
+            writes.append("upload")
+            digest = "sha256:" + hashlib.sha256(profile.read_bytes()).hexdigest()
+            release["assets"].append({"name": profile.name, "digest": digest})
+            return subprocess.CompletedProcess(command, 0)
+        endpoint = command[2]
+        payload = json.loads(input) if input else None
+        if endpoint == f"{root}/git/ref/tags/{tag}":
+            assert payload is None
+            mode = next(reads)
+            if mode in ("missing", "forbidden"):
+                status = "Not Found (HTTP 404)" if mode == "missing" else "Forbidden (HTTP 403)"
+                return subprocess.CompletedProcess(command, 1, "", f"gh: {status}")
+            answer = reference(mode)
+        elif endpoint == f"{root}/git/refs":
+            assert payload == {"ref": f"refs/tags/{tag}", "sha": REVISION}
+            writes.append("create-tag")
+            answer = reference(created)
+        elif endpoint == "graphql":
+            answer = {"data": {"repository": {"release": None}}}
+        elif endpoint == f"{root}/releases":
+            assert payload["draft"] is True and payload["target_commitish"] == REVISION
+            writes.append("draft")
+            answer = release
+        else:
+            assert endpoint == f"{root}/releases/7"
+            if payload:
+                assert payload == {"draft": False}
+                writes.append("publish")
+            answer = release
+        return subprocess.CompletedProcess(command, 0, json.dumps(answer), "")
+
+    monkeypatch.setattr(publisher.subprocess, "run", execute)
+    monkeypatch.setattr(publisher.time, "sleep", backoff.append)
+    if error is None:
+        publisher.publish(REPOSITORY, tag, REVISION, [profile])
+    else:
+        with pytest.raises(ValueError, match=error):
+            publisher.publish(REPOSITORY, tag, REVISION, [profile])
+    expected = ["create-tag"]
+    if early and early[-1] == "exact":
+        expected.extend(["draft", "upload"])
+    if error is None:
+        expected.append("publish")
+    assert writes == expected
+    assert backoff == [delay for stage in (early, final) for delay in (1, 2, 4, 8)[: stage.count("missing")]]
+    assert next(reads, None) is None
 
 
 def test_partial_pypi_failure_is_resumable_without_changing_tag_or_replacing_assets(tmp_path, monkeypatch):
@@ -65,7 +147,7 @@ def test_partial_pypi_failure_is_resumable_without_changing_tag_or_replacing_ass
         if path == "graphql":
             return {"data": {"repository": {"release": {"databaseId": 7} if release else None}}}
         if "/git/ref/" in path:
-            return {"object": {"type": "commit", "sha": REVISION}}
+            return {"ref": "refs/tags/plugin/v1.0.0", "object": {"type": "commit", "sha": REVISION}}
         if data is not None and method == "PATCH":
             assert release["assets"] == [asset], "publish only after verifying every upload"
             release["draft"] = data["draft"]
@@ -110,7 +192,7 @@ def test_a_draft_hidden_from_rest_tag_lookup_is_resumed_and_verified_by_id(tmp_p
             assert data["variables"] == {"owner": "example", "name": "plugins", "tag": "plugin/v1.0.0"}
             return {"data": {"repository": {"release": {"databaseId": 7}}}}
         if "/git/ref/" in path:
-            return {"object": {"type": "commit", "sha": REVISION}}
+            return {"ref": "refs/tags/plugin/v1.0.0", "object": {"type": "commit", "sha": REVISION}}
         assert path == "repos/example/plugins/releases/7", (
             "Never create a duplicate draft or use its hidden REST tag route"
         )
@@ -167,7 +249,7 @@ def test_explicit_latest_policy_is_applied_only_after_complete_asset_verificatio
     asset = {"name": artifact.name, "digest": "sha256:" + hashlib.sha256(artifact.read_bytes()).hexdigest()}
     release = {"id": 7, "tag_name": "app-v0.9.1", "draft": True, "assets": [asset]}
     mutations = []
-    monkeypatch.setattr(publisher, "exact_tag", lambda *_args: None)
+    monkeypatch.setattr(publisher, "exact_tag", lambda *_args, **_kwargs: None)
     monkeypatch.setattr(publisher, "find_release", lambda *_args: release)
 
     def api(path, data=None, method="POST", **_kwargs):
@@ -205,7 +287,7 @@ def test_unverified_assets_cannot_change_latest_policy(tmp_path, monkeypatch):
     artifact = tmp_path / "standard.json"
     artifact.write_bytes(b"built profile")
     release = {"id": 7, "draft": True, "assets": [{"name": artifact.name, "digest": "sha256:" + "0" * 64}]}
-    monkeypatch.setattr(publisher, "exact_tag", lambda *_args: None)
+    monkeypatch.setattr(publisher, "exact_tag", lambda *_args, **_kwargs: None)
     monkeypatch.setattr(publisher, "find_release", lambda *_args: release)
     monkeypatch.setattr(
         publisher, "api", lambda *_args, **_kwargs: pytest.fail("No upload or alias mutation before verification")
@@ -233,7 +315,7 @@ def test_app_prerelease_publishes_atomically_without_reclassifying_public_releas
         return release
 
     monkeypatch.setattr(publisher, "api", api)
-    monkeypatch.setattr(publisher, "exact_tag", lambda *_: None)
+    monkeypatch.setattr(publisher, "exact_tag", lambda *_, **_kwargs: None)
     monkeypatch.setattr(publisher, "find_release", lambda *_: release)
 
     if state == "final":
@@ -260,7 +342,7 @@ def test_the_release_body_is_set_when_the_draft_is_created(tmp_path, monkeypatch
         if path == "graphql":
             return {"data": {"repository": {"release": {"databaseId": 7} if release else None}}}
         if "/git/ref/" in path:
-            return {"object": {"type": "commit", "sha": REVISION}}
+            return {"ref": "refs/tags/plugin/v1.0.0", "object": {"type": "commit", "sha": REVISION}}
         if data is not None and method == "PATCH":
             assert "body" not in data, "notes are written once, at draft creation"
             release["draft"] = data["draft"]
@@ -305,7 +387,7 @@ def test_a_resumed_release_keeps_its_body_without_new_notes(tmp_path, monkeypatc
     asset = {"name": wheel.name, "digest": "sha256:" + hashlib.sha256(wheel.read_bytes()).hexdigest()}
     release = {"id": 7, "tag_name": "plugin/v1.0.0", "assets": [asset], "draft": True}
     patches = []
-    monkeypatch.setattr(publisher, "exact_tag", lambda *_: None)
+    monkeypatch.setattr(publisher, "exact_tag", lambda *_, **_kwargs: None)
     monkeypatch.setattr(publisher, "find_release", lambda *_: release)
 
     def api(path, data=None, method="POST", **_):
