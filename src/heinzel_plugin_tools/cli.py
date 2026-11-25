@@ -588,6 +588,8 @@ def check(
     if has_gallery(project):
         check_screenshots(project)
     prepare_environment(project, core)
+    if frontend:
+        build_view_assets(project)  # Owning Python integration tests can inspect and serve the installed view.
     run(
         python_command(project, core, ["python", str(TOOLING_SCRIPT), "boundary", project.name]),
         cwd=project.directory,
@@ -636,7 +638,7 @@ def _frontend_steps(project: Project, *, tests_only: bool, fast: bool) -> None:
     if not package.is_file():
         return
     scripts = json.loads(package.read_text()).get("scripts", {})
-    for step in ["test"] if fast else ["typecheck", "test"] if tests_only else ["lint", "typecheck", "test", "build"]:
+    for step in ["test"] if fast else ["typecheck", "test"] if tests_only else ["lint", "typecheck", "test"]:
         if step in scripts:
             run(
                 ["uv", "run", "--no-project", "--script", str(project.directory / "web/build.py"), "run", step],
