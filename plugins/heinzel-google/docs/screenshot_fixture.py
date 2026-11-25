@@ -4,7 +4,7 @@ import base64
 import json
 import os
 import sys
-from datetime import UTC, datetime
+from datetime import UTC, datetime, timedelta
 from pathlib import Path
 
 from heinzel import (
@@ -29,7 +29,7 @@ from rich.markdown import Markdown
 from rich.table import Table
 from rich.text import Text
 
-from heinzel_google import Gws, Process
+from heinzel_google import Drive, GoogleSession, Gws, Process
 
 SINCE = datetime(2026, 10, 19, tzinfo=UTC)
 UNTIL = datetime(2026, 10, 26, tzinfo=UTC)
@@ -37,6 +37,8 @@ DOC = "launch-plan"
 SHEET = "launch-metrics"
 DOCUMENT = "application/vnd.google-apps.document"
 SPREADSHEET = "application/vnd.google-apps.spreadsheet"
+DEMO_NOW = UNTIL
+MODIFIED_AT = DEMO_NOW - timedelta(hours=12)
 
 
 def paragraph(text, style="NORMAL_TEXT"):
@@ -69,6 +71,13 @@ def message(identity):
     }
 
 
+class DemoDrive(Drive):
+    """Use the owning adapter's explicit clock seam; no Core or process clock changes."""
+
+    def recent(self, days, name=None, now=None):
+        return super().recent(days, name, DEMO_NOW if now is None else now)
+
+
 class DemoGws(Gws):
     def login(self, executable, arguments, timeout):
         raise RuntimeError("The fictional gallery never signs in or starts a Google process")
@@ -76,19 +85,19 @@ class DemoGws(Gws):
     def run(self, executable, arguments, timeout):
         command = tuple(arguments[: arguments.index("--params")]) if "--params" in arguments else tuple(arguments)
         params = json.loads(arguments[arguments.index("--params") + 1]) if "--params" in arguments else {}
-        now = datetime.now(UTC).strftime("%Y-%m-%dT%H:%M:%SZ")
+        modified = MODIFIED_AT.strftime("%Y-%m-%dT%H:%M:%SZ")
         if command == ("--version",):
             return Process(0, b"gws 0.22.5\n")
         if command == ("drive", "files", "list"):
             value = {
                 "files": [
-                    {"id": DOC, "name": "Launch plan", "mimeType": DOCUMENT, "modifiedTime": now},
-                    {"id": SHEET, "name": "Launch metrics", "mimeType": SPREADSHEET, "modifiedTime": now},
+                    {"id": DOC, "name": "Launch plan", "mimeType": DOCUMENT, "modifiedTime": modified},
+                    {"id": SHEET, "name": "Launch metrics", "mimeType": SPREADSHEET, "modifiedTime": modified},
                     {
                         "id": "launch-readiness",
                         "name": "Launch readiness checklist",
                         "mimeType": DOCUMENT,
-                        "modifiedTime": now,
+                        "modifiedTime": modified,
                     },
                 ]
             }
@@ -239,27 +248,34 @@ def message_content(mail: Mail) -> MailContent:
     return mail.read("m1")
 
 
-state = Path(os.environ["HZ_STATE_DIR"]) / "fictional-gws"
-state.mkdir(parents=True, exist_ok=True)
-(state / "credentials.enc").write_bytes(b"documentation-only-no-credential")
-(state / "client_secret.json").write_text("{}")
-executable = state / "gws"
-# Inert, clearly fictional identity bytes: selection reads their real header/hash; DemoGws never executes them.
-executable.write_bytes(b"\xcf\xfa\xed\xfe" + b"fictional-google-gallery-not-a-runnable-vendor-binary")
-executable.chmod(0o700)
-os.environ.update(
-    GOOGLE_WORKSPACE_CLI_CONFIG_DIR=str(state),
-    HZ_GOOGLE__GWS_PATH=str(executable),
-    HZ_CAPABILITIES__DOCUMENTS="google",
-    HZ_CAPABILITIES__CALENDAR="google",
-    HZ_CAPABILITIES__MAIL="google",
-)
-config = Config.load()
-records, errors = discover()
-if sys.argv[1:2] == ["showcase"]:
-    records.append(ModuleRecord("showcase", showcase, Origin("heinzel-documentation-fixture", "1.0.0", builtin=False)))
-kernel = Kernel(config.settings(Settings, "hz"), records, errors, config)
-kernel.bind(Gws, DemoGws())
-if __name__ == "__main__":
+def main():
+    state = Path(os.environ["HZ_STATE_DIR"]) / "fictional-gws"
+    state.mkdir(parents=True, exist_ok=True)
+    (state / "credentials.enc").write_bytes(b"documentation-only-no-credential")
+    (state / "client_secret.json").write_text("{}")
+    executable = state / "gws"
+    # Inert, clearly fictional identity bytes: selection reads their real header/hash; DemoGws never executes them.
+    executable.write_bytes(b"\xcf\xfa\xed\xfe" + b"fictional-google-gallery-not-a-runnable-vendor-binary")
+    executable.chmod(0o700)
+    os.environ.update(
+        GOOGLE_WORKSPACE_CLI_CONFIG_DIR=str(state),
+        HZ_GOOGLE__GWS_PATH=str(executable),
+        HZ_CAPABILITIES__DOCUMENTS="google",
+        HZ_CAPABILITIES__CALENDAR="google",
+        HZ_CAPABILITIES__MAIL="google",
+    )
+    config = Config.load()
+    records, errors = discover()
+    if sys.argv[1:2] == ["showcase"]:
+        records.append(
+            ModuleRecord("showcase", showcase, Origin("heinzel-documentation-fixture", "1.0.0", builtin=False))
+        )
+    kernel = Kernel(config.settings(Settings, "hz"), records, errors, config)
+    kernel.bind(Gws, DemoGws())
+    kernel.bind(Drive, DemoDrive(kernel.resolve(GoogleSession)))
     sys.argv = ["hz", *sys.argv[1:]]
     build(kernel)()
+
+
+if __name__ == "__main__":
+    main()

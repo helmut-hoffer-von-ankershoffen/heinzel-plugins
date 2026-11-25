@@ -210,13 +210,13 @@ Inspect a fictional selected-source identity as the Google source review panel s
 
 The real Google Calendar adapter lists fictional meetings for a fixed week through a documentation-only command.
 
-<img src="docs/assets/screenshots/launch-files-json.png" alt="Inspect a three-day launch-file query as structured data — actual Google operation, fictional Workspace replies." width="960">
+<img src="docs/assets/screenshots/launch-files-json.png" alt="Inspect a fixed three-day launch-file query as structured data — actual Google operation, fictional Workspace replies and demonstration clock." width="960">
 
-Inspect a three-day launch-file query as structured data — actual Google operation, fictional Workspace replies.
+Inspect a fixed three-day launch-file query as structured data — actual Google operation, fictional Workspace replies and demonstration clock.
 
-<img src="docs/assets/screenshots/launch-files-week.png" alt="Try a seven-day file query — fictional replies demonstrate invocation, not verified server-side filtering." width="960">
+<img src="docs/assets/screenshots/launch-files-week.png" alt="Try a fixed seven-day file query — fictional replies and demonstration clock illustrate invocation, not verified server-side filtering." width="960">
 
-Try a seven-day file query — fictional replies demonstrate invocation, not verified server-side filtering.
+Try a fixed seven-day file query — fictional replies and demonstration clock illustrate invocation, not verified server-side filtering.
 
 <img src="docs/assets/screenshots/launch-plan.png" alt="Read a fictional Google Doc through the real adapter; this showcase command exists only in the documentation fixture." width="960">
 

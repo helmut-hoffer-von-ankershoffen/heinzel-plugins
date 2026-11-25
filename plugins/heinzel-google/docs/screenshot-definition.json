@@ -63,7 +63,7 @@
     {
       "name": "launch-files-json",
       "surface": "cli",
-      "caption": "Inspect a three-day launch-file query as structured data — actual Google operation, fictional Workspace replies.",
+      "caption": "Inspect a fixed three-day launch-file query as structured data — actual Google operation, fictional Workspace replies and demonstration clock.",
       "command": [
         "google",
         "files",
@@ -77,7 +77,7 @@
     {
       "name": "launch-files-week",
       "surface": "cli",
-      "caption": "Try a seven-day file query — fictional replies demonstrate invocation, not verified server-side filtering.",
+      "caption": "Try a fixed seven-day file query — fictional replies and demonstration clock illustrate invocation, not verified server-side filtering.",
       "command": [
         "google",
         "files",
