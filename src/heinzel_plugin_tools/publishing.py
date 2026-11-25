@@ -85,7 +85,10 @@ def api(path: str, *, data: dict | None = None, missing: bool = False, method: s
         if missing and "(HTTP 404)" in result.stderr:
             return None
         raise ValueError(f"GitHub request failed for {path}: {result.stderr.strip()}")
-    return json.loads(result.stdout)
+    response = json.loads(result.stdout)
+    if not isinstance(response, dict):
+        raise ValueError(f"Invalid GitHub response for {path}: expected a JSON object")
+    return response
 
 
 def _read_tag_with_backoff(path: str) -> dict | None:

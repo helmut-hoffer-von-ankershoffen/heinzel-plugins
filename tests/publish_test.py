@@ -54,6 +54,17 @@ def test_missing_tag_is_created_at_exact_build_revision(monkeypatch):
     assert calls[1][1] == {"ref": "refs/tags/plugin/v1.0.0", "sha": REVISION}
 
 
+def test_null_initial_tag_response_refuses_without_writing_or_waiting(monkeypatch):
+    def execute(command, **_):
+        assert command == ["gh", "api", f"repos/{REPOSITORY}/git/ref/tags/app-v0.9.55"]
+        return subprocess.CompletedProcess(command, 0, "null", "")
+
+    monkeypatch.setattr(publisher.subprocess, "run", execute)
+    monkeypatch.setattr(publisher.time, "sleep", lambda _: pytest.fail("Malformed response is not retryable"))
+    with pytest.raises(ValueError, match="expected a JSON object"):
+        publisher.exact_tag(REPOSITORY, "app-v0.9.55", REVISION)
+
+
 @pytest.mark.parametrize(
     ("created", "early", "final", "error"),
     [
@@ -62,8 +73,10 @@ def test_missing_tag_is_created_at_exact_build_revision(monkeypatch):
         ("wrong-commit", [], [], "did not confirm creation"),
         ("exact", ["missing"] * 5, [], "HTTP 404"),
         ("exact", ["forbidden"], [], "HTTP 403"),
+        ("exact", ["null"], [], "expected a JSON object"),
         ("exact", ["wrong-ref"], [], "different tag ref"),
         ("exact", ["exact"], ["missing"] * 5, "HTTP 404"),
+        ("exact", ["exact"], ["null"], "expected a JSON object"),
         ("exact", ["exact"], ["wrong-ref"], "different tag ref"),
         ("exact", ["exact"], ["wrong-commit"], "built commit"),
     ],
@@ -98,7 +111,7 @@ def test_app_publication_requires_bounded_exact_tag_readbacks(tmp_path, monkeypa
             if mode in ("missing", "forbidden"):
                 status = "Not Found (HTTP 404)" if mode == "missing" else "Forbidden (HTTP 403)"
                 return subprocess.CompletedProcess(command, 1, "", f"gh: {status}")
-            answer = reference(mode)
+            answer = None if mode == "null" else reference(mode)
         elif endpoint == f"{root}/git/refs":
             assert payload == {"ref": f"refs/tags/{tag}", "sha": REVISION}
             writes.append("create-tag")
