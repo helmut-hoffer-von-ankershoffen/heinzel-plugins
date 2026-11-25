@@ -686,6 +686,7 @@ def safe_screenshot(
     private_paths: tuple[str, ...] = (),
     owning_interpreter_prefix: OwningPrefix | None = None,
     clip: dict | None = None,
+    scan_path: Path | None = None,
 ) -> str:
     """Redact authentication presentation and reject unsafe text before writing any PNG."""
     if owning_interpreter_prefix:
@@ -693,7 +694,11 @@ def safe_screenshot(
         redact_owning_prefix(page, owning_interpreter_prefix)
     redact_auth_presentation(page, tokens, private_paths)
     body = page.locator("body").inner_text()
-    scan_text(page_text(page))
+    inspected = page_text(page)
+    scan_text(inspected)
+    if scan_path is not None:
+        scan_path.write_text(inspected)
+        scan_path.chmod(0o600)
     page.screenshot(path=str(path), animations="disabled", clip=clip)
     return body
 
@@ -750,12 +755,18 @@ def draft_artifacts(root: Path, plan: dict, draft: dict) -> tuple[dict, dict]:
     names = [scene["name"] for scene in plan["scenes"]]
     terms = confidential_patterns()
     images, transcripts = {}, {}
+    if set(draft.get("scan_text", {})) != {f"{name}.scan.txt" for name in names}:
+        raise CaptureError("Draft has no complete private DOM evidence; capture again")
     for name in names:
         image = regular_bytes(safe_path(folder, f"{name}.png"), MAX_IMAGE)
         if not image.startswith(b"\x89PNG\r\n\x1a\n") or len(image) > MAX_IMAGE:
             raise CaptureError(f"{name}.png: expected a PNG smaller than 500 KiB")
         text = regular_bytes(safe_path(folder, f"{name}.txt"), 256 * 1024).decode("utf-8", errors="replace")
         scan_text(text, terms=terms)
+        inspected = regular_bytes(safe_path(folder, f"{name}.scan.txt"), 256 * 1024)
+        if hashlib.sha256(inspected).hexdigest() != draft["scan_text"][f"{name}.scan.txt"]:
+            raise CaptureError("Private DOM evidence changed after capture; capture again")
+        scan_text(inspected.decode("utf-8"), terms=terms)
         if hashlib.sha256(image).hexdigest() != draft.get("images", {}).get(f"{name}.png"):
             raise CaptureError("Draft images changed after capture. Capture again")
         images[(OUTPUT / f"{name}.png").as_posix()] = hashlib.sha256(image).hexdigest()
@@ -1203,6 +1214,7 @@ def capture(
                                 private_paths=(str(work), str(work.resolve())),
                                 owning_interpreter_prefix=owning_identity,
                                 clip=clip,
+                                scan_path=work / f"{scene['name']}.scan.txt",
                             )
                             if scene["surface"] == "ui":
                                 (work / f"{scene['name']}.txt").write_text(canonical_text(body))
@@ -1247,14 +1259,23 @@ def capture(
             if artifact.is_file():
                 artifact.unlink()
         for scene in plan["scenes"]:
-            for extension in ("png", "txt"):
-                shutil.copyfile(work / f"{scene['name']}.{extension}", folder / f"{scene['name']}.{extension}")
+            for extension in ("png", "txt", "scan.txt"):
+                target = folder / f"{scene['name']}.{extension}"
+                shutil.copyfile(work / f"{scene['name']}.{extension}", target)
+                if extension == "scan.txt":
+                    target.chmod(0o600)
         (folder / "index.html").write_text(preview_document(name, plan["scenes"], version))
         draft = {
             "format": 1,
             "plugin": name,
             "core_version": version,
             "inputs_sha256": input_digest(root, plan),
+            "scan_text": {
+                f"{scene['name']}.scan.txt": hashlib.sha256(
+                    (folder / f"{scene['name']}.scan.txt").read_bytes()
+                ).hexdigest()
+                for scene in plan["scenes"]
+            },
             "images": {
                 f"{scene['name']}.png": hashlib.sha256((folder / f"{scene['name']}.png").read_bytes()).hexdigest()
                 for scene in plan["scenes"]
@@ -1392,10 +1413,16 @@ def main() -> int:
             webbrowser.open(Path(report["preview"]).as_uri())
         return 0
     except Exception as error:  # The subprocess boundary must preserve the JSON result even if a browser adapter fails.
-        message = safe_failure_message(error)
+        message = (
+            "Zero-secret rendering comparison failed; no private-policy approval or publication"
+            if args.render_check
+            else safe_failure_message(error)
+        )
         if args.json:
             failure = {"ok": False, "error": message, "next": "Review docs/screenshot-definition.json and retry"}
-            if isinstance(error, StaleGallery):
+            if args.render_check:
+                failure.update(scope="render-only", render_verified=False, private_scan=False)
+            if isinstance(error, StaleGallery) and not args.render_check:
                 failure |= {"stale": True, "command": error.command, "next": error.command}
             print(json.dumps(failure))
         print(f"Capture failed: {message}", file=sys.stderr)

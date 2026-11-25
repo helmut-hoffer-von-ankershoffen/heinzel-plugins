@@ -239,3 +239,9 @@ does not copy results out of the private scratch directory. It cannot publish. B
 changes are admitted, the approved local tooling must run the full private-policy verification and
 bind the passing scan to the exact committed gallery files. A future hosted private scan requires
 separate protected authority; rendering success alone is never that approval.
+
+Full DOM evidence (body, input/textarea values, title and URL) travels back only in private
+`*.scan.txt` sidecars, bound by SHA-256 in the private draft manifest. The trusted host checks
+those bytes against the private policy, including form values not present in the visible-body
+transcript, before importing or publishing. Sidecars are never part of the public gallery or
+public manifest. Older private drafts without this evidence must be captured again.

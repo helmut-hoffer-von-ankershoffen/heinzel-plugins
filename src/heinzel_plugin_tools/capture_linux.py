@@ -52,7 +52,7 @@ def copy_draft(source: Path, root: Path, plan: dict) -> None:
     draft = source / capture.DRAFT
     manifest = json.loads(regular_bytes(safe_path(draft, capture.DRAFT_MANIFEST), 1024 * 1024))
     capture.draft_artifacts(source, plan, manifest)
-    names = [f"{scene['name']}.{ext}" for scene in plan["scenes"] for ext in ("png", "txt")]
+    names = [f"{scene['name']}.{ext}" for scene in plan["scenes"] for ext in ("png", "txt", "scan.txt")]
     names += [capture.DRAFT_MANIFEST, "index.html"]
     payload = {name: regular_bytes(safe_path(draft, name), 20 * 1024 * 1024) for name in names}
     target = safe_path(root, capture.DRAFT)

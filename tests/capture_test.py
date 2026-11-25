@@ -70,11 +70,16 @@ def draft_of(owner):
         for extension in ("png", "txt"):
             name = f"{scene['name']}.{extension}"
             (folder / name).write_bytes((owner / capture.OUTPUT / name).read_bytes())
+        (folder / f"{scene['name']}.scan.txt").write_text("Fictional DOM and form values")
     draft = {
         "format": 1,
         "plugin": "heinzel-harbor",
         "core_version": "0.9.8",
         "inputs_sha256": capture.input_digest(owner, plan),
+        "scan_text": {
+            f"{s['name']}.scan.txt": hashlib.sha256((folder / f"{s['name']}.scan.txt").read_bytes()).hexdigest()
+            for s in plan["scenes"]
+        },
         "images": {
             f"{s['name']}.png": hashlib.sha256((folder / f"{s['name']}.png").read_bytes()).hexdigest()
             for s in plan["scenes"]
@@ -946,3 +951,61 @@ def test_zero_secret_render_check_never_reads_policy_or_publishes_unscanned_data
         assert "verified" not in report and report["scope"] == "render-only"
         assert "unscanned" not in json.dumps(report) and report["fresh"] is False
     assert (owner / capture.MANIFEST).read_bytes() == before and not (owner / capture.DRAFT).exists()
+
+
+def test_render_check_failure_never_reads_host_private_policy_or_prints_unscanned_error(owner, monkeypatch, capsys):
+    from heinzel_plugin_tools import capture_linux
+
+    def fail(args):
+        raise privacy.CaptureError("unscanned-provider-output")
+
+    def forbidden(*args, **kwargs):
+        raise AssertionError("render-only failure must not read confidential policy")
+
+    monkeypatch.setattr(capture_linux, "run", fail)
+    monkeypatch.setattr(capture, "safe_failure_message", forbidden)
+    monkeypatch.setattr(sys, "argv", ["capture", "--project", str(owner), "--render-check", "--json"])
+    assert capture.main() == 1
+    shown = capsys.readouterr()
+    report = json.loads(shown.out)
+    assert report["scope"] == "render-only" and report["private_scan"] is False
+    assert "unscanned-provider-output" not in shown.out + shown.err
+
+
+def test_capture_retains_full_private_dom_evidence_without_changing_visible_transcript(tmp_path, monkeypatch):
+    class Page:
+        url = "http://127.0.0.1/fixture"
+
+        def locator(self, selector):
+            return SimpleNamespace(inner_text=lambda: "Visible body", evaluate_all=lambda script: "form-only-value")
+
+        def title(self):
+            return "Fixture title"
+
+        def screenshot(self, *, path, **kwargs):
+            Path(path).write_bytes(b"\x89PNG\r\n\x1a\nfixture")
+
+    monkeypatch.setattr(capture, "redact_auth_presentation", lambda *a, **k: None)
+    sidecar = tmp_path / "scene.scan.txt"
+    body = capture.safe_screenshot(Page(), tmp_path / "scene.png", scan_path=sidecar)
+    assert body == "Visible body"
+    assert sidecar.read_text() == "Visible body\nform-only-value\nFixture title\nhttp://127.0.0.1/fixture"
+    assert sidecar.stat().st_mode & 0o777 == 0o600
+
+
+@pytest.mark.parametrize("tamper_hash", [False, True])
+def test_private_form_sidecar_blocks_publication_even_when_body_is_clean(owner, tamper_hash):
+    recorded(owner)
+    folder = draft_of(owner)
+    plan = capture.read_plan(owner)
+    sidecar = folder / f"{plan['scenes'][0]['name']}.scan.txt"
+    sidecar.write_text("fictional-capture-canary-8329")
+    manifest = json.loads((folder / capture.DRAFT_MANIFEST).read_text())
+    if not tamper_hash:
+        manifest["scan_text"][sidecar.name] = hashlib.sha256(sidecar.read_bytes()).hexdigest()
+        (folder / capture.DRAFT_MANIFEST).write_text(json.dumps(manifest))
+    before = (owner / capture.MANIFEST).read_bytes()
+    with pytest.raises(privacy.CaptureError):
+        capture.publish_draft(owner)
+    assert (owner / capture.MANIFEST).read_bytes() == before
+    assert not list((owner / capture.OUTPUT).glob("*.scan.txt"))
