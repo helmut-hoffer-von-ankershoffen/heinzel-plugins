@@ -1,12 +1,17 @@
 """A plugin version bump must ship something, carry its changelog section, and get released (ADR 0114)."""
 
+import json
 import re
 import subprocess
 import sys
 import tomllib
+import urllib.error
+import urllib.request
+from collections.abc import Callable
 from pathlib import Path, PurePosixPath
 
 PLUGINS = "plugins"
+PYPI = "https://pypi.org/pypi/{name}/{version}/json"
 REVISION = re.compile(r"[0-9A-Za-z][0-9A-Za-z_./~^-]*")
 NOT_SHIPPED = ("tests", "docs", "media", "screenshots")
 # The hash lock and its record make the plugin's own CI reproducible; no wheel carries them (ADR 0003).
@@ -157,19 +162,49 @@ def missing_changelogs(base: str, head: str = "HEAD") -> list[str]:
     return missing
 
 
-def unreleased(root: Path, tags: set[str]) -> list[str]:
-    """Plugins in `root` whose current version has no release tag yet."""
+def on_pypi(name: str, version: str) -> bool:
+    """Whether PyPI serves `name` at exactly `version`. Unreadable counts as not published: the release then refuses a
+    duplicate upload itself, so a PyPI outage never hides a release."""
+    url = PYPI.format(name=name, version=version)
+    try:
+        with urllib.request.urlopen(url, timeout=20) as reply:  # noqa: S310 - a fixed https URL
+            data = json.load(reply)
+            prefix = f"{name.replace('-', '_')}-{version}"
+            files = data.get("urls", [])
+            return (
+                data.get("info", {}).get("version") == version
+                and any(
+                    row.get("packagetype") == "bdist_wheel"
+                    and row.get("filename", "").startswith(prefix + "-")
+                    and row["filename"].endswith(".whl")
+                    for row in files
+                )
+                and any(
+                    row.get("packagetype") == "sdist" and row.get("filename") == prefix + ".tar.gz" for row in files
+                )
+            )
+    except (OSError, ValueError, urllib.error.URLError):
+        return False
+
+
+def unreleased(
+    root: Path, tags: set[str], published: Callable[[str, str], bool] | None = None, *, with_tags: bool = False
+) -> list[str]:
+    """Plugins in `root` whose current version has no release tag yet (and, with `published`, is not on PyPI yet)."""
     names = []
     for path in sorted((root / PLUGINS).glob("*/pyproject.toml")):
         project = tomllib.loads(path.read_text(encoding="utf-8"))["project"]
-        if f"{project['name']}/v{project['version']}" not in tags:
-            names.append(project["name"])
+        if not with_tags and f"{project['name']}/v{project['version']}" in tags:
+            continue
+        if published is not None and published(project["name"], project["version"]):
+            continue
+        names.append(f"{project['name']}/v{project['version']}" if with_tags else project["name"])
     return names
 
 
 def main(arguments: list[str]) -> int:
     """`check <base>` refuses a bump that ships nothing or lacks its changelog section, or a shipped change without a
-    bump; `unreleased` lists the rest."""
+    bump; `unreleased [--skip-published]` lists the rest (without the versions PyPI serves already)."""
     if arguments[:1] == ["check"] and len(arguments) == 2:  # noqa: PLR2004
         bumps = unjustified_bumps(arguments[1])
         stale = unbumped_changes(arguments[1])
@@ -193,8 +228,13 @@ def main(arguments: list[str]) -> int:
                 file=sys.stderr,
             )
         return 1 if bumps or stale or undocumented else 0
-    if arguments == ["unreleased"]:
-        print("\n".join(unreleased(Path(), set(_git("tag", "--list").splitlines()))))
+    if arguments in (["unreleased"], ["unreleased", "--skip-published"], ["unreleased", "--skip-published", "--tags"]):
+        published = on_pypi if "--skip-published" in arguments else None
+        print(
+            "\n".join(
+                unreleased(Path(), set(_git("tag", "--list").splitlines()), published, with_tags="--tags" in arguments)
+            )
+        )
         return 0
     print(main.__doc__, file=sys.stderr)
     return 2

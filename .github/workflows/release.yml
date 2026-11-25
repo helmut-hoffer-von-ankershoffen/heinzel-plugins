@@ -1,4 +1,5 @@
 name: Release one plugin
+run-name: Release ${{ inputs.plugin }}
 on:
   workflow_dispatch:
     inputs:
@@ -15,6 +16,15 @@ on:
         type: choice
         options: [github, pypi]
         default: pypi
+      expected_sha:
+        description: Automatic release source selected by successful main CI
+        type: string
+      expected_tag:
+        description: Automatic plugin version selected at that source
+        type: string
+      expected_tag_revision:
+        description: Original immutable revision for automatic tagged recovery
+        type: string
       resume_tag:
         description: Existing plugin tag to verify and upload without rebuilding
         type: string
@@ -38,6 +48,25 @@ jobs:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
+      - name: Verify the automatic release source
+        if: inputs.expected_sha != '' || inputs.expected_tag != '' || inputs.expected_tag_revision != ''
+        env:
+          EXPECTED: ${{ inputs.expected_sha }}
+          TAG: ${{ inputs.expected_tag }}
+          PLUGIN: ${{ inputs.plugin }}
+          RESUME: ${{ inputs.resume_tag }}
+          TAG_REVISION: ${{ inputs.expected_tag_revision }}
+        run: |
+          if [ -n "$RESUME" ]; then
+            test "$RESUME" = "$TAG"
+            [[ "$TAG_REVISION" =~ ^[0-9a-f]{40}$ ]]
+          else
+            test -z "$TAG_REVISION"
+          fi
+          test "$GITHUB_REF" = refs/heads/main
+          test "$EXPECTED" = "$GITHUB_SHA"
+          test "$EXPECTED" = "$(git rev-parse HEAD)"
+          test -n "$TAG" && test "${TAG%/v*}" = "$PLUGIN"
       - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e # v10.3.2
       - name: Restore the original verified artifact set
         id: resume
@@ -50,7 +79,10 @@ jobs:
           REF: ${{ github.ref }}
         run: |
           test "$REF" = refs/heads/main
-          uv run --frozen --no-build --group tooling python -m heinzel_plugin_tools.publishing --restore --name "$PLUGIN" --tag "$TAG" --directory release-dist
+          uv run --frozen --no-build --group tooling python -m heinzel_plugin_tools.publishing --restore --name "$PLUGIN" --tag "$TAG" --directory release-dist || {
+            echo "::error::Could not restore the original verified assets for $TAG. Inspect the original release run and resume its publication with those assets."
+            exit 1
+          }
       - id: core
         if: inputs.resume_tag == ''
         env:
@@ -76,6 +108,14 @@ jobs:
           fi
           uv run --frozen --no-build --group tooling python scripts/browser_dependencies.py
           uv run --frozen --no-build --group tooling hz-plugin verify-release "$PLUGIN" --core "$CORE" --output release-dist
+      - name: Verify the selected automatic version
+        if: inputs.expected_sha != '' || inputs.expected_tag != '' || inputs.expected_tag_revision != ''
+        env:
+          TAG: ${{ steps.verify.outputs.tag || steps.resume.outputs.tag }}
+          REVISION: ${{ steps.verify.outputs.revision || steps.resume.outputs.revision }}
+          SELECTED: ${{ inputs.expected_tag }}
+          EXPECTED: ${{ inputs.expected_tag_revision || inputs.expected_sha }}
+        run: test "$TAG" = "$SELECTED" && test "$REVISION" = "$EXPECTED"
       - uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
         if: inputs.resume_tag == '' && (!github.event.repository.private || vars.PRIVATE_ATTESTATIONS == 'true')
         with:
@@ -87,6 +127,9 @@ jobs:
   publish:
     if: inputs.publish && inputs.registry == 'pypi' && !github.event.repository.private
     needs: build
+    concurrency:
+      group: plugin-publication-${{ needs.build.outputs.tag }}
+      cancel-in-progress: false
     runs-on: ubuntu-latest
     environment: pypi
     permissions:
@@ -107,15 +150,21 @@ jobs:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
           REVISION: ${{ needs.build.outputs.revision }}
+          AUTOMATIC: ${{ inputs.expected_sha }}
           RESUME_TAG: ${{ inputs.resume_tag }}
         run: |
           if ! uv run --frozen --no-build --group tooling python scripts/release_notes.py plugin "${RELEASE_TAG%/v*}" --version "${RELEASE_TAG##*/v}" > "$RUNNER_TEMP/release-notes.md"; then
             test -n "$RESUME_TAG" # a resumed release keeps its notes; publishing refuses to create one without them
           fi
-          uv run --frozen --no-build --group tooling python -m heinzel_plugin_tools.publishing --tag "$RELEASE_TAG" --revision "$REVISION" --directory dist --pypi --make-latest false --notes-file "$RUNNER_TEMP/release-notes.md"
+          options=()
+          if [ -n "$AUTOMATIC" ]; then options+=(--reconcile-published); fi
+          uv run --frozen --no-build --group tooling python -m heinzel_plugin_tools.publishing --tag "$RELEASE_TAG" --revision "$REVISION" --directory dist --pypi --make-latest false --notes-file "$RUNNER_TEMP/release-notes.md" "${options[@]}"
   github-publish:
     if: inputs.publish && inputs.registry == 'github'
     needs: build
+    concurrency:
+      group: plugin-publication-${{ needs.build.outputs.tag }}
+      cancel-in-progress: false
     runs-on: ubuntu-latest
     permissions:
       contents: write
