@@ -108,7 +108,6 @@ def test_confidential_terms_are_scoped_to_real_gallery_and_policy_steps():
     real_steps = {
         ("policy", "make policies"),
         ("plugin", 'make check NAME="$PLUGIN" CORE="$CORE"'),
-        ("gallery", 'make screenshots-verify NAME="$PLUGIN"'),
     }
     keys = {"CONFIDENTIAL_TERMS", "CONFIDENTIALITY_REQUIRED"}
     scoped = {}
@@ -125,6 +124,9 @@ def test_confidential_terms_are_scoped_to_real_gallery_and_policy_steps():
     assert "github.event.pull_request.head.repo.full_name == github.repository" in policy["CONFIDENTIALITY_REQUIRED"]
     assert "github.actor != 'dependabot[bot]'" in policy["CONFIDENTIALITY_REQUIRED"]
     assert all(env == policy for env in scoped.values())
+    gallery = jobs["gallery"]
+    assert all(not keys.intersection(step.get("env", {})) for step in gallery["steps"])
+    assert any(step.get("run") == 'make screenshots-render-check NAME="$PLUGIN"' for step in gallery["steps"])
     assert "coverage-floor" in jobs["ok"]["needs"]
     assert "gate-guard" in jobs["ok"]["needs"]
     assert "sonar-ratings" in jobs["ok"]["needs"]

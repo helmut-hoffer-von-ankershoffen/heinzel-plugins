@@ -154,15 +154,16 @@ In a Heinzel worktree `sm check` regenerates a stale gallery and `sm ship` takes
 
 The narrow local digest cannot see displayed text that comes from plugin Python, metadata or Core. CI therefore
 re-captures the gallery of every plugin a pull request changes against its newest compatible released Core
-(`make screenshots-verify NAME=<plugin>`) and fails when any scene renders different text than its committed
+(`make screenshots-render-check NAME=<plugin>`) and fails when any scene renders different text than its committed
 transcript, naming `make screenshots NAME=<plugin>`. The job reports its result while the refreshed galleries are
 being verified on hosted Linux. Image differences are listed:
 two captures differ in antialiasing and cursor pixels even on one machine, and fonts differ between operating
 systems (`--strict-images` makes them gate). Clock readings (hh:mm) are not compared, since fixtures may anchor
 their data on the real time; set `browser_time` to fix the browser's clock.
 
-In CI the guards fail when no confidential terms are configured, instead of scanning for none; a local run without
-terms warns once and checks everything else.
+The zero-secret CI render check performs the public-pattern checks and the real rendering comparison; it does
+not approve confidential terms or publish images. Full local capture and verification require configured private
+terms and scan on the trusted host before publication. Advanced `--python` diagnostics without terms warn once.
 
 The toolkit's dedicated CI journey creates a new unknown plugin, captures real Today and terminal output against an
 installed released SDK, publishes, detects staleness, fails a scene, and recovers. It also proves authentication
@@ -209,9 +210,10 @@ inexpensive portable freshness check and does not start Docker.
 The source is copied into a disposable directory without development environments, Node modules or Git
 metadata. No host application directory, credential directory, Docker socket or host tool directory is
 mounted into the worker. The worker uses the fictional hostname demo-host, UTC and C.UTF-8, the pinned browser image, and the owning locked
-Core/plugin environment. The only external policy supplied is the configured confidential-term list;
-missing terms refuse canonical capture on authors' machines as well as CI. Terms never appear in command
-arguments or an image layer. All scene text and the existing privacy scans remain required. Images
+Core/plugin environment. The renderer receives no confidential terms: it runs the public privacy-pattern checks only. The
+trusted host applies the configured confidential-term policy to every returned transcript and caption
+before importing or publishing anything; missing terms refuse the canonical command. No term list
+is mounted into the worker or included in its arguments or image. All scene text remains required. Images
 can still differ in rasterization; `--strict-images` additionally compares their bytes.
 
 The advanced explicit `--python` path is an environment diagnostic, not canonical release-gallery proof.
@@ -219,6 +221,21 @@ It retains its caller-selected runtime; use the ordinary commands above for publ
 
 The worker runs with the author's/CI runner's numeric UID and GID, so its scratch files remain removable
 on rootful Linux Docker as well as Docker Desktop. Its HOME, Python downloads and caches are private to
-the run. Fork/Dependabot runs without external confidential terms refuse this proof; private dependencies
+the run. Fork/Dependabot render checks need no confidential terms. Full private-policy proof still requires the trusted
+host scan; private dependencies
 that require credentials also refuse rather than mounting credentials. Use a separately prepared `--python`
 environment with `--headed` only for noncanonical interactive diagnostics.
+
+Private-policy acceptance requires a trusted host controller. Do not supply repository secrets to
+editable pull-request code. A protected, base-owned scan/execution route is a prerequisite for required
+PR gallery acceptance; a reusable workflow selected by an editable caller is not that authority.
+Unscanned output must remain private until that scan passes. This local capture command does not
+establish a protected GitHub approval or a fork-PR acceptance path.
+
+`make screenshots-render-check NAME=<plugin>` is the secret-free CI path for ordinary and fork PRs. It
+returns `render_verified: true`, `private_scan: false`, and `scope: render-only` only after a real fresh
+comparison. It emits counts rather than unscanned transcripts, captions, images, or worker stderr, and
+does not copy results out of the private scratch directory. It cannot publish. Before public gallery
+changes are admitted, the approved local tooling must run the full private-policy verification and
+bind the passing scan to the exact committed gallery files. A future hosted private scan requires
+separate protected authority; rendering success alone is never that approval.

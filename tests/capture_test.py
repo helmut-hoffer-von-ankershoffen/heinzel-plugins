@@ -787,8 +787,10 @@ def test_canonical_capture_requires_external_terms(monkeypatch):
         capture_linux.configured_terms()
 
 
-@pytest.mark.parametrize("failed", [False, True])
-def test_canonical_linux_runs_exact_image_without_host_state_and_keeps_all_text(owner, monkeypatch, failed):
+@pytest.mark.parametrize(("failed", "private_text"), [(False, False), (True, False), (False, True)])
+def test_canonical_linux_runs_exact_image_without_host_state_and_keeps_all_text(
+    owner, monkeypatch, failed, private_text
+):
     from heinzel_plugin_tools import capture_linux
 
     recorded(owner)
@@ -799,9 +801,10 @@ def test_canonical_linux_runs_exact_image_without_host_state_and_keeps_all_text(
     (owner / ".env").write_text("host-only")
     before = (owner / capture.MANIFEST).read_bytes()
     calls = []
+    first_scene = capture.read_plan(owner)["scenes"][0]["name"]
     monkeypatch.setattr(capture_linux, "configured_terms", lambda: "fictional-private-term\n")
 
-    def run(argv, *, cwd, capture=False, timeout=900):
+    def run(argv, *, cwd, capture=False, capture_stderr=False, timeout=900):
         calls.append(argv)
         if argv[1] == "rm":
             assert argv[2] == "--force" and argv[3].startswith("hz-gallery-")
@@ -815,6 +818,9 @@ def test_canonical_linux_runs_exact_image_without_host_state_and_keeps_all_text(
         assert argv[argv.index("--platform") + 1] == "linux/amd64"
         assert str(owner) not in " ".join(argv)
         assert "fictional-private-term" not in " ".join(argv)
+        assert "CONFIDENTIALITY_REQUIRED=false" in argv
+        assert "CONFIDENTIAL_TERMS_FILE=/dev/null" in argv
+        assert not (cwd / "terms").exists()
         assert not any("docker.sock" in item or "/Applications" in item for item in argv)
         assert "--verify" in argv and "--container-worker" in argv
         assert not (cwd / "project/.venv").exists()
@@ -822,6 +828,8 @@ def test_canonical_linux_runs_exact_image_without_host_state_and_keeps_all_text(
         assert (cwd / "core" / wheel.name).read_bytes() == wheel.read_bytes()
         folder = draft_of(cwd / "project")
         (folder / "index.html").write_text("Fictional contact sheet")
+        if private_text:
+            (folder / (first_scene + ".txt")).write_text("fictional-capture-canary-8329")
         return SimpleNamespace(
             returncode=1 if failed else 0,
             stdout=json.dumps(
@@ -836,17 +844,22 @@ def test_canonical_linux_runs_exact_image_without_host_state_and_keeps_all_text(
 
     monkeypatch.setattr(capture_linux, "command", run)
     args = SimpleNamespace(project=owner, core=str(wheel), headed=False, verify=True, draft=False, strict_images=False)
-    if failed:
+    if private_text:
+        with pytest.raises(privacy.CaptureError):
+            capture_linux.run(args)
+        assert not (owner / capture.DRAFT).exists()
+    elif failed:
         with pytest.raises(privacy.CaptureError, match="real scene differs"):
             capture_linux.run(args)
     else:
         assert capture_linux.run(args)["capture_platform"] == "linux/amd64"
     assert len(calls) == 2
     assert (owner / capture.MANIFEST).read_bytes() == before
-    for scene in capture.read_plan(owner)["scenes"]:
-        assert (
-            owner / capture.DRAFT / (scene["name"] + ".txt")
-        ).read_text() == "Fictional screenshot test transcript\n"
+    if not private_text:
+        for scene in capture.read_plan(owner)["scenes"]:
+            assert (
+                owner / capture.DRAFT / (scene["name"] + ".txt")
+            ).read_text() == "Fictional screenshot test transcript\n"
 
 
 def test_imported_linux_draft_refuses_destination_links_before_writing_any_scene(owner, tmp_path):
@@ -882,3 +895,54 @@ def test_installed_tooling_keeps_the_exact_external_terms_scanner(tmp_path, monk
     assert scanner.load_terms() == ["fictional-secret-marker"]
     with pytest.raises(privacy.CaptureError):
         capture.scan_text("FICTIONAL-SECRET-MARKER")
+
+
+@pytest.mark.parametrize("failed", [False, True])
+def test_zero_secret_render_check_never_reads_policy_or_publishes_unscanned_data(owner, monkeypatch, failed):
+    from heinzel_plugin_tools import capture_linux
+
+    recorded(owner)
+    before = (owner / capture.MANIFEST).read_bytes()
+
+    def forbidden(*args, **kwargs):
+        raise AssertionError("the untrusted render path must not access private policy or publish")
+
+    monkeypatch.setattr(capture_linux, "configured_terms", forbidden)
+    monkeypatch.setattr(capture, "check_capture", forbidden)
+    monkeypatch.setattr(capture_linux, "copy_draft", forbidden)
+    monkeypatch.setattr(capture, "publish_draft", forbidden)
+
+    def run(argv, *, cwd, capture=False, capture_stderr=False, timeout=900):
+        if argv[1] == "rm":
+            return SimpleNamespace(returncode=0)
+        assert capture_stderr
+        assert "CONFIDENTIALITY_REQUIRED=false" in argv
+        assert "CONFIDENTIAL_TERMS_FILE=/dev/null" in argv and not (cwd / "terms").exists()
+        assert "--verify" in argv
+        return SimpleNamespace(
+            returncode=int(failed),
+            stdout=json.dumps(
+                {
+                    "ok": True,
+                    "verified": True,
+                    "screenshots": [{"caption": "unscanned-caption"}],
+                    "transcripts_differ": [],
+                    "images_differ": [],
+                    "error": "unscanned-error",
+                }
+            ),
+        )
+
+    monkeypatch.setattr(capture_linux, "command", run)
+    args = SimpleNamespace(
+        project=owner, core=None, headed=False, verify=True, draft=False, strict_images=False, render_check=True
+    )
+    if failed:
+        with pytest.raises(privacy.CaptureError, match="Zero-secret rendering comparison failed"):
+            capture_linux.run(args)
+    else:
+        report = capture_linux.run(args)
+        assert report["render_verified"] is True and report["private_scan"] is False
+        assert "verified" not in report and report["scope"] == "render-only"
+        assert "unscanned" not in json.dumps(report) and report["fresh"] is False
+    assert (owner / capture.MANIFEST).read_bytes() == before and not (owner / capture.DRAFT).exists()

@@ -286,7 +286,7 @@ jobs:
     # The local digest covers only UI inputs; this re-capture against the newest compatible released Core catches text
     # that comes from plugin Python, metadata or Core. Deterministic (Playwright, fixtures), no agent.
     # Promote this to CI OK after the refreshed gallery has been verified on the hosted Linux runners.
-    name: Screenshot gallery re-capture
+    name: Screenshot gallery rendering
     permissions:
       contents: read
     needs: plan
@@ -304,13 +304,11 @@ jobs:
         with:
           enable-cache: true
       # This is the same pinned Linux container used by local authors, including on macOS.
-      - name: Re-capture against released Core and compare every scene's text with the committed gallery
+      - name: Compare real scene rendering without secrets or publication
         if: hashFiles(format('{0}/docs/screenshot-definition.json', matrix.path)) != ''
         env:
           PLUGIN: ${{ matrix.name }}
-          CONFIDENTIAL_TERMS: ${{ secrets.CONFIDENTIAL_TERMS }}
-          CONFIDENTIALITY_REQUIRED: ${{ github.event_name != 'pull_request' || (github.event.pull_request.head.repo.full_name == github.repository && github.actor != 'dependabot[bot]') }}
-        run: make screenshots-verify NAME="$PLUGIN"
+        run: make screenshots-render-check NAME="$PLUGIN"
   ok:
     name: CI OK
     if: always()

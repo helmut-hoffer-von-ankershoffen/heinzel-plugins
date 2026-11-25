@@ -919,6 +919,7 @@ def capture_plugin(
     prepared_python: Path | None = None,
     verify: bool = False,
     strict_images: bool = False,
+    render_check: bool = False,
 ) -> int:
     """Record the owning gallery with on-demand pinned browser tooling and clean machine output."""
     command = [
@@ -942,6 +943,7 @@ def capture_plugin(
         (open_preview, "--open"),
         (draft_only, "--draft"),
         (verify, "--verify"),
+        (render_check, "--render-check"),
         (strict_images, "--strict-images"),
     ):
         if enabled:
@@ -1259,12 +1261,19 @@ def screenshot_main(arguments: list[str], *, check: bool = False) -> int:
         action="store_true",
         help="CI: capture privately again and fail when a scene's rendered text differs from the committed gallery",
     )
-    parser.add_argument("--strict-images", action="store_true", help="With --verify: image bytes must be identical too")
+    parser.add_argument(
+        "--render-check",
+        action="store_true",
+        help="Zero-secret rendering comparison only; does not approve private policy or publish",
+    )
+    parser.add_argument(
+        "--strict-images", action="store_true", help="With --verify or --render-check: compare image bytes too"
+    )
     args = parser.parse_args(arguments)
     try:
-        if sum((bool(check or args.check), args.init, args.draft, args.verify)) > 1:
+        if sum((bool(check or args.check), args.init, args.draft, args.verify, args.render_check)) > 1:
             raise CaptureError("Choose one screenshot mode: --init, --check, --draft, --verify or capture")
-        if args.strict_images and not args.verify:
+        if args.strict_images and not (args.verify or args.render_check):
             raise CaptureError("--strict-images needs --verify")
         if args.all and (not (check or args.check) or args.name is not None):
             raise CaptureError("Use --all with --check and without a plugin name")
@@ -1303,6 +1312,7 @@ def screenshot_main(arguments: list[str], *, check: bool = False) -> int:
                 prepared_python=args.prepared_python,
                 verify=args.verify,
                 strict_images=args.strict_images,
+                render_check=args.render_check,
             )
         print(json.dumps(result) if args.json else f"✓ {project.name}: {result.get('plan', 'screenshots are fresh')}")
         return 0

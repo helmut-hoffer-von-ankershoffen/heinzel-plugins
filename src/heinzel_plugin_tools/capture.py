@@ -1336,9 +1336,14 @@ def main() -> int:
     parser.add_argument("--open", action="store_true")
     parser.add_argument("--verify", action="store_true")
     parser.add_argument("--strict-images", action="store_true")
+    parser.add_argument("--render-check", action="store_true")
     parser.add_argument("--container-worker", action="store_true", help=argparse.SUPPRESS)
     args = parser.parse_args()
     try:
+        if args.render_check:
+            if args.verify or args.draft or args.prepared_python or args.headed or args.open or args.container_worker:
+                raise CaptureError("--render-check is a standalone zero-secret comparison, not publication")
+            args.verify = True
         if args.container_worker and (sys.platform != "linux" or not Path("/.dockerenv").is_file()):
             raise CaptureError("The canonical worker must run inside its Linux container")
         if not args.container_worker and args.prepared_python is None:
@@ -1366,17 +1371,23 @@ def main() -> int:
         if args.json:
             print(json.dumps(report))
         else:
-            if report.get("verified"):
+            if report.get("render_verified"):
+                outcome = "rendering matches; private policy was not checked and nothing was published"
+            elif report.get("verified"):
                 outcome = "scenes re-captured; the committed gallery matches"
             elif report.get("draft"):
                 outcome = "private draft captures ready"
             else:
                 outcome = "screenshots published to the gallery, catalog metadata and README; review the diff"
-            print(f"✓ {report['plugin']}: {len(report['screenshots'])} {outcome}.")
-            print(
-                f"Review: {report['preview']}\nRepeat: make screenshots NAME={report['plugin']}\n"
-                f"Verify: make screenshots-check NAME={report['plugin']}"
-            )
+            if report.get("render_verified"):
+                print(f"✓ {report['scene_count']} scenes: {outcome}.")
+            else:
+                print(f"✓ {report['plugin']}: {len(report['screenshots'])} {outcome}.")
+            if not report.get("render_verified"):
+                print(
+                    f"Review: {report['preview']}\nRepeat: make screenshots NAME={report['plugin']}\n"
+                    f"Verify: make screenshots-check NAME={report['plugin']}"
+                )
         if args.open:
             webbrowser.open(Path(report["preview"]).as_uri())
         return 0
