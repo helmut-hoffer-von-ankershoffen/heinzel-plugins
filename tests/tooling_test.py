@@ -20,6 +20,7 @@ pytestmark = pytest.mark.integration
 @pytest.mark.parametrize(
     "plugin", ("heinzel-clock", "heinzel-resource", "heinzel-tailscale", "heinzel-theme", "heinzel-google")
 )
+@pytest.mark.usefixtures("fictional_capture_terms")
 def test_a_cold_checkout_of_a_committed_gallery_is_fresh_without_building(tmp_path, plugin, monkeypatch):
     source = Path(__file__).resolve().parents[1] / "plugins" / plugin
 

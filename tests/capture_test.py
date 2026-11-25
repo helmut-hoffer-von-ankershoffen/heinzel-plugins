@@ -13,7 +13,7 @@ import pytest
 
 from heinzel_plugin_tools import capture, cli, privacy
 
-pytestmark = pytest.mark.unit
+pytestmark = [pytest.mark.unit, pytest.mark.usefixtures("fictional_capture_terms")]
 
 
 @pytest.fixture

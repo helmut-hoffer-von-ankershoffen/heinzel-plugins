@@ -49,6 +49,8 @@ from heinzel_plugin_tools.privacy import (
 
 PLAN = DEFINITION
 OUTPUT = Path("docs/assets/screenshots")
+PROJECT_FILE = "pyproject.toml"
+README_FILE = "README.md"
 MANIFEST = OUTPUT / "capture.json"
 MAX_IMAGE = 500 * 1024
 MAX_SCENES = 8
@@ -58,7 +60,7 @@ IGNORED = {"node_modules", "__pycache__", ".venv", "dist", ".git", ".acceptance"
 
 def project_data(root: Path) -> dict:
     """Read the owning metadata without importing its code."""
-    return tomllib.loads(safe_path(root, "pyproject.toml").read_text())
+    return tomllib.loads(safe_path(root, PROJECT_FILE).read_text())
 
 
 def theme_names(root: Path) -> list[str]:
@@ -471,7 +473,7 @@ def check_capture(root: Path) -> dict:
         scan_text(data.decode("utf-8", errors="replace"), terms=terms)
     for shot in expected:
         scan_text(shot["caption"], terms=terms)
-    readme = safe_path(root, "README.md")
+    readme = safe_path(root, README_FILE)
     if not readme.is_file():
         raise StaleGallery(f"{name}: the generated README gallery is missing. Run {command}", command)
     readme_text = readme.read_text()
@@ -763,15 +765,33 @@ def draft_artifacts(root: Path, plan: dict, draft: dict) -> tuple[dict, dict]:
     return images, transcripts
 
 
+def stage_gallery(staging: Path, folder: Path, plan: dict, manifest: dict) -> None:
+    """Assemble a validated draft in a temporary directory beside the destination."""
+    staging.mkdir()
+    for scene in plan["scenes"]:
+        for extension in ("png", "txt"):
+            filename = f"{scene['name']}.{extension}"
+            shutil.copyfile(safe_path(folder, filename), staging / filename)
+    # Regenerate the contact sheet from the definition's captions.
+    (staging / "index.html").write_text(preview_document(manifest["plugin"], plan["scenes"], manifest["core_version"]))
+    (staging / "capture.json").write_text(json.dumps(manifest, indent=2) + "\n")
+
+
+def restore_optional_text(path: Path, original: str | None) -> None:
+    """Restore an optional file to its previous contents or absence."""
+    if original is None:
+        path.unlink(missing_ok=True)
+    else:
+        atomic_text(path, original)
+
+
 def install_gallery(
     root: Path, folder: Path, plan: dict, manifest: dict, updated_metadata: str, updated_readme: str
 ) -> dict:
     """Swap a fully validated draft atomically, restoring the original gallery on any failure."""
-    names = [scene["name"] for scene in plan["scenes"]]
-    plugin = manifest["plugin"]
-    metadata_path = safe_path(root, "pyproject.toml")
+    metadata_path = safe_path(root, PROJECT_FILE)
     original_metadata = metadata_path.read_text()
-    readme_path = safe_path(root, "README.md")
+    readme_path = safe_path(root, README_FILE)
     original_readme = readme_path.read_text() if readme_path.exists() else None
     target = safe_path(root, OUTPUT)
     target.parent.mkdir(parents=True, exist_ok=True)
@@ -782,13 +802,7 @@ def install_gallery(
     original_definition = definition.read_text() if definition.exists() else None
     with tempfile.TemporaryDirectory(prefix=".gallery-stage-", dir=target.parent) as temporary:
         staging = Path(temporary) / "screenshots"
-        staging.mkdir()
-        for name in names:
-            for extension in ("png", "txt"):
-                shutil.copyfile(safe_path(folder, f"{name}.{extension}"), staging / f"{name}.{extension}")
-        # The contact sheet is regenerated from the definition's captions, never copied.
-        (staging / "index.html").write_text(preview_document(plugin, plan["scenes"], manifest["core_version"]))
-        (staging / "capture.json").write_text(json.dumps(manifest, indent=2) + "\n")
+        stage_gallery(staging, folder, plan, manifest)
         backup = Path(temporary) / "previous"
         moved = False
         installed = False
@@ -810,10 +824,7 @@ def install_gallery(
             if moved:
                 backup.rename(target)
             atomic_text(metadata_path, original_metadata)
-            if original_readme is None:
-                readme_path.unlink(missing_ok=True)
-            else:
-                atomic_text(readme_path, original_readme)
+            restore_optional_text(readme_path, original_readme)
             if original_definition is None:
                 definition.unlink(missing_ok=True)
             raise
@@ -833,9 +844,9 @@ def publish_draft(root: Path) -> dict:
         )
     expected = expected_shots(plan)
     images, transcripts = draft_artifacts(root, plan, draft)
-    metadata_path = safe_path(root, "pyproject.toml")
+    metadata_path = safe_path(root, PROJECT_FILE)
     original_metadata = metadata_path.read_text()
-    readme_path = safe_path(root, "README.md")
+    readme_path = safe_path(root, README_FILE)
     original_readme = readme_path.read_text() if readme_path.exists() else None
     updated_readme = readme_gallery(original_readme or "", expected)
     document = tomlkit.parse(original_metadata)

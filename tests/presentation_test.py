@@ -142,6 +142,7 @@ class TextPage:
         self.saved = True
 
 
+@pytest.mark.usefixtures("fictional_capture_terms")
 def test_only_exact_owning_path_text_changes_and_all_doctor_rows_statuses_and_details_remain(environment, tmp_path):
     root, interpreter = environment
     identity = presentation.owning_prefix(root, interpreter)

@@ -663,6 +663,7 @@ def test_the_screenshot_init_mode_writes_the_starter_plan(collection, monkeypatc
     assert result["next"] == "hz-plugin screenshots heinzel-harbor"
 
 
+@pytest.mark.usefixtures("fictional_capture_terms")
 def test_screenshot_modes_are_mutually_exclusive(collection, monkeypatch, capsys):
     status, out, _ = screenshots(monkeypatch, capsys, "harbor", "--init", "--check", "--json")
     assert status == 1
@@ -671,6 +672,7 @@ def test_screenshot_modes_are_mutually_exclusive(collection, monkeypatch, capsys
     assert status == 1 and "Choose one screenshot mode" in err
 
 
+@pytest.mark.usefixtures("fictional_capture_terms")
 def test_a_screenshot_command_without_a_unique_plugin_lists_the_choices(collection, monkeypatch, capsys):
     status, _, err = screenshots(monkeypatch, capsys, "missing")
     assert status == 1

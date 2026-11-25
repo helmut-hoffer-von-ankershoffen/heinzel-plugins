@@ -14,6 +14,7 @@ from heinzel_plugin_tools import capture, planning, privacy
 
 pytestmark = [
     pytest.mark.e2e,
+    pytest.mark.usefixtures("fictional_capture_terms"),
     pytest.mark.skipif(
         os.environ.get("HZ_CAPTURE_E2E") != "1", reason="Opt-in installed-SDK browser journey; CI runs this explicitly"
     ),

@@ -102,17 +102,29 @@ def test_every_release_body_comes_from_the_changelog_notes():
             assert notes < run.index("--tag") and '> "$RUNNER_TEMP/release-notes.md"' in run, name
 
 
-def test_fixture_jobs_do_not_require_private_terms_but_real_capture_does():
+def test_confidential_terms_are_scoped_to_real_gallery_and_policy_steps():
     workflow = yaml.safe_load((ROOT / ".github/workflows/ci.yml").read_text())
     jobs = workflow["jobs"]
-    plan_tests = next(step for step in jobs["plan"]["steps"] if step.get("run") == "make tooling-check")
-    coverage_tests = next(
-        step for step in jobs["coverage"]["steps"] if step.get("name") == "Measure the shared developer toolkit"
-    )
-    assert plan_tests["env"]["CONFIDENTIALITY_REQUIRED"] == "false"
-    assert coverage_tests["env"]["CONFIDENTIALITY_REQUIRED"] == "false"
-    assert jobs["gallery"]["env"]["CONFIDENTIAL_TERMS"] == "${{ secrets.CONFIDENTIAL_TERMS }}"
-    assert "github.event_name" in jobs["gallery"]["env"]["CONFIDENTIALITY_REQUIRED"]
+    real_steps = {
+        ("policy", "make policies"),
+        ("plugin", 'make check NAME="$PLUGIN" CORE="$CORE"'),
+        ("gallery", 'make screenshots-verify NAME="$PLUGIN"'),
+    }
+    keys = {"CONFIDENTIAL_TERMS", "CONFIDENTIALITY_REQUIRED"}
+    scoped = {}
+    assert not keys.intersection(workflow.get("env", {}))
+    for name, job in jobs.items():
+        assert not keys.intersection(job.get("env", {}))
+        for step in job.get("steps", []):
+            env = step.get("env", {})
+            if keys.intersection(env):
+                scoped[name, step["run"]] = {key: env[key] for key in keys}
+    assert set(scoped) == real_steps
+    policy = scoped["policy", "make policies"]
+    assert policy["CONFIDENTIAL_TERMS"] == "${{ secrets.CONFIDENTIAL_TERMS }}"
+    assert "github.event.pull_request.head.repo.full_name == github.repository" in policy["CONFIDENTIALITY_REQUIRED"]
+    assert "github.actor != 'dependabot[bot]'" in policy["CONFIDENTIALITY_REQUIRED"]
+    assert all(env == policy for env in scoped.values())
     assert "coverage-floor" in jobs["ok"]["needs"]
     assert "gate-guard" in jobs["ok"]["needs"]
     assert "sonar-ratings" in jobs["ok"]["needs"]

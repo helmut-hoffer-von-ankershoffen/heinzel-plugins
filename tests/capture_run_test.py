@@ -15,7 +15,7 @@ import pytest
 
 from heinzel_plugin_tools import capture, privacy
 
-pytestmark = pytest.mark.unit
+pytestmark = [pytest.mark.unit, pytest.mark.usefixtures("fictional_capture_terms")]
 
 PNG = b"\x89PNG\r\n\x1a\n"
 INTERPRETER = """#!/bin/sh

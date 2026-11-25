@@ -104,6 +104,7 @@ def test_confidential_terms_are_matched_like_the_commit_hook_without_naming_them
     assert "uux" not in str(refused.value)
     monkeypatch.setenv("CONFIDENTIAL_TERMS", "# none\n")
     monkeypatch.setenv("CONFIDENTIAL_TERMS_FILE", "/nonexistent")
+    monkeypatch.delenv("GITHUB_ACTIONS", raising=False)
     privacy.scan_text("A note from quux-corp about tides")
 
 
