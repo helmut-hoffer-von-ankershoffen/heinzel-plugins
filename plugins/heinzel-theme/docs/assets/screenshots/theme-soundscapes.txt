@@ -10,20 +10,58 @@ Mira
 · EM
 Today
 Today
+Doctor: 4 checks need attention
 
-Loading…
+ai.access ai access, system.doctor installation, system.prerequisite system.runner: claude…
 
-v0.9.42
+Open
+v0.9.54
 Updates, off
 0
-System health, off
+System health, warning
 ?
 Daemon not installed, off
-Chat
-New chat
-Ask about your setup, your team's contracts or what to do next. The chat reads with hz and asks you before it changes anything.
-Your message
-Default
+Meet your first Heinzelmännchen
+
+Click a part of the figure to change it, or use the list.
+
+What do you call it?
+
+A suggestion: type your own, or let Surprise me pick.
+
+Surprise me
+Undo
+
+Everything you can change
+Hat
+Follow theme
+Age
+Grown
+Beard
+Age default
+Shirt
+Follow theme
+Build
+Regular
+Accessories
+None
+Hat
+Its mission
+Your day (Recommended)
+I am your day's assistant. I keep your day in order.
+Your reading
+I am your reading helper. I keep what you want to read in one place.
+Your projects
+I am your project helper. I keep track of what comes next.
+
+“I keep your day in order. I draft, you approve.”
+
+For now the mission is only shown here, not saved. Nothing runs on its own.
+
+Start
+
+You can change the name and look any time.
+
 Audio
 Settings
 Filter settings
@@ -31,6 +69,7 @@ Filter settings
 Preferences
 
 Appearance
+Browser
 Notifications
 
 Customize
@@ -51,13 +90,14 @@ Configuration files
 Credentials
 Daemon
 From Claude
+MCP
 System
 Updates
 Web server
 Appearance
 
 First-party
-v0.9.42
+v0.9.54
 
 Mode
 
@@ -83,20 +123,22 @@ Die Heinzelmännchen
 Theme: Heinzelmännchen · Plays from YouTube
 Hyper Focus
 Plugin: heinzel-theme · Plays from YouTube
+Singularity
+Plugin: heinzel-theme · Plays from YouTube
 Volume
 Follow my theme
 Mute during meetings
 Softer while I type
 Audio visualisation
 
-Heinzel shows how its music sounds. Nothing is recorded or uploaded; music in a frame, such as YouTube, is seen only after you share the tab or use the microphone.
+Choose an audio source in the Audio pane to visualize music from an embedded player. Nothing is recorded or uploaded.
 
 Heinzel's own sound
 Shown without asking: it is analysed in this page and never leaves it.
 Microphone or shared audio
 Only after you choose it in the Audio pane and your browser asks you. Choose Off there to stop at once.
 System audio
-Desktop app only, and only when you press Use system audio; it asks every time.
+In supported Heinzel apps, choose Use system audio in the Audio pane and allow it each time.
 Audio visualisation
 Spectrum
 Bars in the right rail that rise and glow with the music.

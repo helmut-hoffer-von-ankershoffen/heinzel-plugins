@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.1.7
+
+Add Singularity as a selectable soundscape (YouTube video `AvtStYuO79Y`). Playback starts only after you press Play.
+
 ## 0.1.6
 
 Requires Python 3.15; relocked.
