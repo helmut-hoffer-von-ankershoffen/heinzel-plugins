@@ -207,14 +207,17 @@ The first call downloads the public image; subsequent calls reuse the downloaded
 resulting local contact sheet after capture. `make screenshots-check NAME=heinzel-resource` remains an
 inexpensive portable freshness check and does not start Docker.
 
-The source is copied into a disposable directory without development environments, Node modules or Git
-metadata. No host application directory, credential directory, Docker socket or host tool directory is
+The source is copied into a disposable directory without development environments, Node modules or host Git
+metadata. A frozen list of the original source files preserves discovery across generated build output. The worker
+receives no Git metadata, and host checks never execute Git against the worker-writable copy. No host application directory, credential directory, Docker socket or host tool directory is
 mounted into the worker. The worker uses the fictional hostname demo-host, UTC and C.UTF-8, the pinned browser image, and the owning locked
 Core/plugin environment. The renderer receives no confidential terms: it runs the public privacy-pattern checks only. The
 trusted host applies the configured confidential-term policy to every returned transcript and caption
 before importing or publishing anything; missing terms refuse the canonical command. No term list
 is mounted into the worker or included in its arguments or image. All scene text remains required. Images
-can still differ in rasterization; `--strict-images` additionally compares their bytes.
+can still differ in rasterization; `--strict-images` additionally compares their bytes. The existing text
+comparison permits changing `hh:mm` clock readings; full original transcripts remain stored and
+scanned. This does not suppress any other scene text or turn a missing capture into a pass.
 
 The advanced explicit `--python` path is an environment diagnostic, not canonical release-gallery proof.
 It retains its caller-selected runtime; use the ordinary commands above for publication or CI comparison.
@@ -227,15 +230,16 @@ that require credentials also refuse rather than mounting credentials. Use a sep
 environment with `--headed` only for noncanonical interactive diagnostics.
 
 Private-policy acceptance requires a trusted host controller. Do not supply repository secrets to
-editable pull-request code. A protected, base-owned scan/execution route is a prerequisite for required
-PR gallery acceptance; a reusable workflow selected by an editable caller is not that authority.
+editable pull-request code. A protected, base-owned scan route is a prerequisite for hosted private-policy
+approval; a reusable workflow selected by an editable caller is not that authority.
 Unscanned output must remain private until that scan passes. This local capture command does not
 establish a protected GitHub approval or a fork-PR acceptance path.
 
 `make screenshots-render-check NAME=<plugin>` is the secret-free CI path for ordinary and fork PRs. It
 returns `render_verified: true`, `private_scan: false`, and `scope: render-only` only after a real fresh
 comparison. It emits counts rather than unscanned transcripts, captions, images, or worker stderr, and
-does not copy results out of the private scratch directory. It cannot publish. Before public gallery
+does not copy results out of the private scratch directory. It cannot publish. CI OK requires this executed rendering result for selected plugins, including fork PRs;
+a missing plan or skipped selected render fails. Unselected changes retain the existing plan selection. Before public gallery
 changes are admitted, the approved local tooling must run the full private-policy verification and
 bind the passing scan to the exact committed gallery files. A future hosted private scan requires
 separate protected authority; rendering success alone is never that approval.

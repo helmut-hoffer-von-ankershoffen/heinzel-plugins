@@ -162,3 +162,51 @@ def test_automatic_release_guards_execute_against_checkout_and_build(drift):
     assert (version.returncode == 0) == (drift == "none")
     for job in ("publish", "github-publish"):
         assert workflow["jobs"][job]["concurrency"]["group"] == "plugin-publication-${{ needs.build.outputs.tag }}"
+
+
+@pytest.mark.parametrize(
+    ("selected", "result", "passes"),
+    [
+        ("True", "success", True),
+        ("True", "skipped", False),
+        ("True", "failure", False),
+        ("True", "cancelled", False),
+        ("False", "skipped", True),
+        ("False", "success", True),
+        ("False", "failure", False),
+        ("", "success", False),
+        ("true", "success", False),
+    ],
+)
+def test_ci_ok_requires_executed_rendering_for_selected_plugins(selected, result, passes):
+    import os
+    import subprocess
+
+    jobs = yaml.safe_load((ROOT / ".github/workflows/ci.yml").read_text())["jobs"]
+    assert "gallery" in jobs["ok"]["needs"]
+    assert jobs["gallery"]["if"] == "needs.plan.outputs.selected == 'True'"
+    step = next(step for step in jobs["gallery"]["steps"] if "render-check" in step.get("run", ""))
+    assert "if" not in step  # A selected project with no plan must fail, not skip its execution.
+    assert step["env"] == {"PLUGIN": "${{ matrix.name }}"}
+    assert jobs["gallery"]["permissions"] == {"contents": "read"}
+    assert not any("upload-artifact" in step.get("uses", "") for step in jobs["gallery"]["steps"])
+    env = dict(
+        os.environ,
+        EVENT="pull_request",
+        POLICY="success",
+        PLAN="success",
+        PLUGIN="success",
+        COVERAGE="success",
+        FLOOR="success",
+        SCREENSHOTS="success",
+        SONAR="success",
+        GUARD="success",
+        GALLERY=result,
+        GALLERY_SELECTED=selected,
+    )
+    completed = subprocess.run(  # noqa: S603 -- execute the actual aggregate with synthetic statuses only
+        ["/bin/bash", "-e", "-c", jobs["ok"]["steps"][0]["run"]],
+        env=env,
+        capture_output=True,
+    )
+    assert (completed.returncode == 0) is passes
