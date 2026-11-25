@@ -1175,6 +1175,41 @@ def focused_hook_targets(manifest: Path, selected: list[Project], changed: list[
     return result
 
 
+def check_all_screenshots(inventory: list[Project], *, json_output: bool) -> int:
+    """Check every configured gallery, retaining both stale and broken results."""
+    from heinzel_plugin_tools.capture import PLAN, safe_failure_message
+    from heinzel_plugin_tools.privacy import StaleGallery
+
+    fresh, stale, failed = [], [], []
+    for project in inventory:
+        # Projects without a capture plan have no gallery to check.
+        if not (project.directory / PLAN).exists() and not (project.directory / PLAN).is_symlink():
+            continue
+        try:
+            check_screenshots(project)
+            fresh.append(project.name)
+        except StaleGallery as error:
+            stale.append(
+                {
+                    "plugin": project.name,
+                    "command": f"hz-plugin screenshots {project.name}",
+                    "error": safe_failure_message(error),
+                }
+            )
+        except Exception as error:  # One invalid gallery must not hide the remaining checks.
+            failed.append({"plugin": project.name, "error": safe_failure_message(error)})
+    report = {"ok": not stale and not failed, "fresh": fresh, "stale": stale, "failed": failed}
+    if json_output:
+        print(json.dumps(report))
+    else:
+        for item in stale:
+            print(f"STALE {item['plugin']}: run {item['command']}")
+        for item in failed:
+            print(f"FAIL  {item['plugin']}: {item['error']}")
+        print(f"{len(fresh)} fresh, {len(stale)} stale, {len(failed)} failed")
+    return 0 if report["ok"] else 1
+
+
 def screenshot_main(arguments: list[str], *, check: bool = False) -> int:
     """Keep capture help focused and all agent results machine-readable."""
     from heinzel_plugin_tools.capture import PLAN, safe_failure_message, write_default_plan
@@ -1196,6 +1231,7 @@ def screenshot_main(arguments: list[str], *, check: bool = False) -> int:
         "--core", default=os.environ.get("PLUGIN_CORE") or None, help="Candidate SDK wheel or artifact URL"
     )
     parser.add_argument("--json", action="store_true", help="JSON on stdout, progress on stderr")
+    parser.add_argument("--all", action="store_true", help="With --check: check every configured gallery")
     parser.add_argument(
         "--check", action="store_true", help="Check committed captures offline; no browser or plugin execution"
     )
@@ -1227,7 +1263,11 @@ def screenshot_main(arguments: list[str], *, check: bool = False) -> int:
             args.review_receipt and args.draft
         ):
             raise CaptureError("Choose one screenshot mode: --plan, --init, --check, capture, or --review-receipt")
+        if args.all and (not (check or args.check) or args.name is not None):
+            raise CaptureError("Use --all with --check and without a plugin name")
         inventory = projects()
+        if args.all:
+            return check_all_screenshots(inventory, json_output=args.json)
         selected = [
             p
             for p in inventory
