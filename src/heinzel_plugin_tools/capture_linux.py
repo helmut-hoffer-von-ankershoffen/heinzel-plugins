@@ -17,9 +17,6 @@ IMAGE = (
     "330d401ae23c905896a0c26c66c36fc971b621519e7b11b435a8328d7bf6e031"
 )
 PLATFORM = "linux/amd64"
-DOCKERFILE = f"""FROM {IMAGE}
-RUN apt-get update -qq && apt-get install -y -qq git && python -m pip install --no-cache-dir uv==0.13.7
-"""
 
 
 def configured_terms() -> str:
@@ -94,21 +91,6 @@ def run(args) -> dict:
         (runtime / "scripts").mkdir()
         shutil.copyfile(Path(_confidentiality_module().__file__), runtime / "scripts/check_confidentiality.py")
         (work / "terms").write_text(terms)
-        build = work / "image"
-        build.mkdir()
-        (build / "Dockerfile").write_text(DOCKERFILE)
-        identity = work / "image-id"
-        print("Preparing the pinned Linux capture image…", file=sys.stderr, flush=True)
-        built = command(
-            ["docker", "build", "--platform", PLATFORM, "--quiet", "--iidfile", str(identity), str(build)],
-            cwd=work,
-            capture=True,
-        )
-        if built.returncode or not identity.is_file():
-            raise CaptureError("The pinned canonical Linux capture image could not be built")
-        image = identity.read_text().strip()
-        if not image.startswith("sha256:") or len(image) != 71:
-            raise CaptureError("Docker returned no immutable capture image identity")
         core = args.core
         if core and Path(core).expanduser().is_file():
             selected = Path(core).expanduser()
@@ -161,7 +143,14 @@ def run(args) -> dict:
                     "CONFIDENTIALITY_REQUIRED=true",
                     "--env",
                     "CONFIDENTIAL_TERMS_FILE=/capture/terms",
-                    image,
+                    "--entrypoint",
+                    "python",
+                    IMAGE,
+                    "-c",
+                    "import os,subprocess,sys; "
+                    "subprocess.run([sys.executable, '-m', 'pip', 'install', '--quiet', "
+                    "'--no-cache-dir', 'uv==0.13.7'], check=True); "
+                    "os.execvp(sys.argv[1], sys.argv[1:])",
                     *child,
                 ],
                 cwd=work,

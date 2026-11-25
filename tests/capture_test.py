@@ -802,14 +802,11 @@ def test_canonical_linux_runs_exact_image_without_host_state_and_keeps_all_text(
 
     def run(argv, *, cwd, capture=False, timeout=900):
         calls.append(argv)
-        if argv[1] == "build":
-            Path(argv[argv.index("--iidfile") + 1]).write_text("sha256:" + "a" * 64)
-            assert set(Path(argv[-1]).iterdir()) == {Path(argv[-1]) / "Dockerfile"}
-            return SimpleNamespace(returncode=0)
         if argv[1] == "rm":
             assert argv[2] == "--force" and argv[3].startswith("hz-gallery-")
             return SimpleNamespace(returncode=0)
         assert argv[1:3] == ["run", "--rm"]
+        assert capture_linux.IMAGE in argv
         assert argv[argv.index("--platform") + 1] == "linux/amd64"
         assert str(owner) not in " ".join(argv)
         assert "fictional-private-term" not in " ".join(argv)
@@ -838,7 +835,7 @@ def test_canonical_linux_runs_exact_image_without_host_state_and_keeps_all_text(
             capture_linux.run(args)
     else:
         assert capture_linux.run(args)["capture_platform"] == "linux/amd64"
-    assert len(calls) == 3
+    assert len(calls) == 2
     assert (owner / capture.MANIFEST).read_bytes() == before
     for scene in capture.read_plan(owner)["scenes"]:
         assert (
