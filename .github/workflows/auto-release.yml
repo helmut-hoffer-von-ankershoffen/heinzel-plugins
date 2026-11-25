@@ -49,5 +49,11 @@ jobs:
             exit 0
           fi
           while read -r tag; do
-            gh workflow run release.yml --ref main -f plugin="${tag%/v*}" -f publish=true -f expected_sha="$GREEN_SHA" -f expected_tag="$tag"
+            recovery=()
+            if git show-ref --verify --quiet "refs/tags/$tag"; then
+              revision="$(git rev-parse --verify "refs/tags/$tag^{commit}")"
+              git merge-base --is-ancestor "$revision" "$GREEN_SHA"
+              recovery=(-f resume_tag="$tag" -f expected_tag_revision="$revision")
+            fi
+            gh workflow run release.yml --ref main -f plugin="${tag%/v*}" -f publish=true -f expected_sha="$GREEN_SHA" -f expected_tag="$tag" "${recovery[@]}"
           done <<< "$plugins"

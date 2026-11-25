@@ -180,7 +180,7 @@ def unreleased(
     names = []
     for path in sorted((root / PLUGINS).glob("*/pyproject.toml")):
         project = tomllib.loads(path.read_text(encoding="utf-8"))["project"]
-        if f"{project['name']}/v{project['version']}" in tags:
+        if not with_tags and f"{project['name']}/v{project['version']}" in tags:
             continue
         if published is not None and published(project["name"], project["version"]):
             continue

@@ -22,6 +22,9 @@ on:
       expected_tag:
         description: Automatic plugin version selected at that source
         type: string
+      expected_tag_revision:
+        description: Original immutable revision for automatic tagged recovery
+        type: string
       resume_tag:
         description: Existing plugin tag to verify and upload without rebuilding
         type: string
@@ -46,14 +49,20 @@ jobs:
         with:
           persist-credentials: false
       - name: Verify the automatic release source
-        if: inputs.expected_sha != '' || inputs.expected_tag != ''
+        if: inputs.expected_sha != '' || inputs.expected_tag != '' || inputs.expected_tag_revision != ''
         env:
           EXPECTED: ${{ inputs.expected_sha }}
           TAG: ${{ inputs.expected_tag }}
           PLUGIN: ${{ inputs.plugin }}
           RESUME: ${{ inputs.resume_tag }}
+          TAG_REVISION: ${{ inputs.expected_tag_revision }}
         run: |
-          test -z "$RESUME"
+          if [ -n "$RESUME" ]; then
+            test "$RESUME" = "$TAG"
+            [[ "$TAG_REVISION" =~ ^[0-9a-f]{40}$ ]]
+          else
+            test -z "$TAG_REVISION"
+          fi
           test "$GITHUB_REF" = refs/heads/main
           test "$EXPECTED" = "$GITHUB_SHA"
           test "$EXPECTED" = "$(git rev-parse HEAD)"
@@ -70,7 +79,10 @@ jobs:
           REF: ${{ github.ref }}
         run: |
           test "$REF" = refs/heads/main
-          uv run --frozen --no-build --group tooling python -m heinzel_plugin_tools.publishing --restore --name "$PLUGIN" --tag "$TAG" --directory release-dist
+          uv run --frozen --no-build --group tooling python -m heinzel_plugin_tools.publishing --restore --name "$PLUGIN" --tag "$TAG" --directory release-dist || {
+            echo "::error::Could not restore the original verified assets for $TAG. Inspect the original release run and resume its publication with those assets."
+            exit 1
+          }
       - id: core
         if: inputs.resume_tag == ''
         env:
@@ -97,12 +109,12 @@ jobs:
           uv run --frozen --no-build --group tooling python scripts/browser_dependencies.py
           uv run --frozen --no-build --group tooling hz-plugin verify-release "$PLUGIN" --core "$CORE" --output release-dist
       - name: Verify the selected automatic version
-        if: inputs.expected_sha != '' || inputs.expected_tag != ''
+        if: inputs.expected_sha != '' || inputs.expected_tag != '' || inputs.expected_tag_revision != ''
         env:
-          TAG: ${{ steps.verify.outputs.tag }}
-          REVISION: ${{ steps.verify.outputs.revision }}
+          TAG: ${{ steps.verify.outputs.tag || steps.resume.outputs.tag }}
+          REVISION: ${{ steps.verify.outputs.revision || steps.resume.outputs.revision }}
           SELECTED: ${{ inputs.expected_tag }}
-          EXPECTED: ${{ inputs.expected_sha }}
+          EXPECTED: ${{ inputs.expected_tag_revision || inputs.expected_sha }}
         run: test "$TAG" = "$SELECTED" && test "$REVISION" = "$EXPECTED"
       - uses: actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8 # v4.2.2
         if: inputs.resume_tag == '' && (!github.event.repository.private || vars.PRIVATE_ATTESTATIONS == 'true')
