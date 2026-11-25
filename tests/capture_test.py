@@ -1009,3 +1009,12 @@ def test_private_form_sidecar_blocks_publication_even_when_body_is_clean(owner, 
         capture.publish_draft(owner)
     assert (owner / capture.MANIFEST).read_bytes() == before
     assert not list((owner / capture.OUTPUT).glob("*.scan.txt"))
+
+
+def test_successful_publication_never_publishes_private_scan_evidence(owner):
+    recorded(owner)
+    folder = draft_of(owner)
+    capture.publish_draft(owner)
+    assert list(folder.glob("*.scan.txt"))
+    assert not list((owner / capture.OUTPUT).glob("*.scan.txt"))
+    assert "scan_text" not in json.loads((owner / capture.MANIFEST).read_text())
