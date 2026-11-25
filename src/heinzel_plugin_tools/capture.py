@@ -771,10 +771,12 @@ def stage_gallery(staging: Path, folder: Path, plan: dict, manifest: dict) -> No
     for scene in plan["scenes"]:
         for extension in ("png", "txt"):
             filename = f"{scene['name']}.{extension}"
-            shutil.copyfile(safe_path(folder, filename), staging / filename)
+            shutil.copyfile(safe_path(folder, filename), safe_path(staging, filename))
     # Regenerate the contact sheet from the definition's captions.
-    (staging / "index.html").write_text(preview_document(manifest["plugin"], plan["scenes"], manifest["core_version"]))
-    (staging / "capture.json").write_text(json.dumps(manifest, indent=2) + "\n")
+    atomic_text(
+        safe_path(staging, "index.html"), preview_document(manifest["plugin"], plan["scenes"], manifest["core_version"])
+    )
+    atomic_text(safe_path(staging, "capture.json"), json.dumps(manifest, indent=2) + "\n")
 
 
 def restore_optional_text(path: Path, original: str | None) -> None:
@@ -801,7 +803,7 @@ def install_gallery(
     definition = safe_path(root, PLAN)
     original_definition = definition.read_text() if definition.exists() else None
     with tempfile.TemporaryDirectory(prefix=".gallery-stage-", dir=target.parent) as temporary:
-        staging = Path(temporary) / "screenshots"
+        staging = safe_path(Path(temporary), "screenshots")
         stage_gallery(staging, folder, plan, manifest)
         backup = Path(temporary) / "previous"
         moved = False

@@ -99,8 +99,10 @@ identify demonstration data accurately. Never fabricate a product page or edit a
 
 The capture process uses fresh HOME, XDG, application and vendor state, an environment credential backend, a neutral
 shell prompt and a fresh browser. It does not inherit tokens or normal configuration. Browser requests stay on the
-isolated app's origin. Fixture commands execute with normal operating-system permissions: inspect the fixture before
-running it and use local adapters instead of real accounts or seeding commands that create external resources.
+isolated app's origin. Treat the scene definition, fixture and owning plugin as executable project content. Review
+them before capture. An application command can still write files or contact services with the account's operating
+system permissions. Use local adapters for demonstrations and disposable operating-system isolation when evaluating
+untrusted projects.
 No discovered public plugin executes during catalog generation.
 
 Authentication links and session credentials presented by the running app are redacted before **every** screenshot
