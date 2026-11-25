@@ -303,9 +303,7 @@ jobs:
       - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e # v10.3.2
         with:
           enable-cache: true
-      - name: Install the capture browser and its runner libraries
-        if: hashFiles(format('{0}/docs/screenshot-definition.json', matrix.path)) != ''
-        run: uv run --frozen --with playwright==1.64.1 --group tooling playwright install --with-deps chromium
+      # This is the same pinned Linux container used by local authors, including on macOS.
       - name: Re-capture against released Core and compare every scene's text with the committed gallery
         if: hashFiles(format('{0}/docs/screenshot-definition.json', matrix.path)) != ''
         env:

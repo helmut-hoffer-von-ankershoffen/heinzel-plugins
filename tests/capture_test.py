@@ -777,3 +777,86 @@ def test_single_and_aggregate_use_the_same_gallery_discovery(owner, monkeypatch,
     assert cli.check_all_screenshots([project], json_output=True) == 1
     assert called == [project, project]
     assert json.loads(capsys.readouterr().out)["failed"][0]["plugin"] == project.name
+
+
+def test_canonical_capture_requires_external_terms(monkeypatch):
+    from heinzel_plugin_tools import capture_linux
+
+    monkeypatch.setattr(capture_linux, "_confidentiality_module", lambda: None)
+    with pytest.raises(privacy.CaptureError, match="configured confidential terms"):
+        capture_linux.configured_terms()
+
+
+@pytest.mark.parametrize("failed", [False, True])
+def test_canonical_linux_runs_exact_image_without_host_state_and_keeps_all_text(owner, monkeypatch, failed):
+    from heinzel_plugin_tools import capture_linux
+
+    recorded(owner)
+    wheel = owner / "heinzel-0.9.8-py3-none-any.whl"
+    wheel.write_bytes(b"fictional wheel")
+    (owner / ".venv").mkdir()
+    (owner / ".venv/host-secret").write_text("not an input")
+    before = (owner / capture.MANIFEST).read_bytes()
+    calls = []
+    monkeypatch.setattr(capture_linux, "configured_terms", lambda: "fictional-private-term\n")
+
+    def run(argv, *, cwd, capture=False, timeout=900):
+        calls.append(argv)
+        if argv[1] == "build":
+            Path(argv[argv.index("--iidfile") + 1]).write_text("sha256:" + "a" * 64)
+            assert set(Path(argv[-1]).iterdir()) == {Path(argv[-1]) / "Dockerfile"}
+            return SimpleNamespace(returncode=0)
+        assert argv[1:5] == ["run", "--rm", "--platform", "linux/amd64"]
+        assert str(owner) not in " ".join(argv)
+        assert "fictional-private-term" not in " ".join(argv)
+        assert not any("docker.sock" in item or "/Applications" in item for item in argv)
+        assert "--verify" in argv and "--container-worker" in argv
+        assert not (cwd / "project/.venv").exists()
+        assert (cwd / "core" / wheel.name).read_bytes() == wheel.read_bytes()
+        folder = draft_of(cwd / "project")
+        (folder / "index.html").write_text("Fictional contact sheet")
+        return SimpleNamespace(
+            returncode=1 if failed else 0,
+            stdout=json.dumps(
+                {
+                    "ok": not failed,
+                    "error": "a real scene differs",
+                    "verified": True,
+                    "preview": "/capture/project/.preview/screenshots/draft/index.html",
+                }
+            ),
+        )
+
+    monkeypatch.setattr(capture_linux, "command", run)
+    args = SimpleNamespace(project=owner, core=str(wheel), headed=False, verify=True, draft=False, strict_images=False)
+    if failed:
+        with pytest.raises(privacy.CaptureError, match="real scene differs"):
+            capture_linux.run(args)
+    else:
+        assert capture_linux.run(args)["capture_platform"] == "linux/amd64"
+    assert len(calls) == 2
+    assert (owner / capture.MANIFEST).read_bytes() == before
+    for scene in capture.read_plan(owner)["scenes"]:
+        assert (
+            owner / capture.DRAFT / (scene["name"] + ".txt")
+        ).read_text() == "Fictional screenshot test transcript\n"
+
+
+def test_imported_linux_draft_refuses_destination_links_before_writing_any_scene(owner, tmp_path):
+    from heinzel_plugin_tools import capture_linux
+
+    recorded(owner)
+    source = owner.parent / (owner.name + "-isolated")
+    shutil.copytree(owner, source)
+    draft = draft_of(source)
+    (draft / "index.html").write_text("Fictional contact sheet")
+    target = owner / capture.DRAFT
+    target.mkdir(parents=True)
+    outside = tmp_path / "unrelated"
+    outside.write_text("unchanged")
+    plan = capture.read_plan(owner)
+    (target / f"{plan['scenes'][-1]['name']}.txt").symlink_to(outside)
+    with pytest.raises(privacy.CaptureError, match="symbolic links"):
+        capture_linux.copy_draft(source, owner, plan)
+    assert outside.read_text() == "unchanged"
+    assert not (target / f"{plan['scenes'][0]['name']}.png").exists()

@@ -192,3 +192,24 @@ can change only that detail, never a health status. The advanced external `--pyt
 redaction authority. Disclose both fictionalized paths and this hostname value in the captions.
 
 Other private paths, hostnames, identities or tokens can still make a capture fail; do not treat this mapping as successful privacy acceptance.
+
+
+## Canonical release-gallery environment
+
+`make screenshots NAME=heinzel-resource CORE=/absolute/path/to/heinzel.whl` and
+`make screenshots-verify NAME=heinzel-resource CORE=/absolute/path/to/heinzel.whl`
+run the same pinned Playwright Linux/amd64 container on macOS and Linux CI. Docker must be running.
+The first call downloads the public image; subsequent calls reuse the build cache. `OPEN=1` opens the
+resulting local contact sheet after capture. `make screenshots-check NAME=heinzel-resource` remains an
+inexpensive portable freshness check and does not start Docker.
+
+The source is copied into a disposable directory without development environments, Node modules or Git
+metadata. No host application directory, credential directory, Docker socket or host tool directory is
+mounted into the worker. The worker uses UTC and C.UTF-8, the pinned browser image, and the owning locked
+Core/plugin environment. The only external policy supplied is the configured confidential-term list;
+missing terms refuse canonical capture on authors' machines as well as CI. Terms never appear in command
+arguments or image build context. All scene text and the existing privacy scans remain required. Images
+can still differ in rasterization; `--strict-images` additionally compares their bytes.
+
+The advanced explicit `--python` path is an environment diagnostic, not canonical release-gallery proof.
+It retains its caller-selected runtime; use the ordinary commands above for publication or CI comparison.

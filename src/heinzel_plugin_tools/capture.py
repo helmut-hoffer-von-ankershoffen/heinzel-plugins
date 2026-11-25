@@ -1334,25 +1334,33 @@ def main() -> int:
     parser.add_argument("--open", action="store_true")
     parser.add_argument("--verify", action="store_true")
     parser.add_argument("--strict-images", action="store_true")
+    parser.add_argument("--container-worker", action="store_true", help=argparse.SUPPRESS)
     args = parser.parse_args()
     try:
-        report = (
-            verify(
-                args.project.resolve(),
-                core=args.core,
-                headed=args.headed,
-                prepared_python=args.prepared_python,
-                strict_images=args.strict_images,
+        if args.container_worker and (sys.platform != "linux" or not Path("/.dockerenv").is_file()):
+            raise CaptureError("The canonical worker must run inside its Linux container")
+        if not args.container_worker and args.prepared_python is None:
+            from heinzel_plugin_tools.capture_linux import run
+
+            report = run(args)
+        else:
+            report = (
+                verify(
+                    args.project.resolve(),
+                    core=args.core,
+                    headed=args.headed,
+                    prepared_python=args.prepared_python,
+                    strict_images=args.strict_images,
+                )
+                if args.verify
+                else capture(
+                    args.project.resolve(),
+                    core=args.core,
+                    headed=args.headed,
+                    draft_only=args.draft,
+                    prepared_python=args.prepared_python,
+                )
             )
-            if args.verify
-            else capture(
-                args.project.resolve(),
-                core=args.core,
-                headed=args.headed,
-                draft_only=args.draft,
-                prepared_python=args.prepared_python,
-            )
-        )
         if args.json:
             print(json.dumps(report))
         else:
