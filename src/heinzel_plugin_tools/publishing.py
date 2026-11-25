@@ -14,11 +14,13 @@ import secrets
 import ssl
 import subprocess
 import tarfile
+import tempfile
 import time
 import zipfile
 from collections.abc import Callable, Collection
 from email.parser import Parser
 from pathlib import Path
+from typing import Any
 from urllib.error import HTTPError
 from urllib.parse import quote, urlsplit
 from urllib.request import urlopen
@@ -28,6 +30,7 @@ from packaging.version import Version
 
 TRANSIENT_HTTP = frozenset({429, 500, 502, 503, 504})
 FETCH_ATTEMPTS = 3
+TAG_READBACK_DELAYS = (1, 2, 4, 8)
 DEFAULT_NOTES = "Independently checked artifacts from the exact tagged source commit."
 NOTES_LIMIT = 125_000
 
@@ -73,7 +76,8 @@ def fetch_bytes(
         attempt += 1
 
 
-def api(path: str, *, data: dict | None = None, missing: bool = False, method: str = "POST") -> dict | None:
+def api(path: str, *, data: dict | None = None, missing: bool = False, method: str = "POST") -> Any:
+    """Decode GitHub JSON objects or collections. Only an explicit 404 may return None."""
     command = ["gh", "api", path]
     if data is not None:
         command += ["--method", method, "--input", "-"]
@@ -84,21 +88,49 @@ def api(path: str, *, data: dict | None = None, missing: bool = False, method: s
         if missing and "(HTTP 404)" in result.stderr:
             return None
         raise ValueError(f"GitHub request failed for {path}: {result.stderr.strip()}")
-    return json.loads(result.stdout)
+    response = json.loads(result.stdout)
+    if not isinstance(response, (dict, list)):
+        raise ValueError(f"Invalid GitHub response for {path}: expected a JSON object or array")
+    return response
 
 
-def exact_tag(repository: str, tag: str, revision: str) -> None:
+def _read_tag_with_backoff(path: str) -> dict | None:
+    """Allow a newly created ref to propagate. Only 404s retry, and all retries are reads."""
+    for delay in TAG_READBACK_DELAYS:
+        reference = api(path, missing=True)
+        if reference is not None:
+            return reference
+        time.sleep(delay)
+    return api(path)
+
+
+def exact_tag(repository: str, tag: str, revision: str, *, create: bool = True) -> None:
     path = f"repos/{repository}/git/ref/tags/{quote(tag, safe='')}"
-    reference = api(path, missing=True)
-    if reference is None:
-        api(f"repos/{repository}/git/refs", data={"ref": f"refs/tags/{tag}", "sha": revision})
-        reference = api(path)
-    target = reference["object"]
+    ref = f"refs/tags/{tag}"
+    reference = api(path, missing=True) if create else _read_tag_with_backoff(path)
+    if reference is None and create:
+        created = api(f"repos/{repository}/git/refs", data={"ref": ref, "sha": revision})
+        target = created.get("object") if isinstance(created, dict) else None
+        if (
+            not isinstance(created, dict)
+            or created.get("ref") != ref
+            or not isinstance(target, dict)
+            or (target.get("type"), target.get("sha")) != ("commit", revision)
+        ):
+            raise ValueError(f"GitHub did not confirm creation of {tag} at the built commit")
+        reference = _read_tag_with_backoff(path)
+    if not isinstance(reference, dict) or reference.get("ref") != ref:
+        raise ValueError(f"GitHub returned a different tag ref while checking the built commit for {tag}")
+    target = reference.get("object")
     for _ in range(8):
-        if target["type"] != "tag":
+        if not isinstance(target, dict) or target.get("type") != "tag":
             break
-        target = api(f"repos/{repository}/git/tags/{target['sha']}")["object"]
-    if target["type"] != "commit" or target["sha"] != revision:
+        sha = target.get("sha")
+        if not isinstance(sha, str) or not re.fullmatch(r"[a-f0-9]{40}|[a-f0-9]{64}", sha):
+            break
+        annotation = api(f"repos/{repository}/git/tags/{sha}")
+        target = annotation.get("object") if isinstance(annotation, dict) else None
+    if not isinstance(target, dict) or (target.get("type"), target.get("sha")) != ("commit", revision):
         raise ValueError(f"{tag} does not point at the built commit; nothing was published")
 
 
@@ -226,7 +258,7 @@ def publish(
     verified = api(f"repos/{repository}/releases/{release['id']}") if release else None
     if not verified or existing_assets(verified, artifacts):
         raise ValueError("Publication is incomplete; retry the same built artifacts")
-    exact_tag(repository, tag, revision)
+    exact_tag(repository, tag, revision, create=False)
     if prerelease and verified.get("draft") is not True:
         if verified.get("draft") is False and verified.get("prerelease") is True:
             return
@@ -356,6 +388,22 @@ def restore(repository: str, tag: str, name: str, destination: Path) -> dict:
     }
 
 
+def reconcile_published(repository: str, tag: str, revision: str) -> bool:
+    """Another serialized writer finished first. Use the original attested artifacts for PyPI."""
+    release = find_release(repository, tag)
+    if release is None or release.get("draft") is True:
+        return False
+    with tempfile.TemporaryDirectory() as work:
+        record = restore(repository, tag, tag.split("/v")[0], Path(work) / "original")
+        if record["revision"] != revision:
+            raise ValueError("Existing plugin tag belongs to another revision")
+        exact_tag(repository, tag, revision, create=False)
+        subprocess.run(
+            ["uv", "publish", "--check-url", "https://pypi.org/simple", *record["artifacts"]], check=True, timeout=600
+        )
+    return True
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--tag", required=True)
@@ -364,6 +412,7 @@ def main() -> None:
     parser.add_argument("--pypi", action="store_true")
     parser.add_argument("--make-latest", choices=("true", "false"))
     parser.add_argument("--prerelease", action="store_true")
+    parser.add_argument("--reconcile-published", action="store_true")
     parser.add_argument("--restore", action="store_true")
     parser.add_argument("--name")
     parser.add_argument("--notes-file", type=Path, help="Release body for a new draft (default: a fixed sentence)")
@@ -380,6 +429,11 @@ def main() -> None:
         return
     if not args.revision:
         parser.error("Publication requires the exact built revision")
+    if args.reconcile_published:
+        if not args.pypi or args.prerelease:
+            parser.error("Automatic reconciliation requires a public plugin release")
+        if reconcile_published(os.environ["GH_REPO"], args.tag, args.revision):
+            return
     files = sorted(path for path in args.directory.iterdir() if path.name != "release.json" and path.is_file())
     publish(
         os.environ["GH_REPO"],

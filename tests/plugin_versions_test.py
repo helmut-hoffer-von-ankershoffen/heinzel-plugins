@@ -99,6 +99,60 @@ def test_unreleased_lists_versions_without_a_tag(tmp_path, monkeypatch):
     assert versions.unreleased(tmp_path, {"heinzel-a/v0.1.0"}) == []
 
 
+def test_unreleased_skips_a_version_pypi_serves_already(tmp_path, monkeypatch):
+    repository(tmp_path, monkeypatch)
+    seen = []
+    assert versions.unreleased(tmp_path, set(), lambda name, version: seen.append((name, version)) or True) == []
+    tag = "heinzel-a/v0.1.0"
+    assert versions.unreleased(tmp_path, {tag}, lambda *_: False, with_tags=True) == [tag]
+    assert versions.unreleased(tmp_path, {tag}, lambda *_: True, with_tags=True) == []
+    assert seen == [("heinzel-a", "0.1.0")]
+    assert versions.unreleased(tmp_path, set(), with_tags=True) == ["heinzel-a/v0.1.0"]
+    assert versions.unreleased(tmp_path, set(), lambda name, version: False) == ["heinzel-a"]
+
+
+@pytest.mark.parametrize(
+    ("reply", "expected"),
+    [
+        (
+            {
+                "info": {"version": "0.1.0"},
+                "urls": [
+                    {"packagetype": "bdist_wheel", "filename": "heinzel_a-0.1.0-py3-none-any.whl"},
+                    {"packagetype": "sdist", "filename": "heinzel_a-0.1.0.tar.gz"},
+                ],
+            },
+            True,
+        ),
+        (
+            {
+                "info": {"version": "0.1.0"},
+                "urls": [{"packagetype": "bdist_wheel", "filename": "heinzel_a-0.1.0-py3-none-any.whl"}],
+            },
+            False,
+        ),
+        (
+            {"info": {"version": "0.1.0"}, "urls": [{"packagetype": "sdist", "filename": "heinzel_a-0.1.0.tar.gz"}]},
+            False,
+        ),
+        ({"info": {"version": "0.0.9"}}, False),
+        (OSError("offline"), False),  # unreadable is not published: the release refuses a duplicate upload itself
+    ],
+)
+def test_on_pypi_reads_the_exact_version(monkeypatch, reply, expected):
+    import io
+    import json
+
+    def urlopen(url, timeout):
+        assert url == "https://pypi.org/pypi/heinzel-a/0.1.0/json" and timeout == 20
+        if isinstance(reply, Exception):
+            raise reply
+        return io.BytesIO(json.dumps(reply).encode())
+
+    monkeypatch.setattr(versions.urllib.request, "urlopen", urlopen)
+    assert versions.on_pypi("heinzel-a", "0.1.0") is expected
+
+
 def test_a_revision_cannot_be_read_as_a_git_option():
     with pytest.raises(ValueError, match="plain commit"):
         versions.unjustified_bumps("--output=/tmp/x")

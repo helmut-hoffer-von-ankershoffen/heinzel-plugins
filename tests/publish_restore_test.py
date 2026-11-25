@@ -65,10 +65,11 @@ def test_other_failures_are_never_treated_as_a_missing_object(monkeypatch):
 
 
 def test_a_tag_that_resolves_to_a_tree_or_never_peels_is_refused(monkeypatch):
-    monkeypatch.setattr(publisher, "api", lambda *a, **k: {"object": {"type": "tree", "sha": REVISION}})
+    ref = "refs/tags/plugin/v1.0.0"
+    monkeypatch.setattr(publisher, "api", lambda *a, **k: {"ref": ref, "object": {"type": "tree", "sha": REVISION}})
     with pytest.raises(ValueError, match="built commit"):
         publisher.exact_tag(REPOSITORY, "plugin/v1.0.0", REVISION)
-    monkeypatch.setattr(publisher, "api", lambda *a, **k: {"object": {"type": "tag", "sha": "c" * 40}})
+    monkeypatch.setattr(publisher, "api", lambda *a, **k: {"ref": ref, "object": {"type": "tag", "sha": "c" * 40}})
     with pytest.raises(ValueError, match="built commit"):
         publisher.exact_tag(REPOSITORY, "plugin/v1.0.0", REVISION)
 
@@ -162,7 +163,7 @@ def test_artifacts_must_be_existing_regular_non_linked_files(tmp_path, monkeypat
 def test_a_published_but_incomplete_release_is_never_modified(tmp_path, monkeypatch):
     wheel = tmp_path / "a.whl"
     wheel.write_bytes(b"x")
-    monkeypatch.setattr(publisher, "exact_tag", lambda *a: None)
+    monkeypatch.setattr(publisher, "exact_tag", lambda *a, **kw: None)
     monkeypatch.setattr(publisher, "find_release", lambda *a: {"id": 7, "draft": False, "assets": []})
     monkeypatch.setattr(publisher.subprocess, "run", lambda *a, **k: pytest.fail("Immutable release was touched"))
     with pytest.raises(ValueError, match="incomplete; refusing to change immutable"):
@@ -173,7 +174,7 @@ def test_an_upload_that_does_not_show_up_is_reported_as_incomplete(tmp_path, mon
     wheel = tmp_path / "a.whl"
     wheel.write_bytes(b"x")
     draft = {"id": 7, "draft": True, "assets": []}
-    monkeypatch.setattr(publisher, "exact_tag", lambda *a: None)
+    monkeypatch.setattr(publisher, "exact_tag", lambda *a, **kw: None)
     monkeypatch.setattr(publisher, "find_release", lambda *a: draft)
     monkeypatch.setattr(publisher, "api", lambda *a, **k: draft)
     monkeypatch.setattr(publisher.subprocess, "run", lambda command, **k: completed(command))
@@ -197,7 +198,7 @@ def test_a_fresh_release_is_created_as_a_draft_pinned_to_the_built_commit(tmp_pa
             return {"id": 9, "draft": True, "assets": [{"name": wheel.name, "digest": digest}]}
         return {"id": 9, "draft": False}
 
-    monkeypatch.setattr(publisher, "exact_tag", lambda *a: None)
+    monkeypatch.setattr(publisher, "exact_tag", lambda *a, **kw: None)
     monkeypatch.setattr(publisher, "find_release", lambda *a: None)
     monkeypatch.setattr(publisher, "api", api)
     monkeypatch.setattr(publisher.subprocess, "run", lambda command, **k: completed(command))
