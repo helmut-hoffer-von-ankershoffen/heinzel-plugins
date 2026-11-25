@@ -110,6 +110,8 @@ def _confidentiality_module():
     """The repository's confidential-terms checker (scripts/check_confidentiality.py), when this is a checkout."""
     script = Path(__file__).resolve().parents[2] / "scripts/check_confidentiality.py"
     if not script.is_file():
+        script = Path(__file__).with_name("_confidentiality.py")
+    if not script.is_file():
         return None
     spec = importlib.util.spec_from_file_location("_hz_confidentiality", script)
     if spec is None or spec.loader is None:

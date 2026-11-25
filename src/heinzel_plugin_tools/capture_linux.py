@@ -90,9 +90,7 @@ def run(args) -> dict:
         package = Path(__file__).resolve().parent
         shutil.copytree(package, runtime / "src/heinzel_plugin_tools", ignore=shutil.ignore_patterns("__pycache__"))
         (runtime / "scripts").mkdir()
-        shutil.copyfile(
-            package.parents[1] / "scripts/check_confidentiality.py", runtime / "scripts/check_confidentiality.py"
-        )
+        shutil.copyfile(Path(_confidentiality_module().__file__), runtime / "scripts/check_confidentiality.py")
         (work / "terms").write_text(terms)
         build = work / "image"
         build.mkdir()

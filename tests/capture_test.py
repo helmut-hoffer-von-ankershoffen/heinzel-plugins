@@ -860,3 +860,18 @@ def test_imported_linux_draft_refuses_destination_links_before_writing_any_scene
         capture_linux.copy_draft(source, owner, plan)
     assert outside.read_text() == "unchanged"
     assert not (target / f"{plan['scenes'][0]['name']}.png").exists()
+
+
+def test_installed_tooling_keeps_the_exact_external_terms_scanner(tmp_path, monkeypatch):
+    package = tmp_path / "installed/heinzel_plugin_tools"
+    package.mkdir(parents=True)
+    original = Path(privacy.__file__).resolve().parents[2] / "scripts/check_confidentiality.py"
+    bundled = package / "_confidentiality.py"
+    bundled.write_bytes(original.read_bytes())
+    monkeypatch.setattr(privacy, "__file__", str(package / "privacy.py"))
+    monkeypatch.setenv("CONFIDENTIAL_TERMS", "fictional-secret-marker")
+    scanner = privacy._confidentiality_module()
+    assert Path(scanner.__file__) == bundled
+    assert scanner.load_terms() == ["fictional-secret-marker"]
+    with pytest.raises(privacy.CaptureError):
+        capture.scan_text("FICTIONAL-SECRET-MARKER")

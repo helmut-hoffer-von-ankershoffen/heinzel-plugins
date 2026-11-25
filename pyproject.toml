@@ -21,6 +21,9 @@ build-backend = "hatchling.build"
 [tool.hatch.build.targets.wheel]
 packages = ["src/heinzel_plugin_tools"]
 
+[tool.hatch.build.targets.wheel.force-include]
+"scripts/check_confidentiality.py" = "heinzel_plugin_tools/_confidentiality.py"
+
 [tool.hatch.build.targets.sdist]
 include = ["src/heinzel_plugin_tools", "pyproject.toml", "README.md", "LICENSE"]
 
