@@ -441,10 +441,20 @@ def test_overlapping_automatic_publication_reconciles_original_bytes(monkeypatch
         publisher, "restore", lambda *args: {"revision": REVISION, "artifacts": ["original.whl", "original.tar.gz"]}
     )
     monkeypatch.setattr(subprocess, "run", lambda argv, **kwargs: uploads.append(argv))
+
+    def reread(repo, selected, revision, *, create):
+        assert (repo, selected, revision, create) == (REPOSITORY, tag, REVISION, False)
+        if current.get("moved"):
+            raise ValueError("tag moved during restore")
+
+    monkeypatch.setattr(publisher, "exact_tag", reread)
     assert not publisher.reconcile_published(REPOSITORY, tag, REVISION)
     current["release"] = {"draft": False}
     assert publisher.reconcile_published(REPOSITORY, tag, REVISION)
     assert uploads == [["uv", "publish", "--check-url", "https://pypi.org/simple", "original.whl", "original.tar.gz"]]
     with pytest.raises(ValueError, match="another revision"):
         publisher.reconcile_published(REPOSITORY, tag, "b" * 40)
+    current["moved"] = True
+    with pytest.raises(ValueError, match="tag moved during restore"):
+        publisher.reconcile_published(REPOSITORY, tag, REVISION)
     assert len(uploads) == 1

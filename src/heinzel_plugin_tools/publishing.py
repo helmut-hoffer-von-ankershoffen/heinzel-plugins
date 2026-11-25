@@ -397,6 +397,7 @@ def reconcile_published(repository: str, tag: str, revision: str) -> bool:
         record = restore(repository, tag, tag.split("/v")[0], Path(work) / "original")
         if record["revision"] != revision:
             raise ValueError("Existing plugin tag belongs to another revision")
+        exact_tag(repository, tag, revision, create=False)
         subprocess.run(
             ["uv", "publish", "--check-url", "https://pypi.org/simple", *record["artifacts"]], check=True, timeout=600
         )
