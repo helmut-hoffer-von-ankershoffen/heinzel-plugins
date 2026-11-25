@@ -54,14 +54,15 @@ def test_missing_tag_is_created_at_exact_build_revision(monkeypatch):
     assert calls[1][1] == {"ref": "refs/tags/plugin/v1.0.0", "sha": REVISION}
 
 
-def test_null_initial_tag_response_refuses_without_writing_or_waiting(monkeypatch):
+@pytest.mark.parametrize(("body", "message"), [("null", "expected a JSON object"), ("[]", "different tag ref")])
+def test_malformed_initial_tag_response_refuses_without_writing_or_waiting(monkeypatch, body, message):
     def execute(command, **_):
         assert command == ["gh", "api", f"repos/{REPOSITORY}/git/ref/tags/app-v0.9.55"]
-        return subprocess.CompletedProcess(command, 0, "null", "")
+        return subprocess.CompletedProcess(command, 0, body, "")
 
     monkeypatch.setattr(publisher.subprocess, "run", execute)
     monkeypatch.setattr(publisher.time, "sleep", lambda _: pytest.fail("Malformed response is not retryable"))
-    with pytest.raises(ValueError, match="expected a JSON object"):
+    with pytest.raises(ValueError, match=message):
         publisher.exact_tag(REPOSITORY, "app-v0.9.55", REVISION)
 
 
@@ -74,9 +75,11 @@ def test_null_initial_tag_response_refuses_without_writing_or_waiting(monkeypatc
         ("exact", ["missing"] * 5, [], "HTTP 404"),
         ("exact", ["forbidden"], [], "HTTP 403"),
         ("exact", ["null"], [], "expected a JSON object"),
+        ("exact", ["array"], [], "different tag ref"),
         ("exact", ["wrong-ref"], [], "different tag ref"),
         ("exact", ["exact"], ["missing"] * 5, "HTTP 404"),
         ("exact", ["exact"], ["null"], "expected a JSON object"),
+        ("exact", ["exact"], ["array"], "different tag ref"),
         ("exact", ["exact"], ["wrong-ref"], "different tag ref"),
         ("exact", ["exact"], ["wrong-commit"], "built commit"),
     ],
@@ -111,7 +114,7 @@ def test_app_publication_requires_bounded_exact_tag_readbacks(tmp_path, monkeypa
             if mode in ("missing", "forbidden"):
                 status = "Not Found (HTTP 404)" if mode == "missing" else "Forbidden (HTTP 403)"
                 return subprocess.CompletedProcess(command, 1, "", f"gh: {status}")
-            answer = None if mode == "null" else reference(mode)
+            answer = {"null": None, "array": []}.get(mode, reference(mode))
         elif endpoint == f"{root}/git/refs":
             assert payload == {"ref": f"refs/tags/{tag}", "sha": REVISION}
             writes.append("create-tag")

@@ -19,6 +19,7 @@ import zipfile
 from collections.abc import Callable, Collection
 from email.parser import Parser
 from pathlib import Path
+from typing import Any
 from urllib.error import HTTPError
 from urllib.parse import quote, urlsplit
 from urllib.request import urlopen
@@ -74,7 +75,8 @@ def fetch_bytes(
         attempt += 1
 
 
-def api(path: str, *, data: dict | None = None, missing: bool = False, method: str = "POST") -> dict | None:
+def api(path: str, *, data: dict | None = None, missing: bool = False, method: str = "POST") -> Any:
+    """Decode GitHub JSON objects or collections. Only an explicit 404 may return None."""
     command = ["gh", "api", path]
     if data is not None:
         command += ["--method", method, "--input", "-"]
@@ -86,8 +88,8 @@ def api(path: str, *, data: dict | None = None, missing: bool = False, method: s
             return None
         raise ValueError(f"GitHub request failed for {path}: {result.stderr.strip()}")
     response = json.loads(result.stdout)
-    if not isinstance(response, dict):
-        raise ValueError(f"Invalid GitHub response for {path}: expected a JSON object")
+    if not isinstance(response, (dict, list)):
+        raise ValueError(f"Invalid GitHub response for {path}: expected a JSON object or array")
     return response
 
 
