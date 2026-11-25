@@ -797,6 +797,7 @@ def test_canonical_capture_requires_external_terms(monkeypatch):
 def test_canonical_linux_runs_exact_image_without_host_state_and_keeps_all_text(
     owner, monkeypatch, failed, private_text
 ):
+    from heinzel_plugin_tools import capture as capture_module
     from heinzel_plugin_tools import capture_linux
 
     recorded(owner)
@@ -832,10 +833,18 @@ def test_canonical_linux_runs_exact_image_without_host_state_and_keeps_all_text(
         assert not (cwd / "project/.venv").exists()
         assert not (cwd / "project/.env").exists()
         assert (cwd / "core" / wheel.name).read_bytes() == wheel.read_bytes()
+        folder = draft_of(cwd / "project")
         # An untrusted renderer must never arrange host-side Git execution.
         config = cwd / "project/.git/config"
-        config.write_text(config.read_text() + "\n[core]\nfsmonitor = /untrusted-worker-command\n")
-        folder = draft_of(cwd / "project")
+        config.parent.mkdir()
+        config.write_text("[core]\nfsmonitor = /untrusted-worker-command\n")
+        original_inventory = capture_module.candidate_files
+
+        def inventory(path):
+            assert path != cwd / "project", "Host discovery must not read worker-controlled Git metadata"
+            return original_inventory(path)
+
+        monkeypatch.setattr(capture_module, "candidate_files", inventory)
         (folder / "index.html").write_text("Fictional contact sheet")
         if private_text:
             (folder / (first_scene + ".txt")).write_text("fictional-capture-canary-8329")
@@ -1025,8 +1034,6 @@ def test_successful_publication_never_publishes_private_scan_evidence(owner):
 
 
 def test_canonical_snapshot_preserves_declared_inputs_and_ignores_build_output(owner, tmp_path):
-    from heinzel_plugin_tools import capture_linux
-
     capture.write_default_plan(owner)
     view = owner / "src/heinzel_harbor/views"
     view.mkdir()
@@ -1039,11 +1046,10 @@ def test_canonical_snapshot_preserves_declared_inputs_and_ignores_build_output(o
     before = capture.input_digest(owner, plan)
     project = tmp_path / "copy"
     shutil.copytree(owner, project, ignore=shutil.ignore_patterns(".git", "copy"))
-    capture_linux.index_snapshot(owner, project)
-    assert not (project / ".git/hooks").exists()
-    assert not (project / ".git/refs/heads/main").exists()
+    source_files = capture.candidate_files(owner)
+    assert not (project / ".git").exists()
     (project / "src/heinzel_harbor/views/generated.js").write_text("built asset")
-    assert capture.input_digest(project, plan) == before
-    assert "src/heinzel_harbor/views/[original].js" in capture.candidate_files(project)
+    assert capture.input_digest(project, plan, source_files=source_files) == before
+    assert "src/heinzel_harbor/views/[original].js" in source_files
     (project / "src/heinzel_harbor/views/[original].js").write_text("changed source")
-    assert capture.input_digest(project, plan) != before
+    assert capture.input_digest(project, plan, source_files=source_files) != before

@@ -45,51 +45,6 @@ def command(argv: list[str], *, cwd: Path, capture: bool = False, capture_stderr
         ) from error
 
 
-def index_snapshot(root: Path, project: Path) -> None:
-    """Preserve source discovery without copying host Git history, configuration or hooks.
-
-    Builds may create ignored UI assets. A fresh index retains exactly the original
-    candidates, including tracked ignored assets, while excluding new build output.
-    """
-    from heinzel_plugin_tools import capture
-
-    names = [
-        name for name in capture.candidate_files(root) if (project / name).is_file() or (project / name).is_symlink()
-    ]
-    env = {key: value for key, value in os.environ.items() if not key.startswith("GIT_")}
-    env.update(GIT_CONFIG_NOSYSTEM="1", GIT_CONFIG_GLOBAL=os.devnull)
-    try:
-        metadata = project / ".git"
-        if metadata.is_symlink() or metadata.is_file():
-            raise CaptureError("The isolated source inventory is not a directory")
-        if metadata.exists():
-            shutil.rmtree(metadata)
-        subprocess.run(
-            ["git", "init", "--quiet", "--template=", str(project)], env=env, check=True, capture_output=True
-        )
-        (project / ".git/info").mkdir(exist_ok=True)
-        (project / ".git/info/exclude").write_text("*\n")
-        if names:
-            subprocess.run(
-                [
-                    "git",
-                    "--literal-pathspecs",
-                    "-C",
-                    str(project),
-                    "add",
-                    "--force",
-                    "--pathspec-from-file=-",
-                    "--pathspec-file-nul",
-                ],
-                input=("\0".join(names) + "\0").encode(),
-                env=env,
-                check=True,
-                capture_output=True,
-            )
-    except (OSError, subprocess.CalledProcessError) as error:
-        raise CaptureError("Cannot preserve the isolated screenshot source inventory") from error
-
-
 def copy_draft(source: Path, root: Path, plan: dict) -> None:
     """Import only bounded, validated scene artifacts, never arbitrary container paths."""
     from heinzel_plugin_tools import capture
@@ -126,7 +81,8 @@ def run(args) -> dict:
     render_check = getattr(args, "render_check", False)
     if not render_check:
         configured_terms()  # Only the trusted host applies private policy; rendering receives none.
-    original_inputs = capture.input_digest(root, plan)
+    source_files = capture.candidate_files(root)
+    original_inputs = capture.input_digest(root, plan, source_files=source_files)
     if args.verify and not render_check:
         capture.check_capture(root)
     with tempfile.TemporaryDirectory(prefix="hz-gallery-linux-") as scratch:
@@ -152,7 +108,7 @@ def run(args) -> dict:
                 ".pypirc",
             ),
         )
-        index_snapshot(root, project)
+        (work / "source-files.json").write_text(json.dumps(source_files))
         for directory in ("home", "cache", "python", "bootstrap"):
             (work / directory).mkdir()
         runtime = work / "runtime"
@@ -175,6 +131,8 @@ def run(args) -> dict:
             "--project",
             "/capture/project",
             "--container-worker",
+            "--source-inventory",
+            "/capture/source-files.json",
             "--json",
             "--verify" if args.verify else "--draft",
         ]
@@ -246,9 +204,8 @@ def run(args) -> dict:
             raise CaptureError("Canonical Linux capture returned no result; no gallery was changed") from error
         if capture.input_digest(root, capture.read_plan(root)) != original_inputs:
             raise CaptureError("Screenshot inputs changed during canonical capture; capture again")
-        # The worker can change its private Git config. Never let host Git read it.
-        index_snapshot(root, project)
-        if capture.input_digest(project, plan) != original_inputs:
+        # Never execute host Git against worker-writable metadata.
+        if capture.input_digest(project, plan, source_files=source_files) != original_inputs:
             raise CaptureError("The isolated source snapshot differs from the owning screenshot inputs")
         if render_check:
             if result.returncode or report.get("ok") is not True or report.get("verified") is not True:

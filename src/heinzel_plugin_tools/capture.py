@@ -351,14 +351,14 @@ def candidate_files(root: Path) -> list[str]:
     return sorted(found)
 
 
-def ui_inputs(root: Path, plan: dict) -> list[str]:
+def ui_inputs(root: Path, plan: dict, *, source_files: list[str] | None = None) -> list[str]:
     """What a capture renders (ADR 0003, as narrowed for deterministic capture): the definition, its fixture
     bootstrap, the plugin's theme declarations and its web, static and view assets. Python logic, metadata, locks,
     tests and documentation are no capture input, so editing them never makes the gallery stale."""
     selected = set()  # the definition itself enters the digest as its parsed scenes, in `input_digest`
     if plan.get("bootstrap"):
         selected.add(Path(plan["bootstrap"]).as_posix())
-    for name in candidate_files(root):
+    for name in source_files if source_files is not None else candidate_files(root):
         parts = Path(name).parts
         if len(parts) < 2 or parts[0] not in UI_FOLDERS or set(parts) & (IGNORED | NOT_RENDERED):
             continue
@@ -370,10 +370,10 @@ def ui_inputs(root: Path, plan: dict) -> list[str]:
     return sorted(selected)
 
 
-def input_digest(root: Path, plan: dict) -> str:
+def input_digest(root: Path, plan: dict, *, source_files: list[str] | None = None) -> str:
     """Identify exactly the UI inputs of a gallery (`ui_inputs`), each by path and content."""
     digest = hashlib.sha256(json.dumps(plan, sort_keys=True, separators=(",", ":")).encode())
-    for name in ui_inputs(root, plan):
+    for name in ui_inputs(root, plan, source_files=source_files):
         path = root / name
         if not path.is_file() and not path.is_symlink():
             continue
@@ -400,9 +400,9 @@ def unrendered_version(root: Path, core_version: object) -> None:
             )
 
 
-def inputs_current(root: Path, plan: dict, recorded: object) -> bool:
+def inputs_current(root: Path, plan: dict, recorded: object, *, source_files: list[str] | None = None) -> bool:
     """The recorded digest is the digest of today's UI inputs."""
-    return isinstance(recorded, str) and recorded == input_digest(root, plan)
+    return isinstance(recorded, str) and recorded == input_digest(root, plan, source_files=source_files)
 
 
 def regenerate_command(root: Path) -> str:
@@ -421,7 +421,7 @@ def expected_shots(plan: dict) -> list[dict]:
 MANIFEST_KEYS = {"format", "plugin", "core_version", "inputs_sha256", "images", "transcripts"}
 
 
-def check_capture(root: Path) -> dict:
+def check_capture(root: Path, *, source_files: list[str] | None = None) -> dict:
     """Check freshness and complete gallery assets offline, without installing or running a plugin or an agent."""
     command = regenerate_command(root)
     name = project_data(root)["project"]["name"]
@@ -438,7 +438,7 @@ def check_capture(root: Path) -> dict:
         raise StaleGallery(f"{name}: the gallery manifest predates deterministic capture. Run {command}", command)
     if manifest.get("plugin") != name:
         raise CaptureError(f"{MANIFEST} names another plugin. Run {command}")
-    if not inputs_current(root, plan, manifest.get("inputs_sha256")):
+    if not inputs_current(root, plan, manifest.get("inputs_sha256"), source_files=source_files):
         raise StaleGallery(
             f"{name}: screenshots are stale (the definition, its fixture or a UI asset changed). Run {command} "
             "and commit the regenerated gallery",
@@ -492,7 +492,7 @@ def check_capture(root: Path) -> dict:
         "manifest": str(root / MANIFEST),
         "plan": str(root / PLAN),
         "fresh": True,
-        "inputs": ui_inputs(root, plan),
+        "inputs": ui_inputs(root, plan, source_files=source_files),
     }
 
 
@@ -979,7 +979,13 @@ def installed_artifact(root: Path, interpreter: Path, *, owning: bool) -> Iterat
 
 
 def capture(
-    root: Path, *, core: str | None, headed: bool, draft_only: bool = False, prepared_python: Path | None = None
+    root: Path,
+    *,
+    core: str | None,
+    headed: bool,
+    draft_only: bool = False,
+    prepared_python: Path | None = None,
+    source_files: list[str] | None = None,
 ) -> dict:
     """Prepare the owning artifact, record every scene, and publish a complete gallery only after success."""
     from playwright.sync_api import Error, sync_playwright
@@ -1269,7 +1275,7 @@ def capture(
             "format": 1,
             "plugin": name,
             "core_version": version,
-            "inputs_sha256": input_digest(root, plan),
+            "inputs_sha256": input_digest(root, plan, source_files=source_files),
             "scan_text": {
                 f"{scene['name']}.scan.txt": hashlib.sha256(
                     (folder / f"{scene['name']}.scan.txt").read_bytes()
@@ -1297,7 +1303,13 @@ def capture(
 
 
 def verify(
-    root: Path, *, core: str | None, headed: bool, prepared_python: Path | None = None, strict_images: bool = False
+    root: Path,
+    *,
+    core: str | None,
+    headed: bool,
+    prepared_python: Path | None = None,
+    strict_images: bool = False,
+    source_files: list[str] | None = None,
 ) -> dict:
     """CI's re-capture: capture privately again and compare with the committed gallery, scene by scene.
 
@@ -1308,9 +1320,9 @@ def verify(
     since antialiasing differs between runs and fonts between operating systems.
     """
     root = root.resolve()
-    check_capture(root)
+    check_capture(root, source_files=source_files)
     command = regenerate_command(root)
-    capture(root, core=core, headed=headed, draft_only=True, prepared_python=prepared_python)
+    capture(root, core=core, headed=headed, draft_only=True, prepared_python=prepared_python, source_files=source_files)
     plan = read_plan(root)
     folder = safe_path(root, DRAFT)
     manifest = json.loads(safe_path(root, MANIFEST).read_text())
@@ -1359,6 +1371,7 @@ def main() -> int:
     parser.add_argument("--strict-images", action="store_true")
     parser.add_argument("--render-check", action="store_true")
     parser.add_argument("--container-worker", action="store_true", help=argparse.SUPPRESS)
+    parser.add_argument("--source-inventory", type=Path, help=argparse.SUPPRESS)
     args = parser.parse_args()
     try:
         if args.render_check:
@@ -1367,6 +1380,20 @@ def main() -> int:
             args.verify = True
         if args.container_worker and (sys.platform != "linux" or not Path("/.dockerenv").is_file()):
             raise CaptureError("The canonical worker must run inside its Linux container")
+        source_files = None
+        if args.source_inventory:
+            if not args.container_worker or not (args.draft or args.verify):
+                raise CaptureError("Source inventories belong only to isolated worker drafts and verification")
+            source_files = json.loads(regular_bytes(args.source_inventory, 1024 * 1024))
+            if not isinstance(source_files, list) or any(
+                not isinstance(name, str)
+                or not name
+                or Path(name).is_absolute()
+                or ".." in Path(name).parts
+                or Path(name).as_posix() != name
+                for name in source_files
+            ):
+                raise CaptureError("Invalid isolated source inventory")
         if not args.container_worker and args.prepared_python is None:
             from heinzel_plugin_tools.capture_linux import run
 
@@ -1379,6 +1406,7 @@ def main() -> int:
                     headed=args.headed,
                     prepared_python=args.prepared_python,
                     strict_images=args.strict_images,
+                    source_files=source_files,
                 )
                 if args.verify
                 else capture(
@@ -1387,6 +1415,7 @@ def main() -> int:
                     headed=args.headed,
                     draft_only=args.draft,
                     prepared_python=args.prepared_python,
+                    source_files=source_files,
                 )
             )
         if args.json:
