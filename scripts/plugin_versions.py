@@ -168,7 +168,21 @@ def on_pypi(name: str, version: str) -> bool:
     url = PYPI.format(name=name, version=version)
     try:
         with urllib.request.urlopen(url, timeout=20) as reply:  # noqa: S310 - a fixed https URL
-            return json.load(reply).get("info", {}).get("version") == version
+            data = json.load(reply)
+            prefix = f"{name.replace('-', '_')}-{version}"
+            files = data.get("urls", [])
+            return (
+                data.get("info", {}).get("version") == version
+                and any(
+                    row.get("packagetype") == "bdist_wheel"
+                    and row.get("filename", "").startswith(prefix + "-")
+                    and row["filename"].endswith(".whl")
+                    for row in files
+                )
+                and any(
+                    row.get("packagetype") == "sdist" and row.get("filename") == prefix + ".tar.gz" for row in files
+                )
+            )
     except (OSError, ValueError, urllib.error.URLError):
         return False
 

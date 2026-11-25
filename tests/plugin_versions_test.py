@@ -114,7 +114,27 @@ def test_unreleased_skips_a_version_pypi_serves_already(tmp_path, monkeypatch):
 @pytest.mark.parametrize(
     ("reply", "expected"),
     [
-        ({"info": {"version": "0.1.0"}}, True),
+        (
+            {
+                "info": {"version": "0.1.0"},
+                "urls": [
+                    {"packagetype": "bdist_wheel", "filename": "heinzel_a-0.1.0-py3-none-any.whl"},
+                    {"packagetype": "sdist", "filename": "heinzel_a-0.1.0.tar.gz"},
+                ],
+            },
+            True,
+        ),
+        (
+            {
+                "info": {"version": "0.1.0"},
+                "urls": [{"packagetype": "bdist_wheel", "filename": "heinzel_a-0.1.0-py3-none-any.whl"}],
+            },
+            False,
+        ),
+        (
+            {"info": {"version": "0.1.0"}, "urls": [{"packagetype": "sdist", "filename": "heinzel_a-0.1.0.tar.gz"}]},
+            False,
+        ),
         ({"info": {"version": "0.0.9"}}, False),
         (OSError("offline"), False),  # unreadable is not published: the release refuses a duplicate upload itself
     ],
