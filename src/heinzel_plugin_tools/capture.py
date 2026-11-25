@@ -43,6 +43,7 @@ from heinzel_plugin_tools.privacy import (
     DRAFT,
     SOURCE_STORY,
     CaptureError,
+    StaleGallery,
     atomic_text,
     bundle_digest,
     canonical_text,
@@ -493,14 +494,14 @@ def check_capture(root: Path) -> dict:
     """Check freshness and complete gallery assets offline, without installing or running a plugin."""
     manifest_path = safe_path(root, MANIFEST)
     if not manifest_path.is_file():
-        raise CaptureError(
+        raise StaleGallery(
             "No capture manifest yet. Run make screenshots (or hz-plugin screenshots <name>), then review it"
         )
     plan = read_plan(root)
     manifest_bytes = manifest_path.read_bytes()
     manifest = json.loads(manifest_bytes)
     if manifest.get("format") != 1 or not inputs_current(root, plan, manifest.get("inputs_sha256")):
-        raise CaptureError(
+        raise StaleGallery(
             "Screenshots are stale. Run make screenshots, review the preview, and commit the updated gallery"
         )
     unrendered_version(root, manifest.get("core_version"))
