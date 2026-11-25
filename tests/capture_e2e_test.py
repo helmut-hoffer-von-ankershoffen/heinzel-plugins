@@ -134,13 +134,20 @@ def test_capture_freshness_and_recovery_for_a_new_plugin(tmp_path):
     broken["scenes"][0]["timeout_ms"] = 1000
     broken["scenes"][0]["steps"] = [{"action": "click", "role": "button", "name": "A missing fixture button"}]
     planning.write_definition(owner, broken)
+    published_before_failure = {
+        path: path.read_bytes()
+        for path in [*(owner / capture.OUTPUT).iterdir(), owner / "README.md", owner / "pyproject.toml"]
+    }
     failed = command("screenshots", "--json")
     assert failed.returncode == 1
     error = json.loads(failed.stdout)
     assert not error["ok"]
     assert "Scene today failed" in error["error"]
     assert "#token=" not in error["error"]
-    assert (owner / ".preview/screenshots/today-failure.png").is_file()
+    assert str(owner) not in error["error"]
+    # Canonical rendering discards unscanned failure media with the private worker.
+    assert not (owner / ".preview/screenshots/today-failure.png").exists()
+    assert all(path.read_bytes() == data for path, data in published_before_failure.items())
     assert all((owner / path).read_bytes() == content for path, content in images.items())
     planning.write_definition(owner, plan)
     recovered = command("screenshots", "--json")

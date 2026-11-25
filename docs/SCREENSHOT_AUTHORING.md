@@ -169,7 +169,8 @@ terms and scan on the trusted host before publication. Advanced `--python` diagn
 
 The toolkit's dedicated CI journey creates a new unknown plugin, captures real Today and terminal output against an
 installed released SDK, publishes, detects staleness, fails a scene, and recovers. It also proves authentication
-presentation is removed before both success and failure image saves. Ordinary offline checks neither import a
+presentation is removed before both success and failure image saves. The canonical journey requires a real
+scene failure, a safe error and unchanged published bytes; unscanned failure images stay inside the discarded worker. Ordinary offline checks neither import a
 plugin nor start a browser.
 
 ## Fictional owning-interpreter paths
