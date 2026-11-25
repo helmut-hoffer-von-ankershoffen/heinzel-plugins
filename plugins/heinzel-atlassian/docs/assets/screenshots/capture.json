@@ -2,16 +2,16 @@
   "format": 2,
   "plugin": "heinzel-atlassian",
   "core_version": "0.9.55",
-  "inputs_sha256": "d5c030c04d2633e79ae266a010dab21e925ef9e5b12cc9b8e28ea77e45e76130",
+  "inputs_sha256": "38c27b84c80e9a88d742272baf881c31939d050c1abedc906e5a0a65607f6062",
   "images": {
-    "docs/assets/screenshots/review-inventory.png": "414c3e8fca8f46060416e03e166e93713639c680979b39a92d4f60a624bd7a2c",
-    "docs/assets/screenshots/workflow-context.png": "87e9795dca33ffbec34d01a12e490244cadb2b3ca2656d41295fb2c3b062b199",
-    "docs/assets/screenshots/issues-json.png": "530fb20dd9c11947fa7ca48aae30ba0d8435cfceda0e0856252d634d05c5c2a0",
-    "docs/assets/screenshots/confluence-cli.png": "6ee48d63544e8aef45de102226a6af51904e5175304b473b65e49b1e6abef622"
+    "docs/assets/screenshots/review-inventory.png": "0ba6d8eed21add038ef94f0225eb313cd848f5839cbd00fb7404d41b0794f0d8",
+    "docs/assets/screenshots/workflow-context.png": "c87dd9bce178036fe4f57c4441509c13973f4d96e5d9389482f51af81e6fb9b6",
+    "docs/assets/screenshots/issues-json.png": "3d382450dbdfa292bef30950879d86395ada9ac612462d3838e63f2c15eb2d19",
+    "docs/assets/screenshots/confluence-cli.png": "700df0383f176cc32cbc6a7a75a61127115099cfa34109ea8c130ee076ea8d62"
   },
   "transcripts": {
-    "review-inventory.txt": "b65d03cca4507d84c00e341df6fa2f3501d06db035f945499e85a4993f39b229",
-    "workflow-context.txt": "599a47a013b65d10ab97f65479b8a16082bea53495c5ae85cdc0a261fdc324f2",
+    "review-inventory.txt": "a2da4f4ed1fc1324d4934ae9b0e6213b5638a358d4afdc689227c14d45ecfacb",
+    "workflow-context.txt": "6ee8ca2142083b5e55297e36f7a6712bd464a35a84390aefe2509fca97347f76",
     "issues-json.txt": "aac6434c0d1d1dece3ee23798229598f722dbee48a9bc4a854dfc3d6fb532cdc",
     "confluence-cli.txt": "dbac0428b2123fd6cfb248be30010051986995ee83bfa9e33b4b1a272541b710"
   }

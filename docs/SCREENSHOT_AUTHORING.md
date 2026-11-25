@@ -155,11 +155,13 @@ In a Heinzel worktree `sm check` regenerates a stale gallery and `sm ship` takes
 The narrow local digest cannot see displayed text that comes from plugin Python, metadata or Core. CI therefore
 re-captures the gallery of every plugin a pull request changes against its newest compatible released Core
 (`make screenshots-render-check NAME=<plugin>`) and fails when any scene renders different text than its committed
-transcript, naming `make screenshots NAME=<plugin>`. The job reports its result while the refreshed galleries are
-being verified on hosted Linux. Image differences are listed:
-two captures differ in antialiasing and cursor pixels even on one machine, and fonts differ between operating
-systems (`--strict-images` makes them gate). Clock readings (hh:mm) are not compared, since fixtures may anchor
-their data on the real time; set `browser_time` to fix the browser's clock.
+transcript. The selected gallery job is required by CI OK, including for fork pull requests. It returns only a
+render result and scene count; it withholds intermediate output and artifacts. To diagnose a failed comparison,
+run `make screenshots-verify NAME=<plugin>` locally with configured private terms, then use
+`make screenshots NAME=<plugin>` to regenerate after fixing the cause. The local verification reports image
+differences: two captures can differ in antialiasing and cursor pixels even on one machine, and fonts differ
+between operating systems (`--strict-images` makes them gate). Clock readings (hh:mm) are not compared, since
+fixtures may anchor their data on the real time; set `browser_time` to fix the browser's clock.
 
 The zero-secret CI render check performs the public-pattern checks and the real rendering comparison; it does
 not approve confidential terms or publish images. Full local capture and verification require configured private
@@ -206,6 +208,11 @@ run the same pinned Playwright Linux/amd64 container on macOS and Linux CI. Dock
 The first call downloads the public image; subsequent calls reuse the downloaded image. `OPEN=1` opens the
 resulting local contact sheet after capture. `make screenshots-check NAME=heinzel-resource` remains an
 inexpensive portable freshness check and does not start Docker.
+
+The host caches the exact public Linux `uv` bootstrap wheel in `~/.cache/heinzel-plugin-tools/bootstrap`,
+checking its SHA-256 before every use. Only verified wheel bytes are copied into each disposable directory;
+the worker installs them without an index and never mounts or writes the host cache. A corrupt cached wheel
+fails before rendering; remove that file to permit a fresh authenticated download.
 
 The source is copied into a disposable directory without development environments, Node modules or host Git
 metadata. A frozen list of the original source files preserves discovery across generated build output. The worker

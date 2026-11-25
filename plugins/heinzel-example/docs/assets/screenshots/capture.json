@@ -4,18 +4,18 @@
   "core_version": "0.9.55",
   "inputs_sha256": "e8e7c39b6249b31375e195e2c07aa555cbf75846c7db2832ae379a99e882b11b",
   "images": {
-    "docs/assets/screenshots/widget-and-status.png": "9d393cddbceaa32e3324cbce83e19259c983f6768e341c2412ea47a9a1a79cf5",
-    "docs/assets/screenshots/inspector.png": "d49eb50d0c2a171a6580327b614144c60ca040d9a3b326949e97705736c367a4",
-    "docs/assets/screenshots/greeting-terminal.png": "02143feb88a053a124545f9d6642fc9dc457a91b66e3c687ef1eb20272f3a4c3",
-    "docs/assets/screenshots/plugin-notice.png": "b84ebc1cf124af0075fd807dda4fd9f88fbcfee159edad5877cfa45816a00e4e",
-    "docs/assets/screenshots/greeting-cli.png": "375b8962cc5c7c30ab9c63248ea2ac468f325afc3bc53932dd70c9c5da5478fd",
-    "docs/assets/screenshots/sample-json.png": "fcebdd36aba06edc9113cb2009094d20c07f83342ffec053e78d5e47d715e1f5"
+    "docs/assets/screenshots/widget-and-status.png": "21066546a8e8d2ee101ef2948cf7a355b378350a4367520a40a27f2753762bd5",
+    "docs/assets/screenshots/inspector.png": "84b87af246828f8a55dc0736f9ee52a8b56d535a57acb4d0af451cb16e72ae47",
+    "docs/assets/screenshots/greeting-terminal.png": "ee212ce1a4955152d4a918334b81fb553e381d3cf45fa2f8bd370985b922b14f",
+    "docs/assets/screenshots/plugin-notice.png": "00116e85487f93b056061ef365f4d64784165bcda4b03d4d5dc17cfa9431e74c",
+    "docs/assets/screenshots/greeting-cli.png": "7cbd9405866f3b42ce4b4593d550184126160e9a588f7fa3db9f505f5b7e782a",
+    "docs/assets/screenshots/sample-json.png": "4f95e6238b30fef19a0095998b806663537e8826a61fe20192e8c383c172aa84"
   },
   "transcripts": {
-    "widget-and-status.txt": "8da61bee8ea8c854156c2ed0c5cbbc986c89333fc35d1a8e013dc5997351bbd3",
-    "inspector.txt": "4a026743103f745ecc21b832561c14f0ffb980170af13bc645d111c8902c0ea8",
-    "greeting-terminal.txt": "c5b456183ff10f6cf8358ec32ea2ccdfa29437763f66bfb92d4f5cb792c8e8c2",
-    "plugin-notice.txt": "1a41ec2fa92d7e747fe57ff4dc8bca06ab1c153df5ffc1e09a8c8b5402ed4e4b",
+    "widget-and-status.txt": "c6163836eaaec475b25983cbef97acd30bd405b069ae6a137ae07e0f94ca1319",
+    "inspector.txt": "61c5978b7ebe7032988b7fdb87e5fd9d794e6ffe5e355df4d8fd6edb28c08136",
+    "greeting-terminal.txt": "7f0487901d157595e36916b5b4e9dbcefcf576443dc1fe8432ad0f7e08eadcf1",
+    "plugin-notice.txt": "14840c499a87674958664d60934f1c168978033da8d109708db00d2448a9d3c3",
     "greeting-cli.txt": "0a315745bb1e963bf40b1ccfdc9a822532fa703f2c1b5013c8fe303b8cf0f59f",
     "sample-json.txt": "084c799cd551dd1d8d5c5f9a5d593b2e931f5e36122ee5c793c1d08a19839cc0"
   }

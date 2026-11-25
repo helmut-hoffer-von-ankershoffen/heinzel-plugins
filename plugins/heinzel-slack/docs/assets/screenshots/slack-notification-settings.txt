@@ -10,13 +10,13 @@ Mira
 · EM
 Today
 Today
-Doctor: 7 checks need attention
+Doctor: 8 checks need attention
 
 ai.access ai access, system.credential backend, system.credential credential slack/app-token…
 
 Open
 v0.9.55
-Updates available, off
+Updates, off
 0
 System health, warning
 ?

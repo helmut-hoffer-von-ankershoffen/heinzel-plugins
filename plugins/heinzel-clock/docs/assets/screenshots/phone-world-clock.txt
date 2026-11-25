@@ -27,6 +27,7 @@ Starts in 30m · 2d 14h 30m since end
 08:30:00
 Edit time zones
 v0.9.55
+Updates, off
 System health, warning
 ?
 16:30:00

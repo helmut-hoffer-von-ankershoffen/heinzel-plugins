@@ -2,21 +2,21 @@
   "format": 2,
   "plugin": "heinzel-weather",
   "core_version": "0.9.55",
-  "inputs_sha256": "c076a24baf72a5fddc4456159eb74abe45f99c770352e576a2b200ec09a7a2ba",
+  "inputs_sha256": "8abde57cb19d7703acefefb8fca98e43fdad3fb250a9dc9f9efbabeb65191b77",
   "images": {
-    "docs/assets/screenshots/today-weather.png": "d81e8dec46b426db916afe46cfca7cdb2e4fa14fe807e778b927f041843132fc",
-    "docs/assets/screenshots/weather-detail.png": "8ec40b3e672dfe1dd8f534c45285978846c02a664b8a6695266167e6430d8ac9",
-    "docs/assets/screenshots/weather-page.png": "25a0cea631e254d9c3f991f04432f1454d4267a6e33521d2fd05b24a2222b6a3",
-    "docs/assets/screenshots/phone-weather.png": "2e232812c4c885226d0f83587f2f7118d6a0bd2be002a340ac7243d5296aeee8",
-    "docs/assets/screenshots/cli-weather.png": "d8da224dcb57fd667196a78d50d1b89dcca986b11fad9b555b4dedc9a114d164",
-    "docs/assets/screenshots/cli-forecast.png": "118faab57b62504b5c632d8040d420892a4eac93ba2f25674c6decb6a5b57a26"
+    "docs/assets/screenshots/today-weather.png": "27f379cdc647ae13d2b64269b78d5a3ed5c4e5671de997a401b3e992ab7b0bb0",
+    "docs/assets/screenshots/weather-detail.png": "ab3826e3b8455191073655df664280bf128326cd92f75b240e5cecd9c1b420ad",
+    "docs/assets/screenshots/weather-page.png": "553150abb76cf6db89b6ad7654e68411dbe2cffdf64d4b49827efb47fdf174c8",
+    "docs/assets/screenshots/phone-weather.png": "e059ceb5cc736cead2f2894886ed0a68eb8d88e10f7ab54f8414e834392c7850",
+    "docs/assets/screenshots/cli-weather.png": "71b3f9d23c8b638b2d5f1dd167624092d6c80ef6151303da19c7676a38b3b15c",
+    "docs/assets/screenshots/cli-forecast.png": "a7bbaca71180265eafddbfb8c79c7e4afa148f6d41f9bd48d2e175530e75a18a"
   },
   "transcripts": {
-    "today-weather.txt": "2ecaef7e860328fc7c991bbe1062a03e21db3d4d692a9351c8826705a519f3a3",
-    "weather-detail.txt": "4009b0b59c8fb47a2e7d06b36d1bed941f5f99ab18ed10850faf4dd8c328e452",
-    "weather-page.txt": "a960cb7628fefd382fe633a04558a0c5530bdd0a6297740843bcb5c1784f704b",
-    "phone-weather.txt": "d15ef7aa88e5b804370fc5565a0f0edec91dc25b2735683760077906cc69e443",
-    "cli-weather.txt": "e23d3ea3f0de9e2d20dc873097eddaec837c7f955727d833fb0c6478e1f9daa3",
-    "cli-forecast.txt": "402d62793a8229b197b0b58bde48b95d4d7d985e6460d3947046f9d14623d9da"
+    "today-weather.txt": "11c0d632cc39b0d4dc4bca87cfc72f4efe8f480750b95413da37a3355d96ce6f",
+    "weather-detail.txt": "b16d03f4ccec0bfea554f38cf49a880b6bd462980d9504102f733cb844e47879",
+    "weather-page.txt": "6c08efbbad108945158902021331495385cfb86ac31afadef0acde63cec48738",
+    "phone-weather.txt": "e396e29360df673d14845c70d4a0163dbbd30aec39b95b96d0495edf7881f697",
+    "cli-weather.txt": "6a2fba007fcf1e2fc362a66bd59844d8aad7228ce5ef8352cab3c08edd3e6ee3",
+    "cli-forecast.txt": "2fc2ea8b6b92c9139b6d004e94a367066f8ed7e19ed9b41fd8fab01b13c3b647"
   }
 }

@@ -4,15 +4,15 @@
   "core_version": "0.9.55",
   "inputs_sha256": "c93416362d8788ba163d6c6e1d763ada24c8da3e31f552fe8d17dccb2aaef61e",
   "images": {
-    "docs/assets/screenshots/issues-page.png": "77fd0c5d7f1a8ecd979f04b5a3bf0a0d1c133071b80653b96c90a50ae3ace250",
-    "docs/assets/screenshots/report-history.png": "30e6a1d1390d09364246b97327159dc14e07674cf2d846b8234471131e07a57c",
-    "docs/assets/screenshots/today-open-reports.png": "86984e339d9adcbde8e967672322cf540a53f807ef27c098c10141dec2f83b19",
-    "docs/assets/screenshots/cli-list.png": "e8a2c412a35760cf9eb4725826c6b6ac075d532ddc910392a48e23af56b563bc"
+    "docs/assets/screenshots/issues-page.png": "024aafa83693e1c406efb2bf1bb6cd1ee9881840debaade9dacd770f0d9846d3",
+    "docs/assets/screenshots/report-history.png": "9fe91c0ca205d514d8f250d6747f9a8bb2c0f14cac1297b43fdefac1d1631960",
+    "docs/assets/screenshots/today-open-reports.png": "43ff95a3b312e34babcdcb80be2fc9b0c9e0587e343bcefc2c60bc9b59bb24cd",
+    "docs/assets/screenshots/cli-list.png": "34bd143280f7079c738a40fc3be6500bd7dd2819774a19893e12cd214e55cf87"
   },
   "transcripts": {
-    "issues-page.txt": "797867496dad03aa208c97631133b5a9baa1407aebffd325c296b2eb0c6c0748",
-    "report-history.txt": "7a10db5f7c5846dc40726e73c05dba7552803114ee26978250db921a733762b1",
-    "today-open-reports.txt": "2f3f27564164250b599a8c4ca2708f487383d329d55b1034cb0d7356ccb07f45",
+    "issues-page.txt": "2e4873d9160c8a09d0031171a064512e0937a569dc3e6b08f87f9c59d90b4ce1",
+    "report-history.txt": "d1590c045f612af2be4159f27319cee3f6ad9626c31926fc4502059e31c757ab",
+    "today-open-reports.txt": "a0b0960c32a27218b307f061c5fb755d3f553163bc7c355a35a41aaeb160aad7",
     "cli-list.txt": "d0eac2c0b1b435cac45b7f7052b732fe1e8f619035e7778e11b8f6e6101ff08f"
   }
 }

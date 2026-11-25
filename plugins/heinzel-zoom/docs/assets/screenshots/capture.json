@@ -2,17 +2,17 @@
   "format": 2,
   "plugin": "heinzel-zoom",
   "core_version": "0.9.55",
-  "inputs_sha256": "b6532cb3307e24c3ceb300bd487f8dc213649b22fd726e0351eb4661fea93d63",
+  "inputs_sha256": "18dc94975a0bf283ca2cd35eb474ad486a6036f391eee8aacdde290b7f90aab6",
   "images": {
-    "docs/assets/screenshots/workflow-list.png": "45c4a8f3fecfce97f88e959f996541b81c536f4043b2f1a001b9158f91cdf44a",
-    "docs/assets/screenshots/workflow-context.png": "18dfc2a6eb0f79ccc4352193950624aeb10a2aebf72a0c5b4412a70d97c1f475",
-    "docs/assets/screenshots/summary-cli.png": "b6882ac1fc26da06900bfc063db82c5fae23809a5d909c73abdc9aa1d3e2afd6",
-    "docs/assets/screenshots/launch-cli.png": "6eef3cec105f6d2bb71df86e01f3a3d0fb5da6cb1f350b55d6b2e28d6efea3f9",
-    "docs/assets/screenshots/meeting-list-json.png": "4baccb4a6154df4a67ad97a1c24df2b1596ffb24b084aa045e6bc704c4a597c5"
+    "docs/assets/screenshots/workflow-list.png": "20c2d8f8adf657d78a7902c9ec9e414389675a7afdb720e5ab7d36a6cd53b9b9",
+    "docs/assets/screenshots/workflow-context.png": "a9f4917255c0cd544069cfb2cbc80b018546930550c50f84f0ba96cf81667927",
+    "docs/assets/screenshots/summary-cli.png": "26da3ef0023bdd904580d6f9764b1372c23aea68a0ed763133e1976490589140",
+    "docs/assets/screenshots/launch-cli.png": "057db4ba2782ae93a72433013247fcd6bb338f5533ec1355f2a3719b15b2ca9d",
+    "docs/assets/screenshots/meeting-list-json.png": "0448651f6bdeffaf51fb446a024671035d4069a5adc14ac543741d6fb8fa555d"
   },
   "transcripts": {
-    "workflow-list.txt": "7e423858738aa33ec14d662287f1cdd576e9cf860c5b73153b503f57b1b162e7",
-    "workflow-context.txt": "17b777b0c1ab9aa340d326d2d1cf3407f4742283ff796f3365ad8bfd2e3bf4db",
+    "workflow-list.txt": "338c206f78c54ff831384c25b5866605ba4386071e851930429828b054cb4389",
+    "workflow-context.txt": "c2b27fc564f9427a54219250ba5c6ed82e235393c2c75cf5796cc701fefef704",
     "summary-cli.txt": "4be37a1c9908c8f4c8c3bad307e5dbaeb5578b4b71951327f1560dfd3c371c99",
     "launch-cli.txt": "0c5a827a0454f9a2918a11c13785c51da87128b0cd4baf9fa8081fbcd5d51761",
     "meeting-list-json.txt": "2762667503f795cc6f754156a447becaca466c238f3714d29fd2496c3486e210"

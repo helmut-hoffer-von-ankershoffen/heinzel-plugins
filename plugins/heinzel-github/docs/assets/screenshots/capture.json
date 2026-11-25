@@ -2,20 +2,20 @@
   "format": 2,
   "plugin": "heinzel-github",
   "core_version": "0.9.55",
-  "inputs_sha256": "13e898e43b36363b276b8c8267a09463ca6682062f85bec1c7e119b44f0c00f8",
+  "inputs_sha256": "78f7f5e87ff4a90abeabf5860d0b06095eef357588756a17852ae6548b1001a8",
   "images": {
-    "docs/assets/screenshots/workflow-collection.png": "29a6fe9d1b4a1dde19ab0ffd30c1de2460ab1719bb3b4b8d012458d8e5f39a06",
-    "docs/assets/screenshots/workflow-context.png": "ad078a64e3b42fc2f40d77a0171c7011cd1cbd092f8ad2ecaaf4d197c6f6276d",
-    "docs/assets/screenshots/merged-work.png": "4594a8c1d9d3226e4247e7aa26dc3a1be9f255675fdb5a794fe3201221ffdbd0",
-    "docs/assets/screenshots/issue-changes.png": "078193078f57527db18184a33327e498692727038541b47a407dc4c233f2bd35",
-    "docs/assets/screenshots/merged-cli.png": "787d4a4a73a860dbf4b33fd849f9737e0a58e5495e3e94ea1104a0e60bdf7233",
-    "docs/assets/screenshots/issues-json.png": "e3754138bf5a295204a0f986463e9a54dda6168697fa870ab9c3d41b3d7ff6bd"
+    "docs/assets/screenshots/workflow-collection.png": "d80dbe852b16e4d19796c6a23036186fc8801916a1a5238d1bd38be9386e5c5c",
+    "docs/assets/screenshots/workflow-context.png": "b3ae18669e2c48599e6018259ffce11cff8e8f7cf9980facdf5320dd06afb213",
+    "docs/assets/screenshots/merged-work.png": "e02c200fb34fd2a0c6348545bd99f4ff85d144d1bc20c5c3a1619e7906a78623",
+    "docs/assets/screenshots/issue-changes.png": "9f6482200efa429b26eceef7eb74048da5a9f054238ad09ea4e28ff002f58cb6",
+    "docs/assets/screenshots/merged-cli.png": "64627cdc9e333b9330f89b9713ce629fd8617801ac95ad1c94c037f83a6d5171",
+    "docs/assets/screenshots/issues-json.png": "27909799fbe4fa0e56c903a62df0069ad5a576140650617a12ca23d9f27e79c8"
   },
   "transcripts": {
-    "workflow-collection.txt": "23703daa5ec6b75273ba0713a8e27cacfb8c143cc9bf631c771eaf41fbe6e185",
-    "workflow-context.txt": "7e23443e9a7fd918345c269a65f73ae0fd3dc850102dd000c2f705aa419966db",
-    "merged-work.txt": "ecfacc4bde90b5a7d893d375a7b71d501ff81ee13aa5eb78b2ecb219ab312413",
-    "issue-changes.txt": "5526e5e28cd1c95fe2d0369a1321dc04ffa35f6079af123858219e7b38a9d92b",
+    "workflow-collection.txt": "f2f395812b69722ef504e0d8f3ad1b8b1a927a485cb52bbaf3797324509d2d5f",
+    "workflow-context.txt": "587cac77e4193e7d5d73f8e0a7cf8c1f460e3c5a6685df9c24f72b7b36215ac1",
+    "merged-work.txt": "6e4a44515754606de152ad688b7e00ae76a4710dc31a78e0b24fc2154b59e25c",
+    "issue-changes.txt": "c64d16e42243cc92965d3ba9d0c72c23a7c915f832969b99a213b40e5960702b",
     "merged-cli.txt": "e4df52085e704c49ba37bd75f62656de48cd879405856220a53bcebb7efdebb4",
     "issues-json.txt": "a866c9bd0fe09d6dc1355428d53f5ce30511912b71452e84e925b65b89f104b0"
   }

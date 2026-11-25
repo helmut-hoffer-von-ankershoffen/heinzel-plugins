@@ -135,7 +135,11 @@ threading.Thread(target=server.serve_forever, daemon=True).start()
 try:
     config = Config.load()
     records, errors = discover()
-    records.append(ModuleRecord("showcase", showcase, Origin("heinzel-documentation-fixture", "1.0.0", builtin=False)))
+    # CLI helpers are not installed distributions and must not enter the UI inventory.
+    if sys.argv[1:2] == ["showcase"]:
+        records.append(
+            ModuleRecord("showcase", showcase, Origin("heinzel-documentation-fixture", "1.0.0", builtin=False))
+        )
     kernel = Kernel(config.settings(Settings, "hz"), records, errors, config)
     kernel.bind(TailscaleCli, DemoCli())
     sys.argv = ["hz", *sys.argv[1:]]

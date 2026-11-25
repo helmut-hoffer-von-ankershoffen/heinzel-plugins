@@ -56,8 +56,7 @@ Weekly code review
 me:weekly-code-review
 by hand only
 v0.9.55
-Plugins changed, warning
-Updates available, off
+Updates, off
 0
 System health, warning
 ?

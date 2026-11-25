@@ -1,12 +1,15 @@
 """The same disposable Linux browser and source snapshot for authors and CI."""
 
 import contextlib
+import hashlib
 import json
 import os
 import shutil
 import subprocess
 import sys
 import tempfile
+import urllib.error
+import urllib.request
 import uuid
 from pathlib import Path
 
@@ -17,6 +20,43 @@ IMAGE = (
     "330d401ae23c905896a0c26c66c36fc971b621519e7b11b435a8328d7bf6e031"
 )
 PLATFORM = "linux/amd64"
+BOOTSTRAP_WHEEL = "uv-0.13.7-py3-none-manylinux_2_17_x86_64.manylinux2014_x86_64.whl"
+BOOTSTRAP_SHA256 = "2c9bdc4a872b60a93c5f26c0791089ea11585a4f9d3b3c017d78eb8487505e25"
+BOOTSTRAP_URL = (
+    "https://files.pythonhosted.org/packages/b9/93/0e053a2ca4523ee9825ccbedeb7121470d0a188933f11688b6d90d7f5c08/"
+    + BOOTSTRAP_WHEEL
+)
+BOOTSTRAP_LIMIT = 20 * 1024 * 1024
+
+
+def bootstrap_wheel() -> bytes:
+    """Cache only a hash-locked public wheel; the worker never sees or writes this host cache."""
+    cache = Path.home() / ".cache/heinzel-plugin-tools/bootstrap"
+    path = cache / BOOTSTRAP_WHEEL
+    if path.exists() or path.is_symlink():
+        data = regular_bytes(path, BOOTSTRAP_LIMIT)
+    else:
+        try:
+            with urllib.request.urlopen(BOOTSTRAP_URL, timeout=60) as response:  # noqa: S310 - fixed public HTTPS URL
+                data = response.read(BOOTSTRAP_LIMIT + 1)
+        except (OSError, urllib.error.URLError) as error:
+            raise CaptureError(
+                "Cannot fetch the hash-locked public capture bootstrap wheel; retry when transport recovers"
+            ) from error
+    if len(data) > BOOTSTRAP_LIMIT or hashlib.sha256(data).hexdigest() != BOOTSTRAP_SHA256:
+        raise CaptureError(
+            "Public capture bootstrap wheel hash differs; remove the invalid cached wheel before retrying"
+        )
+    if not path.exists():
+        cache.mkdir(parents=True, exist_ok=True)
+        with tempfile.NamedTemporaryFile(dir=cache, delete=False) as handle:
+            handle.write(data)
+            temporary = Path(handle.name)
+        try:
+            os.replace(temporary, path)
+        finally:
+            temporary.unlink(missing_ok=True)
+    return data
 
 
 def configured_terms() -> str:
@@ -109,6 +149,7 @@ def run(args) -> dict:
             ),
         )
         (work / "source-files.json").write_text(json.dumps(source_files))
+        (work / BOOTSTRAP_WHEEL).write_bytes(bootstrap_wheel())
         for directory in ("home", "cache", "python", "bootstrap"):
             (work / directory).mkdir()
         runtime = work / "runtime"
@@ -187,7 +228,8 @@ def run(args) -> dict:
                     "import os,subprocess,sys; "
                     "os.environ['PATH']='/capture/bootstrap/bin:'+os.environ['PATH']; "
                     "subprocess.run([sys.executable, '-m', 'pip', 'install', '--quiet', "
-                    "'--no-cache-dir', '--target', '/capture/bootstrap', 'uv==0.13.7'], check=True); "
+                    "'--no-index', '--no-deps', '--target', '/capture/bootstrap', "
+                    f"'/capture/{BOOTSTRAP_WHEEL}'], check=True); "
                     "os.execvp(sys.argv[1], sys.argv[1:])",
                     *child,
                 ],

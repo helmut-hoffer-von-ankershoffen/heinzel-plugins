@@ -17,6 +17,14 @@ from heinzel_plugin_tools import capture, cli, privacy
 pytestmark = [pytest.mark.unit, pytest.mark.usefixtures("fictional_capture_terms")]
 
 
+@pytest.fixture(autouse=True)
+def fictional_public_bootstrap(monkeypatch):
+    from heinzel_plugin_tools import capture_linux
+
+    # Unit renderer probes never fetch; separate cache tests verify the real hash boundary.
+    monkeypatch.setattr(capture_linux, "bootstrap_wheel", lambda: b"fictional-public-wheel")
+
+
 @pytest.fixture
 def owner(tmp_path):
     (tmp_path / "src/heinzel_harbor").mkdir(parents=True)
@@ -818,6 +826,9 @@ def test_canonical_linux_runs_exact_image_without_host_state_and_keeps_all_text(
             return SimpleNamespace(returncode=0)
         assert argv[1:3] == ["run", "--rm"]
         assert capture_linux.IMAGE in argv
+        assert "'--no-index', '--no-deps'" in " ".join(argv)
+        assert (cwd / capture_linux.BOOTSTRAP_WHEEL).read_bytes() == b"fictional-public-wheel"
+        assert str(Path.home() / ".cache") not in " ".join(argv)
         assert argv[argv.index("--hostname") + 1] == "demo-host"
         assert argv[argv.index("--user") + 1] == f"{os.getuid()}:{os.getgid()}"
         assert "HOME=/capture/home" in argv and "UV_CACHE_DIR=/capture/cache" in argv

@@ -4,16 +4,16 @@
   "core_version": "0.9.55",
   "inputs_sha256": "a3b4587e4ba7b2b59c06853d7dffa0329af0149b554cc57591cc9f360ef88691",
   "images": {
-    "docs/assets/screenshots/theme-light.png": "d492bd5776568fd60f9e3b7de93a2e8672144e92eef62d5c2f28e51a51b4da21",
-    "docs/assets/screenshots/theme-dark.png": "15441b245a8bd61c770bbfe6c8c6a3065f16ee73853f615351d606a36ce1c51a",
-    "docs/assets/screenshots/theme-soundscapes.png": "f3955cc032597082ec805463c593a6e80cf10b1376ef4a074877f980017219da",
-    "docs/assets/screenshots/theme-cli.png": "2ebc7271bafa972d57b82a6278d25aee8901031963a3342297a50658f653e015",
-    "docs/assets/screenshots/soundscapes-cli.png": "335ec0d3fb642b032bef3d76d20c1588096a41afcf2fe3db880b801e8b949f3e"
+    "docs/assets/screenshots/theme-light.png": "3108dce140799621315159bd1046d7a945f2381ed69d50cad469320dc468f959",
+    "docs/assets/screenshots/theme-dark.png": "b329012cf64a4c413c5bbbd08163c86b71832c2fe9776f5f1fefa2bc05585843",
+    "docs/assets/screenshots/theme-soundscapes.png": "939cee2390f68fdba82108af40b4308c351695a1dfed3d8ed182e76044194bfe",
+    "docs/assets/screenshots/theme-cli.png": "3af21d7491826f9804a98d10bd433dc37a978ec6fc4aa60a991e6dfa1bbc036f",
+    "docs/assets/screenshots/soundscapes-cli.png": "b387b10800f28e6c51e3cb3635def4c00ab6b848acbda41a0bd59f9dcbef9610"
   },
   "transcripts": {
-    "theme-light.txt": "3cb056967534a46e3d758682768ec8f58be4eb89e4d651edd9187b9a2fa62de8",
-    "theme-dark.txt": "3cb056967534a46e3d758682768ec8f58be4eb89e4d651edd9187b9a2fa62de8",
-    "theme-soundscapes.txt": "643e321c7122357c492970cfae9a4b0290b5e70526ac2cc4526a09c99c2f3842",
+    "theme-light.txt": "4458d8fd62f66360e37b1ca9207edee813d2ce8059d70ff96f6a3a88a1e7f736",
+    "theme-dark.txt": "4458d8fd62f66360e37b1ca9207edee813d2ce8059d70ff96f6a3a88a1e7f736",
+    "theme-soundscapes.txt": "70c33568bbec4bdd089f768e167cf7a70441914ea65603f83d4c344cd3b84810",
     "theme-cli.txt": "36d653efa87eeec3a67c92ac4c27069a4697714578a9cd172bda926c27fdfa1f",
     "soundscapes-cli.txt": "0b2c10983afe745e121ad38b039b18a1db4464c283a6ac3e3c9a85aed148575c"
   }
