@@ -1077,3 +1077,44 @@ def test_canonical_capture_rejects_replaced_snapshot_root_before_reading_it(owne
     with pytest.raises(privacy.CaptureError, match="snapshot directory was replaced"):
         capture_linux.run(args)
     assert marker.read_text() == "untouched"
+
+
+@pytest.mark.parametrize("names", [["src/view.js"], ["../escape"], ["/absolute"], ["./view"], ["src//view"], {}, [1]])
+def test_worker_inventory_accepts_only_explicit_relative_source_names(owner, tmp_path, monkeypatch, capsys, names):
+    inventory = tmp_path / "source-files.json"
+    inventory.write_text(json.dumps(names))
+    original_is_file = Path.is_file
+    monkeypatch.setattr(Path, "is_file", lambda path: path == Path("/.dockerenv") or original_is_file(path))
+    monkeypatch.setattr(sys, "platform", "linux")
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "capture",
+            "--project",
+            str(owner),
+            "--container-worker",
+            "--draft",
+            "--source-inventory",
+            str(inventory),
+            "--json",
+        ],
+    )
+    received = []
+
+    def run(root, **kwargs):
+        received.append(kwargs["source_files"])
+        return {"ok": True}
+
+    monkeypatch.setattr(capture, "capture", run)
+    assert capture.main() == (0 if names == ["src/view.js"] else 1)
+    assert received == ([names] if names == ["src/view.js"] else [])
+    assert json.loads(capsys.readouterr().out)["ok"] is bool(received)
+
+
+def test_source_inventory_is_not_an_author_freshness_override(owner, monkeypatch, capsys):
+    monkeypatch.setattr(
+        sys, "argv", ["capture", "--project", str(owner), "--draft", "--source-inventory", "/missing", "--json"]
+    )
+    assert capture.main() == 1
+    assert "isolated worker" in json.loads(capsys.readouterr().out)["error"]
