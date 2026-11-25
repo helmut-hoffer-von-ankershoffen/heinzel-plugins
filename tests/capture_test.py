@@ -1053,3 +1053,27 @@ def test_canonical_snapshot_preserves_declared_inputs_and_ignores_build_output(o
     assert "src/heinzel_harbor/views/[original].js" in source_files
     (project / "src/heinzel_harbor/views/[original].js").write_text("changed source")
     assert capture.input_digest(project, plan, source_files=source_files) != before
+
+
+def test_canonical_capture_rejects_replaced_snapshot_root_before_reading_it(owner, tmp_path, monkeypatch):
+    from heinzel_plugin_tools import capture_linux
+
+    recorded(owner)
+    outside = tmp_path / "outside"
+    outside.mkdir()
+    marker = outside / "keep"
+    marker.write_text("untouched")
+    monkeypatch.setattr(capture_linux, "configured_terms", lambda: "fictional-private-term\n")
+
+    def run(argv, *, cwd, capture=False, capture_stderr=False, timeout=900):
+        if argv[1] != "rm":
+            project = cwd / "project"
+            shutil.rmtree(project)
+            project.symlink_to(outside, target_is_directory=True)
+        return SimpleNamespace(returncode=0, stdout='{"ok": true, "verified": true}')
+
+    monkeypatch.setattr(capture_linux, "command", run)
+    args = SimpleNamespace(project=owner, core=None, headed=False, verify=False, draft=True, strict_images=False)
+    with pytest.raises(privacy.CaptureError, match="snapshot directory was replaced"):
+        capture_linux.run(args)
+    assert marker.read_text() == "untouched"

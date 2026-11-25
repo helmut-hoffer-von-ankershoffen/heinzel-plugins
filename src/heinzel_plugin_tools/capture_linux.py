@@ -202,6 +202,8 @@ def run(args) -> dict:
             report = json.loads(result.stdout)
         except (ValueError, TypeError) as error:
             raise CaptureError("Canonical Linux capture returned no result; no gallery was changed") from error
+        if project.is_symlink() or not project.is_dir() or project.resolve() != work.resolve() / "project":
+            raise CaptureError("The isolated snapshot directory was replaced; no gallery was changed")
         if capture.input_digest(root, capture.read_plan(root)) != original_inputs:
             raise CaptureError("Screenshot inputs changed during canonical capture; capture again")
         # Never execute host Git against worker-writable metadata.
