@@ -41,6 +41,10 @@ class CaptureError(ValueError):
     """A deliberate safe author-facing error, without arbitrary provider or parser output."""
 
 
+class StaleGallery(CaptureError):
+    """Valid gallery inputs require a new capture; other validation errors remain failures."""
+
+
 def canonical_text(value: str) -> str:
     """Match commit hooks before hashing generated text: LF, no trailing whitespace, one final newline."""
     value = value.replace("\r\n", "\n").replace("\r", "\n")
