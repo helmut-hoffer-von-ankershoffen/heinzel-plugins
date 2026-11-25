@@ -34,9 +34,9 @@ SECRET_PATTERNS = (
     r"\b(?:api[_-]?key|secret|password|passwd|client[_-]?secret|auth[_-]?token)\b\s*[:=]\s*[\"']?[A-Za-z0-9_+/=-]{16,}",
 )
 PRIVATE_PATH = r"(?:/Users/|/home/|/private/var/folders/|/var/folders/|/private/tmp/|/tmp/|[A-Za-z]:\\Users\\)[^\s/\\]+"
-EMAIL = r"[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\.[A-Za-z]{2,}"
+EMAIL = r"[A-Za-z0-9._%+-]{1,64}@[A-Za-z0-9.-]{1,253}\.[A-Za-z]{2,63}"
 FICTIONAL_EMAIL = ("@example.com", ".example", "@example.org", "@example.net", "@example.test")
-PRIVATE_HOST = r"\b(?:[A-Za-z0-9-]+\.)+(?:local|localdomain|lan|internal|intranet|corp|home|ts\.net)\b"
+PRIVATE_HOST = r"\b(?:[a-z0-9-]+\.)+(?:local|localdomain|lan|internal|intranet|corp|home|ts\.net)\b"
 IPV4 = r"(?<![\d.])(?:\d{1,3}\.){3}\d{1,3}(?![\d.])"
 FICTIONAL_HOSTS = {"localhost", "demo-host", "demo-workstation"}
 

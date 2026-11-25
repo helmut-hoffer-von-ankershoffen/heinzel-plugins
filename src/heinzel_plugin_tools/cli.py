@@ -557,6 +557,16 @@ def build_view_assets(project: Project) -> None:
         run(["uv", "run", "--no-project", "--script", str(project.directory / "web/build.py"), "run", "build"])
 
 
+def has_gallery(project: Project) -> bool:
+    """Discover configured media, including legacy manifests and broken linked inputs."""
+    from heinzel_plugin_tools.capture import MANIFEST, PLAN
+
+    paths = (project.directory / PLAN, project.directory / MANIFEST)
+    return any(path.exists() or path.is_symlink() for path in paths) or bool(
+        project.metadata.get("tool", {}).get("heinzel", {}).get("catalog", {}).get("screenshots")
+    )
+
+
 def check_screenshots(project: Project) -> dict:
     """Verify gallery freshness offline: no build, browser, plugin run or agent (the digest covers UI sources only)."""
     from heinzel_plugin_tools.capture import check_capture
@@ -575,9 +585,7 @@ def check(
 ) -> None:
     """Run only the owning package's checks against an installed core/SDK artifact."""
     verified = vendor.project(project.directory)
-    if (project.directory / "docs/screenshot-definition.json").exists() or (
-        project.directory / "docs/assets/screenshots/capture.json"
-    ).exists():
+    if has_gallery(project):
         check_screenshots(project)
     prepare_environment(project, core)
     run(
@@ -1177,12 +1185,12 @@ def focused_hook_targets(manifest: Path, selected: list[Project], changed: list[
 
 def check_all_screenshots(inventory: list[Project], *, json_output: bool) -> int:
     """Offline freshness of every gallery: stale plugins with the exact command that regenerates each."""
-    from heinzel_plugin_tools.capture import PLAN, safe_failure_message
+    from heinzel_plugin_tools.capture import safe_failure_message
     from heinzel_plugin_tools.privacy import StaleGallery
 
     fresh, stale, failed = [], [], []
     for project in inventory:
-        if not (project.directory / PLAN).is_file():
+        if not has_gallery(project):
             continue
         try:
             check_screenshots(project)
@@ -1256,10 +1264,10 @@ def screenshot_main(arguments: list[str], *, check: bool = False) -> int:
             raise CaptureError("Choose one screenshot mode: --init, --check, --draft, --verify or capture")
         if args.strict_images and not args.verify:
             raise CaptureError("--strict-images needs --verify")
+        if args.all and (not (check or args.check) or args.name is not None):
+            raise CaptureError("Use --all with --check and without a plugin name")
         inventory = projects()
         if args.all:
-            if not (check or args.check):
-                raise CaptureError("--all needs --check (or screenshots-check)")
             return check_all_screenshots(inventory, json_output=args.json)
         selected = [
             p

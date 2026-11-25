@@ -89,3 +89,19 @@ def test_every_release_body_comes_from_the_changelog_notes():
             assert all('--notes-file "$RUNNER_TEMP/release-notes.md"' in line for line in publications), name
             notes = run.index("scripts/release_notes.py")
             assert notes < run.index("--tag") and '> "$RUNNER_TEMP/release-notes.md"' in run, name
+
+
+def test_fixture_jobs_do_not_require_private_terms_but_real_capture_does():
+    workflow = yaml.safe_load((ROOT / ".github/workflows/ci.yml").read_text())
+    jobs = workflow["jobs"]
+    plan_tests = next(step for step in jobs["plan"]["steps"] if step.get("run") == "make tooling-check")
+    coverage_tests = next(
+        step for step in jobs["coverage"]["steps"] if step.get("name") == "Measure the shared developer toolkit"
+    )
+    assert plan_tests["env"]["CONFIDENTIALITY_REQUIRED"] == "false"
+    assert coverage_tests["env"]["CONFIDENTIALITY_REQUIRED"] == "false"
+    assert jobs["gallery"]["env"]["CONFIDENTIAL_TERMS"] == "${{ secrets.CONFIDENTIAL_TERMS }}"
+    assert "github.event_name" in jobs["gallery"]["env"]["CONFIDENTIALITY_REQUIRED"]
+    assert "coverage-floor" in jobs["ok"]["needs"]
+    assert "gate-guard" in jobs["ok"]["needs"]
+    assert "sonar-ratings" in jobs["ok"]["needs"]

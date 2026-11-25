@@ -20,6 +20,7 @@ def test_theme_and_soundscapes_are_owned_public_contributions(make_kernel):
         "claude-fm": "tRsQsTMvPNg",
         "focus": "5Le8Mrx3uA0",
         "hyper-focus": "uNw_a7HFwvg",
+        "singularity": "AvtStYuO79Y",
     }
     assert sounds["focus"].pairs_with == ("heinzelmaennchen",)
     assert all(sound.stream.provider == "youtube" for sound in sounds.values())

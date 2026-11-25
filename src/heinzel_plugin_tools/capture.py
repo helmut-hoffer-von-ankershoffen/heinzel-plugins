@@ -534,6 +534,8 @@ def demo_environment(home: Path, interpreter: Path) -> dict[str, str]:
 
 def hz(interpreter: Path, args: list[str], env: dict, cwd: Path) -> str:
     """Run the reviewed scene's hz argument list without a shell."""
+    if not valid_command(args):
+        raise CaptureError("Screenshot command must be a bounded list of literal hz arguments")
     args = args[1:] if args[:1] == ["hz"] else args
     command = (
         [str(interpreter), "-I", "-B", env["HZ_PLUGIN_CAPTURE_BOOTSTRAP"], *args]
@@ -739,18 +741,9 @@ def readme_gallery(text: str, shots: list[dict]) -> str:
 DRAFT_MANIFEST = "draft.json"
 
 
-def publish_draft(root: Path) -> dict:
-    """Publish a complete fresh draft: deterministic guards again, then gallery, catalog, README, contact sheet."""
-    import tomlkit
-
+def draft_artifacts(root: Path, plan: dict, draft: dict) -> tuple[dict, dict]:
+    """Validate every draft image, transcript and caption before changing public files."""
     folder = safe_path(root, DRAFT)
-    plan = read_plan(root)
-    draft = json.loads(safe_path(folder, DRAFT_MANIFEST).read_text())
-    if not inputs_current(root, plan, draft.get("inputs_sha256")):
-        raise StaleGallery(
-            "Draft UI inputs changed since capture. Capture again: " + regenerate_command(root),
-            regenerate_command(root),
-        )
     expected = expected_shots(plan)
     names = [scene["name"] for scene in plan["scenes"]]
     terms = confidential_patterns()
@@ -767,27 +760,24 @@ def publish_draft(root: Path) -> dict:
         transcripts[f"{name}.txt"] = hashlib.sha256(text.encode()).hexdigest()
     for shot in expected:
         scan_text(shot["caption"], terms=terms)
+    return images, transcripts
+
+
+def install_gallery(
+    root: Path, folder: Path, plan: dict, manifest: dict, updated_metadata: str, updated_readme: str
+) -> dict:
+    """Swap a fully validated draft atomically, restoring the original gallery on any failure."""
+    names = [scene["name"] for scene in plan["scenes"]]
+    plugin = manifest["plugin"]
     metadata_path = safe_path(root, "pyproject.toml")
     original_metadata = metadata_path.read_text()
     readme_path = safe_path(root, "README.md")
     original_readme = readme_path.read_text() if readme_path.exists() else None
-    updated_readme = readme_gallery(original_readme or "", expected)
-    document = tomlkit.parse(original_metadata)
-    document.setdefault("tool", {}).setdefault("heinzel", {}).setdefault("catalog", {})["screenshots"] = expected
     target = safe_path(root, OUTPUT)
     target.parent.mkdir(parents=True, exist_ok=True)
     if target.exists():
         for artifact in target.rglob("*"):
             safe_path(root, artifact.relative_to(root))
-    plugin = project_data(root)["project"]["name"]
-    manifest = {
-        "format": 2,
-        "plugin": plugin,
-        "core_version": draft["core_version"],
-        "inputs_sha256": draft["inputs_sha256"],
-        "images": images,
-        "transcripts": transcripts,
-    }
     definition = safe_path(root, PLAN)
     original_definition = definition.read_text() if definition.exists() else None
     with tempfile.TemporaryDirectory(prefix=".gallery-stage-", dir=target.parent) as temporary:
@@ -797,7 +787,7 @@ def publish_draft(root: Path) -> dict:
             for extension in ("png", "txt"):
                 shutil.copyfile(safe_path(folder, f"{name}.{extension}"), staging / f"{name}.{extension}")
         # The contact sheet is regenerated from the definition's captions, never copied.
-        (staging / "index.html").write_text(preview_document(plugin, plan["scenes"], draft["core_version"]))
+        (staging / "index.html").write_text(preview_document(plugin, plan["scenes"], manifest["core_version"]))
         (staging / "capture.json").write_text(json.dumps(manifest, indent=2) + "\n")
         backup = Path(temporary) / "previous"
         moved = False
@@ -811,7 +801,7 @@ def publish_draft(root: Path) -> dict:
             installed = True
             if original_definition is None:
                 write_definition(root, plan)
-            atomic_text(metadata_path, tomlkit.dumps(document))
+            atomic_text(metadata_path, updated_metadata)
             atomic_text(readme_path, updated_readme)
             return check_capture(root)
         except BaseException:
@@ -827,6 +817,39 @@ def publish_draft(root: Path) -> dict:
             if original_definition is None:
                 definition.unlink(missing_ok=True)
             raise
+
+
+def publish_draft(root: Path) -> dict:
+    """Publish a complete fresh draft: deterministic guards again, then gallery, catalog, README, contact sheet."""
+    import tomlkit
+
+    folder = safe_path(root, DRAFT)
+    plan = read_plan(root)
+    draft = json.loads(safe_path(folder, DRAFT_MANIFEST).read_text())
+    if not inputs_current(root, plan, draft.get("inputs_sha256")):
+        raise StaleGallery(
+            "Draft UI inputs changed since capture. Capture again: " + regenerate_command(root),
+            regenerate_command(root),
+        )
+    expected = expected_shots(plan)
+    images, transcripts = draft_artifacts(root, plan, draft)
+    metadata_path = safe_path(root, "pyproject.toml")
+    original_metadata = metadata_path.read_text()
+    readme_path = safe_path(root, "README.md")
+    original_readme = readme_path.read_text() if readme_path.exists() else None
+    updated_readme = readme_gallery(original_readme or "", expected)
+    document = tomlkit.parse(original_metadata)
+    document.setdefault("tool", {}).setdefault("heinzel", {}).setdefault("catalog", {})["screenshots"] = expected
+    plugin = project_data(root)["project"]["name"]
+    manifest = {
+        "format": 2,
+        "plugin": plugin,
+        "core_version": draft["core_version"],
+        "inputs_sha256": draft["inputs_sha256"],
+        "images": images,
+        "transcripts": transcripts,
+    }
+    return install_gallery(root, folder, plan, manifest, tomlkit.dumps(document), updated_readme)
 
 
 def terminal_scene(page, command: list[str]) -> None:
@@ -1306,13 +1329,12 @@ def main() -> int:
         if args.json:
             print(json.dumps(report))
         else:
-            outcome = (
-                "scenes re-captured; the committed gallery matches"
-                if report.get("verified")
-                else "private draft captures ready"
-                if report.get("draft")
-                else "screenshots published to the gallery, catalog metadata and README; review the diff"
-            )
+            if report.get("verified"):
+                outcome = "scenes re-captured; the committed gallery matches"
+            elif report.get("draft"):
+                outcome = "private draft captures ready"
+            else:
+                outcome = "screenshots published to the gallery, catalog metadata and README; review the diff"
             print(f"✓ {report['plugin']}: {len(report['screenshots'])} {outcome}.")
             print(
                 f"Review: {report['preview']}\nRepeat: make screenshots NAME={report['plugin']}\n"

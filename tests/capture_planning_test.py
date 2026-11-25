@@ -26,7 +26,8 @@ def test_init_writes_a_canonical_editable_definition_once(owner):
     text = path.read_text()
     plan = json.loads(text)
     assert text == planning.definition_text(plan)
-    assert plan["format"] == 1 and len(plan["scenes"]) == 3
+    assert plan["format"] == 1
+    assert len(plan["scenes"]) == 3
     plan["scenes"][0]["caption"] = "My own caption for the fictional harbor"
     planning.write_definition(owner, plan)
     capture.write_default_plan(owner)

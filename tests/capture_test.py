@@ -135,7 +135,8 @@ def test_demo_profile_cannot_inherit_normal_credentials_or_state(owner, monkeypa
     monkeypatch.setenv("HZ_CONFIG_HOME", "/normal/private/config")
     monkeypatch.setenv("PATH", "/private/vendor/bin")
     env = capture.demo_environment(owner, owner / ".venv/bin/python")
-    assert "GH_TOKEN" not in env and "OPENAI_API_KEY" not in env
+    assert "GH_TOKEN" not in env
+    assert "OPENAI_API_KEY" not in env
     assert env["HZ_CONFIG_HOME"] == str(owner / "config_home")
     assert env["HOME"] == str(owner)
     assert env["HZ_SYSTEM_CREDENTIAL__BACKEND"] == "environment"
@@ -147,7 +148,9 @@ def test_demo_profile_cannot_inherit_normal_credentials_or_state(owner, monkeypa
 def test_offline_checks_detect_ui_changes_without_running_or_installing_code(owner):
     recorded(owner)
     report = capture.check_capture(owner)
-    assert report["ok"] and report["fresh"] and len(report["screenshots"]) == 3
+    assert report["ok"]
+    assert report["fresh"]
+    assert len(report["screenshots"]) == 3
     source = owner / "src/heinzel_harbor/__init__.py"
     source.write_text(source.read_text() + "# Changed logic, no UI input\n")
     assert capture.check_capture(owner)["fresh"]
@@ -238,7 +241,9 @@ def test_agent_check_has_clean_json_for_success_and_actionable_stale_results(own
     (owner / "src/heinzel_harbor/new.css").write_text("main { color: teal; }\n")
     assert cli.main() == 1
     failure = json.loads(capsys.readouterr().out)
-    assert not failure["ok"] and "stale" in failure["error"] and failure["stale"] is True
+    assert not failure["ok"]
+    assert "stale" in failure["error"]
+    assert failure["stale"] is True
     assert failure["command"] == failure["next"] == "make screenshots NAME=heinzel-harbor"
 
 
@@ -384,7 +389,8 @@ def test_a_fresh_draft_publishes_without_any_review_and_checks_fresh(owner):
     (owner / capture.MANIFEST).unlink()
     draft_of(owner)
     report = capture.publish_draft(owner)
-    assert report["fresh"] and set(json.loads((owner / capture.MANIFEST).read_text())) == capture.MANIFEST_KEYS
+    assert report["fresh"]
+    assert set(json.loads((owner / capture.MANIFEST).read_text())) == capture.MANIFEST_KEYS
 
 
 def test_a_draft_with_an_unsafe_transcript_publishes_nothing(owner):
@@ -649,3 +655,125 @@ def test_a_version_only_relock_keeps_a_committed_gallery_fresh(tmp_path):
     assert moved == 1
     lock.write_text(relocked)
     assert capture.check_capture(plugin)["fresh"]
+
+
+@pytest.mark.parametrize("state", ["fresh", "stale", "missing", "corrupt", "malformed"])
+def test_all_checks_real_galleries_and_preserves_failure_types(owner, monkeypatch, capsys, state):
+    shots = recorded(owner)
+    if state == "stale":
+        (owner / "src/heinzel_harbor/new.css").write_text("main {color: teal}\n")
+    elif state == "missing":
+        (owner / capture.MANIFEST).unlink()
+    elif state == "corrupt":
+        image = owner / shots[0]["path"]
+        image.write_bytes(image.read_bytes() + b"tampered")
+    elif state == "malformed":
+        (owner / capture.MANIFEST).write_text("not JSON")
+    project = cli.Project(owner, "heinzel-harbor", "0.1.0", capture.project_data(owner))
+    monkeypatch.setattr(cli, "projects", lambda: [project])
+    monkeypatch.setattr(cli, "prepare_environment", lambda *_: pytest.fail("must not install or run the plugin"))
+    assert cli.screenshot_main(["--all", "--json"], check=True) == (0 if state == "fresh" else 1)
+    report = json.loads(capsys.readouterr().out)
+    category = "fresh" if state == "fresh" else "stale" if state in {"stale", "missing"} else "failed"
+    assert len(report[category]) == 1
+    assert sum(len(report[key]) for key in ("fresh", "stale", "failed")) == 1
+    assert report["ok"] is (state == "fresh")
+    if category == "stale":
+        assert report[category][0]["command"] == "make screenshots NAME=heinzel-harbor"
+
+
+def test_all_continues_after_failure_and_skips_only_unconfigured_galleries(tmp_path, monkeypatch, capsys):
+    projects = []
+    for name in ("broken", "fresh", "stale", "absent", "linked"):
+        root = tmp_path / name
+        root.mkdir()
+        if name != "absent":
+            (root / capture.PLAN).parent.mkdir()
+            if name == "linked":
+                (root / capture.PLAN).symlink_to(root / "missing-plan")
+            else:
+                (root / capture.PLAN).write_text("# synthetic plan\n")
+        projects.append(cli.Project(root, f"heinzel-{name}", "0.1.0", {}))
+    seen = []
+
+    def check(project):
+        seen.append(project.name)
+        if project.name in {"heinzel-broken", "heinzel-linked"}:
+            raise privacy.CaptureError("Invalid gallery")
+        if project.name == "heinzel-stale":
+            raise privacy.StaleGallery("Regenerate gallery", "make screenshots NAME=heinzel-stale")
+        return {"ok": True}
+
+    monkeypatch.setattr(cli, "projects", lambda: projects)
+    monkeypatch.setattr(cli, "check_screenshots", check)
+    assert cli.screenshot_main(["--check", "--all", "--json"]) == 1
+    report = json.loads(capsys.readouterr().out)
+    assert seen == ["heinzel-broken", "heinzel-fresh", "heinzel-stale", "heinzel-linked"]
+    assert report["fresh"] == ["heinzel-fresh"]
+    assert [item["plugin"] for item in report["failed"]] == ["heinzel-broken", "heinzel-linked"]
+    assert [item["plugin"] for item in report["stale"]] == ["heinzel-stale"]
+
+
+@pytest.mark.parametrize("arguments", [["--all"], ["harbor", "--all", "--check"], ["--all", "--init"]])
+def test_all_refuses_capture_or_ambiguous_selection_before_inventory(monkeypatch, capsys, arguments):
+    monkeypatch.setattr(cli, "projects", lambda: pytest.fail("invalid options must not inspect galleries"))
+    assert cli.screenshot_main([*arguments, "--json"]) == 1
+    assert not json.loads(capsys.readouterr().out)["ok"]
+
+
+def test_all_empty_and_text_reports_are_complete(monkeypatch, capsys):
+    monkeypatch.setattr(cli, "projects", lambda: [])
+    assert cli.screenshot_main(["--all", "--check"]) == 0
+    assert capsys.readouterr().out == "0 fresh, 0 stale, 0 failed\n"
+
+
+@pytest.mark.parametrize("state", ["default", "malformed", "dangling", "catalog-only", "linked-plan", "bad-plan"])
+def test_all_checks_manifest_only_and_catalog_galleries(owner, monkeypatch, capsys, state):
+    recorded(owner)
+    (owner / capture.PLAN).unlink()
+    if state == "linked-plan":
+        (owner / capture.PLAN).symlink_to(owner / "missing-plan")
+    elif state == "bad-plan":
+        (owner / capture.PLAN).write_text("not valid TOML]")
+    elif state == "malformed":
+        (owner / capture.MANIFEST).write_text("not JSON")
+    elif state in {"dangling", "catalog-only"}:
+        (owner / capture.MANIFEST).unlink()
+        if state == "dangling":
+            (owner / capture.MANIFEST).symlink_to(owner / "missing-manifest")
+    project = cli.Project(owner, "heinzel-harbor", "0.1.0", capture.project_data(owner))
+    monkeypatch.setattr(cli, "projects", lambda: [project])
+    assert cli.screenshot_main(["--all", "--json"], check=True) == 1
+    report = json.loads(capsys.readouterr().out)
+    key = "failed"  # deterministic format requires an explicit definition, never silently skips media
+    assert len(report[key]) == 1
+    assert sum(len(report[key]) for key in ("fresh", "stale", "failed")) == 1
+
+
+@pytest.mark.parametrize("indication", ["plan", "manifest", "linked-plan", "linked-manifest", "catalog"])
+def test_single_and_aggregate_use_the_same_gallery_discovery(owner, monkeypatch, capsys, indication):
+    if indication == "catalog":
+        metadata = {"tool": {"heinzel": {"catalog": {"screenshots": [{"path": "missing.png"}]}}}}
+    else:
+        metadata = {}
+        relative = capture.PLAN if indication.endswith("plan") else capture.MANIFEST
+        path = owner / relative
+        path.parent.mkdir(parents=True, exist_ok=True)
+        if indication.startswith("linked"):
+            path.symlink_to(owner / "missing-input")
+        else:
+            path.write_text("malformed input")
+    project = cli.Project(owner, "heinzel-harbor", "0.1.0", metadata)
+    called = []
+
+    def checked(item):
+        called.append(item)
+        raise privacy.CaptureError("Broken configured gallery")
+
+    monkeypatch.setattr(cli.vendor, "project", lambda *_: None)
+    monkeypatch.setattr(cli, "check_screenshots", checked)
+    with pytest.raises(privacy.CaptureError, match="Broken configured gallery"):
+        cli.check(project, None, fast=True)
+    assert cli.check_all_screenshots([project], json_output=True) == 1
+    assert called == [project, project]
+    assert json.loads(capsys.readouterr().out)["failed"][0]["plugin"] == project.name

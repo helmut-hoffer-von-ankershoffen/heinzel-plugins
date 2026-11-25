@@ -43,10 +43,12 @@ def test_a_cold_checkout_of_a_committed_gallery_is_fresh_without_building(tmp_pa
     before = gallery_hashes()
     monkeypatch.setattr(plugins, "run", lambda *a, **kw: pytest.fail("the offline check builds nothing"))
     inventory = plugins.projects(owner)
-    assert len(inventory) == 1 and inventory[0].name == plugin
+    assert len(inventory) == 1
+    assert inventory[0].name == plugin
     # A cold checkout without built views is fresh: the digest covers UI sources, never build output.
     report = plugins.check_screenshots(inventory[0])
-    assert report["fresh"] is True and "privacy_reviewed" not in report
+    assert report["fresh"] is True
+    assert "privacy_reviewed" not in report
     assert before == gallery_hashes()
 
 
@@ -137,7 +139,8 @@ def test_plugin_only_hooks_do_not_run_collection_checks():
     assert "check-changed" in owner["entry"]
     assert owner["require_serial"] is True
     assert owner["entry"].endswith("--git-hook'")
-    assert owner["pass_filenames"] is False and owner["always_run"] is True
+    assert owner["pass_filenames"] is False
+    assert owner["always_run"] is True
 
 
 @pytest.fixture(params=[False, True])
@@ -201,7 +204,8 @@ def test_actual_prek_dispatch_includes_deletions_and_noops_for_unrelated_changes
     import yaml
 
     git, prek = shutil.which("git"), shutil.which("prek")
-    assert git and prek
+    assert git
+    assert prek
 
     def run(*args):
         return subprocess.check_output([git, *args], cwd=tmp_path, text=True, timeout=30)  # noqa: S603 - resolved git and disposable repository
@@ -254,7 +258,8 @@ def test_actual_first_push_and_new_branch_deletion_select_the_owning_contract_co
     import yaml
 
     git, prek = shutil.which("git"), shutil.which("prek")
-    assert git and prek
+    assert git
+    assert prek
     remote, root = tmp_path / "origin.git", tmp_path / "work"
     root.mkdir()
 

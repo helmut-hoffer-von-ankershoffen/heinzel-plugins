@@ -90,13 +90,15 @@ def test_capture_freshness_and_recovery_for_a_new_plugin(tmp_path):
     published = command("screenshots", "--json")
     assert published.returncode == 0, published.stderr + published.stdout
     report = json.loads(published.stdout)
-    assert report["ok"] and report["fresh"]
+    assert report["ok"]
+    assert report["fresh"]
     assert len(report["screenshots"]) == 3
     assert Path(report["preview"]).is_file()
     assert (owner / "README.md").read_text().count("<img ") == 3
     images = {s["path"]: (owner / s["path"]).read_bytes() for s in report["screenshots"]}
     check = command("screenshots", "--check", "--json")
-    assert check.returncode == 0 and json.loads(check.stdout)["fresh"]
+    assert check.returncode == 0
+    assert json.loads(check.stdout)["fresh"]
     generated = [path for path in (owner / capture.OUTPUT).iterdir() if path.suffix != ".png"]
     generated += [owner / "README.md", plan_path]
     generated_bytes = {path: path.read_bytes() for path in generated}
@@ -125,7 +127,8 @@ def test_capture_freshness_and_recovery_for_a_new_plugin(tmp_path):
     (package / "static").mkdir()
     (package / "static/harbor.css").write_text("main { color: teal; }\n")
     stale = command("screenshots-check", "--json")
-    assert stale.returncode == 1 and json.loads(stale.stdout)["command"] == "make screenshots NAME=heinzel-harbor"
+    assert stale.returncode == 1
+    assert json.loads(stale.stdout)["command"] == "make screenshots NAME=heinzel-harbor"
     broken = json.loads(json.dumps(plan))
     broken["scenes"][0]["timeout_ms"] = 1000
     broken["scenes"][0]["steps"] = [{"action": "click", "role": "button", "name": "A missing fixture button"}]
@@ -133,7 +136,8 @@ def test_capture_freshness_and_recovery_for_a_new_plugin(tmp_path):
     failed = command("screenshots", "--json")
     assert failed.returncode == 1
     error = json.loads(failed.stdout)
-    assert not error["ok"] and "Scene today failed" in error["error"]
+    assert not error["ok"]
+    assert "Scene today failed" in error["error"]
     assert "#token=" not in error["error"]
     assert (owner / ".preview/screenshots/today-failure.png").is_file()
     assert all((owner / path).read_bytes() == content for path, content in images.items())

@@ -6,7 +6,7 @@
       "name": "theme-light",
       "surface": "ui",
       "route": "/contracts/launch-review",
-      "caption": "A fictional Launch review contract, its configuration and run commands, in the applied Heinzelmännchen light theme.",
+      "caption": "A fictional Launch review contract, its requirements and next-step commands in the applied Heinzelmännchen light theme.",
       "theme": "heinzelmaennchen",
       "appearance": "light",
       "viewport": {
@@ -46,7 +46,7 @@
       "name": "theme-soundscapes",
       "surface": "ui",
       "route": "/?settings=appearance",
-      "caption": "Demo profile: browse the three optional YouTube soundscapes in appearance settings.",
+      "caption": "Demo profile: browse the four optional soundscapes in Appearance settings without starting playback.",
       "theme": "heinzelmaennchen",
       "appearance": "light",
       "viewport": {
@@ -66,6 +66,10 @@
         {
           "action": "wait",
           "text": "Die Heinzelmännchen"
+        },
+        {
+          "action": "wait",
+          "text": "Singularity"
         }
       ]
     },
@@ -82,7 +86,7 @@
     {
       "name": "soundscapes-cli",
       "surface": "cli",
-      "caption": "Demo profile: list Claude FM, Die Heinzelmännchen and Hyper Focus without starting playback.",
+      "caption": "Demo profile: list the available soundscapes without starting playback.",
       "command": [
         "system",
         "sound",

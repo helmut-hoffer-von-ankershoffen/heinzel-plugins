@@ -3,6 +3,7 @@
    claude-fm    Claude FM            stream (youtube)  heinzel-theme
    focus        Die Heinzelmännchen  stream (youtube)  heinzel-theme
    hyper-focus  Hyper Focus          stream (youtube)  heinzel-theme
+   singularity  Singularity          stream (youtube)  heinzel-theme
 Volume 50; follow my theme off; mute in meetings on. It plays in the web app (hz ui) after you press Play.
 Next:
   hz system sound use claude-fm

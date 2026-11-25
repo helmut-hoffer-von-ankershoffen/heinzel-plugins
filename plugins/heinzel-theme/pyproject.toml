@@ -1,6 +1,6 @@
 [project]
 name = "heinzel-theme"
-version = "0.1.6"
+version = "0.1.7"
 description = "The Heinzelmännchen theme and its soundscapes."
 license = "MIT"
 license-files = ["LICENSE"]
@@ -133,7 +133,7 @@ title = "Heinzelmännchen"
 category = "themes"
 highlights = [
     "Warm light and dark palettes with character artwork",
-    "Claude FM, Die Heinzelmännchen and Hyper Focus soundscapes",
+    "Claude FM, Die Heinzelmännchen, Hyper Focus and Singularity soundscapes",
     "Theme content owned entirely by this plugin",
 ]
 themes = ["src/heinzel_theme/themes/heinzelmaennchen.toml"]
@@ -141,7 +141,7 @@ themes = ["src/heinzel_theme/themes/heinzelmaennchen.toml"]
 [[tool.heinzel.catalog.screenshots]]
 path = "docs/assets/screenshots/theme-light.png"
 surface = "ui"
-caption = "A fictional Launch review contract, its configuration and run commands, in the applied Heinzelmännchen light theme."
+caption = "A fictional Launch review contract, its requirements and next-step commands in the applied Heinzelmännchen light theme."
 
 [[tool.heinzel.catalog.screenshots]]
 path = "docs/assets/screenshots/theme-dark.png"
@@ -151,7 +151,7 @@ caption = "The same fictional Launch review contract in the applied Heinzelmänn
 [[tool.heinzel.catalog.screenshots]]
 path = "docs/assets/screenshots/theme-soundscapes.png"
 surface = "ui"
-caption = "Demo profile: browse the three optional YouTube soundscapes in appearance settings."
+caption = "Demo profile: browse the four optional soundscapes in Appearance settings without starting playback."
 
 [[tool.heinzel.catalog.screenshots]]
 path = "docs/assets/screenshots/theme-cli.png"
@@ -161,4 +161,4 @@ caption = "Demo profile: list available themes and identify Heinzelmännchen fro
 [[tool.heinzel.catalog.screenshots]]
 path = "docs/assets/screenshots/soundscapes-cli.png"
 surface = "cli"
-caption = "Demo profile: list Claude FM, Die Heinzelmännchen and Hyper Focus without starting playback."
+caption = "Demo profile: list the available soundscapes without starting playback."

@@ -284,11 +284,15 @@ def backend_is_running(state):
 def test_a_draft_capture_records_every_scene_privately(harness):
     report = record(harness, draft_only=True)
     folder = harness.owner / capture.DRAFT
-    assert report["ok"] is True and report["fresh"] is False and report["draft"] == str(folder)
+    assert report["ok"] is True
+    assert report["fresh"] is False
+    assert report["draft"] == str(folder)
     assert [shot["surface"] for shot in report["screenshots"]] == ["ui", "ui", "cli"]
     draft = json.loads((folder / capture.DRAFT_MANIFEST).read_text())
-    assert draft["plugin"] == "heinzel-harbor" and draft["core_version"] == "0.9.8"
-    assert not (folder / "REVIEW.md").exists() and not (folder / "review.schema.json").exists()
+    assert draft["plugin"] == "heinzel-harbor"
+    assert draft["core_version"] == "0.9.8"
+    assert not (folder / "REVIEW.md").exists()
+    assert not (folder / "review.schema.json").exists()
     assert (folder / "cli.txt").read_text() == "Hello, Mira!\n"
     assert (folder / "ui.txt").read_text() == "Harbor greeting: Hello, Mira!\n"
     assert all((folder / name).read_bytes().startswith(PNG) for name in draft["images"])
@@ -308,7 +312,8 @@ def test_a_whole_capture_starts_no_agent_process(harness, monkeypatch):
     monkeypatch.setattr(capture.shutil, "which", lambda name: pytest.fail(f"looked up {name}"))
     assert record(harness)["fresh"] is True
     started = [Path(str(command[0])).name for command in harness.commands + popened]
-    assert started and not AGENTS & set(started)
+    assert started
+    assert not AGENTS & set(started)
 
 
 def test_the_isolated_backend_is_always_reaped(harness):
@@ -319,11 +324,11 @@ def test_the_isolated_backend_is_always_reaped(harness):
 def test_ui_scenes_only_reach_the_local_app_and_use_the_demo_appearance(harness):
     record(harness, draft_only=True)
     goto = [entry[1] for entry in harness.log if entry[0] == "goto"]
-    assert goto and all(
-        url.startswith("http://127.0.0.1:8123/") and url.endswith("#token=demo_session_token") for url in goto
-    )
+    assert goto
+    assert all(url.startswith("http://127.0.0.1:8123/") and url.endswith("#token=demo_session_token") for url in goto)
     init = next(entry[1] for entry in harness.log if entry[0] == "init")
-    assert '"hz.theme","light"' in init and "hz.onboarding" in init
+    assert '"hz.theme","light"' in init
+    assert "hz.onboarding" in init
     assert ("route", "**/*") in harness.log
 
 
@@ -347,14 +352,16 @@ def test_a_missing_browser_is_installed_once_and_launch_is_retried(harness):
     harness.launch_errors.append(FakeError("Executable doesn't exist at /somewhere"))
     report = record(harness, draft_only=True)
     assert report["ok"] is True
-    assert len(harness.installs) == 1 and harness.installs[0][-2:] == ["install", "chromium"]
+    assert len(harness.installs) == 1
+    assert harness.installs[0][-2:] == ["install", "chromium"]
 
 
 def test_an_unrelated_browser_launch_failure_is_not_papered_over_by_an_install(harness):
     harness.launch_errors.append(FakeError("Sandbox initialization failed"))
     with pytest.raises(FakeError):
         record(harness, draft_only=True)
-    assert harness.installs == [] and not backend_is_running(harness)
+    assert harness.installs == []
+    assert not backend_is_running(harness)
 
 
 def test_an_oversized_cli_rendering_is_refused(harness):
@@ -514,7 +521,8 @@ def test_a_complete_capture_publishes_deterministically_and_checks_fresh(harness
     catalog = capture.project_data(harness.owner)["tool"]["heinzel"]["catalog"]["screenshots"]
     assert [shot["path"] for shot in catalog] == [f"docs/assets/screenshots/{n}.png" for n in ("ui", "terminal", "cli")]
     manifest = json.loads((harness.owner / capture.MANIFEST).read_text())
-    assert manifest["format"] == 2 and "privacy_review" not in manifest
+    assert manifest["format"] == 2
+    assert "privacy_review" not in manifest
 
 
 def test_a_page_title_or_url_with_private_data_stops_the_capture(harness):
@@ -624,7 +632,8 @@ def test_a_failed_command_line_run_returns_safe_json_and_status_one(harness, mon
     assert capture.main() == 1
     captured = capsys.readouterr()
     report = json.loads(captured.out)
-    assert report["ok"] is False and "CLI scene failed" in report["error"]
+    assert report["ok"] is False
+    assert "CLI scene failed" in report["error"]
     assert "Capture failed:" in captured.err
 
 
@@ -679,7 +688,8 @@ def test_capture_uses_physical_owned_temp_paths_even_when_the_os_returns_an_alia
     assert record(harness, draft_only=True)["ok"] is True
     assert len(observed) == 1
     assert not observed[0].exists()
-    assert alias.is_symlink() and physical.is_dir()
+    assert alias.is_symlink()
+    assert physical.is_dir()
 
 
 def test_environment_does_not_canonicalize_a_foreign_supplied_path(tmp_path):
@@ -842,7 +852,8 @@ def test_capture_installs_the_built_wheel_and_restores_the_editable_install(harn
     ):
         assert seen == [["uv", "build", "--wheel"], ["uv", "pip", "install"]]
         raise RuntimeError("scene failed")
-    assert len(seen) == 3 and seen[2] == ["uv", "pip", "install"]
+    assert len(seen) == 3
+    assert seen[2] == ["uv", "pip", "install"]
 
 
 @pytest.mark.parametrize(
@@ -887,7 +898,9 @@ def test_a_failed_restore_never_hides_the_capture_failure(harness, monkeypatch, 
 def test_verify_recaptures_and_passes_when_every_scene_renders_the_same_text(harness):
     record(harness)
     report = capture.verify(harness.owner, core=None, headed=False, prepared_python=harness.interpreter)
-    assert report["ok"] and report["transcripts_differ"] == [] and report["images_differ"] == []
+    assert report["ok"]
+    assert report["transcripts_differ"] == []
+    assert report["images_differ"] == []
 
 
 def test_verify_fails_naming_the_command_when_displayed_text_changed_outside_the_ui_inputs(harness):
@@ -904,7 +917,8 @@ def test_verify_lists_image_differences_and_gates_them_only_when_strict(harness)
     record(harness)
     harness.settings["png"] = PNG + b"other-font-rendering"
     report = capture.verify(harness.owner, core=None, headed=False, prepared_python=harness.interpreter)
-    assert report["ok"] and len(report["images_differ"]) == 3
+    assert report["ok"]
+    assert len(report["images_differ"]) == 3
     with pytest.raises(privacy.StaleGallery):
         capture.verify(harness.owner, core=None, headed=False, prepared_python=harness.interpreter, strict_images=True)
 
@@ -918,3 +932,19 @@ def test_verify_ignores_clock_readings_but_not_labels(harness):
     manifest["transcripts"]["cli.txt"] = hashlib.sha256(transcript.read_bytes()).hexdigest()
     (harness.owner / capture.MANIFEST).write_text(json.dumps(manifest))
     assert capture.verify(harness.owner, core=None, headed=False, prepared_python=harness.interpreter)["ok"]
+
+
+def test_cli_arguments_stay_literal_and_never_become_interpreter_or_shell_options(tmp_path):
+    binary = tmp_path / "bin"
+    binary.mkdir()
+    interpreter = binary / "python"
+    interpreter.symlink_to(sys.executable)
+    marker = tmp_path / "should-not-exist"
+    (binary / "hz").write_text("import json, sys\nprint(json.dumps(sys.argv[1:]))\n")
+    arguments = ["-c", f"open({str(marker)!r}, 'w').write('bad')", "; touch should-not-exist"]
+    env = capture.demo_environment(tmp_path / "demo", interpreter)
+    assert json.loads(capture.hz(interpreter, arguments, env, tmp_path)) == arguments
+    assert not marker.exists()
+    assert not (tmp_path / "should-not-exist").exists()
+    with pytest.raises(privacy.CaptureError, match="bounded list"):
+        capture.hz(interpreter, ["safe", "bad\x00argument"], env, tmp_path)

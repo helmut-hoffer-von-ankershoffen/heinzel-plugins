@@ -1,0 +1,9 @@
+# Singularity, a selectable YouTube soundscape (ADR 0058).
+# By default, played in YouTube's privacy-enhanced player; nothing of YouTube loads until you press Play.
+name = "singularity"
+title = "Singularity"
+kind = "stream"
+
+[stream]
+provider = "youtube"
+video = "AvtStYuO79Y"
