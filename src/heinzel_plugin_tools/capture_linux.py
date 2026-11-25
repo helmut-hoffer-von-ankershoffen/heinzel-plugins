@@ -59,6 +59,11 @@ def index_snapshot(root: Path, project: Path) -> None:
     env = {key: value for key, value in os.environ.items() if not key.startswith("GIT_")}
     env.update(GIT_CONFIG_NOSYSTEM="1", GIT_CONFIG_GLOBAL=os.devnull)
     try:
+        metadata = project / ".git"
+        if metadata.is_symlink() or metadata.is_file():
+            raise CaptureError("The isolated source inventory is not a directory")
+        if metadata.exists():
+            shutil.rmtree(metadata)
         subprocess.run(
             ["git", "init", "--quiet", "--template=", str(project)], env=env, check=True, capture_output=True
         )
@@ -241,6 +246,8 @@ def run(args) -> dict:
             raise CaptureError("Canonical Linux capture returned no result; no gallery was changed") from error
         if capture.input_digest(root, capture.read_plan(root)) != original_inputs:
             raise CaptureError("Screenshot inputs changed during canonical capture; capture again")
+        # The worker can change its private Git config. Never let host Git read it.
+        index_snapshot(root, project)
         if capture.input_digest(project, plan) != original_inputs:
             raise CaptureError("The isolated source snapshot differs from the owning screenshot inputs")
         if render_check:

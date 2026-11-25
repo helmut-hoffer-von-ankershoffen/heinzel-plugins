@@ -832,6 +832,9 @@ def test_canonical_linux_runs_exact_image_without_host_state_and_keeps_all_text(
         assert not (cwd / "project/.venv").exists()
         assert not (cwd / "project/.env").exists()
         assert (cwd / "core" / wheel.name).read_bytes() == wheel.read_bytes()
+        # An untrusted renderer must never arrange host-side Git execution.
+        config = cwd / "project/.git/config"
+        config.write_text(config.read_text() + "\n[core]\nfsmonitor = /untrusted-worker-command\n")
         folder = draft_of(cwd / "project")
         (folder / "index.html").write_text("Fictional contact sheet")
         if private_text:
