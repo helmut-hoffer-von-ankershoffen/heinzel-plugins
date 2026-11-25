@@ -45,6 +45,46 @@ def command(argv: list[str], *, cwd: Path, capture: bool = False, capture_stderr
         ) from error
 
 
+def index_snapshot(root: Path, project: Path) -> None:
+    """Preserve source discovery without copying host Git history, configuration or hooks.
+
+    Builds may create ignored UI assets. A fresh index retains exactly the original
+    candidates, including tracked ignored assets, while excluding new build output.
+    """
+    from heinzel_plugin_tools import capture
+
+    names = [
+        name for name in capture.candidate_files(root) if (project / name).is_file() or (project / name).is_symlink()
+    ]
+    env = {key: value for key, value in os.environ.items() if not key.startswith("GIT_")}
+    env.update(GIT_CONFIG_NOSYSTEM="1", GIT_CONFIG_GLOBAL=os.devnull)
+    try:
+        subprocess.run(
+            ["git", "init", "--quiet", "--template=", str(project)], env=env, check=True, capture_output=True
+        )
+        (project / ".git/info").mkdir(exist_ok=True)
+        (project / ".git/info/exclude").write_text("*\n")
+        if names:
+            subprocess.run(
+                [
+                    "git",
+                    "--literal-pathspecs",
+                    "-C",
+                    str(project),
+                    "add",
+                    "--force",
+                    "--pathspec-from-file=-",
+                    "--pathspec-file-nul",
+                ],
+                input=("\0".join(names) + "\0").encode(),
+                env=env,
+                check=True,
+                capture_output=True,
+            )
+    except (OSError, subprocess.CalledProcessError) as error:
+        raise CaptureError("Cannot preserve the isolated screenshot source inventory") from error
+
+
 def copy_draft(source: Path, root: Path, plan: dict) -> None:
     """Import only bounded, validated scene artifacts, never arbitrary container paths."""
     from heinzel_plugin_tools import capture
@@ -107,6 +147,7 @@ def run(args) -> dict:
                 ".pypirc",
             ),
         )
+        index_snapshot(root, project)
         for directory in ("home", "cache", "python", "bootstrap"):
             (work / directory).mkdir()
         runtime = work / "runtime"

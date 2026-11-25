@@ -5,6 +5,7 @@ import json
 import os
 import re
 import shutil
+import subprocess
 import sys
 from pathlib import Path
 from types import SimpleNamespace
@@ -1018,3 +1019,28 @@ def test_successful_publication_never_publishes_private_scan_evidence(owner):
     assert list(folder.glob("*.scan.txt"))
     assert not list((owner / capture.OUTPUT).glob("*.scan.txt"))
     assert "scan_text" not in json.loads((owner / capture.MANIFEST).read_text())
+
+
+def test_canonical_snapshot_preserves_declared_inputs_and_ignores_build_output(owner, tmp_path):
+    from heinzel_plugin_tools import capture_linux
+
+    capture.write_default_plan(owner)
+    view = owner / "src/heinzel_harbor/views"
+    view.mkdir()
+    tracked = view / "[original].js"
+    tracked.write_text("original view")
+    (owner / ".gitignore").write_text("src/heinzel_harbor/views/\n")
+    subprocess.run(["git", "init", "--quiet", "--template=", str(owner)], check=True)  # noqa: S603,S607 -- fixed fixture Git command
+    subprocess.run(["git", "-C", str(owner), "add", "--force", str(tracked)], check=True)  # noqa: S603,S607 -- fixed fixture Git command
+    plan = capture.read_plan(owner)
+    before = capture.input_digest(owner, plan)
+    project = tmp_path / "copy"
+    shutil.copytree(owner, project, ignore=shutil.ignore_patterns(".git", "copy"))
+    capture_linux.index_snapshot(owner, project)
+    assert not (project / ".git/hooks").exists()
+    assert not (project / ".git/refs/heads/main").exists()
+    (project / "src/heinzel_harbor/views/generated.js").write_text("built asset")
+    assert capture.input_digest(project, plan) == before
+    assert "src/heinzel_harbor/views/[original].js" in capture.candidate_files(project)
+    (project / "src/heinzel_harbor/views/[original].js").write_text("changed source")
+    assert capture.input_digest(project, plan) != before
