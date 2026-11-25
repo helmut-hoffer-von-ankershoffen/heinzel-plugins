@@ -1,11 +1,13 @@
 """The same disposable Linux browser and source snapshot for authors and CI."""
 
+import contextlib
 import json
 import os
 import shutil
 import subprocess
 import sys
 import tempfile
+import uuid
 from pathlib import Path
 
 from heinzel_plugin_tools.privacy import CaptureError, _confidentiality_module, regular_bytes, safe_path
@@ -130,37 +132,44 @@ def run(args) -> dict:
         if args.strict_images:
             child += ["--strict-images"]
         print("Capturing inside the isolated Linux worker…", file=sys.stderr, flush=True)
-        result = command(
-            [
-                "docker",
-                "run",
-                "--rm",
-                "--platform",
-                PLATFORM,
-                "--ipc=private",
-                "--shm-size=1g",
-                "--mount",
-                f"type=bind,source={work},target=/capture",
-                "--workdir",
-                "/capture/project",
-                "--env",
-                "LANG=C.UTF-8",
-                "--env",
-                "LC_ALL=C.UTF-8",
-                "--env",
-                "TZ=UTC",
-                "--env",
-                "GITHUB_ACTIONS=true",
-                "--env",
-                "CONFIDENTIALITY_REQUIRED=true",
-                "--env",
-                "CONFIDENTIAL_TERMS_FILE=/capture/terms",
-                image,
-                *child,
-            ],
-            cwd=work,
-            capture=True,
-        )
+        container = "hz-gallery-" + uuid.uuid4().hex
+        try:
+            result = command(
+                [
+                    "docker",
+                    "run",
+                    "--rm",
+                    "--name",
+                    container,
+                    "--platform",
+                    PLATFORM,
+                    "--ipc=private",
+                    "--shm-size=1g",
+                    "--mount",
+                    f"type=bind,source={work},target=/capture",
+                    "--workdir",
+                    "/capture/project",
+                    "--env",
+                    "LANG=C.UTF-8",
+                    "--env",
+                    "LC_ALL=C.UTF-8",
+                    "--env",
+                    "TZ=UTC",
+                    "--env",
+                    "GITHUB_ACTIONS=true",
+                    "--env",
+                    "CONFIDENTIALITY_REQUIRED=true",
+                    "--env",
+                    "CONFIDENTIAL_TERMS_FILE=/capture/terms",
+                    image,
+                    *child,
+                ],
+                cwd=work,
+                capture=True,
+            )
+        finally:
+            with contextlib.suppress(CaptureError):
+                command(["docker", "rm", "--force", container], cwd=work, capture=True, timeout=30)
         try:
             report = json.loads(result.stdout)
         except (ValueError, TypeError) as error:
@@ -176,7 +185,7 @@ def run(args) -> dict:
                 capture.safe_failure_message(CaptureError(str(report.get("error", "Canonical Linux capture failed"))))
             )
         if not args.verify and not args.draft:
-            return capture.publish_draft(root)
+            report = capture.publish_draft(root)
         report["preview"] = str(root / capture.DRAFT / "index.html")
         if "draft" in report:
             report["draft"] = str(root / capture.DRAFT)
