@@ -104,6 +104,7 @@ def test_unreleased_skips_a_version_pypi_serves_already(tmp_path, monkeypatch):
     seen = []
     assert versions.unreleased(tmp_path, set(), lambda name, version: seen.append((name, version)) or True) == []
     assert seen == [("heinzel-a", "0.1.0")]
+    assert versions.unreleased(tmp_path, set(), with_tags=True) == ["heinzel-a/v0.1.0"]
     assert versions.unreleased(tmp_path, set(), lambda name, version: False) == ["heinzel-a"]
 
 

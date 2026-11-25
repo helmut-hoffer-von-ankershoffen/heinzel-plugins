@@ -332,3 +332,21 @@ def test_the_cli_reads_the_notes_file(tmp_path, monkeypatch):
     monkeypatch.setattr("sys.argv", arguments)
     publisher.main()
     assert seen["notes"] == publisher.DEFAULT_NOTES
+
+
+def test_overlapping_automatic_publication_reconciles_original_bytes(monkeypatch):
+    tag = "heinzel-clock/v1.0"
+    current = {"release": None}
+    uploads = []
+    monkeypatch.setattr(publisher, "find_release", lambda repo, selected: current["release"])
+    monkeypatch.setattr(
+        publisher, "restore", lambda *args: {"revision": REVISION, "artifacts": ["original.whl", "original.tar.gz"]}
+    )
+    monkeypatch.setattr(subprocess, "run", lambda argv, **kwargs: uploads.append(argv))
+    assert not publisher.reconcile_published(REPOSITORY, tag, REVISION)
+    current["release"] = {"draft": False}
+    assert publisher.reconcile_published(REPOSITORY, tag, REVISION)
+    assert uploads == [["uv", "publish", "--check-url", "https://pypi.org/simple", "original.whl", "original.tar.gz"]]
+    with pytest.raises(ValueError, match="another revision"):
+        publisher.reconcile_published(REPOSITORY, tag, "b" * 40)
+    assert len(uploads) == 1

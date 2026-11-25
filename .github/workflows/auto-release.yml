@@ -3,7 +3,7 @@ name: Release bumped plugins
 # After a green main, release every plugin whose version has no tag yet and is not on PyPI yet, so a version bump is
 # published when it merges and app composition never finds a version that was never released (ADR 0114; owner decision
 # 2026-11-22: CI publishes on merge). Each release goes through the reviewed Release one plugin workflow (trusted
-# publishing); a plugin whose release is already running is skipped, so a release is never dispatched twice.
+# publishing). Publishers serialize on the verified version tag.
 
 on:
   workflow_run: # zizmor: ignore[dangerous-triggers] the job admits only a green push to this repository's main
@@ -39,20 +39,15 @@ jobs:
       # has moved on, the newer commit's own green run releases what is still untagged.
       - name: Dispatch a release for each version not released yet
         env:
+          GREEN_SHA: ${{ github.event.workflow_run.head_sha }}
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
         run: |
-          plugins="$(python3 scripts/plugin_versions.py unreleased --skip-published)"
+          plugins="$(python3 scripts/plugin_versions.py unreleased --skip-published --tags)"
           if [ -z "$plugins" ]; then
             echo "Every plugin version is released."
             exit 0
           fi
-          active="$(gh run list --workflow release.yml --limit 100 --json status,displayTitle \
-            --jq '.[] | select(.status != "completed") | .displayTitle')"
-          while read -r plugin; do
-            if grep -qxF "Release $plugin" <<< "$active"; then
-              echo "A release of $plugin is running already."
-              continue
-            fi
-            gh workflow run release.yml --ref main -f plugin="$plugin" -f publish=true
+          while read -r tag; do
+            gh workflow run release.yml --ref main -f plugin="${tag%/v*}" -f publish=true -f expected_sha="$GREEN_SHA" -f expected_tag="$tag"
           done <<< "$plugins"

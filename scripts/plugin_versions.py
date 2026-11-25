@@ -173,7 +173,9 @@ def on_pypi(name: str, version: str) -> bool:
         return False
 
 
-def unreleased(root: Path, tags: set[str], published: Callable[[str, str], bool] | None = None) -> list[str]:
+def unreleased(
+    root: Path, tags: set[str], published: Callable[[str, str], bool] | None = None, *, with_tags: bool = False
+) -> list[str]:
     """Plugins in `root` whose current version has no release tag yet (and, with `published`, is not on PyPI yet)."""
     names = []
     for path in sorted((root / PLUGINS).glob("*/pyproject.toml")):
@@ -182,7 +184,7 @@ def unreleased(root: Path, tags: set[str], published: Callable[[str, str], bool]
             continue
         if published is not None and published(project["name"], project["version"]):
             continue
-        names.append(project["name"])
+        names.append(f"{project['name']}/v{project['version']}" if with_tags else project["name"])
     return names
 
 
@@ -212,9 +214,13 @@ def main(arguments: list[str]) -> int:
                 file=sys.stderr,
             )
         return 1 if bumps or stale or undocumented else 0
-    if arguments in (["unreleased"], ["unreleased", "--skip-published"]):
+    if arguments in (["unreleased"], ["unreleased", "--skip-published"], ["unreleased", "--skip-published", "--tags"]):
         published = on_pypi if "--skip-published" in arguments else None
-        print("\n".join(unreleased(Path(), set(_git("tag", "--list").splitlines()), published)))
+        print(
+            "\n".join(
+                unreleased(Path(), set(_git("tag", "--list").splitlines()), published, with_tags="--tags" in arguments)
+            )
+        )
         return 0
     print(main.__doc__, file=sys.stderr)
     return 2

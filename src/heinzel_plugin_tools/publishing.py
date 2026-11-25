@@ -14,6 +14,7 @@ import secrets
 import ssl
 import subprocess
 import tarfile
+import tempfile
 import time
 import zipfile
 from collections.abc import Callable, Collection
@@ -356,6 +357,21 @@ def restore(repository: str, tag: str, name: str, destination: Path) -> dict:
     }
 
 
+def reconcile_published(repository: str, tag: str, revision: str) -> bool:
+    """Another serialized writer finished first. Use the original attested artifacts for PyPI."""
+    release = find_release(repository, tag)
+    if release is None or release.get("draft") is True:
+        return False
+    with tempfile.TemporaryDirectory() as work:
+        record = restore(repository, tag, tag.split("/v")[0], Path(work) / "original")
+        if record["revision"] != revision:
+            raise ValueError("Existing plugin tag belongs to another revision")
+        subprocess.run(
+            ["uv", "publish", "--check-url", "https://pypi.org/simple", *record["artifacts"]], check=True, timeout=600
+        )
+    return True
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--tag", required=True)
@@ -364,6 +380,7 @@ def main() -> None:
     parser.add_argument("--pypi", action="store_true")
     parser.add_argument("--make-latest", choices=("true", "false"))
     parser.add_argument("--prerelease", action="store_true")
+    parser.add_argument("--reconcile-published", action="store_true")
     parser.add_argument("--restore", action="store_true")
     parser.add_argument("--name")
     parser.add_argument("--notes-file", type=Path, help="Release body for a new draft (default: a fixed sentence)")
@@ -380,6 +397,11 @@ def main() -> None:
         return
     if not args.revision:
         parser.error("Publication requires the exact built revision")
+    if args.reconcile_published:
+        if not args.pypi or args.prerelease:
+            parser.error("Automatic reconciliation requires a public plugin release")
+        if reconcile_published(os.environ["GH_REPO"], args.tag, args.revision):
+            return
     files = sorted(path for path in args.directory.iterdir() if path.name != "release.json" and path.is_file())
     publish(
         os.environ["GH_REPO"],

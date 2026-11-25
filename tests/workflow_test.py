@@ -80,7 +80,7 @@ def test_auto_release_publishes_every_merged_bump_and_never_twice():
     run = yaml.safe_load(text)["jobs"]["release"]["steps"][-1]["run"]
     assert "RELEASE_CHANNELS" not in text
     assert "plugin_versions.py unreleased --skip-published" in run
-    assert 'grep -qxF "Release $plugin"' in run and "gh workflow run release.yml --ref main" in run
+    assert "gh workflow run release.yml --ref main" in run and '-f expected_sha="$GREEN_SHA"' in run
     release = yaml.safe_load((ROOT / ".github/workflows/release.yml").read_text())
     assert release["run-name"] == "Release ${{ inputs.plugin }}"
 
@@ -100,3 +100,35 @@ def test_every_release_body_comes_from_the_changelog_notes():
             assert all('--notes-file "$RUNNER_TEMP/release-notes.md"' in line for line in publications), name
             notes = run.index("scripts/release_notes.py")
             assert notes < run.index("--tag") and '> "$RUNNER_TEMP/release-notes.md"' in run, name
+
+
+@pytest.mark.parametrize("drift", ["none", "sha", "tag"])
+def test_automatic_release_guards_execute_against_checkout_and_build(drift):
+    import os
+    import subprocess
+
+    workflow = yaml.safe_load((ROOT / ".github/workflows/release.yml").read_text())
+    steps = workflow["jobs"]["build"]["steps"]
+    guards = [step["run"] for step in steps if "automatic" in step.get("name", "").lower()]
+    sha = subprocess.check_output(["/usr/bin/git", "rev-parse", "HEAD"], cwd=ROOT, text=True).strip()
+    selected = "heinzel-clock/v1.0"
+    env = dict(
+        os.environ,
+        EXPECTED=sha,
+        GITHUB_SHA=sha,
+        GITHUB_REF="refs/heads/main",
+        PLUGIN="heinzel-clock",
+        RESUME="",
+        TAG=selected,
+    )
+    if drift == "sha":
+        env["EXPECTED"] = "0" * 40
+    source = subprocess.run(["/bin/bash", "-ec", guards[0]], cwd=ROOT, env=env)  # noqa: S603 - exercise the repository workflow with synthetic inputs
+    env.update(REVISION=sha, SELECTED=selected)
+    if drift == "tag":
+        env["TAG"] = "heinzel-clock/v1.1"
+    version = subprocess.run(["/bin/bash", "-ec", guards[1]], cwd=ROOT, env=env)  # noqa: S603 - exercise the repository workflow with synthetic inputs
+    assert (source.returncode == 0) == (drift != "sha")
+    assert (version.returncode == 0) == (drift == "none")
+    for job in ("publish", "github-publish"):
+        assert workflow["jobs"][job]["concurrency"]["group"] == "plugin-publication-${{ needs.build.outputs.tag }}"
