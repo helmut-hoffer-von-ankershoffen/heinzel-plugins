@@ -557,6 +557,16 @@ def build_view_assets(project: Project) -> None:
         run(["uv", "run", "--no-project", "--script", str(project.directory / "web/build.py"), "run", "build"])
 
 
+def has_gallery(project: Project) -> bool:
+    """Discover configured media, including legacy manifests and broken linked inputs."""
+    from heinzel_plugin_tools.capture import MANIFEST, PLAN
+
+    paths = (project.directory / PLAN, project.directory / MANIFEST)
+    return any(path.exists() or path.is_symlink() for path in paths) or bool(
+        project.metadata.get("tool", {}).get("heinzel", {}).get("catalog", {}).get("screenshots")
+    )
+
+
 def check_screenshots(project: Project) -> dict:
     """Verify gallery freshness offline; the digest covers built view assets, so a clean checkout builds them first."""
     from heinzel_plugin_tools.capture import check_capture
@@ -576,9 +586,7 @@ def check(
 ) -> None:
     """Run only the owning package's checks against an installed core/SDK artifact."""
     verified = vendor.project(project.directory)
-    if (project.directory / "docs/screenshots.toml").exists() or (
-        project.directory / "docs/assets/screenshots/capture.json"
-    ).exists():
+    if has_gallery(project):
         check_screenshots(project)
     prepare_environment(project, core)
     run(
@@ -1177,13 +1185,12 @@ def focused_hook_targets(manifest: Path, selected: list[Project], changed: list[
 
 def check_all_screenshots(inventory: list[Project], *, json_output: bool) -> int:
     """Check every configured gallery, retaining both stale and broken results."""
-    from heinzel_plugin_tools.capture import PLAN, safe_failure_message
+    from heinzel_plugin_tools.capture import safe_failure_message
     from heinzel_plugin_tools.privacy import StaleGallery
 
     fresh, stale, failed = [], [], []
     for project in inventory:
-        # Projects without a capture plan have no gallery to check.
-        if not (project.directory / PLAN).exists() and not (project.directory / PLAN).is_symlink():
+        if not has_gallery(project):
             continue
         try:
             check_screenshots(project)
