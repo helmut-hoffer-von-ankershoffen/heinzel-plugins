@@ -432,12 +432,14 @@ def test_a_full_check_runs_strict_types_coverage_typos_and_the_frontend_gates(pr
     monkeypatch.setattr(cli, "prepare_environment", lambda *a: None)
     monkeypatch.setattr(cli, "run", lambda command, **options: calls.append(command))
     (project.directory / "web").mkdir()
-    (project.directory / "web/package.json").write_text(json.dumps({"scripts": {"lint": "x", "test": "y"}}))
+    (project.directory / "web/package.json").write_text(
+        json.dumps({"scripts": {"build": "vite build", "lint": "x", "test": "y"}})
+    )
     cli.check(project, None)
     names = [Path(command[0]).name for command in calls]
-    assert names[:2] == ["python", "ruff"]
+    assert names[:3] == ["uv", "python", "ruff"]
     assert {"mypy", "pyright", "coverage", "typos"} <= set(names)
-    assert [c[-1] for c in calls if c[0] == "uv"] == ["lint", "test"]
+    assert [c[-1] for c in calls if c[0] == "uv"] == ["build", "lint", "test"]
 
 
 def test_the_test_only_loop_skips_lint_and_types_and_reports_nothing_but_tests(project, monkeypatch):
