@@ -19,14 +19,12 @@ Being worked on
 
 Nothing needs you right now. Ask anything below.
 
-v0.9.50
-Updates, off
+v0.9.55
+Updates available, off
 0
 System health, warning
 ?
 Daemon not installed, off
-Chat
-Issues
 Status
 All statuses
 Received

@@ -69,9 +69,9 @@ Turn private sharing off explicitly — fictional local Tailscale demo
 <details>
 <summary>Command line</summary>
 
-<img src="docs/assets/screenshots/sharing-request-cli.png" alt="Then hz tailscale status --json: mapped to the web app port; the CLI cannot see the web listener, so it says apply-required — fictional demo" width="960">
+<img src="docs/assets/screenshots/sharing-request-cli.png" alt="The real CLI sharing status reports apply-required for the mapped demo app. The fixture labels the ephemeral web listener port." width="960">
 
-Then hz tailscale status --json: mapped to the web app port; the CLI cannot see the web listener, so it says apply-required — fictional demo
+The real CLI sharing status reports apply-required for the mapped demo app. The fixture labels the ephemeral web listener port.
 
 <img src="docs/assets/screenshots/sharing-off-cli.png" alt="Then hz tailscale status --json after switching off: not mapped; the target shows the default port 8737 — fictional local Tailscale demo" width="960">
 

@@ -1,18 +1,18 @@
 {
   "format": 2,
   "plugin": "heinzel-tailscale",
-  "core_version": "0.9.54",
-  "inputs_sha256": "730d723720a92e3fab881232fc72b12f813c217ef513cc4a07605b81a9e32db2",
+  "core_version": "0.9.55",
+  "inputs_sha256": "f0329d9efbdf950d7c83b8ab5f22873be4fab5c68e43c055d0eeb139cb8b1e47",
   "images": {
-    "docs/assets/screenshots/sharing-ready.png": "ebf585a039ccf28ea5d689d2984cb719de02c18fff036780b294819a4df97ae4",
-    "docs/assets/screenshots/sharing-request-cli.png": "fe42b74c881eaeab12ad04f3b212768d77586ca9634af19ad490960238051cd5",
-    "docs/assets/screenshots/sharing-off.png": "398daf92c44530dd18052d5916f0e7a34d1d1dc6161ed8a2a31f606c928ec6ac",
+    "docs/assets/screenshots/sharing-ready.png": "d34d7569b5cc39d62c120687ddef9fa86e04ba6d9ff1060376ee28427e381cfd",
+    "docs/assets/screenshots/sharing-request-cli.png": "8acd0d2750e0073fed7d7bae1567b305f0beb95e7e4f9637e46350aab03706cd",
+    "docs/assets/screenshots/sharing-off.png": "1b8e9d46c19278596b4587eb62c7978548604fbd9d9e5d5c5ab1070b1984e29c",
     "docs/assets/screenshots/sharing-off-cli.png": "592011836c508fac6809305cbc29752484a4be2cc32546e31dffbc369ee0c774"
   },
   "transcripts": {
-    "sharing-ready.txt": "06fceaac1aaae805ee47ba2deef1e8959aded91e4e7e9e78028cdf4881547973",
-    "sharing-request-cli.txt": "62377175c58a2dc39c917918f7865b7602c80b91b2e76f3a12c971a084670495",
-    "sharing-off.txt": "38a863ca580d4298fe4ac9f4e5dc43c604cdffca8155401262fb253a1d94285f",
+    "sharing-ready.txt": "242d028ddbbd0b74664efb10822453920a1e48420a38d7288e22851e797e93a6",
+    "sharing-request-cli.txt": "94137e54e37a1d63cafcc8c9ed58e5065157f597b607c78fda7b214adf5a6f8f",
+    "sharing-off.txt": "52a6f56305a58eed0c1649a4fe784522f0cc2e7c5bdbc185804867714ff0d19b",
     "sharing-off-cli.txt": "cf49c8bdefcb23c7b464e229ae6e18bbd8f639abb0121bf570e3e30b631fc8b0"
   }
 }

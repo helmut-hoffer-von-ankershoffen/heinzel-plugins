@@ -1,22 +1,22 @@
 {
   "format": 2,
   "plugin": "heinzel-clock",
-  "core_version": "0.9.42",
-  "inputs_sha256": "b60bb3454d0feb6dc805ebaa5fc3afe5da6fdf723393f8c9aaeeb0682dae3e25",
+  "core_version": "0.9.55",
+  "inputs_sha256": "fc9f620746d271cb1dc154931d409e384de1171504798aa64d9f333da4d00ea2",
   "images": {
-    "docs/assets/screenshots/world-clock.png": "d026da962debe70070f558a4a45c106d2d9f655fec0e2934a5409eec700541e1",
-    "docs/assets/screenshots/team-overview.png": "c0ced9340a9fa8a364e94d3f2a287dac31fe211da7344edbf2b584cad18710b8",
-    "docs/assets/screenshots/footer-detail.png": "7ae3d6c3f913430f45de8ca0c4abbc70646f9bc73e5a1d5070df1214b000f905",
-    "docs/assets/screenshots/phone-world-clock.png": "a620acf7300e69206acae21725901260bbf93e5a0f5aabfba99e7ffa2eabc5ec",
+    "docs/assets/screenshots/world-clock.png": "91ccdcc7ed5716ca4b5bbd56fdf2cdd1d17cfcade2aab9b3cd95ff536a913b0e",
+    "docs/assets/screenshots/team-overview.png": "adf000de41498f795ec4627377b3e0cb9005d13cd224c58e8b2ad7a14f754562",
+    "docs/assets/screenshots/footer-detail.png": "5be8b7c203953dec2b02dce468102845b41c18d4736ff57b5626d919ae335cae",
+    "docs/assets/screenshots/phone-world-clock.png": "fa641f2e1efd504a4b4b3354deacd560f389c5ab25487cba68e8e1bbb2cc4577",
     "docs/assets/screenshots/terminal-current.png": "6b5424327b872c1494ba191a4c697b4bdde5f9ed461cc25150b14e5845205f52",
     "docs/assets/screenshots/terminal-overlap.png": "694eb1332ea37f12f01a43d74c5187adb92ab8f2d42fc31267ae2a98169e4b78",
     "docs/assets/screenshots/cli-json.png": "9034b7749189a58ef9506674b6dd5150b562fe44513c0f50c1052f799f3f06d3"
   },
   "transcripts": {
-    "world-clock.txt": "99e99db01c2bbc27b326db293e9a88e316b5ae374fd5a8c6f8f04e027e11da54",
-    "team-overview.txt": "e9b224090c8a350853d6fc8829f90dab18503e67dfd0b235f52848c5c39de174",
-    "footer-detail.txt": "f98a19564b5d54003328ecd2a82f17df6ff5630b09b1c7813fb941c3e2bf615f",
-    "phone-world-clock.txt": "4ca6829e8f45610c9d4f4596a4ed19bf533154ba42672c35a4c004bd202a0c39",
+    "world-clock.txt": "26a3f5bd6a9aafc17246bf78fc434e7da304be63526687cd4d3cfe0c20e8bab0",
+    "team-overview.txt": "a768c2edf2a9fc92f543721ac69b45f63dab18b59d638b26462461b2d5f7cfba",
+    "footer-detail.txt": "a768c2edf2a9fc92f543721ac69b45f63dab18b59d638b26462461b2d5f7cfba",
+    "phone-world-clock.txt": "ac84c57f0cbe882217de654ce4cab69270f3075f898e02768b241124cefe3f65",
     "terminal-current.txt": "05f1fa56e8a12d26bad2cf2635575d237d9ace564a919e04e76e0b75ed699843",
     "terminal-overlap.txt": "38adb315cb9cbf79f485393c40ca00c5fd3af498d201ff024da182f822938553",
     "cli-json.txt": "8cc4255d19d78d8dee533a130c756f8d32e7d3cc594d21493ded166c4965d167"

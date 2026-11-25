@@ -147,7 +147,7 @@ caption = "Sharing On with Copy link and Open (fictional demo); the capture tool
 [[tool.heinzel.catalog.screenshots]]
 path = "docs/assets/screenshots/sharing-request-cli.png"
 surface = "cli"
-caption = "Then hz tailscale status --json: mapped to the web app port; the CLI cannot see the web listener, so it says apply-required — fictional demo"
+caption = "The real CLI sharing status reports apply-required for the mapped demo app. The fixture labels the ephemeral web listener port."
 
 [[tool.heinzel.catalog.screenshots]]
 path = "docs/assets/screenshots/sharing-off.png"

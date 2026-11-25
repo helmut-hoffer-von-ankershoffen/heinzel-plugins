@@ -53,12 +53,6 @@
           "optional": true
         },
         {
-          "action": "click",
-          "role": "button",
-          "name": "Close the chat",
-          "within_role": "complementary"
-        },
-        {
           "action": "hover",
           "role": "button",
           "name_regex": "^World clock: Berlin"

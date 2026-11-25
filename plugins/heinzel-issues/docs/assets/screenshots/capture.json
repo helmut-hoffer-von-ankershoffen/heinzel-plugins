@@ -1,18 +1,18 @@
 {
   "format": 2,
   "plugin": "heinzel-issues",
-  "core_version": "0.9.50",
+  "core_version": "0.9.55",
   "inputs_sha256": "c93416362d8788ba163d6c6e1d763ada24c8da3e31f552fe8d17dccb2aaef61e",
   "images": {
-    "docs/assets/screenshots/issues-page.png": "ffa3b1fd6a41a37baab4cddc12b2565edb72a0d6f9d024bd73d650c18cc56ecb",
-    "docs/assets/screenshots/report-history.png": "426aed8ef238701fd660b34d8ac7875b16dd592627ed70646c923b3c09cd9ffc",
-    "docs/assets/screenshots/today-open-reports.png": "b791365b4fc0750d8d1a174a14fa217e4d30782474d676e0af995c5bdf9ff124",
+    "docs/assets/screenshots/issues-page.png": "77fd0c5d7f1a8ecd979f04b5a3bf0a0d1c133071b80653b96c90a50ae3ace250",
+    "docs/assets/screenshots/report-history.png": "30e6a1d1390d09364246b97327159dc14e07674cf2d846b8234471131e07a57c",
+    "docs/assets/screenshots/today-open-reports.png": "86984e339d9adcbde8e967672322cf540a53f807ef27c098c10141dec2f83b19",
     "docs/assets/screenshots/cli-list.png": "e8a2c412a35760cf9eb4725826c6b6ac075d532ddc910392a48e23af56b563bc"
   },
   "transcripts": {
-    "issues-page.txt": "d43891f477e558d8b5db612d517e13b632a4dcef8c1d7176f501a70fa987825f",
-    "report-history.txt": "9735e880d995743c1bccb21a6cb26dfd92ed74870a12414cb02ef0091ee1ecdd",
-    "today-open-reports.txt": "9fe2ed3e454985852718e8fcf383ca9c90e126af14d0eb79baed003052316577",
+    "issues-page.txt": "797867496dad03aa208c97631133b5a9baa1407aebffd325c296b2eb0c6c0748",
+    "report-history.txt": "7a10db5f7c5846dc40726e73c05dba7552803114ee26978250db921a733762b1",
+    "today-open-reports.txt": "2f3f27564164250b599a8c4ca2708f487383d329d55b1034cb0d7356ccb07f45",
     "cli-list.txt": "d0eac2c0b1b435cac45b7f7052b732fe1e8f619035e7778e11b8f6e6101ff08f"
   }
 }

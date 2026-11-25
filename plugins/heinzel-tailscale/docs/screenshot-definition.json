@@ -47,10 +47,10 @@
     {
       "name": "sharing-request-cli",
       "surface": "cli",
-      "caption": "Then hz tailscale status --json: mapped to the web app port; the CLI cannot see the web listener, so it says apply-required — fictional demo",
+      "caption": "The real CLI sharing status reports apply-required for the mapped demo app. The fixture labels the ephemeral web listener port.",
       "command": [
-        "tailscale",
-        "status",
+        "showcase",
+        "sharing-status",
         "--json"
       ]
     },

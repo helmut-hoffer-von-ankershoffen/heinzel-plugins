@@ -3,11 +3,11 @@
   "bootstrap": "docs/screenshot_fixture.py",
   "scenes": [
     {
-      "name": "google-upcoming-review",
+      "name": "google-connector",
       "surface": "ui",
-      "route": "/",
+      "route": "/?settings=connectors",
       "appearance": "dark",
-      "caption": "A fictional launch review shows as the next meeting in the footer calendar summary, read through the Google calendar adapter.",
+      "caption": "Heinzel's Connectors settings show Google selected for documents, calendar and mail in the fictional demonstration profile.",
       "timeout_ms": 30000,
       "viewport": {
         "width": 1280,
@@ -15,54 +15,22 @@
       },
       "steps": [
         {
-          "action": "click",
+          "action": "hover",
           "role": "button",
-          "name_regex": "^Calendar: .*Launch readiness review",
-          "within_role": "contentinfo"
-        },
-        {
-          "action": "wait",
-          "text": "Next: Launch readiness review"
+          "name_regex": "^Google .*Connects: .*calendar",
+          "within_role": "dialog"
         }
-      ]
+      ],
+      "focus": {
+        "role": "button",
+        "name_regex": "^Google .*Connects: .*calendar"
+      }
     },
     {
       "name": "google-calendar-week",
-      "surface": "ui",
-      "route": "/",
-      "appearance": "light",
-      "caption": "The real Core calendar pane lists a fictional launch day's meetings through the Google adapter; no Google account is contacted.",
-      "timeout_ms": 30000,
-      "viewport": {
-        "width": 1280,
-        "height": 900
-      },
-      "steps": [
-        {
-          "action": "wait",
-          "role": "button",
-          "name": "Ask about it"
-        },
-        {
-          "action": "wait",
-          "role": "button",
-          "name": "Open calendar"
-        },
-        {
-          "action": "click",
-          "role": "button",
-          "name": "Open calendar"
-        },
-        {
-          "action": "wait",
-          "role": "button",
-          "name": "Previous week"
-        },
-        {
-          "action": "wait",
-          "text": "Launch readiness review"
-        }
-      ]
+      "surface": "cli",
+      "caption": "The real Google Calendar adapter lists fictional meetings for a fixed week through a documentation-only command.",
+      "command": ["showcase", "week"]
     },
     {
       "name": "google-source-review",

@@ -4,101 +4,41 @@
   "browser_time": "2026-11-02T10:00:00+01:00",
   "scenes": [
     {
-      "name": "review-slack-notice",
+      "name": "slack-settings",
       "surface": "ui",
-      "route": "/",
+      "route": "/?settings=slack",
       "appearance": "light",
-      "caption": "Demo data: Mira reviews the fictional Slack account, destination, scope and complete weekly-report notice before delivery.",
-      "timeout_ms": 20000,
-      "viewport": {
-        "width": 1440,
-        "height": 1700
-      },
+      "caption": "Slack settings for a fictional member and workspace, including how long a draft can wait for a decision.",
+      "steps": [
+        {"action": "wait", "text": "Your Slack member ID"},
+        {"action": "wait", "text": "Workspace ID"},
+        {"action": "wait", "text": "Time to answer"}
+      ]
+    },
+    {
+      "name": "slack-notification-settings",
+      "surface": "ui",
+      "route": "/?settings=notifications",
+      "appearance": "dark",
+      "caption": "Heinzel offers to send notices and questions through Slack direct messages when the Slack chat capability is selected.",
       "steps": [
         {
-          "action": "click",
-          "role": "button",
-          "name": "New chat: switch chats"
-        },
-        {
-          "action": "click",
-          "role": "button",
-          "within_role": "dialog",
-          "name_regex": "^text hz-[0-9A-HJKMNP-TV-Z]{26}\\b"
-        },
-        {
           "action": "wait",
-          "role": "heading",
-          "name": "The Heinzel proposes"
+          "text": "Through Slack, in your own direct messages. The app keeps showing everything."
         },
         {
-          "action": "wait",
-          "text": "Review exact channel posting account, destination, scope and full message"
-        },
-        {
-          "action": "wait",
-          "role": "button",
-          "name": "Confirm"
-        },
-        {
-          "action": "wait",
-          "role": "button",
-          "name": "Decline"
+          "action": "hover",
+          "role": "switch",
+          "name": "Notices also in chat"
         }
       ],
-      "focus": {
-        "role": "region",
-        "name": "The Heinzel proposes"
-      }
+      "focus": {"role": "region", "name": "Also in chat"}
     },
     {
       "name": "slack-notice-delivered",
-      "surface": "ui",
-      "route": "/",
-      "appearance": "dark",
-      "caption": "Demo data: after Confirm, Core's chat reports that the channel delivered the fictional notice; this does not approve a captured write.",
-      "timeout_ms": 20000,
-      "viewport": {
-        "width": 900,
-        "height": 560
-      },
-      "steps": [
-        {
-          "action": "click",
-          "role": "tab",
-          "name": "Chat"
-        },
-        {
-          "action": "click",
-          "role": "button",
-          "name": "New chat: switch chats"
-        },
-        {
-          "action": "click",
-          "role": "button",
-          "within_role": "dialog",
-          "name_regex": "^text hz-[0-9A-HJKMNP-TV-Z]{26}\\b"
-        },
-        {
-          "action": "wait",
-          "role": "heading",
-          "name": "The Heinzel proposes"
-        },
-        {
-          "action": "wait",
-          "text": "Review exact channel posting account, destination, scope and full message"
-        },
-        {
-          "action": "click",
-          "role": "button",
-          "within_role": "region",
-          "name": "Confirm"
-        },
-        {
-          "action": "wait",
-          "text": "Ran `Review exact channel posting account, destination, scope and full message`: The channel reported delivered. This does not approve the captured write."
-        }
-      ]
+      "surface": "cli",
+      "command": ["gallery-smoke"],
+      "caption": "A fixture verifies one fictional Slack delivery through Core's confirmation API and checks refusal of unauthenticated and repeated attempts."
     },
     {
       "name": "slack-draft-cli",

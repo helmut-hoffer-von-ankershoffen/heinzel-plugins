@@ -1,22 +1,22 @@
 {
   "format": 2,
   "plugin": "heinzel-resource",
-  "core_version": "0.9.42",
+  "core_version": "0.9.55",
   "inputs_sha256": "379a83172162eb01317f0949f3dcf2b63cd08b39244e9629f0fadae805ef3d72",
   "images": {
-    "docs/assets/screenshots/resources-pane.png": "d15c0820649ac81806dcf3aa01c566f3293517a7963f0ddbffefe2e1f92c155f",
-    "docs/assets/screenshots/today-resources.png": "7a1323661336f9d97eed689971204b40d98107f694b3c1f0ba55ade927fe9688",
-    "docs/assets/screenshots/phone-resources.png": "2765dc202d4ba4623c6be1be46f59996068975b37b7b60bc7678278327bcc150",
+    "docs/assets/screenshots/resources-pane.png": "eed5a70cc027963b3d3981303c58e72005fb096e4b48737cdef9315b027c1423",
+    "docs/assets/screenshots/today-resources.png": "a2dd92606b8668cdf2d4b233100167abd23f7befee52eb1490ff6856134e0795",
+    "docs/assets/screenshots/phone-resources.png": "f4a21e046f735f1f5d682774321bd382cda427fe028ed01d4a20b28347043766",
     "docs/assets/screenshots/cli-resources.png": "3d8012cf0ff56ee191ad3c8616855bc514e3a6692621c7248f8a72b554a96073",
-    "docs/assets/screenshots/terminal-resources.png": "9ad9c39cf1b7f573247a01eb440852e50e7b37ca9e0623f26e4cb0bb60272f91",
-    "docs/assets/screenshots/terminal-resources-json.png": "6b54eaf4d3892e7b9d4a19297706d408a2a0f9baaf9204bc6098bfc4c3477edc"
+    "docs/assets/screenshots/terminal-resources.png": "8117e4c52e0eff9db69cc797a7f455fa5599632486060d26d3bd4b7438293d91",
+    "docs/assets/screenshots/terminal-resources-json.png": "bf60f1200e21eb0f154d2e6856e0e9344233ccee6a2e4467459571a13d2b8fff"
   },
   "transcripts": {
-    "resources-pane.txt": "d89022bbcbd0ce154a271f7f8cabf7a6d0707a21e74e303d3206fb55ece30ec8",
-    "today-resources.txt": "ede07a668b6180b00e5273e08fd69e96addbe83b731913fa4075301fb6f348e2",
-    "phone-resources.txt": "a1d462b23ca71376d2c9645301abbd21bb16ee7e68fe0212e6246c0466829536",
+    "resources-pane.txt": "741e6321c222ea7be440ea6e8f3dd12746486dd95d83d2ee68ca9c412ab9fa51",
+    "today-resources.txt": "d3b7521838f9f54c513ff547942347a376c8a861e417d95bce7e3e02c0245846",
+    "phone-resources.txt": "d2a1b093bc4d418ad95ea0800259c5baa99afd4bd0bfdf02df9a253e0d2f488f",
     "cli-resources.txt": "ddef8a589eb34e18d3fd06ab545c884ebcc82923f5270bb88a6fcfc2ae8272a7",
-    "terminal-resources.txt": "11710047df8701cf74eece471ee09226a0473f3aa4dcc778daf4ac8b0c9ba195",
-    "terminal-resources-json.txt": "5a4ef792762f1212d3eff2b72069c4b50485d39569b7a5f01fd5e4f7bc51bc3a"
+    "terminal-resources.txt": "35d7445595ce2fb8db18a69d2962ffe64f0477596784d4732064bf8777ab69d1",
+    "terminal-resources-json.txt": "43a3e2095bb0f6deb4f32544bd1f7b2852588b9607c83851f38814386a3ac08e"
   }
 }

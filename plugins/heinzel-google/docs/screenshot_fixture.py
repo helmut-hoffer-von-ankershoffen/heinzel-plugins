@@ -4,7 +4,7 @@ import base64
 import json
 import os
 import sys
-from datetime import UTC, datetime, timedelta
+from datetime import UTC, datetime
 from pathlib import Path
 
 from heinzel import (
@@ -24,11 +24,12 @@ from heinzel import (
 )
 from heinzel.heads.cli import build
 from heinzel.kernel import Origin, discover
-from heinzel_google import Gws, Process
 from rich.console import Group
 from rich.markdown import Markdown
 from rich.table import Table
 from rich.text import Text
+
+from heinzel_google import Gws, Process
 
 SINCE = datetime(2026, 10, 19, tzinfo=UTC)
 UNTIL = datetime(2026, 10, 26, tzinfo=UTC)
@@ -149,8 +150,8 @@ class DemoGws(Gws):
                     {
                         "id": "one-on-one",
                         "summary": "Mira Example / Priya Example — one-on-one",
-                        "start": {"dateTime": "2026-10-23T09:00:00Z"},
-                        "end": {"dateTime": "2026-10-23T09:30:00Z"},
+                        "start": {"dateTime": "2026-10-22T14:00:00Z"},
+                        "end": {"dateTime": "2026-10-22T14:30:00Z"},
                         "attendees": [{"displayName": "Priya Example", "email": "priya@example.com"}],
                     },
                     {
@@ -161,27 +162,11 @@ class DemoGws(Gws):
                     },
                 ],
             }
-            # A stable fictional current-day dataset also exercises Core's real agenda and calendar-week UI.
-            anchor_path = state / "calendar-anchor.txt"
-            if not anchor_path.exists():
-                anchor_path.write_text((datetime.now(UTC) + timedelta(minutes=15)).isoformat())
-            anchor = datetime.fromisoformat(anchor_path.read_text())
-            current = []
-            for index, item in enumerate(value["items"]):
-                start = anchor + timedelta(minutes=index * 45)
-                current.append(
-                    dict(
-                        item,
-                        id="current-" + item["id"],
-                        start={"dateTime": start.isoformat()},
-                        end={"dateTime": (start + timedelta(minutes=30)).isoformat()},
-                    )
-                )
             since = datetime.fromisoformat(params["timeMin"].replace("Z", "+00:00"))
             until = datetime.fromisoformat(params["timeMax"].replace("Z", "+00:00"))
             value["items"] = [
                 item
-                for item in [*value["items"], *current]
+                for item in value["items"]
                 if datetime.fromisoformat(item["start"]["dateTime"].replace("Z", "+00:00")) < until
                 and datetime.fromisoformat(item["end"]["dateTime"].replace("Z", "+00:00")) > since
             ]
@@ -271,7 +256,8 @@ os.environ.update(
 )
 config = Config.load()
 records, errors = discover()
-records.append(ModuleRecord("showcase", showcase, Origin("heinzel-documentation-fixture", "1.0.0", builtin=False)))
+if sys.argv[1:2] == ["showcase"]:
+    records.append(ModuleRecord("showcase", showcase, Origin("heinzel-documentation-fixture", "1.0.0", builtin=False)))
 kernel = Kernel(config.settings(Settings, "hz"), records, errors, config)
 kernel.bind(Gws, DemoGws())
 if __name__ == "__main__":

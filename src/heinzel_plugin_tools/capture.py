@@ -878,6 +878,21 @@ def terminal_scene(page, command: list[str]) -> None:
     page.get_by_role("tab", name="Demo complete", exact=True).wait_for()
 
 
+def dismiss_first_heinzel(page) -> None:
+    """Close the empty first-Heinzel pane without closing a fixture's real chat."""
+    from playwright.sync_api import TimeoutError as BrowserTimeout
+
+    chat = page.get_by_role("complementary", name="Chat", exact=True, include_hidden=True)
+    first = chat.get_by_role("heading", name="Meet your first Heinzelmännchen", exact=True, include_hidden=True)
+    try:
+        first.wait_for(state="attached", timeout=3000)
+    except BrowserTimeout:
+        return
+    # Use the app's own close control, even when a Settings dialog makes the background pane inert.
+    chat.get_by_role("button", name="Close the chat", exact=True, include_hidden=True).dispatch_event("click")
+    first.wait_for(state="detached")
+
+
 def prepared_version(interpreter: Path, metadata: dict) -> str:
     """Validate the explicit installed owner and current source's SDK requirements before execution."""
     if not interpreter.is_file() or not os.access(interpreter, os.X_OK):
@@ -1091,6 +1106,7 @@ def capture(
                                     hz(interpreter, ["system", "theme", "use", scene["theme"]], env, work)
                                 page.goto(base + scene.get("route", "/") + "#" + address.split("#", 1)[1])
                                 page.locator("#splash").wait_for(state="hidden")
+                                dismiss_first_heinzel(page)
                                 if scene.get("plugin_card"):
                                     field = page.get_by_role("searchbox", name="Search plugins")
                                     field.fill(name)
@@ -1263,7 +1279,7 @@ def verify(
     """CI's re-capture: capture privately again and compare with the committed gallery, scene by scene.
 
     The local digest covers only UI inputs, so a displayed string that comes from plugin Python or metadata, or a
-    Core change, can leave a committed gallery behind; a fresh deterministic capture against the plugin's locked Core
+    Core change, can leave a committed gallery behind; a fresh deterministic capture against compatible released Core
     shows it. The rendered text of every scene (its transcript) must be identical, except clock readings (hh:mm),
     which fixtures may anchor on the real time. Image bytes are compared and listed; they gate with `strict_images`,
     since antialiasing differs between runs and fonts between operating systems.

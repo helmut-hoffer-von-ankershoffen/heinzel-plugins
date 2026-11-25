@@ -80,6 +80,7 @@ keeps a bounded margin around the native element without imposing a wide minimum
 `timeout_ms` defaults to 15000 and permits 1000–30000. Motion defaults to `reduce`; animated canvases may need
 `no-preference`. An ISO8601 `browser_time` fixes browser wall-clock dates while animation frames continue running.
 Set `"theme": "harbor"` to apply an installed owning theme.
+Capture dismisses an empty first-Heinzel pane through the app's close control. A scene can open chat from the toolbar.
 
 Wait for **every surface promised by the caption**, including lazily mounted sidebar tickers, footer controls and
 secondary panes. A ready Today widget or main region does not prove those contributions have loaded. Require their
@@ -149,10 +150,10 @@ fails with the exact command to run (`make screenshots NAME=<plugin>`), never by
 In a Heinzel worktree `sm check` regenerates a stale gallery and `sm ship` takes it into the shipped commit.
 
 The narrow local digest cannot see displayed text that comes from plugin Python, metadata or Core. CI therefore
-re-captures the gallery of every plugin a pull request changes against the Core version the plugin's lock pins
+re-captures the gallery of every plugin a pull request changes against its newest compatible released Core
 (`make screenshots-verify NAME=<plugin>`) and fails when any scene renders different text than its committed
-transcript, naming `make screenshots NAME=<plugin>`. (The job reports but is not yet required: the committed
-galleries predate Core 0.9.54, whose first-Heinzel panel the capture does not dismiss yet.) Image bytes are compared and listed too, but they do not gate:
+transcript, naming `make screenshots NAME=<plugin>`. The job reports its result while the refreshed galleries are
+being verified on hosted Linux. Image differences are listed:
 two captures differ in antialiasing and cursor pixels even on one machine, and fonts differ between operating
 systems (`--strict-images` makes them gate). Clock readings (hh:mm) are not compared, since fixtures may anchor
 their data on the real time; set `browser_time` to fix the browser's clock.

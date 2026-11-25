@@ -8,11 +8,13 @@ import threading
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from socketserver import TCPServer
+from urllib.parse import urlsplit
 
-from heinzel import Config, Kernel, Settings
+from heinzel import Config, Kernel, Module, ModuleRecord, Settings
 from heinzel.heads.cli import build
-from heinzel.kernel import discover
-from heinzel_tailscale import TailscaleCli
+from heinzel.kernel import Origin, discover
+from heinzel_tailscale import SharingActions, SharingState, TailscaleCli
+from heinzel_tailscale import status as tailscale_status
 from heinzel_tailscale._cli import Result
 
 DNS = "workstation.tail-example.ts.net"
@@ -115,11 +117,25 @@ class DemoCli(TailscaleCli):
         return Result(0, json.dumps(payload).encode(), b"")
 
 
+showcase = Module("showcase", "Fictional Tailscale sharing with an isolated app listener.")
+
+
+@showcase.operation(heads={"cli"})
+def sharing_status(service: SharingActions) -> SharingState:
+    """Show the real mapped status with only the capture's ephemeral web port labeled."""
+    found = tailscale_status(service)
+    port = urlsplit(found.target or "").port
+    if not found.mapped or not port or found.target != f"http://127.0.0.1:{port}":
+        raise ValueError("The demonstration must show a mapping to its isolated loopback web listener")
+    return found.model_copy(update={"target": "http://127.0.0.1:<demo-web-port>"})
+
+
 server = LocalServer(("127.0.0.1", 0), LocalAPI)
 threading.Thread(target=server.serve_forever, daemon=True).start()
 try:
     config = Config.load()
     records, errors = discover()
+    records.append(ModuleRecord("showcase", showcase, Origin("heinzel-documentation-fixture", "1.0.0", builtin=False)))
     kernel = Kernel(config.settings(Settings, "hz"), records, errors, config)
     kernel.bind(TailscaleCli, DemoCli())
     sys.argv = ["hz", *sys.argv[1:]]

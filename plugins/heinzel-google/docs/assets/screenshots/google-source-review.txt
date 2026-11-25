@@ -15,14 +15,11 @@ Doctor: 4 checks need attention
 ai.access ai access, system.doctor installation, system.prerequisite system.runner: claude…
 
 Open
-v0.9.42
-Updates, off
+v0.9.55
+Updates available, off
 0
 System health, warning
-15
 Daemon not installed, off
-Chat
-Google source review
 Google source review
 
 Selected command: /demo-profile/state_dir/fictional-gws/gws

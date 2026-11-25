@@ -283,10 +283,9 @@ jobs:
           fi
           python3 -I "$RUNNER_TEMP/gate_guard.py"
   gallery:
-    # The local digest covers only UI inputs; this re-capture against the plugin's locked Core catches displayed text
+    # The local digest covers only UI inputs; this re-capture against the newest compatible released Core catches text
     # that comes from plugin Python, metadata or Core. Deterministic (Playwright, fixtures), no agent.
-    # Not yet required by CI OK: the committed galleries predate Core 0.9.54 (its first-Heinzel panel covers the
-    # captures; the slack and google definitions no longer run). It turns required once those are fixed.
+    # Promote this to CI OK after the refreshed gallery has been verified on the hosted Linux runners.
     name: Screenshot gallery re-capture
     permissions:
       contents: read
@@ -307,7 +306,7 @@ jobs:
       - name: Install the capture browser and its runner libraries
         if: hashFiles(format('{0}/docs/screenshot-definition.json', matrix.path)) != ''
         run: uv run --frozen --with playwright==1.64.1 --group tooling playwright install --with-deps chromium
-      - name: Re-capture against the locked Core and compare every scene's text with the committed gallery
+      - name: Re-capture against released Core and compare every scene's text with the committed gallery
         if: hashFiles(format('{0}/docs/screenshot-definition.json', matrix.path)) != ''
         env:
           PLUGIN: ${{ matrix.name }}

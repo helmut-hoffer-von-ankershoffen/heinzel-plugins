@@ -1,0 +1,140 @@
+Skip to content
+Heinzelmännchen
+Heinzelmännchen
+Contracts
+Team graph
+Organisation
+Team roster
+M
+Mira
+· EM
+Today
+Today
+Doctor: 7 checks need attention
+
+ai.access ai access, system.credential backend, system.credential credential slack/app-token…
+
+Open
+v0.9.55
+Updates available, off
+0
+System health, warning
+?
+Daemon not installed, off
+Audio
+Settings
+Filter settings
+
+Preferences
+
+Appearance
+Browser
+Notifications
+Slack
+
+Customize
+
+AI
+Connectors
+Plugins
+Skills
+
+Organisation
+
+Team
+You
+
+This computer
+
+Configuration files
+Credentials
+Daemon
+From Claude
+MCP
+System
+Updates
+Web server
+
+To install it, open this page in Chrome, Edge or Safari.
+
+Notify me in this browser
+
+Blocked by your browser. Allow this page in site settings.
+
+Play a sound for new notifications
+
+A short ding while this app is open, apart from your music.
+
+Send a test notification
+This browser is paired: it opens the app without a new link while `hz ui serve` runs.
+Unpair
+Notifications
+Notifications
+
+Keep a list of notices at all; off turns every kind off.
+
+Drafts to approve
+
+Notify when a draft is ready to read and approve.
+
+Heinzel notifications
+
+Notify when a personal Heinzel checks in.
+
+Failed runs
+
+Notify when a contract run on your daemon failed.
+
+Health problems
+
+Notify when a health check finds something degraded or down.
+
+New releases
+
+Notify when a newer release of Heinzelmännchen is out.
+
+Plugin notices
+
+Notify when an installed plugin reports something that needs attention.
+
+Calendar reminders
+
+Allow background calendar reads and reminders before meetings start and end; set up the worker in Calendar.
+
+Notification sound
+
+Play the system notification sound with Heinzel Notifier on macOS.
+
+Quiet mode
+
+Keep notices in the list but never pop one up, not even an urgent one.
+
+Only in working hours
+
+Hold notices that aren't urgent until your working hours start, Monday to Friday, in your time zone (both under Your profile).
+
+Pop-ups per hour
+
+At most this many pop-ups an hour; the rest go to the list only.
+
+per hour
+Drop repeats within
+
+The same notice again within this many hours is dropped.
+
+hours
+System notifications
+
+Let the daemon show system notifications (Heinzel Notifier on macOS, notify-send on Linux) when no web app is open.
+
+Also in chat
+
+Through Slack, in your own direct messages. The app keeps showing everything.
+
+Notices also in chat
+
+Each notice that pops up also goes to Slack: its title and text, at the same time, under the same rules.
+
+Questions also in chat
+
+A Heinzel's message that asks you something goes to Slack as written, also quoting what it read. The first answer counts; after 5 min it stays open here.

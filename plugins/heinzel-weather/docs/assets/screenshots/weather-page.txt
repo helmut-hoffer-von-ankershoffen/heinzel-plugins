@@ -12,7 +12,7 @@ Mira
 · EM
 Weather in
 Berlin, DE
-Thunderstorm warning · until 08:00 · Example Weather Service
+Thunderstorm warning · until 02:00 · Example Weather Service
 
 22°
 °C
@@ -34,95 +34,95 @@ Now
 22°
 10%
 10% chance of rain
-03:00
+21:00
 20°
 80%
 80% chance of rain
-04:00
+22:00
 18°
 80%
 80% chance of rain
-05:00
+23:00
 17°
 80%
 80% chance of rain
-06:00
+00:00
 15°
 80%
 80% chance of rain
-07:00
+01:00
 14°
+10%
+10% chance of rain
+02:00
+12°
+10%
+10% chance of rain
+03:00
+14°
+10%
+10% chance of rain
+04:00
+15°
+10%
+10% chance of rain
+05:00
+16°
+10%
+10% chance of rain
+06:00
+12°
+10%
+10% chance of rain
+07:00
+13°
 10%
 10% chance of rain
 08:00
-12°
+14°
 10%
 10% chance of rain
 09:00
-14°
+15°
 10%
 10% chance of rain
 10:00
-15°
+16°
 10%
 10% chance of rain
 11:00
-16°
+12°
 10%
 10% chance of rain
 12:00
-12°
+13°
 10%
 10% chance of rain
 13:00
-13°
+14°
 10%
 10% chance of rain
 14:00
-14°
+15°
 10%
 10% chance of rain
 15:00
-15°
+16°
 10%
 10% chance of rain
 16:00
-16°
+12°
 10%
 10% chance of rain
 17:00
-12°
+13°
 10%
 10% chance of rain
 18:00
-13°
+14°
 10%
 10% chance of rain
 19:00
-14°
-10%
-10% chance of rain
-20:00
-15°
-10%
-10% chance of rain
-21:00
-16°
-10%
-10% chance of rain
-22:00
-12°
-10%
-10% chance of rain
-23:00
-13°
-10%
-10% chance of rain
-00:00
-14°
-10%
-10% chance of rain
-01:00
 15°
 10%
 10% chance of rain
@@ -139,48 +139,44 @@ Tomorrow
 10% chance of rain
 10°
 19°
-Tuesday
+Friday
 , moderate rain
 80%
 80% chance of rain
 9°
 18°
-Wednesday
+Saturday
 , clear sky
 10%
 10% chance of rain
 12°
 21°
-Thursday
+Sunday
 , clear sky
 10%
 10% chance of rain
 13°
 24°
-Friday
+Monday
 , broken clouds
 10%
 10% chance of rain
 13°
 22°
-Saturday
+Tuesday
 , moderate rain
 80%
 80% chance of rain
 12°
 24°
 
-Updated 02:08
+Updated 20:01
 
-v0.9.42
-Updates, off
+v0.9.55
+Updates available, off
 0
 System health, warning
 ?
 22°C Berlin, DE, off
 Daemon not installed, off
-Chat
-New chat
-Your message
-Default
 Audio

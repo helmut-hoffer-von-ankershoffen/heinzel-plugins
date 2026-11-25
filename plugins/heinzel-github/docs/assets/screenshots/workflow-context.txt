@@ -37,15 +37,11 @@ the packet the agent gets; nothing is spent
 hz heinzel wake me:weekly-code-review
 Run in terminal
 draft it now, at most 0.5 USD; the draft is saved under /demo-profile/data_dir/workflow/drafts/me-weekly-code-review
-v0.9.42
+v0.9.55
 Plugins changed, warning
-Updates, off
+Updates available, off
 0
 System health, warning
 ?
 Daemon not installed, off
-Chat
-New chat
-Your message
-Default
 Audio

@@ -56,6 +56,9 @@ class FakeLocator:
     def click(self):
         self._act("click")
 
+    def dispatch_event(self, event):
+        self._act("dispatch_event", event)
+
     def hover(self):
         self._act("hover")
 
@@ -71,7 +74,7 @@ class FakeLocator:
     def wait_for(self, **options):
         self._act("wait_for")
 
-    def get_by_role(self, role, name=None, exact=False):
+    def get_by_role(self, role, name=None, exact=False, include_hidden=False):
         return FakeLocator(self.page, f"{self.label}>{role}:{name}")
 
     def bounding_box(self):
@@ -132,7 +135,7 @@ class FakePage:
     def locator(self, selector):
         return FakeLocator(self, selector)
 
-    def get_by_role(self, role, name=None, exact=False):
+    def get_by_role(self, role, name=None, exact=False, include_hidden=False):
         return FakeLocator(self, f"{role}:{name}")
 
     def get_by_text(self, text, exact=False):
@@ -214,6 +217,7 @@ def harness(tmp_path, monkeypatch):
 
     sync_api = types.ModuleType("playwright.sync_api")
     sync_api.Error = FakeError
+    sync_api.TimeoutError = FakeError
     sync_api.sync_playwright = lambda: Context()
 
     class Text:
@@ -452,6 +456,14 @@ caption = "hz tides list, fictional data"
     assert any(entry[:1] == ("hover",) and "button:re.compile" in entry[1] for entry in actions)
     assert ("page", {"width": 800, "height": 600}, "no-preference") in harness.log
     assert any(entry[0] == "clock" and "2026-11-03" in entry[1] for entry in harness.log)
+    assert ("dispatch_event", "complementary:Chat>button:Close the chat", "click") in harness.log
+
+
+def test_capture_leaves_existing_chat_open(harness):
+    first_heinzel = "complementary:Chat>heading:Meet your first Heinzelmännchen"
+    harness.failures.add(("wait_for", first_heinzel))
+    assert record(harness, draft_only=True)["ok"]
+    assert ("dispatch_event", "complementary:Chat>button:Close the chat", "click") not in harness.log
 
 
 def test_a_focused_scene_whose_target_is_not_visible_is_refused(harness):

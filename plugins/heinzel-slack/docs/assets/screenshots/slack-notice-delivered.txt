@@ -1,26 +1,3 @@
-Skip to content
-M
-Today
-Today
-Doctor: 7 checks need attention
-
-ai.access ai access, system.credential backend, system.credential credential slack/app-token…
-
-Open
-Page
-Chat
-Chat
-text hz-01M7EBW2CWNR217FYJHS2VSH0E
-
-About: text hz-01M7EBW2CWNR217FYJHS2VSH0E
-
-Ran `Review exact channel posting account, destination, scope and full message`: The channel reported delivered. This does not approve the captured write.
-Your message
-Default
-v0.9.42
-Updates, off
-1
-System health, warning
-?
-Daemon not installed, off
-Audio
+Delivered one fictional Slack notice.
+Unauthenticated confirmation refused.
+Repeated confirmation refused.

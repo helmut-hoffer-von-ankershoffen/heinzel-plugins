@@ -1,45 +1,7 @@
-Skip to content
-Heinzelmännchen
-Heinzelmännchen
-Contracts
-Team graph
-Organisation
-Team roster
-M
-Mira
-· EM
-Today
-Today
-Doctor: 4 checks need attention
-
-ai.access ai access, system.doctor installation, system.prerequisite system.runner: claude…
-
-Open
-v0.9.42
-Updates, off
-0
-System health, warning
-15
-Daemon not installed, off
-Chat
-Calendar
-Calendar
-
-Turn on Calendar reminders in Notification settings first.
-
-Now: nothing. Next: Launch readiness review in 15 min.
-
-TODAY · SUN 15 NOV
-02:05
-02:20
-02:50
-Launch readiness review
-in 15 min
-03:05
-03:35
-Mira Example / Priya Example — one-on-one
-03:50
-04:20
-Rollout checkpoint
-Notification settings
-Audio
+┏━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
+┃ UTC start ┃ Meeting                                   ┃ People                      ┃
+┡━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┩
+│ Thu 13:00 │ Launch readiness review                   │ Mira Example, Jonas Example │
+│ Thu 14:00 │ Mira Example / Priya Example — one-on-one │ Priya Example               │
+│ Fri 14:00 │ Rollout checkpoint                        │                             │
+└───────────┴───────────────────────────────────────────┴─────────────────────────────┘
