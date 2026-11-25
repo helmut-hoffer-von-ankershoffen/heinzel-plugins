@@ -8,7 +8,7 @@ Show the actual theme applied to useful work in both light and dark appearances,
 
 ## Scenes
 
-1. **A clear start, in light:** The real Core contract view displays the fictional Launch review and its readiness checks with the applied light palette.
+1. **A clear start, in light:** The real Core contract view displays the fictional Launch review, its requirements and next-step commands with the applied light palette.
 2. **The same work, after dark:** The same genuine view and fictional contract show the applied dark palette. Keep the content and viewport comparable so the theme change is visible.
 3. **Choose the atmosphere:** Core’s Appearance settings show the four contributed soundscapes in a demo profile, without starting playback.
 4. **Find the theme:** The native CLI lists themes in the demo profile.
@@ -25,7 +25,7 @@ Use the existing `docs/screenshot_fixture.py` bootstrap. It creates the local La
 - `README.md` identifies Core’s Settings → Appearance as the selection surface and describes the pairing and Play behavior. The existing plan uses `/?settings=appearance`; capture must confirm that this opens the genuine Core settings and exposes all four entries. The supplied files do not contain Core’s route or settings implementation.
 - `src/heinzel_theme/soundscapes/claude-fm.toml`, `focus.toml`, `hyper-focus.toml` and `singularity.toml` declare four YouTube streams; `focus.toml` pairs Die Heinzelmännchen with the theme. YouTube playback is an external provider surface, not a plugin-owned screen, and is outside these captures. README and the declarations say playback starts only after Play.
 - `README.md` documents `hz system theme use` and `hz system sound use`; the existing `docs/screenshots.toml` supplies the `list` discovery commands. Their rendered results are CLI evidence, not feature UI. The supplied source does not implement those Core commands, so capture must verify their real output.
-- The existing plan and catalog captions describe only three soundscapes, while the README and four declarations include Singularity. The revised scene calls for all four; if the installed compatible Core does not display one, record that discrepancy rather than fabricating it. Core-version-dependent default behavior described in the README must not be inferred from a screenshot of the list.
+- The soundscape scene shows all four selectable tracks, including Singularity. The list demonstrates availability. Core owns the initial selection, and playback requires Play.
 
 ## Privacy pitfalls
 

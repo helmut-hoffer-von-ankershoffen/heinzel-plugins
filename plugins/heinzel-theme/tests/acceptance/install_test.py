@@ -58,7 +58,7 @@ def test_installed_catalog_is_complete_and_silent_by_default(installed):
         ("heinzelmaennchen", "heinzel-theme"),
     ]
     sounds = hz("system", "sound", "list")
-    # Core 0.9.55 and later default to Singularity, older Cores to off; either way nothing plays before Play.
+    # Core owns the initial selection. Core 0.9.55 defaults to off, and playback requires Play.
     assert sounds["selected"] in {"off", "singularity"}
     assert sounds["effective"] == sounds["selected"]
     names = {item["name"] for item in sounds["soundscapes"]}

@@ -10,9 +10,9 @@ Select **Heinzelmännchen** in Settings → Appearance, or run `hz system theme 
 theme** enabled, its paired soundscape is Die Heinzelmännchen (`focus`). Choose any of its soundscapes manually with
 `hz system sound use claude-fm`, `focus`, `hyper-focus` or `singularity`.
 
-Singularity is the default soundscape of Core 0.9.55 and later for anyone who never chose one (an explicit choice,
-`off` included, always wins); older Cores keep `off` as the default and still offer it. It plays the video
-`AvtStYuO79Y` alone, no playlist, and only after the person presses Play.
+In Core 0.9.55, the soundscape defaults to `off`. You can select **Singularity** in Settings → Appearance or run
+`hz system sound use singularity`. Installing the plugin preserves your explicit choice, including `off`.
+Singularity plays the single YouTube video `AvtStYuO79Y` only after you press Play.
 
 All theme values, logos, soundscape definitions, pairing and tests belong to this directory. The plugin uses public
 `module.theme` and `module.soundscape` declarations. It imports no other plugin or core implementation. Disabling
@@ -25,9 +25,9 @@ or parent registry change.
 <!-- screenshots:start -->
 ## Screenshots
 
-<img src="docs/assets/screenshots/theme-light.png" alt="A fictional Launch review contract and its readiness checks in the applied Heinzelmännchen light theme." width="960">
+<img src="docs/assets/screenshots/theme-light.png" alt="A fictional Launch review contract, its requirements and next-step commands in the applied Heinzelmännchen light theme." width="960">
 
-A fictional Launch review contract and its readiness checks in the applied Heinzelmännchen light theme.
+A fictional Launch review contract, its requirements and next-step commands in the applied Heinzelmännchen light theme.
 
 <img src="docs/assets/screenshots/theme-dark.png" alt="The same fictional Launch review contract in the applied Heinzelmännchen dark theme." width="960">
 

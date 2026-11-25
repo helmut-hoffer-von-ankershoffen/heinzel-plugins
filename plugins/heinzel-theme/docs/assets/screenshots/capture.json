@@ -2,10 +2,10 @@
   "format": 1,
   "plugin": "heinzel-theme",
   "core_version": "0.9.54",
-  "inputs_sha256": "e5efcf0506fec1c882284b598538e3e88a1bc182b77ab6568e7f2d84eda53b7b",
+  "inputs_sha256": "a52d1b0c86c30194d8169d14d2473816935cf8187fc72983d4f4ad3148dd4d28",
   "images": {
     "docs/assets/screenshots/theme-light.png": "74a1a58915138509e48b68a32f8641cef00952362f629fa399588d00a5a411e3",
-    "docs/assets/screenshots/theme-dark.png": "1a427bb5987143dc816c00d06dc379281974c51eacd8184946bfa94e913f82f4",
+    "docs/assets/screenshots/theme-dark.png": "a38836db966fc1c64d40ebf2ffc7294bd4d8242056a56b23aba9394c412c5973",
     "docs/assets/screenshots/theme-soundscapes.png": "dd54f9e6a529c69b03f1387ceae6e9f42f2b39aeb662ce15d3ada34155f8264e",
     "docs/assets/screenshots/theme-cli.png": "2ebc7271bafa972d57b82a6278d25aee8901031963a3342297a50658f653e015",
     "docs/assets/screenshots/soundscapes-cli.png": "335ec0d3fb642b032bef3d76d20c1588096a41afcf2fe3db880b801e8b949f3e"
@@ -14,23 +14,23 @@
     "format": 2,
     "source_story": {
       "path": "source-story.md",
-      "sha256": "c5cca2a6b2c6e046bc5ac619d883b114e6c18fc57eac62e8bd322d3dff91afb8"
+      "sha256": "b1ae06d217f0eddefc7a2278fa7ccc93c29893dfbc0d0d7b64507bca1040cf4a"
     },
     "definition": {
       "format": 1,
-      "reviewer": "Codex feature-story agent",
-      "source_sha256": "7bdf5c14bb0a3897e7055b09f0fed79d8b9793ab8225e870ed8b9d7b1d29e670",
-      "plan_sha256": "8cac5bc9366fd540ad3ebbc05730d044cab2c7363162c859a2b2fd3b5d68cda4",
-      "story_sha256": "c5cca2a6b2c6e046bc5ac619d883b114e6c18fc57eac62e8bd322d3dff91afb8"
+      "reviewer": "Codex theme source-analysis agent",
+      "source_sha256": "846c81c96d074617c0d16bf0f32eb9d847937bd0b5e4191745582fb7e6bbea0c",
+      "plan_sha256": "813e0fec8877c2326421282f1101d9bff60d6776a5311260fb48c85ef0793b2b",
+      "story_sha256": "b1ae06d217f0eddefc7a2278fa7ccc93c29893dfbc0d0d7b64507bca1040cf4a"
     },
     "plugin": "heinzel-theme",
     "core_version": "0.9.54",
-    "inputs_sha256": "e5efcf0506fec1c882284b598538e3e88a1bc182b77ab6568e7f2d84eda53b7b",
+    "inputs_sha256": "a52d1b0c86c30194d8169d14d2473816935cf8187fc72983d4f4ad3148dd4d28",
     "screenshots": [
       {
         "path": "docs/assets/screenshots/theme-light.png",
         "surface": "ui",
-        "caption": "A fictional Launch review contract and its readiness checks in the applied Heinzelm\u00e4nnchen light theme."
+        "caption": "A fictional Launch review contract, its requirements and next-step commands in the applied Heinzelm\u00e4nnchen light theme."
       },
       {
         "path": "docs/assets/screenshots/theme-dark.png",
@@ -55,23 +55,23 @@
     ],
     "images": {
       "theme-light.png": "74a1a58915138509e48b68a32f8641cef00952362f629fa399588d00a5a411e3",
-      "theme-dark.png": "1a427bb5987143dc816c00d06dc379281974c51eacd8184946bfa94e913f82f4",
+      "theme-dark.png": "a38836db966fc1c64d40ebf2ffc7294bd4d8242056a56b23aba9394c412c5973",
       "theme-soundscapes.png": "dd54f9e6a529c69b03f1387ceae6e9f42f2b39aeb662ce15d3ada34155f8264e",
       "theme-cli.png": "2ebc7271bafa972d57b82a6278d25aee8901031963a3342297a50658f653e015",
       "soundscapes-cli.png": "335ec0d3fb642b032bef3d76d20c1588096a41afcf2fe3db880b801e8b949f3e"
     },
     "transcripts": {
       "theme-light.txt": "bf09e1f4e437f861e9212c0eea06a7114e6a96c5bfe0415c8baf4d9b7b0d212a",
-      "theme-dark.txt": "bf09e1f4e437f861e9212c0eea06a7114e6a96c5bfe0415c8baf4d9b7b0d212a",
+      "theme-dark.txt": "8a79fad2fdd393e3ccd48be84c8de982e98004d9d8db9f2c97b88364c3d350fd",
       "theme-soundscapes.txt": "13a5cf5333785394bb79506105bfc9b4f3e07c1e6687addd2705db09583901dd",
       "theme-cli.txt": "36d653efa87eeec3a67c92ac4c27069a4697714578a9cd172bda926c27fdfa1f",
       "soundscapes-cli.txt": "0b2c10983afe745e121ad38b039b18a1db4464c283a6ac3e3c9a85aed148575c"
     },
-    "bundle_sha256": "347100ae8d34040419f7aa46148ac80fcbb9fa33b93ec95f3a3291f1cbde6d36"
+    "bundle_sha256": "d1ca90c3026397c8e50406edfdc99143c8bc2e83f7b5161e670786ba4b53e59d"
   },
   "privacy_review": {
     "format": 1,
-    "bundle_sha256": "347100ae8d34040419f7aa46148ac80fcbb9fa33b93ec95f3a3291f1cbde6d36",
+    "bundle_sha256": "d1ca90c3026397c8e50406edfdc99143c8bc2e83f7b5161e670786ba4b53e59d",
     "reviewer": "Codex privacy agent",
     "decision": "approve",
     "checked_images": [

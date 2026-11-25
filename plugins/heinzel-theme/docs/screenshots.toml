@@ -5,7 +5,7 @@ bootstrap = "docs/screenshot_fixture.py"
 name = "theme-light"
 surface = "ui"
 route = "/contracts/launch-review"
-caption = "A fictional Launch review contract and its readiness checks in the applied Heinzelmännchen light theme."
+caption = "A fictional Launch review contract, its requirements and next-step commands in the applied Heinzelmännchen light theme."
 theme = "heinzelmaennchen"
 appearance = "light"
 viewport = { width = 1440, height = 1000 }

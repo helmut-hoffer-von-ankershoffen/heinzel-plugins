@@ -141,7 +141,7 @@ themes = ["src/heinzel_theme/themes/heinzelmaennchen.toml"]
 [[tool.heinzel.catalog.screenshots]]
 path = "docs/assets/screenshots/theme-light.png"
 surface = "ui"
-caption = "A fictional Launch review contract and its readiness checks in the applied Heinzelmännchen light theme."
+caption = "A fictional Launch review contract, its requirements and next-step commands in the applied Heinzelmännchen light theme."
 
 [[tool.heinzel.catalog.screenshots]]
 path = "docs/assets/screenshots/theme-dark.png"
