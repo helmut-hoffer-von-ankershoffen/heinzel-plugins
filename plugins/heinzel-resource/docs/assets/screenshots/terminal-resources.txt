@@ -10,9 +10,9 @@ Mira
 · EM
 Today
 Today
-Doctor: 4 checks need attention
+Doctor: 5 checks need attention
 
-ai.access ai access, system.doctor installation, system.prerequisite system.runner: claude…
+ai.access ai access, system.doctor installation, system.prerequisite system: gh…
 
 Open
 Computer resources
@@ -20,7 +20,7 @@ Computer resources
 CPU 36%
 
 v0.9.55
-Updates available, off
+Updates, off
 0
 System health, warning
 ?
