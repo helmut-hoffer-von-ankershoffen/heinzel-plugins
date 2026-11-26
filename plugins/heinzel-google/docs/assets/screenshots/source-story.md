@@ -1,44 +1,55 @@
-## Audience and outcome
+# Google connector gallery source story
 
-A person considering the Google Workspace connector can see how a fictional launch day appears in Heinzel’s calendar, inspect the selected Workspace CLI source, and explore real adapter output for files, documents, spreadsheets and mail. The gallery demonstrates offline behavior; it does not establish a successful Google sign-in, live provider access, a write, or a complete workflow.
+## Audience and scope
 
-## Scenes
+Show prospective Heinzel users the real, offline behavior of the Google connector: fictional Calendar data in Core, the selected `gws` source review, and representative document, spreadsheet, mail, and file adapter output. This gallery is fixture-backed. It does not prove Google sign-in, that the user granted any OAuth scopes, live provider access, writes, or a complete connector workflow.
 
-1. **Next up, in context — dark UI.** Open the footer calendar summary for the fictional launch review. This shows the immediate value of the calendar adapter in an ordinary Core surface.
-2. **Plan the week — light UI.** Open Core’s calendar pane and see the fictional launch meetings together. This is a distinct, useful state of the same calendar flow.
-3. **Inspect the source — dark UI.** Open the actual Google source review panel and show the fictional selected executable and its digest. The panel explains that a digest is not publisher authentication or permission to read an account.
-4. **Find recent files — CLI.** Show the Google `files` operation with a three-day, name-filtered JSON invocation.
-5. **Broaden the window — CLI.** Show the same operation with a seven-day window. The fixture returns the same canned file list, so this demonstrates the invocation, not server-side filtering.
-6. **Read the launch plan — CLI.** Show a fictional Doc converted by the real adapter, using the documentation-only requester.
-7. **Read the metrics — CLI.** Show a fictional Sheet converted by the real adapter through that requester.
-8. **Read the message — CLI.** Show a fictional Gmail message body through that requester. These showcase commands are fixture-only, not installed plugin commands.
+The staged product change makes the default setup request broad read/write access, including all Drive files and Gmail `gmail.modify`; Google still presents the consent decision in the browser. Custom setup remains available. App sign-in also reports progress, verifies a Calendar grant where requested, and may open a validated Google consent URL from terminal login. Do not imply Heinzel silently authorizes this access or performs writes without confirmation. Do not capture a real Google consent page or treat the fixture as evidence of user consent.
 
-The existing plan already covers these useful behaviors, so it is preserved below. The UI scenes are genuine Core or plugin UI; the CLI scenes are labeled as terminal output, not presented as feature screens.
+## Current plan assessment
 
-## Fictional fixtures and presentation
+Keep the eight existing scenes for this capture. Their claims remain supported by the fixture and plugin declarations, and they retain the required two useful UI scenes plus a CLI scene. They illustrate connector value without implying the new broad default is safe, granted, or exercised. No added sign-in scene is source-justified from this plugin worktree alone: the Google consent UI is external, and the Core host's grant-selection/progress screen and a safe fixture route are not established here. If the product owner wants permission onboarding represented, inspect the exact Core route and fixture support in a later source pass before changing the plan.
 
-`docs/screenshot_fixture.py` supplies a temporary fictional profile, an inert selected executable, canned Google responses, example people and launch data, and a `DemoGws` transport that refuses sign-in and does not start Google. It uses the real adapters and adds documentation-only `showcase` operations. Its calendar includes a current-time anchor as well as fixed October 2026 events; actual captures must confirm that each scene contains the intended meeting.
+## Scene story
 
-Normal presentation fictionalization must be explicit: verified owning-interpreter paths become `/demo-profile/.venv`, and only the verified whole hostname detail in the genuine Doctor row becomes `demo-host`. These mappings change no SDK health status or remaining detail and establish no privacy acceptance. Unknown identities still fail, and independent review must inspect every image and transcript.
+1. **Upcoming meeting, dark UI.** Open Core's footer Calendar summary and show the fictional Launch readiness review. This is a Core capability surface backed by the Google calendar adapter and the fixture's current-time anchor.
+2. **Calendar week, light UI.** Open Core's calendar pane and show the fictional launch meetings. This is a second useful state of the same Calendar flow; verify the expected event and applied appearance during capture.
+3. **Selected source, dark UI.** Open the plugin's declared Google source review action/view. Show only the fictional selected executable and digest. A digest establishes byte continuity, not publisher identity, account access, or safety.
+4. **Recent files, JSON CLI.** Run the declared `google files` operation for three days and a Launch name filter. The fixture replies are canned and do not prove Drive filtering.
+5. **Wider file window, CLI.** Run the same operation for seven days. The fixture returns the same canned files; caption it as invocation behavior, not server-side filtering.
+6. **Launch plan, CLI.** Use the fixture-only `showcase notes launch-plan` requester to pass a fictional Doc through the real adapter. Do not present `showcase` as an installed Google command.
+7. **Launch metrics, CLI.** Use `showcase notes launch-metrics` for fictional Sheet content through the real adapter. It is fixture-only.
+8. **Launch message, CLI.** Use `showcase message-content` to render fictional Gmail content through the real adapter. It is fixture-only and does not establish Gmail consent or mail access.
 
-## Privacy pitfalls
+## Fixture and review constraints
 
-Inspect paths, hostnames, account names, addresses, tokens, executable identities, document contents, browser chrome and terminal transcripts. The fixture’s example addresses and names are fictional, but fixture isolation alone does not prove that every rendered surface is free of real data. Apply only the verified mappings above; do not guess at or conceal unknown identities. The source review digest demonstrates byte continuity, not publisher authentication. Do not portray a local health check as a live connection or imply that canned responses prove Google filtering, consent or writes.
+`docs/screenshot_fixture.py` uses a temporary fictional profile, inert selected executable, canned Workspace responses, and a `DemoGws` that refuses sign-in and never starts Google. It adds documentation-only showcase operations. Its stable current-day Calendar anchor and fixed October 2026 examples serve different windows; capture must verify the intended scene content. Keep only the already verified mappings in the maintained story (owning interpreter to `/demo-profile/.venv`; the verified whole hostname detail to `demo-host`). Unknown paths, identities, hostnames, browser chrome, tokens, document contents, or transcript data are a failure; do not guess mappings.
 
-## Source-bound UI surface inventory
+A later independent reviewer must inspect every PNG and transcript against the exact generated bundle, confirm all captions and the two Calendar UI states, and reject any claim of live access, scope consent, write acceptance, or filtering unsupported by the fixture. This source story is not visual approval or a privacy receipt.
 
-- **Declared entrypoints:** `pyproject.toml` declares both `heinzel.modules` and `heinzel.connected_sources` as `google = "heinzel_google"`. `src/heinzel_google/__init__.py` exposes `module`, defined as `Module("google", ...)` in `src/heinzel_google/_module.py`. The connected-source declaration points to the same package; conditional registration of `GoogleConnectedReadService`, `GoogleDocumentWrites` and `GoogleDraftAppends` depends on host APIs and captured-source activation in `__init__.py`. The docstring in `src/heinzel_google/_connected_calendar.py` calls its service unregistered, while `__init__.py` conditionally registers it: availability depends on that actual loading path and remains to be verified for the capture host.
-- **Plugin feature UI:** `src/heinzel_google/__init__.py` declares the `Google source review` action navigating to `/?panel=google:source-review`, a `source-review` view, and a private read-only `source_review` operation with CLI and web heads. `src/heinzel_google/views/index.js` renders its configured, loading and unconfigured states. This is a real plugin view, not a route inferred from the plugin name.
-- **Core feature UI:** `__init__.py` provides calendar read/write, documents read, and mail read/write capabilities. `docs/screenshot_fixture.py` binds their fictional adapters and specifically supplies calendar events for Core’s agenda and calendar-week UI. The existing plan identifies the footer calendar summary and calendar pane on `/`; capture must verify those controls and their contents. Other capability-driven Core surfaces may exist, but their exact routes and fixture states are not established by these supplied files.
-- **Operations and generic surfaces:** `__init__.py` declares `info`, private `files`, setup, system info, local health and live health contributions; `src/heinzel_google/_service.py` implements the information and checks. Core may render operation, setup, information or Doctor surfaces, but these source files do not establish a capture-ready route or exact UI state for each. `files` being private does not prove it is terminal-only. The plan uses its genuine CLI invocation without claiming there is no web rendering.
-- **Sign-in and approvals:** `src/heinzel_google/_sign_in.py` registers `module.sign_in(grants=GRANTS)(GoogleSignIn)` and describes progress and host-side completion; `README.md` describes a connector command and a later sign-in button. Google’s consent/browser page is external provider UI, not a plugin screen. `src/heinzel_google/_document_write.py` says the host owns approval; the supplied source does not establish a fixture-backed approval screen. Do not invent one or represent source review as approval.
-- **Channels and footer:** No plugin channel or footer declaration is present in the inspected package declarations. The calendar footer in the existing plan is a Core-rendered capability surface, not a plugin-declared footer. No separate plugin navigation route is declared beyond the source-review action.
-- **Terminal output:** `docs/screenshot_fixture.py` declares the `showcase` operations and Rich renderers for documents, calendar and mail. The selected showcase captures are native CLI results of that fixture, not evidence that the underlying capabilities lack UI. `README.md` documents `hz google files` and its parameters.
+# Google Calendar week scene: source review
 
-## Acceptance criteria
+## Verdict
 
-- Capture all eight distinct planned scenes with the existing bootstrap only during an explicitly requested capture. Verify the two calendar states contain the intended fictional event and that light and dark appearances are actually applied.
-- Confirm the source-review panel is genuine and its displayed details match the fictional selected executable. Confirm the two file commands have different arguments and label the fixture’s unfiltered replies accurately.
-- Preserve the distinction between installed Google commands and fixture-only showcase commands. Reject duplicate captures, caption-only changes, forged HTML and terminal output labeled as feature UI.
-- Independently inspect every image and transcript for privacy and accuracy, including the narrowly specified presentation mappings. Fail on unknown identities. Do not claim live account, provider-write, privacy or workflow acceptance from this offline gallery.
-- The TOML below has been checked against the supplied field rules by inspection; it has not been parsed, executed or capture-tested because this request prohibits code execution.
+Affirm the corrected source-defined scene. Removing the initial `wait` for `Ask about it` is correct for Core v0.9.55. That control is not rendered by the tagged Home/TopBar calendar surface. The supported entry point on this version is the `Open calendar` button; after opening, the CalendarPanel contains an enabled `Previous week` action and renders the agenda content. The plan still needs the later capture to confirm that the fixture-backed event actually appears in the captured panel. This review is not visual approval.
+
+## Evidence checked
+
+- Core release tag `v0.9.55` resolves to commit `c51a98c649fae65516ac0b26bef8fc3c11476419`.
+- `web/src/layout/TopBar.tsx:247-258` defines the header button with accessible name `Open calendar`; the tools menu exposes the same action at lines 326-335. The tagged source has no `Ask about it` text in `TopBar.tsx`.
+- `web/src/layout/CalendarPanel.tsx:138-152` renders the Calendar panel header; lines 175-189 render the agenda when data is available; lines 205-212 define Today/Previous week/Next week, with Previous week enabled at offset zero.
+- `web/src/layout/CalendarSummary.tsx:158-190` confirms the footer summary may also contain an `Open calendar` action. The corrected scene's initial wait now proceeds to the expected available control; capture still must disambiguate the intended header/footer target by the actual page state and verify it opens the panel.
+- Owner fixture `plugins/heinzel-google/docs/screenshot_fixture.py:135-187` supplies fictional `Launch readiness review` events and a current-day anchor 15 minutes ahead, with later events staggered 45 minutes apart. The Calendar response filters against the requested window. This supports an intended Calendar display, but does not prove which event or layout appears in a screenshot.
+- Current plan diff removes only the `wait` for `Ask about it`; the remaining steps wait/click `Open calendar`, wait for `Previous week`, and wait for `Launch readiness review`.
+
+## Scope and limits
+
+This is a source-only acceptance of the corrected interaction sequence against Core v0.9.55 plus the owner fixture. It does not inspect rendered pixels, confirm the planned light appearance, establish that the original run reached a particular screen beyond the parent's report, or approve the gallery bundle. If capture still fails, inspect the actual accessible names and whether duplicate `Open calendar` controls are present before changing the plan again.
+
+## Verified synthetic executable path
+
+The path `/demo-profile/state_dir/fictional-gws/gws` identifies the inert executable created by the owner fixture in the isolated capture state directory. The fixture sets the selected executable under `HZ_STATE_DIR/fictional-gws` and writes only fictional executable and credential bytes (`docs/screenshot_fixture.py:257–267`). The pinned capture sets that state directory under its temporary work directory and rewrites the temporary work prefix to `/demo-profile` before saving the image and transcript (`capture.py:607–608,740–750,1068,1239–1248`). Source verification does not approve the image.
+
+## Annotation-only source refresh
+
+The only new product-source change adds the explicit `frozenset[str]` annotation to the local `approved_scopes` value in `src/heinzel_google/_gws.py`. This changes no runtime value, branch, OAuth scope, fixture, route, caption, or scene step. The existing eight-scene plan and fixture remain applicable; no visual change is expected from this annotation. This source analysis does not approve or reuse any image without the separate gallery review rules.

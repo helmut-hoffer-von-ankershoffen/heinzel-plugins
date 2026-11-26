@@ -32,11 +32,6 @@ viewport = { width = 1280, height = 900 }
 [[scenes.steps]]
 action = "wait"
 role = "button"
-name = "Ask about it"
-
-[[scenes.steps]]
-action = "wait"
-role = "button"
 name = "Open calendar"
 
 [[scenes.steps]]

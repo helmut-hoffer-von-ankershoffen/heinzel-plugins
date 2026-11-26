@@ -1,6 +1,7 @@
 """`hz setup google`: finding gws, signing it in, binding the capabilities; with a scripted person and a fake gws."""
 
 import json
+import os
 from pathlib import Path
 
 import pytest
@@ -19,10 +20,10 @@ from heinzel_google import (
     Process,
     login_command,
 )
-from heinzel_google._gws import DOCUMENTS_WRITE_SCOPE
-from heinzel_google._setup import DOCS_ASKED, DOCS_HAPPENS, run_setup
+from heinzel_google._gws import DOCUMENT_WRITE_SCOPES, DOCUMENTS_WRITE_SCOPE
+from heinzel_google._setup import DEFAULT_CONSENT, DOCS_ASKED, DOCS_HAPPENS, run_setup
 
-pytestmark = pytest.mark.unit
+pytestmark = [pytest.mark.unit, pytest.mark.usefixtures("calendar_access")]
 
 
 class Editor:
@@ -57,9 +58,57 @@ def setup(session, fake_gws, answers, view=None, settings=None) -> tuple[Scripte
     return prompter, editor
 
 
-def test_signs_in_and_binds_documents_and_calendar_but_not_mail_by_default(session, fake_gws, gws_path):
+def test_enter_uses_default_permissions_and_binds_google_in_one_step(session, fake_gws):
     fake_gws.sign_out()
-    prompter, editor = setup(session, fake_gws, ["", "", "", "", "", ""])
+    prompter, editor = setup(session, fake_gws, [""])
+    assert any(DEFAULT_CONSENT in line for line in prompter.transcript)
+    assert not any("Let hz also" in line for line in prompter.transcript)
+    (login,) = fake_gws.logins
+    scopes = set(login[login.index("--scopes") + 1].split(","))
+    assert scopes >= {*DOCUMENT_WRITE_SCOPES, CALENDAR_WRITE_SCOPE, MAIL_WRITE_SCOPE}
+    assert MAIL_SCOPE not in scopes
+    assert editor.written == {
+        "capabilities.documents": "google",
+        "capabilities.calendar": "google",
+        "capabilities.mail": "google",
+    }
+
+
+def test_default_setup_reauthorizes_without_replacing_other_connectors(session, fake_gws):
+    _, editor = setup(session, fake_gws, [""], Bound(documents="google", calendar="google", mail="other"))
+    assert len(fake_gws.logins) == 1
+    assert editor.written == {}
+
+
+def test_default_setup_does_not_bind_google_when_sign_in_fails(session, fake_gws):
+    fake_gws.login_code = 1
+    prompter, editor = setup(session, fake_gws, [""])
+    assert "gws auth login did not finish (exit 1)." in prompter.transcript
+    assert editor.written == {}
+
+
+def test_default_setup_discards_stale_token_before_checking_calendar(session, fake_gws, gws_config, monkeypatch):
+    cache = gws_config / "token_cache.json"
+    cache.write_bytes(b"old access token")
+    os.utime(cache, ns=(1, 1))
+    original = fake_gws.run
+
+    def freshly_authorized(executable, arguments, timeout):
+        if tuple(arguments[:3]) == ("calendar", "events", "list"):
+            assert not cache.exists()
+            assert (gws_config / "credentials.enc").read_bytes() == b"encrypted"
+        return original(executable, arguments, timeout)
+
+    monkeypatch.setattr(fake_gws, "run", freshly_authorized)
+    prompter, _ = setup(session, fake_gws, [""])
+    assert "gws is signed in." in prompter.transcript
+    assert [run.command for run in fake_gws.api_runs] == [("calendar", "events", "list")]
+    assert fake_gws.api_runs[0].params == {"calendarId": "primary", "maxResults": 1, "fields": "kind"}
+
+
+def test_custom_sign_in_can_keep_read_only_documents_and_calendar(session, fake_gws, gws_path):
+    fake_gws.sign_out()
+    prompter, editor = setup(session, fake_gws, ["n", "", "", "n", "n", "n", ""])
     assert fake_gws.logins == [LOGIN.split()[1:]]
     scopes = fake_gws.logins[0][-1].split(",")
     assert len(scopes) == 5
@@ -80,7 +129,7 @@ def test_normal_read_only_login_authorizes_slides_only_with_its_read_scope(
     session, fake_gws, monkeypatch, slide_permission
 ):
     fake_gws.sign_out()
-    setup(session, fake_gws, ["", "", "", "", "", ""])
+    setup(session, fake_gws, ["n", "", "", "n", "n", "n", ""])
     (login,) = fake_gws.logins
     scopes = set(login[login.index("--scopes") + 1].split(","))
     if not slide_permission:
@@ -119,7 +168,8 @@ def test_normal_read_only_login_authorizes_slides_only_with_its_read_scope(
     else:
         with pytest.raises(HeinzelError, match=r"(?i)permission|scope"):
             GoogleDocuments(session).read(identity)
-    metadata, slides = fake_gws.api_runs
+    calendar, metadata, slides = fake_gws.api_runs
+    assert calendar.command == ("calendar", "events", "list")
     assert (metadata.command, metadata.params["fileId"]) == (("drive", "files", "get"), identity)
     assert (slides.command, slides.params, slides.body) == (
         ("slides", "presentations", "get"),
@@ -130,21 +180,25 @@ def test_normal_read_only_login_authorizes_slides_only_with_its_read_scope(
 
 
 def test_binding_mail_signs_in_again_with_gmails_scope(session, fake_gws):
-    prompter, editor = setup(session, fake_gws, ["y", "", "", "", ""], Bound(documents="google", calendar="google"))
+    prompter, editor = setup(
+        session, fake_gws, ["n", "", "n", "n", "n", ""], Bound(documents="google", calendar="google")
+    )
     assert editor.written == {"capabilities.mail": "google"}
     assert fake_gws.logins == [LOGIN_WITH_MAIL.split()[1:]]
     assert any("all of your mail" in line for line in prompter.transcript)
 
 
 def test_already_signed_in_and_bound_runs_no_sign_in(session, fake_gws):
-    _, editor = setup(session, fake_gws, ["n", "n", "n"], Bound(documents="google", calendar="google", mail="other"))
+    _, editor = setup(
+        session, fake_gws, ["n", "n", "n", "n"], Bound(documents="google", calendar="google", mail="other")
+    )
     assert (fake_gws.logins, editor.written) == ([], {})
 
 
 def test_keeps_another_binding_when_declined_and_reports_a_failed_login(session, fake_gws):
     fake_gws.sign_out()
     fake_gws.login_code = 1
-    prompter, editor = setup(session, fake_gws, ["n", "", "n", "n", "y"], Bound(documents="other"))
+    prompter, editor = setup(session, fake_gws, ["n", "n", "", "n", "n", "y"], Bound(documents="other"))
     assert editor.written == {"capabilities.calendar": "google"}
     assert "gws auth login did not finish (exit 1)." in prompter.transcript
 
@@ -162,7 +216,7 @@ def test_asks_for_the_path_of_gws_when_it_is_not_found(fake_gws, gws_path, tmp_p
     prompter, editor = setup(
         session,
         fake_gws,
-        ["relative/gws", str(tmp_path), gws_path, "n", "n", "n"],
+        ["relative/gws", str(tmp_path), gws_path, "n", "n", "n", "n"],
         Bound(documents="google", calendar="google", mail="other"),
     )
     assert editor.written == {"google.gws_path": gws_path}
@@ -180,21 +234,21 @@ def test_without_gws_and_no_path_it_names_the_install(fake_gws, tmp_path, monkey
 
 def test_a_declined_sign_in_runs_nothing(session, fake_gws):
     fake_gws.sign_out()
-    _, editor = setup(session, fake_gws, ["n", "n", "n", "n"], Bound(documents="google", calendar="google"))
+    _, editor = setup(session, fake_gws, ["n", "n", "n", "n", "n"], Bound(documents="google", calendar="google"))
     assert (fake_gws.logins, editor.written) == ([], {})
 
 
 def test_mail_bound_before_offers_signing_in_again_with_gmails_scope(session, fake_gws):
     bound = Bound(documents="google", calendar="google", mail="google")
-    _, editor = setup(session, fake_gws, ["", "", "", ""], bound)
+    _, editor = setup(session, fake_gws, ["n", "n", "n", "n", "n"], bound)
     assert (fake_gws.logins, editor.written) == ([], {})
-    setup(session, fake_gws, ["", "", "", "y"], bound)
+    setup(session, fake_gws, ["n", "n", "n", "n", ""], bound)
     assert fake_gws.logins == [LOGIN_WITH_MAIL.split()[1:]]
 
 
 def test_google_serving_automatically_is_asked_and_declined_mail_is_turned_off(session, fake_gws):
     prompter, editor = setup(
-        session, fake_gws, ["", "", "", "", ""], Bound(automatic=("documents", "calendar", "mail"))
+        session, fake_gws, ["n", "", "", "n", "n", "n"], Bound(automatic=("documents", "calendar", "mail"))
     )
     assert editor.written == {
         "capabilities.documents": "google",
@@ -206,7 +260,7 @@ def test_google_serving_automatically_is_asked_and_declined_mail_is_turned_off(s
 
 
 def test_letting_hz_write_the_calendar_signs_in_again_with_its_write_scope_only(session, fake_gws):
-    prompter, _ = setup(session, fake_gws, ["n", "y", "n", ""], Bound(documents="google", calendar="google"))
+    prompter, _ = setup(session, fake_gws, ["n", "n", "", "n", ""], Bound(documents="google", calendar="google"))
     (login,) = fake_gws.logins
     scopes = login[login.index("--scopes") + 1].split(",")
     assert CALENDAR_WRITE_SCOPE in scopes
@@ -217,7 +271,7 @@ def test_letting_hz_write_the_calendar_signs_in_again_with_its_write_scope_only(
 
 def test_letting_hz_write_mail_asks_for_gmails_modify_scope_instead_of_its_read_only_one(session, fake_gws):
     bound = Bound(documents="google", calendar="google", mail="google")
-    setup(session, fake_gws, ["n", "y", "n", ""], bound)
+    setup(session, fake_gws, ["n", "n", "", "n", ""], bound)
     assert fake_gws.logins == [login_command(mail=True, write=frozenset({"mail"})).split()[1:]]
     (login,) = fake_gws.logins
     scopes = login[login.index("--scopes") + 1].split(",")
@@ -226,7 +280,9 @@ def test_letting_hz_write_mail_asks_for_gmails_modify_scope_instead_of_its_read_
 
 
 def test_writes_are_offered_only_for_what_google_serves(session, fake_gws):
-    prompter, _ = setup(session, fake_gws, ["n", "n", "n"], Bound(documents="other", calendar="other", mail="other"))
+    prompter, _ = setup(
+        session, fake_gws, ["n", "n", "n", "n"], Bound(documents="other", calendar="other", mail="other")
+    )
     assert not any("Let hz also" in line for line in prompter.transcript)
 
 
@@ -235,10 +291,10 @@ def test_declining_an_automatic_documents_binding_skips_docs_write_consent(sessi
     if not signed_in:
         fake_gws.sign_out()
     bound = Bound(automatic=("documents",), calendar="other", mail="other")
-    prompter, editor = setup(session, fake_gws, ["n", "n", "n", "y", "y"], bound)
+    prompter, editor = setup(session, fake_gws, ["n", "n", "n", "n", "y"], bound)
     assert editor.written == {"capabilities.documents": "none"}
     assert DOCS_ASKED not in prompter.transcript
-    assert not any("Let hz also add to your Google Docs" in line for line in prompter.transcript)
+    assert not any("Let hz also change your Google Docs" in line for line in prompter.transcript)
     assert fake_gws.logins == ([] if signed_in else [LOGIN.split()[1:]])
     assert fake_gws.api_runs == []
 
@@ -246,7 +302,7 @@ def test_declining_an_automatic_documents_binding_skips_docs_write_consent(sessi
 def test_declining_automatic_documents_and_sign_in_makes_no_auth_or_provider_call(session, fake_gws):
     fake_gws.sign_out()
     bound = Bound(automatic=("documents",), calendar="other", mail="other")
-    prompter, editor = setup(session, fake_gws, ["n", "n", "n", "n"], bound)
+    prompter, editor = setup(session, fake_gws, ["n", "n", "n", "n", "n"], bound)
     assert editor.written == {"capabilities.documents": "none"}
     assert DOCS_ASKED not in prompter.transcript
     assert fake_gws.logins == []
@@ -256,7 +312,7 @@ def test_declining_automatic_documents_and_sign_in_makes_no_auth_or_provider_cal
 @pytest.mark.parametrize("reconnect", [False, True])
 def test_accepting_automatic_documents_write_still_requires_separate_reconnect(session, fake_gws, reconnect):
     bound = Bound(automatic=("documents",), calendar="other", mail="other")
-    prompter, editor = setup(session, fake_gws, ["y", "n", "n", "y", "y" if reconnect else "n"], bound)
+    prompter, editor = setup(session, fake_gws, ["n", "y", "n", "n", "", "" if reconnect else "n"], bound)
     assert editor.written == {"capabilities.documents": "google"}
     assert DOCS_ASKED in prompter.transcript
     assert DOCS_HAPPENS in prompter.transcript
@@ -265,20 +321,18 @@ def test_accepting_automatic_documents_write_still_requires_separate_reconnect(s
         (login,) = fake_gws.logins
         scopes = set(login[login.index("--scopes") + 1].split(","))
         readonly = set(LOGIN.split()[-1].split(","))
-        assert scopes == readonly | {DOCUMENTS_WRITE_SCOPE}
+        assert scopes == readonly | set(DOCUMENT_WRITE_SCOPES)
     else:
         assert fake_gws.logins == []
 
 
-def test_letting_hz_write_docs_is_a_separate_two_line_consent_that_adds_only_the_documents_scope(
-    session, fake_gws, caplog
-):
+def test_custom_documents_write_consent_adds_document_and_drive_scopes(session, fake_gws, caplog):
     caplog.set_level("INFO", logger="heinzel_google.setup")
     bound = Bound(documents="google", calendar="google")
-    prompter, _ = setup(session, fake_gws, ["n", "n", "y", ""], bound)
+    prompter, _ = setup(session, fake_gws, ["n", "n", "n", "", ""], bound)
     (login,) = fake_gws.logins
     scopes = login[login.index("--scopes") + 1].split(",")
-    assert DOCUMENTS_WRITE_SCOPE in scopes
+    assert set(DOCUMENT_WRITE_SCOPES) <= set(scopes)
     assert CALENDAR_WRITE_SCOPE not in scopes
     assert "https://www.googleapis.com/auth/documents.readonly" in scopes  # reads keep their own scope
     assert DOCS_ASKED in prompter.transcript
@@ -292,7 +346,7 @@ def test_letting_hz_write_docs_is_a_separate_two_line_consent_that_adds_only_the
 def test_declining_docs_write_keeps_the_read_only_sign_in_and_logs_the_outcome(session, fake_gws, caplog):
     caplog.set_level("INFO", logger="heinzel_google.setup")
     session_gws = fake_gws
-    prompter, _ = setup(session, session_gws, ["n", "n", "n"], Bound(documents="google", calendar="google"))
+    prompter, _ = setup(session, session_gws, ["n", "n", "n", "n"], Bound(documents="google", calendar="google"))
     assert session_gws.logins == []
     assert DOCUMENTS_WRITE_SCOPE not in str(session_gws.logins)
     assert [r.outcome for r in caplog.records if hasattr(r, "outcome")] == ["declined"]

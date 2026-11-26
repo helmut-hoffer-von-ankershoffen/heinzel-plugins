@@ -188,6 +188,12 @@ def fake_gws() -> FakeGws:
 
 
 @pytest.fixture
+def calendar_access(fake_gws: FakeGws) -> None:
+    """Google accepts the Calendar probe after a test sign-in."""
+    fake_gws.json(("calendar", "events", "list"), {"kind": "calendar#events"})
+
+
+@pytest.fixture
 def session(fake_gws: FakeGws, gws_path: str) -> GoogleSession:
     """A session whose `gws` is the fake."""
     return GoogleSession(GoogleSettings(gws_path=gws_path), fake_gws)

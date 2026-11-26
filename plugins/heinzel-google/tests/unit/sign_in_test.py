@@ -1,6 +1,7 @@
 """The Google sign-in Core runs from the app (ADR 0136), against the fake gws: grants, scopes, progress, outcomes."""
 
 import json
+import os
 import threading
 from dataclasses import dataclass, field
 from urllib.parse import urlsplit
@@ -11,17 +12,18 @@ from heinzel.kernel import SignInLet, SignInProgress
 from heinzel_google import GRANTS, GoogleSession, GoogleSettings, GoogleSignIn, Process
 from heinzel_google._gws import (
     CALENDAR_WRITE_SCOPE,
-    DOCUMENTS_WRITE_SCOPE,
+    DOCUMENT_WRITE_SCOPES,
     MAIL_SCOPE,
     MAIL_WRITE_SCOPE,
     SCOPES,
 )
 from heinzel_google._sign_in import scopes
 
-pytestmark = pytest.mark.unit
+pytestmark = [pytest.mark.unit, pytest.mark.usefixtures("calendar_access")]
 
 CONSENT = "https://accounts.google.com/o/oauth2/auth?client_id=example.apps.googleusercontent.com&scope=x"
-DEFAULTS = frozenset({"docs-read", "calendar-read"})
+REQUIRED_READS = frozenset({"docs-read", "calendar-read"})
+DEFAULTS = REQUIRED_READS
 
 
 def output(body: object, exit_code: int = 0) -> Process:
@@ -51,7 +53,7 @@ def run(sign_in: GoogleSignIn, grants: frozenset[str], stop: threading.Event | N
     return outcome, seen
 
 
-def test_a_first_sign_in_asks_for_the_document_and_calendar_reads_only():
+def test_required_provider_defaults_leave_optional_write_grants_selectable():
     assert {grant.id for grant in GRANTS if grant.default} == DEFAULTS
     assert scopes(DEFAULTS) == list(SCOPES)
 
@@ -59,8 +61,7 @@ def test_a_first_sign_in_asks_for_the_document_and_calendar_reads_only():
 def test_no_grant_reaches_google_cloud_or_everything():
     every = scopes(grant.id for grant in GRANTS)
     assert not [scope for scope in every if "cloud-platform" in scope]
-    assert "https://www.googleapis.com/auth/drive" not in every  # never all of Drive's contents
-    assert set(every) == {*SCOPES, CALENDAR_WRITE_SCOPE, DOCUMENTS_WRITE_SCOPE, MAIL_WRITE_SCOPE}
+    assert set(every) == {*SCOPES, CALENDAR_WRITE_SCOPE, *DOCUMENT_WRITE_SCOPES, MAIL_WRITE_SCOPE}
 
 
 @pytest.mark.parametrize(
@@ -72,7 +73,7 @@ def test_no_grant_reaches_google_cloud_or_everything():
             {"calendar-read", "calendar-write"},
             ["https://www.googleapis.com/auth/calendar.readonly", CALENDAR_WRITE_SCOPE],
         ),
-        ({"docs-write"}, [DOCUMENTS_WRITE_SCOPE]),
+        ({"docs-write"}, list(DOCUMENT_WRITE_SCOPES)),
         (set(), []),
     ],
     ids=["mail read", "mail write replaces mail read", "calendar write", "docs write", "nothing"],
@@ -97,7 +98,7 @@ def test_signed_in_is_read_from_gws_files_and_every_grant_is_unknown(session, fa
     ("bindings", "needed"),
     [
         ({}, set()),
-        ({"documents": ("google", "automatic"), "calendar": ("google", "configured")}, DEFAULTS),
+        ({"documents": ("google", "automatic"), "calendar": ("google", "configured")}, REQUIRED_READS),
         ({"mail": ("google", "automatic")}, set()),
         ({"mail": ("google", "configured")}, {"mail-read"}),
         ({"mail": ("google", "default")}, {"mail-read"}),
@@ -150,7 +151,7 @@ def test_live_with_a_sign_in_google_refuses_says_to_sign_in_again(session, fake_
 
 def test_a_sign_in_runs_gws_auth_login_with_exactly_the_scopes_and_reports_the_page(session, fake_gws):
     fake_gws.sign_in_lines = ["Open this URL in your browser to authenticate:", "", f"  {CONSENT}  ", CONSENT]
-    outcome, seen = run(provider(session, fake_gws), DEFAULTS | {"calendar-write"})
+    outcome, seen = run(provider(session, fake_gws), REQUIRED_READS | {"calendar-write"})
     assert fake_gws.sign_ins == [["auth", "login", "--scopes", ",".join([*SCOPES, CALENDAR_WRITE_SCOPE])]]
     assert seen == [SignInProgress(url=CONSENT, finish_on="host")]  # once, and only on the computer Heinzel runs on
     assert (outcome.state, outcome.message, outcome.account) == ("succeeded", "Signed in to Google.", "")
@@ -160,6 +161,35 @@ def test_a_page_elsewhere_than_google_is_never_reported(session, fake_gws):
     fake_gws.sign_in_lines = ["https://evil.example/o/oauth2/auth?x", "http://accounts.google.com/plain"]
     outcome, seen = run(provider(session, fake_gws), DEFAULTS)
     assert (outcome.state, seen) == ("succeeded", [])
+
+
+def test_app_sign_in_discards_stale_token_but_reports_calendar_refusal(session, fake_gws, gws_config):
+    cache = gws_config / "token_cache.json"
+    cache.write_bytes(b"old access token")
+    os.utime(cache, ns=(1, 1))
+    fake_gws.on(
+        ("calendar", "events", "list"),
+        output({"error": {"code": 403, "reason": "insufficientPermissions"}}, 1),
+    )
+    outcome, _ = run(provider(session, fake_gws), DEFAULTS)
+    assert not cache.exists()
+    assert outcome.state == "failed"
+    assert "Sign in again and allow Calendar." in outcome.message
+
+
+def test_fresh_cache_is_kept_and_a_failed_login_leaves_an_older_cache_in_place(session, fake_gws, gws_config):
+    cache = gws_config / "token_cache.json"
+    cache.write_bytes(b"fresh access token")
+    saved = (gws_config / "credentials.enc").stat()
+    os.utime(cache, ns=(saved.st_atime_ns, saved.st_mtime_ns + 1_000_000_000))
+    outcome, _ = run(provider(session, fake_gws), DEFAULTS)
+    assert outcome.state == "succeeded"
+    assert cache.read_bytes() == b"fresh access token"
+    os.utime(cache, ns=(1, 1))
+    fake_gws.sign_in_code = 1
+    outcome, _ = run(provider(session, fake_gws), DEFAULTS)
+    assert outcome.state == "failed"
+    assert cache.read_bytes() == b"fresh access token"
 
 
 FAILED = (

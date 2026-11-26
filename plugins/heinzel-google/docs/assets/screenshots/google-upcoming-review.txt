@@ -15,17 +15,53 @@ Doctor: 4 checks need attention
 ai.access ai access, system.doctor installation, system.prerequisite system.runner: claude…
 
 Open
-v0.9.42
+v0.9.55
 Updates, off
 0
 System health, warning
 16
 Daemon not installed, off
-Chat
-New chat
-Ask about your setup, your team's contracts or what to do next. The chat reads with hz and asks you before it changes anything.
-Your message
-Default
+Meet your first Heinzelmännchen
+
+Click a part of the figure to change it, or use the list.
+
+What do you call it?
+
+A suggestion: type your own, or let Surprise me pick.
+
+Surprise me
+Undo
+
+Everything you can change
+Hat
+Follow theme
+Age
+Grown
+Beard
+Age default
+Shirt
+Follow theme
+Build
+Regular
+Accessories
+None
+Hat
+Its mission
+Your day (Recommended)
+I am your day's assistant. I keep your day in order.
+Your reading
+I am your reading helper. I keep what you want to read in one place.
+Your projects
+I am your project helper. I keep track of what comes next.
+
+“I keep your day in order. I draft, you approve.”
+
+For now the mission is only shown here, not saved. Nothing runs on its own.
+
+Start
+
+You can change the name and look any time.
+
 Audio
 
 Calendar
@@ -43,12 +79,12 @@ NEXT
 Next: Launch readiness review
 in 16 min
 
-02:20–02:50 · 2 invited
+11:37–12:07 · 2 invited
 
 THEN
 
-03:05–03:35
+12:22–12:52
 Mira Example / Priya Example — one-on-one
-03:50–04:20
+13:07–13:37
 Rollout checkpoint
 Open calendar
