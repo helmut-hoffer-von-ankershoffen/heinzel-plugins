@@ -1,7 +1,7 @@
 {
   "format": 1,
   "reviewer": "luna_release_checklist",
-  "source_sha256": "f4e25fb899cd5231a0318afedc85617b881de5d0160e9417d3f99762d94f236f",
+  "source_sha256": "3b3f9817c497b535bccc38e22adc3b43ff158a5016126e36c9cef89ebab1282e",
   "plan_sha256": "f2a58ec909269319a7cb5f298dd7237efd9a3295e65c6d4a5610907bdca945c7",
-  "story_sha256": "ba0c008fa6333f0579db35033c3bf2bc0d8d1522ae634a1fca864c8e4521811f"
+  "story_sha256": "7fcc0377937584718582bee6fa8b41b89cc432cf040dbba4bf3c387cc91558c3"
 }

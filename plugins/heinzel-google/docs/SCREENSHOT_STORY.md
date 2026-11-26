@@ -49,3 +49,7 @@ This is a source-only acceptance of the corrected interaction sequence against C
 ## Verified synthetic executable path
 
 The path `/demo-profile/state_dir/fictional-gws/gws` identifies the inert executable created by the owner fixture in the isolated capture state directory. The fixture sets the selected executable under `HZ_STATE_DIR/fictional-gws` and writes only fictional executable and credential bytes (`docs/screenshot_fixture.py:257–267`). The pinned capture sets that state directory under its temporary work directory and rewrites the temporary work prefix to `/demo-profile` before saving the image and transcript (`capture.py:607–608,740–750,1068,1239–1248`). Source verification does not approve the image.
+
+## Annotation-only source refresh
+
+The only new product-source change adds the explicit `frozenset[str]` annotation to the local `approved_scopes` value in `src/heinzel_google/_gws.py`. This changes no runtime value, branch, OAuth scope, fixture, route, caption, or scene step. The existing eight-scene plan and fixture remain applicable; no visual change is expected from this annotation. This source analysis does not approve or reuse any image without the separate gallery review rules.

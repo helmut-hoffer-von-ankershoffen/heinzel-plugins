@@ -395,7 +395,7 @@ class Gws:
         )
         opened = threading.Event()
         gate = threading.Lock()
-        approved_scopes = frozenset()
+        approved_scopes: frozenset[str] = frozenset()
         if "--scopes" in arguments:
             index = arguments.index("--scopes") + 1
             if index < len(arguments):

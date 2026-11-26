@@ -2,13 +2,13 @@
   "format": 1,
   "plugin": "heinzel-google",
   "core_version": "0.9.55",
-  "inputs_sha256": "9d42bacea83a2ca1ac70f2fcb1f3e6d157194a18648ddcbf3b53e78959de47d8",
+  "inputs_sha256": "501fac86cddd76d6e400c5ad5033604f95da3fe3542a7143331b6d5e20901af8",
   "images": {
-    "docs/assets/screenshots/google-upcoming-review.png": "9e80ebe03ea19ee243abcc20adda5a7ed20c7224b0f4b60540535fe9837d801c",
-    "docs/assets/screenshots/google-calendar-week.png": "3926ac637a17fd11eacbc44bdaf614f4057c11a1e2c4424bc24eb687bf8637bf",
+    "docs/assets/screenshots/google-upcoming-review.png": "7cd7233b7be1be4b3fe761eecc1e06ae732cf884d0838c928da6ed04bbf12d07",
+    "docs/assets/screenshots/google-calendar-week.png": "ac4b7d0c54a78a426177d18bd7e8a631c2f7b97e8039ef6da90289d1f12e707c",
     "docs/assets/screenshots/google-source-review.png": "584b54c641bde5012cdaf9904bfe235ae4f615f0b0323fc833e532d5eb10528a",
-    "docs/assets/screenshots/launch-files-json.png": "8112ca3ccb4a34c1d3bd160692addad32e649639c9fb96122d7733ac59dd9aed",
-    "docs/assets/screenshots/launch-files-week.png": "cb1451d0f220e61f8d3a51d102df62694e834e8b492699ceaeb4d8e134fd0652",
+    "docs/assets/screenshots/launch-files-json.png": "1f801475b1218b3cd9493b488fdb0d5cf9387625c6244daf1a8fa2998667d101",
+    "docs/assets/screenshots/launch-files-week.png": "79459739ebb87ad472c40f2d50ed7a5a4d38c3503471ecb432708a70e12b1d3e",
     "docs/assets/screenshots/launch-plan.png": "a8f723cff386597587a28aa1a76dc6e59b72b40665107629cda30dc1c060fe09",
     "docs/assets/screenshots/launch-metrics.png": "694361694713cb2bb4b3e9a89ec50004ab36120233ed8dbe615466cd5ae09a62",
     "docs/assets/screenshots/mail-content.png": "ceef4e8ed3b08a9d3b787467049c7e8e45effbbdfcaacee0508b023d51691cd4"
@@ -17,18 +17,18 @@
     "format": 2,
     "source_story": {
       "path": "source-story.md",
-      "sha256": "ba0c008fa6333f0579db35033c3bf2bc0d8d1522ae634a1fca864c8e4521811f"
+      "sha256": "7fcc0377937584718582bee6fa8b41b89cc432cf040dbba4bf3c387cc91558c3"
     },
     "definition": {
       "format": 1,
       "reviewer": "luna_release_checklist",
-      "source_sha256": "f4e25fb899cd5231a0318afedc85617b881de5d0160e9417d3f99762d94f236f",
+      "source_sha256": "3b3f9817c497b535bccc38e22adc3b43ff158a5016126e36c9cef89ebab1282e",
       "plan_sha256": "f2a58ec909269319a7cb5f298dd7237efd9a3295e65c6d4a5610907bdca945c7",
-      "story_sha256": "ba0c008fa6333f0579db35033c3bf2bc0d8d1522ae634a1fca864c8e4521811f"
+      "story_sha256": "7fcc0377937584718582bee6fa8b41b89cc432cf040dbba4bf3c387cc91558c3"
     },
     "plugin": "heinzel-google",
     "core_version": "0.9.55",
-    "inputs_sha256": "9d42bacea83a2ca1ac70f2fcb1f3e6d157194a18648ddcbf3b53e78959de47d8",
+    "inputs_sha256": "501fac86cddd76d6e400c5ad5033604f95da3fe3542a7143331b6d5e20901af8",
     "screenshots": [
       {
         "path": "docs/assets/screenshots/google-upcoming-review.png",
@@ -72,30 +72,30 @@
       }
     ],
     "images": {
-      "google-upcoming-review.png": "9e80ebe03ea19ee243abcc20adda5a7ed20c7224b0f4b60540535fe9837d801c",
-      "google-calendar-week.png": "3926ac637a17fd11eacbc44bdaf614f4057c11a1e2c4424bc24eb687bf8637bf",
+      "google-upcoming-review.png": "7cd7233b7be1be4b3fe761eecc1e06ae732cf884d0838c928da6ed04bbf12d07",
+      "google-calendar-week.png": "ac4b7d0c54a78a426177d18bd7e8a631c2f7b97e8039ef6da90289d1f12e707c",
       "google-source-review.png": "584b54c641bde5012cdaf9904bfe235ae4f615f0b0323fc833e532d5eb10528a",
-      "launch-files-json.png": "8112ca3ccb4a34c1d3bd160692addad32e649639c9fb96122d7733ac59dd9aed",
-      "launch-files-week.png": "cb1451d0f220e61f8d3a51d102df62694e834e8b492699ceaeb4d8e134fd0652",
+      "launch-files-json.png": "1f801475b1218b3cd9493b488fdb0d5cf9387625c6244daf1a8fa2998667d101",
+      "launch-files-week.png": "79459739ebb87ad472c40f2d50ed7a5a4d38c3503471ecb432708a70e12b1d3e",
       "launch-plan.png": "a8f723cff386597587a28aa1a76dc6e59b72b40665107629cda30dc1c060fe09",
       "launch-metrics.png": "694361694713cb2bb4b3e9a89ec50004ab36120233ed8dbe615466cd5ae09a62",
       "mail-content.png": "ceef4e8ed3b08a9d3b787467049c7e8e45effbbdfcaacee0508b023d51691cd4"
     },
     "transcripts": {
-      "google-upcoming-review.txt": "3d77209b261d917167716a304a14a241621ca49784d653a7a105f78d8e61cec0",
-      "google-calendar-week.txt": "247a59b172db45b4542c4049f28df190f4feaf8f09acaa83224ef95b848ee037",
+      "google-upcoming-review.txt": "1e65d6738dd2b65bf8147c38dcf7cf3daaeeab0324ad54f2a6587a7116eac01a",
+      "google-calendar-week.txt": "fb3df184a5fe21cb2306dbe7c959b7471213444e8453460f5ce324559c967837",
       "google-source-review.txt": "d2069cd29c1f3311aa4970d48d29ddd7596ed87cbcd384dcb45de310de57539b",
-      "launch-files-json.txt": "bbd298e4d11b0479a35f9711ce1b4f5e0593bba14c3cc3b6cc1eb2146196423c",
-      "launch-files-week.txt": "771339b7bc512b81888dd47b2b23cc9c3b084466cdbc37710d00295e75f4cb84",
+      "launch-files-json.txt": "a9c573de126ed770dbdb734205f09526d1a6e7b77b953af04fde3d66ea1ed109",
+      "launch-files-week.txt": "0719de29f608597727d599dc28f3df6581079037081585ec88613050a2f685f0",
       "launch-plan.txt": "a7ded47e8432d800d520488f35d85f613b09609b4041a074ae8a13aaa7c37d91",
       "launch-metrics.txt": "d3f2f19f3a5f470e2c567dd65d8333fdba8fb653a2346a31cfa8b9c008545a04",
       "mail-content.txt": "57cda012c3d61d21aa3e387c296ebce6483c114b169bb416d5296d4af344a813"
     },
-    "bundle_sha256": "9a25a5cf133eb7f1205d3a0f0e36838fc790dae181c1b6dbb09b47b1397caba5"
+    "bundle_sha256": "4cd42de6bc0fe1d732fd479f687991c595bf83738818f741acc8309fb829a428"
   },
   "privacy_review": {
     "format": 1,
-    "bundle_sha256": "9a25a5cf133eb7f1205d3a0f0e36838fc790dae181c1b6dbb09b47b1397caba5",
+    "bundle_sha256": "4cd42de6bc0fe1d732fd479f687991c595bf83738818f741acc8309fb829a428",
     "reviewer": "Codex privacy agent",
     "decision": "approve",
     "checked_images": [
