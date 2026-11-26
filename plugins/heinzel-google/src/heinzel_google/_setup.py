@@ -1,7 +1,7 @@
 """`hz setup google`, also part of `hz setup`: find `gws`, sign it in, bind the capabilities (ADR 0032).
 
-The sign-in asks Google for read-only scopes, Gmail's only when mail is read from Google, and the write scopes of the
-calendar and mail only when the person lets hz write them (ADR 0028: a read-only setup never asks for write access).
+Use the default read/write Google permissions in one step or choose capabilities and permissions individually.
+Google still asks the person to approve the scopes in the browser.
 """
 
 import logging
@@ -18,8 +18,11 @@ from heinzel_google._models import GoogleSettings
 _LOG = logging.getLogger("heinzel_google.setup")
 
 CAPABILITIES = ("documents", "calendar", "mail")
-OPT_IN = frozenset({"mail"})
-"""Capabilities offered with "no" as the default: Gmail's read scope covers all of a person's mail."""
+DEFAULT_CONSENT = "Use the default Google read/write permissions and open your browser to sign in?"
+DEFAULT_PERMISSIONS = (
+    "The defaults let Heinzel work with your Google Docs, Sheets, Slides, all Drive files, Calendar events and Gmail. "
+    "Heinzel asks before each change. Answer No to choose permissions individually."
+)
 LOGIN_TIMEOUT = 900.0
 """Seconds `gws auth login` may take, consent in the browser included."""
 
@@ -58,6 +61,27 @@ def run_setup(  # noqa: PLR0913, PLR0917 - what the step is injected with
     if not signed_in and "OAuth client" in detail:
         prompter.say(f"Give gws an OAuth client first, then run hz setup google again: {CLIENT}")
         return
+    prompter.say(DEFAULT_PERMISSIONS)
+    if prompter.confirm(DEFAULT_CONSENT, default=True):
+        login = login_command(mail=True, write=frozenset(CAPABILITIES))
+        if _sign_in(session, gws, executable, login, prompter, calendar=True):
+            for capability in CAPABILITIES:
+                bound, how = view.binding(capability)
+                if (bound is None and how == "unbound") or (bound == "google" and how == "automatic"):
+                    _bind_google(capability, prompter, editor)
+        return
+    _custom_setup(session, executable, signed_in, gws, view, prompter, editor)
+
+
+def _custom_setup(  # noqa: PLR0913, PLR0917 - the selected gws and existing setup dependencies
+    session: GoogleSession,
+    executable: str,
+    signed_in: bool,
+    gws: Gws,
+    view: CapabilityView,
+    prompter: Prompter,
+    editor: ConfigEditor,
+) -> None:
     newly = _bind(view, prompter, editor)
     # Mail Google serves only automatically was asked about in _bind: kept, it is in newly; declined, it is off.
     mail = "mail" in newly or view.binding("mail") in {("google", "configured"), ("google", "default")}
@@ -72,10 +96,9 @@ def run_setup(  # noqa: PLR0913, PLR0917 - what the step is injected with
         # Mail was bound before; whether that sign-in included Gmail's scope, gws's status doesn't say.
         prompter.say("If gws was signed in before mail was read from Google, Google doesn't let it read your mail yet.")
         if prompter.confirm(
-            "Sign in to Google again so Heinzel may read your mail? It opens your browser", default=False
+            "Sign in to Google again so Heinzel may read your mail? It opens your browser", default=True
         ):
-            code = gws.login(executable, LOGIN_WITH_MAIL.split()[1:], LOGIN_TIMEOUT)
-            prompter.say("gws is signed in." if code == 0 else f"gws auth login did not finish (exit {code}).")
+            _sign_in(session, gws, executable, LOGIN_WITH_MAIL, prompter, calendar=calendar)
         return
     login = login_command(mail=mail, write=write)
     why = "read-only access, to your mail too" if mail else "read-only access"
@@ -85,23 +108,39 @@ def run_setup(  # noqa: PLR0913, PLR0917 - what the step is injected with
         why += " only"
     prompter.say(f"Signing in asks Google for {why}.")
     if prompter.confirm("Sign gws in now? It opens your browser"):
-        code = gws.login(executable, login.split()[1:], LOGIN_TIMEOUT)
-        prompter.say("gws is signed in." if code == 0 else f"gws auth login did not finish (exit {code}).")
+        _sign_in(session, gws, executable, login, prompter, calendar=calendar)
+
+
+def _sign_in(  # noqa: PLR0913 - the setup session, selected executable and consent choice
+    session: GoogleSession, gws: Gws, executable: str, login: str, prompter: Prompter, *, calendar: bool
+) -> bool:
+    code = gws.login(executable, login.split()[1:], LOGIN_TIMEOUT)
+    if code != 0:
+        prompter.say(f"gws auth login did not finish (exit {code}).")
+        return False
+    try:
+        session.verify_sign_in(calendar=calendar)
+    except HeinzelError as exc:
+        prompter.say(str(exc))
+        return False
+    prompter.say("gws is signed in.")
+    return True
+
+
+def _bind_google(capability: str, prompter: Prompter, editor: ConfigEditor) -> None:
+    prompter.say(f"Saved to {editor.write(f'capabilities.{capability}', 'google')}.")
 
 
 def _writes(prompter: Prompter, *, calendar: bool, mail: bool, documents: bool = False) -> frozenset[str]:
-    """Ask whether hz may write the calendar, the mail and the Docs it reads from Google; the ones it may.
-
-    "No" is the default; Docs has its own two-line consent.
-    """
+    """Ask which of the selected Google capabilities may also write."""
     allowed: set[str] = set()
     if calendar and prompter.confirm(
-        "Let hz also create, move, cancel and answer events, each only after you confirm it?", default=False
+        "Let hz also create, move, cancel and answer events, each only after you confirm it?", default=True
     ):
         allowed.add("calendar")
     if mail and prompter.confirm(
         "Let hz also keep drafts, send the ones you confirm and file conversations (never delete mail)?",
-        default=False,
+        default=True,
     ):
         allowed.add("mail")
     if documents and _documents_consent(prompter):
@@ -109,21 +148,20 @@ def _writes(prompter: Prompter, *, calendar: bool, mail: bool, documents: bool =
     return frozenset(allowed)
 
 
-DOCS_ASKED = "Asked: Google's permission to change your Docs; reading them needs nothing more."
+DOCS_ASKED = "Asked: Google's permission to change your Docs, Sheets, Slides and all Drive files."
 DOCS_HAPPENS = (
-    "Then: hz adds to a document only after you confirm each change; "
-    "if you also agree to sign in again, Google opens your browser to approve."
+    "Then: hz asks you before making each change. If you agree to sign in, your browser opens for Google approval."
 )
 
 
 def _documents_consent(prompter: Prompter) -> bool:
-    """The separate, explicit consent for writing Docs: two plain lines, then the question ("No" is the default)."""
+    """Explain and offer the Google document and Drive write scopes."""
     started = time.monotonic()
     fields = {"operation": "setup", "step": "documents-write-consent", "plugin": "heinzel-google"}
     _LOG.info("google.setup.step.start", extra=fields)
     prompter.say(DOCS_ASKED)
     prompter.say(DOCS_HAPPENS)
-    granted = prompter.confirm("Let hz also add to your Google Docs, each only after you confirm it?", default=False)
+    granted = prompter.confirm("Let hz also change your Google Docs, Sheets, Slides and Drive files?", default=True)
     _LOG.info(
         "google.setup.step.outcome",
         extra=fields
@@ -136,7 +174,7 @@ def _bind(view: CapabilityView, prompter: Prompter, editor: ConfigEditor) -> set
     """Offer each capability not chosen to be read from Google yet; the ones now bound to it.
 
     Google serving a capability automatically, as the only installed adapter (ADR 0055), is no choice of the
-    person's: they are asked, and declining writes `none`, so mail stays opt-in even when nothing else provides it.
+    person's: they are asked, and declining an automatic binding writes `none`.
     """
     newly: set[str] = set()
     for capability in CAPABILITIES:
@@ -146,9 +184,9 @@ def _bind(view: CapabilityView, prompter: Prompter, editor: ConfigEditor) -> set
         automatic = bound == "google"
         other = None if automatic else bound
         question = f"Read {capability} from Google" + (f" instead of {other}" if other else "")
-        question += " (this grants read access to all of your mail)?" if capability in OPT_IN else "?"
-        if prompter.confirm(question, default=other is None and capability not in OPT_IN):
-            prompter.say(f"Saved to {editor.write(f'capabilities.{capability}', 'google')}.")
+        question += " (this grants read access to all of your mail)?" if capability == "mail" else "?"
+        if prompter.confirm(question, default=other is None):
+            _bind_google(capability, prompter, editor)
             newly.add(capability)
         elif automatic:
             prompter.say(f"Not read from Google; saved to {editor.write(f'capabilities.{capability}', 'none')}.")

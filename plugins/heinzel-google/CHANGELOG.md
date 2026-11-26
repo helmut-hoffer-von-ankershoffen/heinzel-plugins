@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.9.10
+
+Google setup opens the consent page and offers one prompt for the default read/write permissions.
+Signing in again refreshes an older Google access-token cache and checks that Calendar can read your events when requested.
+
 ## 0.9.9
 
 Requires Python 3.15; relocked.

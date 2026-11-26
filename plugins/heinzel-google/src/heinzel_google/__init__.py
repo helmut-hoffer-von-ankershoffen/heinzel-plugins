@@ -154,12 +154,10 @@ def setup(  # noqa: PLR0913, PLR0917 - what the step is injected with
     prompter: Prompter,
     editor: ConfigEditor,
 ) -> None:
-    """Find the Google Workspace CLI, sign it in and read documents, calendar and, if you like, mail from it.
+    """Connect Google Workspace so Heinzel can read and act on your behalf.
 
-    It asks whether hz may also write your calendar and mail (each write only after you confirm it); only then does
-    the sign-in ask Google for the write scopes. Without a terminal, do it by hand: install gws
-    (`npm install -g @googleworkspace/cli`), run `gws auth login --scopes` with the scopes `hz google info` lists,
-    then `hz system config set capabilities.documents google`, and the same for `calendar` and `mail`.
+    Accept the default read/write permissions to open Google's consent screen, or choose permissions individually.
+    Heinzel asks for confirmation before carrying out a supported write.
     """
     run_setup(settings, session, gws, view, prompter, editor)
 
