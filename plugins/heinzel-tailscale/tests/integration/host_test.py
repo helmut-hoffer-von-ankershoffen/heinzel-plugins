@@ -18,10 +18,11 @@ from heinzel.heads.web import _terminal
 from mcp import Client
 from typer.testing import CliRunner
 
-from heinzel_tailscale import module
+from heinzel_tailscale import module, sharing
 from heinzel_tailscale._cli import TailscaleCli
 from heinzel_tailscale._localapi import Connection, ServeStore, Snapshot
 from heinzel_tailscale._mapping import Mapping
+from heinzel_tailscale._models import SharingState
 from heinzel_tailscale._service import SharingActions
 
 pytestmark = pytest.mark.integration
@@ -290,6 +291,33 @@ def test_external_origin_change_moves_hz_own_mapping_as_off_and_on_would(setup):
     assert saved()["hz"]["ui_allowed_origins"] == [f"{ORIGIN}:9443"]  # The origin it added for 443 is gone.
 
 
+@pytest.mark.parametrize("web_action", [False, True])
+def test_external_origin_change_cannot_claim_another_existing_route(setup, web_action):
+    fresh, store = setup
+    command(fresh(), "enable")
+    destination = Mapping.for_node(DNS, 8737, 9443)
+    store.config = destination.enable(store.config)
+    edit(fresh(), "tailscale.https_port", 9443)
+    before = copy.deepcopy(store.config)
+    saved_before = saved()
+    if web_action:
+        response = client(fresh()).post("/api/tailscale/enable", json={}, headers=AUTH)
+        assert response.status_code != 200
+        message = response.text
+    else:
+        result = CliRunner().invoke(build(fresh()), ["tailscale", "enable", "--json"])
+        assert result.exit_code == 1
+        message = result.output
+    assert "Turn sharing off before switching" in message
+    assert store.config == before
+    assert store.writes == 1
+    assert saved() == saved_before
+    command(fresh(), "disable")
+    assert store.writes == 2
+    assert destination.matches(store.config)
+    assert not Mapping.for_node(DNS, 8737).has_handler(store.config)
+
+
 def test_external_origin_change_never_replaces_a_handler_hz_did_not_set(setup):
     fresh, store = setup
     command(fresh(), "enable")
@@ -453,16 +481,118 @@ def test_completed_off_relinquishes_mapping_ownership_before_manual_recreation(s
     assert store.writes == writes
 
 
-def test_enable_does_not_adopt_a_preexisting_matching_manual_handler(setup):
+def test_cli_enable_does_not_adopt_a_preexisting_matching_manual_handler(setup):
     fresh, store = setup
-    store.config = Mapping.for_node(DNS, 8737).enable({})
+    mapping = Mapping.for_node(DNS, 8737)
+    store.config = mapping.enable({})
     before = copy.deepcopy(store.config)
     result = CliRunner().invoke(build(fresh()), ["tailscale", "enable", "--json"])
     assert result.exit_code == 1
-    assert "did not set that up" in result.output
+    assert "Open sharing in the Heinzel web app" in result.output
+    assert mapping.clear_command not in result.output
     assert store.config == before
     assert store.writes == 0
     assert not (Path(os.environ["HZ_CONFIG_HOME"]) / "config.toml").exists()
+
+
+@pytest.mark.parametrize("manual_origin", [False, True])
+def test_web_toggle_adopts_the_exact_private_route_after_a_reset(setup, manual_origin):
+    fresh, store = setup
+    mapping = Mapping.for_node(DNS, 9123)
+    unrelated = {"Web": {mapping.authority: {"Handlers": {"/other": {"Text": "Keep this"}}}}}
+    store.config = mapping.enable(unrelated)
+    before = copy.deepcopy(store.config)
+    if manual_origin:
+        edit(fresh(), "hz.ui_allowed_origins", [ORIGIN])
+    web_client = client(fresh(), port=9123)
+
+    state = web_client.get("/api/tailscale/status", headers=AUTH).json()
+    assert state["mapped"]
+    assert not state["desired_enabled"]
+    before_toggle = sharing(SharingState.model_validate(state)).toggle
+    assert before_toggle is not None
+    assert before_toggle.status == "Private route to this Heinzel found."
+    assert before_toggle.explanation == "Turn sharing on to let Heinzel manage this route."
+    assert store.connects == 0
+    assert store.writes == 0
+    if manual_origin:
+        assert "tailscale" not in saved()
+    else:
+        assert not (Path(os.environ["HZ_CONFIG_HOME"]) / "config.toml").exists()
+
+    result = web_client.post("/api/tailscale/enable", json={}, headers=AUTH)
+    assert result.status_code == 200, result.text
+    assert result.json()["state"] == "ready"
+    assert result.json()["target"] == mapping.target
+    ready_toggle = sharing(SharingState.model_validate(result.json())).toggle
+    assert ready_toggle is not None
+    assert ready_toggle.checked
+    assert ready_toggle.status is None
+    assert ready_toggle.problem is None
+    assert ready_toggle.explanation is None
+    assert mapping.clear_command not in result.text
+    assert store.config == before
+    assert store.writes == 0
+    assert saved()["tailscale"]["intent"]["phase"] == "owned"
+    assert saved()["tailscale"]["intent"]["added_origin"] is not manual_origin
+
+    result = web_client.post("/api/tailscale/disable", json={}, headers=AUTH)
+    assert result.status_code == 200, result.text
+    assert result.json()["state"] == "off"
+    assert store.config["Web"] == unrelated["Web"]
+    assert saved()["hz"]["ui_allowed_origins"] == ([ORIGIN] if manual_origin else [])
+
+
+@pytest.mark.parametrize("conflict", ["other-port", "other-handler", "public", "dormant"])
+def test_web_toggle_refuses_nonidentical_or_public_routes(setup, conflict):
+    fresh, store = setup
+    mapping = Mapping.for_node(DNS, 8737)
+    store.config = mapping.enable({})
+    match conflict:
+        case "other-port":
+            store.config = Mapping.for_node(DNS, 9123).enable({})
+        case "other-handler":
+            store.config["Web"][mapping.authority]["Handlers"]["/"] = {"Text": "Another app"}
+        case "public":
+            store.config["AllowFunnel"] = {mapping.authority: True}
+        case "dormant":
+            store.config["TCP"] = {}
+    before = copy.deepcopy(store.config)
+
+    result = client(fresh()).post("/api/tailscale/enable", json={}, headers=AUTH)
+    assert result.status_code != 200
+    assert store.config == before
+    assert store.writes == 0
+    assert not (Path(os.environ["HZ_CONFIG_HOME"]) / "config.toml").exists()
+
+
+@pytest.mark.parametrize(("change", "manual_origin"), [("public", False), ("revision-only", True)])
+def test_web_toggle_rechecks_serve_before_claiming_adoption(setup, monkeypatch, change, manual_origin):
+    fresh, store = setup
+    mapping = Mapping.for_node(DNS, 8737)
+    store.config = mapping.enable({})
+    if manual_origin:
+        edit(fresh(), "hz.ui_allowed_origins", [ORIGIN])
+    read = store.read
+    reads = 0
+
+    def concurrent_read(connection):
+        nonlocal reads
+        reads += 1
+        if reads == 2:
+            if change == "public":
+                store.config["AllowFunnel"] = {mapping.authority: True}
+            store.version += 1
+        return read(connection)
+
+    monkeypatch.setattr(store, "read", concurrent_read)
+    result = client(fresh()).post("/api/tailscale/enable", json={}, headers=AUTH)
+    assert result.status_code != 200
+    assert "Tailscale Serve changed" in result.text
+    assert store.writes == 0
+    assert saved()["tailscale"]["intent"]["phase"] == "enabling"
+    assert not saved()["tailscale"]["intent"]["added_origin"]
+    assert saved()["hz"]["ui_allowed_origins"] == ([ORIGIN] if manual_origin else [])
 
 
 def test_origin_granted_by_a_manual_writer_before_the_locked_insert_is_never_claimed(setup, monkeypatch):

@@ -7,7 +7,7 @@ from urllib.parse import urlsplit
 from heinzel import Config, ConfigEditor, HeinzelError, Settings
 
 from heinzel_tailscale._cli import TailscaleCli
-from heinzel_tailscale._localapi import Connection, ServeStore
+from heinzel_tailscale._localapi import Connection, ServeStore, Snapshot
 from heinzel_tailscale._lock import SharingLock
 from heinzel_tailscale._mapping import Mapping, SharingProblemError
 from heinzel_tailscale._models import SharingIntent, SharingState, TailscaleSettings
@@ -171,6 +171,7 @@ class Sharing:
                 else "Private web sharing is off.",
             )
         if old is None or old.phase != "owned":
+            can_adopt = self.readiness.owns_listener(mapping)
             return SharingState(
                 state="blocked",
                 installed=True,
@@ -180,13 +181,12 @@ class Sharing:
                 origin=mapping.origin,
                 target=mapping.target,
                 apply_settings=apply,
-                summary="hz did not set this up. Check Tailscale Serve.",
+                summary="Private route to this Heinzel found." if can_adopt else "Existing Tailscale route in use.",
                 problem=True,
                 message=(
-                    "Tailscale already shares this app, and hz did not set that up.\n"
-                    "So hz left it alone. You can keep it as it is.\n"
-                    f"To let hz manage sharing, delete that mapping with this command:\n{mapping.clear_command}\n"
-                    "Then switch sharing on here."
+                    f"{'Try again' if desired else 'Turn sharing on'} to let Heinzel manage this route."
+                    if can_adopt
+                    else "Open sharing in the Heinzel web app that this route points to."
                 ),
             )
         ready = self.readiness.verifies(mapping) and mapping.origin in configured
@@ -260,14 +260,15 @@ class SharingActions:
             old = choices.intent
             owned = old is not None and old.phase in {"owned", "disabling"}
             planned, retired = _moved(old, mapping, planned) if old is not None and owned else (planned, None)
-            if not owned and mapping.has_handler(planned):
-                msg = (
-                    f"Tailscale already shares this app at {mapping.origin}, and hz did not set that up, "
-                    "so hz did not change it. To let hz manage sharing instead, "
-                    f"delete that mapping with: {mapping.clear_command}"
-                )
+            occupied = mapping.has_handler(planned)
+            if occupied and old is not None and owned and intent_mapping(old) != mapping:
+                msg = "Turn sharing off before switching to a port that already has a Tailscale route."
                 raise HeinzelError(msg)
-            planned = mapping.enable(planned)
+            adopting = occupied and not owned
+            if adopting:
+                self._check_adoption(mapping, snapshot)
+            else:
+                planned = mapping.enable(planned)
             added = bool(
                 old
                 and old.phase in {"enabling", "owned", "disabling"}
@@ -286,27 +287,67 @@ class SharingActions:
             change = self.editor.change_list("hz.ui_allowed_origins", add=(mapping.origin,))
             intent = intent.model_copy(update={"added_origin": added or mapping.origin in change.added})
             self.editor.write("tailscale.intent", intent)
-            if mapping.origin not in self.sharing.origins():
-                msg = "A higher-priority configuration source prevents applying the origin; Serve was not changed."
-                raise HeinzelError(msg)
-            if planned != snapshot.config:
-                try:
-                    self.store.write(connection, snapshot, planned)
-                except HeinzelError:
-                    if old is not None and owned:
-                        self._keep(old, connection)
-                    raise
-            if not mapping.matches(self.store.read(connection).config):
-                msg = (
-                    "hz could not confirm that sharing is set up in Tailscale. "
-                    "To see the current state, run: tailscale serve status. Then try again."
-                )
-                raise HeinzelError(msg)
+            try:
+                self._require_configured_origin(mapping)
+                if planned != snapshot.config:
+                    try:
+                        self.store.write(connection, snapshot, planned)
+                    except HeinzelError:
+                        if old is not None and owned:
+                            self._keep(old, connection)
+                        raise
+                self._confirm_enable(connection, mapping, snapshot if adopting else None)
+            except HeinzelError:
+                if adopting and mapping.origin in change.added:
+                    self.editor.change_list("hz.ui_allowed_origins", remove=(mapping.origin,))
+                    self.editor.write("tailscale.intent", intent.model_copy(update={"added_origin": added}))
+                raise
             self.editor.write("tailscale.intent", intent.model_copy(update={"phase": "owned"}))
             if retired is not None:
                 self.editor.change_list("hz.ui_allowed_origins", remove=(retired,))
             self.sharing.readiness.apply_origins(self.sharing.origins())
             return self.sharing.status()
+
+    def _require_configured_origin(self, mapping: Mapping) -> None:
+        """Require an effective origin grant before finishing enable.
+
+        Raises:
+            HeinzelError: If a higher-priority source prevents applying the origin.
+        """
+        if mapping.origin not in self.sharing.origins():
+            msg = "A higher-priority configuration source prevents applying the origin; Serve was not changed."
+            raise HeinzelError(msg)
+
+    def _check_adoption(self, mapping: Mapping, snapshot: Snapshot) -> None:
+        """Allow only the authenticated web listener to claim an exact private route.
+
+        Raises:
+            HeinzelError: If the listener or existing route cannot be verified.
+        """
+        if not mapping.matches(snapshot.config):
+            msg = "Choose another sharing port in Settings to keep the existing Tailscale route."
+            raise HeinzelError(msg)
+        if self.sharing.readiness.owns_listener(mapping):
+            return
+        msg = "Open sharing in the Heinzel web app that this route points to."
+        raise HeinzelError(msg)
+
+    def _confirm_enable(self, connection: Connection, mapping: Mapping, adopted: Snapshot | None) -> None:
+        """Verify the live route before claiming it, including its exact revision for adoption.
+
+        Raises:
+            HeinzelError: If the route is unconfirmed or the adoption snapshot has changed.
+        """
+        current = self.store.read(connection)
+        if adopted is not None and current != adopted:
+            msg = "Tailscale Serve changed while Heinzel was turning sharing on. Try again."
+            raise HeinzelError(msg)
+        if not mapping.matches(current.config):
+            msg = (
+                "hz could not confirm that sharing is set up in Tailscale. "
+                "To see the current state, run: tailscale serve status. Then try again."
+            )
+            raise HeinzelError(msg)
 
     def _keep(self, old: SharingIntent, connection: Connection) -> None:
         """A move that left hz's own mapping exactly in place keeps it owned, so Try again can still move it."""

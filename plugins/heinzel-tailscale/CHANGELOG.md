@@ -1,5 +1,10 @@
 # Changelog
 
+## 0.9.10
+
+Turn sharing on after reinstall to adopt an existing private Tailscale Serve route that already points to the
+running Heinzel web app. Heinzel checks the route before taking ownership and leaves its Serve configuration intact.
+
 ## 0.9.9
 
 **Try again** now moves sharing that still forwards to an earlier hz port (or address) to this hz, as switching

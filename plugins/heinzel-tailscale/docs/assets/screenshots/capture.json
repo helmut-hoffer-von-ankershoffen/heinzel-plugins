@@ -1,11 +1,12 @@
 {
   "format": 1,
   "plugin": "heinzel-tailscale",
-  "core_version": "0.9.54",
-  "inputs_sha256": "a35417f7ab452be1cde9afd5a4a06fd9008697dd3716da13404536b09222384f",
+  "core_version": "0.9.55",
+  "inputs_sha256": "8bf0167e90babd715173138ae3d68de64df208dc4bdf27a281ebc2d116378b50",
   "images": {
-    "docs/assets/screenshots/sharing-ready.png": "ebf585a039ccf28ea5d689d2984cb719de02c18fff036780b294819a4df97ae4",
-    "docs/assets/screenshots/sharing-request-cli.png": "fe42b74c881eaeab12ad04f3b212768d77586ca9634af19ad490960238051cd5",
+    "docs/assets/screenshots/sharing-existing-private.png": "530e6e14cca0da6a7f56c586678b87cc3b2d67cd98335beb30e942ca4d9f4598",
+    "docs/assets/screenshots/sharing-ready.png": "609a339166fd09acc64002f9529f869ebb0e3861987ba3bf94633eb515825b4e",
+    "docs/assets/screenshots/sharing-request-cli.png": "9fe7c1054b84b2a04ad8647bcc1ee395591e3a9c33a19c566d366837a5e0e04f",
     "docs/assets/screenshots/sharing-off.png": "398daf92c44530dd18052d5916f0e7a34d1d1dc6161ed8a2a31f606c928ec6ac",
     "docs/assets/screenshots/sharing-off-cli.png": "592011836c508fac6809305cbc29752484a4be2cc32546e31dffbc369ee0c774"
   },
@@ -13,23 +14,28 @@
     "format": 2,
     "source_story": {
       "path": "source-story.md",
-      "sha256": "4b335f221043033a22e95a8a48511c54a40e56ff36196a46d9eaa301bc50a8a8"
+      "sha256": "bdae4512d3814101d888119121303c4910e0c54dcda29f8deda9317447ec1957"
     },
     "definition": {
       "format": 1,
-      "reviewer": "story-confirm-opus-tailscale-stale-port",
-      "source_sha256": "2f308b16ab4b3f507040c00fe4f483fea484332c79e33f4f208363866985434f",
-      "plan_sha256": "7cff472608aa79e38f9d9e2f4cf924446b79f4d9026d577a62c891db43124ce0",
-      "story_sha256": "4b335f221043033a22e95a8a48511c54a40e56ff36196a46d9eaa301bc50a8a8"
+      "reviewer": "protected_final_reviewer",
+      "source_sha256": "7cc8e028cc952e61c2e4ca3ea3e4b0ff44cc303e56fc43826a97bb14c25fcd99",
+      "plan_sha256": "fe653365717c283e9f71b574eabd1d918a9c0d9b64581f12841ead1aabb599cb",
+      "story_sha256": "bdae4512d3814101d888119121303c4910e0c54dcda29f8deda9317447ec1957"
     },
     "plugin": "heinzel-tailscale",
-    "core_version": "0.9.54",
-    "inputs_sha256": "a35417f7ab452be1cde9afd5a4a06fd9008697dd3716da13404536b09222384f",
+    "core_version": "0.9.55",
+    "inputs_sha256": "8bf0167e90babd715173138ae3d68de64df208dc4bdf27a281ebc2d116378b50",
     "screenshots": [
+      {
+        "path": "docs/assets/screenshots/sharing-existing-private.png",
+        "surface": "ui",
+        "caption": "An existing private route to this Heinzel is ready to adopt \u2014 fictional local Tailscale demo"
+      },
       {
         "path": "docs/assets/screenshots/sharing-ready.png",
         "surface": "ui",
-        "caption": "Sharing On with Copy link and Open (fictional demo); the capture tool hides the share link as [authentication link hidden]"
+        "caption": "One switch adopts the existing private route, then shows Copy link and Open (fictional demo); the capture tool hides the share link as [authentication link hidden]"
       },
       {
         "path": "docs/assets/screenshots/sharing-request-cli.png",
@@ -48,29 +54,32 @@
       }
     ],
     "images": {
-      "sharing-ready.png": "ebf585a039ccf28ea5d689d2984cb719de02c18fff036780b294819a4df97ae4",
-      "sharing-request-cli.png": "fe42b74c881eaeab12ad04f3b212768d77586ca9634af19ad490960238051cd5",
+      "sharing-existing-private.png": "530e6e14cca0da6a7f56c586678b87cc3b2d67cd98335beb30e942ca4d9f4598",
+      "sharing-ready.png": "609a339166fd09acc64002f9529f869ebb0e3861987ba3bf94633eb515825b4e",
+      "sharing-request-cli.png": "9fe7c1054b84b2a04ad8647bcc1ee395591e3a9c33a19c566d366837a5e0e04f",
       "sharing-off.png": "398daf92c44530dd18052d5916f0e7a34d1d1dc6161ed8a2a31f606c928ec6ac",
       "sharing-off-cli.png": "592011836c508fac6809305cbc29752484a4be2cc32546e31dffbc369ee0c774"
     },
     "transcripts": {
-      "sharing-ready.txt": "06fceaac1aaae805ee47ba2deef1e8959aded91e4e7e9e78028cdf4881547973",
-      "sharing-request-cli.txt": "62377175c58a2dc39c917918f7865b7602c80b91b2e76f3a12c971a084670495",
-      "sharing-off.txt": "38a863ca580d4298fe4ac9f4e5dc43c604cdffca8155401262fb253a1d94285f",
+      "sharing-existing-private.txt": "aef2fc50bc5eb1e775619e0719b1af1eacea61e6da6cc8779ad5fdaf17bbf532",
+      "sharing-ready.txt": "7e37890ce6a5626e3cae991ef731270002e6416fed8d0db52ee56e7f2fad0067",
+      "sharing-request-cli.txt": "e0e9d995c7fcbed6c96c66b4012cc53b1d5eedbf674b23a7ed8c02c0660cff61",
+      "sharing-off.txt": "04b937cbd5c92b32bc29fd2b67c3cf0e1130722a3d2e8c895086c673f2da2d33",
       "sharing-off-cli.txt": "cf49c8bdefcb23c7b464e229ae6e18bbd8f639abb0121bf570e3e30b631fc8b0"
     },
-    "bundle_sha256": "c73ab892e3faf25182f617550d0be8790f4cffefc7b7456b91cd40d9cda39aa5"
+    "bundle_sha256": "c057d49205369660b1095c0adb3754aacb453f56ad609c50bb6590e1c8ceb6fc"
   },
   "privacy_review": {
     "format": 1,
-    "bundle_sha256": "c73ab892e3faf25182f617550d0be8790f4cffefc7b7456b91cd40d9cda39aa5",
-    "reviewer": "Claude Sonnet 5.5 screenshot reviewer",
+    "bundle_sha256": "c057d49205369660b1095c0adb3754aacb453f56ad609c50bb6590e1c8ceb6fc",
+    "reviewer": "protected_final_reviewer",
     "decision": "approve",
     "checked_images": [
-      "sharing-ready.png",
-      "sharing-request-cli.png",
+      "sharing-existing-private.png",
+      "sharing-off-cli.png",
       "sharing-off.png",
-      "sharing-off-cli.png"
+      "sharing-ready.png",
+      "sharing-request-cli.png"
     ],
     "checks": {
       "tokens_absent": true,
