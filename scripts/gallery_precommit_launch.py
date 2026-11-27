@@ -41,7 +41,10 @@ def digest(path):
 
 def runtime_files(runtime):
     """Bind all checked-in package data and scripts, refusing alternate importables."""
-    package = runtime / "src" / "heinzel_plugin_tools"
+    source = runtime / "src"
+    require(source.is_dir() and source.resolve() == source)
+    require({path.name for path in source.iterdir()} == {"heinzel_plugin_tools"})
+    package = source / "heinzel_plugin_tools"
     require(package.is_dir() and package.resolve() == package)
     files = {}
     for path in sorted(package.rglob("*")):
@@ -111,6 +114,7 @@ def authorize(hooks, repo, phase):
 
     common = git("rev-parse", "--path-format=absolute", "--git-common-dir")
     require(Path(common) / "hooks" == hooks)
+    require(not git("ls-files", "--others", "--exclude-standard", "-z"))
     if phase == "after":
         proof = json.loads(regular(receipt, private=True).read_text())
         require(proof["format"] == 1 and proof["policy_sha256"] == pin["policy_sha256"])

@@ -14,6 +14,8 @@ import yaml
 
 from heinzel_plugin_tools import capture
 
+pytestmark = pytest.mark.integration
+
 REPOSITORY = Path(__file__).parents[1]
 spec = importlib.util.spec_from_file_location("gallery_index_guard", REPOSITORY / "scripts/gallery_index_guard.py")
 guard = importlib.util.module_from_spec(spec)
@@ -460,4 +462,42 @@ def test_real_confidential_commit_message_hook_still_refuses(hook_case, monkeypa
     assert "confidential terms" in result.stdout + result.stderr
     assert guard.git(root, "rev-parse", "HEAD") == previous
     assert receipt.is_file()  # Pre-commit proof can exist for a subsequently refused commit.
+    assert not stock_log.exists()
+
+
+@pytest.mark.parametrize("when", ["before", "after"])
+def test_real_opt_in_refuses_nonignored_untracked_files(hook_case, monkeypatch, when):
+    root, receipt, stock_log, pin, commit = hook_case
+    untracked = root / "unreviewed.txt"
+    if when == "before":
+        untracked.write_text("Fictional unreviewed file.\n")
+    else:
+        stock = root / ".git" / "hooks" / "pre-commit.gallery-stock"
+        runner = stock.rename(stock.with_name("pre-commit.actual"))
+        stock.write_text(f'#!/bin/sh\nset -eu\n{shlex.quote(str(runner))} "$@"\ntouch {shlex.quote(str(untracked))}\n')
+        stock.chmod(0o700)
+    pin()
+    monkeypatch.setenv("HZ_TRUSTED_GALLERY_PRECOMMIT", "1")
+    previous = guard.git(root, "rev-parse", "HEAD")
+    result = commit()
+    assert result.returncode != 0
+    assert "authorization refused" in result.stdout + result.stderr
+    assert guard.git(root, "rev-parse", "HEAD") == previous
+    assert receipt.exists() == (when == "after")
+    assert not stock_log.exists()
+
+
+def test_real_opt_in_refuses_unpinned_runtime_import_sibling(hook_case, monkeypatch):
+    root, receipt, stock_log, pin, commit = hook_case
+    pin()
+    sibling = receipt.parent / "runtime" / "src" / "packaging.py"
+    sibling.write_text("raise RuntimeError('this sibling must not be imported')\n")
+    monkeypatch.setenv("HZ_TRUSTED_GALLERY_PRECOMMIT", "1")
+    previous = guard.git(root, "rev-parse", "HEAD")
+    result = commit()
+    assert result.returncode != 0
+    assert "authorization refused" in result.stdout + result.stderr
+    assert "this sibling must not be imported" not in result.stdout + result.stderr
+    assert guard.git(root, "rev-parse", "HEAD") == previous
+    assert not receipt.exists()
     assert not stock_log.exists()
