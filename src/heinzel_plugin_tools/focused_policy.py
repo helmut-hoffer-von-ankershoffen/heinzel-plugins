@@ -11,7 +11,11 @@ import subprocess
 from dataclasses import dataclass
 from pathlib import Path
 
+_CAPTURE_SOURCE = "src/heinzel_plugin_tools/capture.py"
+_POLICY_SOURCE = "src/heinzel_plugin_tools/focused_policy.py"
+_T_CAPTURE = "tests/capture_test.py"
 _T_CLI_COMMANDS = "tests/cli_commands_test.py"
+_T_PRESENTATION = "tests/presentation_test.py"
 _T_TOOLING = "tests/tooling_test.py"
 _T_FOCUSED_HOOK = "tests/focused_hook_test.py"
 _T_FOCUSED_TRUST = "tests/focused_trust_test.py"
@@ -36,7 +40,7 @@ POLICY_PATHS = frozenset(
         "scripts/focused_push_guard.py",
         "scripts/focused_trust.py",
         "src/heinzel_plugin_tools/cli.py",
-        "src/heinzel_plugin_tools/focused_policy.py",
+        _POLICY_SOURCE,
         _T_CLI_COMMANDS,
         _T_TOOLING,
         _T_FOCUSED_HOOK,
@@ -48,7 +52,107 @@ POLICY_PATHS = frozenset(
         _T_FOCUSED_MATERIALIZE,
     }
 )
+GALLERY_ORIGINAL = "330dc9bc521c9b59990604fa3bc9e74342de0886"
+GALLERY_HOSTED_HEAD = "d04153aa78ff1692f81a291b251c527ab86dc476"
+GALLERY_CLOCK_HEAD = "bc201df2544f95c5b60195d5bbd9eb17ca9f05f4"
+GALLERY_THEME_HEAD = "567d08577f9e02cfb90c5f0a6db9c952c40f3d07"
+GALLERY_CAPTURE_HEAD = "5f2c193e5b1070bf0d66e395d334217cecc6bfc0"
+GALLERY_SCENE_HEAD = "aaa94198156510d90c10180f1f285c42cdaae591"
+GALLERY_CAPTURE_FIXTURE = "tests/capture_run_test.py"
+GALLERY_RUNTIME_BLOBS = {
+    ".github/workflows/ci.yml": "98242894cc754d366a8f393bac1a566c5ea30cea",
+    ".python-version": "93a848f9688291c7b2172cf99f133675225ad282",
+    "pyproject.toml": "5d9f9ab9094354dd2c47897ed72077006c85e7a1",
+    "uv.lock": "ac5b39f6beda2983080b1e6b14144b2fc19c5f72",
+}
+GALLERY_FORWARD_BLOBS = {
+    "plugins/heinzel-clock/pyproject.toml": "62288fcdd504267e9c63701ca31fc8ad126e230c",
+    "plugins/heinzel-clock/CHANGELOG.md": "21a4a42fa506cbcbcfd62de403c739f7576f4e64",
+    "plugins/heinzel-weather/pyproject.toml": "dc158e333037afb78a1bb4719dd5f4cc9ea60a0f",
+    "plugins/heinzel-weather/CHANGELOG.md": "32be23b91dba11aef4cdeeab9a714e8b8cde0d09",
+    GALLERY_CAPTURE_FIXTURE: "a1a8756e07e145f32bd00f2685e043578b7737a2",
+}
+GALLERY_CLOCK_BLOBS = {
+    "plugins/heinzel-clock/docs/screenshot-definition.json": "6bdc40680168ea5b8c98cb5c578f06ecfcfb3894",
+    "plugins/heinzel-clock/docs/assets/screenshots/capture.json": "b4bdf09e6ffd1ba0af5124a57cf531aceff3911c",
+}
+GALLERY_THEME_BLOBS = {
+    _CAPTURE_SOURCE: "c6296501ed2188cd52b24a6b0dfc94c70f5a1bd9",
+    "src/heinzel_plugin_tools/capture_linux.py": "d8a84864f52ec80e03a54912903129fa73b31f1e",
+    "src/heinzel_plugin_tools/capture_worker.py": "1bf251f3ea1f9eac58262b74d39b0ba8133bc675",
+    "src/heinzel_plugin_tools/privacy.py": "c26257bff51a5ae00d4b9150dc0b8998e2331687",
+    _T_CAPTURE: "d4d395e9cc67173c76a69c34ca54ddaebc9364fb",
+}
+GALLERY_CAPTURE_BLOBS = {
+    "docs/SCREENSHOT_AUTHORING.md": "5a9c8f69c106830659d18ae1b90169fc16886da8",
+    _CAPTURE_SOURCE: "0a886876863cb8e2b5de53a55353aa81b241e884",
+    "src/heinzel_plugin_tools/capture_host.py": "539b595038d29ebdd8aff151ada143e985ef2abe",
+    "src/heinzel_plugin_tools/capture_linux.py": "804a021874e8871f50b5971f48b562cb00c9da4e",
+    "src/heinzel_plugin_tools/cli.py": "da21c528a640f9b21bcace04e1c4f78bb3e9beaa",
+    GALLERY_CAPTURE_FIXTURE: "efd977783aa8ab7d7620f72b025f6d3ba5f764a4",
+    _T_CAPTURE: "b079d3db75638a34ec39c1d2252f94ec5362b134",
+    _T_CLI_COMMANDS: "db852b1db76ba3ef4ab55de670f796dae190c69d",
+    _T_PRESENTATION: "8219233b5f4408e7973b0de58c915b8399562ebb",
+}
+GALLERY_SCENE_BLOBS = {
+    _CAPTURE_SOURCE: "cbcaae9fba2c8e8cb9c4af7f10adf640fc9ddab1",
+    "src/heinzel_plugin_tools/capture_scene.py": "069557eccb03c5a8b9d19675049b30e2df252f2a",
+    GALLERY_CAPTURE_FIXTURE: "bfd41ad0dca4ec4d242a3f9b87f565415a9c79bd",
+}
+GALLERY_POLICY_PATHS = frozenset(
+    {
+        *GALLERY_RUNTIME_BLOBS,
+        "scripts/focused_dispatch.py",
+        _POLICY_SOURCE,
+        _T_FOCUSED_DISPATCH,
+        _T_FOCUSED_POLICY,
+    }
+)
 PLANS = {
+    GALLERY_ORIGINAL: (
+        "272ced40248432c2d5e91acf2e088859d0bac1d0",
+        (
+            "tests/capture_bootstrap_test.py",
+            "tests/capture_fixture_origins_test.py",
+            _T_CAPTURE,
+            "tests/cli_environment_test.py",
+            "tests/cli_commands_test.py",
+            _T_PRESENTATION,
+            "tests/privacy_test.py",
+            "tests/workflow_test.py",
+            "tests/gallery_index_guard_test.py",
+            "tests/focused_push_guard_test.py",
+            "tests/focused_policy_test.py",
+            "tests/focused_dispatch_test.py",
+            "tests/focused_materialize_test.py",
+            "tests/focused_trust_test.py",
+            "tests/focused_guard_install_test.py",
+            "tests/focused_hook_test.py",
+            "plugins/heinzel-atlassian/tests/unit/contract_test.py",
+            "plugins/heinzel-clock/tests/clock_test.py",
+            "plugins/heinzel-example/tests/contributions_test.py",
+            "plugins/heinzel-github/tests/unit/release_feed_test.py",
+            "plugins/heinzel-github/tests/unit/contract_test.py",
+            "plugins/heinzel-google/tests/unit/setup_test.py",
+            "plugins/heinzel-google/tests/unit/sign_in_test.py",
+            "plugins/heinzel-google/tests/unit/gws_test.py",
+            "plugins/heinzel-google/tests/unit/screenshot_fixture_test.py",
+            "plugins/heinzel-google/tests/integration/cli_test.py",
+            "plugins/heinzel-google/tests/integration/runner_test.py",
+            "plugins/heinzel-issues/tests/unit/view_test.py",
+            "plugins/heinzel-resource/tests/unit/resources_test.py",
+            "plugins/heinzel-slack/tests/integration/cli_process_test.py",
+            "plugins/heinzel-tailscale/tests/unit/status_test.py",
+            "plugins/heinzel-tailscale/tests/unit/readiness_test.py",
+            "plugins/heinzel-tailscale/tests/integration/host_test.py",
+            "plugins/heinzel-theme/tests/unit/content_test.py",
+            "plugins/heinzel-weather/tests/integration/heads_test.py",
+            "plugins/heinzel-weather/tests/unit/service_test.py",
+            "plugins/heinzel-weather/tests/unit/screenshot_fixture_test.py",
+            "plugins/heinzel-zoom/tests/unit/contract_test.py",
+            "plugins/heinzel-clock/web/src/ClockPanel.test.tsx",
+        ),
+    ),
     "39c5bcd10f675c63df1b8c1e5892a4fd3a89006f": (
         "c4cf2a3e00856f227c34cf58d141a7a2c9c0719c",
         (
@@ -98,7 +202,7 @@ PLANS = {
             "tests/publish_restore_test.py",
             "tests/workflow_test.py",
             "tests/browser_bootstrap_ci_test.py",
-            "tests/capture_test.py",
+            _T_CAPTURE,
             "tests/historical_gallery_test.py",
             "tests/links_standards_test.py",
             "plugins/heinzel-atlassian/tests/integration/acli_test.py",
@@ -190,26 +294,54 @@ def _check_ancestry(repo: Path, old: str, new: str, candidate: str, trusted_poli
         raise ValueError("untrusted policy ancestry")
 
 
-def _check_frozen_inputs(repo: Path, old: str, new: str, candidate: str, trusted_policy: str) -> None:
-    if _changed(repo, candidate, new) - POLICY_PATHS:
+def _check_frozen_inputs(
+    repo: Path, old: str, new: str, candidate: str, trusted_policy: str, policy_paths: frozenset[str]
+) -> None:
+    if _changed(repo, candidate, new) - policy_paths:
         raise ValueError("unknown change after frozen candidate")
-    for path in POLICY_PATHS:
+    for path in policy_paths:
         if _entry(repo, trusted_policy, path) != _entry(repo, new, path):
             raise ValueError("policy bytes differ from trusted policy")
     # For every inherited pushed path, matching its anchor entry includes file mode
     # and deletion. A path touching the reviewed contribution remains contribution.
     contribution = _changed(repo, ANCHOR, candidate)
-    for path in _changed(repo, old, new) - contribution - POLICY_PATHS:
+    for path in _changed(repo, old, new) - contribution - policy_paths:
         if _entry(repo, ANCHOR, path) != _entry(repo, new, path):
             raise ValueError("inherited path differs from protected baseline")
 
 
-def _check_required_tests(repo: Path, new: str, candidate: str, tests: tuple[str, ...]) -> None:
+def _check_required_tests(
+    repo: Path, new: str, candidate: str, tests: tuple[str, ...], policy_paths: frozenset[str]
+) -> None:
     for path in tests:
         if not _entry(repo, new, path).startswith(("100644 blob ", "100755 blob ")):
             raise ValueError("required focused test is missing or not a regular blob")
-        if path not in POLICY_PATHS and _entry(repo, new, path) != _entry(repo, candidate, path):
+        if path not in policy_paths and _entry(repo, new, path) != _entry(repo, candidate, path):
             raise ValueError("required focused test differs from frozen candidate")
+
+
+def _gallery_forward_blobs(repo: Path, old: str, new: str) -> dict[str, str]:
+    pins = GALLERY_FORWARD_BLOBS
+    if old == GALLERY_HOSTED_HEAD:
+        return pins
+    pins = pins | GALLERY_CLOCK_BLOBS
+    if old == GALLERY_CLOCK_HEAD:
+        return pins
+    pins = pins | GALLERY_THEME_BLOBS
+    changed = _changed(repo, old, new) - {_POLICY_SOURCE, _T_FOCUSED_POLICY}
+    if old == GALLERY_THEME_HEAD:
+        if changed - GALLERY_THEME_BLOBS.keys():
+            raise ValueError("gallery diagnostic changes a path outside its reviewed scope")
+        return pins
+    repair = GALLERY_CAPTURE_BLOBS
+    if old == GALLERY_SCENE_HEAD:
+        pins = pins | GALLERY_CAPTURE_BLOBS
+        repair = GALLERY_SCENE_BLOBS
+    elif old != GALLERY_CAPTURE_HEAD:
+        raise ValueError("unknown gallery capture repair parent")
+    if changed != repair.keys():
+        raise ValueError("gallery capture repair requires its exact reviewed path set")
+    return pins | repair
 
 
 def plan(repo: Path, old: str, new: str, trusted_policy: str) -> CheckPlan:
@@ -218,15 +350,38 @@ def plan(repo: Path, old: str, new: str, trusted_policy: str) -> CheckPlan:
     `trusted_policy` must be fixed by an independently trusted launcher. Accepting
     a caller-provided value here without such a launcher does not confer trust.
     """
-    if old not in PLANS:
+    hosted_fix = old in (
+        GALLERY_HOSTED_HEAD,
+        GALLERY_CLOCK_HEAD,
+        GALLERY_THEME_HEAD,
+        GALLERY_CAPTURE_HEAD,
+        GALLERY_SCENE_HEAD,
+    )
+    plan_key = GALLERY_ORIGINAL if hosted_fix else old
+    if plan_key not in PLANS:
         raise ValueError("unknown original PR head")
-    candidate, tests = PLANS[old]
+    candidate, tests = PLANS[plan_key]
     for sha in (old, new, trusted_policy):
         if len(sha) != 40 or any(c not in "0123456789abcdef" for c in sha):
             raise ValueError("expected full immutable commit ids")
+    gallery = plan_key == GALLERY_ORIGINAL
+    if gallery and (
+        new != trusted_policy
+        or _git(repo, "show", "-s", "--format=%P", new).strip() != (old if hosted_fix else candidate)
+    ):
+        raise ValueError("gallery push requires the pinned, direct policy successor")
+    policy_paths = GALLERY_POLICY_PATHS if gallery else POLICY_PATHS
+    forward_blobs = _gallery_forward_blobs(repo, old, new) if hosted_fix else {}
+    if hosted_fix:
+        policy_paths = policy_paths.union(forward_blobs)
+        tests = (*tests, GALLERY_CAPTURE_FIXTURE)
     _check_ancestry(repo, old, new, candidate, trusted_policy)
-    _check_frozen_inputs(repo, old, new, candidate, trusted_policy)
-    _check_required_tests(repo, new, candidate, tests)
+    _check_frozen_inputs(repo, old, new, candidate, trusted_policy, policy_paths)
+    blobs = GALLERY_RUNTIME_BLOBS if gallery else {}
+    for path, blob in (blobs | forward_blobs).items():
+        if _entry(repo, new, path) != f"100644 blob {blob}\t{path}\0":
+            raise ValueError(f"gallery runtime input differs from its reviewed blob: {path}")
+    _check_required_tests(repo, new, candidate, tests, policy_paths)
     grouped: dict[str, list[str]] = {}
     for path in tests:
         if path.startswith("plugins/") and "/tests/" in path:

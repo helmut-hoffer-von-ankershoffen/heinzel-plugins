@@ -1,120 +1,26 @@
 {
-  "format": 1,
+  "format": 2,
   "plugin": "heinzel-google",
-  "core_version": "0.9.55",
-  "inputs_sha256": "501fac86cddd76d6e400c5ad5033604f95da3fe3542a7143331b6d5e20901af8",
+  "core_version": "0.9.56",
+  "inputs_sha256": "a8434f8fcdcdbd2fcc4f2c38ac1dc4a419417e9e7e7d4d36d4085db40ae4d2a2",
   "images": {
-    "docs/assets/screenshots/google-upcoming-review.png": "7cd7233b7be1be4b3fe761eecc1e06ae732cf884d0838c928da6ed04bbf12d07",
-    "docs/assets/screenshots/google-calendar-week.png": "ac4b7d0c54a78a426177d18bd7e8a631c2f7b97e8039ef6da90289d1f12e707c",
-    "docs/assets/screenshots/google-source-review.png": "584b54c641bde5012cdaf9904bfe235ae4f615f0b0323fc833e532d5eb10528a",
-    "docs/assets/screenshots/launch-files-json.png": "1f801475b1218b3cd9493b488fdb0d5cf9387625c6244daf1a8fa2998667d101",
-    "docs/assets/screenshots/launch-files-week.png": "79459739ebb87ad472c40f2d50ed7a5a4d38c3503471ecb432708a70e12b1d3e",
-    "docs/assets/screenshots/launch-plan.png": "a8f723cff386597587a28aa1a76dc6e59b72b40665107629cda30dc1c060fe09",
-    "docs/assets/screenshots/launch-metrics.png": "694361694713cb2bb4b3e9a89ec50004ab36120233ed8dbe615466cd5ae09a62",
-    "docs/assets/screenshots/mail-content.png": "ceef4e8ed3b08a9d3b787467049c7e8e45effbbdfcaacee0508b023d51691cd4"
+    "docs/assets/screenshots/google-connector.png": "f3ddfb93035f965a3ecec385ca029a52f9eaedfe86e4c5e8fde2bfb7f856db69",
+    "docs/assets/screenshots/google-calendar-week.png": "8cf45e4405c6b78614b02576beabbf8362062b69e34cf0a5beb76d4c3805af5c",
+    "docs/assets/screenshots/google-source-review.png": "b1d8bd29842cb82b89bf73d66bac02cb9d6108385a11b49abe8fa3e8be103582",
+    "docs/assets/screenshots/launch-files-json.png": "cf4dfd7993cec3d369cae09c39b475c7eaea4e03f55c4bf7f43757682853c11b",
+    "docs/assets/screenshots/launch-files-week.png": "676c9a7ae8ce4fee16454b3873377d2d3f4eb17d423639bd7f8ef5624d33caf4",
+    "docs/assets/screenshots/launch-plan.png": "2933ffc09b64230177b816c3d11a711c78921f100c2baee42fe84ccfb0d03745",
+    "docs/assets/screenshots/launch-metrics.png": "fe58c0700cb394d42996f7587ab79fc10846e59d586ce63b2308903501dbf4af",
+    "docs/assets/screenshots/mail-content.png": "213a4112d8ef0227320c76132092b2ebca04e0afc3f569c5e3887318b5cc411d"
   },
-  "review_bundle": {
-    "format": 2,
-    "source_story": {
-      "path": "source-story.md",
-      "sha256": "7fcc0377937584718582bee6fa8b41b89cc432cf040dbba4bf3c387cc91558c3"
-    },
-    "definition": {
-      "format": 1,
-      "reviewer": "luna_release_checklist",
-      "source_sha256": "3b3f9817c497b535bccc38e22adc3b43ff158a5016126e36c9cef89ebab1282e",
-      "plan_sha256": "f2a58ec909269319a7cb5f298dd7237efd9a3295e65c6d4a5610907bdca945c7",
-      "story_sha256": "7fcc0377937584718582bee6fa8b41b89cc432cf040dbba4bf3c387cc91558c3"
-    },
-    "plugin": "heinzel-google",
-    "core_version": "0.9.55",
-    "inputs_sha256": "501fac86cddd76d6e400c5ad5033604f95da3fe3542a7143331b6d5e20901af8",
-    "screenshots": [
-      {
-        "path": "docs/assets/screenshots/google-upcoming-review.png",
-        "surface": "ui",
-        "caption": "A fictional launch review shows as the next meeting in the footer calendar summary, read through the Google calendar adapter."
-      },
-      {
-        "path": "docs/assets/screenshots/google-calendar-week.png",
-        "surface": "ui",
-        "caption": "The real Core calendar pane lists a fictional launch day's meetings through the Google adapter; no Google account is contacted."
-      },
-      {
-        "path": "docs/assets/screenshots/google-source-review.png",
-        "surface": "ui",
-        "caption": "Inspect a fictional selected-source identity as the Google source review panel shows it."
-      },
-      {
-        "path": "docs/assets/screenshots/launch-files-json.png",
-        "surface": "cli",
-        "caption": "Inspect a three-day launch-file query as structured data \u2014 actual Google operation, fictional Workspace replies."
-      },
-      {
-        "path": "docs/assets/screenshots/launch-files-week.png",
-        "surface": "cli",
-        "caption": "Try a seven-day file query \u2014 fictional replies demonstrate invocation, not verified server-side filtering."
-      },
-      {
-        "path": "docs/assets/screenshots/launch-plan.png",
-        "surface": "cli",
-        "caption": "Read a fictional Google Doc through the real adapter; this showcase command exists only in the documentation fixture."
-      },
-      {
-        "path": "docs/assets/screenshots/launch-metrics.png",
-        "surface": "cli",
-        "caption": "Read a fictional Sheet through the real adapter; this showcase command exists only in the documentation fixture."
-      },
-      {
-        "path": "docs/assets/screenshots/mail-content.png",
-        "surface": "cli",
-        "caption": "Read a fictional message through the real Gmail adapter; this showcase command exists only in the documentation fixture."
-      }
-    ],
-    "images": {
-      "google-upcoming-review.png": "7cd7233b7be1be4b3fe761eecc1e06ae732cf884d0838c928da6ed04bbf12d07",
-      "google-calendar-week.png": "ac4b7d0c54a78a426177d18bd7e8a631c2f7b97e8039ef6da90289d1f12e707c",
-      "google-source-review.png": "584b54c641bde5012cdaf9904bfe235ae4f615f0b0323fc833e532d5eb10528a",
-      "launch-files-json.png": "1f801475b1218b3cd9493b488fdb0d5cf9387625c6244daf1a8fa2998667d101",
-      "launch-files-week.png": "79459739ebb87ad472c40f2d50ed7a5a4d38c3503471ecb432708a70e12b1d3e",
-      "launch-plan.png": "a8f723cff386597587a28aa1a76dc6e59b72b40665107629cda30dc1c060fe09",
-      "launch-metrics.png": "694361694713cb2bb4b3e9a89ec50004ab36120233ed8dbe615466cd5ae09a62",
-      "mail-content.png": "ceef4e8ed3b08a9d3b787467049c7e8e45effbbdfcaacee0508b023d51691cd4"
-    },
-    "transcripts": {
-      "google-upcoming-review.txt": "1e65d6738dd2b65bf8147c38dcf7cf3daaeeab0324ad54f2a6587a7116eac01a",
-      "google-calendar-week.txt": "fb3df184a5fe21cb2306dbe7c959b7471213444e8453460f5ce324559c967837",
-      "google-source-review.txt": "d2069cd29c1f3311aa4970d48d29ddd7596ed87cbcd384dcb45de310de57539b",
-      "launch-files-json.txt": "a9c573de126ed770dbdb734205f09526d1a6e7b77b953af04fde3d66ea1ed109",
-      "launch-files-week.txt": "0719de29f608597727d599dc28f3df6581079037081585ec88613050a2f685f0",
-      "launch-plan.txt": "a7ded47e8432d800d520488f35d85f613b09609b4041a074ae8a13aaa7c37d91",
-      "launch-metrics.txt": "d3f2f19f3a5f470e2c567dd65d8333fdba8fb653a2346a31cfa8b9c008545a04",
-      "mail-content.txt": "57cda012c3d61d21aa3e387c296ebce6483c114b169bb416d5296d4af344a813"
-    },
-    "bundle_sha256": "4cd42de6bc0fe1d732fd479f687991c595bf83738818f741acc8309fb829a428"
-  },
-  "privacy_review": {
-    "format": 1,
-    "bundle_sha256": "4cd42de6bc0fe1d732fd479f687991c595bf83738818f741acc8309fb829a428",
-    "reviewer": "Codex privacy agent",
-    "decision": "approve",
-    "checked_images": [
-      "google-upcoming-review.png",
-      "google-calendar-week.png",
-      "google-source-review.png",
-      "launch-files-json.png",
-      "launch-files-week.png",
-      "launch-plan.png",
-      "launch-metrics.png",
-      "mail-content.png"
-    ],
-    "checks": {
-      "tokens_absent": true,
-      "personal_data_absent": true,
-      "feature_relevant": true,
-      "multiple_ui_scenes": true,
-      "captions_accurate": true
-    },
-    "findings": []
+  "transcripts": {
+    "google-connector.txt": "cbc689ddaac9cc25bdb44c540bb68e652449f03031188cae21e6a2b9d4cb714c",
+    "google-calendar-week.txt": "e250699589991f5049a57eaf68fc2b88f1f97e6699de64482230518d448ba9a3",
+    "google-source-review.txt": "61c0e571c88509101f0c80f0c98f4795a93294cc873a97237b0c60169e980d76",
+    "launch-files-json.txt": "6b6fbbd15ae8ecf731b7889a66cce9a7baa9f5286af5718d7c4a0581ccfd0f7a",
+    "launch-files-week.txt": "90c3bfdaf563c935ae80be3b4fcb708419b7aaaf47a58a4a1dc426319cf80749",
+    "launch-plan.txt": "a7ded47e8432d800d520488f35d85f613b09609b4041a074ae8a13aaa7c37d91",
+    "launch-metrics.txt": "d3f2f19f3a5f470e2c567dd65d8333fdba8fb653a2346a31cfa8b9c008545a04",
+    "mail-content.txt": "57cda012c3d61d21aa3e387c296ebce6483c114b169bb416d5296d4af344a813"
   }
 }

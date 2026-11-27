@@ -31,7 +31,7 @@ jobs:
           persist-credentials: false
       - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e # v10.3.2
         with:
-          python-version: "3.14"
+          python-version: "3.15"
       - name: Measure the shared developer toolkit
         run: uv run --frozen --no-build --group tooling --extra checks coverage run -m pytest tests -q
       - name: Record the total for the Coverage floor job
@@ -63,6 +63,8 @@ jobs:
           fetch-depth: 0
           persist-credentials: false
       - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e # v10.3.2
+        with:
+          python-version: "3.15"
       - name: Preserve commit, title, branch and confidentiality checks
         env:
           CHECK_BASE: ${{ github.event.pull_request.base.sha || github.event.before }}
@@ -87,6 +89,8 @@ jobs:
           fetch-depth: 0
           persist-credentials: false
       - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e # v10.3.2
+        with:
+          python-version: "3.15"
       - run: make tooling-check
       - id: plan
         env:
@@ -121,6 +125,8 @@ jobs:
         with:
           persist-credentials: false
       - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e # v10.3.2
+        with:
+          python-version: "3.15"
       - name: Install the capture browser and its runner libraries
         run: uv run --frozen --with playwright==1.64.1 --group tooling playwright install --with-deps chromium
       - name: Capture a new unknown plugin, detect staleness, fail a scene and recover
@@ -146,6 +152,7 @@ jobs:
           persist-credentials: false
       - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e # v10.3.2
         with:
+          python-version: "3.15"
           enable-cache: true
       - id: core
         env:
@@ -157,6 +164,8 @@ jobs:
         env:
           PLUGIN: ${{ matrix.name }}
           CORE: ${{ steps.core.outputs.wheel }}
+          CONFIDENTIAL_TERMS: ${{ secrets.CONFIDENTIAL_TERMS }}
+          CONFIDENTIALITY_REQUIRED: ${{ github.event_name != 'pull_request' || (github.event.pull_request.head.repo.full_name == github.repository && github.actor != 'dependabot[bot]') }}
         run: make check NAME="$PLUGIN" CORE="$CORE"
       - name: Audit the owning runtime dependency closure
         env:
@@ -280,10 +289,37 @@ jobs:
             cp scripts/gate_guard.py "$RUNNER_TEMP/gate_guard.py"
           fi
           python3 -I "$RUNNER_TEMP/gate_guard.py"
+  gallery:
+    # The local digest covers only UI inputs; this re-capture against the newest compatible released Core catches text
+    # that comes from plugin Python, metadata or Core. Deterministic (Playwright, fixtures), no agent.
+    # Required rendering proof uses no private terms; trusted private scanning is a separate admission step.
+    name: Screenshot gallery rendering
+    permissions:
+      contents: read
+    needs: plan
+    if: needs.plan.outputs.selected == 'True'
+    strategy:
+      fail-fast: false
+      matrix: ${{ fromJSON(needs.plan.outputs.matrix) }}
+    runs-on: ubuntu-latest
+    timeout-minutes: 20
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e # v10.3.2
+        with:
+          python-version: "3.15"
+          enable-cache: true
+      # This is the same pinned Linux container used by local authors, including on macOS.
+      - name: Compare real scene rendering without secrets or publication
+        env:
+          PLUGIN: ${{ matrix.name }}
+        run: make screenshots-render-check NAME="$PLUGIN"
   ok:
     name: CI OK
     if: always()
-    needs: [policy, plan, plugin, coverage, coverage-floor, sonar-ratings, gate-guard, screenshots]
+    needs: [policy, plan, plugin, coverage, coverage-floor, sonar-ratings, gate-guard, screenshots, gallery]
     runs-on: ubuntu-latest
     steps:
       - env:
@@ -299,10 +335,20 @@ jobs:
           GUARD_VERDICT: ${{ needs.gate-guard.outputs.verdict }}
           EVENT: ${{ github.event_name }}
           SCREENSHOTS: ${{ needs.screenshots.result }}
+          GALLERY: ${{ needs.gallery.result }}
+          GALLERY_SELECTED: ${{ needs.plan.outputs.selected }}
         run: |
           if [ "$FLOOR" != success ]; then echo "::error::Coverage floor ended with ${FLOOR:-no result}: ${FLOOR_VERDICT:-no verdict}"; fi
           # Sonar ratings and the gate guard judge pull requests; a push to main or a dispatch skips them
           pr_only() { test "$1" = success || { test "$1" = skipped && test "$EVENT" != pull_request; }; }
           pr_only "$SONAR" || echo "::error::Sonar ratings ended with ${SONAR:-no result}: ${SONAR_VERDICT:-no verdict}"
           pr_only "$GUARD" || echo "::error::Gate guard ended with ${GUARD:-no result}: ${GUARD_VERDICT:-no verdict}"
-          pr_only "$SONAR" && pr_only "$GUARD" && test "$POLICY" = success && test "$PLAN" = success && test "$COVERAGE" = success && test "$FLOOR" = success && { test "$SCREENSHOTS" = success || test "$SCREENSHOTS" = skipped; } && { test "$PLUGIN" = success || test "$PLUGIN" = skipped; }
+          gallery_ok() {
+            case "$GALLERY_SELECTED" in
+              True) test "$GALLERY" = success ;;
+              False) test "$GALLERY" = skipped || test "$GALLERY" = success ;;
+              *) return 1 ;;
+            esac
+          }
+          gallery_ok || echo "::error::Gallery rendering ended with ${GALLERY:-no result} for selection ${GALLERY_SELECTED:-missing}"
+          gallery_ok && pr_only "$SONAR" && pr_only "$GUARD" && test "$POLICY" = success && test "$PLAN" = success && test "$COVERAGE" = success && test "$FLOOR" = success && { test "$SCREENSHOTS" = success || test "$SCREENSHOTS" = skipped; } && { test "$PLUGIN" = success || test "$PLUGIN" = skipped; }

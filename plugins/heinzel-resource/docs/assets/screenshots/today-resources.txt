@@ -14,19 +14,12 @@ Computer resources
 
 CPU 36%
 
-Ask about it
-
 Nothing needs you right now. Ask anything below.
 
-v0.9.42
+v0.9.56
 Updates, off
 0
 System health, warning
 ?
 Daemon not installed, off
-Chat
-New chat
-Ask about your setup, your team's contracts or what to do next. The chat reads with hz and asks you before it changes anything.
-Your message
-Default
 Audio

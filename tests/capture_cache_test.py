@@ -92,7 +92,7 @@ def test_built_capture_script_runs_from_uv_cache_with_pinned_script_dependencies
     )
     assert after.returncode == 0, after.stderr
     assert "--core" in after.stdout
-    assert ("--review-receipt" if filename == "capture.py" else "--core") in after.stdout
+    assert ("--draft" if filename == "capture.py" else "--core") in after.stdout
     assert "inside the cache directory" not in after.stderr
     assert script.read_bytes() == script_bytes
     assert not (consumer / ".venv").exists()

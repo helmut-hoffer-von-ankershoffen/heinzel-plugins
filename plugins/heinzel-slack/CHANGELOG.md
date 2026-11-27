@@ -2,6 +2,10 @@
 
 ## Unreleased
 
+## 0.3.2
+
+Bound SlackCLI subprocess cleanup and preserve process-group ownership while retiring the child.
+
 ## 0.3.1
 
 Requires Python 3.15; relocked.

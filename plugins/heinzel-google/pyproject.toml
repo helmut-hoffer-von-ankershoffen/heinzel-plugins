@@ -143,14 +143,14 @@ highlights = [
 ]
 
 [[tool.heinzel.catalog.screenshots]]
-path = "docs/assets/screenshots/google-upcoming-review.png"
+path = "docs/assets/screenshots/google-connector.png"
 surface = "ui"
-caption = "A fictional launch review shows as the next meeting in the footer calendar summary, read through the Google calendar adapter."
+caption = "Heinzel's Connectors settings show Google selected for documents, calendar and mail in the fictional demonstration profile."
 
 [[tool.heinzel.catalog.screenshots]]
 path = "docs/assets/screenshots/google-calendar-week.png"
-surface = "ui"
-caption = "The real Core calendar pane lists a fictional launch day's meetings through the Google adapter; no Google account is contacted."
+surface = "cli"
+caption = "The real Google Calendar adapter lists fictional meetings for a fixed week through a documentation-only command."
 
 [[tool.heinzel.catalog.screenshots]]
 path = "docs/assets/screenshots/google-source-review.png"
@@ -160,12 +160,12 @@ caption = "Inspect a fictional selected-source identity as the Google source rev
 [[tool.heinzel.catalog.screenshots]]
 path = "docs/assets/screenshots/launch-files-json.png"
 surface = "cli"
-caption = "Inspect a three-day launch-file query as structured data — actual Google operation, fictional Workspace replies."
+caption = "Inspect a fixed three-day launch-file query as structured data — actual Google operation, fictional Workspace replies and demonstration clock."
 
 [[tool.heinzel.catalog.screenshots]]
 path = "docs/assets/screenshots/launch-files-week.png"
 surface = "cli"
-caption = "Try a seven-day file query — fictional replies demonstrate invocation, not verified server-side filtering."
+caption = "Try a fixed seven-day file query — fictional replies and demonstration clock illustrate invocation, not verified server-side filtering."
 
 [[tool.heinzel.catalog.screenshots]]
 path = "docs/assets/screenshots/launch-plan.png"

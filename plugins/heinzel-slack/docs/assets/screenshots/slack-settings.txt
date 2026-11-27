@@ -1,0 +1,89 @@
+Skip to content
+Heinzelmännchen
+Heinzelmännchen
+Contracts
+Team graph
+Organisation
+Team roster
+M
+Mira
+· EM
+Today
+Today
+Doctor: 8 checks need attention
+
+ai.access ai access, system.credential backend, system.credential credential slack/app-token…
+
+Open
+v0.9.56
+Updates, off
+0
+System health, warning
+?
+Daemon not installed, off
+Audio
+Settings
+Filter settings
+
+Preferences
+
+Appearance
+Browser
+Notifications
+Slack
+
+Customize
+
+AI
+Connectors
+Plugins
+Skills
+
+Organisation
+
+Team
+You
+
+This computer
+
+Configuration files
+Credentials
+Daemon
+From Claude
+MCP
+System
+Updates
+Web server
+Slack
+
+Plugin
+
+Bot Enabled
+
+Enable the Slack bot channel; false disables it independently of reviewed links. When unset, an owner, workspace or either stored bot token keeps existing bot setup active.
+
+Cli Path
+
+Exact native SlackCLI executable for reviewed links.
+
+Cli Profile
+
+Exact stored file-backed SlackCLI profile key for reviewed links.
+
+Your Slack member ID
+
+Your member ID in the workspace (profile, three dots, Copy member ID), like U01ABCDEF. Drafts and notices go to your direct message with the app, and only your click approves.
+
+Set by HZ_SLACK__OWNER; change it there.
+
+Workspace ID
+
+Required before posting: workspace ID the app must belong to (like T01ABCDEF).
+
+Set by HZ_SLACK__TEAM; change it there.
+
+Time to answer
+
+How long a shared draft can be approved or declined; after that it expires.
+
+minutes

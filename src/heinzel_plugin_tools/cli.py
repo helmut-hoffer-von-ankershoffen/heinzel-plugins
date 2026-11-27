@@ -568,10 +568,9 @@ def has_gallery(project: Project) -> bool:
 
 
 def check_screenshots(project: Project) -> dict:
-    """Verify gallery freshness offline; the digest covers built view assets, so a clean checkout builds them first."""
+    """Verify gallery freshness offline: no build, browser, plugin run or agent (the digest covers UI sources only)."""
     from heinzel_plugin_tools.capture import check_capture
 
-    build_view_assets(project)
     return check_capture(project.directory)
 
 
@@ -589,6 +588,8 @@ def check(
     if has_gallery(project):
         check_screenshots(project)
     prepare_environment(project, core)
+    if frontend:
+        build_view_assets(project)  # Owning Python integration tests can inspect and serve the installed view.
     run(
         python_command(project, core, ["python", str(TOOLING_SCRIPT), "boundary", project.name]),
         cwd=project.directory,
@@ -637,7 +638,7 @@ def _frontend_steps(project: Project, *, tests_only: bool, fast: bool) -> None:
     if not package.is_file():
         return
     scripts = json.loads(package.read_text()).get("scripts", {})
-    for step in ["test"] if fast else ["typecheck", "test"] if tests_only else ["lint", "typecheck", "test", "build"]:
+    for step in ["test"] if fast else ["typecheck", "test"] if tests_only else ["lint", "typecheck", "test"]:
         if step in scripts:
             run(
                 ["uv", "run", "--no-project", "--script", str(project.directory / "web/build.py"), "run", step],
@@ -915,8 +916,12 @@ def capture_plugin(
     headed: bool = False,
     open_preview: bool = False,
     draft_only: bool = False,
-    review_receipt: Path | None = None,
     prepared_python: Path | None = None,
+    inspect_prepared: bool = False,
+    prepared_approval: str | None = None,
+    verify: bool = False,
+    strict_images: bool = False,
+    render_check: bool = False,
 ) -> int:
     """Record the owning gallery with on-demand pinned browser tooling and clean machine output."""
     command = [
@@ -934,13 +939,17 @@ def capture_plugin(
         command += ["--core", core]
     if prepared_python:
         command += ["--python", str(prepared_python.absolute())]
-    if review_receipt:
-        command += ["--review-receipt", str(review_receipt.resolve())]
+    if prepared_approval is not None:
+        command += ["--prepared-approval", prepared_approval]
     for enabled, flag in (
+        (inspect_prepared, "--inspect-prepared"),
         (json_output, "--json"),
         (headed, "--headed"),
         (open_preview, "--open"),
         (draft_only, "--draft"),
+        (verify, "--verify"),
+        (render_check, "--render-check"),
+        (strict_images, "--strict-images"),
     ):
         if enabled:
             command.append(flag)
@@ -1184,7 +1193,7 @@ def focused_hook_targets(manifest: Path, selected: list[Project], changed: list[
 
 
 def check_all_screenshots(inventory: list[Project], *, json_output: bool) -> int:
-    """Check every configured gallery, retaining both stale and broken results."""
+    """Offline freshness of every gallery: stale plugins with the exact command that regenerates each."""
     from heinzel_plugin_tools.capture import safe_failure_message
     from heinzel_plugin_tools.privacy import StaleGallery
 
@@ -1196,14 +1205,8 @@ def check_all_screenshots(inventory: list[Project], *, json_output: bool) -> int
             check_screenshots(project)
             fresh.append(project.name)
         except StaleGallery as error:
-            stale.append(
-                {
-                    "plugin": project.name,
-                    "command": f"hz-plugin screenshots {project.name}",
-                    "error": safe_failure_message(error),
-                }
-            )
-        except Exception as error:  # One invalid gallery must not hide the remaining checks.
+            stale.append({"plugin": project.name, "command": error.command, "error": safe_failure_message(error)})
+        except Exception as error:  # one broken gallery must not hide the others
             failed.append({"plugin": project.name, "error": safe_failure_message(error)})
     report = {"ok": not stale and not failed, "fresh": fresh, "stale": stale, "failed": failed}
     if json_output:
@@ -1220,13 +1223,13 @@ def check_all_screenshots(inventory: list[Project], *, json_output: bool) -> int
 def screenshot_main(arguments: list[str], *, check: bool = False) -> int:
     """Keep capture help focused and all agent results machine-readable."""
     from heinzel_plugin_tools.capture import PLAN, safe_failure_message, write_default_plan
-    from heinzel_plugin_tools.privacy import CaptureError
+    from heinzel_plugin_tools.privacy import CaptureError, StaleGallery
 
     parser = argparse.ArgumentParser(
         prog="hz-plugin screenshots",
         description="Capture real UI and CLI screenshots in an isolated demo profile. Review the local contact sheet.",
         epilog="Examples: hz-plugin screenshots clock --open; hz-plugin screenshots harbor --json; "
-        "hz-plugin screenshots --check. Edit docs/screenshots.toml for richer scenes.",
+        "hz-plugin screenshots --check. Edit docs/screenshot-definition.json for richer scenes; no agent is involved.",
     )
     parser.add_argument(
         "name",
@@ -1238,19 +1241,16 @@ def screenshot_main(arguments: list[str], *, check: bool = False) -> int:
         "--core", default=os.environ.get("PLUGIN_CORE") or None, help="Candidate SDK wheel or artifact URL"
     )
     parser.add_argument("--json", action="store_true", help="JSON on stdout, progress on stderr")
-    parser.add_argument("--all", action="store_true", help="With --check: check every configured gallery")
     parser.add_argument(
         "--check", action="store_true", help="Check committed captures offline; no browser or plugin execution"
     )
     parser.add_argument(
-        "--init", action="store_true", help="Write an editable starter plan; agent definition is still required"
+        "--all",
+        action="store_true",
+        help="With --check: check every plugin that has a definition; JSON lists the stale ones and their commands",
     )
     parser.add_argument(
-        "--plan",
-        "--generate",
-        action="store_true",
-        dest="define_plan",
-        help="Ask a read-only agent to define or update the useful source-based screenshot story",
+        "--init", action="store_true", help="Write a starter docs/screenshot-definition.json to edit by hand"
     )
     parser.add_argument(
         "--python",
@@ -1258,18 +1258,52 @@ def screenshot_main(arguments: list[str], *, check: bool = False) -> int:
         dest="prepared_python",
         help="Use an explicitly prepared Python with the owning plugin and compatible SDK installed",
     )
+    parser.add_argument(
+        "--inspect-prepared",
+        action="store_true",
+        help="Print the prepared host approval inputs and digest without running them",
+    )
+    parser.add_argument("--prepared-approval", help="Reviewed SHA-256 from --inspect-prepared, required with --python")
     parser.add_argument("--open", action="store_true", help="Open the local contact sheet after a successful capture")
     parser.add_argument("--headed", action="store_true", help="Show the capture browser for debugging scenes")
-    parser.add_argument("--draft", action="store_true", help="Capture privately; defer the required agent review")
+    parser.add_argument("--draft", action="store_true", help="Capture privately into .preview without publishing")
     parser.add_argument(
-        "--review-receipt", type=Path, help="Publish an existing draft approved by an independent agent"
+        "--verify",
+        action="store_true",
+        help="CI: capture privately again and fail when a scene's rendered text differs from the committed gallery",
+    )
+    parser.add_argument(
+        "--render-check",
+        action="store_true",
+        help="Zero-secret rendering comparison only; does not approve private policy or publish",
+    )
+    parser.add_argument(
+        "--strict-images", action="store_true", help="With --verify or --render-check: compare image bytes too"
     )
     args = parser.parse_args(arguments)
     try:
-        if sum((bool(check or args.check), args.init, args.define_plan, bool(args.review_receipt))) > 1 or (
-            args.review_receipt and args.draft
+        if (
+            sum(
+                (
+                    bool(check or args.check),
+                    args.init,
+                    args.draft,
+                    args.verify,
+                    args.render_check,
+                    args.inspect_prepared,
+                )
+            )
+            > 1
         ):
-            raise CaptureError("Choose one screenshot mode: --plan, --init, --check, capture, or --review-receipt")
+            raise CaptureError(
+                "Choose one screenshot mode: --init, --check, --draft, --verify, --inspect-prepared or capture"
+            )
+        if (args.inspect_prepared or args.prepared_approval is not None) and (
+            args.prepared_python is None or check or args.check or args.init or args.render_check
+        ):
+            raise CaptureError("Prepared host approval options require --python and local host capture")
+        if args.strict_images and not (args.verify or args.render_check):
+            raise CaptureError("--strict-images needs --verify")
         if args.all and (not (check or args.check) or args.name is not None):
             raise CaptureError("Use --all with --check and without a plugin name")
         inventory = projects()
@@ -1287,19 +1321,7 @@ def screenshot_main(arguments: list[str], *, check: bool = False) -> int:
                 "Choose a plugin name, or run inside its directory. Available: " + ", ".join(p.name for p in inventory)
             )
         project = selected[0]
-        if args.define_plan:
-            from heinzel_plugin_tools.planning import DEFINITION, STORY, ensure_definition
-
-            ensure_definition(project.directory, refresh=True)
-            result = {
-                "ok": True,
-                "plugin": project.name,
-                "plan": str(project.directory / PLAN),
-                "story": str(project.directory / STORY),
-                "definition": str(project.directory / DEFINITION),
-                "next": f"hz-plugin screenshots {project.name} --open",
-            }
-        elif args.init:
+        if args.init:
             write_default_plan(project.directory)
             result = {
                 "ok": True,
@@ -1316,16 +1338,21 @@ def screenshot_main(arguments: list[str], *, check: bool = False) -> int:
                 headed=args.headed,
                 open_preview=args.open,
                 draft_only=args.draft,
-                review_receipt=args.review_receipt,
                 prepared_python=args.prepared_python,
+                inspect_prepared=args.inspect_prepared,
+                prepared_approval=args.prepared_approval,
+                verify=args.verify,
+                strict_images=args.strict_images,
+                render_check=args.render_check,
             )
         print(json.dumps(result) if args.json else f"✓ {project.name}: {result.get('plan', 'screenshots are fresh')}")
         return 0
     except Exception as error:  # Workflow boundary: return safe JSON even for malformed untrusted plan data.
         if args.json:
-            print(
-                json.dumps({"ok": False, "error": safe_failure_message(error), "next": "hz-plugin screenshots --help"})
-            )
+            report = {"ok": False, "error": safe_failure_message(error), "next": "hz-plugin screenshots --help"}
+            if isinstance(error, StaleGallery):
+                report |= {"stale": True, "command": error.command, "next": error.command}
+            print(json.dumps(report))
         else:
             print(f"Screenshot check failed: {safe_failure_message(error)}", file=sys.stderr)
         return 1

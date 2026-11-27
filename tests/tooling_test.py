@@ -11,7 +11,7 @@ from pathlib import Path
 
 import pytest
 
-from heinzel_plugin_tools import capture, privacy
+from heinzel_plugin_tools import capture
 from heinzel_plugin_tools import cli as plugins
 
 pytestmark = pytest.mark.integration
@@ -20,7 +20,8 @@ pytestmark = pytest.mark.integration
 @pytest.mark.parametrize(
     "plugin", ("heinzel-clock", "heinzel-resource", "heinzel-tailscale", "heinzel-theme", "heinzel-google")
 )
-def test_recaptured_current_gallery_has_fresh_independent_format_two_review(tmp_path, plugin, monkeypatch):
+@pytest.mark.usefixtures("fictional_capture_terms")
+def test_a_cold_checkout_of_a_committed_gallery_is_fresh_without_building(tmp_path, plugin, monkeypatch):
     source = Path(__file__).resolve().parents[1] / "plugins" / plugin
 
     def cold_inputs(directory, names):
@@ -41,19 +42,14 @@ def test_recaptured_current_gallery_has_fresh_independent_format_two_review(tmp_
         }
 
     before = gallery_hashes()
-    monkeypatch.setattr(privacy, "run_agent", lambda *a, **kw: pytest.fail("read-only check cannot start an agent"))
-    if plugin == "heinzel-clock":
-        assert not (owner / "src/heinzel_clock/views").exists()
-        with pytest.raises(privacy.CaptureError, match="Screenshots are stale"):
-            capture.check_capture(owner)
+    monkeypatch.setattr(plugins, "run", lambda *a, **kw: pytest.fail("the offline check builds nothing"))
     inventory = plugins.projects(owner)
-    assert len(inventory) == 1 and inventory[0].name == plugin
-    # The normal owning entrypoint builds real frontend assets before applying the unchanged digest checks.
+    assert len(inventory) == 1
+    assert inventory[0].name == plugin
+    # A cold checkout without built views is fresh: the digest covers UI sources, never build output.
     report = plugins.check_screenshots(inventory[0])
     assert report["fresh"] is True
-    assert report["privacy_reviewed"] is True
-    assert report["review_bundle_format"] == 2
-    assert report["source_story_bundle_reviewed"] is True
+    assert "privacy_reviewed" not in report
     assert before == gallery_hashes()
 
 
@@ -144,7 +140,8 @@ def test_plugin_only_hooks_do_not_run_collection_checks():
     assert "check-changed" in owner["entry"]
     assert owner["require_serial"] is True
     assert owner["entry"].endswith("--git-hook'")
-    assert owner["pass_filenames"] is False and owner["always_run"] is True
+    assert owner["pass_filenames"] is False
+    assert owner["always_run"] is True
 
 
 @pytest.fixture(params=[False, True])
@@ -208,7 +205,8 @@ def test_actual_prek_dispatch_includes_deletions_and_noops_for_unrelated_changes
     import yaml
 
     git, prek = shutil.which("git"), shutil.which("prek")
-    assert git and prek
+    assert git
+    assert prek
 
     def run(*args):
         return subprocess.check_output([git, *args], cwd=tmp_path, text=True, timeout=30)  # noqa: S603 - resolved git and disposable repository
@@ -261,7 +259,8 @@ def test_actual_first_push_and_new_branch_deletion_select_the_owning_contract_co
     import yaml
 
     git, prek = shutil.which("git"), shutil.which("prek")
-    assert git and prek
+    assert git
+    assert prek
     remote, root = tmp_path / "origin.git", tmp_path / "work"
     root.mkdir()
 

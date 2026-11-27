@@ -192,13 +192,9 @@ Development and release commands: [repository guide](../../README.md).
 <!-- screenshots:start -->
 ## Screenshots
 
-<img src="docs/assets/screenshots/google-upcoming-review.png" alt="A fictional launch review shows as the next meeting in the footer calendar summary, read through the Google calendar adapter." width="960">
+<img src="docs/assets/screenshots/google-connector.png" alt="Heinzel&#x27;s Connectors settings show Google selected for documents, calendar and mail in the fictional demonstration profile." width="960">
 
-A fictional launch review shows as the next meeting in the footer calendar summary, read through the Google calendar adapter.
-
-<img src="docs/assets/screenshots/google-calendar-week.png" alt="The real Core calendar pane lists a fictional launch day&#x27;s meetings through the Google adapter; no Google account is contacted." width="960">
-
-The real Core calendar pane lists a fictional launch day&#x27;s meetings through the Google adapter; no Google account is contacted.
+Heinzel&#x27;s Connectors settings show Google selected for documents, calendar and mail in the fictional demonstration profile.
 
 <img src="docs/assets/screenshots/google-source-review.png" alt="Inspect a fictional selected-source identity as the Google source review panel shows it." width="960">
 
@@ -207,13 +203,17 @@ Inspect a fictional selected-source identity as the Google source review panel s
 <details>
 <summary>Command line</summary>
 
-<img src="docs/assets/screenshots/launch-files-json.png" alt="Inspect a three-day launch-file query as structured data — actual Google operation, fictional Workspace replies." width="960">
+<img src="docs/assets/screenshots/google-calendar-week.png" alt="The real Google Calendar adapter lists fictional meetings for a fixed week through a documentation-only command." width="960">
 
-Inspect a three-day launch-file query as structured data — actual Google operation, fictional Workspace replies.
+The real Google Calendar adapter lists fictional meetings for a fixed week through a documentation-only command.
 
-<img src="docs/assets/screenshots/launch-files-week.png" alt="Try a seven-day file query — fictional replies demonstrate invocation, not verified server-side filtering." width="960">
+<img src="docs/assets/screenshots/launch-files-json.png" alt="Inspect a fixed three-day launch-file query as structured data — actual Google operation, fictional Workspace replies and demonstration clock." width="960">
 
-Try a seven-day file query — fictional replies demonstrate invocation, not verified server-side filtering.
+Inspect a fixed three-day launch-file query as structured data — actual Google operation, fictional Workspace replies and demonstration clock.
+
+<img src="docs/assets/screenshots/launch-files-week.png" alt="Try a fixed seven-day file query — fictional replies and demonstration clock illustrate invocation, not verified server-side filtering." width="960">
+
+Try a fixed seven-day file query — fictional replies and demonstration clock illustrate invocation, not verified server-side filtering.
 
 <img src="docs/assets/screenshots/launch-plan.png" alt="Read a fictional Google Doc through the real adapter; this showcase command exists only in the documentation fixture." width="960">
 

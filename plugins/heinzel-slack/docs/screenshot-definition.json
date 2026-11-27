@@ -1,7 +1,62 @@
 {
   "format": 1,
-  "reviewer": "story-confirm-sonnet",
-  "source_sha256": "bd76864fb43ba8a61fa4aaf430cb65f9bb408ef23002591dbae0a6d89f2b36d3",
-  "plan_sha256": "1b6bf8608b2ca568abc9043bdedc32e4dc48a79473b1e59a116075c3c348d9a1",
-  "story_sha256": "923a1a10b6221fc91e6811d69701658ef00744bcd51354724894da91d6fa1191"
+  "bootstrap": "docs/screenshot_fixture.py",
+  "browser_time": "2026-11-02T10:00:00+01:00",
+  "scenes": [
+    {
+      "name": "slack-settings",
+      "surface": "ui",
+      "route": "/?settings=slack",
+      "appearance": "light",
+      "caption": "Slack settings for a fictional member and workspace, including how long a draft can wait for a decision.",
+      "steps": [
+        {"action": "wait", "text": "Your Slack member ID"},
+        {"action": "wait", "text": "Workspace ID"},
+        {"action": "wait", "text": "Time to answer"}
+      ]
+    },
+    {
+      "name": "slack-notification-settings",
+      "surface": "ui",
+      "route": "/?settings=notifications",
+      "appearance": "dark",
+      "caption": "Heinzel offers to send notices and questions through Slack direct messages when the Slack chat capability is selected.",
+      "steps": [
+        {
+          "action": "wait",
+          "text": "Through Slack, in your own direct messages. The app keeps showing everything."
+        },
+        {
+          "action": "hover",
+          "role": "switch",
+          "name": "Notices also in chat"
+        }
+      ],
+      "focus": {"role": "region", "name": "Also in chat"}
+    },
+    {
+      "name": "slack-notice-delivered",
+      "surface": "cli",
+      "command": ["gallery-smoke"],
+      "caption": "A fixture verifies one fictional Slack delivery through Core's confirmation API and checks refusal of unauthenticated and repeated attempts."
+    },
+    {
+      "name": "slack-draft-cli",
+      "surface": "cli",
+      "command": [
+        "showcase",
+        "share"
+      ],
+      "caption": "Demo data: the fictional weekly-report draft and printed button labels, rendered in the terminal from Slack message blocks."
+    },
+    {
+      "name": "slack-draft-decision-cli",
+      "surface": "cli",
+      "command": [
+        "showcase",
+        "answers"
+      ],
+      "caption": "Demo data: fictional clicks exercise the real decision code; Mira's exact approval records one reply while invalid attempts are refused."
+    }
+  ]
 }

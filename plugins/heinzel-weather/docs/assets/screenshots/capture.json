@@ -1,102 +1,22 @@
 {
-  "format": 1,
+  "format": 2,
   "plugin": "heinzel-weather",
   "core_version": "0.9.56",
-  "inputs_sha256": "45ee56eac4ad7cd3734828541ad68c77cd91c8b30c78b28dfc1eaa30e53ef6bb",
+  "inputs_sha256": "8abde57cb19d7703acefefb8fca98e43fdad3fb250a9dc9f9efbabeb65191b77",
   "images": {
-    "docs/assets/screenshots/today-weather.png": "f8905f0bb0ac8bb3b10eb5bf8548aee04fb48001f6f17845c10304ff771e6774",
-    "docs/assets/screenshots/weather-detail.png": "ac5d4ee5e29fc62d11aeeebe93e60a34d83eebeb885c19dcff8c73ca644fefa7",
-    "docs/assets/screenshots/weather-page.png": "8212e5d1cd51e54e9064400adb00a1269f0b6a1593157d0e313950fa9b4e85df",
-    "docs/assets/screenshots/phone-weather.png": "8ba0af173ef2e17188397e9de9b62ade66ee8985cec3f2c98e108c753fb14df3",
-    "docs/assets/screenshots/cli-weather.png": "eb1886a03bc9df6073e9a7da851649adb57758ee400a35e32fdf7a8a423dbef6",
-    "docs/assets/screenshots/cli-forecast.png": "811577dc84dfb847639f023dbf8dece1838289c990563a24d19d997703ebc430"
+    "docs/assets/screenshots/today-weather.png": "8515a48b68ac44089545b94806090b12c7a29c41316c45b5d072f33d278350c4",
+    "docs/assets/screenshots/weather-detail.png": "ab3826e3b8455191073655df664280bf128326cd92f75b240e5cecd9c1b420ad",
+    "docs/assets/screenshots/weather-page.png": "e2b8e9b14920a1d7d7bad661967effbd7bf250344ecab96015b38d5aeae733cb",
+    "docs/assets/screenshots/phone-weather.png": "793c57f42bdcdea9f9abaec04f8c3821825fe3d2b7c7334a9e02102f7adb3e52",
+    "docs/assets/screenshots/cli-weather.png": "71b3f9d23c8b638b2d5f1dd167624092d6c80ef6151303da19c7676a38b3b15c",
+    "docs/assets/screenshots/cli-forecast.png": "a7bbaca71180265eafddbfb8c79c7e4afa148f6d41f9bd48d2e175530e75a18a"
   },
-  "review_bundle": {
-    "format": 2,
-    "source_story": {
-      "path": "source-story.md",
-      "sha256": "d11dc4c92ccb76cefdd940185a13f7e68c935ed650e534feb310e63ad106d43a"
-    },
-    "definition": {
-      "format": 1,
-      "reviewer": "Codex /root/physical \u2014 independent Weather source analyst",
-      "source_sha256": "a9a672586ddd5d05a2b6b0fca3fcc7ef2ed7b0ed07d2bdcc42efbeebb65a311e",
-      "plan_sha256": "8193f5441521021b827c26326a1f6474ffabe4521b2ae41907ba6f34fca2bb4c",
-      "story_sha256": "d11dc4c92ccb76cefdd940185a13f7e68c935ed650e534feb310e63ad106d43a"
-    },
-    "plugin": "heinzel-weather",
-    "core_version": "0.9.56",
-    "inputs_sha256": "45ee56eac4ad7cd3734828541ad68c77cd91c8b30c78b28dfc1eaa30e53ef6bb",
-    "screenshots": [
-      {
-        "path": "docs/assets/screenshots/today-weather.png",
-        "surface": "ui",
-        "caption": "Current weather and the coming days on Today \u2014 fictional Berlin forecast"
-      },
-      {
-        "path": "docs/assets/screenshots/weather-detail.png",
-        "surface": "ui",
-        "caption": "Inspect conditions, feels-like temperature and rain chance \u2014 fictional local forecast"
-      },
-      {
-        "path": "docs/assets/screenshots/weather-page.png",
-        "surface": "ui",
-        "caption": "Explore current conditions, the hourly outlook and a warning \u2014 fictional Berlin forecast"
-      },
-      {
-        "path": "docs/assets/screenshots/phone-weather.png",
-        "surface": "ui",
-        "caption": "Weather and near forecast in the phone-sized Today view \u2014 fictional local forecast"
-      },
-      {
-        "path": "docs/assets/screenshots/cli-weather.png",
-        "surface": "cli",
-        "caption": "Hourly conditions and approaching rain through the real CLI \u2014 local fictional forecast"
-      },
-      {
-        "path": "docs/assets/screenshots/cli-forecast.png",
-        "surface": "cli",
-        "caption": "A concise three-day outlook through the real CLI \u2014 local fictional forecast"
-      }
-    ],
-    "images": {
-      "today-weather.png": "f8905f0bb0ac8bb3b10eb5bf8548aee04fb48001f6f17845c10304ff771e6774",
-      "weather-detail.png": "ac5d4ee5e29fc62d11aeeebe93e60a34d83eebeb885c19dcff8c73ca644fefa7",
-      "weather-page.png": "8212e5d1cd51e54e9064400adb00a1269f0b6a1593157d0e313950fa9b4e85df",
-      "phone-weather.png": "8ba0af173ef2e17188397e9de9b62ade66ee8985cec3f2c98e108c753fb14df3",
-      "cli-weather.png": "eb1886a03bc9df6073e9a7da851649adb57758ee400a35e32fdf7a8a423dbef6",
-      "cli-forecast.png": "811577dc84dfb847639f023dbf8dece1838289c990563a24d19d997703ebc430"
-    },
-    "transcripts": {
-      "today-weather.txt": "0b6a72ad02283618cf38a9b38b1c7a361f71cae96bb7ae719eea09346cb03d20",
-      "weather-detail.txt": "65bf8fab3e5434abe0d5d3705c1df4f860affe445b1caa290ca2137ac5d168c0",
-      "weather-page.txt": "de7f856c391b2a0af36cd5eb435df88de904ec4a05a4f4ac3e3580d422110c5c",
-      "phone-weather.txt": "37568c5cad9483565a55c7f55b0ba81b503ce21222ef6c10869f289d5b3ade7e",
-      "cli-weather.txt": "3f05ae33cc7b9d148fcd2936cfc5552851828356b778242c926944cac9c273d2",
-      "cli-forecast.txt": "255134c4ec599f16c24bc651422b862905b031c331dc90fdb01fb39adc3bb84c"
-    },
-    "bundle_sha256": "5b6cf77b07e54f70b2deee5937d0e4582d47f8f5556a9abc9bb4b8bd589cc401"
-  },
-  "privacy_review": {
-    "format": 1,
-    "bundle_sha256": "5b6cf77b07e54f70b2deee5937d0e4582d47f8f5556a9abc9bb4b8bd589cc401",
-    "reviewer": "Codex /root/weather_visual",
-    "decision": "approve",
-    "checked_images": [
-      "today-weather.png",
-      "weather-detail.png",
-      "weather-page.png",
-      "phone-weather.png",
-      "cli-weather.png",
-      "cli-forecast.png"
-    ],
-    "checks": {
-      "tokens_absent": true,
-      "personal_data_absent": true,
-      "feature_relevant": true,
-      "multiple_ui_scenes": true,
-      "captions_accurate": true
-    },
-    "findings": []
+  "transcripts": {
+    "today-weather.txt": "0f124405c64400cd25354d23197a8cb9355420abb80fbb56ae91f11eef81947e",
+    "weather-detail.txt": "c021cbc74ff82f2198257c46a9a4dc61f380fa35af8f784318b2500338770bac",
+    "weather-page.txt": "e943ebb0c6d028d5ecc23bc7c07267cb3c380e4b1d6d13fbdd98f56ee0024240",
+    "phone-weather.txt": "30af1197769fc3a2529ce22b8a1eb0e493a79c86d813c950b422a7f8876c907a",
+    "cli-weather.txt": "6a2fba007fcf1e2fc362a66bd59844d8aad7228ce5ef8352cab3c08edd3e6ee3",
+    "cli-forecast.txt": "2fc2ea8b6b92c9139b6d004e94a367066f8ed7e19ed9b41fd8fab01b13c3b647"
   }
 }

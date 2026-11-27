@@ -4,7 +4,7 @@ import tomllib
 
 import pytest
 from fastapi.testclient import TestClient
-from heinzel.heads import api
+from heinzel.heads import api, web
 from heinzel.kernel import user_config_dir
 
 from heinzel_weather import WeatherService, fake
@@ -82,7 +82,7 @@ def test_the_watch_job_is_advertised_to_the_daemon(hz):
     assert "weather:watch" in [job["job"] for job in jobs]
 
 
-def test_app_weather_items_are_discoverable_with_readable_status_and_controls(hz):
+def test_app_weather_items_are_discoverable_with_readable_status_and_controls(hz, hz_kernel):
     status = hz("system", "ui", "status", "--item", "weather:weather-now").json[0]
     widgets = hz("system", "ui", "widgets").json
     widget = next(item for item in widgets if item["id"] == "weather:weather-today")
@@ -111,8 +111,20 @@ def test_app_weather_items_are_discoverable_with_readable_status_and_controls(hz
     assert weather["title"] == "Weather"
     assert weather["settings"]["sections"] == ["weather"]
     assert weather["sidebar"] == {"kind": "navigate", "path": "/plugins/weather/forecast"}  # the page, not Settings
-    page = hz("system", "ui", "views").json
-    assert any(view["id"] == "weather:forecast" and view["source"]["path"] == "/weather/page" for view in page)
+    views = hz("system", "ui", "views").json
+    page = next(view for view in views if view["id"] == "weather:forecast")
+    assert page["problem"] is None, page["problem"]
+    assert page["plugin"] == "heinzel-weather"
+    assert page["route"] == weather["sidebar"]["path"]
+    assert page["source"]["method"] == "GET"
+    assert page["source"]["path"] == "/weather/page"
+    assert page["bundle"].startswith("/plugin-assets/weather/forecast/")
+    app = web.build(hz_kernel, port=8000, token="weather-test", static=None)
+    client = TestClient(app, base_url="http://127.0.0.1:8000")
+    bundle = client.get(page["bundle"])
+    assert bundle.status_code == 200
+    assert bundle.headers["content-type"].startswith("text/javascript")
+    assert bundle.content
     data = hz("weather", "page").json
     assert data["state"] == "ready"
     assert (len(data["report"]["hours"]), len(data["report"]["days"])) == (24, 7)

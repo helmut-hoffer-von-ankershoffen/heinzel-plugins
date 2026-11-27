@@ -102,6 +102,36 @@ def test_every_release_body_comes_from_the_changelog_notes():
             assert notes < run.index("--tag") and '> "$RUNNER_TEMP/release-notes.md"' in run, name
 
 
+def test_confidential_terms_are_scoped_to_real_gallery_and_policy_steps():
+    workflow = yaml.safe_load((ROOT / ".github/workflows/ci.yml").read_text())
+    jobs = workflow["jobs"]
+    real_steps = {
+        ("policy", "make policies"),
+        ("plugin", 'make check NAME="$PLUGIN" CORE="$CORE"'),
+    }
+    keys = {"CONFIDENTIAL_TERMS", "CONFIDENTIALITY_REQUIRED"}
+    scoped = {}
+    assert not keys.intersection(workflow.get("env", {}))
+    for name, job in jobs.items():
+        assert not keys.intersection(job.get("env", {}))
+        for step in job.get("steps", []):
+            env = step.get("env", {})
+            if keys.intersection(env):
+                scoped[name, step["run"]] = {key: env[key] for key in keys}
+    assert set(scoped) == real_steps
+    policy = scoped["policy", "make policies"]
+    assert policy["CONFIDENTIAL_TERMS"] == "${{ secrets.CONFIDENTIAL_TERMS }}"
+    assert "github.event.pull_request.head.repo.full_name == github.repository" in policy["CONFIDENTIALITY_REQUIRED"]
+    assert "github.actor != 'dependabot[bot]'" in policy["CONFIDENTIALITY_REQUIRED"]
+    assert all(env == policy for env in scoped.values())
+    gallery = jobs["gallery"]
+    assert all(not keys.intersection(step.get("env", {})) for step in gallery["steps"])
+    assert any(step.get("run") == 'make screenshots-render-check NAME="$PLUGIN"' for step in gallery["steps"])
+    assert "coverage-floor" in jobs["ok"]["needs"]
+    assert "gate-guard" in jobs["ok"]["needs"]
+    assert "sonar-ratings" in jobs["ok"]["needs"]
+
+
 @pytest.mark.parametrize("drift", ["none", "sha", "tag"])
 def test_automatic_release_guards_execute_against_checkout_and_build(drift):
     import os
@@ -132,3 +162,51 @@ def test_automatic_release_guards_execute_against_checkout_and_build(drift):
     assert (version.returncode == 0) == (drift == "none")
     for job in ("publish", "github-publish"):
         assert workflow["jobs"][job]["concurrency"]["group"] == "plugin-publication-${{ needs.build.outputs.tag }}"
+
+
+@pytest.mark.parametrize(
+    ("selected", "result", "passes"),
+    [
+        ("True", "success", True),
+        ("True", "skipped", False),
+        ("True", "failure", False),
+        ("True", "cancelled", False),
+        ("False", "skipped", True),
+        ("False", "success", True),
+        ("False", "failure", False),
+        ("", "success", False),
+        ("true", "success", False),
+    ],
+)
+def test_ci_ok_requires_executed_rendering_for_selected_plugins(selected, result, passes):
+    import os
+    import subprocess
+
+    jobs = yaml.safe_load((ROOT / ".github/workflows/ci.yml").read_text())["jobs"]
+    assert "gallery" in jobs["ok"]["needs"]
+    assert jobs["gallery"]["if"] == "needs.plan.outputs.selected == 'True'"
+    step = next(step for step in jobs["gallery"]["steps"] if "render-check" in step.get("run", ""))
+    assert "if" not in step  # A selected project with no plan must fail, not skip its execution.
+    assert step["env"] == {"PLUGIN": "${{ matrix.name }}"}
+    assert jobs["gallery"]["permissions"] == {"contents": "read"}
+    assert not any("upload-artifact" in step.get("uses", "") for step in jobs["gallery"]["steps"])
+    env = dict(
+        os.environ,
+        EVENT="pull_request",
+        POLICY="success",
+        PLAN="success",
+        PLUGIN="success",
+        COVERAGE="success",
+        FLOOR="success",
+        SCREENSHOTS="success",
+        SONAR="success",
+        GUARD="success",
+        GALLERY=result,
+        GALLERY_SELECTED=selected,
+    )
+    completed = subprocess.run(  # noqa: S603 -- execute the actual aggregate with synthetic statuses only
+        ["/bin/bash", "-e", "-c", jobs["ok"]["steps"][0]["run"]],
+        env=env,
+        capture_output=True,
+    )
+    assert (completed.returncode == 0) is passes

@@ -1,102 +1,22 @@
 {
-  "format": 1,
+  "format": 2,
   "plugin": "heinzel-resource",
-  "core_version": "0.9.42",
-  "inputs_sha256": "fa6a60ff72317ce51a1e14bdeaf2e72854c681048f724c9a02915661dd6fbe95",
+  "core_version": "0.9.56",
+  "inputs_sha256": "379a83172162eb01317f0949f3dcf2b63cd08b39244e9629f0fadae805ef3d72",
   "images": {
-    "docs/assets/screenshots/resources-pane.png": "d15c0820649ac81806dcf3aa01c566f3293517a7963f0ddbffefe2e1f92c155f",
-    "docs/assets/screenshots/today-resources.png": "7a1323661336f9d97eed689971204b40d98107f694b3c1f0ba55ade927fe9688",
-    "docs/assets/screenshots/phone-resources.png": "2765dc202d4ba4623c6be1be46f59996068975b37b7b60bc7678278327bcc150",
-    "docs/assets/screenshots/cli-resources.png": "3d8012cf0ff56ee191ad3c8616855bc514e3a6692621c7248f8a72b554a96073",
-    "docs/assets/screenshots/terminal-resources.png": "9ad9c39cf1b7f573247a01eb440852e50e7b37ca9e0623f26e4cb0bb60272f91",
-    "docs/assets/screenshots/terminal-resources-json.png": "6b54eaf4d3892e7b9d4a19297706d408a2a0f9baaf9204bc6098bfc4c3477edc"
+    "docs/assets/screenshots/resources-pane.png": "01fae1b4b0c065ba9847e31407c05c9a9b6747f32c1f2e7a9300648b4b03fef7",
+    "docs/assets/screenshots/today-resources.png": "e945b3845be843dae62789b58fa1d840a864e597033861304c6c7d1a9f033166",
+    "docs/assets/screenshots/phone-resources.png": "48c77f55a402c013f7855503912ff91ea6866cf1de111d90d8ccf60e508cb9dc",
+    "docs/assets/screenshots/cli-resources.png": "60b65752e5e124ec2dc2e1a9f06d4030c95477f2e44a11f7e587b393a2809262",
+    "docs/assets/screenshots/terminal-resources.png": "ca8fad9613de080e516c24c92d3afd096d65e7bf1799a7ba3cfc006ecf6b6503",
+    "docs/assets/screenshots/terminal-resources-json.png": "e72d0773dc1e14d73e25fb5812f33e2a52bb08d423ff8c48ab4816cd6dd0aba3"
   },
-  "review_bundle": {
-    "format": 2,
-    "source_story": {
-      "path": "source-story.md",
-      "sha256": "dfe702951b9671b81af7aceeb938a90ca1c6e5b4aec4724d5a07427db794864b"
-    },
-    "definition": {
-      "format": 1,
-      "reviewer": "story-confirm-sonnet",
-      "source_sha256": "263100c67ea93b4397da3bf7be6566dccba2fcd7d397bd7b69550bf6e4b5db6d",
-      "plan_sha256": "9b38b6511c80349092e39d17c5dc81a84501935e568267c8df18b45ee3fd2db4",
-      "story_sha256": "dfe702951b9671b81af7aceeb938a90ca1c6e5b4aec4724d5a07427db794864b"
-    },
-    "plugin": "heinzel-resource",
-    "core_version": "0.9.42",
-    "inputs_sha256": "fa6a60ff72317ce51a1e14bdeaf2e72854c681048f724c9a02915661dd6fbe95",
-    "screenshots": [
-      {
-        "path": "docs/assets/screenshots/resources-pane.png",
-        "surface": "ui",
-        "caption": "Host, CPU, memory and one-minute load in the expanded monitor \u2014 fictional demo workstation"
-      },
-      {
-        "path": "docs/assets/screenshots/today-resources.png",
-        "surface": "ui",
-        "caption": "A quick CPU summary on Today \u2014 demonstration values"
-      },
-      {
-        "path": "docs/assets/screenshots/phone-resources.png",
-        "surface": "ui",
-        "caption": "Read host, CPU, memory and load on a phone \u2014 fictional demo workstation"
-      },
-      {
-        "path": "docs/assets/screenshots/cli-resources.png",
-        "surface": "cli",
-        "caption": "The same fictional CPU, memory and raw load measurements in the CLI"
-      },
-      {
-        "path": "docs/assets/screenshots/terminal-resources.png",
-        "surface": "ui",
-        "caption": "Check CPU, memory, raw load and core count in the app terminal \u2014 fictional demo-workstation values"
-      },
-      {
-        "path": "docs/assets/screenshots/terminal-resources-json.png",
-        "surface": "ui",
-        "caption": "Inspect the structured resource sample for automation in the app terminal \u2014 fictional demo-workstation data"
-      }
-    ],
-    "images": {
-      "resources-pane.png": "d15c0820649ac81806dcf3aa01c566f3293517a7963f0ddbffefe2e1f92c155f",
-      "today-resources.png": "7a1323661336f9d97eed689971204b40d98107f694b3c1f0ba55ade927fe9688",
-      "phone-resources.png": "2765dc202d4ba4623c6be1be46f59996068975b37b7b60bc7678278327bcc150",
-      "cli-resources.png": "3d8012cf0ff56ee191ad3c8616855bc514e3a6692621c7248f8a72b554a96073",
-      "terminal-resources.png": "9ad9c39cf1b7f573247a01eb440852e50e7b37ca9e0623f26e4cb0bb60272f91",
-      "terminal-resources-json.png": "6b54eaf4d3892e7b9d4a19297706d408a2a0f9baaf9204bc6098bfc4c3477edc"
-    },
-    "transcripts": {
-      "resources-pane.txt": "d89022bbcbd0ce154a271f7f8cabf7a6d0707a21e74e303d3206fb55ece30ec8",
-      "today-resources.txt": "ede07a668b6180b00e5273e08fd69e96addbe83b731913fa4075301fb6f348e2",
-      "phone-resources.txt": "a1d462b23ca71376d2c9645301abbd21bb16ee7e68fe0212e6246c0466829536",
-      "cli-resources.txt": "ddef8a589eb34e18d3fd06ab545c884ebcc82923f5270bb88a6fcfc2ae8272a7",
-      "terminal-resources.txt": "11710047df8701cf74eece471ee09226a0473f3aa4dcc778daf4ac8b0c9ba195",
-      "terminal-resources-json.txt": "5a4ef792762f1212d3eff2b72069c4b50485d39569b7a5f01fd5e4f7bc51bc3a"
-    },
-    "bundle_sha256": "a571854da0acf7212ae15eb3d9bc076ea4b32c0074ffddeb2b002685e391888e"
-  },
-  "privacy_review": {
-    "format": 1,
-    "bundle_sha256": "a571854da0acf7212ae15eb3d9bc076ea4b32c0074ffddeb2b002685e391888e",
-    "reviewer": "privacy-review-opus",
-    "decision": "approve",
-    "checked_images": [
-      "resources-pane.png",
-      "today-resources.png",
-      "phone-resources.png",
-      "cli-resources.png",
-      "terminal-resources.png",
-      "terminal-resources-json.png"
-    ],
-    "checks": {
-      "tokens_absent": true,
-      "personal_data_absent": true,
-      "feature_relevant": true,
-      "multiple_ui_scenes": true,
-      "captions_accurate": true
-    },
-    "findings": []
+  "transcripts": {
+    "resources-pane.txt": "33c840175569e1254a8f4ab8eec25e803ca77291516779781edac71bb4f57e46",
+    "today-resources.txt": "0f3d0a96467e718f1e2d16b1e4d162c0eb1f783924d3608e263d201a0ffb79be",
+    "phone-resources.txt": "37797d86ad07e4600397bda007635d4ca8f39ba9a0d4a83d4847955a26a9783e",
+    "cli-resources.txt": "ddef8a589eb34e18d3fd06ab545c884ebcc82923f5270bb88a6fcfc2ae8272a7",
+    "terminal-resources.txt": "a3eaab861932f6091ff8cc0b0fdc16a00d509ee8add1c32c01195e6ce483ec6b",
+    "terminal-resources-json.txt": "e44b877b64162107b994960ef6acefab1182d938971b27359f3ed99cf893b5e3"
   }
 }

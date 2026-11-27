@@ -2,7 +2,7 @@
 
 From the collection root, run `make screenshots NAME=heinzel-zoom OPEN=1`.
 Review the [contact sheet](assets/screenshots/index.html) before committing.
-The [scene plan](screenshots.toml) describes the real UI and CLI captures.
+The [definition](screenshot-definition.json) describes the real UI and CLI captures.
 `make screenshots-check NAME=heinzel-zoom` verifies freshness offline.
 
 Captures use a temporary fictional profile without connected accounts. The generated

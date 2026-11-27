@@ -1,6 +1,6 @@
 [project]
 name = "heinzel-slack"
-version = "0.3.1"
+version = "0.3.2"
 description = "Slack for Heinzelmännchen: notices, exact-draft approvals and questions in your own DM, and the chat capability."
 readme = "README.md"
 license = "MIT"
@@ -67,14 +67,19 @@ highlights = [
 ]
 
 [[tool.heinzel.catalog.screenshots]]
-path = "docs/assets/screenshots/review-slack-notice.png"
+path = "docs/assets/screenshots/slack-settings.png"
 surface = "ui"
-caption = "Demo data: Mira reviews the fictional Slack account, destination, scope and complete weekly-report notice before delivery."
+caption = "Slack settings for a fictional member and workspace, including how long a draft can wait for a decision."
+
+[[tool.heinzel.catalog.screenshots]]
+path = "docs/assets/screenshots/slack-notification-settings.png"
+surface = "ui"
+caption = "Heinzel offers to send notices and questions through Slack direct messages when the Slack chat capability is selected."
 
 [[tool.heinzel.catalog.screenshots]]
 path = "docs/assets/screenshots/slack-notice-delivered.png"
-surface = "ui"
-caption = "Demo data: after Confirm, Core's chat reports that the channel delivered the fictional notice; this does not approve a captured write."
+surface = "cli"
+caption = "A fixture verifies one fictional Slack delivery through Core's confirmation API and checks refusal of unauthenticated and repeated attempts."
 
 [[tool.heinzel.catalog.screenshots]]
 path = "docs/assets/screenshots/slack-draft-cli.png"

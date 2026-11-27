@@ -1,7 +1,118 @@
 {
   "format": 1,
-  "reviewer": "luna_release_checklist",
-  "source_sha256": "3b3f9817c497b535bccc38e22adc3b43ff158a5016126e36c9cef89ebab1282e",
-  "plan_sha256": "f2a58ec909269319a7cb5f298dd7237efd9a3295e65c6d4a5610907bdca945c7",
-  "story_sha256": "7fcc0377937584718582bee6fa8b41b89cc432cf040dbba4bf3c387cc91558c3"
+  "bootstrap": "docs/screenshot_fixture.py",
+  "scenes": [
+    {
+      "name": "google-connector",
+      "surface": "ui",
+      "route": "/?settings=connectors",
+      "appearance": "dark",
+      "caption": "Heinzel's Connectors settings show Google selected for documents, calendar and mail in the fictional demonstration profile.",
+      "timeout_ms": 30000,
+      "viewport": {
+        "width": 1280,
+        "height": 900
+      },
+      "steps": [
+        {
+          "action": "hover",
+          "role": "button",
+          "name_regex": "^Google .*Connects: .*calendar",
+          "within_role": "dialog"
+        }
+      ],
+      "focus": {
+        "role": "button",
+        "name_regex": "^Google .*Connects: .*calendar"
+      }
+    },
+    {
+      "name": "google-calendar-week",
+      "surface": "cli",
+      "caption": "The real Google Calendar adapter lists fictional meetings for a fixed week through a documentation-only command.",
+      "command": ["showcase", "week"]
+    },
+    {
+      "name": "google-source-review",
+      "surface": "ui",
+      "route": "/",
+      "appearance": "dark",
+      "caption": "Inspect a fictional selected-source identity as the Google source review panel shows it.",
+      "timeout_ms": 30000,
+      "viewport": {
+        "width": 1280,
+        "height": 900
+      },
+      "steps": [
+        {
+          "action": "click",
+          "role": "button",
+          "name": "Google source review"
+        },
+        {
+          "action": "wait",
+          "role": "heading",
+          "name": "Google source review"
+        },
+        {
+          "action": "wait",
+          "text": "Direct native executable."
+        }
+      ]
+    },
+    {
+      "name": "launch-files-json",
+      "surface": "cli",
+      "caption": "Inspect a fixed three-day launch-file query as structured data — actual Google operation, fictional Workspace replies and demonstration clock.",
+      "command": [
+        "google",
+        "files",
+        "--days",
+        "3",
+        "--name",
+        "Launch",
+        "--json"
+      ]
+    },
+    {
+      "name": "launch-files-week",
+      "surface": "cli",
+      "caption": "Try a fixed seven-day file query — fictional replies and demonstration clock illustrate invocation, not verified server-side filtering.",
+      "command": [
+        "google",
+        "files",
+        "--days",
+        "7"
+      ]
+    },
+    {
+      "name": "launch-plan",
+      "surface": "cli",
+      "caption": "Read a fictional Google Doc through the real adapter; this showcase command exists only in the documentation fixture.",
+      "command": [
+        "showcase",
+        "notes",
+        "launch-plan"
+      ]
+    },
+    {
+      "name": "launch-metrics",
+      "surface": "cli",
+      "caption": "Read a fictional Sheet through the real adapter; this showcase command exists only in the documentation fixture.",
+      "command": [
+        "showcase",
+        "notes",
+        "launch-metrics"
+      ]
+    },
+    {
+      "name": "mail-content",
+      "surface": "cli",
+      "caption": "Read a fictional message through the real Gmail adapter; this showcase command exists only in the documentation fixture.",
+      "command": [
+        "showcase",
+        "message-content"
+      ]
+    }
+  ]
 }

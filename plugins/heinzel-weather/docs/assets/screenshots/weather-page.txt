@@ -12,7 +12,7 @@ Mira
 · EM
 Weather in
 Berlin, DE
-Thunderstorm warning · until 02:00 · Example Weather Service
+Thunderstorm warning · until 18:00 · Example Weather Service
 
 22°
 °C
@@ -34,95 +34,95 @@ Now
 22°
 10%
 10% chance of rain
-21:00
+13:00
 20°
 80%
 80% chance of rain
-22:00
+14:00
 18°
 80%
 80% chance of rain
-23:00
+15:00
 17°
 80%
 80% chance of rain
-00:00
+16:00
 15°
 80%
 80% chance of rain
-01:00
-14°
-10%
-10% chance of rain
-02:00
-12°
-10%
-10% chance of rain
-03:00
-14°
-10%
-10% chance of rain
-04:00
-15°
-10%
-10% chance of rain
-05:00
-16°
-10%
-10% chance of rain
-06:00
-12°
-10%
-10% chance of rain
-07:00
-13°
-10%
-10% chance of rain
-08:00
-14°
-10%
-10% chance of rain
-09:00
-15°
-10%
-10% chance of rain
-10:00
-16°
-10%
-10% chance of rain
-11:00
-12°
-10%
-10% chance of rain
-12:00
-13°
-10%
-10% chance of rain
-13:00
-14°
-10%
-10% chance of rain
-14:00
-15°
-10%
-10% chance of rain
-15:00
-16°
-10%
-10% chance of rain
-16:00
-12°
-10%
-10% chance of rain
 17:00
-13°
+14°
 10%
 10% chance of rain
 18:00
-14°
+12°
 10%
 10% chance of rain
 19:00
+14°
+10%
+10% chance of rain
+20:00
+15°
+10%
+10% chance of rain
+21:00
+16°
+10%
+10% chance of rain
+22:00
+12°
+10%
+10% chance of rain
+23:00
+13°
+10%
+10% chance of rain
+00:00
+14°
+10%
+10% chance of rain
+01:00
+15°
+10%
+10% chance of rain
+02:00
+16°
+10%
+10% chance of rain
+03:00
+12°
+10%
+10% chance of rain
+04:00
+13°
+10%
+10% chance of rain
+05:00
+14°
+10%
+10% chance of rain
+06:00
+15°
+10%
+10% chance of rain
+07:00
+16°
+10%
+10% chance of rain
+08:00
+12°
+10%
+10% chance of rain
+09:00
+13°
+10%
+10% chance of rain
+10:00
+14°
+10%
+10% chance of rain
+11:00
 15°
 10%
 10% chance of rain
@@ -139,85 +139,44 @@ Tomorrow
 10% chance of rain
 10°
 19°
-Sunday
+Tuesday
 , moderate rain
 80%
 80% chance of rain
 9°
 18°
-Monday
+Wednesday
 , clear sky
 10%
 10% chance of rain
 12°
 21°
-Tuesday
+Thursday
 , clear sky
 10%
 10% chance of rain
 13°
 24°
-Wednesday
+Friday
 , broken clouds
 10%
 10% chance of rain
 13°
 22°
-Thursday
+Saturday
 , moderate rain
 80%
 80% chance of rain
 12°
 24°
 
-Updated 20:07
+Updated 12:00
 
 v0.9.56
-Updates available, off
+Updates, off
 0
 System health, warning
 ?
 22°C Berlin, DE, off
 Daemon not installed, off
-Meet your first Heinzelmännchen
-
-Click a part of the figure to change it, or use the list.
-
-What do you call it?
-
-A suggestion: type your own, or let Surprise me pick.
-
-Surprise me
-Undo
-
-Everything you can change
-Hat
-Follow theme
-Age
-Grown
-Beard
-Age default
-Shirt
-Follow theme
-Build
-Regular
-Accessories
-None
-Hat
-Its mission
-Your day (Recommended)
-I am your day's assistant. I keep your day in order.
-Your reading
-I am your reading helper. I keep what you want to read in one place.
-Your projects
-I am your project helper. I keep track of what comes next.
-
-“I keep your day in order. I draft, you approve.”
-
-For now the mission is only shown here, not saved. Nothing runs on its own.
-
-Start
-
-You can change the name and look any time.
-
 Audio

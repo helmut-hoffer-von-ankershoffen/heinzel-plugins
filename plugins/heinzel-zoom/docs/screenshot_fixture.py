@@ -1,9 +1,15 @@
-"""Read fictional summary emails through the real Zoom adapter in a documentation-only requester."""
+"""Read fictional summary emails through the real Zoom adapter.
 
-import sys
+The mailbox and requester belong to this plugin's documentation, not its shipped wheel.
+The mailbox reuses the actual installed Zoom origin only in this isolated demonstration.
+"""
+
 import os
-from pathlib import Path
+import sys
 from datetime import UTC, datetime
+from pathlib import Path
+
+from packaging.utils import canonicalize_name
 
 from heinzel import (
     HeinzelError,
@@ -173,8 +179,18 @@ data = {
 }
 configuration = Config(files=configuration.files, data=data)
 records, errors = discover()
-origin = Origin("heinzel-documentation-fixture", "1.0.0", builtin=False)
-records.extend([ModuleRecord("inbox", inbox, origin), ModuleRecord("showcase", showcase, origin)])
+# The documentation mailbox is not shipped in the wheel; its owner is this installed Zoom project.
+origins = {
+    record.origin
+    for record in records
+    if not record.origin.builtin and canonicalize_name(record.origin.distribution) == "heinzel-zoom"
+}
+if len(origins) != 1:
+    raise ValueError("The documentation mailbox needs one unambiguous installed Zoom origin")
+origin = origins.pop()
+records.append(ModuleRecord("inbox", inbox, origin))
+if sys.argv[1:2] == ["showcase"]:
+    records.append(ModuleRecord("showcase", showcase, Origin("heinzel-documentation-fixture", "1.0.0", builtin=False)))
 kernel = Kernel(configuration.settings(Settings, "hz"), records, errors, configuration)
 sys.argv = ["hz", *sys.argv[1:]]
 build(kernel)()

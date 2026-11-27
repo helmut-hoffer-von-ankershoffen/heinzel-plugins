@@ -1,93 +1,20 @@
 {
-  "format": 1,
+  "format": 2,
   "plugin": "heinzel-tailscale",
-  "core_version": "0.9.55",
-  "inputs_sha256": "8bf0167e90babd715173138ae3d68de64df208dc4bdf27a281ebc2d116378b50",
+  "core_version": "0.9.56",
+  "inputs_sha256": "f2f3bb1b6b47eca6ee6b56743053fda4b59870887cf1a30bf1b48476ba563d65",
   "images": {
-    "docs/assets/screenshots/sharing-existing-private.png": "530e6e14cca0da6a7f56c586678b87cc3b2d67cd98335beb30e942ca4d9f4598",
-    "docs/assets/screenshots/sharing-ready.png": "609a339166fd09acc64002f9529f869ebb0e3861987ba3bf94633eb515825b4e",
-    "docs/assets/screenshots/sharing-request-cli.png": "9fe7c1054b84b2a04ad8647bcc1ee395591e3a9c33a19c566d366837a5e0e04f",
-    "docs/assets/screenshots/sharing-off.png": "398daf92c44530dd18052d5916f0e7a34d1d1dc6161ed8a2a31f606c928ec6ac",
-    "docs/assets/screenshots/sharing-off-cli.png": "592011836c508fac6809305cbc29752484a4be2cc32546e31dffbc369ee0c774"
+    "docs/assets/screenshots/sharing-existing-private.png": "4e27238cea3a206b1833b7ebc49aa8e6dfcd6821c9208cddeb71098293d5fe70",
+    "docs/assets/screenshots/sharing-ready.png": "7d9d12d0402ae4667fcd272081736c8d7b21b86128857fa8d12b06b28ea95034",
+    "docs/assets/screenshots/sharing-request-cli.png": "f734cd02c4b7b74d9ad129da4a0a12a3d32b55a0128b70c7058d73444703100e",
+    "docs/assets/screenshots/sharing-off.png": "fe29397d9128ef60bfaa5732c69b240a7566855f2d247630c3eb65a849f2aa1a",
+    "docs/assets/screenshots/sharing-off-cli.png": "a8eb54c75a6c6d6f2dbe641151bb8a80071fbfbb302b8005a44148f99e610aaf"
   },
-  "review_bundle": {
-    "format": 2,
-    "source_story": {
-      "path": "source-story.md",
-      "sha256": "bdae4512d3814101d888119121303c4910e0c54dcda29f8deda9317447ec1957"
-    },
-    "definition": {
-      "format": 1,
-      "reviewer": "protected_final_reviewer",
-      "source_sha256": "7cc8e028cc952e61c2e4ca3ea3e4b0ff44cc303e56fc43826a97bb14c25fcd99",
-      "plan_sha256": "fe653365717c283e9f71b574eabd1d918a9c0d9b64581f12841ead1aabb599cb",
-      "story_sha256": "bdae4512d3814101d888119121303c4910e0c54dcda29f8deda9317447ec1957"
-    },
-    "plugin": "heinzel-tailscale",
-    "core_version": "0.9.55",
-    "inputs_sha256": "8bf0167e90babd715173138ae3d68de64df208dc4bdf27a281ebc2d116378b50",
-    "screenshots": [
-      {
-        "path": "docs/assets/screenshots/sharing-existing-private.png",
-        "surface": "ui",
-        "caption": "An existing private route to this Heinzel is ready to adopt \u2014 fictional local Tailscale demo"
-      },
-      {
-        "path": "docs/assets/screenshots/sharing-ready.png",
-        "surface": "ui",
-        "caption": "One switch adopts the existing private route, then shows Copy link and Open (fictional demo); the capture tool hides the share link as [authentication link hidden]"
-      },
-      {
-        "path": "docs/assets/screenshots/sharing-request-cli.png",
-        "surface": "cli",
-        "caption": "Then hz tailscale status --json: mapped to the web app port; the CLI cannot see the web listener, so it says apply-required \u2014 fictional demo"
-      },
-      {
-        "path": "docs/assets/screenshots/sharing-off.png",
-        "surface": "ui",
-        "caption": "Turn private sharing off explicitly \u2014 fictional local Tailscale demo"
-      },
-      {
-        "path": "docs/assets/screenshots/sharing-off-cli.png",
-        "surface": "cli",
-        "caption": "Then hz tailscale status --json after switching off: not mapped; the target shows the default port 8737 \u2014 fictional local Tailscale demo"
-      }
-    ],
-    "images": {
-      "sharing-existing-private.png": "530e6e14cca0da6a7f56c586678b87cc3b2d67cd98335beb30e942ca4d9f4598",
-      "sharing-ready.png": "609a339166fd09acc64002f9529f869ebb0e3861987ba3bf94633eb515825b4e",
-      "sharing-request-cli.png": "9fe7c1054b84b2a04ad8647bcc1ee395591e3a9c33a19c566d366837a5e0e04f",
-      "sharing-off.png": "398daf92c44530dd18052d5916f0e7a34d1d1dc6161ed8a2a31f606c928ec6ac",
-      "sharing-off-cli.png": "592011836c508fac6809305cbc29752484a4be2cc32546e31dffbc369ee0c774"
-    },
-    "transcripts": {
-      "sharing-existing-private.txt": "aef2fc50bc5eb1e775619e0719b1af1eacea61e6da6cc8779ad5fdaf17bbf532",
-      "sharing-ready.txt": "7e37890ce6a5626e3cae991ef731270002e6416fed8d0db52ee56e7f2fad0067",
-      "sharing-request-cli.txt": "e0e9d995c7fcbed6c96c66b4012cc53b1d5eedbf674b23a7ed8c02c0660cff61",
-      "sharing-off.txt": "04b937cbd5c92b32bc29fd2b67c3cf0e1130722a3d2e8c895086c673f2da2d33",
-      "sharing-off-cli.txt": "cf49c8bdefcb23c7b464e229ae6e18bbd8f639abb0121bf570e3e30b631fc8b0"
-    },
-    "bundle_sha256": "c057d49205369660b1095c0adb3754aacb453f56ad609c50bb6590e1c8ceb6fc"
-  },
-  "privacy_review": {
-    "format": 1,
-    "bundle_sha256": "c057d49205369660b1095c0adb3754aacb453f56ad609c50bb6590e1c8ceb6fc",
-    "reviewer": "protected_final_reviewer",
-    "decision": "approve",
-    "checked_images": [
-      "sharing-existing-private.png",
-      "sharing-off-cli.png",
-      "sharing-off.png",
-      "sharing-ready.png",
-      "sharing-request-cli.png"
-    ],
-    "checks": {
-      "tokens_absent": true,
-      "personal_data_absent": true,
-      "feature_relevant": true,
-      "multiple_ui_scenes": true,
-      "captions_accurate": true
-    },
-    "findings": []
+  "transcripts": {
+    "sharing-existing-private.txt": "cd0c5f0b31141adb32d5b2c45c0c3fd302741577113a9db1074006495f828c47",
+    "sharing-ready.txt": "aabc11728b8aa0c28ff6eee8927eccf58e64434806e320f08e4710518f92f03f",
+    "sharing-request-cli.txt": "94137e54e37a1d63cafcc8c9ed58e5065157f597b607c78fda7b214adf5a6f8f",
+    "sharing-off.txt": "fbc7f10368456fe42e4c5f1fe48ce1f771833efe421461a68a3ffc7e166e931a",
+    "sharing-off-cli.txt": "cf49c8bdefcb23c7b464e229ae6e18bbd8f639abb0121bf570e3e30b631fc8b0"
   }
 }

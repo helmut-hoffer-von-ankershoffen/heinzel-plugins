@@ -7,12 +7,9 @@ Zones at work now
 
 2/3
 
-Ask about it
-
 Nothing needs you right now. Ask anything below.
 
 Page
-Chat
 World clock
 World clock
 
@@ -29,7 +26,8 @@ Los Angeles
 Starts in 30m · 2d 14h 30m since end
 08:30:00
 Edit time zones
-v0.9.42
+v0.9.56
+Updates, off
 System health, warning
 ?
 16:30:00

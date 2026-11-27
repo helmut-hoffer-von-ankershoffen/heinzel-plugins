@@ -16,7 +16,7 @@ Today
 Notifications
 1 unread
 Example is ready
-02:01
+20:44
 All notifications
 Example is ready
 Open
@@ -24,16 +24,13 @@ Example value
 
 42
 
-Ask about it
-v0.9.42
+v0.9.56
 Updates, off
 0
 System health, warning
 ?
 Example: 42, off
 Daemon not installed, off
-Chat
-Example
 Example
 
 42

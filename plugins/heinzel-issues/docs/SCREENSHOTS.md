@@ -2,7 +2,7 @@
 
 From the collection root, run `make screenshots NAME=heinzel-issues OPEN=1`.
 Review the [contact sheet](assets/screenshots/index.html) before committing.
-The [scene plan](screenshots.toml) describes the real UI and CLI captures.
+The [definition](screenshot-definition.json) describes the real UI and CLI captures.
 `make screenshots-check NAME=heinzel-issues` verifies freshness offline.
 
 Captures use a temporary fictional profile without connected accounts and an in-memory tracker with three

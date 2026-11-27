@@ -13,54 +13,13 @@ Today
 
 Nothing needs you right now. Ask anything below.
 
-v0.9.55
+v0.9.56
 Updates, off
 0
 System health, warning
 ?
 Tailscale, off
 Daemon not installed, off
-Meet your first Heinzelmännchen
-
-Click a part of the figure to change it, or use the list.
-
-What do you call it?
-
-A suggestion: type your own, or let Surprise me pick.
-
-Surprise me
-Undo
-
-Everything you can change
-Hat
-Follow theme
-Age
-Grown
-Beard
-Age default
-Shirt
-Follow theme
-Build
-Regular
-Accessories
-None
-Hat
-Its mission
-Your day (Recommended)
-I am your day's assistant. I keep your day in order.
-Your reading
-I am your reading helper. I keep what you want to read in one place.
-Your projects
-I am your project helper. I keep track of what comes next.
-
-“I keep your day in order. I draft, you approve.”
-
-For now the mission is only shown here, not saved. Nothing runs on its own.
-
-Start
-
-You can change the name and look any time.
-
 Audio
 
 Tailscale

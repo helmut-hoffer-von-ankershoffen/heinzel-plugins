@@ -54,14 +54,10 @@ All contracts
 Meeting notes
 me:meeting-notes
 by hand only
-v0.9.42
+v0.9.56
 Updates, off
 0
 System health, warning
 ?
 Daemon not installed, off
-Chat
-New chat
-Your message
-Default
 Audio

@@ -44,7 +44,11 @@ os.environ["HZ_HEINZEL__USER_DIR"] = str(contract_folder)
 def launch(requester, runner_type, runner):
     configuration = Config.load()
     records, errors = discover()
-    records.append(ModuleRecord("showcase", requester, Origin("heinzel-documentation-fixture", "1.0.0", builtin=False)))
+    # CLI helpers are not installed distributions and must not enter the UI inventory.
+    if sys.argv[1:2] == ["showcase"]:
+        records.append(
+            ModuleRecord("showcase", requester, Origin("heinzel-documentation-fixture", "1.0.0", builtin=False))
+        )
     kernel = Kernel(configuration.settings(Settings, "hz"), records, errors, configuration)
     kernel.bind(runner_type, runner)
     sys.argv = ["hz", *sys.argv[1:]]

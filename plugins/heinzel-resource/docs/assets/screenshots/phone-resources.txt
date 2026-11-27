@@ -6,13 +6,9 @@ Computer resources
 
 CPU 36%
 
-Ask about it
-
 Nothing needs you right now. Ask anything below.
 
-Page
-Chat
-v0.9.42
+v0.9.56
 Updates, off
 0
 System health, warning

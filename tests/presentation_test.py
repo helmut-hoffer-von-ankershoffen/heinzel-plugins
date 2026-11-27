@@ -11,7 +11,7 @@ from types import SimpleNamespace
 import pytest
 
 from heinzel_plugin_tools import _presentation as presentation
-from heinzel_plugin_tools import capture
+from heinzel_plugin_tools import capture, capture_host
 from heinzel_plugin_tools.privacy import CaptureError
 
 pytestmark = pytest.mark.unit
@@ -110,9 +110,14 @@ def test_group_writable_environment_is_not_a_redaction_authority(environment):
 class TextPage:
     """Execute the real presentation JavaScript against text-node fixtures, never manufactured product UI."""
 
+    url = "http://127.0.0.1:8123/doctor"
+
     def __init__(self, texts):
         self.texts = texts
         self.saved = False
+
+    def title(self):
+        return "Heinzel"
 
     def evaluate(self, script, argument):
         node = shutil.which("node")
@@ -137,6 +142,7 @@ class TextPage:
         self.saved = True
 
 
+@pytest.mark.usefixtures("fictional_capture_terms")
 def test_only_exact_owning_path_text_changes_and_all_doctor_rows_statuses_and_details_remain(environment, tmp_path):
     root, interpreter = environment
     identity = presentation.owning_prefix(root, interpreter)
@@ -257,3 +263,131 @@ def test_verified_hostname_change_invalidates_environment_evidence(environment, 
     monkeypatch.setattr(presentation.socket, "gethostname", lambda: "changed-host")
     with pytest.raises(CaptureError, match="changed"):
         identity.verify()
+
+
+@pytest.fixture
+def capture_before_browser(monkeypatch):
+    """These prefix lifecycle checks must stop before any browser work."""
+
+    def unexpected_browser():
+        pytest.fail("The prefix lifecycle check started a browser")
+
+    monkeypatch.setitem(
+        sys.modules, "playwright.sync_api", SimpleNamespace(Error=RuntimeError, sync_playwright=unexpected_browser)
+    )
+    monkeypatch.setitem(sys.modules, "rich.console", SimpleNamespace(Console=unexpected_browser))
+    monkeypatch.setitem(sys.modules, "rich.terminal_theme", SimpleNamespace(MONOKAI=None))
+    monkeypatch.setitem(sys.modules, "rich.text", SimpleNamespace(Text=unexpected_browser))
+
+
+@pytest.mark.parametrize("external", [False, True])
+@pytest.mark.parametrize("tamper", [False, True, "attestation-failure"])
+@pytest.mark.usefixtures("capture_before_browser")
+def test_capture_attests_after_wheel_config_replacement_and_restores(environment, monkeypatch, external, tamper):
+    root, interpreter = environment
+    events = []
+    identities = []
+    run = subprocess.run
+    attest = capture.owning_prefix
+    config = root / ".venv/pyvenv.cfg"
+    original = config.read_bytes()
+    reviewed_digest = "a" * 64
+
+    def replace_config():
+        replacement = config.with_suffix(".replacement")
+        replacement.write_bytes(original)
+        replacement.replace(config)
+
+    def command(args, **kwargs):
+        if args[0] != "uv":
+            return run(args, **kwargs)
+        if args[1] == "build":
+            events.append("build")
+            (Path(args[args.index("-o") + 1]) / "fictional.whl").touch()
+        elif "--reinstall" in args:
+            events.append("install")
+            replace_config()
+        elif "--editable" in args:
+            events.append("restore")
+        else:
+            events.append("setup")
+        return SimpleNamespace(returncode=0)
+
+    def identity(*args):
+        events.append("attest")
+        if tamper == "attestation-failure":
+            raise CaptureError("attestation refused")
+        result = attest(*args)
+        identities.append(result)
+        if tamper:
+            replace_config()
+        return result
+
+    class StopBeforeBackend(Exception):
+        pass
+
+    def demo(*args):
+        events.append("demo")
+        if identities:
+            identities[0].verify()
+        raise StopBeforeBackend
+
+    def authorize(candidate_root, plan, selected_python, digest):
+        assert candidate_root == root
+        assert plan == {"scenes": []}
+        assert selected_python == interpreter
+        assert digest == reviewed_digest
+        events.append("authorize")
+
+    monkeypatch.setattr(capture, "read_plan", lambda *_: {"scenes": []})
+    monkeypatch.setattr(capture, "project_data", lambda *_: {"project": {"name": "fictional"}})
+    monkeypatch.setattr(capture, "prepared_version", lambda *_: "0.0.0")
+    monkeypatch.setattr(capture.subprocess, "run", command)
+    monkeypatch.setattr(capture, "owning_prefix", identity)
+    monkeypatch.setattr(capture, "demo_environment", demo)
+    monkeypatch.setattr(capture_host, "require_approval", authorize)
+    failure = CaptureError if tamper and not external else StopBeforeBackend
+    with pytest.raises(failure):
+        capture.capture(
+            root,
+            core=None,
+            headed=False,
+            prepared_python=interpreter if external else None,
+            prepared_approval=reviewed_digest if external else None,
+        )
+    expected = ["setup", "build", "install", "attest"]
+    if tamper != "attestation-failure":
+        expected.append("demo")
+    assert events == (["authorize", "demo"] if external else [*expected, "restore"])
+
+
+@pytest.mark.parametrize("unsafe", ["root-alias", "bin-alias", "config-alias", "writable", "foreign-python"])
+@pytest.mark.usefixtures("capture_before_browser")
+def test_capture_refuses_unsafe_existing_environment_before_setup(environment, monkeypatch, unsafe):
+    root, interpreter = environment
+    if unsafe == "writable":
+        (root / ".venv").chmod(0o775)
+    elif unsafe == "foreign-python":
+        other = root / "other"
+        subprocess.run([sys.executable, "-m", "venv", "--without-pip", str(other)], check=True, timeout=30)  # noqa: S603 - disposable test venv
+        interpreter.unlink()
+        interpreter.symlink_to(other / "bin/python")
+    else:
+        path = {
+            "root-alias": root / ".venv",
+            "bin-alias": interpreter.parent,
+            "config-alias": root / ".venv/pyvenv.cfg",
+        }[unsafe]
+        target = path.with_name(path.name + "-original")
+        path.rename(target)
+        path.symlink_to(target, target_is_directory=target.is_dir())
+
+    def forbidden(*args, **kwargs):
+        pytest.fail("unsafe existing environment reached execution or attestation")
+
+    monkeypatch.setattr(capture, "read_plan", lambda *_: {"scenes": []})
+    monkeypatch.setattr(capture, "project_data", lambda *_: {"project": {"name": "fictional"}})
+    monkeypatch.setattr(capture.subprocess, "run", forbidden)
+    monkeypatch.setattr(capture, "owning_prefix", forbidden)
+    with pytest.raises(CaptureError):
+        capture.capture(root, core=None, headed=False)

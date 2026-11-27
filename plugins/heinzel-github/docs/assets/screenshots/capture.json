@@ -1,102 +1,22 @@
 {
-  "format": 1,
+  "format": 2,
   "plugin": "heinzel-github",
-  "core_version": "0.9.42",
-  "inputs_sha256": "18fabfad3015f45e39ca88fa13fa9bb37e17f56f3e9e66b549162cd39884e094",
+  "core_version": "0.9.56",
+  "inputs_sha256": "78f7f5e87ff4a90abeabf5860d0b06095eef357588756a17852ae6548b1001a8",
   "images": {
-    "docs/assets/screenshots/workflow-collection.png": "8d71f9c242a8265a315a11006af86bfd21f41ab18d5cd8edc668c89fc4c73a8d",
-    "docs/assets/screenshots/workflow-context.png": "2407f5b0dbfdf2d23895961f6c33af353f0d007b1651cdb342ad92433740435e",
-    "docs/assets/screenshots/merged-work.png": "0baf90373abc10ed8a8a1f31909a78f6d4e9875d81b3157c4a0a79733c2218d8",
-    "docs/assets/screenshots/issue-changes.png": "bc3311ff71e68815e7488de603f36a4246ef92b55ec598ad0d2f13b988fecdc5",
-    "docs/assets/screenshots/merged-cli.png": "787d4a4a73a860dbf4b33fd849f9737e0a58e5495e3e94ea1104a0e60bdf7233",
-    "docs/assets/screenshots/issues-json.png": "e3754138bf5a295204a0f986463e9a54dda6168697fa870ab9c3d41b3d7ff6bd"
+    "docs/assets/screenshots/workflow-collection.png": "2eeac8f732a6bc5013a8013bf6465f879a33f0b2913c3a124cc31e7f5e9cbb35",
+    "docs/assets/screenshots/workflow-context.png": "99083b3298b151b8bb0cd6f322c9bd7b3a2532a06d618b4a56f012279701d993",
+    "docs/assets/screenshots/merged-work.png": "e02c200fb34fd2a0c6348545bd99f4ff85d144d1bc20c5c3a1619e7906a78623",
+    "docs/assets/screenshots/issue-changes.png": "9f6482200efa429b26eceef7eb74048da5a9f054238ad09ea4e28ff002f58cb6",
+    "docs/assets/screenshots/merged-cli.png": "64627cdc9e333b9330f89b9713ce629fd8617801ac95ad1c94c037f83a6d5171",
+    "docs/assets/screenshots/issues-json.png": "27909799fbe4fa0e56c903a62df0069ad5a576140650617a12ca23d9f27e79c8"
   },
-  "review_bundle": {
-    "format": 2,
-    "source_story": {
-      "path": "source-story.md",
-      "sha256": "64652889140ce55c6653af1e7f459a842670a3f149f6ff2e1e38eb863476dc96"
-    },
-    "definition": {
-      "format": 1,
-      "reviewer": "story-confirm-sonnet",
-      "source_sha256": "650cdaaf893882cf88076b77a29b477874e20e4f409416ab3a5409b19f6e4c3c",
-      "plan_sha256": "4b2f2733e91a815803ccfec3f3159a7b58900ad41be8c262d4b514b685420e07",
-      "story_sha256": "64652889140ce55c6653af1e7f459a842670a3f149f6ff2e1e38eb863476dc96"
-    },
-    "plugin": "heinzel-github",
-    "core_version": "0.9.42",
-    "inputs_sha256": "18fabfad3015f45e39ca88fa13fa9bb37e17f56f3e9e66b549162cd39884e094",
-    "screenshots": [
-      {
-        "path": "docs/assets/screenshots/workflow-collection.png",
-        "surface": "ui",
-        "caption": "The fictional weekly code review in the Core workflow graph and contracts list"
-      },
-      {
-        "path": "docs/assets/screenshots/workflow-context.png",
-        "surface": "ui",
-        "caption": "Fictional weekly review declares merged-work and issue inputs; no report was generated"
-      },
-      {
-        "path": "docs/assets/screenshots/merged-work.png",
-        "surface": "ui",
-        "caption": "Fictional merged pull requests in the app terminal, using a fixture-only requester and the real adapter"
-      },
-      {
-        "path": "docs/assets/screenshots/issue-changes.png",
-        "surface": "ui",
-        "caption": "Fictional issue changes, owners and states in the app terminal, using a fixture-only requester"
-      },
-      {
-        "path": "docs/assets/screenshots/merged-cli.png",
-        "surface": "cli",
-        "caption": "Read fictional merged work in the shell with a fixture-only requester and the real adapter"
-      },
-      {
-        "path": "docs/assets/screenshots/issues-json.png",
-        "surface": "cli",
-        "caption": "Fictional issue results as JSON for scripts and agents, using a fixture-only requester"
-      }
-    ],
-    "images": {
-      "workflow-collection.png": "8d71f9c242a8265a315a11006af86bfd21f41ab18d5cd8edc668c89fc4c73a8d",
-      "workflow-context.png": "2407f5b0dbfdf2d23895961f6c33af353f0d007b1651cdb342ad92433740435e",
-      "merged-work.png": "0baf90373abc10ed8a8a1f31909a78f6d4e9875d81b3157c4a0a79733c2218d8",
-      "issue-changes.png": "bc3311ff71e68815e7488de603f36a4246ef92b55ec598ad0d2f13b988fecdc5",
-      "merged-cli.png": "787d4a4a73a860dbf4b33fd849f9737e0a58e5495e3e94ea1104a0e60bdf7233",
-      "issues-json.png": "e3754138bf5a295204a0f986463e9a54dda6168697fa870ab9c3d41b3d7ff6bd"
-    },
-    "transcripts": {
-      "workflow-collection.txt": "1ceaa17dd0c524475add03a07896d3c51c531c0ea2a9d408c7eb19d4dc122901",
-      "workflow-context.txt": "126046e987c956072c8cf7de9806f59d8c7b886038b9001fd85b16bbfb329ae6",
-      "merged-work.txt": "c3d9eccdb181ea1ba8482d12aa9ebb2277c45c93f49a97d7bbe3ad11ea3ae61f",
-      "issue-changes.txt": "689484e31972830887f4e7fc500bbe335e0241d8fa4bf324a7be9f23796f6bf1",
-      "merged-cli.txt": "e4df52085e704c49ba37bd75f62656de48cd879405856220a53bcebb7efdebb4",
-      "issues-json.txt": "a866c9bd0fe09d6dc1355428d53f5ce30511912b71452e84e925b65b89f104b0"
-    },
-    "bundle_sha256": "3e363e6d607df9e08049ce52a75baab073b0563b85bb20808e2ecef359535745"
-  },
-  "privacy_review": {
-    "format": 1,
-    "bundle_sha256": "3e363e6d607df9e08049ce52a75baab073b0563b85bb20808e2ecef359535745",
-    "reviewer": "privacy-review-opus",
-    "decision": "approve",
-    "checked_images": [
-      "workflow-collection.png",
-      "workflow-context.png",
-      "merged-work.png",
-      "issue-changes.png",
-      "merged-cli.png",
-      "issues-json.png"
-    ],
-    "checks": {
-      "tokens_absent": true,
-      "personal_data_absent": true,
-      "feature_relevant": true,
-      "multiple_ui_scenes": true,
-      "captions_accurate": true
-    },
-    "findings": []
+  "transcripts": {
+    "workflow-collection.txt": "3f2f6de0cf0ff0c58909783c4a061d3ed63de94ee83ecd5b6f9411803aa9691b",
+    "workflow-context.txt": "09d07cc21a24c8738aabf3ad64d0eba9557f56c4e75a72b87f7ceee62247f1e6",
+    "merged-work.txt": "0c53991d30cf27b05e141c2e69a6853de229202facbf6f907b9d04d216b9b629",
+    "issue-changes.txt": "26ac5eb79482bf2988ca21b6a4c354b24bf41ecd6b0e39ab8a176452b793c4ca",
+    "merged-cli.txt": "e4df52085e704c49ba37bd75f62656de48cd879405856220a53bcebb7efdebb4",
+    "issues-json.txt": "a866c9bd0fe09d6dc1355428d53f5ce30511912b71452e84e925b65b89f104b0"
   }
 }

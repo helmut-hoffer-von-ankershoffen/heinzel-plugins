@@ -1,54 +1,43 @@
-# Show the useful feature, then publish the approved gallery
+# Screenshot authoring: a hand-edited definition, deterministic capture, review in the PR
 
-One command defines the plugin's screenshot story, captures its real UI and CLI with fictional data, asks an
-independent agent to check every image and transcript, and publishes the approved gallery:
-
-```sh
-make screenshots NAME=clock OPEN=1
-make screenshots-check NAME=clock
-```
-
-The source-analysis agent reads a bounded copy of the owning source and documentation before the plugin runs.
-Its story explains the audience, useful outcome, distinct scenes, fictional fixtures, privacy pitfalls and acceptance
-criteria. The editable plan is `docs/screenshots.toml`; `docs/SCREENSHOT_STORY.md` and
-`docs/screenshot-definition.json` record what was analyzed. Source, fixture or plan changes require renewed analysis.
-An existing plan is preserved when it already tells the useful feature story.
-
-The normal command runs both agents through the local Codex CLI. Install and sign in to Codex first. Neither
-agent can edit source or approve an interface that it has not inspected. Agent logs and arbitrary provider errors
-are kept out of command output. If an agent cannot finish, the command stops with an actionable error; it never
-silently substitutes help screenshots or publishes unreviewed images.
-
-## Define, capture, review
-
-Humans and agents use the same command:
+Taking screenshots needs no AI. Each plugin's checked-in `docs/screenshot-definition.json` is the whole plan: its
+scenes, their captions, an optional fixture bootstrap and a fixed browser clock. Edit it like any other file.
+Capture runs Playwright against the plugin's fixture scenes with fictional data only and never plans, and no agent
+approves anything: deterministic guards refuse unsafe text, and the pull request diff shows the images for the
+normal review.
 
 ```sh
-hz-plugin screenshots clock --plan --json       # define or refresh the source-based story only
-hz-plugin screenshots clock --draft --open     # capture privately; ask another agent to review later
-hz-plugin screenshots clock --json             # define if needed, capture, independently review, publish
-hz-plugin screenshots clock --check --json      # validate published source/plan/image/review hashes offline
+hz-plugin screenshots clock --init          # write a starter definition (only when there is none)
+make screenshots NAME=clock OPEN=1         # capture and publish the gallery, catalog metadata and README block
+hz-plugin screenshots clock --draft --open # capture privately into .preview/screenshots/draft, publish nothing
+make screenshots-check NAME=clock          # offline freshness: no browser, plugin run, build or agent
+hz-plugin screenshots-check --all --json   # every gallery; stale ones with the exact command that regenerates each
 ```
 
-`--generate` is an alias for `--plan`. `--init` writes an editable starter plan without executing the plugin; it
-still needs source analysis and image review before publication. Inside a standalone plugin, omit the name.
-`--headed` shows the capture browser. `--open` opens the local contact sheet, including for private drafts.
-`CORE=/path/to/core.whl` selects a candidate SDK through the owning environment's ordinary setup contract.
-
-For an existing governed project that already has a prepared environment, use:
+Inside a standalone plugin, omit the name. `--headed` shows the capture browser. `--open` opens the local contact
+sheet. `CORE=/path/to/core.whl` selects a candidate SDK through the owning environment's ordinary setup contract.
+For a prepared host environment, inspect the proposed inputs before capture:
 
 ```sh
-hz-plugin screenshots --python /absolute/path/to/.venv/bin/python --draft --open
+hz-plugin screenshots clock --python /absolute/path/to/.venv/bin/python --inspect-prepared
+hz-plugin screenshots clock --python /absolute/path/to/.venv/bin/python --prepared-approval REVIEWED_SHA256 --draft
 ```
 
-The interpreter must contain the owning distribution at its declared version and a compatible Heinzel SDK.
-This skips environment setup; it does not change the project's lock format, skip source analysis, or bypass review.
+Review the plan, source and runtime inventory from a trusted checkout and supply the SHA-256 separately. The
+approval covers the bounded project inputs, fixture, selected Python binary, entrypoint, and local
+`site-packages` tree including startup path files and bytecode. Inspection runs neither the project nor the selected
+Python. The standard virtual environment must use installed wheels, keep system site-packages disabled, and omit
+executable startup hooks and additional startup import roots. Capture checks the live inputs again before starting
+the app and running scene commands. Use a trusted project and host, and keep the reviewed inputs stable during
+capture. The base Python standard library, system libraries and dynamic effects of the reviewed code are outside
+the approval inventory.
+Use the canonical Linux path when a disposable OS environment is required.
 Only the owning plugin's frontend build runs when it declares one. This workflow never runs core's test suite.
 
-A successful JSON result contains absolute `preview`, `plan` and `manifest` paths, the screenshot metadata,
-`fresh: true`, and the approving reviewer. A private draft instead returns `review_required: true` and its draft path.
-Progress goes to stderr; stdout remains JSON. The first capture installs pinned browser tools as needed.
-Linux requires Chromium's system libraries; CI installs them in its dedicated screenshot job.
+A successful JSON result contains absolute `preview`, `plan` and `manifest` paths, the screenshot metadata and
+`fresh: true`. Progress goes to stderr; stdout remains JSON. The first capture installs the pinned browser once; if
+that fails, the error names the exact install command and then the capture command to run. Linux requires
+Chromium's system libraries; CI installs them in its dedicated screenshot job.
 
 ## Plan real UI and CLI scenes
 
@@ -59,163 +48,145 @@ output presented as feature UI and forged HTML do not qualify. A CLI-only plugin
 results in the native app terminal. A theme needs applied light and dark views. Settings and installed-plugin cards
 can supplement a story, but cannot replace a feature that the plugin actually provides.
 
-```toml
-format = 1
-browser_time = "2026-11-02T10:00:00+01:00"
-
-[[scenes]]
-name = "world-clock"
-surface = "ui"
-route = "/?panel=clock:world-clock"
-caption = "World Clock with fictional team locations"
-reduced_motion = "no-preference"
-steps = [
-  {action="wait", role="region", name="World clock"},
-  {action="wait-webgl"},
-]
-
-[[scenes]]
-name = "clock-detail"
-surface = "ui"
-route = "/?panel=clock:world-clock"
-caption = "Clock details for the fictional team, dark appearance"
-appearance = "dark"
-reduced_motion = "no-preference"
-steps = [{action="wait", role="region", name="World clock"}, {action="wait-webgl"}]
-focus = {role="region", name="World clock"}
-
-[[scenes]]
-name = "cli"
-surface = "cli"
-command = ["clock"]
-caption = "The same fictional team's local times in the CLI"
+```json
+{
+  "format": 1,
+  "browser_time": "2026-11-02T10:00:00+01:00",
+  "bootstrap": "docs/screenshot_fixture.py",
+  "scenes": [
+    {
+      "name": "world-clock",
+      "surface": "ui",
+      "route": "/?panel=clock:world-clock",
+      "caption": "World Clock with fictional team locations",
+      "reduced_motion": "no-preference",
+      "steps": [{"action": "wait", "role": "region", "name": "World clock"}, {"action": "wait-webgl"}]
+    },
+    {
+      "name": "clock-detail",
+      "surface": "ui",
+      "route": "/?panel=clock:world-clock",
+      "caption": "Clock details for the fictional team, dark appearance",
+      "appearance": "dark",
+      "reduced_motion": "no-preference",
+      "steps": [{"action": "wait", "role": "region", "name": "World clock"}, {"action": "wait-webgl"}],
+      "focus": {"role": "region", "name": "World clock"}
+    },
+    {"name": "cli", "surface": "cli", "command": ["clock"], "caption": "The same fictional team's local times in the CLI"}
+  ]
+}
 ```
 
 Routes stay inside the local app, without fragments. Commands are arrays of `hz` arguments, never shell strings.
-The plan does not accept browser source, raw selectors or `evaluate` actions. Steps support:
+The definition does not accept browser source, raw selectors or `evaluate` actions. Steps support:
 
 - `click` or `hover`: accessible `role` and exact `name`, or a bounded `name_regex`; optional `within_role` scopes it.
 - `fill`: exact `label` and `value`.
 - `press`: a keyboard `key`.
 - `wait`: exact `text`, or `role` and `name`.
-- `terminal`: `command = ["harbor", "hello"]`, showing actual output in the app's terminal.
+- `terminal`: `"command": ["harbor", "hello"]`, showing actual output in the app's terminal.
 - `wait-webgl`: wait for a painted canvas rather than capturing an empty globe.
 
-A `click`, `hover` or `wait` can set `optional = true` for an unrelated dismissible card; optional waits are bounded
+A `click`, `hover` or `wait` can set `"optional": true` for an unrelated dismissible card; optional waits are bounded
 to one second. Required feature waits still fail. A `focus` with accessible `role` and `name` or `name_regex` crops a
 useful detail view without replacing or inventing UI. Optional focus `padding` (16–160 pixels, default 40)
-keeps a bounded margin around the native element without imposing a wide minimum canvas. `viewport = {width=390, height=844}` adds a phone view.
+keeps a bounded margin around the native element without imposing a wide minimum canvas. `"viewport": {"width": 390, "height": 844}` adds a phone view.
 `timeout_ms` defaults to 15000 and permits 1000–30000. Motion defaults to `reduce`; animated canvases may need
 `no-preference`. An ISO8601 `browser_time` fixes browser wall-clock dates while animation frames continue running.
-Set `theme = "harbor"` to apply an installed owning theme.
+Set `"theme": "harbor"` to apply an installed owning theme.
+Capture dismisses an empty first-Heinzel pane through the app's close control. A scene can open chat from the toolbar.
 
 Wait for **every surface promised by the caption**, including lazily mounted sidebar tickers, footer controls and
 secondary panes. A ready Today widget or main region does not prove those contributions have loaded. Require their
 actual visible accessible controls before saving; then move the pointer to a neutral heading or region so hover
 underlines and temporary tooltips are not mistaken for feature state. For a WebGL globe, explicitly select
-`reduced_motion = "no-preference"` and `wait-webgl`; the default reduced-motion flat map is a different valid view
+`"reduced_motion": "no-preference"` and `wait-webgl`; the default reduced-motion flat map is a different valid view
 and needs its own accurate caption.
 
 ## Use deterministic fictional fixtures
 
-Optional `bootstrap = "docs/screenshot_fixture.py"` names an owning, source-bound Python fixture. It can seed the
+Optional `"bootstrap": "docs/screenshot_fixture.py"` names an owning, source-bound Python fixture. It can seed the
 isolated profile or run the real installed kernel with public plugin declarations and local demonstration adapters.
 Use names such as Mira Example, `mira@example.com`, `demo-workstation`, and fictional example domains. Show populated
 weather, tracker, calendar or document results from local fixtures when a real account is unnecessary. Captions must
 identify demonstration data accurately. Never fabricate a product page or edit a screenshot to simulate a feature.
 
-The capture process uses fresh HOME, XDG, application and vendor state, an environment credential backend, a neutral
-shell prompt and a fresh browser. It does not inherit tokens or normal configuration. Browser requests stay on the
-isolated app's origin. Fixture commands execute with normal operating-system permissions: inspect the fixture before
-running it and use local adapters instead of real accounts or seeding commands that create external resources.
+The app and scene subprocesses use fresh HOME, XDG, application and vendor state, an environment credential backend
+and a neutral shell prompt. They receive a limited environment that excludes the caller's credentials. The fresh
+browser keeps requests on the isolated app's origin. Preparing the owning plugin can execute its build tooling with
+the caller's environment. Treat the scene definition, fixture and owning plugin as executable project content. Review
+them before capture. An application command can still write files or contact services with the account's operating
+system permissions. Use local adapters for demonstrations and disposable operating-system isolation when evaluating
+untrusted projects.
 No discovered public plugin executes during catalog generation.
 
 Authentication links and session credentials presented by the running app are redacted before **every** screenshot
 save, including failure diagnostics. Other recognizable credentials, private home paths or host identity prevent an
-image save. The independent review remains mandatory; automated pattern checks alone cannot approve a gallery.
+image save.
 
-## Independent privacy and product review
+## Deterministic guards instead of an agent review
 
-Captures initially remain under `.preview/screenshots/draft/`. That folder contains every PNG, text transcript,
-a contact sheet, `review-input.json`, `review.schema.json`, and `REVIEW.md`. The review bundle binds source and SDK
-provenance, the source-analysis definition, captions and every image/transcript SHA-256.
+Before every image save, the text the scene shows is scanned: the DOM text, every input and textarea value, the
+document title and the URL. CLI transcripts and every caption are scanned the same way, at capture, at publication
+and again by the offline check. A match refuses the capture and names the kind of finding, never the value:
 
-A reviewer must open every PNG and read all transcripts and captions. They reject credentials, authentication URLs,
-private paths/hostnames, personal account data, unreadable images, inaccurate captions, or scenes that do not show a
-useful feature. They also verify the two-UI-plus-CLI requirement and theme appearances. Approval identifies the
-reviewing agent and names every image; an incomplete, stale or rejected receipt cannot publish.
+- credentials: token query parameters, bearer tokens, GitHub, GitLab, OpenAI/Anthropic, Stripe, Slack, AWS and
+  Google keys, JWTs, private key blocks and `api_key=`/`password=`-style assignments (in the spirit of the
+  repository's gitleaks rules, which also scan every committed transcript);
+- personal identity: email addresses outside the example domains, home and temporary directory paths, this
+  machine's hostname and home directory;
+- private networks: hostnames under `.local`, `.lan`, `.internal`, `.corp`, `.home` or `.ts.net` unless a label is
+  fictional (contains `example`, or is `demo-host`/`demo-workstation`), and IPv4/IPv6 addresses other than loopback,
+  unspecified and the documentation ranges 192.0.2.0/24, 198.51.100.0/24, 203.0.113.0/24 and 2001:db8::/32.
+  IPv6 URL brackets and interface zone IDs do not bypass this check;
+- the configured confidential terms, matched exactly as the repository's confidential-terms hook matches them.
 
-An independently reviewed private draft can be published with:
+Captions come only from the definition, so the README, catalog metadata and contact sheet say exactly what the
+definition says. The images and transcripts are committed: the pull request diff shows them, and the normal PR
+review looks at them like any other change.
 
-```sh
-hz-plugin screenshots clock --review-receipt /absolute/path/to/privacy-review.json --json
-```
+## Publication
 
-A source-analysis agent working in another chat can record its actual source review with
-`planning.record_definition(root, read_plan(root), story, reviewer="the reviewing agent")` before capture.
-This records work the agent actually performed; authors must not generate approval receipts merely to satisfy a gate.
-CI uses an explicitly labeled synthetic review fixture only for its unknown-plugin test; production has no automatic
-approval switch.
+Publication stages the complete gallery before replacing the old one. Symlinked inputs or output paths are refused.
+Images, transcripts, the contact sheet and `capture.json` live in `docs/assets/screenshots/`; catalog metadata and
+the owning README's generated screenshot block update together. The README shows UI captures immediately and puts
+CLI images in an expandable section. Text outside `<!-- screenshots:start -->` / `<!-- screenshots:end -->` stays
+author-owned. Generated transcripts use LF line endings, no trailing whitespace and exactly one final newline, so
+the commit whitespace hooks leave them unchanged.
 
-Generated transcripts use LF line endings, no trailing whitespace and exactly one final newline before hashes are
-computed. Contact sheets are canonical too. Commit whitespace hooks therefore leave the reviewed bytes unchanged.
-For a format-2 private draft, `privacy.canonicalize_draft(folder)` preserves every PNG, canonicalizes text, rebuilds
-its bundle hash and deletes stale review receipts. Any changed transcript requires a new independent review.
-Never normalize a public gallery and keep its old review hash.
-
-Publication rechecks all hashes after review and stages the complete gallery before replacing the old one.
-Symlinked inputs or output paths are refused. Approved images, transcripts, contact sheet and review manifest live in
-`docs/assets/screenshots/`; catalog metadata and the owning README's generated screenshot block update together.
-The README shows UI captures immediately and puts CLI images in an expandable section. Text outside
-`<!-- screenshots:start -->` / `<!-- screenshots:end -->` stays author-owned.
+`capture.json` (format 2) records the plugin, the SDK version the capture used, the digest of the UI inputs and the
+SHA-256 of every image and transcript.
 
 ## Keep the gallery current
 
-Owning checks and CI verify captures offline once a plan exists. Source, frontend, packaged assets, dependency inputs,
-fixture, ordinary README prose, story or plan changes invalidate the corresponding definition or capture.
-The generated README media block is excluded from source hashing, so publication does not make itself stale.
-Changed images or transcripts invalidate their exact review. Run capture and independent review again, then commit
-all owning gallery files. Failed capture or rejected review preserves the existing public gallery.
+The freshness digest covers only what a capture renders: the definition, its fixture bootstrap, the plugin's theme
+declarations and its web, static and view assets (scripts, styles, markup, images and fonts under `src/`, `web/`,
+`assets/`, `static/`, `templates/` and `resources/`, as git tracks them; built output and tests are left out).
+Python logic, metadata, locks, documentation and README prose are no capture input, so changing them never makes
+the gallery stale. The owning checks and the `owning-plugin-checks` hook verify freshness offline; a stale gallery
+fails with the exact command to run (`make screenshots NAME=<plugin>`), never by starting an agent or a browser.
+In a Heinzel worktree `sm check` regenerates a stale gallery and `sm ship` takes it into the shipped commit.
+
+The narrow local digest cannot see displayed text that comes from plugin Python, metadata or Core. CI therefore
+re-captures the gallery of every plugin a pull request changes against its newest compatible released Core
+(`make screenshots-render-check NAME=<plugin>`) and fails when any scene renders different text than its committed
+transcript. The selected gallery job is required by CI OK, including for fork pull requests. It returns only a
+render result and scene count; it withholds intermediate output and artifacts. To diagnose a failed comparison,
+run `make screenshots-verify NAME=<plugin>` locally with configured private terms, then use
+`make screenshots NAME=<plugin>` to regenerate after fixing the cause. The local verification reports image
+differences: two captures can differ in antialiasing and cursor pixels even on one machine, and fonts differ
+between operating systems (`--strict-images` makes them gate). Clock readings (hh:mm) are not compared, since
+fixtures may anchor their data on the real time; set `browser_time` to fix the browser's clock.
+
+The zero-secret CI render check performs the public-pattern checks and the real rendering comparison; it does
+not approve confidential terms or publish images. Full local capture and verification require configured private
+terms and scan on the trusted host before publication. Advanced `--python` diagnostics without terms warn once.
 
 The toolkit's dedicated CI journey creates a new unknown plugin, captures real Today and terminal output against an
-installed released SDK, verifies explicit review and README publication, detects staleness, fails a scene, and recovers.
-It also proves authentication presentation is removed before both success and failure image saves. Ordinary offline
-checks neither import a plugin nor start a browser.
-
-### Source evidence in the review bundle
-
-New captures use a format-2 review bundle with a fixed `source-story.md` file. It contains the normal source-analysis
-agent's exact story, bound by SHA-256 to both the definition and review bundle. The file must be regular, unlinked,
-bounded UTF-8; missing or changed evidence refuses review and publication. It is retained beside the published
-images and transcripts. A receipt for older bytes or a bundle without that evidence cannot approve a new capture.
-
-Source analysis inventories all declared entry points and actual declarations, including generic Core-rendered
-approvals and other feature surfaces. It distinguishes external provider UI, Core feature UI and terminal-only
-results. No Page declaration alone does not prove a plugin is terminal-only. The independent reviewer reads this
-untrusted evidence and every image/transcript; contradictory or insufficient evidence refuses publication. A plugin
-with feature UI still needs at least two genuine feature UI scenes plus a CLI scene. Terminal output cannot replace
-those views, and a story cannot override privacy checks or grant approval.
-
-
-### Exact historical galleries: read only
-
-The initial 0.3.5 policy rejected every older review bundle. Read-only gallery validation now makes one closed
-compatibility exception for the ten public manifests authenticated at
-[pre-upgrade commit `3be4b072`](https://github.com/helmut-hoffer-von-ankershoffen/heinzel-plugins/tree/3be4b072ca2c78c6558298434319e30550e91a23).
-The reviewed internal allowlist binds each plugin identity to the SHA-256 of its entire original capture manifest,
-including the independent privacy receipt. It has no caller-supplied pins, date cutoffs, wildcards or generic
-format-1 fallback. Rewriting even the manifest's whitespace changes that exact identity.
-
-All existing provenance, source-input, current definition, story, plan, image, transcript, independent approval,
-README and contact-sheet checks still apply. The normal owning check still builds missing generated view assets
-before checking source freshness. No gallery bytes or original receipts are rewritten. The JSON result identifies
-`review_bundle_format: 1` and `source_story_bundle_reviewed: false`: historical image/transcript review is not a claim
-that the new self-contained story evidence was reviewed.
-
-This exception admits no private draft, agent review, canonicalization or publication. Those paths require the
-strict format-2 story bundle, including when an authentic pinned historical manifest or receipt is supplied.
-Any changed or unrecognized historical evidence requires a fresh capture and genuine independent review; never
-copy a prior receipt into a new bundle or manufacture an approval to satisfy the check.
+installed released SDK, publishes, detects staleness, fails a scene, and recovers. It also proves authentication
+presentation is removed before both success and failure image saves. The canonical journey requires a real
+scene failure, a safe error and unchanged published bytes; unscanned failure images stay inside the discarded worker. Ordinary offline checks neither import a
+plugin nor start a browser.
 
 ## Fictional owning-interpreter paths
 
@@ -230,8 +201,7 @@ The UI transcript uses the same rendered text. This is presentation redaction, n
 Doctor row, status, error and remaining detail survives. Exact directory boundaries are required; lookalikes,
 dot segments, repeated separators, percent-encoded suffixes and unknown private paths are left unchanged for
 the ordinary scan. URL/email-bearing text nodes are also left unchanged, including whitespace in query values.
-This deliberately narrow matching rule does not normalize paths or establish a general privacy guarantee. Disclose the fictionalized paths in the source
-story and captions. Independent review must still inspect every image and transcript.
+This deliberately narrow matching rule does not normalize paths or establish a general privacy guarantee. Disclose the fictionalized paths in the captions.
 
 External prepared `--python` mode keeps its prior behavior and receives no new owning-prefix redaction authority.
 No free-form prefix allowlist or fixture hook is available. Normal setup also compares the selected owning Python's reported hostname with the controller's hostname;
@@ -241,6 +211,79 @@ presentation can replace the unique `system.doctor` / `hostname` row's whole sol
 match that verified hostname. No labels, status cells, attributes, inputs, URLs, emails or paths are rewritten.
 A missing/duplicate/ambiguous row or mismatched detail refuses capture unchanged. Even a hostname such as `UP`
 can change only that detail, never a health status. The advanced external `--python` path gains no hostname
-redaction authority. Disclose both fictionalized paths and this hostname value in the source story and captions.
+redaction authority. Disclose both fictionalized paths and this hostname value in the captions.
 
 Other private paths, hostnames, identities or tokens can still make a capture fail; do not treat this mapping as successful privacy acceptance.
+
+
+## Canonical release-gallery environment
+
+`make screenshots NAME=heinzel-resource CORE=/absolute/path/to/heinzel.whl` and
+`make screenshots-verify NAME=heinzel-resource CORE=/absolute/path/to/heinzel.whl`
+run the same pinned Playwright Linux/amd64 container on macOS and Linux CI. Docker must be running.
+The first call downloads the public image; subsequent calls reuse the downloaded image. `OPEN=1` opens the
+resulting local contact sheet after capture. `make screenshots-check NAME=heinzel-resource` remains an
+inexpensive portable freshness check and does not start Docker.
+
+The host caches the exact public Linux `uv` bootstrap wheel in `~/.cache/heinzel-plugin-tools/bootstrap`,
+checking its SHA-256 before every use. Only verified wheel bytes are copied into each disposable directory;
+the worker installs them without an index and never mounts or writes the host cache. A corrupt cached wheel
+fails before rendering; remove that file to permit a fresh authenticated download.
+
+The source snapshot copies only selected tracked or nonignored new authoring files:
+package metadata, locks, README, LICENSE, Makefile and hatch_build.py; source/assets under `src`, `web`, `assets`,
+`static`, `templates`, `resources` and `vendor-provenance`; the definition and its named bootstrap; and the expected
+published gallery files used by verification. Uncommitted edits and new nonignored inputs in those locations work
+without a commit. Existing repositories use their Git inventory; Git errors or broken repository metadata fail
+closed. An ignored definition or bootstrap must be deliberately added to Git before capture.
+Standalone projects need no repository initialization: capture creates empty Git metadata in a disposable temporary
+directory and inventories the explicit source work tree with its root and nested `.gitignore` rules. It uses no
+templates, hooks, global Git configuration or existing index in this mode and leaves the source project alone.
+Required standalone inputs must be nonignored. Git must be installed in either mode.
+Normal offline freshness uses this same inventory, including standalone ignore rules; it never falls back to
+an unrestricted filesystem walk after a Git failure. The renderer uses its explicit frozen inventory instead.
+Generated frontend output is rebuilt inside the worker; ignored local output is not imported.
+Every copied input must be a bounded regular file inside the owner, with no symlink leaf or parent component.
+Other fixture dependencies must live in the selected source locations. Private local files must remain ignored.
+Development environments, Node modules and host Git metadata are excluded. A frozen list of the selected source
+files preserves discovery across generated build output. The worker
+receives no Git metadata, and host checks never execute Git against the worker-writable copy. No host application directory, credential directory, Docker socket or host tool directory is
+mounted into the worker. The worker uses the fictional hostname demo-host, UTC and C.UTF-8, the pinned browser image, and the owning locked
+Core/plugin environment. The renderer receives no confidential terms: it runs the public privacy-pattern checks only. The
+trusted host applies the configured confidential-term policy to every returned transcript and caption
+before importing or publishing anything; missing terms refuse the canonical command. No term list
+is mounted into the worker or included in its arguments or image. All scene text remains required. Images
+can still differ in rasterization; `--strict-images` additionally compares their bytes. The existing text
+comparison permits changing `hh:mm` clock readings; full original transcripts remain stored and
+scanned. This does not suppress any other scene text or turn a missing capture into a pass.
+
+The advanced explicit `--python` path is an environment diagnostic, not canonical release-gallery proof.
+It retains its caller-selected runtime; use the ordinary commands above for publication or CI comparison.
+
+The worker runs with the author's/CI runner's numeric UID and GID, so its scratch files remain removable
+on rootful Linux Docker as well as Docker Desktop. Its HOME, Python downloads and caches are private to
+the run. Fork/Dependabot render checks need no confidential terms. Full private-policy proof still requires the trusted
+host scan; private dependencies
+that require credentials also refuse rather than mounting credentials. Use a separately prepared `--python`
+environment with `--headed` only for noncanonical interactive diagnostics.
+
+Private-policy acceptance requires a trusted host controller. Do not supply repository secrets to
+editable pull-request code. A protected, base-owned scan route is a prerequisite for hosted private-policy
+approval; a reusable workflow selected by an editable caller is not that authority.
+Unscanned output must remain private until that scan passes. This local capture command does not
+establish a protected GitHub approval or a fork-PR acceptance path.
+
+`make screenshots-render-check NAME=<plugin>` is the secret-free CI path for ordinary and fork PRs. It
+returns `render_verified: true`, `private_scan: false`, and `scope: render-only` only after a real fresh
+comparison. It emits counts rather than unscanned transcripts, captions, images, or worker stderr, and
+does not copy results out of the private scratch directory. It cannot publish. CI OK requires this executed rendering result for selected plugins, including fork PRs;
+a missing plan or skipped selected render fails. Unselected changes retain the existing plan selection. Before public gallery
+changes are admitted, the approved local tooling must run the full private-policy verification and
+bind the passing scan to the exact committed gallery files. A future hosted private scan requires
+separate protected authority; rendering success alone is never that approval.
+
+Full DOM evidence (body, input/textarea values, title and URL) travels back only in private
+`*.scan.txt` sidecars, bound by SHA-256 in the private draft manifest. The trusted host checks
+those bytes against the private policy, including form values not present in the visible-body
+transcript, before importing or publishing. Sidecars are never part of the public gallery or
+public manifest. Older private drafts without this evidence must be captured again.

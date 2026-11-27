@@ -1,7 +1,123 @@
 {
   "format": 1,
-  "reviewer": "story-confirm-sonnet",
-  "source_sha256": "e7f833eaab5a78adc6f77f845e2966722528ba3cfcf8cac816be35a81e0eb42a",
-  "plan_sha256": "4349628e972b078196f4ce1aec8c7e248c5c3499a9c8b4b3ae42e4d6242660a7",
-  "story_sha256": "e7a95d314a1d16b7830c57c69624425cbf3875d57e10260ec7416b5a941fcc70"
+  "bootstrap": "docs/screenshot_fixture.py",
+  "scenes": [
+    {
+      "name": "widget-and-status",
+      "surface": "ui",
+      "route": "/",
+      "appearance": "light",
+      "caption": "Demo data: the constant 42 appears in both the Today widget and sidebar status.",
+      "steps": [
+        {
+          "action": "wait",
+          "text": "Example value"
+        },
+        {
+          "action": "wait",
+          "text": "Example: 42"
+        },
+        {
+          "action": "click",
+          "role": "button",
+          "name_regex": "^Dismiss Doctor",
+          "optional": true
+        }
+      ]
+    },
+    {
+      "name": "inspector",
+      "surface": "ui",
+      "route": "/?panel=example:inspector",
+      "appearance": "dark",
+      "caption": "Demo data: open the plugin-owned inspector to see the same constant value, 42.",
+      "steps": [
+        {
+          "action": "wait",
+          "role": "region",
+          "name": "Example"
+        },
+        {
+          "action": "wait",
+          "text": "42"
+        },
+        {
+          "action": "click",
+          "role": "button",
+          "name_regex": "^Dismiss Doctor",
+          "optional": true
+        }
+      ]
+    },
+    {
+      "name": "greeting-terminal",
+      "surface": "ui",
+      "route": "/",
+      "caption": "Demo data: greet fictional Mira with structured JSON in the app's native terminal.",
+      "steps": [
+        {
+          "action": "terminal",
+          "command": [
+            "example",
+            "hello",
+            "--name",
+            "Mira",
+            "--json"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "plugin-notice",
+      "surface": "ui",
+      "route": "/",
+      "caption": "Demo data: a seeded Example is ready notice appears in the shared in-app notification panel.",
+      "steps": [
+        {
+          "action": "wait",
+          "text": "Example value"
+        },
+        {
+          "action": "click",
+          "role": "button",
+          "name_regex": "^Dismiss Doctor",
+          "optional": true
+        },
+        {
+          "action": "click",
+          "role": "button",
+          "name_regex": "^Notifications"
+        },
+        {
+          "action": "wait",
+          "text": "Example is ready"
+        }
+      ],
+      "viewport": {
+        "width": 1280,
+        "height": 650
+      }
+    },
+    {
+      "name": "greeting-cli",
+      "surface": "cli",
+      "caption": "Demo data: the typed hello operation greets fictional Mira from the CLI.",
+      "command": [
+        "example",
+        "hello",
+        "--name",
+        "Mira"
+      ]
+    },
+    {
+      "name": "sample-json",
+      "surface": "cli",
+      "caption": "Demo data: sample returns 42 as JSON, the same constant used by the widget, status and inspector.",
+      "command": [
+        "example",
+        "sample",
+        "--json"
+      ]
+    }
+  ]
 }

@@ -1,84 +1,18 @@
 {
-  "format": 1,
+  "format": 2,
   "plugin": "heinzel-atlassian",
-  "core_version": "0.9.42",
-  "inputs_sha256": "a8931908da5fc79c0884e9b628a1e521e1f8aa941fb6b4d888d3e4feb904ceb0",
+  "core_version": "0.9.56",
+  "inputs_sha256": "38c27b84c80e9a88d742272baf881c31939d050c1abedc906e5a0a65607f6062",
   "images": {
-    "docs/assets/screenshots/review-inventory.png": "d3543ab312a3572967a1c4a42c35a8e9cabe31a196ba5ba65dc042ccf9961dd9",
-    "docs/assets/screenshots/workflow-context.png": "798d3528fe475adcf670266f3f8df5f6af068f2f6a9241d240e2264564c38956",
-    "docs/assets/screenshots/issues-json.png": "530fb20dd9c11947fa7ca48aae30ba0d8435cfceda0e0856252d634d05c5c2a0",
-    "docs/assets/screenshots/confluence-cli.png": "6ee48d63544e8aef45de102226a6af51904e5175304b473b65e49b1e6abef622"
+    "docs/assets/screenshots/review-inventory.png": "ed50b65b159b8d74938ffde5e6f1327c64cb3a199707d02a3f810c98deabe43a",
+    "docs/assets/screenshots/workflow-context.png": "28cf0bb62a8374d97955638b508ba75302f1f2a321a9540f288f2012bc2bcd59",
+    "docs/assets/screenshots/issues-json.png": "3d382450dbdfa292bef30950879d86395ada9ac612462d3838e63f2c15eb2d19",
+    "docs/assets/screenshots/confluence-cli.png": "700df0383f176cc32cbc6a7a75a61127115099cfa34109ea8c130ee076ea8d62"
   },
-  "review_bundle": {
-    "format": 2,
-    "source_story": {
-      "path": "source-story.md",
-      "sha256": "b8eb4ad09a2fa5fdb3fe3eed026ec86f6d98ff04a5d3d032b56b83439023ef3a"
-    },
-    "definition": {
-      "format": 1,
-      "reviewer": "story-confirm-sonnet",
-      "source_sha256": "80d06c335ceb0578791e379926d5f05b2deab34b82b68f5361a21bd202fa1462",
-      "plan_sha256": "3f91fd09ffc8c4b1d0c16cb8004a7f7b56f15f33a8b581781a11d2ffd3016187",
-      "story_sha256": "b8eb4ad09a2fa5fdb3fe3eed026ec86f6d98ff04a5d3d032b56b83439023ef3a"
-    },
-    "plugin": "heinzel-atlassian",
-    "core_version": "0.9.42",
-    "inputs_sha256": "a8931908da5fc79c0884e9b628a1e521e1f8aa941fb6b4d888d3e4feb904ceb0",
-    "screenshots": [
-      {
-        "path": "docs/assets/screenshots/review-inventory.png",
-        "surface": "ui",
-        "caption": "Demo data: find the fictional Weekly work review among local contracts."
-      },
-      {
-        "path": "docs/assets/screenshots/workflow-context.png",
-        "surface": "ui",
-        "caption": "Demo data: the local Weekly work review declares Jira and Confluence inputs; no report has been generated."
-      },
-      {
-        "path": "docs/assets/screenshots/issues-json.png",
-        "surface": "cli",
-        "caption": "Demo data: structured fictional Jira changes through the real adapter, using a fixture-only requester and local vendor replies."
-      },
-      {
-        "path": "docs/assets/screenshots/confluence-cli.png",
-        "surface": "cli",
-        "caption": "Demo data: the fictional Confluence plan, source and revision in the shell, using a fixture-only requester and local vendor replies."
-      }
-    ],
-    "images": {
-      "review-inventory.png": "d3543ab312a3572967a1c4a42c35a8e9cabe31a196ba5ba65dc042ccf9961dd9",
-      "workflow-context.png": "798d3528fe475adcf670266f3f8df5f6af068f2f6a9241d240e2264564c38956",
-      "issues-json.png": "530fb20dd9c11947fa7ca48aae30ba0d8435cfceda0e0856252d634d05c5c2a0",
-      "confluence-cli.png": "6ee48d63544e8aef45de102226a6af51904e5175304b473b65e49b1e6abef622"
-    },
-    "transcripts": {
-      "review-inventory.txt": "3cabeb17f1972eeca87bc053f23b37152d7747caf318bb22cd66e09687f14170",
-      "workflow-context.txt": "10dd8946db0222f3006532f6230ff24217892379f6acda87d8b32f774e441606",
-      "issues-json.txt": "aac6434c0d1d1dece3ee23798229598f722dbee48a9bc4a854dfc3d6fb532cdc",
-      "confluence-cli.txt": "dbac0428b2123fd6cfb248be30010051986995ee83bfa9e33b4b1a272541b710"
-    },
-    "bundle_sha256": "ce8c42e04960bd7abe11c117a4559d8a6fd404fdb4e506a55131c98b9e81fae0"
-  },
-  "privacy_review": {
-    "format": 1,
-    "bundle_sha256": "ce8c42e04960bd7abe11c117a4559d8a6fd404fdb4e506a55131c98b9e81fae0",
-    "reviewer": "privacy-review-opus",
-    "decision": "approve",
-    "checked_images": [
-      "review-inventory.png",
-      "workflow-context.png",
-      "issues-json.png",
-      "confluence-cli.png"
-    ],
-    "checks": {
-      "tokens_absent": true,
-      "personal_data_absent": true,
-      "feature_relevant": true,
-      "multiple_ui_scenes": true,
-      "captions_accurate": true
-    },
-    "findings": []
+  "transcripts": {
+    "review-inventory.txt": "9b750c92a48f9b1e1437e3c7ce584b72e0e9ba612072be1895f1c1d06224b056",
+    "workflow-context.txt": "ff3312d67fd72ccc5e7d14975be038b6af3e639360822da06959c2c6bc3e0ef4",
+    "issues-json.txt": "aac6434c0d1d1dece3ee23798229598f722dbee48a9bc4a854dfc3d6fb532cdc",
+    "confluence-cli.txt": "dbac0428b2123fd6cfb248be30010051986995ee83bfa9e33b4b1a272541b710"
   }
 }

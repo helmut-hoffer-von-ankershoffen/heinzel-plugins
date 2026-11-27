@@ -1,7 +1,143 @@
 {
   "format": 1,
-  "reviewer": "protected_final_reviewer",
-  "source_sha256": "7cc8e028cc952e61c2e4ca3ea3e4b0ff44cc303e56fc43826a97bb14c25fcd99",
-  "plan_sha256": "fe653365717c283e9f71b574eabd1d918a9c0d9b64581f12841ead1aabb599cb",
-  "story_sha256": "bdae4512d3814101d888119121303c4910e0c54dcda29f8deda9317447ec1957"
+  "bootstrap": "docs/screenshot_fixture.py",
+  "browser_time": "2026-10-31T12:00:00Z",
+  "scenes": [
+    {
+      "name": "sharing-existing-private",
+      "surface": "ui",
+      "route": "/",
+      "appearance": "dark",
+      "caption": "An existing private route to this Heinzel is ready to adopt \u2014 fictional local Tailscale demo",
+      "timeout_ms": 30000,
+      "steps": [
+        {
+          "action": "click",
+          "role": "button",
+          "name_regex": "^Dismiss Doctor",
+          "optional": true
+        },
+        {
+          "action": "click",
+          "role": "button",
+          "name_regex": "^Tailscale",
+          "within_role": "contentinfo"
+        },
+        {
+          "action": "wait",
+          "role": "region",
+          "name": "Tailscale"
+        },
+        {
+          "action": "wait",
+          "text": "Private route to this Heinzel found."
+        }
+      ],
+      "focus": {
+        "role": "region",
+        "name": "Tailscale"
+      }
+    },
+    {
+      "name": "sharing-ready",
+      "surface": "ui",
+      "route": "/",
+      "appearance": "dark",
+      "caption": "One switch adopts the existing private route, then shows Copy link and Open (fictional demo); the capture tool hides the share link as [authentication link hidden]",
+      "timeout_ms": 30000,
+      "steps": [
+        {
+          "action": "click",
+          "role": "button",
+          "name_regex": "^Dismiss Doctor",
+          "optional": true
+        },
+        {
+          "action": "click",
+          "role": "button",
+          "name_regex": "^Tailscale",
+          "within_role": "contentinfo"
+        },
+        {
+          "action": "wait",
+          "role": "region",
+          "name": "Tailscale"
+        },
+        {
+          "action": "click",
+          "role": "switch",
+          "name": "Share over Tailscale"
+        },
+        {
+          "action": "wait",
+          "role": "link",
+          "name": "Open"
+        }
+      ],
+      "focus": {
+        "role": "region",
+        "name": "Tailscale"
+      }
+    },
+    {
+      "name": "sharing-request-cli",
+      "surface": "cli",
+      "caption": "The real CLI sharing status reports apply-required for the mapped demo app. The fixture labels the ephemeral web listener port.",
+      "command": [
+        "showcase",
+        "sharing-status",
+        "--json"
+      ]
+    },
+    {
+      "name": "sharing-off",
+      "surface": "ui",
+      "route": "/",
+      "appearance": "light",
+      "caption": "Turn private sharing off explicitly \u2014 fictional local Tailscale demo",
+      "timeout_ms": 30000,
+      "steps": [
+        {
+          "action": "click",
+          "role": "button",
+          "name_regex": "^Dismiss Doctor",
+          "optional": true
+        },
+        {
+          "action": "click",
+          "role": "button",
+          "name_regex": "^Tailscale",
+          "within_role": "contentinfo"
+        },
+        {
+          "action": "wait",
+          "role": "region",
+          "name": "Tailscale"
+        },
+        {
+          "action": "click",
+          "role": "switch",
+          "name": "Share over Tailscale"
+        },
+        {
+          "action": "wait",
+          "text": "Off"
+        }
+      ],
+      "focus": {
+        "role": "region",
+        "name": "Tailscale"
+      }
+    },
+    {
+      "name": "sharing-off-cli",
+      "surface": "cli",
+      "caption": "Then hz tailscale status --json after switching off: not mapped; the target shows the default port 8737 \u2014 fictional local Tailscale demo",
+      "command": [
+        "tailscale",
+        "status",
+        "--json"
+      ]
+    }
+  ]
 }

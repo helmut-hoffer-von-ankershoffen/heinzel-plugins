@@ -185,7 +185,12 @@ def run_gallery_ui(home: Path, *, smoke: bool) -> None:
         worker.start()
         try:
             # Core re-reads the profile when checking transport consent.
-            os.environ["HZ_FEATURES"] = "connected_channels"
+            os.environ.update(
+                HZ_FEATURES="connected_channels",
+                HZ_CAPABILITIES__CHAT="slack",
+                HZ_SLACK__OWNER=OWNER,
+                HZ_SLACK__TEAM=TEAM,
+            )
             kernel = boot(cwd=home)
             slack = sys.modules["heinzel_slack"]
             require(
@@ -207,8 +212,9 @@ def run_gallery_ui(home: Path, *, smoke: bool) -> None:
             kernel.bind(CurrentUser, CurrentUser(kernel.settings.state_dir / "gallery-identity"))
             kernel.bind(slack.Transport, LoopbackTransport())
             kernel.bind(slack.SlackSettings, slack.SlackSettings(owner=OWNER, team=TEAM))
-            stage_notice(kernel, posts, rejections, requests, smoke=smoke)
-            if not smoke:
+            if smoke:
+                stage_notice(kernel, posts, rejections, requests)
+            else:
                 web.serve(kernel, port=0, browser=False, restartable=False)
         finally:
             server.shutdown()
@@ -220,8 +226,6 @@ def stage_notice(
     posts: list[dict[str, Any]],
     rejections: list[str],
     requests: dict[str, dict[str, int]],
-    *,
-    smoke: bool,
 ) -> None:
     """Use the same authenticated proposal operations and confirmation as the installed UI."""
     from fastapi.testclient import TestClient
@@ -280,8 +284,6 @@ def stage_notice(
             and not rejections,
             "Gallery proposal must show the exact notice and post nothing",
         )
-        if not smoke:
-            return
         decision = {"session": chat["id"], "action": action["id"]}
         require(
             client.post(CONFIRM, params=decision).status_code == 401 and not posts,
@@ -298,7 +300,9 @@ def stage_notice(
             and not rejections,
             "Gallery confirmation replay must be refused before reaching Slack",
         )
-    print(json.dumps({"slack_posts": 1, "unauthenticated_refused": True, "replay_refused": True}))
+    print("Delivered one fictional Slack notice.")
+    print("Unauthenticated confirmation refused.")
+    print("Repeated confirmation refused.")
 
 
 # Core must capture Slack before the CLI demonstration imports it directly.

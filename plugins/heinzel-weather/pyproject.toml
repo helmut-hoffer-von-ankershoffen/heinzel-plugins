@@ -1,6 +1,6 @@
 [project]
 name = "heinzel-weather"
-version = "0.5.8"
+version = "0.5.9"
 description = "Weather where you are, keyless from Open-Meteo (or OpenWeather with your key): now, the next hours and days, and a heads-up when it changes. Set your place in Settings; until then your time zone's city is used."
 readme = "README.md"
 authors = [{ name = "Helmut Hoffer von Ankershoffen", email = "helmuthva@gmail.com" }]
@@ -32,6 +32,8 @@ build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/heinzel_weather"]
+# The build hook packages these generated assets, including in standalone source snapshots.
+exclude = ["/src/heinzel_weather/views"]
 
 [tool.ruff]
 line-length = 120

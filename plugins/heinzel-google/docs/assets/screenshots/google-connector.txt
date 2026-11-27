@@ -1,0 +1,143 @@
+Skip to content
+Heinzelmännchen
+Heinzelmännchen
+Contracts
+Team graph
+Organisation
+Team roster
+M
+Mira
+· EM
+Today
+Today
+Doctor: 5 checks need attention
+
+ai.access ai access, system.doctor installation, system.prerequisite system: gh…
+
+Open
+v0.9.56
+Updates, off
+0
+System health, warning
+Daemon not installed, off
+Audio
+Settings
+Filter settings
+
+Preferences
+
+Appearance
+Browser
+Notifications
+
+Customize
+
+AI
+Connectors
+Plugins
+Skills
+
+Organisation
+
+Team
+You
+
+This computer
+
+Configuration files
+Credentials
+Daemon
+From Claude
+MCP
+System
+Updates
+Web server
+Connectors
+
+Plugins that connect hz to your tools. Open one for its settings.
+
+Google
+Google Docs, Sheets, Slides, Drive, Calendar and Gmail: the documents, calendar and mail capabilities.
+Connects: calendar, documents, mail
+In use for calendar, documents, mail
+Which connector serves what
+Agent runner
+
+What runs drafts and chats: Claude Code (the default), your own command, or a runner a plugin brings.
+
+None
+claude-code · heinzel
+codex · heinzel
+command · heinzel
+engine · heinzel
+AI access
+
+How Heinzelmännchen reaches AI: Claude Code (the default), your company's AI gateway, Pydantic AI, or a way a plugin brings.
+
+None
+chatgpt · heinzel
+claude-code · heinzel
+codex · heinzel
+dummy · heinzel
+gateway · heinzel
+pydantic-ai · heinzel
+Calendar
+
+The connector that reads your calendar, such as Google.
+
+Set by HZ_CAPABILITIES__CALENDAR; change it there.
+
+None
+google · heinzel-google
+Chat
+
+The connector for team chat, such as Slack.
+
+not set
+None
+Code host
+
+The connector for pull requests and code, such as GitHub.
+
+not set
+None
+Directory
+
+Who reports to whom: guessed from recurring one-on-ones in your calendar (the default, each guess for you to confirm), or read from a directory a plugin connects.
+
+None
+one-on-ones · heinzel
+
+Documents
+
+The connectors for documents and pages, such as Google Docs and Confluence; switch on several.
+
+Set by HZ_CAPABILITIES__DOCUMENTS; change it there.
+
+google · heinzel-google
+Mail
+
+The connector that reads your mail, such as Google.
+
+Set by HZ_CAPABILITIES__MAIL; change it there.
+
+None
+google · heinzel-google
+Meetings
+
+The connector for meeting summaries, such as Zoom.
+
+not set
+None
+Tracker
+
+The connector for issues, such as GitHub or Jira.
+
+not set
+None
+Team graph
+
+What draws your team's graph: the built-in graph of your team's contracts and telemetry (the default), or one a plugin brings.
+
+None
+hz-graph · heinzel

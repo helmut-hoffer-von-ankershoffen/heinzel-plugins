@@ -1,7 +1,140 @@
 {
   "format": 1,
-  "reviewer": "story-confirm-sonnet",
-  "source_sha256": "263100c67ea93b4397da3bf7be6566dccba2fcd7d397bd7b69550bf6e4b5db6d",
-  "plan_sha256": "9b38b6511c80349092e39d17c5dc81a84501935e568267c8df18b45ee3fd2db4",
-  "story_sha256": "dfe702951b9671b81af7aceeb938a90ca1c6e5b4aec4724d5a07427db794864b"
+  "bootstrap": "docs/screenshot_fixture.py",
+  "browser_time": "2026-10-31T10:00:00Z",
+  "scenes": [
+    {
+      "name": "resources-pane",
+      "surface": "ui",
+      "route": "/",
+      "appearance": "light",
+      "caption": "Host, CPU, memory and one-minute load in the expanded monitor — fictional demo workstation",
+      "steps": [
+        {
+          "action": "wait",
+          "text": "Computer resources"
+        },
+        {
+          "action": "click",
+          "role": "button",
+          "name_regex": "^Dismiss Doctor",
+          "optional": true
+        },
+        {
+          "action": "click",
+          "role": "button",
+          "name_regex": "CPU.*Memory.*Load"
+        },
+        {
+          "action": "wait",
+          "text": "Host: demo-workstation"
+        }
+      ],
+      "focus": {
+        "role": "region",
+        "name_regex": "^Computer resources"
+      }
+    },
+    {
+      "name": "today-resources",
+      "surface": "ui",
+      "route": "/",
+      "appearance": "dark",
+      "caption": "A quick CPU summary on Today — demonstration values",
+      "steps": [
+        {
+          "action": "wait",
+          "text": "CPU 36%"
+        },
+        {
+          "action": "click",
+          "role": "button",
+          "name_regex": "^Dismiss Doctor",
+          "optional": true
+        }
+      ]
+    },
+    {
+      "name": "phone-resources",
+      "surface": "ui",
+      "route": "/",
+      "caption": "Read host, CPU, memory and load on a phone — fictional demo workstation",
+      "steps": [
+        {
+          "action": "wait",
+          "text": "CPU 36%"
+        },
+        {
+          "action": "click",
+          "role": "button",
+          "name_regex": "^Dismiss Doctor",
+          "optional": true
+        },
+        {
+          "action": "click",
+          "role": "button",
+          "name": "More status items",
+          "optional": true
+        },
+        {
+          "action": "click",
+          "role": "button",
+          "name_regex": "CPU.*Memory.*Load"
+        },
+        {
+          "action": "wait",
+          "text": "Host: demo-workstation"
+        }
+      ],
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "cli-resources",
+      "surface": "cli",
+      "caption": "The same fictional CPU, memory and raw load measurements in the CLI",
+      "command": [
+        "resource"
+      ]
+    },
+    {
+      "name": "terminal-resources",
+      "surface": "ui",
+      "route": "/",
+      "caption": "Check CPU, memory, raw load and core count in the app terminal — fictional demo-workstation values",
+      "viewport": {
+        "width": 1280,
+        "height": 900
+      },
+      "steps": [
+        {
+          "action": "terminal",
+          "command": [
+            "resource"
+          ]
+        }
+      ]
+    },
+    {
+      "name": "terminal-resources-json",
+      "surface": "ui",
+      "route": "/",
+      "caption": "Inspect the structured resource sample for automation in the app terminal — fictional demo-workstation data",
+      "viewport": {
+        "width": 1280,
+        "height": 900
+      },
+      "steps": [
+        {
+          "action": "terminal",
+          "command": [
+            "resource",
+            "--json"
+          ]
+        }
+      ]
+    }
+  ]
 }

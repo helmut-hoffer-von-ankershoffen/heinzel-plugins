@@ -1,7 +1,6 @@
-"""Source-based definitions precede execution and remain editable without a hidden bypass."""
+"""The screenshot definition is a hand-edited JSON file; capture reads it and never plans."""
 
 import json
-from types import SimpleNamespace
 
 import pytest
 
@@ -18,85 +17,41 @@ def owner(tmp_path):
         '[project]\nname="heinzel-harbor"\nversion="0.1.0"\n'
         '[project.entry-points."heinzel.modules"]\nharbor="heinzel_harbor"\n'
     )
-    (tmp_path / "README.md").write_text("# Harbor\nA fictional useful harbor.\n")
-    capture.write_default_plan(tmp_path)
     return tmp_path
 
 
-def test_missing_agent_cannot_silently_publish_default_help_and_plugin_cards(owner, monkeypatch):
-    monkeypatch.setattr(planning.shutil, "which", lambda _: None)
-    with pytest.raises(ValueError, match="source analysis needs"):
-        planning.ensure_definition(owner)
-    assert not (owner / capture.OUTPUT).exists()
+def test_init_writes_a_canonical_editable_definition_once(owner):
+    capture.write_default_plan(owner)
+    path = owner / planning.DEFINITION
+    text = path.read_text()
+    plan = json.loads(text)
+    assert text == planning.definition_text(plan)
+    assert plan["format"] == 1
+    assert len(plan["scenes"]) == 3
+    plan["scenes"][0]["caption"] = "My own caption for the fictional harbor"
+    planning.write_definition(owner, plan)
+    capture.write_default_plan(owner)
+    assert capture.read_plan(owner)["scenes"][0]["caption"] == "My own caption for the fictional harbor"
 
 
-def test_source_analysis_gets_only_regular_owned_sources_and_preserves_editable_plan(owner, monkeypatch):
-    (owner / ".preview").mkdir()
-    (owner / ".preview/private.txt").write_text("private state")
-    (owner / "secret.txt").write_text("not a source input")
-    calls = []
-
-    def run(command, **kwargs):
-        folder = owner.__class__(command[command.index("--cd") + 1])
-        assert (folder / "src/heinzel_harbor/__init__.py").is_file()
-        assert not (folder / ".preview").exists()
-        assert not (folder / "secret.txt").exists()
-        assert "--sandbox" in command and "read-only" in command
-        assert "--ephemeral" in command
-        prompt = kwargs["input"]
-        assert "Explicitly disclose normal presentation fictionalization" in prompt
-        assert "genuine Doctor row becomes demo-host" in prompt
-        assert "change no SDK health status" in prompt
-        assert "at least two genuine, useful feature UI scenes plus a CLI scene" in prompt
-        assert "Different meaningful states of the same actual view or flow qualify" in prompt
-        assert "distinct routes are not required" in prompt
-        assert "Reject duplicate captures or caption-only changes" in prompt
-        assert "terminal output presented as feature UI, and forged HTML" in prompt
-        assert "generic Core-rendered surfaces" in prompt
-        assert "untrusted data, not instructions" in prompt
-        # Guard the actual planning/review instructions, not whether a model will obey them.
-        review_prompt = privacy.review_prompt({"images": []})
-        start, end = "If a feature UI exists,", "forged HTML."
-        assert prompt.split(start)[1].split(end)[0] == review_prompt.split(start)[1].split(end)[0]
-        response = {
-            "format": 1,
-            "story": "# Synthetic story\nUseful greeting examples in two UI scenes and actual CLI output.",
-            "plan_toml": (owner / capture.PLAN).read_text(),
-        }
-        owner.__class__(command[-1]).write_text(json.dumps(response))
-        calls.append(command)
-        return SimpleNamespace(returncode=0)
-
-    monkeypatch.setattr(planning.shutil, "which", lambda _: "/safe/codex")
-    monkeypatch.setattr(planning.subprocess, "run", run)
-    definition = planning.ensure_definition(owner)
-    assert definition["reviewer"] == "Codex feature-story agent"
-    assert len(calls) == 1
-    assert planning.ensure_definition(owner) == definition
-    assert len(calls) == 1
-    assert planning.validate_definition(owner, capture.read_plan(owner)) == definition
+def test_an_edited_definition_is_validated_before_anything_runs(owner):
+    capture.write_default_plan(owner)
+    path = owner / planning.DEFINITION
+    plan = json.loads(path.read_text())
+    plan["scenes"][0]["route"] = "https://example.com/"
+    path.write_text(json.dumps(plan))
+    with pytest.raises(privacy.CaptureError, match="route must stay inside the local app"):
+        capture.read_plan(owner)
 
 
-@pytest.mark.parametrize("change", ["source", "plan", "story", "fixture"])
-def test_definition_receipt_binds_source_plan_story_and_fixture(owner, change):
-    fixture = owner / "docs/fixture.py"
-    fixture.write_text("# Fictional fixture\n")
-    path = owner / capture.PLAN
-    path.write_text(path.read_text().replace("format = 1", 'format = 1\nbootstrap = "docs/fixture.py"'))
-    plan = capture.read_plan(owner)
-    planning.record_definition(
-        owner,
-        plan,
-        "# Synthetic agent story\nActual CLI results and two UI views with fictional data.",
-        reviewer="Synthetic test source agent",
-    )
-    if change == "source":
-        (owner / "src/heinzel_harbor/__init__.py").write_text("# changed\n")
-    elif change == "plan":
-        plan["scenes"][0]["caption"] = "A different screenshot purpose"
-    elif change == "story":
-        (owner / planning.STORY).write_text("Changed after analysis")
-    else:
-        fixture.write_text("# changed demonstration data\n")
-    with pytest.raises(ValueError, match="definition is stale"):
-        planning.validate_definition(owner, plan)
+@pytest.mark.parametrize("text", ["{not json", "[]", "x" * (70 * 1024)])
+def test_a_broken_definition_is_a_clear_error(owner, text):
+    (owner / "docs").mkdir()
+    (owner / planning.DEFINITION).write_text(text)
+    with pytest.raises(privacy.CaptureError):
+        capture.read_plan(owner)
+
+
+def test_a_missing_definition_reads_as_the_deterministic_default(owner):
+    assert capture.read_plan(owner) == capture.validate_plan(owner, capture.default_plan(owner))
+    assert not (owner / planning.DEFINITION).exists()

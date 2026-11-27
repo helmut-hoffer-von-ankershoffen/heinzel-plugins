@@ -212,16 +212,20 @@ The in-memory Slack in `tests/conftest.py` is a labelled fake. `tests/e2e/live_t
 <!-- screenshots:start -->
 ## Screenshots
 
-<img src="docs/assets/screenshots/review-slack-notice.png" alt="Demo data: Mira reviews the fictional Slack account, destination, scope and complete weekly-report notice before delivery." width="960">
+<img src="docs/assets/screenshots/slack-settings.png" alt="Slack settings for a fictional member and workspace, including how long a draft can wait for a decision." width="960">
 
-Demo data: Mira reviews the fictional Slack account, destination, scope and complete weekly-report notice before delivery.
+Slack settings for a fictional member and workspace, including how long a draft can wait for a decision.
 
-<img src="docs/assets/screenshots/slack-notice-delivered.png" alt="Demo data: after Confirm, Core&#x27;s chat reports that the channel delivered the fictional notice; this does not approve a captured write." width="960">
+<img src="docs/assets/screenshots/slack-notification-settings.png" alt="Heinzel offers to send notices and questions through Slack direct messages when the Slack chat capability is selected." width="960">
 
-Demo data: after Confirm, Core&#x27;s chat reports that the channel delivered the fictional notice; this does not approve a captured write.
+Heinzel offers to send notices and questions through Slack direct messages when the Slack chat capability is selected.
 
 <details>
 <summary>Command line</summary>
+
+<img src="docs/assets/screenshots/slack-notice-delivered.png" alt="A fixture verifies one fictional Slack delivery through Core&#x27;s confirmation API and checks refusal of unauthenticated and repeated attempts." width="960">
+
+A fixture verifies one fictional Slack delivery through Core&#x27;s confirmation API and checks refusal of unauthenticated and repeated attempts.
 
 <img src="docs/assets/screenshots/slack-draft-cli.png" alt="Demo data: the fictional weekly-report draft and printed button labels, rendered in the terminal from Slack message blocks." width="960">
 

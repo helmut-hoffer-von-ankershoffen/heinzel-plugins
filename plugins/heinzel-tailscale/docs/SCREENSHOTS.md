@@ -2,9 +2,16 @@
 
 From the collection root, run `make screenshots NAME=heinzel-tailscale OPEN=1`.
 Review the [contact sheet](assets/screenshots/index.html) before committing.
-The [scene plan](screenshots.toml) describes the real UI and CLI captures.
+The [definition](screenshot-definition.json) describes the real UI and CLI captures.
 `make screenshots-check NAME=heinzel-tailscale` verifies freshness offline.
 
 Captures use a temporary fictional profile without connected accounts. The generated
 [manifest](assets/screenshots/capture.json) records the SDK version and input/image digests.
 See the [author guide](../../../docs/SCREENSHOT_AUTHORING.md) for human and agent commands.
+
+The five committed images and their original manifest are reference evidence from
+the existing-private-route release. They have not been captured with the composed
+fixture and definition. The gallery owner must rerender all five scenes with the
+canonical harness, including `sharing-existing-private` and the bounded
+`showcase sharing-status --json` command, then replace the whole generated bundle.
+The historical manifest is intentionally unchanged and does not certify these new inputs.

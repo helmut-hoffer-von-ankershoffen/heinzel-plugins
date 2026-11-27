@@ -1,6 +1,6 @@
 [project]
 name = "heinzel-clock"
-version = "0.9.11"
+version = "0.9.12"
 description = "What time it is for everyone on the team: a Heinzelmännchen plugin."
 readme = "README.md"
 license = "MIT"
@@ -115,6 +115,10 @@ requires = ["core:plugin-api@1"]
 provides = []
 
 [tool.hatch.build.hooks.custom]
+
+[tool.hatch.build.targets.wheel]
+# The build hook packages these generated assets, including in standalone source snapshots.
+exclude = ["/src/heinzel_clock/views"]
 
 [tool.coverage.run]
 source = ["heinzel_clock"]

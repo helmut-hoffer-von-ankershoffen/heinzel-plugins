@@ -83,3 +83,12 @@ constraints. Plugins import `pydantic` and `rich` without declaring them, becaus
   to a commit after this change.
 - `hz system update` and installed plugins are unaffected: users never receive the lock, and Core does not read
   `plugin-lock.json`.
+
+## Amendment: deterministic screenshot capture
+
+The gallery digest no longer covers metadata, locks or Python source at all. It covers only what a capture
+renders: the hand-edited `docs/screenshot-definition.json`, its fixture bootstrap, theme declarations and the
+plugin's web, static and view assets ([Screenshot authoring](../SCREENSHOT_AUTHORING.md)). The rules above about
+which metadata renders, the legacy digest and the pinned migration (`_digest_migration.py`) are therefore retired:
+every committed gallery was verified fresh under the old rule and re-recorded under the new digest once, at the flip
+(format-2 `capture.json`). A dependency or relock never makes a gallery stale now.
