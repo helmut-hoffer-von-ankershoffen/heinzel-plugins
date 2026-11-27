@@ -14,6 +14,7 @@ from pathlib import Path
 _POLICY_SOURCE = "src/heinzel_plugin_tools/focused_policy.py"
 _T_CAPTURE = "tests/capture_test.py"
 _T_CLI_COMMANDS = "tests/cli_commands_test.py"
+_T_PRESENTATION = "tests/presentation_test.py"
 _T_TOOLING = "tests/tooling_test.py"
 _T_FOCUSED_HOOK = "tests/focused_hook_test.py"
 _T_FOCUSED_TRUST = "tests/focused_trust_test.py"
@@ -54,6 +55,7 @@ GALLERY_ORIGINAL = "330dc9bc521c9b59990604fa3bc9e74342de0886"
 GALLERY_HOSTED_HEAD = "d04153aa78ff1692f81a291b251c527ab86dc476"
 GALLERY_CLOCK_HEAD = "bc201df2544f95c5b60195d5bbd9eb17ca9f05f4"
 GALLERY_THEME_HEAD = "567d08577f9e02cfb90c5f0a6db9c952c40f3d07"
+GALLERY_CAPTURE_HEAD = "5f2c193e5b1070bf0d66e395d334217cecc6bfc0"
 GALLERY_CAPTURE_FIXTURE = "tests/capture_run_test.py"
 GALLERY_RUNTIME_BLOBS = {
     ".github/workflows/ci.yml": "98242894cc754d366a8f393bac1a566c5ea30cea",
@@ -79,6 +81,17 @@ GALLERY_THEME_BLOBS = {
     "src/heinzel_plugin_tools/privacy.py": "c26257bff51a5ae00d4b9150dc0b8998e2331687",
     _T_CAPTURE: "d4d395e9cc67173c76a69c34ca54ddaebc9364fb",
 }
+GALLERY_CAPTURE_BLOBS = {
+    "docs/SCREENSHOT_AUTHORING.md": "5a9c8f69c106830659d18ae1b90169fc16886da8",
+    "src/heinzel_plugin_tools/capture.py": "0a886876863cb8e2b5de53a55353aa81b241e884",
+    "src/heinzel_plugin_tools/capture_host.py": "539b595038d29ebdd8aff151ada143e985ef2abe",
+    "src/heinzel_plugin_tools/capture_linux.py": "804a021874e8871f50b5971f48b562cb00c9da4e",
+    "src/heinzel_plugin_tools/cli.py": "da21c528a640f9b21bcace04e1c4f78bb3e9beaa",
+    GALLERY_CAPTURE_FIXTURE: "efd977783aa8ab7d7620f72b025f6d3ba5f764a4",
+    _T_CAPTURE: "b079d3db75638a34ec39c1d2252f94ec5362b134",
+    _T_CLI_COMMANDS: "db852b1db76ba3ef4ab55de670f796dae190c69d",
+    _T_PRESENTATION: "8219233b5f4408e7973b0de58c915b8399562ebb",
+}
 GALLERY_POLICY_PATHS = frozenset(
     {
         *GALLERY_RUNTIME_BLOBS,
@@ -97,7 +110,7 @@ PLANS = {
             _T_CAPTURE,
             "tests/cli_environment_test.py",
             "tests/cli_commands_test.py",
-            "tests/presentation_test.py",
+            _T_PRESENTATION,
             "tests/privacy_test.py",
             "tests/workflow_test.py",
             "tests/gallery_index_guard_test.py",
@@ -300,15 +313,31 @@ def _check_required_tests(
             raise ValueError("required focused test differs from frozen candidate")
 
 
+def _gallery_forward_blobs(repo: Path, old: str, new: str) -> dict[str, str]:
+    pins = GALLERY_FORWARD_BLOBS
+    if old == GALLERY_HOSTED_HEAD:
+        return pins
+    pins = pins | GALLERY_CLOCK_BLOBS
+    if old == GALLERY_CLOCK_HEAD:
+        return pins
+    pins = pins | GALLERY_THEME_BLOBS
+    changed = _changed(repo, old, new) - {_POLICY_SOURCE, _T_FOCUSED_POLICY}
+    if old == GALLERY_THEME_HEAD:
+        if changed - GALLERY_THEME_BLOBS.keys():
+            raise ValueError("gallery diagnostic changes a path outside its reviewed scope")
+        return pins
+    if old != GALLERY_CAPTURE_HEAD or changed != GALLERY_CAPTURE_BLOBS.keys():
+        raise ValueError("gallery capture repair requires its exact reviewed path set")
+    return pins | GALLERY_CAPTURE_BLOBS
+
+
 def plan(repo: Path, old: str, new: str, trusted_policy: str) -> CheckPlan:
     """Return a fixed plan, only when trusted launcher and all frozen inputs match.
 
     `trusted_policy` must be fixed by an independently trusted launcher. Accepting
     a caller-provided value here without such a launcher does not confer trust.
     """
-    theme_diagnostic = old == GALLERY_THEME_HEAD
-    clock_fix = old == GALLERY_CLOCK_HEAD or theme_diagnostic
-    hosted_fix = old == GALLERY_HOSTED_HEAD or clock_fix
+    hosted_fix = old in (GALLERY_HOSTED_HEAD, GALLERY_CLOCK_HEAD, GALLERY_THEME_HEAD, GALLERY_CAPTURE_HEAD)
     plan_key = GALLERY_ORIGINAL if hosted_fix else old
     if plan_key not in PLANS:
         raise ValueError("unknown original PR head")
@@ -323,14 +352,7 @@ def plan(repo: Path, old: str, new: str, trusted_policy: str) -> CheckPlan:
     ):
         raise ValueError("gallery push requires the pinned, direct policy successor")
     policy_paths = GALLERY_POLICY_PATHS if gallery else POLICY_PATHS
-    forward_blobs = GALLERY_FORWARD_BLOBS if hosted_fix else {}
-    if clock_fix:
-        forward_blobs = forward_blobs | GALLERY_CLOCK_BLOBS
-    if theme_diagnostic:
-        diagnostic_paths = {_POLICY_SOURCE, _T_FOCUSED_POLICY, *GALLERY_THEME_BLOBS}
-        if _changed(repo, old, new) - diagnostic_paths:
-            raise ValueError("gallery diagnostic changes a path outside its reviewed scope")
-        forward_blobs = forward_blobs | GALLERY_THEME_BLOBS
+    forward_blobs = _gallery_forward_blobs(repo, old, new) if hosted_fix else {}
     if hosted_fix:
         policy_paths = policy_paths.union(forward_blobs)
         tests = (*tests, GALLERY_CAPTURE_FIXTURE)

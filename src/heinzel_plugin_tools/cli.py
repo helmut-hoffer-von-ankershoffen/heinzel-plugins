@@ -917,6 +917,8 @@ def capture_plugin(
     open_preview: bool = False,
     draft_only: bool = False,
     prepared_python: Path | None = None,
+    inspect_prepared: bool = False,
+    prepared_approval: str | None = None,
     verify: bool = False,
     strict_images: bool = False,
     render_check: bool = False,
@@ -937,7 +939,10 @@ def capture_plugin(
         command += ["--core", core]
     if prepared_python:
         command += ["--python", str(prepared_python.absolute())]
+    if prepared_approval is not None:
+        command += ["--prepared-approval", prepared_approval]
     for enabled, flag in (
+        (inspect_prepared, "--inspect-prepared"),
         (json_output, "--json"),
         (headed, "--headed"),
         (open_preview, "--open"),
@@ -1253,6 +1258,12 @@ def screenshot_main(arguments: list[str], *, check: bool = False) -> int:
         dest="prepared_python",
         help="Use an explicitly prepared Python with the owning plugin and compatible SDK installed",
     )
+    parser.add_argument(
+        "--inspect-prepared",
+        action="store_true",
+        help="Print the prepared host approval inputs and digest without running them",
+    )
+    parser.add_argument("--prepared-approval", help="Reviewed SHA-256 from --inspect-prepared, required with --python")
     parser.add_argument("--open", action="store_true", help="Open the local contact sheet after a successful capture")
     parser.add_argument("--headed", action="store_true", help="Show the capture browser for debugging scenes")
     parser.add_argument("--draft", action="store_true", help="Capture privately into .preview without publishing")
@@ -1271,8 +1282,26 @@ def screenshot_main(arguments: list[str], *, check: bool = False) -> int:
     )
     args = parser.parse_args(arguments)
     try:
-        if sum((bool(check or args.check), args.init, args.draft, args.verify, args.render_check)) > 1:
-            raise CaptureError("Choose one screenshot mode: --init, --check, --draft, --verify or capture")
+        if (
+            sum(
+                (
+                    bool(check or args.check),
+                    args.init,
+                    args.draft,
+                    args.verify,
+                    args.render_check,
+                    args.inspect_prepared,
+                )
+            )
+            > 1
+        ):
+            raise CaptureError(
+                "Choose one screenshot mode: --init, --check, --draft, --verify, --inspect-prepared or capture"
+            )
+        if (args.inspect_prepared or args.prepared_approval is not None) and (
+            args.prepared_python is None or check or args.check or args.init or args.render_check
+        ):
+            raise CaptureError("Prepared host approval options require --python and local host capture")
         if args.strict_images and not (args.verify or args.render_check):
             raise CaptureError("--strict-images needs --verify")
         if args.all and (not (check or args.check) or args.name is not None):
@@ -1310,6 +1339,8 @@ def screenshot_main(arguments: list[str], *, check: bool = False) -> int:
                 open_preview=args.open,
                 draft_only=args.draft,
                 prepared_python=args.prepared_python,
+                inspect_prepared=args.inspect_prepared,
+                prepared_approval=args.prepared_approval,
                 verify=args.verify,
                 strict_images=args.strict_images,
                 render_check=args.render_check,

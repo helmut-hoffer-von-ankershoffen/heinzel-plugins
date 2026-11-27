@@ -1297,7 +1297,12 @@ def test_render_check_failure_never_reads_host_private_policy_or_prints_unscanne
 
 
 @pytest.mark.parametrize("error_type", [privacy.StaleGallery, privacy.RenderedGalleryMismatch])
-def test_zero_secret_worker_distinguishes_post_render_mismatch_from_freshness(owner, monkeypatch, capsys, error_type):
+def test_zero_secret_worker_distinguishes_post_render_mismatch_from_freshness(
+    owner, tmp_path, monkeypatch, capsys, error_type
+):
+    inventory = tmp_path / "source-files.json"
+    inventory.write_text('["pyproject.toml"]')
+    monkeypatch.setattr(capture, "WORKER_INVENTORY", inventory)
     original_is_file = Path.is_file
     monkeypatch.setattr(Path, "is_file", lambda path: path == Path("/.dockerenv") or original_is_file(path))
     monkeypatch.setattr(sys, "platform", "linux")
@@ -1418,6 +1423,7 @@ def test_canonical_capture_rejects_replaced_snapshot_root_before_reading_it(owne
 def test_worker_inventory_accepts_only_explicit_relative_source_names(owner, tmp_path, monkeypatch, capsys, names):
     inventory = tmp_path / "source-files.json"
     inventory.write_text(json.dumps(names))
+    monkeypatch.setattr(capture, "WORKER_INVENTORY", inventory)
     original_is_file = Path.is_file
     monkeypatch.setattr(Path, "is_file", lambda path: path == Path("/.dockerenv") or original_is_file(path))
     monkeypatch.setattr(sys, "platform", "linux")
@@ -1430,8 +1436,6 @@ def test_worker_inventory_accepts_only_explicit_relative_source_names(owner, tmp
             str(owner),
             "--container-worker",
             "--draft",
-            "--source-inventory",
-            str(inventory),
             "--json",
         ],
     )
@@ -1447,12 +1451,19 @@ def test_worker_inventory_accepts_only_explicit_relative_source_names(owner, tmp
     assert json.loads(capsys.readouterr().out)["ok"] is bool(received)
 
 
-def test_source_inventory_is_not_an_author_freshness_override(owner, monkeypatch, capsys):
-    monkeypatch.setattr(
-        sys, "argv", ["capture", "--project", str(owner), "--draft", "--source-inventory", "/missing", "--json"]
-    )
-    assert capture.main() == 1
-    assert "isolated worker" in json.loads(capsys.readouterr().out)["error"]
+@pytest.mark.parametrize("worker", [False, True])
+def test_source_inventory_path_is_not_accepted_from_the_cli(owner, monkeypatch, worker):
+    def forbidden(*args):
+        raise AssertionError("an alternate CLI path must be rejected before reading any inventory")
+
+    monkeypatch.setattr(capture, "regular_bytes", forbidden)
+    argv = ["capture", "--project", str(owner), "--draft", "--source-inventory", "/missing", "--json"]
+    if worker:
+        argv.append("--container-worker")
+    monkeypatch.setattr(sys, "argv", argv)
+    with pytest.raises(SystemExit) as rejected:
+        capture.main()
+    assert rejected.value.code == 2
 
 
 def test_snapshot_keeps_uncommitted_authoring_and_excludes_unrelated_files(owner):

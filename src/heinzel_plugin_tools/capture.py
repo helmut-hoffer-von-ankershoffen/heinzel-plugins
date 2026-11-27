@@ -65,6 +65,7 @@ MAX_IMAGE = 500 * 1024
 MAX_SCENES = 8
 CLOCK_READING = re.compile(r"(?<![\d:])\d{1,2}:\d{2}(?::\d{2})?(?![\d:])")
 IGNORED = {"node_modules", "__pycache__", ".venv", "dist", ".git", ".acceptance", ".preview"}
+WORKER_INVENTORY = Path("/capture/source-files.json")
 
 
 def project_data(root: Path) -> dict:
@@ -994,16 +995,25 @@ def capture(
     headed: bool,
     draft_only: bool = False,
     prepared_python: Path | None = None,
+    prepared_approval: str | None = None,
     source_files: list[str] | None = None,
 ) -> dict:
     """Prepare the owning artifact, record every scene, and publish a complete gallery only after success."""
+    root = root.resolve()
+    plan = read_plan(root)
+
+    def check_prepared():
+        if prepared_python is not None:
+            from heinzel_plugin_tools.capture_host import require_approval
+
+            require_approval(root, plan, prepared_python, prepared_approval)
+
+    check_prepared()
     from playwright.sync_api import Error, sync_playwright
     from rich.console import Console
     from rich.terminal_theme import MONOKAI
     from rich.text import Text
 
-    root = root.resolve()
-    plan = read_plan(root)
     metadata = project_data(root)
     name = metadata["project"]["name"]
     if not re.fullmatch(r"[A-Za-z0-9][A-Za-z0-9._-]*", name):
@@ -1039,6 +1049,7 @@ def capture(
             check=True,
             timeout=600,
         )
+        check_prepared()
     interpreter = prepared_python.absolute() if prepared_python else root / ".venv/bin/python"
     if prepared_python is None:
         validate_owning_environment(root, interpreter)
@@ -1070,7 +1081,9 @@ def capture(
         )
         themes = theme_names(root)
         if themes:
+            check_prepared()
             hz(interpreter, ["system", "theme", "use", themes[0]], env, work)
+        check_prepared()
         process, address = backend(interpreter, env, work)
         try:
             with sync_playwright() as playwright:
@@ -1108,6 +1121,7 @@ def capture(
                         phase = "scene preparation"
                         try:
                             if scene["surface"] == "cli":
+                                check_prepared()
                                 output = hz(interpreter, scene["command"], env, work)
                                 scan_text(output)
                                 (work / f"{scene['name']}.txt").write_text(canonical_text(Text.from_ansi(output).plain))
@@ -1138,6 +1152,7 @@ def capture(
                                     f'localStorage.setItem("hz.theme",{json.dumps(appearance)});'
                                 )
                                 if scene.get("theme"):
+                                    check_prepared()
                                     hz(interpreter, ["system", "theme", "use", scene["theme"]], env, work)
                                 page.goto(base + scene.get("route", "/") + "#" + address.split("#", 1)[1])
                                 page.locator("#splash").wait_for(state="hidden")
@@ -1155,6 +1170,7 @@ def capture(
                                     phase = "action " + step["action"]
                                     match step["action"]:
                                         case "terminal":
+                                            check_prepared()
                                             terminal_scene(page, step["command"])
                                         case "click" | "hover":
                                             accessible_name = (
@@ -1324,6 +1340,7 @@ def verify(
     core: str | None,
     headed: bool,
     prepared_python: Path | None = None,
+    prepared_approval: str | None = None,
     strict_images: bool = False,
     source_files: list[str] | None = None,
 ) -> dict:
@@ -1338,7 +1355,15 @@ def verify(
     root = root.resolve()
     check_capture(root, source_files=source_files)
     command = regenerate_command(root)
-    capture(root, core=core, headed=headed, draft_only=True, prepared_python=prepared_python, source_files=source_files)
+    capture(
+        root,
+        core=core,
+        headed=headed,
+        draft_only=True,
+        prepared_python=prepared_python,
+        prepared_approval=prepared_approval,
+        source_files=source_files,
+    )
     plan = read_plan(root)
     folder = safe_path(root, DRAFT)
     manifest = json.loads(safe_path(root, MANIFEST).read_text())
@@ -1379,6 +1404,8 @@ def main() -> int:
     parser.add_argument("--project", required=True, type=Path)
     parser.add_argument("--core")
     parser.add_argument("--python", type=Path, dest="prepared_python")
+    parser.add_argument("--inspect-prepared", action="store_true")
+    parser.add_argument("--prepared-approval")
     parser.add_argument("--json", action="store_true")
     parser.add_argument("--headed", action="store_true")
     parser.add_argument("--draft", action="store_true")
@@ -1388,9 +1415,20 @@ def main() -> int:
     parser.add_argument("--render-check", action="store_true")
     parser.add_argument("--container-worker", action="store_true", help=argparse.SUPPRESS)
     parser.add_argument("--render-check-worker", action="store_true", help=argparse.SUPPRESS)
-    parser.add_argument("--source-inventory", type=Path, help=argparse.SUPPRESS)
     args = parser.parse_args()
     try:
+        if (args.inspect_prepared or args.prepared_approval is not None) and (
+            args.prepared_python is None or args.container_worker or args.render_check
+        ):
+            raise CaptureError("Prepared host approval options require --python and local host capture")
+        if args.inspect_prepared:
+            if args.prepared_approval is not None or any((args.verify, args.draft, args.headed, args.open, args.core)):
+                raise CaptureError("--inspect-prepared is a standalone inspection of the selected --python")
+            from heinzel_plugin_tools.capture_host import approval
+
+            root = args.project.resolve()
+            print(json.dumps(approval(root, read_plan(root), args.prepared_python)))
+            return 0
         if args.render_check:
             if args.verify or args.draft or args.prepared_python or args.headed or args.open or args.container_worker:
                 raise CaptureError("--render-check is a standalone zero-secret comparison, not publication")
@@ -1400,10 +1438,10 @@ def main() -> int:
         if args.render_check_worker and not (args.container_worker and args.verify and args.json):
             raise CaptureError("The render check worker requires isolated JSON verification")
         source_files = None
-        if args.source_inventory:
-            if not args.container_worker or not (args.draft or args.verify):
+        if args.container_worker:
+            if not (args.draft or args.verify):
                 raise CaptureError("Source inventories belong only to isolated worker drafts and verification")
-            source_files = json.loads(regular_bytes(args.source_inventory, 1024 * 1024))
+            source_files = json.loads(regular_bytes(WORKER_INVENTORY, 1024 * 1024))
             if not isinstance(source_files, list) or any(
                 not isinstance(name, str)
                 or not name
@@ -1424,6 +1462,7 @@ def main() -> int:
                     core=args.core,
                     headed=args.headed,
                     prepared_python=args.prepared_python,
+                    prepared_approval=args.prepared_approval,
                     strict_images=args.strict_images,
                     source_files=source_files,
                 )
@@ -1434,6 +1473,7 @@ def main() -> int:
                     headed=args.headed,
                     draft_only=args.draft,
                     prepared_python=args.prepared_python,
+                    prepared_approval=args.prepared_approval,
                     source_files=source_files,
                 )
             )

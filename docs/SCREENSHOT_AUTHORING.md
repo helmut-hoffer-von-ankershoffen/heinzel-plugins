@@ -16,8 +16,22 @@ hz-plugin screenshots-check --all --json   # every gallery; stale ones with the 
 
 Inside a standalone plugin, omit the name. `--headed` shows the capture browser. `--open` opens the local contact
 sheet. `CORE=/path/to/core.whl` selects a candidate SDK through the owning environment's ordinary setup contract.
-For an existing governed project with a prepared environment, `--python /absolute/path/to/.venv/bin/python` uses
-that interpreter as it is; it must contain the owning distribution at its declared version and a compatible SDK.
+For a prepared host environment, inspect the proposed inputs before capture:
+
+```sh
+hz-plugin screenshots clock --python /absolute/path/to/.venv/bin/python --inspect-prepared
+hz-plugin screenshots clock --python /absolute/path/to/.venv/bin/python --prepared-approval REVIEWED_SHA256 --draft
+```
+
+Review the plan, source and runtime inventory from a trusted checkout and supply the SHA-256 separately. The
+approval covers the bounded project inputs, fixture, selected Python binary, entrypoint, and local
+`site-packages` tree including startup path files and bytecode. Inspection runs neither the project nor the selected
+Python. The standard virtual environment must use installed wheels, keep system site-packages disabled, and omit
+executable startup hooks and additional startup import roots. Capture checks the live inputs again before starting
+the app and running scene commands. Use a trusted project and host, and keep the reviewed inputs stable during
+capture. The base Python standard library, system libraries and dynamic effects of the reviewed code are outside
+the approval inventory.
+Use the canonical Linux path when a disposable OS environment is required.
 Only the owning plugin's frontend build runs when it declares one. This workflow never runs core's test suite.
 
 A successful JSON result contains absolute `preview`, `plan` and `manifest` paths, the screenshot metadata and

@@ -614,6 +614,7 @@ def test_capture_runs_the_pinned_tool_with_only_the_requested_options(collection
         open_preview=True,
         draft_only=True,
         prepared_python=Path("python"),
+        prepared_approval="a" * 64,
     )
     command, options = seen[0]
     assert status == 4 and options["cwd"] == collection / "plugins/heinzel-harbor"
@@ -625,6 +626,15 @@ def test_capture_runs_the_pinned_tool_with_only_the_requested_options(collection
     assert command[script + 2 : script + 4] == ["--project", str(collection / "plugins/heinzel-harbor")]
     assert command[command.index("--core") + 1] == "candidate.whl"
     assert Path(command[command.index("--python") + 1]).is_absolute()
+    assert command[command.index("--prepared-approval") + 1] == "a" * 64
+
+
+def test_capture_forwards_prepared_inspection_without_executing_a_scene(collection, monkeypatch):
+    seen = []
+    monkeypatch.setattr(cli.subprocess, "call", lambda command, **options: seen.append(command) or 0)
+    assert cli.capture_plugin(project_in(collection), None, prepared_python=Path("python"), inspect_prepared=True) == 0
+    assert "--inspect-prepared" in seen[0]
+    assert "--prepared-approval" not in seen[0]
 
 
 @pytest.mark.parametrize(

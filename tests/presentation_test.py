@@ -11,7 +11,7 @@ from types import SimpleNamespace
 import pytest
 
 from heinzel_plugin_tools import _presentation as presentation
-from heinzel_plugin_tools import capture
+from heinzel_plugin_tools import capture, capture_host
 from heinzel_plugin_tools.privacy import CaptureError
 
 pytestmark = pytest.mark.unit
@@ -291,6 +291,7 @@ def test_capture_attests_after_wheel_config_replacement_and_restores(environment
     attest = capture.owning_prefix
     config = root / ".venv/pyvenv.cfg"
     original = config.read_bytes()
+    reviewed_digest = "a" * 64
 
     def replace_config():
         replacement = config.with_suffix(".replacement")
@@ -331,19 +332,33 @@ def test_capture_attests_after_wheel_config_replacement_and_restores(environment
             identities[0].verify()
         raise StopBeforeBackend
 
+    def authorize(candidate_root, plan, selected_python, digest):
+        assert candidate_root == root
+        assert plan == {"scenes": []}
+        assert selected_python == interpreter
+        assert digest == reviewed_digest
+        events.append("authorize")
+
     monkeypatch.setattr(capture, "read_plan", lambda *_: {"scenes": []})
     monkeypatch.setattr(capture, "project_data", lambda *_: {"project": {"name": "fictional"}})
     monkeypatch.setattr(capture, "prepared_version", lambda *_: "0.0.0")
     monkeypatch.setattr(capture.subprocess, "run", command)
     monkeypatch.setattr(capture, "owning_prefix", identity)
     monkeypatch.setattr(capture, "demo_environment", demo)
+    monkeypatch.setattr(capture_host, "require_approval", authorize)
     failure = CaptureError if tamper and not external else StopBeforeBackend
     with pytest.raises(failure):
-        capture.capture(root, core=None, headed=False, prepared_python=interpreter if external else None)
+        capture.capture(
+            root,
+            core=None,
+            headed=False,
+            prepared_python=interpreter if external else None,
+            prepared_approval=reviewed_digest if external else None,
+        )
     expected = ["setup", "build", "install", "attest"]
     if tamper != "attestation-failure":
         expected.append("demo")
-    assert events == (["demo"] if external else [*expected, "restore"])
+    assert events == (["authorize", "demo"] if external else [*expected, "restore"])
 
 
 @pytest.mark.parametrize("unsafe", ["root-alias", "bin-alias", "config-alias", "writable", "foreign-python"])

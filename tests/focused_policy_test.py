@@ -280,3 +280,72 @@ def test_gallery_theme_diagnostic_accepts_only_reviewed_bytes_on_the_clock_succe
         reason = "differs from its reviewed blob" if path in pins else "outside its reviewed scope"
         with pytest.raises(ValueError, match=reason):
             policy.plan(repo, hosted, rejected, rejected)
+
+
+@pytest.fixture
+def capture_repair(history, monkeypatch):
+    repo, original, _, _ = history
+    candidate, tests = policy.PLANS[original]
+    git(repo, "checkout", "-q", "--detach", candidate)
+    inherited = ("GALLERY_RUNTIME_BLOBS", "GALLERY_FORWARD_BLOBS", "GALLERY_CLOCK_BLOBS", "GALLERY_THEME_BLOBS")
+    introduced = "src/heinzel_plugin_tools/capture_host.py"
+    prior_paths = {p for group in inherited for p in getattr(policy, group)}
+    for name in prior_paths | (policy.GALLERY_CAPTURE_BLOBS.keys() - {introduced}):
+        path = repo / name
+        path.parent.mkdir(parents=True, exist_ok=True)
+        path.write_text(f"before repair: {name}\n")
+    hosted = commit(repo, "published Theme diagnostic")
+    for group in inherited:
+        pins = {p: git(repo, "rev-parse", f"{hosted}:{p}") for p in getattr(policy, group)}
+        monkeypatch.setattr(policy, group, pins)
+
+    pins = {}
+    for name in policy.GALLERY_CAPTURE_BLOBS:
+        path = repo / name
+        path.write_text(f"reviewed capture repair: {name}\n")
+        pins[name] = git(repo, "hash-object", name)
+    approved = commit(repo, "capture repair")
+    monkeypatch.setattr(policy, "GALLERY_ORIGINAL", original)
+    monkeypatch.setattr(policy, "GALLERY_CAPTURE_HEAD", hosted)
+    monkeypatch.setattr(policy, "GALLERY_CAPTURE_BLOBS", pins)
+    selected = ("tests/capture_test.py", "tests/cli_commands_test.py", "tests/presentation_test.py")
+    monkeypatch.setitem(policy.PLANS, original, (candidate, (*tests, *selected)))
+    return repo, hosted, approved, introduced, selected
+
+
+def test_capture_repair_preserves_inventory_and_requires_direct_reviewed_parent(capture_repair, monkeypatch):
+    repo, hosted, approved, _, selected = capture_repair
+    assert policy.plan(repo, hosted, approved, approved).tooling == (*selected, policy.GALLERY_CAPTURE_FIXTURE)
+    with monkeypatch.context() as previous:
+        previous.setattr(policy, "GALLERY_CAPTURE_HEAD", "0" * 40)
+        previous.setattr(policy, "GALLERY_THEME_HEAD", hosted)
+        with pytest.raises(ValueError, match="outside its reviewed scope"):
+            policy.plan(repo, hosted, approved, approved)
+    (repo / "intermediate").write_text("unreviewed descendant\n")
+    later = commit(repo, "second successor")
+    with pytest.raises(ValueError, match="pinned, direct policy successor"):
+        policy.plan(repo, hosted, later, later)
+
+
+def test_capture_repair_refuses_modified_omitted_extra_and_executable_inputs(capture_repair):
+    repo, hosted, approved, introduced, _ = capture_repair
+    for name in policy.GALLERY_CAPTURE_BLOBS:
+        git(repo, "checkout", "-q", "--detach", hosted)
+        git(repo, "checkout", approved, "--", ".")
+        (repo / name).write_text("different bytes\n")
+        rejected = commit(repo, "unreviewed replacement")
+        with pytest.raises(ValueError, match="differs from its reviewed blob"):
+            policy.plan(repo, hosted, rejected, rejected)
+    for change in ("omitted", "extra", "executable"):
+        git(repo, "checkout", "-q", "--detach", hosted)
+        git(repo, "checkout", approved, "--", ".")
+        if change == "omitted":
+            (repo / introduced).unlink()
+        elif change == "extra":
+            (repo / "src/heinzel_plugin_tools/privacy.py").write_text("unapproved change to prior diagnostic\n")
+        else:
+            (repo / introduced).chmod(0o755)
+        rejected = commit(repo, change)
+        reason = "differs from its reviewed blob" if change == "executable" else "exact reviewed path set"
+        with pytest.raises(ValueError, match=reason):
+            policy.plan(repo, hosted, rejected, rejected)

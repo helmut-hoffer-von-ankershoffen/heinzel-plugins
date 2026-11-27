@@ -13,7 +13,7 @@ from pathlib import Path
 
 import pytest
 
-from heinzel_plugin_tools import capture, privacy
+from heinzel_plugin_tools import capture, capture_host, privacy
 
 pytestmark = [pytest.mark.unit, pytest.mark.usefixtures("fictional_capture_terms")]
 
@@ -183,6 +183,18 @@ def harness(tmp_path, monkeypatch):
     interpreter = bin_directory / "python"
     interpreter.write_text(INTERPRETER)
     (bin_directory / "hz").write_text(HZ)
+    (bin_directory.parent / "pyvenv.cfg").write_text("include-system-site-packages = false\n")
+    site = bin_directory.parent / "lib/python3.15/site-packages"
+    (site / "heinzel").mkdir(parents=True)
+    (site / "heinzel/__init__.py").write_text("# synthetic Core\n")
+    (site / "heinzel-0.9.8.dist-info").mkdir()
+    (site / "heinzel-0.9.8.dist-info/METADATA").write_text("Name: heinzel\nVersion: 0.9.8\n")
+    (site / "heinzel_harbor").mkdir()
+    (site / "heinzel_harbor/__init__.py").write_text("# installed fixture owner\n")
+    (site / "dependency.py").write_text("# installed fixture dependency\n")
+    (site / "__pycache__").mkdir()
+    (site / "__pycache__/dependency.cpython-315.pyc").write_bytes(b"fixture bytecode")
+    (site / "local.pth").write_text("# local startup path\n.\n")
     for path in (interpreter, bin_directory / "hz"):
         path.chmod(0o755)
 
@@ -274,7 +286,182 @@ def as_definition(text):
 
 
 def record(state, **options):
-    return capture.capture(state.owner, core=None, headed=False, prepared_python=state.interpreter, **options)
+    return capture.capture(state.owner, core=None, headed=False, **prepared(state), **options)
+
+
+def prepared(state):
+    return {
+        "prepared_python": state.interpreter,
+        "prepared_approval": capture_host.approval(state.owner, capture.read_plan(state.owner), state.interpreter)[
+            "prepared_approval_sha256"
+        ],
+    }
+
+
+def prepared_args(state):
+    return ["--python", str(state.interpreter), "--prepared-approval", prepared(state)["prepared_approval"]]
+
+
+@pytest.mark.parametrize(
+    "change",
+    [
+        "missing",
+        "cli",
+        "terminal",
+        "bootstrap",
+        "source",
+        "interpreter",
+        "sdk",
+        "entrypoint",
+        "owner",
+        "dependency",
+        "bytecode",
+        "pth",
+    ],
+)
+def test_prepared_host_refuses_missing_or_stale_approval_before_launch(harness, change):
+    capture.write_default_plan(harness.owner)
+    definition = harness.owner / capture.PLAN
+    plan = capture.read_plan(harness.owner)
+    fixture = harness.owner / "docs/fixture.py"
+    fixture.write_text("# original fixture")
+    definition.write_text(json.dumps({**plan, "bootstrap": "docs/fixture.py"}))
+    approved = prepared(harness)
+    if change in {"cli", "terminal"}:
+        scene = next(row for row in plan["scenes"] if row["name"] == change)
+        command = scene["command"] if change == "cli" else scene["steps"][0]["command"]
+        command.append("--another-option")
+        definition.write_text(json.dumps({**plan, "bootstrap": "docs/fixture.py"}))
+    elif change != "missing":
+        prefix = harness.interpreter.parent.parent
+        site = prefix / "lib/python3.15/site-packages"
+        target = {
+            "bootstrap": fixture,
+            "source": harness.owner / "src/heinzel_harbor/__init__.py",
+            "interpreter": harness.interpreter,
+            "sdk": site / "heinzel/__init__.py",
+            "entrypoint": prefix / "bin/hz",
+            "owner": site / "heinzel_harbor/__init__.py",
+            "dependency": site / "dependency.py",
+            "bytecode": site / "__pycache__/dependency.cpython-315.pyc",
+            "pth": site / "local.pth",
+        }[change]
+        target.write_bytes(target.read_bytes() + b"\n# modified\n")
+    else:
+        approved.pop("prepared_approval")
+    harness.commands.clear()
+    with pytest.raises(privacy.CaptureError, match="requires a reviewed|approval is stale"):
+        capture.capture(harness.owner, core=None, headed=False, draft_only=True, **approved)
+    assert not harness.browsers and not harness.pid_file.exists()
+    assert all(command[0] == "git" for command in harness.commands)
+    if change == "missing":
+        assert harness.commands == []
+
+
+@pytest.mark.parametrize(
+    ("relative", "content", "message"),
+    [
+        ("local.pth", "../external", "additional import roots"),
+        ("local.pth", "import arbitrary_startup", "executable .pth"),
+        ("local.pth", "nested", "additional import roots"),
+        ("owning.start", "startup:launch", "startup customization"),
+        ("sitecustomize.py", "# startup hook", "startup customization"),
+        ("owner.egg-link", "../outside", "editable links"),
+        ("heinzel-0.9.8.dist-info/direct_url.json", '{"dir_info":{"editable":true}}', "editable imports"),
+    ],
+)
+def test_prepared_approval_refuses_unbound_import_origins(harness, relative, content, message):
+    site = harness.interpreter.parent.parent / "lib/python3.15/site-packages"
+    (site / "nested").mkdir()
+    (site / "nested/sitecustomize.py").write_text("# nested startup hook")
+    (site / relative).write_text(content)
+    with pytest.raises(privacy.CaptureError, match=message):
+        prepared(harness)
+    assert not harness.browsers and not harness.pid_file.exists()
+    assert all(command[0] == "git" for command in harness.commands)
+
+
+def test_prepared_approval_refuses_inherited_site_packages(harness):
+    (harness.interpreter.parent.parent / "pyvenv.cfg").write_text("include-system-site-packages = true\n")
+    with pytest.raises(privacy.CaptureError, match="include-system-site-packages = false"):
+        prepared(harness)
+    assert not harness.browsers and not harness.pid_file.exists()
+
+
+def test_inspect_prepared_returns_candidate_identity_without_running_it(harness, monkeypatch, capsys):
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        [
+            "capture",
+            "--project",
+            str(harness.owner),
+            "--python",
+            str(harness.interpreter),
+            "--inspect-prepared",
+        ],
+    )
+    assert capture.main() == 0
+    receipt = json.loads(capsys.readouterr().out)
+    assert receipt["prepared_approval_sha256"] == prepared(harness)["prepared_approval"]
+    assert receipt["runtime"]["invoked"] == str(harness.interpreter)
+    assert not harness.browsers and not harness.pid_file.exists()
+    assert all(command[0] == "git" for command in harness.commands)
+
+
+def test_canonical_render_does_not_require_prepared_approval(harness, monkeypatch, capsys):
+    from heinzel_plugin_tools import capture_linux
+
+    monkeypatch.setattr(capture_host, "approval", lambda *_: pytest.fail("prepared host policy used in canonical mode"))
+    monkeypatch.setattr(capture_linux, "run", lambda args: {"render_verified": args.render_check, "scene_count": 3})
+    monkeypatch.setattr(sys, "argv", ["capture", "--project", str(harness.owner), "--render-check", "--json"])
+    assert capture.main() == 0
+    assert json.loads(capsys.readouterr().out) == {"render_verified": True, "scene_count": 3}
+
+
+def test_prepared_host_rechecks_inputs_changed_by_an_approved_frontend_build(harness, monkeypatch):
+    web = harness.owner / "web"
+    web.mkdir()
+    (web / "package.json").write_text('{"scripts":{"build":"vite build"}}')
+    source = harness.owner / "src/heinzel_harbor/__init__.py"
+    approved = prepared(harness)
+    run = capture.subprocess.run
+
+    def frontend(command, **options):
+        if command[0] == "uv":
+            source.write_text("# changed by the frontend build")
+            return subprocess.CompletedProcess(command, 0)
+        return run(command, **options)
+
+    monkeypatch.setattr(capture.subprocess, "run", frontend)
+    with pytest.raises(privacy.CaptureError, match="approval is stale"):
+        capture.capture(harness.owner, core=None, headed=False, draft_only=True, **approved)
+    assert not harness.browsers and not harness.pid_file.exists()
+    assert all(command[0] == "git" for command in harness.commands)
+
+
+@pytest.mark.parametrize("next_command", ["terminal", "cli"])
+def test_prepared_host_stops_scene_execution_if_backend_changes_approved_runtime(harness, monkeypatch, next_command):
+    capture.write_default_plan(harness.owner)
+    if next_command == "cli":
+        plan = capture.read_plan(harness.owner)
+        next(row for row in plan["scenes"] if row["name"] == "terminal").pop("steps")
+        (harness.owner / capture.PLAN).write_text(json.dumps(plan))
+    approved = prepared(harness)
+    backend = capture.backend
+    site = harness.interpreter.parent.parent / "lib/python3.15/site-packages"
+
+    def changing_backend(*args):
+        ready = backend(*args)
+        (site / "dependency.py").write_text("# changed after app launch")
+        return ready
+
+    monkeypatch.setattr(capture, "backend", changing_backend)
+    with pytest.raises(privacy.CaptureError, match="approval is stale"):
+        capture.capture(harness.owner, core=None, headed=False, draft_only=True, **approved)
+    assert not any(entry[0] == "type" for entry in harness.log)
+    assert not any("tides" in command for command in harness.commands)
+    assert not backend_is_running(harness)
 
 
 def backend_is_running(state):
@@ -599,14 +786,14 @@ def test_a_built_frontend_is_prepared_before_the_interpreter_is_checked(harness,
 
     monkeypatch.setattr(capture.subprocess, "run", run)
     record(harness, draft_only=True)
-    assert order[0] == "uv build"
+    assert next(command for command in order if command != "git") == "uv build"
 
 
 def test_a_prepared_interpreter_that_is_not_executable_is_refused(harness, tmp_path):
     plain = tmp_path / "notpython"
     plain.write_text("")
     with pytest.raises(privacy.CaptureError, match="existing Python executable"):
-        capture.capture(harness.owner, core=None, headed=False, prepared_python=plain)
+        capture.capture(harness.owner, core=None, headed=False, prepared_python=plain, prepared_approval="0" * 64)
 
 
 def test_the_command_line_prints_a_human_summary_and_opens_the_contact_sheet(harness, monkeypatch, capsys):
@@ -615,7 +802,7 @@ def test_the_command_line_prints_a_human_summary_and_opens_the_contact_sheet(har
     monkeypatch.setattr(
         sys,
         "argv",
-        ["capture", "--project", str(harness.owner), "--python", str(harness.interpreter), "--draft", "--open"],
+        ["capture", "--project", str(harness.owner), *prepared_args(harness), "--draft", "--open"],
     )
     assert capture.main() == 0
     out = capsys.readouterr().out
@@ -628,7 +815,7 @@ def test_the_command_line_emits_one_json_document_for_agents(harness, monkeypatc
     monkeypatch.setattr(
         sys,
         "argv",
-        ["capture", "--project", str(harness.owner), "--python", str(harness.interpreter), "--draft", "--json"],
+        ["capture", "--project", str(harness.owner), *prepared_args(harness), "--draft", "--json"],
     )
     assert capture.main() == 0
     assert json.loads(capsys.readouterr().out)["plugin"] == "heinzel-harbor"
@@ -639,7 +826,7 @@ def test_a_failed_command_line_run_returns_safe_json_and_status_one(harness, mon
     monkeypatch.setattr(
         sys,
         "argv",
-        ["capture", "--project", str(harness.owner), "--python", str(harness.interpreter), "--draft", "--json"],
+        ["capture", "--project", str(harness.owner), *prepared_args(harness), "--draft", "--json"],
     )
     assert capture.main() == 1
     captured = capsys.readouterr()
@@ -739,7 +926,8 @@ def test_normal_capture_imports_leave_owned_vendor_source_inventory_unchanged(ha
     plan = harness.owner / capture.PLAN
     capture.write_default_plan(harness.owner)
     plan.write_text(json.dumps(json.loads(plan.read_text()) | {"bootstrap": "docs/fixture.py"}))
-    harness.interpreter = Path(sys.executable)
+    harness.interpreter.unlink()
+    harness.interpreter.symlink_to(sys.executable)
     monkeypatch.setattr(capture, "prepared_version", lambda *_args: "0.9.16")
     original_environment = capture.demo_environment
     environment = {}
@@ -914,7 +1102,7 @@ def test_a_failed_restore_never_hides_the_capture_failure(harness, monkeypatch, 
 
 def test_verify_recaptures_and_passes_when_every_scene_renders_the_same_text(harness):
     record(harness)
-    report = capture.verify(harness.owner, core=None, headed=False, prepared_python=harness.interpreter)
+    report = capture.verify(harness.owner, core=None, headed=False, **prepared(harness))
     assert report["ok"]
     assert report["transcripts_differ"] == []
     assert report["images_differ"] == []
@@ -926,18 +1114,18 @@ def test_verify_fails_naming_the_command_when_displayed_text_changed_outside_the
     (harness.interpreter.parent / "hz").write_text('#!/bin/sh\necho "Ahoy, Mira!"\n')
     assert capture.check_capture(harness.owner)["fresh"], "the narrow local digest does not see this change"
     with pytest.raises(privacy.StaleGallery, match=r"differs from the committed gallery \(cli.txt\)") as stale:
-        capture.verify(harness.owner, core=None, headed=False, prepared_python=harness.interpreter)
+        capture.verify(harness.owner, core=None, headed=False, **prepared(harness))
     assert stale.value.command == "make screenshots NAME=heinzel-harbor"
 
 
 def test_verify_lists_image_differences_and_gates_them_only_when_strict(harness):
     record(harness)
     harness.settings["png"] = PNG + b"other-font-rendering"
-    report = capture.verify(harness.owner, core=None, headed=False, prepared_python=harness.interpreter)
+    report = capture.verify(harness.owner, core=None, headed=False, **prepared(harness))
     assert report["ok"]
     assert len(report["images_differ"]) == 3
     with pytest.raises(privacy.StaleGallery):
-        capture.verify(harness.owner, core=None, headed=False, prepared_python=harness.interpreter, strict_images=True)
+        capture.verify(harness.owner, core=None, headed=False, strict_images=True, **prepared(harness))
 
 
 def test_verify_ignores_clock_readings_but_not_labels(harness):
@@ -948,7 +1136,7 @@ def test_verify_ignores_clock_readings_but_not_labels(harness):
     manifest = json.loads((harness.owner / capture.MANIFEST).read_text())
     manifest["transcripts"]["cli.txt"] = hashlib.sha256(transcript.read_bytes()).hexdigest()
     (harness.owner / capture.MANIFEST).write_text(json.dumps(manifest))
-    assert capture.verify(harness.owner, core=None, headed=False, prepared_python=harness.interpreter)["ok"]
+    assert capture.verify(harness.owner, core=None, headed=False, **prepared(harness))["ok"]
 
 
 def test_cli_arguments_stay_literal_and_never_become_interpreter_or_shell_options(tmp_path):

@@ -263,7 +263,7 @@ def source_inventory(root: Path) -> bytes:
     return listed.stdout
 
 
-def snapshot_files(root: Path, plan: dict) -> list[str]:
+def snapshot_files(root: Path, plan: dict, *, require_definition: bool = True) -> list[str]:
     """Select the same validated authoring allowlist in repositories and standalone sources."""
     from heinzel_plugin_tools import capture
 
@@ -277,7 +277,9 @@ def snapshot_files(root: Path, plan: dict) -> list[str]:
         "hatch_build.py",
         "Makefile",
     }
-    required = {"pyproject.toml", capture.PLAN.as_posix()}
+    required = {"pyproject.toml"}
+    if require_definition or safe_path(root, capture.PLAN).exists():
+        required.add(capture.PLAN.as_posix())
     if plan.get("bootstrap"):
         required.add(plan["bootstrap"])
     gallery_files = {capture.MANIFEST.as_posix(), (capture.OUTPUT / "index.html").as_posix()}
@@ -375,8 +377,6 @@ def run(args) -> dict:
             "--project",
             "/capture/project",
             "--container-worker",
-            "--source-inventory",
-            "/capture/source-files.json",
             "--json",
             "--verify" if args.verify else "--draft",
         ]
