@@ -32,6 +32,8 @@ build-backend = "hatchling.build"
 
 [tool.hatch.build.targets.wheel]
 packages = ["src/heinzel_weather"]
+# The build hook packages these generated assets, including in standalone source snapshots.
+exclude = ["/src/heinzel_weather/views"]
 
 [tool.ruff]
 line-length = 120
