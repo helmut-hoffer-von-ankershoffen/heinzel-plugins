@@ -11,6 +11,7 @@ import subprocess
 from dataclasses import dataclass
 from pathlib import Path
 
+_CAPTURE_SOURCE = "src/heinzel_plugin_tools/capture.py"
 _POLICY_SOURCE = "src/heinzel_plugin_tools/focused_policy.py"
 _T_CAPTURE = "tests/capture_test.py"
 _T_CLI_COMMANDS = "tests/cli_commands_test.py"
@@ -56,6 +57,7 @@ GALLERY_HOSTED_HEAD = "d04153aa78ff1692f81a291b251c527ab86dc476"
 GALLERY_CLOCK_HEAD = "bc201df2544f95c5b60195d5bbd9eb17ca9f05f4"
 GALLERY_THEME_HEAD = "567d08577f9e02cfb90c5f0a6db9c952c40f3d07"
 GALLERY_CAPTURE_HEAD = "5f2c193e5b1070bf0d66e395d334217cecc6bfc0"
+GALLERY_SCENE_HEAD = "aaa94198156510d90c10180f1f285c42cdaae591"
 GALLERY_CAPTURE_FIXTURE = "tests/capture_run_test.py"
 GALLERY_RUNTIME_BLOBS = {
     ".github/workflows/ci.yml": "98242894cc754d366a8f393bac1a566c5ea30cea",
@@ -75,7 +77,7 @@ GALLERY_CLOCK_BLOBS = {
     "plugins/heinzel-clock/docs/assets/screenshots/capture.json": "b4bdf09e6ffd1ba0af5124a57cf531aceff3911c",
 }
 GALLERY_THEME_BLOBS = {
-    "src/heinzel_plugin_tools/capture.py": "c6296501ed2188cd52b24a6b0dfc94c70f5a1bd9",
+    _CAPTURE_SOURCE: "c6296501ed2188cd52b24a6b0dfc94c70f5a1bd9",
     "src/heinzel_plugin_tools/capture_linux.py": "d8a84864f52ec80e03a54912903129fa73b31f1e",
     "src/heinzel_plugin_tools/capture_worker.py": "1bf251f3ea1f9eac58262b74d39b0ba8133bc675",
     "src/heinzel_plugin_tools/privacy.py": "c26257bff51a5ae00d4b9150dc0b8998e2331687",
@@ -83,7 +85,7 @@ GALLERY_THEME_BLOBS = {
 }
 GALLERY_CAPTURE_BLOBS = {
     "docs/SCREENSHOT_AUTHORING.md": "5a9c8f69c106830659d18ae1b90169fc16886da8",
-    "src/heinzel_plugin_tools/capture.py": "0a886876863cb8e2b5de53a55353aa81b241e884",
+    _CAPTURE_SOURCE: "0a886876863cb8e2b5de53a55353aa81b241e884",
     "src/heinzel_plugin_tools/capture_host.py": "539b595038d29ebdd8aff151ada143e985ef2abe",
     "src/heinzel_plugin_tools/capture_linux.py": "804a021874e8871f50b5971f48b562cb00c9da4e",
     "src/heinzel_plugin_tools/cli.py": "da21c528a640f9b21bcace04e1c4f78bb3e9beaa",
@@ -91,6 +93,11 @@ GALLERY_CAPTURE_BLOBS = {
     _T_CAPTURE: "b079d3db75638a34ec39c1d2252f94ec5362b134",
     _T_CLI_COMMANDS: "db852b1db76ba3ef4ab55de670f796dae190c69d",
     _T_PRESENTATION: "8219233b5f4408e7973b0de58c915b8399562ebb",
+}
+GALLERY_SCENE_BLOBS = {
+    _CAPTURE_SOURCE: "cbcaae9fba2c8e8cb9c4af7f10adf640fc9ddab1",
+    "src/heinzel_plugin_tools/capture_scene.py": "069557eccb03c5a8b9d19675049b30e2df252f2a",
+    GALLERY_CAPTURE_FIXTURE: "bfd41ad0dca4ec4d242a3f9b87f565415a9c79bd",
 }
 GALLERY_POLICY_PATHS = frozenset(
     {
@@ -326,9 +333,15 @@ def _gallery_forward_blobs(repo: Path, old: str, new: str) -> dict[str, str]:
         if changed - GALLERY_THEME_BLOBS.keys():
             raise ValueError("gallery diagnostic changes a path outside its reviewed scope")
         return pins
-    if old != GALLERY_CAPTURE_HEAD or changed != GALLERY_CAPTURE_BLOBS.keys():
+    repair = GALLERY_CAPTURE_BLOBS
+    if old == GALLERY_SCENE_HEAD:
+        pins = pins | GALLERY_CAPTURE_BLOBS
+        repair = GALLERY_SCENE_BLOBS
+    elif old != GALLERY_CAPTURE_HEAD:
+        raise ValueError("unknown gallery capture repair parent")
+    if changed != repair.keys():
         raise ValueError("gallery capture repair requires its exact reviewed path set")
-    return pins | GALLERY_CAPTURE_BLOBS
+    return pins | repair
 
 
 def plan(repo: Path, old: str, new: str, trusted_policy: str) -> CheckPlan:
@@ -337,7 +350,13 @@ def plan(repo: Path, old: str, new: str, trusted_policy: str) -> CheckPlan:
     `trusted_policy` must be fixed by an independently trusted launcher. Accepting
     a caller-provided value here without such a launcher does not confer trust.
     """
-    hosted_fix = old in (GALLERY_HOSTED_HEAD, GALLERY_CLOCK_HEAD, GALLERY_THEME_HEAD, GALLERY_CAPTURE_HEAD)
+    hosted_fix = old in (
+        GALLERY_HOSTED_HEAD,
+        GALLERY_CLOCK_HEAD,
+        GALLERY_THEME_HEAD,
+        GALLERY_CAPTURE_HEAD,
+        GALLERY_SCENE_HEAD,
+    )
     plan_key = GALLERY_ORIGINAL if hosted_fix else old
     if plan_key not in PLANS:
         raise ValueError("unknown original PR head")

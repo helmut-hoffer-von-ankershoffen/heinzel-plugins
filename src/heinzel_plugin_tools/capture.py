@@ -40,6 +40,7 @@ from heinzel_plugin_tools._presentation import (
     redact_doctor_hostname,
     redact_owning_prefix,
 )
+from heinzel_plugin_tools.capture_scene import ENTRYPOINT, REQUEST_FD, valid_command
 from heinzel_plugin_tools.planning import DEFINITION, load_definition, write_definition
 from heinzel_plugin_tools.privacy import (
     DRAFT,
@@ -294,18 +295,6 @@ def validate_plan(root: Path, data: dict) -> dict:
     return data
 
 
-def valid_command(command: object) -> bool:
-    """Bound command arguments without interpreting shell syntax."""
-    return (
-        isinstance(command, list)
-        and 0 < len(command) <= 40
-        and all(
-            isinstance(arg, str) and len(arg) <= 2000 and not any(unicodedata.category(c) in {"Cc", "Cf"} for c in arg)
-            for arg in command
-        )
-    )
-
-
 def validate_locator(locator: dict, scene: str) -> None:
     """Validate only accessible-role locators and bounded regular expressions."""
     if (
@@ -538,13 +527,16 @@ def hz(interpreter: Path, args: list[str], env: dict, cwd: Path) -> str:
     """Run the reviewed scene's hz argument list without a shell."""
     if not valid_command(args):
         raise CaptureError("Screenshot command must be a bounded list of literal hz arguments")
-    args = args[1:] if args[:1] == ["hz"] else args
-    command = (
-        [str(interpreter), "-I", "-B", env["HZ_PLUGIN_CAPTURE_BOOTSTRAP"], *args]
-        if env.get("HZ_PLUGIN_CAPTURE_BOOTSTRAP")
-        else [str(interpreter), "-I", "-B", str(interpreter.parent / "hz"), *args]
-    )
-    result = subprocess.run(command, cwd=cwd, env=env, capture_output=True, text=True, timeout=60)
+    entrypoint = env.get("HZ_PLUGIN_CAPTURE_BOOTSTRAP") or str(interpreter.parent / "hz")
+    command = [str(interpreter), "-I", "-B", str(Path(__file__).with_name("capture_scene.py"))]
+    with tempfile.TemporaryFile(dir=cwd) as request:
+        request.write(json.dumps(args, ensure_ascii=True, separators=(",", ":")).encode("ascii"))
+        request.seek(0)
+        descriptor = request.fileno()
+        child_env = {**env, ENTRYPOINT: entrypoint, REQUEST_FD: str(descriptor)}
+        result = subprocess.run(
+            command, cwd=cwd, env=child_env, pass_fds=(descriptor,), capture_output=True, text=True, timeout=60
+        )
     if result.returncode:
         raise CaptureError("A screenshot CLI scene failed. Inspect its command in the editable scene plan")
     if len(result.stdout) > 256 * 1024:

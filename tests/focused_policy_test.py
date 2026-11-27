@@ -282,44 +282,62 @@ def test_gallery_theme_diagnostic_accepts_only_reviewed_bytes_on_the_clock_succe
             policy.plan(repo, hosted, rejected, rejected)
 
 
+@pytest.fixture(
+    params=[
+        ("GALLERY_CAPTURE", "GALLERY_THEME", "capture_host.py"),
+        ("GALLERY_SCENE", "GALLERY_CAPTURE", "capture_scene.py"),
+    ],
+    ids=["capture-inventory", "fixed-scene-launch"],
+)
+def repair_stage(request):
+    return request.param
+
+
 @pytest.fixture
-def capture_repair(history, monkeypatch):
+def capture_repair(history, monkeypatch, repair_stage):
     repo, original, _, _ = history
     candidate, tests = policy.PLANS[original]
     git(repo, "checkout", "-q", "--detach", candidate)
     inherited = ("GALLERY_RUNTIME_BLOBS", "GALLERY_FORWARD_BLOBS", "GALLERY_CLOCK_BLOBS", "GALLERY_THEME_BLOBS")
-    introduced = "src/heinzel_plugin_tools/capture_host.py"
+    stage, prior, module = repair_stage
+    if prior == "GALLERY_CAPTURE":
+        inherited += ("GALLERY_CAPTURE_BLOBS",)
+    introduced = f"src/heinzel_plugin_tools/{module}"
+    repair_blobs = getattr(policy, f"{stage}_BLOBS")
     prior_paths = {p for group in inherited for p in getattr(policy, group)}
-    for name in prior_paths | (policy.GALLERY_CAPTURE_BLOBS.keys() - {introduced}):
+    for name in prior_paths | (repair_blobs.keys() - {introduced}):
         path = repo / name
         path.parent.mkdir(parents=True, exist_ok=True)
         path.write_text(f"before repair: {name}\n")
-    hosted = commit(repo, "published Theme diagnostic")
+    hosted = commit(repo, "published repair parent")
     for group in inherited:
         pins = {p: git(repo, "rev-parse", f"{hosted}:{p}") for p in getattr(policy, group)}
         monkeypatch.setattr(policy, group, pins)
 
     pins = {}
-    for name in policy.GALLERY_CAPTURE_BLOBS:
+    for name in repair_blobs:
         path = repo / name
         path.write_text(f"reviewed capture repair: {name}\n")
         pins[name] = git(repo, "hash-object", name)
     approved = commit(repo, "capture repair")
     monkeypatch.setattr(policy, "GALLERY_ORIGINAL", original)
-    monkeypatch.setattr(policy, "GALLERY_CAPTURE_HEAD", hosted)
-    monkeypatch.setattr(policy, "GALLERY_CAPTURE_BLOBS", pins)
+    monkeypatch.setattr(policy, f"{stage}_HEAD", hosted)
+    monkeypatch.setattr(policy, f"{stage}_BLOBS", pins)
     selected = ("tests/capture_test.py", "tests/cli_commands_test.py", "tests/presentation_test.py")
     monkeypatch.setitem(policy.PLANS, original, (candidate, (*tests, *selected)))
     return repo, hosted, approved, introduced, selected
 
 
-def test_capture_repair_preserves_inventory_and_requires_direct_reviewed_parent(capture_repair, monkeypatch):
+def test_capture_repair_preserves_inventory_and_requires_direct_reviewed_parent(
+    capture_repair, repair_stage, monkeypatch
+):
     repo, hosted, approved, _, selected = capture_repair
     assert policy.plan(repo, hosted, approved, approved).tooling == (*selected, policy.GALLERY_CAPTURE_FIXTURE)
+    stage, prior, _ = repair_stage
     with monkeypatch.context() as previous:
-        previous.setattr(policy, "GALLERY_CAPTURE_HEAD", "0" * 40)
-        previous.setattr(policy, "GALLERY_THEME_HEAD", hosted)
-        with pytest.raises(ValueError, match="outside its reviewed scope"):
+        previous.setattr(policy, f"{stage}_HEAD", "0" * 40)
+        previous.setattr(policy, f"{prior}_HEAD", hosted)
+        with pytest.raises(ValueError, match="outside its reviewed scope|exact reviewed path set"):
             policy.plan(repo, hosted, approved, approved)
     (repo / "intermediate").write_text("unreviewed descendant\n")
     later = commit(repo, "second successor")
@@ -327,9 +345,10 @@ def test_capture_repair_preserves_inventory_and_requires_direct_reviewed_parent(
         policy.plan(repo, hosted, later, later)
 
 
-def test_capture_repair_refuses_modified_omitted_extra_and_executable_inputs(capture_repair):
+def test_capture_repair_refuses_modified_omitted_extra_and_executable_inputs(capture_repair, repair_stage):
     repo, hosted, approved, introduced, _ = capture_repair
-    for name in policy.GALLERY_CAPTURE_BLOBS:
+    stage, _, _ = repair_stage
+    for name in getattr(policy, f"{stage}_BLOBS"):
         git(repo, "checkout", "-q", "--detach", hosted)
         git(repo, "checkout", approved, "--", ".")
         (repo / name).write_text("different bytes\n")

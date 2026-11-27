@@ -3,6 +3,7 @@
 import hashlib
 import json
 import os
+import shlex
 import signal
 import subprocess
 import sys
@@ -13,7 +14,7 @@ from pathlib import Path
 
 import pytest
 
-from heinzel_plugin_tools import capture, capture_host, privacy
+from heinzel_plugin_tools import capture, capture_host, capture_scene, privacy
 
 pytestmark = [pytest.mark.unit, pytest.mark.usefixtures("fictional_capture_terms")]
 
@@ -29,10 +30,13 @@ for argument in "$@"; do
     echo "Serving on http://127.0.0.1:8123/#token=demo_session_token"
     exec sleep 120
   fi
+  case "$argument" in
+    */capture_scene.py) exec @TEST_PYTHON@ "$@" ;;
+  esac
 done
 exec "$(dirname "$0")/hz" "$@"
-"""
-HZ = '#!/bin/sh\necho "Hello, Mira!"\n'
+""".replace("@TEST_PYTHON@", shlex.quote(sys.executable))
+HZ = 'print("Hello, Mira!")\n'
 AGENTS = {"codex", "claude"}
 
 
@@ -575,13 +579,13 @@ def test_page_text_with_a_private_path_stops_the_capture_before_any_image_is_wri
 
 
 def test_cli_output_with_a_credential_is_refused(harness):
-    (harness.interpreter.parent / "hz").write_text('#!/bin/sh\necho "token ghp_abcdefghijklmnopqrstuvwxyz0123456789"\n')
+    (harness.interpreter.parent / "hz").write_text('print("token ghp_abcdefghijklmnopqrstuvwxyz0123456789")\n')
     with pytest.raises(privacy.CaptureError, match="possible credential"):
         record(harness, draft_only=True)
 
 
 def test_a_failing_cli_scene_points_the_author_at_the_editable_plan(harness):
-    (harness.interpreter.parent / "hz").write_text("#!/bin/sh\nexit 3\n")
+    (harness.interpreter.parent / "hz").write_text("raise SystemExit(3)\n")
     with pytest.raises(privacy.CaptureError, match="CLI scene failed"):
         record(harness, draft_only=True)
     assert not backend_is_running(harness)
@@ -822,7 +826,7 @@ def test_the_command_line_emits_one_json_document_for_agents(harness, monkeypatc
 
 
 def test_a_failed_command_line_run_returns_safe_json_and_status_one(harness, monkeypatch, capsys):
-    (harness.interpreter.parent / "hz").write_text("#!/bin/sh\nexit 3\n")
+    (harness.interpreter.parent / "hz").write_text("raise SystemExit(3)\n")
     monkeypatch.setattr(
         sys,
         "argv",
@@ -1111,7 +1115,7 @@ def test_verify_recaptures_and_passes_when_every_scene_renders_the_same_text(har
 def test_verify_fails_naming_the_command_when_displayed_text_changed_outside_the_ui_inputs(harness):
     """The reviewer's probe: a label from plugin Python changes; the digest stays, the re-capture catches it."""
     record(harness)
-    (harness.interpreter.parent / "hz").write_text('#!/bin/sh\necho "Ahoy, Mira!"\n')
+    (harness.interpreter.parent / "hz").write_text('print("Ahoy, Mira!")\n')
     assert capture.check_capture(harness.owner)["fresh"], "the narrow local digest does not see this change"
     with pytest.raises(privacy.StaleGallery, match=r"differs from the committed gallery \(cli.txt\)") as stale:
         capture.verify(harness.owner, core=None, headed=False, **prepared(harness))
@@ -1130,7 +1134,7 @@ def test_verify_lists_image_differences_and_gates_them_only_when_strict(harness)
 
 def test_verify_ignores_clock_readings_but_not_labels(harness):
     record(harness)
-    (harness.interpreter.parent / "hz").write_text('#!/bin/sh\necho "Hello, Mira! 10:22"\n')
+    (harness.interpreter.parent / "hz").write_text('print("Hello, Mira! 10:22")\n')
     transcript = harness.owner / capture.OUTPUT / "cli.txt"
     transcript.write_text("Hello, Mira! 02:01\n")
     manifest = json.loads((harness.owner / capture.MANIFEST).read_text())
@@ -1153,3 +1157,67 @@ def test_cli_arguments_stay_literal_and_never_become_interpreter_or_shell_option
     assert not (tmp_path / "should-not-exist").exists()
     with pytest.raises(privacy.CaptureError, match="bounded list"):
         capture.hz(interpreter, ["safe", "bad\x00argument"], env, tmp_path)
+
+
+@pytest.mark.parametrize("fixture", [False, True])
+def test_scene_request_keeps_fixed_python_argv_and_preserves_main_argv_and_stdin(tmp_path, monkeypatch, fixture):
+    interpreter = tmp_path / "python"
+    interpreter.symlink_to(sys.executable)
+    target = tmp_path / ("fixture.py" if fixture else "hz")
+    target.write_text(
+        "import json, os, sys\n"
+        "print(json.dumps({'name': __name__, 'argv': sys.argv, 'main_file': sys.modules['__main__'].__file__, "
+        "'stdin': sys.stdin.read(), 'isolated': sys.flags.isolated, 'no_bytecode': sys.dont_write_bytecode, "
+        "'request_visible': 'HZ_CAPTURE_SCENE_REQUEST_FD' in os.environ, "
+        "'entrypoint_visible': 'HZ_CAPTURE_SCENE_ENTRYPOINT' in os.environ}))\n"
+    )
+    env = capture.demo_environment(tmp_path / "demo", interpreter)
+    if fixture:
+        env["HZ_PLUGIN_CAPTURE_BOOTSTRAP"] = str(target)
+    args = ["show", "--label", "Mira Example --format", "--flag", "✨"]
+    incoming = tmp_path / "stdin.txt"
+    incoming.write_bytes(b"fixture stdin\n")
+    run = subprocess.run
+    launched = []
+
+    def child(argv, **kwargs):
+        launched.append(argv)
+        assert "stdin" not in kwargs and kwargs["timeout"] == 60
+        assert len(kwargs["pass_fds"]) == 1 and kwargs["pass_fds"][0] >= 3
+        with incoming.open("rb") as stdin:
+            return run(argv, stdin=stdin, **kwargs)
+
+    monkeypatch.setattr(capture.subprocess, "run", child)
+    assert json.loads(capture.hz(interpreter, ["hz", *args], env, tmp_path)) == {
+        "name": "__main__",
+        "argv": [str(target), *args],
+        "main_file": str(target),
+        "stdin": "fixture stdin\n",
+        "isolated": 1,
+        "no_bytecode": True,
+        "request_visible": False,
+        "entrypoint_visible": False,
+    }
+    assert launched == [[str(interpreter), "-I", "-B", capture_scene.__file__]]
+
+
+@pytest.mark.parametrize("payload", [b'"not a list"', b'["display",1]', b" " * (capture_scene.REQUEST_LIMIT + 1)])
+def test_child_refuses_invalid_request_before_loading_the_fixture(tmp_path, payload):
+    target = tmp_path / "fixture.py"
+    target.write_text("print('fixture started')\n")
+    request = tmp_path / "request.json"
+    request.write_bytes(payload)
+    with request.open("rb") as source:
+        descriptor = source.fileno()
+        result = subprocess.run(  # noqa: S603 - fixed Python and scene runner, with test-owned request data
+            [sys.executable, "-I", "-B", capture_scene.__file__],
+            env={**os.environ, capture_scene.ENTRYPOINT: str(target), capture_scene.REQUEST_FD: str(descriptor)},
+            pass_fds=(descriptor,),
+            capture_output=True,
+            text=True,
+            timeout=10,
+            check=False,
+        )
+    assert result.returncode == 1
+    assert not result.stdout
+    assert result.stderr == "Invalid capture CLI scene request\n"
