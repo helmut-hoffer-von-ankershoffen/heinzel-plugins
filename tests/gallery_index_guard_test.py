@@ -2,17 +2,27 @@
 
 import importlib.util
 import json
+import os
+import shlex
+import shutil
+import subprocess
+import sys
 from pathlib import Path
 
 import pytest
+import yaml
 
 from heinzel_plugin_tools import capture
 
-spec = importlib.util.spec_from_file_location(
-    "gallery_index_guard", Path(__file__).parents[1] / "scripts/gallery_index_guard.py"
-)
+REPOSITORY = Path(__file__).parents[1]
+spec = importlib.util.spec_from_file_location("gallery_index_guard", REPOSITORY / "scripts/gallery_index_guard.py")
 guard = importlib.util.module_from_spec(spec)
 spec.loader.exec_module(guard)
+launcher_spec = importlib.util.spec_from_file_location(
+    "gallery_precommit_launch", REPOSITORY / "scripts/gallery_precommit_launch.py"
+)
+launcher = importlib.util.module_from_spec(launcher_spec)
+launcher_spec.loader.exec_module(launcher)
 OWNER = "heinzel-demo"
 TERMS = "SyntheticNeverDisclose"
 CORE = "0.9.56"
@@ -32,6 +42,18 @@ def json_file(path, value):
     return guard.sha256(path.read_bytes())
 
 
+def synthetic_hooks(root):
+    stock = yaml.safe_load((REPOSITORY / ".pre-commit-config.yaml").read_text())
+    hooks = {hook["id"]: hook for repo in stock["repos"] for hook in repo["hooks"]}
+    selected = [
+        hooks[name].copy() for name in ("confidentiality", "owning-plugin-checks", "confidentiality-commit-msg")
+    ]
+    scanner = ["-I", str(REPOSITORY / "scripts/check_confidentiality.py")]
+    selected[0]["entry"] = shlex.join([sys.executable, *scanner])
+    selected[2]["entry"] = shlex.join([sys.executable, *scanner, "--commit-msg"])
+    (root / ".pre-commit-config.yaml").write_text(yaml.safe_dump({"repos": [{"repo": "local", "hooks": selected}]}))
+
+
 @pytest.fixture
 def case(tmp_path, monkeypatch):
     monkeypatch.setenv("CONFIDENTIAL_TERMS", TERMS)
@@ -42,6 +64,7 @@ def case(tmp_path, monkeypatch):
     guard.git(root, "init", "--quiet", "--template=")
     guard.git(root, "config", "--local", "user.name", "Example Reviewer")
     guard.git(root, "config", "--local", "user.email", "reviewer@example.com")
+    synthetic_hooks(root)
     project = root / "plugins" / OWNER
     gallery = project / capture.OUTPUT
     gallery.mkdir(parents=True)
@@ -264,3 +287,177 @@ def test_index_change_during_scan_refuses_receipt(case, monkeypatch):
     monkeypatch.setattr(guard, "validate_draft", changed)
     with pytest.raises(ValueError, match="HEAD or index changed"):
         guard.verify(root, path, digest)
+
+
+@pytest.fixture
+def hook_case(case, monkeypatch):
+    root, _project, _draft, _review, policy_path, policy = case
+    prek = shutil.which("prek")
+    git = shutil.which("git")
+    assert prek and git
+    git_binary = Path(git).resolve()
+    subprocess.run(  # noqa: S603 - real runner in a disposable repository
+        [prek, "install", "--hook-type", "pre-commit", "--hook-type", "commit-msg"],
+        cwd=root,
+        check=True,
+        timeout=30,
+        capture_output=True,
+    )
+
+    scratch = root.parent / "trusted"
+    scratch.mkdir(mode=0o700)
+    runtime = scratch / "runtime"
+    shutil.copytree(
+        REPOSITORY / "src/heinzel_plugin_tools",
+        runtime / "src/heinzel_plugin_tools",
+        ignore=shutil.ignore_patterns("__pycache__"),
+    )
+    (runtime / "scripts").mkdir()
+    for name in ("gallery_index_guard.py", "check_confidentiality.py"):
+        shutil.copy2(REPOSITORY / "scripts" / name, runtime / "scripts" / name)
+    terms = scratch / "terms"
+    terms.write_text(TERMS + "\n")
+    terms.chmod(0o600)
+    hooks = root / ".git" / "hooks"
+    (hooks / "pre-commit").rename(hooks / "pre-commit.gallery-stock")
+    shutil.copy2(REPOSITORY / "scripts/gallery_precommit_shim.sh", hooks / "pre-commit")
+    shutil.copy2(REPOSITORY / "scripts/gallery_precommit_launch.py", hooks / "gallery_precommit_launch.py")
+    entry = hooks / "gallery-precommit"
+    entry.write_text(
+        "#!/bin/sh\nexec "
+        + shlex.join([sys.executable, "-I", "-B", str(hooks / "gallery_precommit_launch.py")])
+        + ' "$@"\n'
+    )
+    entry.chmod(0o700)
+    receipt = scratch / "receipt.json"
+    pin_path = hooks / launcher.PIN_NAME
+
+    def pin():
+        _, policy["tree"], _ = guard.frozen_index(root)
+        _, _, policy_sha = pin_case(case)
+        policy_path.chmod(0o600)
+        json_file(
+            pin_path,
+            {
+                "format": 1,
+                "repository": str(root),
+                "hook_config_sha256": launcher.digest(root / ".pre-commit-config.yaml"),
+                "stock_sha256": launcher.digest(hooks / "pre-commit.gallery-stock"),
+                "interpreter": str(Path(sys.executable).resolve()),
+                "git": str(git_binary),
+                "git_sha256": launcher.digest(git_binary),
+                "runtime": str(runtime),
+                "runtime_files": launcher.runtime_files(runtime),
+                "policy": str(policy_path),
+                "policy_sha256": policy_sha,
+                "terms": str(terms),
+                "scratch": str(scratch),
+                "receipt": str(receipt),
+            },
+        )
+        pin_path.chmod(0o600)
+        return pin_path
+
+    # A stock owner command recorder, confined to the synthetic repository's
+    # hook process. Its argument list must match the unmodified stock path.
+    command_log = scratch / "stock.log"
+    bin_dir = scratch / "bin"
+    bin_dir.mkdir()
+    uv_stub = bin_dir / "uv"
+    uv_stub.write_text(f'#!/bin/sh\nprintf "%s\\n" "$@" > {shlex.quote(str(command_log))}\n')
+    uv_stub.chmod(0o700)
+    monkeypatch.setenv("PATH", str(bin_dir) + os.pathsep + os.environ["PATH"])
+    monkeypatch.setenv("GIT_CONFIG_NOSYSTEM", "1")
+    monkeypatch.setenv("GIT_CONFIG_GLOBAL", os.devnull)
+    monkeypatch.delenv("HZ_TRUSTED_GALLERY_PRECOMMIT", raising=False)
+    monkeypatch.delenv("HZ_TRUSTED_FOCUSED_PUSH", raising=False)
+
+    def commit(message="docs: refresh fictional gallery"):
+        return subprocess.run(  # noqa: S603 - resolved Git in the disposable repository
+            [str(git_binary), "commit", "-m", message],
+            cwd=root,
+            text=True,
+            capture_output=True,
+            timeout=30,
+            check=False,
+        )
+
+    return root, receipt, command_log, pin, commit
+
+
+def test_real_opt_in_commit_uses_pinned_checker_and_other_hooks(hook_case, monkeypatch):
+    root, receipt, stock_log, pin, commit = hook_case
+    pin()
+    monkeypatch.setenv("HZ_TRUSTED_GALLERY_PRECOMMIT", "1")
+    previous, expected_tree, _ = guard.frozen_index(root)
+    result = commit()
+    assert result.returncode == 0, result.stdout + result.stderr
+    assert "confidential terms" in result.stdout + result.stderr
+    assert not stock_log.exists()
+    assert receipt.stat().st_mode & 0o077 == 0
+    payload = json.loads(receipt.read_bytes())
+    assert payload["head"] == previous == guard.git(root, "rev-parse", "HEAD^").decode().strip()
+    assert payload["tree"] == expected_tree == guard.git(root, "rev-parse", "HEAD^{tree}").decode().strip()
+    assert payload["hosted_required"]["per_owner_jobs"] == ["plugin", "gallery"]
+
+
+def test_real_default_commit_routes_to_stock_owner_command(hook_case):
+    _root, receipt, stock_log, _pin, commit = hook_case
+    result = commit()
+    assert result.returncode == 0, result.stdout + result.stderr
+    assert stock_log.read_text().splitlines() == [
+        "run",
+        "--frozen",
+        "--group",
+        "tooling",
+        "hz-plugin",
+        "check-changed",
+        "--git-hook",
+    ]
+    assert not receipt.exists()
+
+
+@pytest.mark.parametrize(
+    "problem",
+    ["missing-pin", "replacement-policy", "index-source", "push-revision", "skip", "prek-skip", "stale-receipt"],
+)
+def test_real_opt_in_commit_refuses_invalid_transaction(hook_case, monkeypatch, problem):
+    root, receipt, stock_log, pin, commit = hook_case
+    if problem == "index-source":
+        source = root / "plugins" / OWNER / "README.md"
+        with source.open("a") as file:
+            file.write("\nOther fictional change.\n")
+        guard.git(root, "add", str(source))
+    pin_path = pin()
+    if problem == "missing-pin":
+        pin_path.unlink()
+    if problem == "replacement-policy":
+        policy_path = Path(json.loads(pin_path.read_bytes())["policy"])
+        policy_path.write_text("{}")
+    if problem == "push-revision":
+        monkeypatch.setenv("PRE_COMMIT_TO_REF", "0" * 40)
+    if problem in {"skip", "prek-skip"}:
+        monkeypatch.setenv("SKIP" if problem == "skip" else "PREK_SKIP", "owning-plugin-checks")
+    if problem == "stale-receipt":
+        receipt.write_text("{}")
+    monkeypatch.setenv("HZ_TRUSTED_GALLERY_PRECOMMIT", "1")
+    previous = guard.git(root, "rev-parse", "HEAD")
+    result = commit()
+    assert result.returncode != 0
+    assert "refused" in (result.stdout + result.stderr).lower()
+    assert guard.git(root, "rev-parse", "HEAD") == previous
+    assert receipt.exists() == (problem == "stale-receipt")
+    assert not stock_log.exists()
+
+
+def test_real_confidential_commit_message_hook_still_refuses(hook_case, monkeypatch):
+    root, receipt, stock_log, pin, commit = hook_case
+    pin()
+    monkeypatch.setenv("HZ_TRUSTED_GALLERY_PRECOMMIT", "1")
+    previous = guard.git(root, "rev-parse", "HEAD")
+    result = commit(f"docs: {TERMS}")
+    assert result.returncode != 0
+    assert "confidential terms" in result.stdout + result.stderr
+    assert guard.git(root, "rev-parse", "HEAD") == previous
+    assert receipt.is_file()  # Pre-commit proof can exist for a subsequently refused commit.
+    assert not stock_log.exists()
