@@ -31,7 +31,7 @@ jobs:
           persist-credentials: false
       - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e # v10.3.2
         with:
-          python-version: "3.14"
+          python-version: "3.15"
       - name: Measure the shared developer toolkit
         run: uv run --frozen --no-build --group tooling --extra checks coverage run -m pytest tests -q
       - name: Record the total for the Coverage floor job
@@ -63,6 +63,8 @@ jobs:
           fetch-depth: 0
           persist-credentials: false
       - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e # v10.3.2
+        with:
+          python-version: "3.15"
       - name: Preserve commit, title, branch and confidentiality checks
         env:
           CHECK_BASE: ${{ github.event.pull_request.base.sha || github.event.before }}
@@ -87,6 +89,8 @@ jobs:
           fetch-depth: 0
           persist-credentials: false
       - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e # v10.3.2
+        with:
+          python-version: "3.15"
       - run: make tooling-check
       - id: plan
         env:
@@ -121,6 +125,8 @@ jobs:
         with:
           persist-credentials: false
       - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e # v10.3.2
+        with:
+          python-version: "3.15"
       - name: Install the capture browser and its runner libraries
         run: uv run --frozen --with playwright==1.64.1 --group tooling playwright install --with-deps chromium
       - name: Capture a new unknown plugin, detect staleness, fail a scene and recover
@@ -146,6 +152,7 @@ jobs:
           persist-credentials: false
       - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e # v10.3.2
         with:
+          python-version: "3.15"
           enable-cache: true
       - id: core
         env:
@@ -302,6 +309,7 @@ jobs:
           persist-credentials: false
       - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e # v10.3.2
         with:
+          python-version: "3.15"
           enable-cache: true
       # This is the same pinned Linux container used by local authors, including on macOS.
       - name: Compare real scene rendering without secrets or publication

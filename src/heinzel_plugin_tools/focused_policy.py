@@ -48,7 +48,67 @@ POLICY_PATHS = frozenset(
         _T_FOCUSED_MATERIALIZE,
     }
 )
+GALLERY_ORIGINAL = "330dc9bc521c9b59990604fa3bc9e74342de0886"
+GALLERY_RUNTIME_BLOBS = {
+    ".github/workflows/ci.yml": "98242894cc754d366a8f393bac1a566c5ea30cea",
+    ".python-version": "93a848f9688291c7b2172cf99f133675225ad282",
+    "pyproject.toml": "5d9f9ab9094354dd2c47897ed72077006c85e7a1",
+    "uv.lock": "ac5b39f6beda2983080b1e6b14144b2fc19c5f72",
+}
+GALLERY_POLICY_PATHS = frozenset(
+    {
+        *GALLERY_RUNTIME_BLOBS,
+        "scripts/focused_dispatch.py",
+        "src/heinzel_plugin_tools/focused_policy.py",
+        _T_FOCUSED_DISPATCH,
+        _T_FOCUSED_POLICY,
+    }
+)
 PLANS = {
+    GALLERY_ORIGINAL: (
+        "272ced40248432c2d5e91acf2e088859d0bac1d0",
+        (
+            "tests/capture_bootstrap_test.py",
+            "tests/capture_fixture_origins_test.py",
+            "tests/capture_test.py",
+            "tests/cli_environment_test.py",
+            "tests/cli_commands_test.py",
+            "tests/presentation_test.py",
+            "tests/privacy_test.py",
+            "tests/workflow_test.py",
+            "tests/gallery_index_guard_test.py",
+            "tests/focused_push_guard_test.py",
+            "tests/focused_policy_test.py",
+            "tests/focused_dispatch_test.py",
+            "tests/focused_materialize_test.py",
+            "tests/focused_trust_test.py",
+            "tests/focused_guard_install_test.py",
+            "tests/focused_hook_test.py",
+            "plugins/heinzel-atlassian/tests/unit/contract_test.py",
+            "plugins/heinzel-clock/tests/clock_test.py",
+            "plugins/heinzel-example/tests/contributions_test.py",
+            "plugins/heinzel-github/tests/unit/release_feed_test.py",
+            "plugins/heinzel-github/tests/unit/contract_test.py",
+            "plugins/heinzel-google/tests/unit/setup_test.py",
+            "plugins/heinzel-google/tests/unit/sign_in_test.py",
+            "plugins/heinzel-google/tests/unit/gws_test.py",
+            "plugins/heinzel-google/tests/unit/screenshot_fixture_test.py",
+            "plugins/heinzel-google/tests/integration/cli_test.py",
+            "plugins/heinzel-google/tests/integration/runner_test.py",
+            "plugins/heinzel-issues/tests/unit/view_test.py",
+            "plugins/heinzel-resource/tests/unit/resources_test.py",
+            "plugins/heinzel-slack/tests/integration/cli_process_test.py",
+            "plugins/heinzel-tailscale/tests/unit/status_test.py",
+            "plugins/heinzel-tailscale/tests/unit/readiness_test.py",
+            "plugins/heinzel-tailscale/tests/integration/host_test.py",
+            "plugins/heinzel-theme/tests/unit/content_test.py",
+            "plugins/heinzel-weather/tests/integration/heads_test.py",
+            "plugins/heinzel-weather/tests/unit/service_test.py",
+            "plugins/heinzel-weather/tests/unit/screenshot_fixture_test.py",
+            "plugins/heinzel-zoom/tests/unit/contract_test.py",
+            "plugins/heinzel-clock/web/src/ClockPanel.test.tsx",
+        ),
+    ),
     "39c5bcd10f675c63df1b8c1e5892a4fd3a89006f": (
         "c4cf2a3e00856f227c34cf58d141a7a2c9c0719c",
         (
@@ -190,25 +250,29 @@ def _check_ancestry(repo: Path, old: str, new: str, candidate: str, trusted_poli
         raise ValueError("untrusted policy ancestry")
 
 
-def _check_frozen_inputs(repo: Path, old: str, new: str, candidate: str, trusted_policy: str) -> None:
-    if _changed(repo, candidate, new) - POLICY_PATHS:
+def _check_frozen_inputs(
+    repo: Path, old: str, new: str, candidate: str, trusted_policy: str, policy_paths: frozenset[str]
+) -> None:
+    if _changed(repo, candidate, new) - policy_paths:
         raise ValueError("unknown change after frozen candidate")
-    for path in POLICY_PATHS:
+    for path in policy_paths:
         if _entry(repo, trusted_policy, path) != _entry(repo, new, path):
             raise ValueError("policy bytes differ from trusted policy")
     # For every inherited pushed path, matching its anchor entry includes file mode
     # and deletion. A path touching the reviewed contribution remains contribution.
     contribution = _changed(repo, ANCHOR, candidate)
-    for path in _changed(repo, old, new) - contribution - POLICY_PATHS:
+    for path in _changed(repo, old, new) - contribution - policy_paths:
         if _entry(repo, ANCHOR, path) != _entry(repo, new, path):
             raise ValueError("inherited path differs from protected baseline")
 
 
-def _check_required_tests(repo: Path, new: str, candidate: str, tests: tuple[str, ...]) -> None:
+def _check_required_tests(
+    repo: Path, new: str, candidate: str, tests: tuple[str, ...], policy_paths: frozenset[str]
+) -> None:
     for path in tests:
         if not _entry(repo, new, path).startswith(("100644 blob ", "100755 blob ")):
             raise ValueError("required focused test is missing or not a regular blob")
-        if path not in POLICY_PATHS and _entry(repo, new, path) != _entry(repo, candidate, path):
+        if path not in policy_paths and _entry(repo, new, path) != _entry(repo, candidate, path):
             raise ValueError("required focused test differs from frozen candidate")
 
 
@@ -224,9 +288,18 @@ def plan(repo: Path, old: str, new: str, trusted_policy: str) -> CheckPlan:
     for sha in (old, new, trusted_policy):
         if len(sha) != 40 or any(c not in "0123456789abcdef" for c in sha):
             raise ValueError("expected full immutable commit ids")
+    if old == GALLERY_ORIGINAL and (
+        new != trusted_policy or _git(repo, "show", "-s", "--format=%P", new).strip() != candidate
+    ):
+        raise ValueError("gallery push requires the pinned, direct policy successor")
+    policy_paths = GALLERY_POLICY_PATHS if old == GALLERY_ORIGINAL else POLICY_PATHS
     _check_ancestry(repo, old, new, candidate, trusted_policy)
-    _check_frozen_inputs(repo, old, new, candidate, trusted_policy)
-    _check_required_tests(repo, new, candidate, tests)
+    _check_frozen_inputs(repo, old, new, candidate, trusted_policy, policy_paths)
+    if old == GALLERY_ORIGINAL:
+        for path, blob in GALLERY_RUNTIME_BLOBS.items():
+            if _entry(repo, new, path) != f"100644 blob {blob}\t{path}\0":
+                raise ValueError(f"gallery runtime input differs from its reviewed blob: {path}")
+    _check_required_tests(repo, new, candidate, tests, policy_paths)
     grouped: dict[str, list[str]] = {}
     for path in tests:
         if path.startswith("plugins/") and "/tests/" in path:

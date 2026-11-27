@@ -62,6 +62,9 @@ def dispatch(mode: str = "all") -> None:
         os.environ.get("PRE_COMMIT_TO_REF", ""),
         "dispatcher",
     )
+    # The materialized tree has no project environment. Select only the Python
+    # already authenticated by the installed trust loader for these uv calls.
+    uv_run = ["uv", "run", "--no-env-file", "--python", checked_pin["files"]["dispatcher_python"]["path"]]
     materializer_spec = importlib.util.spec_from_file_location(
         "installed_focused_materialize", checked_pin["files"]["materializer"]["path"]
     )
@@ -70,7 +73,7 @@ def dispatch(mode: str = "all") -> None:
     materializer = importlib.util.module_from_spec(materializer_spec)
     materializer_spec.loader.exec_module(materializer)
     with materializer.materialized(repo, os.environ["PRE_COMMIT_TO_REF"]) as tree:
-        uv = ["uv", "run", "--no-env-file", "--project", str(tree), "--frozen", "--no-build", "--group", "tooling"]
+        uv = [*uv_run, "--project", str(tree), "--frozen", "--no-build", "--group", "tooling"]
         if mode in {"all", "tooling"}:
             run([*uv, "ruff", "check", "scripts", "tests", "src/heinzel_plugin_tools"], tree)
             run([*uv, "ruff", "format", "--check", "scripts", "tests", "src/heinzel_plugin_tools"], tree)
@@ -78,29 +81,28 @@ def dispatch(mode: str = "all") -> None:
             run([*uv, "python", "scripts/tools.py", "run", "actionlint"], tree)
             run([*uv, "zizmor", "--offline", "--quiet", ".github"], tree)
         if mode in {"all", "owners"}:
+            script_uv = [*uv_run, "--no-project", "--no-build", "--script"]
             owner_code = (
                 "import sys; from heinzel_plugin_tools.cli import projects,check; "
                 "p=next(x for x in projects() if x.name==sys.argv[1]); "
                 "check(p,None,fast=True,test_targets=tuple(sys.argv[2:]),frontend=False)"
             )
             for owner, tests in plan.owners:
+                if owner == "heinzel-weather" and "tests/integration/heads_test.py" in tests:
+                    # The Weather app-head tests serve the generated view from the editable package.
+                    build = tree / "plugins/heinzel-weather/web/build.py"
+                    run([*script_uv, str(build), "run", "build"], tree)
                 run([*uv, "python", "-c", owner_code, owner, *tests], tree)
             for owner, test_path in plan.frontend:
                 web = tree / "plugins" / owner / "web"
                 build = str(web / "build.py")
-                run(["uv", "run", "--no-env-file", "--no-project", "--script", build, "run", "typecheck"], tree)
+                frontend_uv = [*script_uv, build, "run"]
+                run([*frontend_uv, "typecheck"], tree)
                 relative = str(Path(test_path).relative_to(Path("plugins") / owner / "web"))
                 run(
                     [
-                        "uv",
-                        "run",
-                        "--no-env-file",
-                        "--no-project",
-                        "--script",
-                        build,
-                        "run",
+                        *frontend_uv,
                         "test",
-                        "--",
                         relative,
                         "--maxWorkers=2",
                     ],

@@ -7,6 +7,8 @@ import pytest
 
 from heinzel_plugin_tools import focused_policy as policy
 
+pytestmark = pytest.mark.integration
+
 
 def git(repo, *args):
     env = {key: value for key, value in os.environ.items() if not key.startswith("GIT_")}
@@ -99,3 +101,88 @@ def test_google_plan_includes_changed_tooling_contract_fixture():
     old = "39c5bcd10f675c63df1b8c1e5892a4fd3a89006f"
     assert "tests/tooling_test.py" in policy.POLICY_PATHS
     assert "tests/tooling_test.py" in policy.PLANS[old][1]
+
+
+def test_gallery_policy_requires_the_separately_pinned_pushed_commit(history, monkeypatch):
+    repo, old, head, trusted = history
+    monkeypatch.setattr(policy, "GALLERY_ORIGINAL", old)
+    with pytest.raises(ValueError, match="pinned, direct policy successor"):
+        policy.plan(repo, old, head, trusted)
+    # A merge of the frozen source and policy cannot impersonate its single-parent policy successor.
+    with pytest.raises(ValueError, match="pinned, direct policy successor"):
+        policy.plan(repo, old, head, head)
+
+
+def test_reviewed_gallery_runtime_paths_do_not_extend_historical_policy(history, monkeypatch):
+    repo, old, _, _ = history
+    candidate, _ = policy.PLANS[old]
+    git(repo, "checkout", "-q", "--detach", candidate)
+    for path in (".python-version", "pyproject.toml", "uv.lock", ".github/workflows/ci.yml"):
+        target = repo / path
+        target.parent.mkdir(parents=True, exist_ok=True)
+        target.write_text("reviewed CPython 3.15 tooling input\n")
+    new = commit(repo, "pin gallery runtime")
+    with pytest.raises(ValueError, match="unknown change after frozen candidate"):
+        policy.plan(repo, old, new, new)
+    monkeypatch.setattr(policy, "GALLERY_ORIGINAL", old)
+    monkeypatch.setattr(
+        policy,
+        "GALLERY_RUNTIME_BLOBS",
+        {path: git(repo, "rev-parse", f"{new}:{path}") for path in policy.GALLERY_RUNTIME_BLOBS},
+    )
+    assert isinstance(policy.plan(repo, old, new, new), policy.CheckPlan)
+    lock = repo / "uv.lock"
+    approved_lock = lock.read_text()
+    lock.write_text("unreviewed dependency bytes\n")
+    git(repo, "add", "uv.lock")
+    git(
+        repo,
+        "-c",
+        "user.name=Fixture",
+        "-c",
+        "user.email=fixture@example.invalid",
+        "commit",
+        "--amend",
+        "--no-edit",
+        "-q",
+    )
+    new = git(repo, "rev-parse", "HEAD")
+    with pytest.raises(ValueError, match="gallery runtime input differs from its reviewed blob: uv.lock"):
+        policy.plan(repo, old, new, new)
+    lock.write_text(approved_lock)
+    (repo / "source").write_text("unreviewed source change\n")
+    git(repo, "add", "source", "uv.lock")
+    git(
+        repo,
+        "-c",
+        "user.name=Fixture",
+        "-c",
+        "user.email=fixture@example.invalid",
+        "commit",
+        "--amend",
+        "--no-edit",
+        "-q",
+    )
+    new = git(repo, "rev-parse", "HEAD")
+    with pytest.raises(ValueError, match="unknown change after frozen candidate"):
+        policy.plan(repo, old, new, new)
+
+
+def test_gallery_plan_covers_every_published_owner_and_named_clock_view():
+    _, targets = policy.PLANS[policy.GALLERY_ORIGINAL]
+    assert all(path.startswith(("plugins/", "tests/")) for path in targets)
+    assert {path.split("/")[1] for path in targets if path.startswith("plugins/") and "/tests/" in path} == {
+        "heinzel-atlassian",
+        "heinzel-clock",
+        "heinzel-example",
+        "heinzel-github",
+        "heinzel-google",
+        "heinzel-issues",
+        "heinzel-resource",
+        "heinzel-slack",
+        "heinzel-tailscale",
+        "heinzel-theme",
+        "heinzel-weather",
+        "heinzel-zoom",
+    }
+    assert [p for p in targets if "/web/" in p] == ["plugins/heinzel-clock/web/src/ClockPanel.test.tsx"]
