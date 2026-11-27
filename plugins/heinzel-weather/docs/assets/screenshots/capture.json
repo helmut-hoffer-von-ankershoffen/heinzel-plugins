@@ -1,21 +1,21 @@
 {
   "format": 2,
   "plugin": "heinzel-weather",
-  "core_version": "0.9.55",
+  "core_version": "0.9.56",
   "inputs_sha256": "8abde57cb19d7703acefefb8fca98e43fdad3fb250a9dc9f9efbabeb65191b77",
   "images": {
-    "docs/assets/screenshots/today-weather.png": "27f379cdc647ae13d2b64269b78d5a3ed5c4e5671de997a401b3e992ab7b0bb0",
+    "docs/assets/screenshots/today-weather.png": "8515a48b68ac44089545b94806090b12c7a29c41316c45b5d072f33d278350c4",
     "docs/assets/screenshots/weather-detail.png": "ab3826e3b8455191073655df664280bf128326cd92f75b240e5cecd9c1b420ad",
-    "docs/assets/screenshots/weather-page.png": "553150abb76cf6db89b6ad7654e68411dbe2cffdf64d4b49827efb47fdf174c8",
-    "docs/assets/screenshots/phone-weather.png": "e059ceb5cc736cead2f2894886ed0a68eb8d88e10f7ab54f8414e834392c7850",
+    "docs/assets/screenshots/weather-page.png": "e2b8e9b14920a1d7d7bad661967effbd7bf250344ecab96015b38d5aeae733cb",
+    "docs/assets/screenshots/phone-weather.png": "793c57f42bdcdea9f9abaec04f8c3821825fe3d2b7c7334a9e02102f7adb3e52",
     "docs/assets/screenshots/cli-weather.png": "71b3f9d23c8b638b2d5f1dd167624092d6c80ef6151303da19c7676a38b3b15c",
     "docs/assets/screenshots/cli-forecast.png": "a7bbaca71180265eafddbfb8c79c7e4afa148f6d41f9bd48d2e175530e75a18a"
   },
   "transcripts": {
-    "today-weather.txt": "11c0d632cc39b0d4dc4bca87cfc72f4efe8f480750b95413da37a3355d96ce6f",
-    "weather-detail.txt": "b16d03f4ccec0bfea554f38cf49a880b6bd462980d9504102f733cb844e47879",
-    "weather-page.txt": "6c08efbbad108945158902021331495385cfb86ac31afadef0acde63cec48738",
-    "phone-weather.txt": "e396e29360df673d14845c70d4a0163dbbd30aec39b95b96d0495edf7881f697",
+    "today-weather.txt": "0f124405c64400cd25354d23197a8cb9355420abb80fbb56ae91f11eef81947e",
+    "weather-detail.txt": "c021cbc74ff82f2198257c46a9a4dc61f380fa35af8f784318b2500338770bac",
+    "weather-page.txt": "e943ebb0c6d028d5ecc23bc7c07267cb3c380e4b1d6d13fbdd98f56ee0024240",
+    "phone-weather.txt": "30af1197769fc3a2529ce22b8a1eb0e493a79c86d813c950b422a7f8876c907a",
     "cli-weather.txt": "6a2fba007fcf1e2fc362a66bd59844d8aad7228ce5ef8352cab3c08edd3e6ee3",
     "cli-forecast.txt": "2fc2ea8b6b92c9139b6d004e94a367066f8ed7e19ed9b41fd8fab01b13c3b647"
   }
