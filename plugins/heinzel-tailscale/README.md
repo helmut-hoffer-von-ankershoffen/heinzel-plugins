@@ -41,9 +41,11 @@ Turning sharing off removes only the still-matching hz root handler and any orig
 Other paths, listeners, services and manually configured origins remain. An existing conflicting root, public
 Funnel setting, foreground session or higher-priority origin policy is refused. A changed Serve revision or unknown
 write outcome stops without retry or rollback; inspect current status before taking another action.
-Matching an existing manual handler does not make it owned by hz, so enabling refuses to adopt it. OFF without an
-owned request is non-destructive. Completed removal relinquishes ownership before cleanup; repeating OFF cannot
-delete a later manual recreation. An uncertain create remains unverified and needs inspection before deletion.
+Turning sharing on in the authenticated web app can adopt the exact private Serve route already pointing to its
+active listener, including after a reinstall. Heinzel verifies that route again before taking ownership and
+leaves the Serve configuration intact. OFF without an owned request is non-destructive. Completed removal
+relinquishes ownership before cleanup; repeating OFF cannot delete a later manual recreation. An uncertain create
+remains unverified and needs inspection before deletion.
 
 `tailscale.https_port` chooses an alternate HTTPS port when another app owns the default. Disable a previous request
 before changing its external origin. A Tailscale version must provide the conditional Serve LocalAPI and one of the
@@ -58,9 +60,13 @@ Development and release commands: [repository guide](../../README.md).
 <!-- screenshots:start -->
 ## Screenshots
 
-<img src="docs/assets/screenshots/sharing-ready.png" alt="Sharing On with Copy link and Open (fictional demo); the capture tool hides the share link as [authentication link hidden]" width="960">
+<img src="docs/assets/screenshots/sharing-existing-private.png" alt="An existing private route to this Heinzel is ready to adopt — fictional local Tailscale demo" width="960">
 
-Sharing On with Copy link and Open (fictional demo); the capture tool hides the share link as [authentication link hidden]
+An existing private route to this Heinzel is ready to adopt — fictional local Tailscale demo
+
+<img src="docs/assets/screenshots/sharing-ready.png" alt="One switch adopts the existing private route, then shows Copy link and Open (fictional demo); the capture tool hides the share link as [authentication link hidden]" width="960">
+
+One switch adopts the existing private route, then shows Copy link and Open (fictional demo); the capture tool hides the share link as [authentication link hidden]
 
 <img src="docs/assets/screenshots/sharing-off.png" alt="Turn private sharing off explicitly — fictional local Tailscale demo" width="960">
 

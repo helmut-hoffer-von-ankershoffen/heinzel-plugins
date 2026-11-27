@@ -128,6 +128,70 @@ def test_a_login_that_ignores_sigterm_is_killed(shell_stand_in, monkeypatch):
     assert Gws().login(shell_stand_in("trap '' TERM\nwhile :; do sleep 1; done"), [], 2.0) is None
 
 
+OAUTH_SCOPE = "https://www.googleapis.com/auth/calendar.readonly"
+OAUTH_URL = (
+    "https://accounts.google.com/o/oauth2/auth?client_id=x&response_type=code&"
+    "redirect_uri=http%3A%2F%2Flocalhost%3A1234&scope=" + OAUTH_SCOPE
+)
+LOGIN_ARGS = ["auth", "login", "--scopes", OAUTH_SCOPE]
+
+
+@pytest.mark.parametrize("redirect", ["", " >&2"])
+def test_terminal_login_opens_one_consent_url_and_keeps_its_printed_fallback(
+    shell_stand_in, monkeypatch, capfd, redirect
+):
+    seen: list[str] = []
+    called = threading.Event()
+
+    def open_browser(value):
+        seen.append(value)
+        called.set()
+        return True
+
+    monkeypatch.setattr(_gws.webbrowser, "open", open_browser)
+    script = shell_stand_in(f"printf 'Open link:\\n  %s\\n  %s\\n' '{OAUTH_URL}' '{OAUTH_URL}'{redirect}")
+    assert Gws().login(script, LOGIN_ARGS, 5) == 0
+    assert called.wait(2)
+    out = capfd.readouterr()
+    assert OAUTH_URL in (out.err if redirect else out.out)
+    assert seen == [OAUTH_URL]
+
+
+@pytest.mark.parametrize(
+    "url",
+    [
+        OAUTH_URL.replace("accounts.google.com", "accounts.google.com.evil.test"),
+        OAUTH_URL.replace("accounts.google.com", "accounts.google.com:443"),
+        OAUTH_URL.replace("accounts.google.com", "user@accounts.google.com"),
+        OAUTH_URL.replace("localhost", "evil.test"),
+        OAUTH_URL + "&redirect_uri=http%3A%2F%2Fevil.test",
+        OAUTH_URL.replace("localhost%3A1234", "localhost%3A1234%2F%3Fcode%3Dexample"),
+        OAUTH_URL + "%20https://www.googleapis.com/auth/drive",
+        OAUTH_URL + "&access_token=example",
+    ],
+)
+def test_terminal_login_never_opens_untrusted_urls(shell_stand_in, monkeypatch, capfd, url):
+    seen: list[str] = []
+    monkeypatch.setattr(_gws.webbrowser, "open", seen.append)
+    assert Gws().login(shell_stand_in(f"printf '%s\\n' '{url}'"), LOGIN_ARGS, 5) == 0
+    assert url in capfd.readouterr().out
+    assert seen == []
+
+
+def test_terminal_login_browser_failure_keeps_manual_flow(shell_stand_in, monkeypatch, capfd):
+    called = threading.Event()
+
+    def unavailable(_):
+        called.set()
+        message = "headless"
+        raise OSError(message)
+
+    monkeypatch.setattr(_gws.webbrowser, "open", unavailable)
+    assert Gws().login(shell_stand_in(f"printf '%s\\n' '{OAUTH_URL}'"), LOGIN_ARGS, 5) == 0
+    assert called.wait(2)
+    assert OAUTH_URL in capfd.readouterr().out
+
+
 LAUNCHD_PATH = "/usr/bin:/bin:/usr/sbin:/sbin"
 """The PATH a launchd service gets when its plist sets none: no Homebrew directory in it."""
 

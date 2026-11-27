@@ -45,6 +45,7 @@ def test_the_kernel_provides_the_real_runner_unless_a_test_binds_a_fake(boot):
     assert type(boot().resolve(Gws)) is Gws
 
 
+@pytest.mark.usefixtures("calendar_access")
 def test_setup_through_the_cli(google_kernel, fake_gws, tmp_path, monkeypatch):
     from heinzel import Prompter
     from heinzel.kernel import ScriptedPrompter
@@ -52,12 +53,14 @@ def test_setup_through_the_cli(google_kernel, fake_gws, tmp_path, monkeypatch):
     home = tmp_path / "config"
     monkeypatch.setenv("HZ_CONFIG_HOME", str(home))
     kernel = google_kernel()
-    # Change it (gws_path is set); documents and calendar; no mail; no writes (calendar, Docs).
-    prompter = ScriptedPrompter(["y", "", "", "", "", ""])
+    # Reopen the configured connector, then accept the default permissions with Return.
+    prompter = ScriptedPrompter(["y", ""])
     kernel.bind(Prompter, prompter)
     result = runner.invoke(build(kernel), ["setup", "google"])
     assert result.exit_code == 0, result.output
     written = "".join(p.read_text(encoding="utf-8") for p in home.rglob("*.toml"))
     assert 'documents = "google"' in written, prompter.transcript
     assert 'calendar = "google"' in written
-    assert "mail" not in written  # mail is never bound automatically (ADR 0055); declined, nothing is written
+    assert 'mail = "google"' in written
+    assert len(fake_gws.logins) == 1
+    assert [run.command for run in fake_gws.api_runs] == [("calendar", "events", "list")]

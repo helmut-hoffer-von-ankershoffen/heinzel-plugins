@@ -23,9 +23,9 @@ class SharingReadiness:
         """Whether this authenticated web instance actually loaded this listener and exact external origin."""
         if mapping.origin not in self.runtime.loaded_origins:
             return False
-        return self._owns(mapping)
+        return self.owns_listener(mapping)
 
-    def _owns(self, mapping: Mapping) -> bool:
+    def owns_listener(self, mapping: Mapping) -> bool:
         """Whether an authenticated web call reached the very listener the mapping forwards to."""
         if self.runtime.port is None or self.runtime.port != mapping.backend_port:
             return False
@@ -51,7 +51,7 @@ class SharingReadiness:
             True when it loaded the origin, False when loading failed, None when there was nothing for it to do.
         """
         loaded = self.runtime.loaded_origins
-        if mapping.origin in loaded or mapping.origin not in configured or not self._owns(mapping):
+        if mapping.origin in loaded or mapping.origin not in configured or not self.owns_listener(mapping):
             return None
         fields: dict[str, object] = {"operation": "status", "step": "finish", "plugin": "heinzel-tailscale"}
         fields["port"] = mapping.backend_port

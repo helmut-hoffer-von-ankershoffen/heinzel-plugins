@@ -1,6 +1,6 @@
 [project]
 name = "heinzel-tailscale"
-version = "0.9.9"
+version = "0.9.10"
 description = "Share the authenticated web app privately through Tailscale Serve: a Heinzelmännchen plugin."
 readme = "README.md"
 license = "MIT"
@@ -140,9 +140,14 @@ highlights = [
 ]
 
 [[tool.heinzel.catalog.screenshots]]
+path = "docs/assets/screenshots/sharing-existing-private.png"
+surface = "ui"
+caption = "An existing private route to this Heinzel is ready to adopt — fictional local Tailscale demo"
+
+[[tool.heinzel.catalog.screenshots]]
 path = "docs/assets/screenshots/sharing-ready.png"
 surface = "ui"
-caption = "Sharing On with Copy link and Open (fictional demo); the capture tool hides the share link as [authentication link hidden]"
+caption = "One switch adopts the existing private route, then shows Copy link and Open (fictional demo); the capture tool hides the share link as [authentication link hidden]"
 
 [[tool.heinzel.catalog.screenshots]]
 path = "docs/assets/screenshots/sharing-request-cli.png"

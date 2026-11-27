@@ -25,9 +25,10 @@ from heinzel.kernel import (
 )
 
 from heinzel_google._gws import (
+    CALENDAR_READ_SCOPE,
     CALENDAR_WRITE_SCOPE,
     CLIENT,
-    DOCUMENTS_WRITE_SCOPE,
+    DOCUMENT_WRITE_SCOPES,
     INSTALL,
     MAIL_SCOPE,
     MAIL_WRITE_SCOPE,
@@ -40,7 +41,6 @@ from heinzel_google._gws import (
 )
 from heinzel_google._module import module
 
-CALENDAR_READ_SCOPE = "https://www.googleapis.com/auth/calendar.readonly"
 DOCUMENT_READ_SCOPES = tuple(scope for scope in SCOPES if scope != CALENDAR_READ_SCOPE)
 GRANTS = (
     Grant(
@@ -82,11 +82,11 @@ GRANTS = (
     ),
     Grant(
         id="docs-write",
-        title="Add to your Docs",
-        explanation="Heinzel can add to your Google Docs, each change only after you confirm it.",
+        title="Change your Docs, Sheets, Slides and Drive files",
+        explanation="This grants access to all your Drive files. Heinzel asks before making a supported change.",
         capability="documents",
         modes=["write"],
-        scopes=[DOCUMENTS_WRITE_SCOPE],
+        scopes=list(DOCUMENT_WRITE_SCOPES),
     ),
     Grant(
         id="mail-write",
@@ -100,8 +100,7 @@ GRANTS = (
         scopes=[MAIL_WRITE_SCOPE],
     ),
 )
-"""What the sign-in can ask Google for. Reads of Docs and the calendar are asked for first; mail only when the person
-reads mail from Google or allows it, a write only when the person allows it."""
+"""The connector requires baseline reads. Interactive sign-in lets the person choose additional permissions."""
 FORBIDDEN = ("cloud-platform",)
 """Scope words never asked for: Heinzel has no use for the person's Google Cloud projects."""
 CONSENT = re.compile(r"https://accounts\.google\.com/[!-~]+")
@@ -240,6 +239,12 @@ class GoogleSignIn:
         except OSError as exc:
             message = f"gws could not be started ({type(exc).__name__}). Check it with {SETUP}."
             return SignInOutcome(state="failed", message=message)
+        if code == 0:
+            calendar = bool({CALENDAR_READ_SCOPE, CALENDAR_WRITE_SCOPE}.intersection(asked))
+            try:
+                self._session.verify_sign_in(calendar=calendar)
+            except HeinzelError as exc:
+                return SignInOutcome(state="failed", message=str(exc))
         return ended(code, stopped=stop.is_set())
 
     def _ready(self, asked: list[str]) -> tuple[str | None, str]:

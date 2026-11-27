@@ -4,11 +4,46 @@
   "browser_time": "2026-10-31T12:00:00Z",
   "scenes": [
     {
+      "name": "sharing-existing-private",
+      "surface": "ui",
+      "route": "/",
+      "appearance": "dark",
+      "caption": "An existing private route to this Heinzel is ready to adopt \u2014 fictional local Tailscale demo",
+      "timeout_ms": 30000,
+      "steps": [
+        {
+          "action": "click",
+          "role": "button",
+          "name_regex": "^Dismiss Doctor",
+          "optional": true
+        },
+        {
+          "action": "click",
+          "role": "button",
+          "name_regex": "^Tailscale",
+          "within_role": "contentinfo"
+        },
+        {
+          "action": "wait",
+          "role": "region",
+          "name": "Tailscale"
+        },
+        {
+          "action": "wait",
+          "text": "Private route to this Heinzel found."
+        }
+      ],
+      "focus": {
+        "role": "region",
+        "name": "Tailscale"
+      }
+    },
+    {
       "name": "sharing-ready",
       "surface": "ui",
       "route": "/",
       "appearance": "dark",
-      "caption": "Sharing On with Copy link and Open (fictional demo); the capture tool hides the share link as [authentication link hidden]",
+      "caption": "One switch adopts the existing private route, then shows Copy link and Open (fictional demo); the capture tool hides the share link as [authentication link hidden]",
       "timeout_ms": 30000,
       "steps": [
         {
@@ -59,7 +94,7 @@
       "surface": "ui",
       "route": "/",
       "appearance": "light",
-      "caption": "Turn private sharing off explicitly — fictional local Tailscale demo",
+      "caption": "Turn private sharing off explicitly \u2014 fictional local Tailscale demo",
       "timeout_ms": 30000,
       "steps": [
         {
@@ -97,7 +132,7 @@
     {
       "name": "sharing-off-cli",
       "surface": "cli",
-      "caption": "Then hz tailscale status --json after switching off: not mapped; the target shows the default port 8737 — fictional local Tailscale demo",
+      "caption": "Then hz tailscale status --json after switching off: not mapped; the target shows the default port 8737 \u2014 fictional local Tailscale demo",
       "command": [
         "tailscale",
         "status",

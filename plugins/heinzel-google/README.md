@@ -69,20 +69,15 @@ explicitly consent with the login command above; `hz setup google` may return wi
 already configured. `gws auth login` replaces its scope list: include any existing opt-in Gmail, Calendar or
 write scopes you intend to retain. This plugin never silently signs in again to add Slides permission.
 
-Mail is opt-in: setup asks, defaulting to no, and then signs in again with Gmail's read-only scope added
-(`,https://www.googleapis.com/auth/gmail.readonly`), which lets the plugin read all of your mail; then
-`hz system config set capabilities.mail google`.
+Press Enter at the default-permissions question to open Google sign-in. Setup requests read/write scopes for Docs,
+Sheets, Slides, Drive, Calendar events and Gmail. Drive access covers all files visible to the account. Gmail uses
+`gmail.modify`, which covers reading, drafting, sending and filing. Choose **No** to pick permissions individually.
 
-Writes are opt-in too. Setup asks whether hz may change your calendar and your mail, defaulting to no; only then does
-the sign-in ask for `https://www.googleapis.com/auth/calendar.events` (create, move, cancel and answer events) and
-`https://www.googleapis.com/auth/gmail.modify` (keep drafts, send them, file conversations; it reads too, so it
-replaces `gmail.readonly`, and it can't delete mail for good). Heinzelmännchen writes only from confirmed write operations
-that show you what they will do and run after you confirm; your Heinzel only proposes them
-([ADR 0059](https://github.com/helmut-hoffer-von-ankershoffen/heinzel/blob/main/docs/adr/0059-the-calendar-and-the-mail-write-through-hz-after-a-confirmation.md)). Without the
-scope, a write fails and says to run `hz setup google` and allow the change.
+Google asks you to approve the requested scopes in the browser. Heinzel still shows each supported write operation
+and waits for your confirmation before running it
+([ADR 0059](https://github.com/helmut-hoffer-von-ankershoffen/heinzel/blob/main/docs/adr/0059-the-calendar-and-the-mail-write-through-hz-after-a-confirmation.md)).
+If Google reports a missing scope, run `hz setup google` again and grant the missing permission in the browser.
 
-These are the narrowest read-only scopes for what the adapters do; `drive.metadata.readonly` lists and identifies files
-and never reads their contents (Google classes it as restricted, which matters only for published OAuth clients).
 Bindings go in your user configuration, never in a project `hz.toml`, which Heinzelmännchen ignores for them.
 
 Optional settings, in `[google]` or `HZ_GOOGLE__<FIELD>`: `gws_path`, the absolute path of `gws` when it isn't on
@@ -94,7 +89,7 @@ controls must not choose the program that reads your data), and `timeout`, the s
 
 Bound automatically to documents and calendar while it is the only installed adapter of them, [ADR
 0055](https://github.com/helmut-hoffer-von-ankershoffen/heinzel/blob/main/docs/adr/0055-connectors-show-their-sign-in-test-live-on-demand-and-bind-themselves-when-alone.md); mail
-never is, so Gmail stays opt-in: `hz setup google` asks. `hz system connector
+never binds automatically. `hz setup google` offers to configure it as part of the default sign-in. `hz system connector
 list` shows whether gws has a sign-in, from its files alone; `hz system connector
 test google` asks Drive who is signed in (`gws drive about get`, 15 s at most), and only when you run it.
 
@@ -187,7 +182,9 @@ Token-shaped strings in anything `gws` says are redacted before it is shortened.
 
 With Heinzelmännchen 0.9.43 or later, a search over your documents includes Google: Drive's full-text search (`fullText contains`) over Docs, Sheets and Slides, not trashed, best match first, at most 50 hits. A hit's snippet is the file's Drive description, if it has one, not an excerpt around the match.
 
-Known limit: the plugin asks Google only for the read-only Drive metadata grant (`drive.metadata.readonly`), and Google does not document whether that grant lets Drive match the text inside files. If Drive refuses, the search says "Google search needs broader Drive access" rather than asking you to sign in again, since signing in asks for the same grants; if Drive accepts the query but matches only names and descriptions, that is the limit. Reading a document and listing recent files are not affected. Broader access (`drive.readonly`, which can download any file) is not requested.
+With the read-only Drive metadata grant (`drive.metadata.readonly`), search may be limited to names and descriptions.
+If Drive refuses a content search, the plugin reports that broader Drive access is needed. The default sign-in requests
+the Drive read/write scope for users who approve it.
 
 Development and release commands: [repository guide](../../README.md).
 

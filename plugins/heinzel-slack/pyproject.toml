@@ -1,6 +1,6 @@
 [project]
 name = "heinzel-slack"
-version = "0.3.1"
+version = "0.3.2"
 description = "Slack for Heinzelmännchen: notices, exact-draft approvals and questions in your own DM, and the chat capability."
 readme = "README.md"
 license = "MIT"

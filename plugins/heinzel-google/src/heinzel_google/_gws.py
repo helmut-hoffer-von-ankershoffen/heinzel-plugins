@@ -15,13 +15,17 @@ import os
 import re
 import shutil
 import signal
+import stat
 import subprocess
+import sys
 import threading
 import time
+import webbrowser
 from collections.abc import Callable, Iterator, Mapping, Sequence
 from dataclasses import dataclass
 from pathlib import Path
 from typing import IO, Any, cast
+from urllib.parse import parse_qs, urlsplit
 
 from heinzel import HeinzelError, clean_text
 
@@ -41,12 +45,13 @@ RETRIES = 3
 """Times a rate-limited request is retried, after 1, 2 and 4 seconds."""
 GRACE = 2.0
 """Seconds a timed-out `gws` gets between SIGTERM and SIGKILL."""
+CALENDAR_READ_SCOPE = "https://www.googleapis.com/auth/calendar.readonly"
 SCOPES = (
     "https://www.googleapis.com/auth/documents.readonly",
     "https://www.googleapis.com/auth/spreadsheets.readonly",
     "https://www.googleapis.com/auth/presentations.readonly",
     "https://www.googleapis.com/auth/drive.metadata.readonly",
-    "https://www.googleapis.com/auth/calendar.readonly",
+    CALENDAR_READ_SCOPE,
 )
 """The read-only scopes the adapters need; `LOGIN` asks `gws` for exactly these."""
 MAIL_SCOPE = "https://www.googleapis.com/auth/gmail.readonly"
@@ -59,6 +64,12 @@ write mail; it covers reading too, so it replaces `MAIL_SCOPE`."""
 DOCUMENTS_WRITE_SCOPE = "https://www.googleapis.com/auth/documents"
 """Docs' scope to change documents (the `document-write` token exchange needs it), asked for only when you let hz write
 your Google Docs; it covers reading too, so reads work with or without it."""
+DOCUMENT_WRITE_SCOPES = (
+    DOCUMENTS_WRITE_SCOPE,
+    "https://www.googleapis.com/auth/spreadsheets",
+    "https://www.googleapis.com/auth/presentations",
+    "https://www.googleapis.com/auth/drive",
+)
 WRITE_SCOPES = {"calendar": CALENDAR_WRITE_SCOPE, "documents": DOCUMENTS_WRITE_SCOPE, "mail": MAIL_WRITE_SCOPE}
 """The scope each capability's `write` mode needs, by capability."""
 
@@ -70,7 +81,10 @@ def login_command(*, mail: bool = False, write: frozenset[str] = frozenset()) ->
         scopes.append(MAIL_WRITE_SCOPE)
     elif mail:
         scopes.append(MAIL_SCOPE)
-    scopes += [WRITE_SCOPES[c] for c in sorted(write - {"mail"}) if c in WRITE_SCOPES]
+    if "calendar" in write:
+        scopes.append(CALENDAR_WRITE_SCOPE)
+    if "documents" in write:
+        scopes.extend(DOCUMENT_WRITE_SCOPES)
     return f"gws auth login --scopes {','.join(scopes)}"
 
 
@@ -372,8 +386,30 @@ class Gws:
             OSError: If the executable can't be started.
         """
         process = subprocess.Popen(  # noqa: S603 - an argument list, the executable resolved to an absolute path
-            [executable, *arguments], env=run_environment(executable), cwd=NEUTRAL, start_new_session=True
+            [executable, *arguments],
+            stdout=subprocess.PIPE,
+            stderr=subprocess.PIPE,
+            env=run_environment(executable),
+            cwd=NEUTRAL,
+            start_new_session=True,
         )
+        opened = threading.Event()
+        gate = threading.Lock()
+        approved_scopes: frozenset[str] = frozenset()
+        if "--scopes" in arguments:
+            index = arguments.index("--scopes") + 1
+            if index < len(arguments):
+                approved_scopes = frozenset(arguments[index].split(","))
+        readers = [
+            threading.Thread(
+                target=_login_output,
+                args=(cast("IO[bytes]", stream), target, opened, gate, approved_scopes),
+                daemon=True,
+            )
+            for stream, target in ((process.stdout, sys.stdout), (process.stderr, sys.stderr))
+        ]
+        for reader in readers:
+            reader.start()
         try:
             return process.wait(timeout)
         except subprocess.TimeoutExpired:
@@ -385,11 +421,103 @@ class Gws:
                 process.wait()
             return None
         finally:
-            signal_group(process.pid, signal.SIGKILL)  # whatever it left running
+            _stop_and_reap(process)
+            for reader in readers:
+                reader.join(GRACE)
 
     def sleep(self, seconds: float) -> None:
         """Wait `seconds` before retrying after a rate limit."""
         time.sleep(seconds)
+
+
+_IDENTITY_SCOPES = {
+    "openid",
+    "https://www.googleapis.com/auth/userinfo.email",
+    "https://www.googleapis.com/auth/userinfo.profile",
+}
+_URL_TEXT = re.compile(r"[!-~]+")
+
+
+def _oauth_request(query: dict[str, list[str]], approved_scopes: frozenset[str]) -> bool:
+    scopes = query.get("scope", [])
+    if len(scopes) != 1 or query.get("response_type") != ["code"]:
+        return False
+    if {"code", "access_token", "id_token", "refresh_token"} & query.keys():
+        return False
+    requested = set(scopes[0].split()) - _IDENTITY_SCOPES
+    return bool(requested and requested <= approved_scopes)
+
+
+def _oauth_loopback(redirects: list[str]) -> bool:
+    if len(redirects) != 1 or _URL_TEXT.fullmatch(redirects[0]) is None:
+        return False
+    redirect = urlsplit(redirects[0])
+    return (
+        redirect.scheme == "http"
+        and redirect.hostname in {"localhost", "127.0.0.1", "::1"}
+        and redirect.username is None
+        and redirect.password is None
+        and bool(redirect.port)
+        and redirect.path in {"", "/"}
+        and not redirect.query
+        and not redirect.fragment
+    )
+
+
+def _consent_url(line: str, approved_scopes: frozenset[str]) -> str | None:
+    """Accept only Google's expected authorization flow for the scopes the user approved."""
+    if _URL_TEXT.fullmatch(line) is None:
+        return None
+    try:
+        url = urlsplit(line)
+        if (url.scheme, url.netloc, url.path) != ("https", "accounts.google.com", "/o/oauth2/auth") or url.fragment:
+            return None
+        query = parse_qs(url.query, keep_blank_values=True)
+        valid = _oauth_request(query, approved_scopes) and _oauth_loopback(query.get("redirect_uri", []))
+    except ValueError:
+        return None
+    return line if valid else None
+
+
+def _login_output(
+    stream: IO[bytes], target: IO[str], opened: threading.Event, gate: threading.Lock, approved_scopes: frozenset[str]
+) -> None:
+    """Relay all output promptly while looking at bounded complete lines for one consent URL."""
+    pending = b""
+    seen = 0
+    skipping = False
+    with stream:
+        while chunk := os.read(stream.fileno(), 4096):
+            with contextlib.suppress(OSError, ValueError):
+                binary = getattr(target, "buffer", None)
+                if binary is None:
+                    target.write(chunk.decode(errors="replace"))
+                    target.flush()
+                else:
+                    binary.write(chunk)
+                    binary.flush()
+            for part in chunk.splitlines(keepends=True):
+                seen += len(part)
+                ended = part.endswith(b"\n")
+                if not skipping and seen <= SIGN_IN_OUTPUT:
+                    pending += part
+                    if len(pending) > SIGN_IN_LINE:
+                        pending, skipping = b"", True
+                    elif ended:
+                        url = _consent_url(pending.decode(errors="replace").strip(), approved_scopes)
+                        if url:
+                            with gate:
+                                if not opened.is_set():
+                                    opened.set()
+                                    threading.Thread(target=_open_consent, args=(url,), daemon=True).start()
+                        pending = b""
+                if ended:
+                    pending, skipping = b"", False
+
+
+def _open_consent(url: str) -> None:
+    with contextlib.suppress(Exception):  # browser unavailable: the printed link remains usable
+        webbrowser.open(url)
 
 
 def redact(text: str) -> str:
@@ -452,10 +580,38 @@ def _failed(subject: str, process: Process, code: object, said: str, *, writing:
 
 
 def config_dir(source: Mapping[str, str] | None = None) -> Path:
-    """Where `gws` keeps its configuration and credentials: `GOOGLE_WORKSPACE_CLI_CONFIG_DIR`, else `~/.config/gws`."""
+    """Follow gws's explicit, current and legacy configuration directory lookup."""
     variables = os.environ if source is None else source
     configured = variables.get("GOOGLE_WORKSPACE_CLI_CONFIG_DIR")
-    return Path(configured) if configured else Path(variables.get("HOME") or Path.home()) / ".config" / "gws"
+    if configured is not None:
+        return Path(NEUTRAL) / configured
+    home = Path(variables.get("HOME") or Path.home())
+    primary = home / ".config" / "gws"
+    xdg = Path(variables.get("XDG_CONFIG_HOME", ""))
+    legacy = (
+        home / "Library" / "Application Support"
+        if sys.platform == "darwin"
+        else (xdg if xdg.is_absolute() else home / ".config")
+    )
+    legacy /= "gws"
+    return legacy if not primary.exists() and legacy.is_dir() else primary
+
+
+def _discard_stale_token_cache(directory: Path) -> None:
+    """Drop only gws's derived access-token cache if it predates the saved encrypted login."""
+    cache = directory / "token_cache.json"
+    try:
+        saved = (directory / "credentials.enc").lstat()
+        cached = cache.lstat()
+    except FileNotFoundError:
+        return
+    if (
+        stat.S_ISREG(saved.st_mode)
+        and stat.S_ISREG(cached.st_mode)
+        and saved.st_uid == cached.st_uid
+        and cached.st_mtime_ns < saved.st_mtime_ns
+    ):
+        cache.unlink(missing_ok=True)
 
 
 def _on_path(name: str) -> str | None:
@@ -682,11 +838,39 @@ class GoogleSession:
             raise HeinzelError(msg)
         return shown
 
+    def verify_sign_in(self, *, calendar: bool) -> None:
+        """After gws saves an OAuth grant, refresh stale access tokens and check Calendar if requested.
+
+        Raises:
+            HeinzelError: The stale cache could not be cleared or Calendar access could not be verified.
+        """
+        try:
+            _discard_stale_token_cache(config_dir())
+        except OSError as exc:
+            msg = "Google sign-in was saved, but Heinzel could not refresh the local Google token cache."
+            raise HeinzelError(msg) from exc
+        if not calendar:
+            return
+        try:
+            self.get(
+                "Google Calendar",
+                ("calendar", "events", "list"),
+                {"calendarId": "primary", "maxResults": 1, "fields": "kind"},
+                "Calendar access",
+                15.0,
+            )
+        except HeinzelError as exc:
+            if SCOPE_REFUSED in str(exc):
+                msg = "Google sign-in was saved, but Calendar permission is missing. Sign in again and allow Calendar."
+            else:
+                msg = "Google sign-in was saved, but Heinzel could not verify Calendar access. Try again."
+            raise HeinzelError(msg) from exc
+
     def signed_in(self) -> tuple[bool, str]:
         """Whether `gws` has stored credentials, and a detail; from its files alone, so nothing reaches Google.
 
         `gws auth status` isn't used: it may refresh the token and ask Google who is signed in. The files are those
-        `gws` keeps in its configuration directory (`GOOGLE_WORKSPACE_CLI_CONFIG_DIR`, else `~/.config/gws`):
+        `gws` keeps in its configuration directory:
         `credentials.enc` (encrypted, its key in the keyring) or `credentials.json`, and the OAuth client in
         `client_secret.json`. Whether Google still accepts the sign-in shows on the first read.
 
