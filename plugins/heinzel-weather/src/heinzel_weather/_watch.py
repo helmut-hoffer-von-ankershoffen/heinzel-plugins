@@ -43,6 +43,7 @@ def _rain(report: Report, now: datetime, chance: float) -> list[Change]:
                     title=f"Rain in {place} from {local}",
                     body=f"{round(hour.rain_chance * 100)}% chance of {hour.description}.",
                     urgent=False,
+                    replaces=f"rain:{place}",
                 )
             ]
     return []
@@ -66,6 +67,7 @@ def _swing(report: Report, now: datetime, swing: float) -> list[Change]:
             title=f"{place}: the temperature {direction} {abs(delta):.0f}{unit} by {extreme.at:%H:%M}",
             body=f"From {start:.0f}{unit} now to {extreme.temperature:.0f}{unit}, {extreme.description}.",
             urgent=False,
+            replaces=f"swing:{place}",
         )
     ]
 
@@ -82,6 +84,7 @@ def _alerts(report: Report, now: datetime) -> list[Change]:
                 + (f": {alert.description}" if alert.description else ".")
             ),
             urgent=True,
+            replaces=f"alert:{place}:{alert.event}",
         )
         for alert in report.alerts
         if alert.end > now
