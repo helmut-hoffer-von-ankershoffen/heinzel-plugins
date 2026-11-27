@@ -4,6 +4,7 @@ import contextlib
 import hashlib
 import json
 import os
+import selectors
 import shutil
 import subprocess
 import sys
@@ -27,6 +28,7 @@ BOOTSTRAP_URL = (
     + BOOTSTRAP_WHEEL
 )
 BOOTSTRAP_LIMIT = 20 * 1024 * 1024
+OUTPUT_LIMIT = 4 * 1024 * 1024
 
 
 def bootstrap_wheel() -> bytes:
@@ -69,6 +71,8 @@ def configured_terms() -> str:
 
 
 def command(argv: list[str], *, cwd: Path, capture: bool = False, capture_stderr: bool = False, timeout: int = 900):
+    if capture or capture_stderr:
+        return bounded_command(argv, cwd=cwd, capture=capture, capture_stderr=capture_stderr, timeout=timeout)
     try:
         return subprocess.run(
             argv,
@@ -83,6 +87,54 @@ def command(argv: list[str], *, cwd: Path, capture: bool = False, capture_stderr
         raise CaptureError(
             "Canonical Linux capture needs a running Docker engine and the pinned public image"
         ) from error
+
+
+def bounded_command(argv, *, cwd, capture, capture_stderr, timeout):
+    """Drain captured pipes with a fixed aggregate ceiling and a deadline."""
+    import time
+
+    try:
+        with subprocess.Popen(
+            argv,
+            cwd=cwd,
+            stdout=subprocess.PIPE if capture else None,
+            stderr=subprocess.PIPE if capture_stderr else None,
+        ) as process:
+            try:
+                buffers = {"stdout": bytearray(), "stderr": bytearray()}
+                deadline = time.monotonic() + timeout
+                total = 0
+                with selectors.DefaultSelector() as selector:
+                    for name in buffers:
+                        stream = getattr(process, name)
+                        if stream is not None:
+                            selector.register(stream, selectors.EVENT_READ, name)
+                    while selector.get_map():
+                        remaining = deadline - time.monotonic()
+                        if remaining <= 0:
+                            raise CaptureError("Canonical capture output timed out")
+                        for key, _ in selector.select(min(remaining, 0.1)):
+                            data = os.read(key.fileobj.fileno(), 65536)
+                            if not data:
+                                selector.unregister(key.fileobj)
+                                continue
+                            total += len(data)
+                            if total > OUTPUT_LIMIT:
+                                raise CaptureError("Canonical capture output exceeds transfer limit")
+                            buffers[key.data].extend(data)
+                    process.wait(timeout=max(0.001, deadline - time.monotonic()))
+                return subprocess.CompletedProcess(
+                    argv,
+                    process.returncode,
+                    buffers["stdout"].decode() if capture else None,
+                    buffers["stderr"].decode() if capture_stderr else None,
+                )
+            finally:
+                if process.poll() is None:
+                    process.kill()
+                    process.wait()
+    except (OSError, subprocess.TimeoutExpired, UnicodeError) as error:
+        raise CaptureError("Canonical Linux capture returned invalid output or timed out") from error
 
 
 def copy_draft(source: Path, root: Path, plan: dict) -> None:
@@ -246,7 +298,14 @@ def run(args) -> dict:
         work = Path(scratch)
         project = work / "project"
         copy_snapshot(root, project, source_files)
+        from heinzel_plugin_tools.capture_worker import fingerprints
+
+        state = fingerprints(project, source_files)
+        (work / "source-state.json").write_text(
+            json.dumps({name: {"sha256": value["sha256"], "mode": value["mode"]} for name, value in state.items()})
+        )
         (work / "source-files.json").write_text(json.dumps(source_files))
+        (work / "source-digest.txt").write_text(original_inputs)
         (work / BOOTSTRAP_WHEEL).write_bytes(bootstrap_wheel())
         for directory in ("home", "cache", "python", "bootstrap"):
             (work / directory).mkdir()
@@ -329,6 +388,9 @@ def run(args) -> dict:
                     "'--no-index', '--no-deps', '--target', '/capture/bootstrap', "
                     f"'/capture/{BOOTSTRAP_WHEEL}'], check=True); "
                     "os.execvp(sys.argv[1], sys.argv[1:])",
+                    "python",
+                    "-I",
+                    "/capture/runtime/src/heinzel_plugin_tools/capture_worker.py",
                     *child,
                 ],
                 cwd=work,

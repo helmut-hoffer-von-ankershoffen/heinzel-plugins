@@ -101,6 +101,240 @@ def draft_of(owner):
     return folder
 
 
+@pytest.fixture
+def native_child(owner, tmp_path):
+    """Benign child fixture: emit a prebuilt fictional draft and generated state."""
+    from heinzel_plugin_tools import capture_linux, capture_worker
+
+    recorded(owner)
+    folder = draft_of(owner)
+    (folder / "index.html").write_text("Fictional preview")
+    payload = {path.name: path.read_bytes().hex() for path in folder.iterdir()}
+    shutil.rmtree(owner / ".preview")
+    names = capture_linux.snapshot_files(owner, capture.read_plan(owner))
+    shared = tmp_path / "shared/project"
+    shared.parent.mkdir()
+    capture_linux.copy_snapshot(owner, shared, names)
+    state = capture_worker.fingerprints(shared, names)
+    (shared.parent / "source-state.json").write_text(
+        json.dumps({name: {"sha256": value["sha256"], "mode": value["mode"]} for name, value in state.items()})
+    )
+    (shared.parent / "source-files.json").write_text(json.dumps(names))
+    (shared.parent / "source-digest.txt").write_text(
+        capture.input_digest(shared, capture.read_plan(shared), source_files=names)
+    )
+    script = shared.parent / "child.py"
+    script.write_text(
+        "import json,sys\nfrom pathlib import Path\n"
+        "root=Path(sys.argv[sys.argv.index('--project')+1])\n"
+        "mode=sys.argv[1]\npayload=json.loads(sys.argv[2])\n"
+        "for name in ('.venv','run-home','cache','node_modules'):\n"
+        "    (root/name).mkdir()\n    (root/name/'generated').write_text('fictional')\n"
+        "if mode not in ('absent','failed'):\n"
+        "    draft=root/'.preview/screenshots/draft'\n"
+        "    draft.mkdir(parents=True)\n"
+        "    for name,data in payload.items():\n"
+        "        (draft/name).write_bytes(bytes.fromhex(data))\n"
+        "    if mode=='extra': (draft/'extra.txt').write_text('fictional')\n"
+        "if mode=='mutated': (root/'README.md').write_text('Changed fictional source')\n"
+        "if mode=='missing': (root/'README.md').unlink()\n"
+        "if mode=='chmod': (root/'README.md').chmod(0o777)\n"
+        "print(json.dumps({'ok':mode!='failed'}))\n"
+        "raise SystemExit(7 if mode=='failed' else 0)\n"
+    )
+
+    def invoke(mode):
+        return capture_worker.run(
+            [sys.executable, str(script), mode, json.dumps(payload), "--project", str(shared)], shared=shared
+        )
+
+    return shared, invoke
+
+
+def test_native_bootstrap_returns_only_validated_draft(native_child):
+    shared, invoke = native_child
+    before = (shared / "README.md").read_bytes()
+    assert invoke("success") == 0
+    assert (shared / privacy.DRAFT / "index.html").read_text() == "Fictional preview"
+    assert (shared / "README.md").read_bytes() == before
+    assert all(not (shared / name).exists() for name in (".venv", "run-home", "cache", "node_modules"))
+
+
+@pytest.mark.parametrize("mode", ["absent", "failed"])
+def test_native_bootstrap_clean_absence_and_failed_render_preserve_state(native_child, mode):
+    shared, invoke = native_child
+    before = {path.relative_to(shared): path.read_bytes() for path in shared.rglob("*") if path.is_file()}
+    cwd = Path.cwd()
+    assert invoke(mode) == (7 if mode == "failed" else 0)
+    assert Path.cwd() == cwd
+    assert not (shared / privacy.DRAFT).exists()
+    assert {path.relative_to(shared): path.read_bytes() for path in shared.rglob("*") if path.is_file()} == before
+
+
+@pytest.mark.parametrize("mode", ["extra", "mutated", "missing", "chmod"])
+def test_native_bootstrap_refuses_invalid_outbound_state(native_child, mode):
+    shared, invoke = native_child
+    before = (shared / "README.md").read_bytes()
+    with pytest.raises(privacy.CaptureError):
+        invoke(mode)
+    assert not (shared / privacy.DRAFT).exists()
+    assert (shared / "README.md").read_bytes() == before
+
+
+def test_native_bootstrap_failed_render_preserves_previous_draft(native_child):
+    shared, invoke = native_child
+    previous = shared / privacy.DRAFT
+    previous.mkdir(parents=True)
+    (previous / "index.html").write_text("Previous fictional preview")
+    assert invoke("failed") == 7
+    assert (previous / "index.html").read_text() == "Previous fictional preview"
+
+
+@pytest.mark.parametrize("boundary", ["shared", "native"])
+def test_native_source_bound_before_execution(native_child, monkeypatch, boundary):
+    from heinzel_plugin_tools import capture_linux
+
+    shared, invoke = native_child
+    if boundary == "shared":
+        (shared / "README.md").write_text("Changed fictional source")
+    else:
+        original = capture_linux.copy_snapshot
+
+        def corrupt(root, project, names):
+            original(root, project, names)
+            (project / "README.md").chmod(0o777)
+
+        monkeypatch.setattr(capture_linux, "copy_snapshot", corrupt)
+    with pytest.raises(privacy.CaptureError, match="source state"):
+        invoke("success")
+    assert not (shared / privacy.DRAFT).exists()
+
+
+@pytest.mark.parametrize("stream", ["stdout", "stderr"])
+def test_canonical_output_limit(tmp_path, monkeypatch, stream):
+    from heinzel_plugin_tools import capture_linux
+
+    monkeypatch.setattr(capture_linux, "OUTPUT_LIMIT", 1024)
+    with pytest.raises(privacy.CaptureError, match="output exceeds"):
+        capture_linux.command(
+            [sys.executable, "-c", f"import sys; sys.{stream}.write('x'*100000)"],
+            cwd=tmp_path,
+            capture=True,
+            capture_stderr=True,
+        )
+
+
+def test_canonical_output_drains_both_streams(tmp_path):
+    from heinzel_plugin_tools import capture_linux
+
+    result = capture_linux.command(
+        [sys.executable, "-c", "import sys; print('fictional'); print('diagnostic', file=sys.stderr)"],
+        cwd=tmp_path,
+        capture=True,
+        capture_stderr=True,
+    )
+    assert result.returncode == 0
+    assert result.stdout == "fictional\n"
+    assert result.stderr == "diagnostic\n"
+
+
+@pytest.mark.parametrize("mode", [0o644, 0o645, 0o654, 0o655, 0o744, 0o745, 0o754, 0o755])
+def test_native_copy_preserves_exact_manifest_mode(native_child, mode):
+    shared, invoke = native_child
+    source = shared / "README.md"
+    original = source.read_bytes()
+    source.chmod(mode)
+    manifest_path = shared.parent / "source-state.json"
+    manifest = json.loads(manifest_path.read_text())
+    manifest["README.md"]["mode"] = mode
+    manifest_path.write_text(json.dumps(manifest))
+    assert invoke("absent") == 0
+    assert source.read_bytes() == original
+    assert source.stat().st_mode & 0o7777 == mode
+
+
+@pytest.mark.parametrize("field", ["uid", "gid"])
+@pytest.mark.parametrize("mutate", [False, True])
+def test_native_bind_mapping_is_recorded_independently(native_child, monkeypatch, field, mutate):
+    from heinzel_plugin_tools import capture_worker
+
+    shared, invoke = native_child
+    original = capture_worker.fingerprints
+    reads = 0
+
+    def mapped(root, names):
+        nonlocal reads
+        result = original(root, names)
+        if root == shared:
+            reads += 1
+            # Model translated bind IDs without requiring privileged chown.
+            for state in result.values():
+                state[field] += 10000
+            if mutate and reads > 1:
+                result["README.md"][field] += 1
+        return result
+
+    monkeypatch.setattr(capture_worker, "fingerprints", mapped)
+    if mutate:
+        with pytest.raises(privacy.CaptureError, match="before execution"):
+            invoke("success")
+        assert not (shared / privacy.DRAFT).exists()
+    else:
+        assert invoke("success") == 0
+
+
+@pytest.mark.parametrize("boundary", ["shared", "native"])
+@pytest.mark.parametrize("field", ["uid", "gid"])
+def test_native_post_child_ownership_change_is_refused(native_child, monkeypatch, boundary, field):
+    from heinzel_plugin_tools import capture_worker
+
+    shared, invoke = native_child
+    original = capture_worker.fingerprints
+    reads = {"shared": 0, "native": 0}
+
+    def changed(root, names):
+        result = original(root, names)
+        location = "shared" if root == shared else "native"
+        reads[location] += 1
+        if location == boundary and reads[location] == (3 if location == "shared" else 2):
+            result["README.md"][field] += 1
+        return result
+
+    monkeypatch.setattr(capture_worker, "fingerprints", changed)
+    with pytest.raises(privacy.CaptureError, match="isolated source snapshot"):
+        invoke("success")
+    assert not (shared / privacy.DRAFT).exists()
+
+
+def test_native_ownership_change_is_refused(native_child, monkeypatch):
+    from heinzel_plugin_tools import capture_worker
+
+    shared, invoke = native_child
+    original = capture_worker.fingerprints
+
+    def changed(root, names):
+        result = original(root, names)
+        if root != shared:
+            result["README.md"]["uid"] += 1
+        return result
+
+    monkeypatch.setattr(capture_worker, "fingerprints", changed)
+    with pytest.raises(privacy.CaptureError, match="before execution"):
+        invoke("success")
+
+
+def test_canonical_output_timeout(tmp_path):
+    from heinzel_plugin_tools import capture_linux
+
+    with pytest.raises(privacy.CaptureError, match="timed out"):
+        capture_linux.command(
+            [sys.executable, "-c", "import time; time.sleep(5)"],
+            cwd=tmp_path,
+            capture=True,
+            timeout=0.1,
+        )
+
+
 def test_default_plan_uses_the_declared_module_and_never_imports_plugin_code(owner):
     plan = capture.default_plan(owner)
     assert {scene["surface"] for scene in plan["scenes"]} == {"ui", "cli"}
@@ -849,6 +1083,9 @@ def test_canonical_linux_runs_exact_image_without_host_state_and_keeps_all_text(
         assert not (cwd / "terms").exists()
         assert not any("docker.sock" in item or "/Applications" in item for item in argv)
         assert "--verify" in argv and "--container-worker" in argv
+        worker = argv.index("/capture/runtime/src/heinzel_plugin_tools/capture_worker.py")
+        assert argv[worker - 2 : worker] == ["python", "-I"]
+        assert argv[worker + 1 : worker + 4] == ["uv", "run", "--no-project"]
         assert not (cwd / "project/.venv").exists()
         assert not (cwd / "project/.env").exists()
         assert not (cwd / "project/credentials.json").exists()
