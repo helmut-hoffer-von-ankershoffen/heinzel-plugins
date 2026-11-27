@@ -188,7 +188,8 @@ def test_gallery_plan_covers_every_published_owner_and_named_clock_view():
     assert [p for p in targets if "/web/" in p] == ["plugins/heinzel-clock/web/src/ClockPanel.test.tsx"]
 
 
-def test_gallery_hosted_repair_requires_exact_parent_and_reviewed_blobs(history, monkeypatch):
+@pytest.mark.parametrize("reviewed_head", ["GALLERY_HOSTED_HEAD", "GALLERY_CLOCK_HEAD"])
+def test_gallery_hosted_repair_requires_exact_parent_and_reviewed_blobs(history, monkeypatch, reviewed_head):
     repo, original, _, _ = history
     candidate, _ = policy.PLANS[original]
     git(repo, "checkout", "-q", "--detach", candidate)
@@ -201,9 +202,12 @@ def test_gallery_hosted_repair_requires_exact_parent_and_reviewed_blobs(history,
     fixture = repo / policy.GALLERY_CAPTURE_FIXTURE
     fixture.parent.mkdir()
     fixture.write_text("reviewed fixture\n")
+    receipt = repo / "clock-capture.json"
+    if reviewed_head == "GALLERY_CLOCK_HEAD":
+        receipt.write_text("reviewed capture\n")
     repair = commit(repo, "exact repair")
     monkeypatch.setattr(policy, "GALLERY_ORIGINAL", original)
-    monkeypatch.setattr(policy, "GALLERY_HOSTED_HEAD", hosted)
+    monkeypatch.setattr(policy, reviewed_head, hosted)
     monkeypatch.setattr(policy, "GALLERY_RUNTIME_BLOBS", {})
     monkeypatch.setattr(policy, "GALLERY_POLICY_PATHS", policy.GALLERY_POLICY_PATHS | {"policy"})
     monkeypatch.setattr(
@@ -211,6 +215,10 @@ def test_gallery_hosted_repair_requires_exact_parent_and_reviewed_blobs(history,
         "GALLERY_FORWARD_BLOBS",
         {path: git(repo, "rev-parse", f"{repair}:{path}") for path in (metadata, policy.GALLERY_CAPTURE_FIXTURE)},
     )
+    if reviewed_head == "GALLERY_CLOCK_HEAD":
+        monkeypatch.setattr(
+            policy, "GALLERY_CLOCK_BLOBS", {receipt.name: git(repo, "rev-parse", f"{repair}:{receipt.name}")}
+        )
     assert policy.GALLERY_CAPTURE_FIXTURE in policy.plan(repo, hosted, repair, repair).tooling
     with pytest.raises(ValueError, match="pinned, direct policy successor"):
         policy.plan(repo, original, repair, repair)
@@ -219,6 +227,8 @@ def test_gallery_hosted_repair_requires_exact_parent_and_reviewed_blobs(history,
     updated.write_text('version = "0.5.10"\n')
     fixture.parent.mkdir(exist_ok=True)
     fixture.write_text("reviewed fixture\n")
+    if reviewed_head == "GALLERY_CLOCK_HEAD":
+        receipt.write_text("reviewed capture\n")
     differently_versioned = commit(repo, "unreviewed package version")
     with pytest.raises(ValueError, match="gallery runtime input differs from its reviewed blob"):
         policy.plan(repo, hosted, differently_versioned, differently_versioned)

@@ -2,7 +2,7 @@
   "format": 2,
   "plugin": "heinzel-clock",
   "core_version": "0.9.56",
-  "inputs_sha256": "fc9f620746d271cb1dc154931d409e384de1171504798aa64d9f333da4d00ea2",
+  "inputs_sha256": "3f6029fb78687970f3b88a0a287f21560e892c4c75c1cc18878e22580c60c084",
   "images": {
     "docs/assets/screenshots/world-clock.png": "d5bf238bfd50231454fb45f69d1715baeb2d9420fd86e56aca9c57fa7e9c2e2e",
     "docs/assets/screenshots/team-overview.png": "88b132134def1c25562d62f74300b4db9fecac7d7ff5dbef097ab1891ac28acc",

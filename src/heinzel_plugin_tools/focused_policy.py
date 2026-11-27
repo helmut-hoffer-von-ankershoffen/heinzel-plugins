@@ -50,6 +50,7 @@ POLICY_PATHS = frozenset(
 )
 GALLERY_ORIGINAL = "330dc9bc521c9b59990604fa3bc9e74342de0886"
 GALLERY_HOSTED_HEAD = "d04153aa78ff1692f81a291b251c527ab86dc476"
+GALLERY_CLOCK_HEAD = "bc201df2544f95c5b60195d5bbd9eb17ca9f05f4"
 GALLERY_CAPTURE_FIXTURE = "tests/capture_run_test.py"
 GALLERY_RUNTIME_BLOBS = {
     ".github/workflows/ci.yml": "98242894cc754d366a8f393bac1a566c5ea30cea",
@@ -63,6 +64,10 @@ GALLERY_FORWARD_BLOBS = {
     "plugins/heinzel-weather/pyproject.toml": "dc158e333037afb78a1bb4719dd5f4cc9ea60a0f",
     "plugins/heinzel-weather/CHANGELOG.md": "32be23b91dba11aef4cdeeab9a714e8b8cde0d09",
     GALLERY_CAPTURE_FIXTURE: "a1a8756e07e145f32bd00f2685e043578b7737a2",
+}
+GALLERY_CLOCK_BLOBS = {
+    "plugins/heinzel-clock/docs/screenshot-definition.json": "6bdc40680168ea5b8c98cb5c578f06ecfcfb3894",
+    "plugins/heinzel-clock/docs/assets/screenshots/capture.json": "b4bdf09e6ffd1ba0af5124a57cf531aceff3911c",
 }
 GALLERY_POLICY_PATHS = frozenset(
     {
@@ -291,7 +296,8 @@ def plan(repo: Path, old: str, new: str, trusted_policy: str) -> CheckPlan:
     `trusted_policy` must be fixed by an independently trusted launcher. Accepting
     a caller-provided value here without such a launcher does not confer trust.
     """
-    hosted_fix = old == GALLERY_HOSTED_HEAD
+    clock_fix = old == GALLERY_CLOCK_HEAD
+    hosted_fix = old == GALLERY_HOSTED_HEAD or clock_fix
     plan_key = GALLERY_ORIGINAL if hosted_fix else old
     if plan_key not in PLANS:
         raise ValueError("unknown original PR head")
@@ -306,15 +312,16 @@ def plan(repo: Path, old: str, new: str, trusted_policy: str) -> CheckPlan:
     ):
         raise ValueError("gallery push requires the pinned, direct policy successor")
     policy_paths = GALLERY_POLICY_PATHS if gallery else POLICY_PATHS
+    forward_blobs = GALLERY_FORWARD_BLOBS if hosted_fix else {}
+    if clock_fix:
+        forward_blobs = forward_blobs | GALLERY_CLOCK_BLOBS
     if hosted_fix:
-        policy_paths = policy_paths.union(GALLERY_FORWARD_BLOBS)
+        policy_paths = policy_paths.union(forward_blobs)
         tests = (*tests, GALLERY_CAPTURE_FIXTURE)
     _check_ancestry(repo, old, new, candidate, trusted_policy)
     _check_frozen_inputs(repo, old, new, candidate, trusted_policy, policy_paths)
     blobs = GALLERY_RUNTIME_BLOBS if gallery else {}
-    if hosted_fix:
-        blobs = blobs | GALLERY_FORWARD_BLOBS
-    for path, blob in blobs.items():
+    for path, blob in (blobs | forward_blobs).items():
         if _entry(repo, new, path) != f"100644 blob {blob}\t{path}\0":
             raise ValueError(f"gallery runtime input differs from its reviewed blob: {path}")
     _check_required_tests(repo, new, candidate, tests, policy_paths)

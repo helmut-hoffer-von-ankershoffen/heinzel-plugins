@@ -54,17 +54,6 @@
         },
         {
           "action": "hover",
-          "role": "button",
-          "name_regex": "^World clock: Berlin"
-        },
-        {
-          "action": "hover",
-          "role": "button",
-          "name_regex": "^Berlin",
-          "within_role": "contentinfo"
-        },
-        {
-          "action": "hover",
           "role": "region",
           "name": "Today"
         }
