@@ -17,7 +17,7 @@ SHA = re.compile(r"[0-9a-f]{40}\Z")
 REF = re.compile(r"refs/heads/[A-Za-z0-9][A-Za-z0-9._/-]*\Z")
 
 
-def validate_transaction(raw: bytes) -> tuple[str, str, str, str]:
+def validate_transaction(raw: bytes, *, repo: Path, git_env: dict[str, str]) -> tuple[str, str, str, str]:
     try:
         lines = raw.decode("ascii").splitlines()
     except UnicodeDecodeError as exc:
@@ -28,10 +28,37 @@ def validate_transaction(raw: bytes) -> tuple[str, str, str, str]:
     if len(parts) != 4:
         raise ValueError("malformed push input")
     local_ref, new, remote_ref, old = parts
-    if not REF.fullmatch(local_ref) or not REF.fullmatch(remote_ref):
+    if not REF.fullmatch(remote_ref):
         raise ValueError("branch refs required")
     if any(not SHA.fullmatch(sha) or sha == "0" * 40 for sha in (new, old)):
         raise ValueError("existing full SHA refs required")
+    if not REF.fullmatch(local_ref):
+        if local_ref != new:
+            raise ValueError("source must be a branch or the exact new commit")
+        # sm ship pushes the checked commit as a literal SHA to the same-named remote branch.
+        # Git reports both its branch identity and object ID alongside any dirty paths.
+        status = subprocess.check_output(
+            [
+                "git",
+                "--no-replace-objects",
+                "status",
+                "--porcelain=v2",
+                "--branch",
+                "--untracked-files=all",
+                "--ignore-submodules=none",
+                "--no-ahead-behind",
+            ],
+            cwd=repo,
+            env=git_env,
+            timeout=30,
+        ).splitlines()
+        branch = remote_ref.removeprefix("refs/heads/")
+        if (
+            f"# branch.oid {new}".encode() not in status
+            or f"# branch.head {branch}".encode() not in status
+            or any(not row.startswith(b"# ") for row in status)
+        ):
+            raise ValueError("literal source requires the clean checked-out destination branch at the new commit")
     return local_ref, new, remote_ref, old
 
 
@@ -49,7 +76,6 @@ def main() -> int:
             raise ValueError("installed focused trust loader is missing")
         module = importlib.util.module_from_spec(spec)
         spec.loader.exec_module(module)
-        _, new, destination, old = validate_transaction(sys.stdin.buffer.read(65537))
         repo = Path(
             subprocess.check_output(
                 ["git", "--no-replace-objects", "rev-parse", "--show-toplevel"],
@@ -57,6 +83,9 @@ def main() -> int:
                 text=True,
                 timeout=30,
             ).strip()
+        )
+        _, new, destination, old = validate_transaction(
+            sys.stdin.buffer.read(65537), repo=repo, git_env=module.clean_env()
         )
         pin, _ = module.load(hook_dir, repo, sys.argv[1], sys.argv[2], old, new, "guard")
         if destination != pin["destination"]:
