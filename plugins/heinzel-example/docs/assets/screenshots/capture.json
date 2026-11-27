@@ -1,21 +1,21 @@
 {
   "format": 2,
   "plugin": "heinzel-example",
-  "core_version": "0.9.55",
+  "core_version": "0.9.56",
   "inputs_sha256": "e8e7c39b6249b31375e195e2c07aa555cbf75846c7db2832ae379a99e882b11b",
   "images": {
-    "docs/assets/screenshots/widget-and-status.png": "21066546a8e8d2ee101ef2948cf7a355b378350a4367520a40a27f2753762bd5",
-    "docs/assets/screenshots/inspector.png": "84b87af246828f8a55dc0736f9ee52a8b56d535a57acb4d0af451cb16e72ae47",
+    "docs/assets/screenshots/widget-and-status.png": "8f5647bbc7e8ca9a7fe91406d963661218e0bf5a5c7c6477c24f49bdb2c4e32f",
+    "docs/assets/screenshots/inspector.png": "cbebb59cde771006c4570fe7a8fe92fe73db10196539011222ea0d0e791c0d83",
     "docs/assets/screenshots/greeting-terminal.png": "ee212ce1a4955152d4a918334b81fb553e381d3cf45fa2f8bd370985b922b14f",
-    "docs/assets/screenshots/plugin-notice.png": "00116e85487f93b056061ef365f4d64784165bcda4b03d4d5dc17cfa9431e74c",
+    "docs/assets/screenshots/plugin-notice.png": "4d495cc4d91f0d7a8b6d9d1cbf7d32248652216b4266f8e23ca7dc8a5b2f11b8",
     "docs/assets/screenshots/greeting-cli.png": "7cbd9405866f3b42ce4b4593d550184126160e9a588f7fa3db9f505f5b7e782a",
     "docs/assets/screenshots/sample-json.png": "4f95e6238b30fef19a0095998b806663537e8826a61fe20192e8c383c172aa84"
   },
   "transcripts": {
-    "widget-and-status.txt": "c6163836eaaec475b25983cbef97acd30bd405b069ae6a137ae07e0f94ca1319",
-    "inspector.txt": "61c5978b7ebe7032988b7fdb87e5fd9d794e6ffe5e355df4d8fd6edb28c08136",
-    "greeting-terminal.txt": "7f0487901d157595e36916b5b4e9dbcefcf576443dc1fe8432ad0f7e08eadcf1",
-    "plugin-notice.txt": "14840c499a87674958664d60934f1c168978033da8d109708db00d2448a9d3c3",
+    "widget-and-status.txt": "3a7c9ae7ecbd2c821909600e1c03136e7bec1ef65d90542985fbd76d67a43e2c",
+    "inspector.txt": "b97b7bbef9c54bff529359d0ae80fc1d0fe35192b4010c1a07633a2c422873c4",
+    "greeting-terminal.txt": "e7baaae2b2b1947d4dd8edf8a91818fc88e6908b5e75c9493a73e785e12b34a6",
+    "plugin-notice.txt": "8ac2b5d7996b346d1d8892a79fa90dcf43fde94d163f4b1afcad85b3e746a05f",
     "greeting-cli.txt": "0a315745bb1e963bf40b1ccfdc9a822532fa703f2c1b5013c8fe303b8cf0f59f",
     "sample-json.txt": "084c799cd551dd1d8d5c5f9a5d593b2e931f5e36122ee5c793c1d08a19839cc0"
   }

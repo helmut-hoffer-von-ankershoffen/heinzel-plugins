@@ -1,22 +1,22 @@
 {
   "format": 2,
   "plugin": "heinzel-resource",
-  "core_version": "0.9.55",
+  "core_version": "0.9.56",
   "inputs_sha256": "379a83172162eb01317f0949f3dcf2b63cd08b39244e9629f0fadae805ef3d72",
   "images": {
     "docs/assets/screenshots/resources-pane.png": "01fae1b4b0c065ba9847e31407c05c9a9b6747f32c1f2e7a9300648b4b03fef7",
-    "docs/assets/screenshots/today-resources.png": "59edc982c1960666e6d1e6295e012b560d2c1b8d5400d196a99626fe658a981b",
-    "docs/assets/screenshots/phone-resources.png": "b5a5bbe4559be135da45abb35e8d8425856e8ece12d77dc65f59be217b39010f",
+    "docs/assets/screenshots/today-resources.png": "e945b3845be843dae62789b58fa1d840a864e597033861304c6c7d1a9f033166",
+    "docs/assets/screenshots/phone-resources.png": "48c77f55a402c013f7855503912ff91ea6866cf1de111d90d8ccf60e508cb9dc",
     "docs/assets/screenshots/cli-resources.png": "60b65752e5e124ec2dc2e1a9f06d4030c95477f2e44a11f7e587b393a2809262",
     "docs/assets/screenshots/terminal-resources.png": "ca8fad9613de080e516c24c92d3afd096d65e7bf1799a7ba3cfc006ecf6b6503",
     "docs/assets/screenshots/terminal-resources-json.png": "e72d0773dc1e14d73e25fb5812f33e2a52bb08d423ff8c48ab4816cd6dd0aba3"
   },
   "transcripts": {
-    "resources-pane.txt": "f1b800fb51988c4570d7af70ec9cb98b627ef39ce1c569b83c289ae04036c204",
-    "today-resources.txt": "be0a554a0d3a72d5463716e3294965c495a31f1bc63afb97075264f70394e37f",
-    "phone-resources.txt": "77d4135a826301c1aed750685327b6540aa33d0b61879b9a7e320dc2b25a537f",
+    "resources-pane.txt": "33c840175569e1254a8f4ab8eec25e803ca77291516779781edac71bb4f57e46",
+    "today-resources.txt": "0f3d0a96467e718f1e2d16b1e4d162c0eb1f783924d3608e263d201a0ffb79be",
+    "phone-resources.txt": "37797d86ad07e4600397bda007635d4ca8f39ba9a0d4a83d4847955a26a9783e",
     "cli-resources.txt": "ddef8a589eb34e18d3fd06ab545c884ebcc82923f5270bb88a6fcfc2ae8272a7",
-    "terminal-resources.txt": "787de207a4ee8c79720d14cdad5e5bc9da06ed13d68e8e295d7ed4efa211bd55",
-    "terminal-resources-json.txt": "5f098b3be1ede7e359c8703c1c51dff8f9738dfeeddf765740f89f9adbaff51a"
+    "terminal-resources.txt": "a3eaab861932f6091ff8cc0b0fdc16a00d509ee8add1c32c01195e6ce483ec6b",
+    "terminal-resources-json.txt": "e44b877b64162107b994960ef6acefab1182d938971b27359f3ed99cf893b5e3"
   }
 }

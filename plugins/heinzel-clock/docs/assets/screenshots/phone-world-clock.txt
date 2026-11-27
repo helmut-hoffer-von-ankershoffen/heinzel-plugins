@@ -26,7 +26,7 @@ Los Angeles
 Starts in 30m · 2d 14h 30m since end
 08:30:00
 Edit time zones
-v0.9.55
+v0.9.56
 Updates, off
 System health, warning
 ?

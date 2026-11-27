@@ -1,18 +1,18 @@
 {
   "format": 2,
   "plugin": "heinzel-slack",
-  "core_version": "0.9.55",
+  "core_version": "0.9.56",
   "inputs_sha256": "436b7f0d8bd2882e08e35efeb15c46ffcb80f28baf30bc6ea4c75c60e6ae5676",
   "images": {
-    "docs/assets/screenshots/slack-settings.png": "f241be0cf53155acfaa1fa6db08b901f737c145b29127f326a4a9500f4624949",
+    "docs/assets/screenshots/slack-settings.png": "483407280f01dc5b4c5b306d64da5873a7bacfbafec0836482ce9f5ee30fedfa",
     "docs/assets/screenshots/slack-notification-settings.png": "023d28c8a89bacc6acf4a4d535ef1fecc12abe6356cf47c096258fba041fee76",
     "docs/assets/screenshots/slack-notice-delivered.png": "477c594cdaa58dbd091cbf833f6a3c5e5a8830d2f9b9ac10e9040de9e82b04aa",
     "docs/assets/screenshots/slack-draft-cli.png": "1b869b8985af2ec3d7e404758cc17e5f35bf64ea70813c7358a5543de746bf96",
     "docs/assets/screenshots/slack-draft-decision-cli.png": "37091fd71c6a59b073bbfeda067712bb3f03f63ef6e7590cbd1e05b31af9b1fc"
   },
   "transcripts": {
-    "slack-settings.txt": "b3647354c358a4cf3c8054916c1dccdd81da42456089b2a5fde41cbd024c70ef",
-    "slack-notification-settings.txt": "944a3cc134a3b0a21391dbaed779556994fdc5cc605cab398cf2f6bfde469d00",
+    "slack-settings.txt": "22b9a4a4291eecfb4047621a27704eae7b7629c358da754ca03d1cc012e373aa",
+    "slack-notification-settings.txt": "315dbe632ac46a80e76c13be7e4de1a8a00532e5cd5c3563a017c5d56c3d758e",
     "slack-notice-delivered.txt": "a03e5ced1f889d4c50138780d1c523e85f58261846ad224f2e4ddd0e6bd4faab",
     "slack-draft-cli.txt": "be3327018fe6adc629a085bf15b212eb24e321038d3cc9acdc18def44c2e96d1",
     "slack-draft-decision-cli.txt": "0bab28155fbc709895dee63143b93edbb1f07227635f1fb6e158f8568fd779fe"

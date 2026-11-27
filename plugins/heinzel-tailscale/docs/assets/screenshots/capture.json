@@ -1,7 +1,7 @@
 {
   "format": 2,
   "plugin": "heinzel-tailscale",
-  "core_version": "0.9.55",
+  "core_version": "0.9.56",
   "inputs_sha256": "f2f3bb1b6b47eca6ee6b56743053fda4b59870887cf1a30bf1b48476ba563d65",
   "images": {
     "docs/assets/screenshots/sharing-existing-private.png": "4e27238cea3a206b1833b7ebc49aa8e6dfcd6821c9208cddeb71098293d5fe70",
@@ -11,10 +11,10 @@
     "docs/assets/screenshots/sharing-off-cli.png": "a8eb54c75a6c6d6f2dbe641151bb8a80071fbfbb302b8005a44148f99e610aaf"
   },
   "transcripts": {
-    "sharing-existing-private.txt": "e8230719a0a01619b677f900f18412b6ed76f95f549b3efb6cb9ef148ac8af73",
-    "sharing-ready.txt": "74c08909da1d83cbce0af91db6145d48c93e932ec5718019a2ac7477e5984a99",
+    "sharing-existing-private.txt": "cd0c5f0b31141adb32d5b2c45c0c3fd302741577113a9db1074006495f828c47",
+    "sharing-ready.txt": "aabc11728b8aa0c28ff6eee8927eccf58e64434806e320f08e4710518f92f03f",
     "sharing-request-cli.txt": "94137e54e37a1d63cafcc8c9ed58e5065157f597b607c78fda7b214adf5a6f8f",
-    "sharing-off.txt": "99eddf67c22d13b7de1fd59af57665f9d8e5a0c8d556a44c738c8c07f910732e",
+    "sharing-off.txt": "fbc7f10368456fe42e4c5f1fe48ce1f771833efe421461a68a3ffc7e166e931a",
     "sharing-off-cli.txt": "cf49c8bdefcb23c7b464e229ae6e18bbd8f639abb0121bf570e3e30b631fc8b0"
   }
 }

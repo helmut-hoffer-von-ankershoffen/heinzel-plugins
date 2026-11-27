@@ -1,18 +1,18 @@
 {
   "format": 2,
   "plugin": "heinzel-zoom",
-  "core_version": "0.9.55",
+  "core_version": "0.9.56",
   "inputs_sha256": "18dc94975a0bf283ca2cd35eb474ad486a6036f391eee8aacdde290b7f90aab6",
   "images": {
-    "docs/assets/screenshots/workflow-list.png": "20c2d8f8adf657d78a7902c9ec9e414389675a7afdb720e5ab7d36a6cd53b9b9",
-    "docs/assets/screenshots/workflow-context.png": "a9f4917255c0cd544069cfb2cbc80b018546930550c50f84f0ba96cf81667927",
+    "docs/assets/screenshots/workflow-list.png": "50169c16d4bc6d971ca16634c0af36c6c46d1e4245a35f19f99ef30364abd058",
+    "docs/assets/screenshots/workflow-context.png": "5df145c3f1cf14b3ddc8e61aec97d37b0a1b3b27c68f7e7c0318ed4fbf860685",
     "docs/assets/screenshots/summary-cli.png": "26da3ef0023bdd904580d6f9764b1372c23aea68a0ed763133e1976490589140",
     "docs/assets/screenshots/launch-cli.png": "057db4ba2782ae93a72433013247fcd6bb338f5533ec1355f2a3719b15b2ca9d",
     "docs/assets/screenshots/meeting-list-json.png": "0448651f6bdeffaf51fb446a024671035d4069a5adc14ac543741d6fb8fa555d"
   },
   "transcripts": {
-    "workflow-list.txt": "338c206f78c54ff831384c25b5866605ba4386071e851930429828b054cb4389",
-    "workflow-context.txt": "c2b27fc564f9427a54219250ba5c6ed82e235393c2c75cf5796cc701fefef704",
+    "workflow-list.txt": "250dedfa98769011338bde2803c768d5238e0573fe5876be8c9b943ac98661e2",
+    "workflow-context.txt": "b158abde0cd1083f525497687d44ba1344e56912c141c4e8e58d1d27d4a567af",
     "summary-cli.txt": "4be37a1c9908c8f4c8c3bad307e5dbaeb5578b4b71951327f1560dfd3c371c99",
     "launch-cli.txt": "0c5a827a0454f9a2918a11c13785c51da87128b0cd4baf9fa8081fbcd5d51761",
     "meeting-list-json.txt": "2762667503f795cc6f754156a447becaca466c238f3714d29fd2496c3486e210"

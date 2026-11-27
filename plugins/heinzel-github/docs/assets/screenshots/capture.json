@@ -1,21 +1,21 @@
 {
   "format": 2,
   "plugin": "heinzel-github",
-  "core_version": "0.9.55",
+  "core_version": "0.9.56",
   "inputs_sha256": "78f7f5e87ff4a90abeabf5860d0b06095eef357588756a17852ae6548b1001a8",
   "images": {
-    "docs/assets/screenshots/workflow-collection.png": "d80dbe852b16e4d19796c6a23036186fc8801916a1a5238d1bd38be9386e5c5c",
-    "docs/assets/screenshots/workflow-context.png": "b3ae18669e2c48599e6018259ffce11cff8e8f7cf9980facdf5320dd06afb213",
+    "docs/assets/screenshots/workflow-collection.png": "2eeac8f732a6bc5013a8013bf6465f879a33f0b2913c3a124cc31e7f5e9cbb35",
+    "docs/assets/screenshots/workflow-context.png": "99083b3298b151b8bb0cd6f322c9bd7b3a2532a06d618b4a56f012279701d993",
     "docs/assets/screenshots/merged-work.png": "e02c200fb34fd2a0c6348545bd99f4ff85d144d1bc20c5c3a1619e7906a78623",
     "docs/assets/screenshots/issue-changes.png": "9f6482200efa429b26eceef7eb74048da5a9f054238ad09ea4e28ff002f58cb6",
     "docs/assets/screenshots/merged-cli.png": "64627cdc9e333b9330f89b9713ce629fd8617801ac95ad1c94c037f83a6d5171",
     "docs/assets/screenshots/issues-json.png": "27909799fbe4fa0e56c903a62df0069ad5a576140650617a12ca23d9f27e79c8"
   },
   "transcripts": {
-    "workflow-collection.txt": "f2f395812b69722ef504e0d8f3ad1b8b1a927a485cb52bbaf3797324509d2d5f",
-    "workflow-context.txt": "587cac77e4193e7d5d73f8e0a7cf8c1f460e3c5a6685df9c24f72b7b36215ac1",
-    "merged-work.txt": "6e4a44515754606de152ad688b7e00ae76a4710dc31a78e0b24fc2154b59e25c",
-    "issue-changes.txt": "c64d16e42243cc92965d3ba9d0c72c23a7c915f832969b99a213b40e5960702b",
+    "workflow-collection.txt": "3f2f6de0cf0ff0c58909783c4a061d3ed63de94ee83ecd5b6f9411803aa9691b",
+    "workflow-context.txt": "09d07cc21a24c8738aabf3ad64d0eba9557f56c4e75a72b87f7ceee62247f1e6",
+    "merged-work.txt": "0c53991d30cf27b05e141c2e69a6853de229202facbf6f907b9d04d216b9b629",
+    "issue-changes.txt": "26ac5eb79482bf2988ca21b6a4c354b24bf41ecd6b0e39ab8a176452b793c4ca",
     "merged-cli.txt": "e4df52085e704c49ba37bd75f62656de48cd879405856220a53bcebb7efdebb4",
     "issues-json.txt": "a866c9bd0fe09d6dc1355428d53f5ce30511912b71452e84e925b65b89f104b0"
   }

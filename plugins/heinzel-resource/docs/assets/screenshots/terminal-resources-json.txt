@@ -19,7 +19,7 @@ Computer resources
 
 CPU 36%
 
-v0.9.55
+v0.9.56
 Updates, off
 0
 System health, warning

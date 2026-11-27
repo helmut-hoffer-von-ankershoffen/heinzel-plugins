@@ -1,22 +1,22 @@
 {
   "format": 2,
   "plugin": "heinzel-clock",
-  "core_version": "0.9.55",
+  "core_version": "0.9.56",
   "inputs_sha256": "fc9f620746d271cb1dc154931d409e384de1171504798aa64d9f333da4d00ea2",
   "images": {
-    "docs/assets/screenshots/world-clock.png": "b9b67d89795297d8d5b0a37264899ad3cc3e77ef11e25b5d793c1554e9bed5f8",
-    "docs/assets/screenshots/team-overview.png": "d3de57fbd8fe06d8f50b4e61922e744aa31e39a1ab3abc8b130c042c80911b5e",
+    "docs/assets/screenshots/world-clock.png": "d5bf238bfd50231454fb45f69d1715baeb2d9420fd86e56aca9c57fa7e9c2e2e",
+    "docs/assets/screenshots/team-overview.png": "88b132134def1c25562d62f74300b4db9fecac7d7ff5dbef097ab1891ac28acc",
     "docs/assets/screenshots/footer-detail.png": "2740628a45acdf44cfeb15f34cd8b0e535e13a40cf2da8a5954db5d0774254ff",
-    "docs/assets/screenshots/phone-world-clock.png": "c35ae9ca07ffd9625bb48d4467b81fb562657bac0ebe2538f3dc48139f893b56",
+    "docs/assets/screenshots/phone-world-clock.png": "ee1b34b72988b029d26d8c593ac0a8de3773d1a86b0f2844e213efac4b572f2f",
     "docs/assets/screenshots/terminal-current.png": "53d618afe3e4c9fd6ef198e512b2b26c69fd0de4620cdce3ca1094bd7860d3dc",
     "docs/assets/screenshots/terminal-overlap.png": "bdb8dca1ecebbfadc985c7fb8e641c92cdcbaddb395942147900c49047bf23f9",
     "docs/assets/screenshots/cli-json.png": "63662ce49e4e802cb277b730a340e2c866c6e858f91a86f6eb0a1b1b67540993"
   },
   "transcripts": {
-    "world-clock.txt": "fbeb8e56c51dc36397c80ada6de036e313c61ef74ea456b17cdb4f3d59a88a16",
-    "team-overview.txt": "988e1c0f1e400a38679167a609386d32dafd289c8e08f3fa4d020d63d8e078d4",
-    "footer-detail.txt": "988e1c0f1e400a38679167a609386d32dafd289c8e08f3fa4d020d63d8e078d4",
-    "phone-world-clock.txt": "5873e20651600a4bddce6bd329e3433d1d2c4dfab537d8467f0432d63494166d",
+    "world-clock.txt": "4deaa8a6f180b78a555a8707ed3ac5ee68c683ac689fd74f41b501a0cbafc62d",
+    "team-overview.txt": "1616ba6227155e3a550ac4ef436172cb02ed106caba24cb038255e0d1da6840f",
+    "footer-detail.txt": "52bb0bc22d222f6638aaf964d914997b3ae93a006f64759f7f5203a1e583614b",
+    "phone-world-clock.txt": "504bac4b0e11cf86d6affa2b7a8138001ffab625fd50c335e3cbb417a5b5d515",
     "terminal-current.txt": "05f1fa56e8a12d26bad2cf2635575d237d9ace564a919e04e76e0b75ed699843",
     "terminal-overlap.txt": "38adb315cb9cbf79f485393c40ca00c5fd3af498d201ff024da182f822938553",
     "cli-json.txt": "8cc4255d19d78d8dee533a130c756f8d32e7d3cc594d21493ded166c4965d167"
