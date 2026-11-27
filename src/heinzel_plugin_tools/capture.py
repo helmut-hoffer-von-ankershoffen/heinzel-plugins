@@ -32,7 +32,14 @@ from urllib.parse import urlsplit
 if __package__ in {None, ""}:
     sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
-from heinzel_plugin_tools._presentation import OwningPrefix, owning_prefix, redact_doctor_hostname, redact_owning_prefix
+from heinzel_plugin_tools._presentation import (
+    OwningPrefix,
+    _interpreter_paths,
+    _validate_environment,
+    owning_prefix,
+    redact_doctor_hostname,
+    redact_owning_prefix,
+)
 from heinzel_plugin_tools.planning import DEFINITION, load_definition, write_definition
 from heinzel_plugin_tools.privacy import (
     DRAFT,
@@ -332,23 +339,13 @@ NOT_RENDERED = {"tests", "test", "e2e", "__tests__"}
 
 
 def candidate_files(root: Path) -> list[str]:
-    """The plugin's relative files: what git tracks or would track (built output is ignored), else a walk."""
-    try:
-        listed = subprocess.run(
-            ["git", "-C", str(root), "ls-files", "-z", "--cached", "--others", "--exclude-standard", "--", "."],
-            capture_output=True,
-            check=False,
-            timeout=60,
-        )
-    except (OSError, subprocess.TimeoutExpired):
-        listed = None
-    if listed is not None and listed.returncode == 0:
-        return sorted({name for name in listed.stdout.decode().split("\0") if name})
-    found = []
-    for current, directories, filenames in os.walk(root, followlinks=False):
-        directories[:] = sorted(name for name in directories if name not in IGNORED)
-        found.extend((Path(current) / name).relative_to(root).as_posix() for name in filenames)
-    return sorted(found)
+    """Use the canonical host inventory, including standalone .gitignore semantics.
+
+    Workers supply their frozen source_files explicitly and never discover files here.
+    """
+    from heinzel_plugin_tools.capture_linux import source_inventory
+
+    return sorted({name for name in source_inventory(root).decode().split("\0") if name})
 
 
 def ui_inputs(root: Path, plan: dict, *, source_files: list[str] | None = None) -> list[str]:
@@ -943,6 +940,16 @@ def prepared_version(interpreter: Path, metadata: dict) -> str:
     return versions["core"]
 
 
+def validate_owning_environment(root: Path, interpreter: Path) -> None:
+    """Keep filesystem preconditions before installation, without granting presentation authority."""
+    expected = root.resolve(strict=True) / ".venv"
+    binary = expected / "bin/python"
+    config = expected / "pyvenv.cfg"
+    _validate_environment(expected, binary, config, interpreter)
+    for path in _interpreter_paths(expected, binary, config):
+        path.lstat()
+
+
 @contextlib.contextmanager
 def installed_artifact(root: Path, interpreter: Path, *, owning: bool) -> Iterator[None]:
     """Capture the plugin as people install it: its built wheel, not the editable development link.
@@ -1014,6 +1021,9 @@ def capture(
     if core:
         prepare += ["--core", core]
     if prepared_python is None:
+        existing = root / ".venv"
+        if existing.exists() or existing.is_symlink():
+            validate_owning_environment(root, existing / "bin/python")
         prepared = subprocess.run(prepare, cwd=root, capture_output=True, timeout=600)
         if prepared.returncode:
             raise CaptureError("Owning capture environment setup failed. Run the owning setup command, then retry")
@@ -1028,13 +1038,17 @@ def capture(
             timeout=600,
         )
     interpreter = prepared_python.absolute() if prepared_python else root / ".venv/bin/python"
+    if prepared_python is None:
+        validate_owning_environment(root, interpreter)
     version = prepared_version(interpreter, metadata)
-    # Explicit external prepared environments retain their existing scans, without new redaction authority.
-    owning_identity = owning_prefix(root, interpreter) if prepared_python is None else None
     with (
         installed_artifact(root, interpreter, owning=prepared_python is None),
         tempfile.TemporaryDirectory(prefix="hz-screenshots-") as temporary,
     ):
+        # Installation may replace pyvenv.cfg. Bind authority only to the installed environment,
+        # before bootstrap/backend/browser work; never refresh this evidence after a mismatch.
+        # Explicit external prepared environments retain their scans without redaction authority.
+        owning_identity = owning_prefix(root, interpreter) if prepared_python is None else None
         work = Path(temporary).resolve(strict=True)
         env = demo_environment(work, interpreter)
         if plan.get("bootstrap"):

@@ -27,6 +27,9 @@ def fictional_public_bootstrap(monkeypatch):
 
 @pytest.fixture
 def owner(tmp_path):
+    git = shutil.which("git")
+    assert git is not None
+    subprocess.run([git, "init", "--quiet", "--template=", str(tmp_path)], check=True)  # noqa: S603
     (tmp_path / "src/heinzel_harbor").mkdir(parents=True)
     (tmp_path / "src/heinzel_harbor/__init__.py").write_text('raise RuntimeError("never import during checks")\n')
     (tmp_path / "pyproject.toml").write_text(
@@ -814,6 +817,11 @@ def test_canonical_linux_runs_exact_image_without_host_state_and_keeps_all_text(
     (owner / ".venv").mkdir()
     (owner / ".venv/host-secret").write_text("not an input")
     (owner / ".env").write_text("host-only")
+    (owner / ".gitignore").write_text("credentials.json\nprivate-fixtures/\nsrc/heinzel_harbor/local-cache.json\n")
+    (owner / "credentials.json").write_text('{"placeholder": "synthetic-local-only"}')
+    (owner / "private-fixtures").mkdir()
+    (owner / "private-fixtures/placeholder.txt").write_text("synthetic-local-only")
+    (owner / "src/heinzel_harbor/local-cache.json").write_text('{"placeholder": "synthetic-local-only"}')
     before = (owner / capture.MANIFEST).read_bytes()
     calls = []
     first_scene = capture.read_plan(owner)["scenes"][0]["name"]
@@ -843,6 +851,9 @@ def test_canonical_linux_runs_exact_image_without_host_state_and_keeps_all_text(
         assert "--verify" in argv and "--container-worker" in argv
         assert not (cwd / "project/.venv").exists()
         assert not (cwd / "project/.env").exists()
+        assert not (cwd / "project/credentials.json").exists()
+        assert not (cwd / "project/private-fixtures").exists()
+        assert not (cwd / "project/src/heinzel_harbor/local-cache.json").exists()
         assert (cwd / "core" / wheel.name).read_bytes() == wheel.read_bytes()
         folder = draft_of(cwd / "project")
         # An untrusted renderer must never arrange host-side Git execution.
@@ -1045,6 +1056,8 @@ def test_successful_publication_never_publishes_private_scan_evidence(owner):
 
 
 def test_canonical_snapshot_preserves_declared_inputs_and_ignores_build_output(owner, tmp_path):
+    from heinzel_plugin_tools import capture_linux
+
     capture.write_default_plan(owner)
     view = owner / "src/heinzel_harbor/views"
     view.mkdir()
@@ -1056,8 +1069,8 @@ def test_canonical_snapshot_preserves_declared_inputs_and_ignores_build_output(o
     plan = capture.read_plan(owner)
     before = capture.input_digest(owner, plan)
     project = tmp_path / "copy"
-    shutil.copytree(owner, project, ignore=shutil.ignore_patterns(".git", "copy"))
-    source_files = capture.candidate_files(owner)
+    source_files = capture_linux.snapshot_files(owner, plan)
+    capture_linux.copy_snapshot(owner, project, source_files)
     assert not (project / ".git").exists()
     (project / "src/heinzel_harbor/views/generated.js").write_text("built asset")
     assert capture.input_digest(project, plan, source_files=source_files) == before
@@ -1129,3 +1142,202 @@ def test_source_inventory_is_not_an_author_freshness_override(owner, monkeypatch
     )
     assert capture.main() == 1
     assert "isolated worker" in json.loads(capsys.readouterr().out)["error"]
+
+
+def test_snapshot_keeps_uncommitted_authoring_and_excludes_unrelated_files(owner):
+    from heinzel_plugin_tools import capture_linux
+
+    capture.write_default_plan(owner)
+    (owner / "docs/screenshot_fixture.py").write_text("# synthetic local-only fixture\n")
+    plan_path = owner / capture.PLAN
+    plan = json.loads(plan_path.read_text())
+    plan["bootstrap"] = "docs/screenshot_fixture.py"
+    plan_path.write_text(json.dumps(plan))
+    (owner / "notes.json").write_text('{"placeholder": "synthetic-local-only"}')
+    names = capture_linux.snapshot_files(owner, plan)
+    expected = {"pyproject.toml", "src/heinzel_harbor/__init__.py", plan["bootstrap"], capture.PLAN.as_posix()}
+    assert expected <= set(names)
+    assert "notes.json" not in names
+    project = owner / "copy"
+    capture_linux.copy_snapshot(owner, project, names)
+    assert (project / plan["bootstrap"]).read_bytes() == (owner / plan["bootstrap"]).read_bytes()
+    assert not (project / ".git").exists()
+
+
+@pytest.mark.parametrize("standalone", [False, True])
+@pytest.mark.parametrize("failure", ["broken-git", "ignored-definition", "ignored-bootstrap"])
+def test_snapshot_requires_source_provenance(owner, failure, standalone):
+    from heinzel_plugin_tools import capture_linux
+
+    capture.write_default_plan(owner)
+    plan = capture.read_plan(owner)
+    if standalone:
+        shutil.rmtree(owner / ".git")
+    if failure == "broken-git":
+        if not standalone:
+            shutil.rmtree(owner / ".git")
+        (owner / ".git").write_text("gitdir: missing-repository\n")
+    elif failure == "ignored-definition":
+        (owner / ".gitignore").write_text(capture.PLAN.as_posix() + "\n")
+    else:
+        plan["bootstrap"] = "docs/screenshot_fixture.py"
+        (owner / plan["bootstrap"]).write_text("# synthetic local-only fixture\n")
+        (owner / ".gitignore").write_text(plan["bootstrap"] + "\n")
+    with pytest.raises(privacy.CaptureError, match="provenance"):
+        capture_linux.snapshot_files(owner, plan)
+
+
+def test_standalone_snapshot_uses_nonignored_inventory_without_changing_project(owner, tmp_path):
+    from heinzel_plugin_tools import capture_linux
+
+    shutil.rmtree(owner / ".git")
+    capture.write_default_plan(owner)
+    source = owner / "src/heinzel_harbor"
+    (source / "views").mkdir()
+    (source / "views/view.js").write_text("fictional view")
+    (source / ".gitignore").write_text("private.py\n")
+    (source / "private.py").write_text("fictional ignored local state")
+    (source / "ignored").mkdir()
+    (source / "ignored/private.py").write_text("fictional ignored directory")
+    (source / "ignored/private.js").write_text("fictional ignored view")
+    (owner / ".gitignore").write_text("src/heinzel_harbor/ignored/\n")
+    (owner / "unselected.txt").write_text("fictional unselected file")
+    before = {path.relative_to(owner): path.read_bytes() for path in owner.rglob("*") if path.is_file()}
+    plan = capture.read_plan(owner)
+    names = capture_linux.snapshot_files(owner, plan)
+    assert set(names) == {
+        "pyproject.toml",
+        capture.PLAN.as_posix(),
+        "src/heinzel_harbor/__init__.py",
+        "src/heinzel_harbor/.gitignore",
+        "src/heinzel_harbor/views/view.js",
+    }
+    project = tmp_path / "snapshot"
+    capture_linux.copy_snapshot(owner, project, names)
+    assert capture.input_digest(project, plan, source_files=names) == capture.input_digest(
+        owner, plan, source_files=names
+    )
+    shutil.rmtree(project)
+    assert not (owner / ".git").exists()
+    assert before == {path.relative_to(owner): path.read_bytes() for path in owner.rglob("*") if path.is_file()}
+
+
+@pytest.mark.parametrize("failure", ["exit", "missing-tool", "timeout"])
+@pytest.mark.parametrize("normal", [False, True])
+def test_existing_repository_inventory_errors_never_use_standalone_fallback(owner, monkeypatch, failure, normal):
+    from heinzel_plugin_tools import capture_linux
+
+    capture.write_default_plan(owner)
+    calls = []
+
+    def failed(argv, **kwargs):
+        calls.append(argv)
+        if failure == "missing-tool":
+            raise FileNotFoundError("fictional unavailable Git")
+        if failure == "timeout":
+            raise subprocess.TimeoutExpired(argv, 60)
+        return SimpleNamespace(returncode=128, stdout=b"")
+
+    monkeypatch.setattr(capture_linux.subprocess, "run", failed)
+    with pytest.raises(privacy.CaptureError, match="provenance"):
+        if normal:
+            capture.candidate_files(owner)
+        else:
+            capture_linux.snapshot_files(owner, capture.read_plan(owner))
+    assert len(calls) == 1
+    assert "ls-files" in calls[0]
+
+
+@pytest.mark.parametrize("standalone", [False, True])
+@pytest.mark.parametrize("kind", ["leaf-link", "parent-link", "fifo"])
+def test_snapshot_refuses_nonregular_or_linked_source(owner, kind, standalone):
+    from heinzel_plugin_tools import capture_linux
+
+    if standalone:
+        shutil.rmtree(owner / ".git")
+    capture.write_default_plan(owner)
+    target = owner / "src/heinzel_harbor/placeholder.py"
+    if kind == "fifo":
+        os.mkfifo(target)
+        # Git does not inventory FIFOs: probe the copier's independent validation.
+        with pytest.raises(privacy.CaptureError, match="regular file"):
+            capture_linux.copy_snapshot(owner, owner / "copy", [target.relative_to(owner).as_posix()])
+    else:
+        if kind == "parent-link":
+            target = owner / "src/linked"
+            target.symlink_to(owner / "src/heinzel_harbor", target_is_directory=True)
+            name = "src/linked/__init__.py"
+        else:
+            target.symlink_to(owner / "pyproject.toml")
+            name = target.relative_to(owner).as_posix()
+            with pytest.raises(privacy.CaptureError, match="symbolic links"):
+                capture_linux.snapshot_files(owner, capture.read_plan(owner))
+        with pytest.raises(privacy.CaptureError, match="symbolic links"):
+            capture_linux.copy_snapshot(owner, owner / "copy", [name])
+
+
+@pytest.mark.parametrize("name", ["../placeholder", "/placeholder"])
+def test_snapshot_copier_requires_containment(owner, name):
+    from heinzel_plugin_tools import capture_linux
+
+    with pytest.raises(privacy.CaptureError, match="inside their owning project"):
+        capture_linux.copy_snapshot(owner, owner / "copy", [name])
+
+
+@pytest.mark.parametrize("standalone", [False, True])
+@pytest.mark.parametrize("suffix", ["js", "svg"])
+def test_normal_and_frozen_inventory_digest_freshness_parity(owner, tmp_path, standalone, suffix):
+    from heinzel_plugin_tools import capture_linux
+
+    if standalone:
+        shutil.rmtree(owner / ".git")
+    source = owner / "src/heinzel_harbor"
+    valid = source / "view.js"
+    valid.write_text("fictional visible view")
+    ignored = source / f"private.{suffix}"
+    ignored.write_text("fictional ignored renderable canary")
+    (source / ".gitignore").write_text(f"private.{suffix}\n")
+    recorded(owner)
+    plan = capture.read_plan(owner)
+    normal = capture.candidate_files(owner)
+    frozen = capture_linux.snapshot_files(owner, plan)
+    assert valid.relative_to(owner).as_posix() in normal
+    assert ignored.relative_to(owner).as_posix() not in normal
+    assert ignored.relative_to(owner).as_posix() not in frozen
+    project = tmp_path / "snapshot-copy"
+    capture_linux.copy_snapshot(owner, project, frozen)
+    assert not (project / ignored.relative_to(owner)).exists()
+    digest = capture.input_digest(project, plan, source_files=frozen)
+    assert capture.input_digest(owner, plan) == digest
+    assert capture.inputs_current(owner, plan, digest)
+    assert capture.check_capture(owner)["fresh"]
+    ignored.write_text("changed fictional ignored renderable canary")
+    assert capture.input_digest(owner, plan) == digest
+    assert capture.inputs_current(owner, plan, digest)
+    assert capture.check_capture(owner)["fresh"]
+    valid.write_text("changed fictional visible view")
+    assert capture.input_digest(owner, plan) != digest
+    assert not capture.inputs_current(owner, plan, digest)
+    with pytest.raises(capture.StaleGallery, match="stale"):
+        capture.check_capture(owner)
+    if standalone:
+        assert not (owner / ".git").exists()
+
+
+def test_frozen_inventory_never_rediscovers_worker_files(owner, monkeypatch):
+    capture.write_default_plan(owner)
+    plan = capture.read_plan(owner)
+    view = "src/heinzel_harbor/view.js"
+    (owner / view).write_text("fictional visible view")
+    frozen = [view]
+    digest = capture.input_digest(owner, plan, source_files=frozen)
+    (owner / "src/heinzel_harbor/unlisted.svg").write_text("fictional unlisted worker file")
+
+    def forbidden(*args, **kwargs):
+        pytest.fail("Frozen worker input must not discover files or invoke Git")
+
+    monkeypatch.setattr(capture, "candidate_files", forbidden)
+    monkeypatch.setattr(subprocess, "run", forbidden)
+    assert capture.ui_inputs(owner, plan, source_files=frozen) == frozen
+    assert capture.input_digest(owner, plan, source_files=frozen) == digest
+    assert capture.inputs_current(owner, plan, digest, source_files=frozen)

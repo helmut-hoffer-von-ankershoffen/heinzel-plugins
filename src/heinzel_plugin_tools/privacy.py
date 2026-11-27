@@ -154,6 +154,15 @@ def confidential_patterns() -> list[re.Pattern[str]]:
 
 
 def _private_ip(text: str) -> bool:
+    # Parse whole colon-bearing tokens, so times, MACs and other non-IP forms survive.
+    # Zones (including URL %25 zones) do not change the address's privacy classification.
+    for token in re.findall(r"(?<![\w:])([0-9a-fA-F:.]*:[0-9a-fA-F:.]+)(?:%[\w.-]+)?(?![\w:])", text):
+        try:
+            address6 = ipaddress.IPv6Address(token.rstrip("."))
+        except ValueError:
+            continue
+        if not (address6.is_loopback or address6.is_unspecified or address6 in ipaddress.IPv6Network("2001:db8::/32")):
+            return True
     for candidate in re.findall(IPV4, text):
         try:
             address = ipaddress.IPv4Address(candidate)

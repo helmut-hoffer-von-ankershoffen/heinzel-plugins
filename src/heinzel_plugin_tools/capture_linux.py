@@ -110,6 +110,123 @@ def copy_draft(source: Path, root: Path, plan: dict) -> None:
             staged.unlink(missing_ok=True)
 
 
+def source_inventory(root: Path) -> bytes:
+    """Use repository provenance, or an empty private index for standalone authors."""
+    root = root.resolve()
+    inventory = ["ls-files", "-z", "--cached", "--others", "--exclude-standard", "--", "."]
+    try:
+        # lexists also catches broken gitfiles/links: damaged repositories must
+        # never become standalone sources merely because Git cannot read them.
+        repository = any(
+            os.path.lexists(parent / ".git")
+            or (os.path.lexists(parent / "HEAD") and os.path.lexists(parent / "objects"))
+            for parent in (root, *root.parents)
+        )
+        explicit_repository = any(
+            key in os.environ for key in ("GIT_DIR", "GIT_WORK_TREE", "GIT_COMMON_DIR", "GIT_INDEX_FILE")
+        )
+        if repository or explicit_repository:
+            listed = subprocess.run(["git", "-C", str(root), *inventory], capture_output=True, check=False, timeout=60)
+        else:
+            # Never initialize the author directory, load templates/hooks, or
+            # consult user configuration for this scoped .gitignore inventory.
+            environment = {key: value for key, value in os.environ.items() if not key.startswith("GIT_")}
+            environment.update(GIT_CONFIG_NOSYSTEM="1", GIT_CONFIG_GLOBAL=os.devnull)
+            with tempfile.TemporaryDirectory(prefix="hz-gallery-inventory-") as temporary:
+                initialized = subprocess.run(
+                    [
+                        "git",
+                        "-c",
+                        f"core.hooksPath={os.devnull}",
+                        "init",
+                        "--bare",
+                        "--quiet",
+                        "--template=",
+                        temporary,
+                    ],
+                    env=environment,
+                    capture_output=True,
+                    check=False,
+                    timeout=60,
+                )
+                if initialized.returncode:
+                    raise CaptureError("Cannot initialize the isolated authoring inventory")
+                listed = subprocess.run(
+                    ["git", f"--git-dir={temporary}", f"--work-tree={root}", *inventory],
+                    env=environment,
+                    capture_output=True,
+                    check=False,
+                    timeout=60,
+                )
+    except (OSError, subprocess.TimeoutExpired) as error:
+        raise CaptureError("Canonical snapshot requires Git source provenance") from error
+    if listed.returncode:
+        raise CaptureError("Canonical snapshot requires Git source provenance")
+    return listed.stdout
+
+
+def snapshot_files(root: Path, plan: dict) -> list[str]:
+    """Select the same validated authoring allowlist in repositories and standalone sources."""
+    from heinzel_plugin_tools import capture
+
+    names = sorted({name for name in source_inventory(root).decode().split("\0") if name})
+    package_files = {
+        "pyproject.toml",
+        "README.md",
+        "LICENSE",
+        "requirements.lock",
+        "plugin-lock.json",
+        "hatch_build.py",
+        "Makefile",
+    }
+    required = {"pyproject.toml", capture.PLAN.as_posix()}
+    if plan.get("bootstrap"):
+        required.add(plan["bootstrap"])
+    gallery_files = {capture.MANIFEST.as_posix(), (capture.OUTPUT / "index.html").as_posix()}
+    gallery_files.update(
+        (capture.OUTPUT / f"{scene['name']}.{extension}").as_posix()
+        for scene in plan["scenes"]
+        for extension in ("png", "txt")
+    )
+    selected = []
+    for name in names:
+        path = Path(name)
+        if path.as_posix() != name or path.is_absolute() or ".." in path.parts:
+            raise CaptureError("Canonical snapshot contains an invalid source path")
+        if set(path.parts) & (capture.IGNORED | {".git", ".env", ".netrc", ".npmrc", ".pypirc"}):
+            continue
+        if any(part.startswith(".env.") for part in path.parts):
+            continue
+        if name in package_files | required | gallery_files or path.parts[0] in {
+            "src",
+            "web",
+            "assets",
+            "static",
+            "templates",
+            "resources",
+            "vendor-provenance",
+        }:
+            source = safe_path(root, name)
+            # A tracked deletion is not an input; dangling links are still refused above.
+            if source.exists():
+                regular_bytes(source, 20 * 1024 * 1024)
+                selected.append(name)
+    if not required.issubset(selected):
+        raise CaptureError("Canonical snapshot is missing required source provenance")
+    return selected
+
+
+def copy_snapshot(root: Path, project: Path, names: list[str]) -> None:
+    """Copy only selected regular files, never directory trees or linked components."""
+    project.mkdir()
+    for name in names:
+        data = regular_bytes(safe_path(root, name), 20 * 1024 * 1024)
+        destination = safe_path(project, name)
+        destination.parent.mkdir(parents=True, exist_ok=True)
+        destination.write_bytes(data)
+        destination.chmod(0o644 | (safe_path(root, name).stat().st_mode & 0o111))
+
+
 def run(args) -> dict:
     """Capture a copy without host tools, applications, credentials, sockets or Python environments."""
     from heinzel_plugin_tools import capture
@@ -121,33 +238,14 @@ def run(args) -> dict:
     render_check = getattr(args, "render_check", False)
     if not render_check:
         configured_terms()  # Only the trusted host applies private policy; rendering receives none.
-    source_files = capture.candidate_files(root)
+    source_files = snapshot_files(root, plan)
     original_inputs = capture.input_digest(root, plan, source_files=source_files)
     if args.verify and not render_check:
         capture.check_capture(root)
     with tempfile.TemporaryDirectory(prefix="hz-gallery-linux-") as scratch:
         work = Path(scratch)
         project = work / "project"
-        shutil.copytree(
-            root,
-            project,
-            symlinks=True,
-            ignore=shutil.ignore_patterns(
-                ".git",
-                ".venv",
-                "node_modules",
-                "__pycache__",
-                ".preview",
-                ".acceptance",
-                ".pytest_cache",
-                "dist",
-                ".env",
-                ".env.*",
-                ".netrc",
-                ".npmrc",
-                ".pypirc",
-            ),
-        )
+        copy_snapshot(root, project, source_files)
         (work / "source-files.json").write_text(json.dumps(source_files))
         (work / BOOTSTRAP_WHEEL).write_bytes(bootstrap_wheel())
         for directory in ("home", "cache", "python", "bootstrap"):
@@ -246,7 +344,8 @@ def run(args) -> dict:
             raise CaptureError("Canonical Linux capture returned no result; no gallery was changed") from error
         if project.is_symlink() or not project.is_dir() or project.resolve() != work.resolve() / "project":
             raise CaptureError("The isolated snapshot directory was replaced; no gallery was changed")
-        if capture.input_digest(root, capture.read_plan(root)) != original_inputs:
+        current_plan = capture.read_plan(root)
+        if capture.input_digest(root, current_plan, source_files=snapshot_files(root, current_plan)) != original_inputs:
             raise CaptureError("Screenshot inputs changed during canonical capture; capture again")
         # Never execute host Git against worker-writable metadata.
         if capture.input_digest(project, plan, source_files=source_files) != original_inputs:

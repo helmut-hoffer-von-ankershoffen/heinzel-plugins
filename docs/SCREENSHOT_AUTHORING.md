@@ -122,8 +122,9 @@ and again by the offline check. A match refuses the capture and names the kind o
 - personal identity: email addresses outside the example domains, home and temporary directory paths, this
   machine's hostname and home directory;
 - private networks: hostnames under `.local`, `.lan`, `.internal`, `.corp`, `.home` or `.ts.net` unless a label is
-  fictional (contains `example`, or is `demo-host`/`demo-workstation`), and IPv4 addresses other than loopback and
-  the documentation ranges 192.0.2.0/24, 198.51.100.0/24 and 203.0.113.0/24;
+  fictional (contains `example`, or is `demo-host`/`demo-workstation`), and IPv4/IPv6 addresses other than loopback,
+  unspecified and the documentation ranges 192.0.2.0/24, 198.51.100.0/24, 203.0.113.0/24 and 2001:db8::/32.
+  IPv6 URL brackets and interface zone IDs do not bypass this check;
 - the configured confidential terms, matched exactly as the repository's confidential-terms hook matches them.
 
 Captions come only from the definition, so the README, catalog metadata and contact sheet say exactly what the
@@ -215,8 +216,23 @@ checking its SHA-256 before every use. Only verified wheel bytes are copied into
 the worker installs them without an index and never mounts or writes the host cache. A corrupt cached wheel
 fails before rendering; remove that file to permit a fresh authenticated download.
 
-The source is copied into a disposable directory without development environments, Node modules or host Git
-metadata. A frozen list of the original source files preserves discovery across generated build output. The worker
+The source snapshot copies only selected tracked or nonignored new authoring files:
+package metadata, locks, README, LICENSE, Makefile and hatch_build.py; source/assets under `src`, `web`, `assets`,
+`static`, `templates`, `resources` and `vendor-provenance`; the definition and its named bootstrap; and the expected
+published gallery files used by verification. Uncommitted edits and new nonignored inputs in those locations work
+without a commit. Existing repositories use their Git inventory; Git errors or broken repository metadata fail
+closed. An ignored definition or bootstrap must be deliberately added to Git before capture.
+Standalone projects need no repository initialization: capture creates empty Git metadata in a disposable temporary
+directory and inventories the explicit source work tree with its root and nested `.gitignore` rules. It uses no
+templates, hooks, global Git configuration or existing index in this mode and leaves the source project alone.
+Required standalone inputs must be nonignored. Git must be installed in either mode.
+Normal offline freshness uses this same inventory, including standalone ignore rules; it never falls back to
+an unrestricted filesystem walk after a Git failure. The renderer uses its explicit frozen inventory instead.
+Generated frontend output is rebuilt inside the worker; ignored local output is not imported.
+Every copied input must be a bounded regular file inside the owner, with no symlink leaf or parent component.
+Other fixture dependencies must live in the selected source locations. Private local files must remain ignored.
+Development environments, Node modules and host Git metadata are excluded. A frozen list of the selected source
+files preserves discovery across generated build output. The worker
 receives no Git metadata, and host checks never execute Git against the worker-writable copy. No host application directory, credential directory, Docker socket or host tool directory is
 mounted into the worker. The worker uses the fictional hostname demo-host, UTC and C.UTF-8, the pinned browser image, and the owning locked
 Core/plugin environment. The renderer receives no confidential terms: it runs the public privacy-pattern checks only. The

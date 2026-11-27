@@ -91,6 +91,45 @@ def test_fictional_demonstration_data_passes(text):
     privacy.scan_text(text, terms=[])
 
 
+@pytest.mark.parametrize(
+    "text",
+    [
+        "fd12:3456:789a::1",
+        "fe80::1234%demo0",
+        "https://[fe80::1234%25demo0]:8123/",
+        "https://[fd12:3456:789a::1]:8123/",
+        "2606:4700:4700::1111",
+        "FD12:3456:789A:0000:0000:0000:0000:0001",
+        "::ffff:10.1.2.3",
+    ],
+)
+def test_nonfictional_ipv6_is_refused(text):
+    with pytest.raises(privacy.CaptureError, match="hostname or IP"):
+        privacy.scan_text(text, terms=[])
+
+
+@pytest.mark.parametrize(
+    "text",
+    [
+        "2001:db8::1234",
+        "https://[2001:db8::1234]:8123/",
+        "2001:DB8:0:0:0:0:0:1",
+        "http://[::1]:8123/",
+        "::",
+        "::1%demo0",
+        "2001:db8::1%25demo0",
+        "At 10:30:45",
+        "aa:bb:cc:dd:ee:ff",
+        "label: value",
+        "urn:example:harbor",
+        "Version 0.9.54",
+        "not:an:ipv6:address",
+    ],
+)
+def test_documentation_ipv6_and_non_ip_forms_pass(text):
+    privacy.scan_text(text, terms=[])
+
+
 def test_this_machine_is_refused(monkeypatch):
     monkeypatch.setattr(socket, "gethostname", lambda: "harbor-laptop")
     with pytest.raises(privacy.CaptureError, match="host-specific"):
