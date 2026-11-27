@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.9.11
+
+In Heinzelmännchen 0.9.56, the weekly Calendar can show your readable Google calendars together, including shared calendars such as Family. All calendars are selected initially and you can choose which ones to show.
+
 ## 0.9.10
 
 Google setup opens the consent page and offers one prompt for the default read/write permissions.

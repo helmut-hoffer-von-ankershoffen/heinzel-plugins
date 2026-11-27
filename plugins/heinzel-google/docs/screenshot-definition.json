@@ -1,6 +1,7 @@
 {
   "format": 1,
   "bootstrap": "docs/screenshot_fixture.py",
+  "browser_time": "2026-10-22T12:00:00+02:00",
   "scenes": [
     {
       "name": "google-connector",
@@ -28,9 +29,71 @@
     },
     {
       "name": "google-calendar-week",
-      "surface": "cli",
-      "caption": "The real Google Calendar adapter lists fictional meetings for a fixed week through a documentation-only command.",
-      "command": ["showcase", "week"]
+      "surface": "ui",
+      "route": "/",
+      "appearance": "light",
+      "caption": "The Core calendar shows a fictional week from Work and Family with both calendars selected in the open Calendars picker; no Google account is contacted.",
+      "timeout_ms": 30000,
+      "viewport": {
+        "width": 1280,
+        "height": 900
+      },
+      "steps": [
+        {
+          "action": "wait",
+          "role": "button",
+          "name": "Open calendar"
+        },
+        {
+          "action": "click",
+          "role": "button",
+          "name": "Open calendar"
+        },
+        {
+          "action": "wait",
+          "role": "button",
+          "name": "Previous week"
+        },
+        {
+          "action": "wait",
+          "text": "Calendars (2)"
+        },
+        {
+          "action": "click",
+          "role": "heading",
+          "name": "Calendar"
+        },
+        {
+          "action": "press",
+          "key": "Tab"
+        },
+        {
+          "action": "press",
+          "key": "Tab"
+        },
+        {
+          "action": "press",
+          "key": "Enter"
+        },
+        {
+          "action": "wait",
+          "role": "checkbox",
+          "name": "Work (primary)"
+        },
+        {
+          "action": "wait",
+          "role": "checkbox",
+          "name": "Family"
+        },
+        {
+          "action": "wait",
+          "text": "Launch readiness review"
+        },
+        {
+          "action": "wait",
+          "text": "Family dinner"
+        }
+      ]
     },
     {
       "name": "google-source-review",

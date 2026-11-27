@@ -6,6 +6,8 @@ import os
 import sys
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
+from unittest.mock import patch
+from zoneinfo import ZoneInfo
 
 from heinzel import (
     Calendar,
@@ -24,6 +26,7 @@ from heinzel import (
 )
 from heinzel.heads.cli import build
 from heinzel.kernel import Origin, discover
+from heinzel.modules import org
 from rich.console import Group
 from rich.markdown import Markdown
 from rich.table import Table
@@ -33,6 +36,7 @@ from heinzel_google import Drive, GoogleSession, Gws, Process
 
 SINCE = datetime(2026, 10, 19, tzinfo=UTC)
 UNTIL = datetime(2026, 10, 26, tzinfo=UTC)
+CALENDAR_NOW = datetime(2026, 10, 22, 12, tzinfo=ZoneInfo("Europe/Berlin"))
 DOC = "launch-plan"
 SHEET = "launch-metrics"
 DOCUMENT = "application/vnd.google-apps.document"
@@ -72,7 +76,7 @@ def message(identity):
 
 
 class DemoDrive(Drive):
-    """Use the owning adapter's explicit clock seam; no Core or process clock changes."""
+    """Use the Drive adapter's clock seam for its fixed three-day and seven-day queries."""
 
     def recent(self, days, name=None, now=None):
         return super().recent(days, name, DEMO_NOW if now is None else now)
@@ -142,6 +146,13 @@ class DemoGws(Gws):
                     }
                 ],
             }
+        elif command == ("calendar", "calendarList", "list"):
+            value = {
+                "items": [
+                    {"id": "primary", "summary": "Work", "primary": True, "accessRole": "owner"},
+                    {"id": "family@example.com", "summary": "Family", "accessRole": "reader"},
+                ],
+            }
         elif command == ("calendar", "events", "list"):
             value = {
                 "timeZone": "Europe/Berlin",
@@ -159,8 +170,8 @@ class DemoGws(Gws):
                     {
                         "id": "one-on-one",
                         "summary": "Mira Example / Priya Example — one-on-one",
-                        "start": {"dateTime": "2026-10-22T14:00:00Z"},
-                        "end": {"dateTime": "2026-10-22T14:30:00Z"},
+                        "start": {"dateTime": "2026-10-23T09:00:00Z"},
+                        "end": {"dateTime": "2026-10-23T09:30:00Z"},
                         "attendees": [{"displayName": "Priya Example", "email": "priya@example.com"}],
                     },
                     {
@@ -171,6 +182,18 @@ class DemoGws(Gws):
                     },
                 ],
             }
+            calendar_id = params["calendarId"]
+            if calendar_id == "family@example.com":
+                value["items"] = [
+                    {
+                        "id": "family-dinner",
+                        "summary": "Family dinner",
+                        "start": {"dateTime": "2026-10-23T17:00:00Z"},
+                        "end": {"dateTime": "2026-10-23T18:00:00Z"},
+                    },
+                ]
+            elif calendar_id != "primary":
+                raise ValueError("Unexpected calendar in the offline demonstration")
             since = datetime.fromisoformat(params["timeMin"].replace("Z", "+00:00"))
             until = datetime.fromisoformat(params["timeMax"].replace("Z", "+00:00"))
             value["items"] = [
@@ -274,7 +297,9 @@ def main():
     kernel.bind(Gws, DemoGws())
     kernel.bind(Drive, DemoDrive(kernel.resolve(GoogleSession)))
     sys.argv = ["hz", *sys.argv[1:]]
-    build(kernel)()
+    # The weekly API and the browser must agree on the demonstration week.
+    with patch.object(org, "local_now", return_value=CALENDAR_NOW):
+        build(kernel)()
 
 
 if __name__ == "__main__":

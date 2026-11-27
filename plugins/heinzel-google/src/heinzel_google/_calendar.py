@@ -1,6 +1,6 @@
 """The Google Calendar adapter of the `calendar` capability (ADR 0028), read and write.
 
-Events come from Calendar API v3 through `gws calendar events list`, calendar `primary`, with `singleEvents=true`
+Events come from Calendar API v3 through `gws calendar events list` with `singleEvents=true`
 (recurrences expanded) and `showDeleted=true` (cancelled occurrences included), paged by `nextPageToken`. People become
 `Participant`s: a display name and an email, nothing else; meeting rooms and other resources are not attendees. The
 email is the join key the protocol defines; the workflow packet builder drops it before anything reaches an agent's
@@ -19,10 +19,11 @@ setting the user's own attendee entry. Event ids are checked before they reach `
 import re
 import uuid
 from datetime import UTC, date, datetime, time, timedelta
-from typing import Any, Literal, cast
+from typing import Any, Literal, TypeGuard, cast
 from urllib.parse import urlsplit
 from zoneinfo import ZoneInfo, ZoneInfoNotFoundError
 
+import heinzel
 from heinzel import (
     RESPONSES,
     Event,
@@ -40,6 +41,7 @@ from heinzel import (
 
 from heinzel_google._gws import GoogleSession
 
+CALENDARS = ("calendar", "calendarList", "list")
 EVENTS = ("calendar", "events", "list")
 GET = ("calendar", "events", "get")
 INSERT = ("calendar", "events", "insert")
@@ -49,6 +51,9 @@ FREEBUSY = ("calendar", "freebusy", "query")
 API = "Google Calendar"
 _EVENT_ID = re.compile(r"^[A-Za-z0-9_-]{1,1024}$")
 """Google's event ids: base32hex, an occurrence's `_<time>Z` suffix; nothing that could name another path."""
+_CALENDAR_ID = re.compile(r"[a-zA-Z0-9_.+@#=\-]{1,1024}")
+_CALENDAR_TITLE_LIMIT = 256  # CalendarSource's display limit; the opaque ID has its own limit.
+_READABLE = frozenset({"reader", "writer", "writerWithoutPrivateAccess", "owner"})
 _ZOOM = re.compile(r"https://(?:[a-z0-9-]+\.)?zoom\.us/(?:j|my|w)/([0-9]{9,11})\b", re.IGNORECASE)
 _MEET = re.compile(r"^[a-z]{3}-[a-z]{4}-[a-z]{3}$")
 _EVENT_LINK = ("https://www.google.com/calendar/", "https://calendar.google.com/")
@@ -80,6 +85,10 @@ def _objects(value: object) -> list[Json]:
     if not isinstance(value, list):
         return []
     return [cast("Json", item) for item in cast("list[object]", value) if isinstance(item, dict)]
+
+
+def _valid_calendar_id(value: object) -> TypeGuard[str]:
+    return isinstance(value, str) and value not in {".", ".."} and _CALENDAR_ID.fullmatch(value) is not None
 
 
 def _bounds(window: Window) -> tuple[datetime, datetime]:
@@ -200,7 +209,7 @@ def _event(item: Json, zone: ZoneInfo | None) -> Event | None:
 
 
 class GoogleCalendar:
-    """Reads the signed-in user's primary Google Calendar."""
+    """Reads the signed-in user's Google calendars and writes to their primary calendar."""
 
     def __init__(self, session: GoogleSession) -> None:
         """Build the adapter; the kernel injects the session."""
@@ -213,11 +222,58 @@ class GoogleCalendar:
             HeinzelError: If the window is malformed, the sign-in is missing, Google fails, or the window holds more
                 than the adapter reads at once (narrow it).
         """
+        return self.events_for("primary", window)
+
+    def calendars(self) -> list[heinzel.CalendarSource]:
+        """List calendars for which Google allows reading events.
+
+        Raises:
+            HeinzelError: Google could not list the calendars.
+        """
+        params = {
+            "minAccessRole": "reader",
+            "showHidden": True,
+            "fields": "nextPageToken,items(id,summary,summaryOverride,primary,accessRole,deleted)",
+        }
+        calendars: dict[str, heinzel.CalendarSource] = {}
+        for items, _ in self._session.pages(API, CALENDARS, params, "your calendar list", "items"):
+            for item in items:
+                if not isinstance(item, dict):
+                    continue
+                identifier = item.get("id")
+                if not _valid_calendar_id(identifier):
+                    continue
+                role = item.get("accessRole")
+                if item.get("deleted") is True or not isinstance(role, str) or role not in _READABLE:
+                    continue
+                name = item.get("summaryOverride") or item.get("summary")
+                title = clean_text(name).strip() if isinstance(name, str) else ""
+                calendars.setdefault(
+                    identifier,
+                    heinzel.CalendarSource(
+                        id=identifier,
+                        title=(title or identifier)[:_CALENDAR_TITLE_LIMIT],
+                        primary=item.get("primary") is True,
+                    ),
+                )
+        return sorted(
+            calendars.values(), key=lambda calendar: (not calendar.primary, calendar.title.casefold(), calendar.id)
+        )
+
+    def events_for(self, calendar: str, window: Window) -> list[Event]:
+        """Read events from the specified Google calendar using the normal bounded event reader.
+
+        Raises:
+            HeinzelError: The ID or window is malformed, or Google refuses the calendar read.
+        """
+        if not _valid_calendar_id(calendar):
+            msg = "That Google calendar has an invalid identifier."
+            raise HeinzelError(msg)
         since, until = _bounds(window)
         if since == until:
             return []
         params: dict[str, object] = {
-            "calendarId": "primary",
+            "calendarId": calendar,
             "timeMin": since.isoformat().replace("+00:00", "Z"),
             "timeMax": until.isoformat().replace("+00:00", "Z"),
             "singleEvents": True,
