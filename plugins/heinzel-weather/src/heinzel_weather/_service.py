@@ -423,6 +423,7 @@ def _notify(notifications: Notifications, change: Change) -> bool:
         command="hz weather show",
         key=f"weather:{change.key}",
         urgent=change.urgent,
+        replaces=change.replaces,
     )
     return notice is not None
 
