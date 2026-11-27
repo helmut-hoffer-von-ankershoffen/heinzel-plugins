@@ -11,6 +11,7 @@ from pathlib import Path
 from types import SimpleNamespace
 
 import pytest
+import yaml
 
 from heinzel_plugin_tools import capture, cli, privacy
 
@@ -71,6 +72,80 @@ def recorded(owner):
         capture.preview_document("heinzel-harbor", plan["scenes"], "0.9.8")
     )
     return shots
+
+
+@pytest.mark.parametrize(
+    ("terms", "source", "error"),
+    [
+        ("Fictional Sentinel", "clean", None),
+        ("", "clean", "The private gallery terms are required for publication."),
+        ("Fictional screenshot test", "clean", "The required private gallery check failed."),
+        ("Fictional Sentinel", "dirty", ""),
+        ("Fictional Sentinel", "wrong-revision", ""),
+    ],
+)
+def test_protected_release_gallery_guard_scans_the_exact_committed_gallery(owner, terms, source, error):
+    recorded(owner)
+    # The fixture supplies the locked interpreter directly, avoiding dependency downloads in this unit check.
+    interpreter = owner / ".venv/bin/python"
+    interpreter.parent.mkdir(parents=True)
+    interpreter.write_text('#!/bin/sh\nexec "$SCANNER_PYTHON" "$@"\n')
+    interpreter.chmod(0o755)
+    (owner / ".gitignore").write_text(".venv/\n")
+    git = shutil.which("git")
+    assert git
+    subprocess.run([git, "add", "."], cwd=owner, check=True)  # noqa: S603
+    subprocess.run(  # noqa: S603
+        [
+            git,
+            "-c",
+            "user.name=Fixture",
+            "-c",
+            "user.email=test@example.invalid",
+            "-c",
+            "commit.gpgsign=false",
+            "commit",
+            "-qm",
+            "Record fictional gallery",
+        ],
+        cwd=owner,
+        check=True,
+    )
+    sha = subprocess.check_output([git, "rev-parse", "HEAD"], cwd=owner, text=True).strip()  # noqa: S603
+    root = Path(__file__).resolve().parents[1]
+    workflow = yaml.safe_load((root / ".github/workflows/release.yml").read_text())
+    scan = workflow["jobs"]["private-gallery"]["steps"][-1]
+    if source == "dirty":
+        (owner / "untracked").touch()
+    output = owner.with_suffix(".private-scan-output")
+    environment = dict(
+        os.environ,
+        CONFIDENTIAL_TERMS=terms,
+        CONFIDENTIAL_TERMS_FILE=str(owner.parent / "missing-terms"),
+        CONFIDENTIALITY_REQUIRED=scan["env"]["CONFIDENTIALITY_REQUIRED"],
+        GITHUB_ACTIONS="true",
+        GITHUB_OUTPUT=str(output),
+        GITHUB_SHA=sha if source != "wrong-revision" else "0" * 40,
+        PLUGIN="heinzel-harbor",
+        PLUGIN_SOURCE_ROOT=str(owner),
+        PYTHONPATH=str(root / scan["env"]["PYTHONPATH"]),
+        SCANNER_PYTHON=sys.executable,
+    )
+    result = subprocess.run(  # noqa: S603
+        ["/bin/bash", "-ec", scan["run"]],
+        cwd=owner,
+        env=environment,
+        capture_output=True,
+        text=True,
+    )
+    if error is not None:
+        assert result.returncode != 0
+        if error:
+            assert error in result.stderr
+        assert not output.exists()
+    else:
+        assert result.returncode == 0, result.stderr
+        assert output.read_text() == f"source={sha}\n"
 
 
 def draft_of(owner):
