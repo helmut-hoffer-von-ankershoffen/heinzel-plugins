@@ -116,6 +116,10 @@ provides = []
 
 [tool.hatch.build.hooks.custom]
 
+[tool.hatch.build.targets.wheel]
+# The build hook packages these generated assets, including in standalone source snapshots.
+exclude = ["/src/heinzel_clock/views"]
+
 [tool.coverage.run]
 source = ["heinzel_clock"]
 branch = true
