@@ -53,6 +53,14 @@ class StaleGallery(CaptureError):
         self.command = command
 
 
+class RenderedGalleryMismatch(StaleGallery):
+    """A completed render differs from the committed gallery."""
+
+
+RENDER_MISMATCH_EXIT = 42
+RENDER_INTEGRITY_EXIT = 43
+
+
 def canonical_text(value: str) -> str:
     """Match commit hooks before hashing generated text: LF, no trailing whitespace, one final newline."""
     value = value.replace("\r\n", "\n").replace("\r", "\n")

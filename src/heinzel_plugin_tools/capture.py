@@ -43,7 +43,9 @@ from heinzel_plugin_tools._presentation import (
 from heinzel_plugin_tools.planning import DEFINITION, load_definition, write_definition
 from heinzel_plugin_tools.privacy import (
     DRAFT,
+    RENDER_MISMATCH_EXIT,
     CaptureError,
+    RenderedGalleryMismatch,
     StaleGallery,
     atomic_text,
     canonical_text,
@@ -1363,7 +1365,7 @@ def verify(
     }
     if not report["ok"]:
         differ = ", ".join(texts + (images if strict_images else []))
-        raise StaleGallery(
+        raise RenderedGalleryMismatch(
             f"{manifest['plugin']}: a fresh capture against Core {draft['core_version']} differs from the committed "
             f"gallery ({differ}). Run {command} and commit the regenerated gallery",
             command,
@@ -1385,6 +1387,7 @@ def main() -> int:
     parser.add_argument("--strict-images", action="store_true")
     parser.add_argument("--render-check", action="store_true")
     parser.add_argument("--container-worker", action="store_true", help=argparse.SUPPRESS)
+    parser.add_argument("--render-check-worker", action="store_true", help=argparse.SUPPRESS)
     parser.add_argument("--source-inventory", type=Path, help=argparse.SUPPRESS)
     args = parser.parse_args()
     try:
@@ -1394,6 +1397,8 @@ def main() -> int:
             args.verify = True
         if args.container_worker and (sys.platform != "linux" or not Path("/.dockerenv").is_file()):
             raise CaptureError("The canonical worker must run inside its Linux container")
+        if args.render_check_worker and not (args.container_worker and args.verify and args.json):
+            raise CaptureError("The render check worker requires isolated JSON verification")
         source_files = None
         if args.source_inventory:
             if not args.container_worker or not (args.draft or args.verify):
@@ -1456,15 +1461,21 @@ def main() -> int:
             webbrowser.open(Path(report["preview"]).as_uri())
         return 0
     except Exception as error:  # The subprocess boundary must preserve the JSON result even if a browser adapter fails.
-        message = (
-            "Zero-secret rendering comparison failed; no private-policy approval or publication"
-            if args.render_check
-            else safe_failure_message(error)
-        )
+        if args.render_check_worker:
+            mismatch = isinstance(error, RenderedGalleryMismatch)
+            print(json.dumps({"ok": False, "comparison_mismatch": mismatch}))
+            return RENDER_MISMATCH_EXIT if mismatch else 1
+        if args.render_check:
+            from heinzel_plugin_tools.capture_linux import RenderCheckFailure, RenderStage
+
+            stage = error.stage if isinstance(error, RenderCheckFailure) else RenderStage.UNKNOWN
+            message = str(RenderCheckFailure(stage))
+        else:
+            message = safe_failure_message(error)
         if args.json:
             failure = {"ok": False, "error": message, "next": "Review docs/screenshot-definition.json and retry"}
             if args.render_check:
-                failure.update(scope="render-only", render_verified=False, private_scan=False)
+                failure.update(scope="render-only", render_verified=False, private_scan=False, stage=stage.value)
             if isinstance(error, StaleGallery) and not args.render_check:
                 failure |= {"stale": True, "command": error.command, "next": error.command}
             print(json.dumps(failure))

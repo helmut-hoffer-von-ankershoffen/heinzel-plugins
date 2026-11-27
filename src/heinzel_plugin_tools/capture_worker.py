@@ -13,7 +13,13 @@ if __package__ in {None, ""}:
     sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
 from heinzel_plugin_tools import capture, capture_linux
-from heinzel_plugin_tools.privacy import CaptureError, regular_bytes, safe_path
+from heinzel_plugin_tools.privacy import (
+    RENDER_INTEGRITY_EXIT,
+    RENDER_MISMATCH_EXIT,
+    CaptureError,
+    regular_bytes,
+    safe_path,
+)
 
 FILE_LIMIT = 20 * 1024 * 1024
 TOTAL_LIMIT = 256 * 1024 * 1024
@@ -64,7 +70,7 @@ def fingerprints(root: Path, names: list[str]) -> dict[str, dict]:
 
 def reconcile(
     project: Path, shared: Path, names: list[str], expected: dict, shared_expected: dict, plan: dict, digest: str
-) -> None:
+) -> bool:
     """Keep source in place and return only a complete validated draft."""
     if fingerprints(project, names) != expected or fingerprints(shared, names) != shared_expected:
         raise CaptureError("The isolated source snapshot differs from the owning screenshot inputs")
@@ -72,7 +78,7 @@ def reconcile(
         raise CaptureError("The isolated source snapshot differs from the owning screenshot inputs")
     draft = safe_path(project, capture.DRAFT)
     if not draft.exists():
-        return
+        return False
     allowed = {capture.DRAFT_MANIFEST, "index.html"}
     allowed.update(f"{scene['name']}.{ext}" for scene in plan["scenes"] for ext in ("png", "txt", "scan.txt"))
     # Enumeration is bounded by the required output count; never walk generated trees.
@@ -87,6 +93,7 @@ def reconcile(
     if actual != allowed:
         raise CaptureError("Incomplete canonical draft")
     capture_linux.copy_draft(project, shared, plan)
+    return True
 
 
 def run(argv: list[str], *, shared: Path = Path("/capture/project")) -> int:
@@ -130,7 +137,18 @@ def run(argv: list[str], *, shared: Path = Path("/capture/project")) -> int:
             raise CaptureError("Canonical source state differs before execution")
         command[index] = str(project)
         result = subprocess.run(command, cwd=project, check=False)
-        reconcile(project, shared, names, expected, shared_expected, plan, digest)
+        render_check = "--render-check-worker" in command
+        try:
+            draft = reconcile(project, shared, names, expected, shared_expected, plan, digest)
+        except Exception:  # An unexpected validation failure is still a reconciliation failure.
+            if render_check:
+                return RENDER_INTEGRITY_EXIT
+            raise
+        if render_check:
+            if result.returncode == RENDER_INTEGRITY_EXIT:
+                return 1
+            if result.returncode == RENDER_MISMATCH_EXIT and not draft:
+                return RENDER_INTEGRITY_EXIT
         return result.returncode
 
 

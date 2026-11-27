@@ -11,6 +11,8 @@ import subprocess
 from dataclasses import dataclass
 from pathlib import Path
 
+_POLICY_SOURCE = "src/heinzel_plugin_tools/focused_policy.py"
+_T_CAPTURE = "tests/capture_test.py"
 _T_CLI_COMMANDS = "tests/cli_commands_test.py"
 _T_TOOLING = "tests/tooling_test.py"
 _T_FOCUSED_HOOK = "tests/focused_hook_test.py"
@@ -36,7 +38,7 @@ POLICY_PATHS = frozenset(
         "scripts/focused_push_guard.py",
         "scripts/focused_trust.py",
         "src/heinzel_plugin_tools/cli.py",
-        "src/heinzel_plugin_tools/focused_policy.py",
+        _POLICY_SOURCE,
         _T_CLI_COMMANDS,
         _T_TOOLING,
         _T_FOCUSED_HOOK,
@@ -51,6 +53,7 @@ POLICY_PATHS = frozenset(
 GALLERY_ORIGINAL = "330dc9bc521c9b59990604fa3bc9e74342de0886"
 GALLERY_HOSTED_HEAD = "d04153aa78ff1692f81a291b251c527ab86dc476"
 GALLERY_CLOCK_HEAD = "bc201df2544f95c5b60195d5bbd9eb17ca9f05f4"
+GALLERY_THEME_HEAD = "567d08577f9e02cfb90c5f0a6db9c952c40f3d07"
 GALLERY_CAPTURE_FIXTURE = "tests/capture_run_test.py"
 GALLERY_RUNTIME_BLOBS = {
     ".github/workflows/ci.yml": "98242894cc754d366a8f393bac1a566c5ea30cea",
@@ -69,11 +72,18 @@ GALLERY_CLOCK_BLOBS = {
     "plugins/heinzel-clock/docs/screenshot-definition.json": "6bdc40680168ea5b8c98cb5c578f06ecfcfb3894",
     "plugins/heinzel-clock/docs/assets/screenshots/capture.json": "b4bdf09e6ffd1ba0af5124a57cf531aceff3911c",
 }
+GALLERY_THEME_BLOBS = {
+    "src/heinzel_plugin_tools/capture.py": "c6296501ed2188cd52b24a6b0dfc94c70f5a1bd9",
+    "src/heinzel_plugin_tools/capture_linux.py": "d8a84864f52ec80e03a54912903129fa73b31f1e",
+    "src/heinzel_plugin_tools/capture_worker.py": "1bf251f3ea1f9eac58262b74d39b0ba8133bc675",
+    "src/heinzel_plugin_tools/privacy.py": "c26257bff51a5ae00d4b9150dc0b8998e2331687",
+    _T_CAPTURE: "d4d395e9cc67173c76a69c34ca54ddaebc9364fb",
+}
 GALLERY_POLICY_PATHS = frozenset(
     {
         *GALLERY_RUNTIME_BLOBS,
         "scripts/focused_dispatch.py",
-        "src/heinzel_plugin_tools/focused_policy.py",
+        _POLICY_SOURCE,
         _T_FOCUSED_DISPATCH,
         _T_FOCUSED_POLICY,
     }
@@ -84,7 +94,7 @@ PLANS = {
         (
             "tests/capture_bootstrap_test.py",
             "tests/capture_fixture_origins_test.py",
-            "tests/capture_test.py",
+            _T_CAPTURE,
             "tests/cli_environment_test.py",
             "tests/cli_commands_test.py",
             "tests/presentation_test.py",
@@ -172,7 +182,7 @@ PLANS = {
             "tests/publish_restore_test.py",
             "tests/workflow_test.py",
             "tests/browser_bootstrap_ci_test.py",
-            "tests/capture_test.py",
+            _T_CAPTURE,
             "tests/historical_gallery_test.py",
             "tests/links_standards_test.py",
             "plugins/heinzel-atlassian/tests/integration/acli_test.py",
@@ -296,7 +306,8 @@ def plan(repo: Path, old: str, new: str, trusted_policy: str) -> CheckPlan:
     `trusted_policy` must be fixed by an independently trusted launcher. Accepting
     a caller-provided value here without such a launcher does not confer trust.
     """
-    clock_fix = old == GALLERY_CLOCK_HEAD
+    theme_diagnostic = old == GALLERY_THEME_HEAD
+    clock_fix = old == GALLERY_CLOCK_HEAD or theme_diagnostic
     hosted_fix = old == GALLERY_HOSTED_HEAD or clock_fix
     plan_key = GALLERY_ORIGINAL if hosted_fix else old
     if plan_key not in PLANS:
@@ -315,6 +326,11 @@ def plan(repo: Path, old: str, new: str, trusted_policy: str) -> CheckPlan:
     forward_blobs = GALLERY_FORWARD_BLOBS if hosted_fix else {}
     if clock_fix:
         forward_blobs = forward_blobs | GALLERY_CLOCK_BLOBS
+    if theme_diagnostic:
+        diagnostic_paths = {_POLICY_SOURCE, _T_FOCUSED_POLICY, *GALLERY_THEME_BLOBS}
+        if _changed(repo, old, new) - diagnostic_paths:
+            raise ValueError("gallery diagnostic changes a path outside its reviewed scope")
+        forward_blobs = forward_blobs | GALLERY_THEME_BLOBS
     if hosted_fix:
         policy_paths = policy_paths.union(forward_blobs)
         tests = (*tests, GALLERY_CAPTURE_FIXTURE)

@@ -130,23 +130,30 @@ def native_child(owner, tmp_path):
         "mode=sys.argv[1]\npayload=json.loads(sys.argv[2])\n"
         "for name in ('.venv','run-home','cache','node_modules'):\n"
         "    (root/name).mkdir()\n    (root/name/'generated').write_text('fictional')\n"
-        "if mode not in ('absent','failed'):\n"
+        "if mode not in ('absent','failed','mismatch-absent','render-failure-mutated'):\n"
         "    draft=root/'.preview/screenshots/draft'\n"
         "    draft.mkdir(parents=True)\n"
         "    for name,data in payload.items():\n"
         "        (draft/name).write_bytes(bytes.fromhex(data))\n"
+        f"    if mode=='render-failure-draft': (draft/{capture.DRAFT_MANIFEST!r}).write_text('[]')\n"
         "    if mode=='extra': (draft/'extra.txt').write_text('fictional')\n"
-        "if mode=='mutated': (root/'README.md').write_text('Changed fictional source')\n"
+        "if mode in ('mutated','mismatch-mutated','render-failure-mutated'):\n"
+        "    (root/'README.md').write_text('Changed fictional source')\n"
         "if mode=='missing': (root/'README.md').unlink()\n"
         "if mode=='chmod': (root/'README.md').chmod(0o777)\n"
+        f"mismatch_exit={privacy.RENDER_MISMATCH_EXIT}\n"
+        "if mode.startswith('render-failure'):\n"
+        "    print(json.dumps({'ok':False,'comparison_mismatch':False}))\n"
+        "    raise SystemExit(1)\n"
         "print(json.dumps({'ok':mode!='failed'}))\n"
-        "raise SystemExit(7 if mode=='failed' else 0)\n"
+        "raise SystemExit(mismatch_exit if mode.startswith('mismatch') else 7 if mode=='failed' else 0)\n"
     )
 
     def invoke(mode):
-        return capture_worker.run(
-            [sys.executable, str(script), mode, json.dumps(payload), "--project", str(shared)], shared=shared
-        )
+        command = [sys.executable, str(script), mode, json.dumps(payload), "--project", str(shared)]
+        if mode.startswith(("mismatch", "render-failure")):
+            command.append("--render-check-worker")
+        return capture_worker.run(command, shared=shared)
 
     return shared, invoke
 
@@ -158,6 +165,15 @@ def test_native_bootstrap_returns_only_validated_draft(native_child):
     assert (shared / privacy.DRAFT / "index.html").read_text() == "Fictional preview"
     assert (shared / "README.md").read_bytes() == before
     assert all(not (shared / name).exists() for name in (".venv", "run-home", "cache", "node_modules"))
+
+
+@pytest.mark.parametrize(
+    "mode", ["mismatch", "mismatch-absent", "mismatch-mutated", "render-failure-mutated", "render-failure-draft"]
+)
+def test_native_bootstrap_forwards_mismatch_only_after_reconciling_the_draft(native_child, mode):
+    shared, invoke = native_child
+    assert invoke(mode) == (privacy.RENDER_MISMATCH_EXIT if mode == "mismatch" else privacy.RENDER_INTEGRITY_EXIT)
+    assert (shared / privacy.DRAFT).exists() == (mode == "mismatch")
 
 
 @pytest.mark.parametrize("mode", ["absent", "failed"])
@@ -1195,7 +1211,7 @@ def test_zero_secret_render_check_never_reads_policy_or_publishes_unscanned_data
         assert capture_stderr
         assert "CONFIDENTIALITY_REQUIRED=false" in argv
         assert "CONFIDENTIAL_TERMS_FILE=/dev/null" in argv and not (cwd / "terms").exists()
-        assert "--verify" in argv
+        assert "--verify" in argv and "--render-check-worker" in argv
         return SimpleNamespace(
             returncode=int(failed),
             stdout=json.dumps(
@@ -1225,23 +1241,81 @@ def test_zero_secret_render_check_never_reads_policy_or_publishes_unscanned_data
     assert (owner / capture.MANIFEST).read_bytes() == before and not (owner / capture.DRAFT).exists()
 
 
-def test_render_check_failure_never_reads_host_private_policy_or_prints_unscanned_error(owner, monkeypatch, capsys):
+@pytest.mark.parametrize(
+    ("status", "stdout", "mutated", "stage"),
+    [
+        (42, '{"ok":false,"comparison_mismatch":true}', False, "comparison"),
+        (42, '{"ok":false,"comparison_mismatch":true}', True, "source-integrity"),
+        (43, '{"ok":false,"comparison_mismatch":false}', False, "source-integrity"),
+        (0, "unscanned-provider-output", True, "source-integrity"),
+        (1, '{"ok":false,"comparison_mismatch":false}', False, "capture"),
+        (1, '{"ok":false,"comparison_mismatch":true}', False, "protocol"),
+        (42, '{"ok":false,"comparison_mismatch":1}', False, "protocol"),
+        (42, '{"ok":false,"comparison_mismatch":true,"error":"unscanned-provider-output"}', False, "protocol"),
+        (0, '{"ok":false,"comparison_mismatch":true}', False, "protocol"),
+        (0, '{"ok":true,"verified":true,"comparison_mismatch":true}', False, "protocol"),
+        (0, '["unscanned-provider-output"]', False, "protocol"),
+        (0, "unscanned-provider-output", False, "protocol"),
+        (125, "unscanned-provider-output", False, "worker"),
+        (None, "", False, "worker"),
+    ],
+)
+def test_render_check_failure_never_reads_host_private_policy_or_prints_unscanned_error(
+    owner, monkeypatch, capsys, status, stdout, mutated, stage
+):
     from heinzel_plugin_tools import capture_linux
 
-    def fail(args):
-        raise privacy.CaptureError("unscanned-provider-output")
+    style = Path("src/heinzel_harbor/site.css")
+    (owner / style).write_text("body { color: black; }\n")
+    recorded(owner)
+    before = (owner / capture.MANIFEST).read_bytes()
+
+    def run(argv, *, cwd, capture=False, capture_stderr=False, timeout=900):
+        assert capture_stderr
+        if argv[1] == "rm":
+            return SimpleNamespace(returncode=0)
+        if status is None:
+            raise privacy.CaptureError("unscanned-provider-output")
+        if mutated:
+            (cwd / "project" / style).write_text("body { color: blue; }\n")
+        return SimpleNamespace(returncode=status, stdout=stdout, stderr="unscanned-provider-output")
 
     def forbidden(*args, **kwargs):
         raise AssertionError("render-only failure must not read confidential policy")
 
-    monkeypatch.setattr(capture_linux, "run", fail)
+    monkeypatch.setattr(capture_linux, "command", run)
+    monkeypatch.setattr(capture_linux, "configured_terms", forbidden)
     monkeypatch.setattr(capture, "safe_failure_message", forbidden)
     monkeypatch.setattr(sys, "argv", ["capture", "--project", str(owner), "--render-check", "--json"])
     assert capture.main() == 1
     shown = capsys.readouterr()
     report = json.loads(shown.out)
     assert report["scope"] == "render-only" and report["private_scan"] is False
+    assert report["stage"] == stage and f"failed ({stage})" in shown.err
     assert "unscanned-provider-output" not in shown.out + shown.err
+    assert (owner / capture.MANIFEST).read_bytes() == before and not (owner / capture.DRAFT).exists()
+
+
+@pytest.mark.parametrize("error_type", [privacy.StaleGallery, privacy.RenderedGalleryMismatch])
+def test_zero_secret_worker_distinguishes_post_render_mismatch_from_freshness(owner, monkeypatch, capsys, error_type):
+    original_is_file = Path.is_file
+    monkeypatch.setattr(Path, "is_file", lambda path: path == Path("/.dockerenv") or original_is_file(path))
+    monkeypatch.setattr(sys, "platform", "linux")
+    monkeypatch.setattr(
+        sys,
+        "argv",
+        ["capture", "--project", str(owner), "--container-worker", "--render-check-worker", "--verify", "--json"],
+    )
+
+    def fail(*args, **kwargs):
+        raise error_type("unscanned-provider-output", "unscanned-command")
+
+    monkeypatch.setattr(capture, "verify", fail)
+    mismatch = error_type is privacy.RenderedGalleryMismatch
+    assert capture.main() == (privacy.RENDER_MISMATCH_EXIT if mismatch else 1)
+    shown = capsys.readouterr()
+    assert json.loads(shown.out) == {"ok": False, "comparison_mismatch": mismatch}
+    assert not shown.err
 
 
 def test_capture_retains_full_private_dom_evidence_without_changing_visible_transcript(tmp_path, monkeypatch):

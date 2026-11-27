@@ -232,3 +232,51 @@ def test_gallery_hosted_repair_requires_exact_parent_and_reviewed_blobs(history,
     differently_versioned = commit(repo, "unreviewed package version")
     with pytest.raises(ValueError, match="gallery runtime input differs from its reviewed blob"):
         policy.plan(repo, hosted, differently_versioned, differently_versioned)
+
+
+def test_gallery_theme_diagnostic_accepts_only_reviewed_bytes_on_the_clock_successor(history, monkeypatch):
+    repo, original, _, _ = history
+    candidate, tests = policy.PLANS[original]
+    git(repo, "checkout", "-q", "--detach", candidate)
+    fixture = repo / policy.GALLERY_CAPTURE_FIXTURE
+    fixture.parent.mkdir()
+    fixture.write_text("retained hosted fixture\n")
+    receipt = repo / "clock-capture.json"
+    receipt.write_text("retained Clock receipt\n")
+    hosted = commit(repo, "published Clock repair")
+    monkeypatch.setattr(policy, "GALLERY_ORIGINAL", original)
+    monkeypatch.setattr(policy, "GALLERY_THEME_HEAD", hosted)
+    monkeypatch.setattr(policy, "GALLERY_RUNTIME_BLOBS", {})
+    monkeypatch.setattr(
+        policy, "GALLERY_FORWARD_BLOBS", {policy.GALLERY_CAPTURE_FIXTURE: git(repo, "hash-object", fixture)}
+    )
+    monkeypatch.setattr(policy, "GALLERY_CLOCK_BLOBS", {receipt.name: git(repo, "hash-object", receipt)})
+    test_path = "tests/capture_test.py"
+    monkeypatch.setitem(policy.PLANS, original, (candidate, (*tests, test_path)))
+    pins = {}
+    for path in policy.GALLERY_THEME_BLOBS:
+        file = repo / path
+        file.parent.mkdir(parents=True, exist_ok=True)
+        file.write_text(f"reviewed diagnostic for {path}\n")
+        pins[path] = git(repo, "hash-object", file)
+    monkeypatch.setattr(policy, "GALLERY_THEME_BLOBS", pins)
+    approved = commit(repo, "reviewed diagnostic")
+    assert policy.plan(repo, hosted, approved, approved).tooling == (test_path, policy.GALLERY_CAPTURE_FIXTURE)
+    with pytest.raises(ValueError, match="pinned, direct policy successor"):
+        policy.plan(repo, original, approved, approved)
+    with monkeypatch.context() as previous:
+        previous.setattr(policy, "GALLERY_THEME_HEAD", "0" * 40)
+        previous.setattr(policy, "GALLERY_CLOCK_HEAD", hosted)
+        with pytest.raises(ValueError, match="unknown change after frozen candidate"):
+            policy.plan(repo, hosted, approved, approved)
+
+    for path in (*pins, policy.GALLERY_CAPTURE_FIXTURE, receipt.name, "scripts/focused_dispatch.py"):
+        git(repo, "checkout", "-q", "--detach", hosted)
+        git(repo, "checkout", approved, "--", ".")
+        changed = repo / path
+        changed.parent.mkdir(parents=True, exist_ok=True)
+        changed.write_text("different bytes\n")
+        rejected = commit(repo, "unreviewed replacement")
+        reason = "differs from its reviewed blob" if path in pins else "outside its reviewed scope"
+        with pytest.raises(ValueError, match=reason):
+            policy.plan(repo, hosted, rejected, rejected)

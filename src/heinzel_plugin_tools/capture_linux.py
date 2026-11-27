@@ -12,9 +12,17 @@ import tempfile
 import urllib.error
 import urllib.request
 import uuid
+from enum import StrEnum
 from pathlib import Path
 
-from heinzel_plugin_tools.privacy import CaptureError, _confidentiality_module, regular_bytes, safe_path
+from heinzel_plugin_tools.privacy import (
+    RENDER_INTEGRITY_EXIT,
+    RENDER_MISMATCH_EXIT,
+    CaptureError,
+    _confidentiality_module,
+    regular_bytes,
+    safe_path,
+)
 
 IMAGE = (
     "mcr.microsoft.com/playwright/python:v1.64.1-noble@sha256:"
@@ -29,6 +37,44 @@ BOOTSTRAP_URL = (
 )
 BOOTSTRAP_LIMIT = 20 * 1024 * 1024
 OUTPUT_LIMIT = 4 * 1024 * 1024
+
+
+class RenderStage(StrEnum):
+    WORKER = "worker"
+    PROTOCOL = "protocol"
+    CAPTURE = "capture"
+    SOURCE_INTEGRITY = "source-integrity"
+    COMPARISON = "comparison"
+    UNKNOWN = "unknown"
+
+
+class RenderCheckFailure(CaptureError):
+    """A public failure with a host-defined stage and no worker data."""
+
+    def __init__(self, stage: RenderStage) -> None:
+        self.stage = stage
+        super().__init__(
+            f"Zero-secret rendering comparison failed ({stage.value}); no private-policy approval or publication"
+        )
+
+
+def require_render_match(returncode: int, report: object) -> None:
+    """Classify the worker protocol after checking both source snapshots."""
+    if not isinstance(report, dict):
+        raise RenderCheckFailure(RenderStage.PROTOCOL)
+    if (
+        returncode == 0
+        and report.get("ok") is True
+        and report.get("verified") is True
+        and "comparison_mismatch" not in report
+    ):
+        return
+    if set(report) == {"ok", "comparison_mismatch"} and report["ok"] is False:
+        if returncode == RENDER_MISMATCH_EXIT and report["comparison_mismatch"] is True:
+            raise RenderCheckFailure(RenderStage.COMPARISON)
+        if returncode == 1 and report["comparison_mismatch"] is False:
+            raise RenderCheckFailure(RenderStage.CAPTURE)
+    raise RenderCheckFailure(RenderStage.PROTOCOL)
 
 
 def bootstrap_wheel() -> bytes:
@@ -338,6 +384,8 @@ def run(args) -> dict:
             child += ["--core", core]
         if args.strict_images:
             child += ["--strict-images"]
+        if render_check:
+            child += ["--render-check-worker"]
         print("Capturing inside the isolated Linux worker…", file=sys.stderr, flush=True)
         container = "hz-gallery-" + uuid.uuid4().hex
         try:
@@ -397,24 +445,46 @@ def run(args) -> dict:
                 capture=True,
                 capture_stderr=render_check,
             )
+        except CaptureError as error:
+            if not render_check:
+                raise
+            raise RenderCheckFailure(RenderStage.WORKER) from error
         finally:
             with contextlib.suppress(CaptureError):
-                command(["docker", "rm", "--force", container], cwd=work, capture=True, timeout=30)
-        try:
-            report = json.loads(result.stdout)
-        except (ValueError, TypeError) as error:
-            raise CaptureError("Canonical Linux capture returned no result; no gallery was changed") from error
+                command(
+                    ["docker", "rm", "--force", container],
+                    cwd=work,
+                    capture=True,
+                    capture_stderr=render_check,
+                    timeout=30,
+                )
+        integrity_failure = RenderCheckFailure(RenderStage.SOURCE_INTEGRITY) if render_check else None
+        if integrity_failure and result.returncode == RENDER_INTEGRITY_EXIT:
+            raise integrity_failure
         if project.is_symlink() or not project.is_dir() or project.resolve() != work.resolve() / "project":
+            if integrity_failure:
+                raise integrity_failure
             raise CaptureError("The isolated snapshot directory was replaced; no gallery was changed")
         current_plan = capture.read_plan(root)
         if capture.input_digest(root, current_plan, source_files=snapshot_files(root, current_plan)) != original_inputs:
+            if integrity_failure:
+                raise integrity_failure
             raise CaptureError("Screenshot inputs changed during canonical capture; capture again")
         # Never execute host Git against worker-writable metadata.
         if capture.input_digest(project, plan, source_files=source_files) != original_inputs:
+            if integrity_failure:
+                raise integrity_failure
             raise CaptureError("The isolated source snapshot differs from the owning screenshot inputs")
+        try:
+            report = json.loads(result.stdout)
+        except (ValueError, TypeError) as error:
+            if render_check:
+                known_exit = result.returncode in (0, 1, RENDER_MISMATCH_EXIT)
+                stage = RenderStage.PROTOCOL if known_exit else RenderStage.WORKER
+                raise RenderCheckFailure(stage) from error
+            raise CaptureError("Canonical Linux capture returned no result; no gallery was changed") from error
         if render_check:
-            if result.returncode or report.get("ok") is not True or report.get("verified") is not True:
-                raise CaptureError("Zero-secret rendering comparison failed; no private-policy approval or publication")
+            require_render_match(result.returncode, report)
             # No unscanned transcript, caption, image or stderr is published by the zero-secret CI mode.
             return {
                 "ok": True,
