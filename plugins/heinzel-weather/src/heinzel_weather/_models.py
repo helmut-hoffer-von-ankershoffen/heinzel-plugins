@@ -293,6 +293,10 @@ class Change(_Strict):
     title: str = Field(description="One line.")
     body: str = Field(description="A sentence more.")
     urgent: bool = Field(description="Whether it may interrupt outside working hours: severe weather alerts.")
+    replaces: str | None = Field(
+        default=None,
+        description="Stable per place and type (the hour left out), so a newer notice replaces the older one.",
+    )
 
 
 class Observation(_Strict):

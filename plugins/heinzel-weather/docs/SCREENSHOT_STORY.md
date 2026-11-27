@@ -29,7 +29,8 @@ Normal presentation fictionalization is disclosed: verified owning-interpreter p
 - Verify at least two useful feature UI scenes and a useful CLI result; verify light and dark appearances were actually applied. Reject duplicate images, caption-only changes, unreadable crops and terminal output presented as feature UI.
 - Confirm the footer hover and its accessible region work as declared in the running Core version. Confirm the Weather page route loads its actual bundled view, and that the warning and forecast data match the fake. If a selector or route fails, record the failure rather than substituting a fabricated screen.
 - Check the phone scene contributes a distinct responsive view; remove or revise it if it merely duplicates the desktop capture. Review image framing, visible truncation, attribution where shown, and every transcript independently.
-- Treat this as a source-reviewed plan, not a completed capture or privacy approval. TOML structure has been checked against the requested format by inspection; no parser, capture, imports, network calls or code execution were used for validation.
+- The maintained plan and definition validators check the source, plan and story binding. The capture and independent visual review must establish what each image and transcript actually shows.
+- Weather 0.5.8 replaces a previous rain or temperature-change notice for the same place and groups alert notices by place and event. The service tests cover that behavior. The six gallery scenes illustrate the forecast, status detail and CLI.
 
 ## Source-bound UI surface inventory
 

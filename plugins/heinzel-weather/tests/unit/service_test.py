@@ -19,8 +19,18 @@ class Recorder(Notifications):
     def __init__(self) -> None:
         self.emitted: list[dict] = []
 
-    def emit(self, kind, title, body="", *, route, command, key, urgent=False) -> Notice | None:  # noqa: PLR0913
-        self.emitted.append({"kind": kind, "title": title, "body": body, "key": key, "urgent": urgent, "route": route})
+    def emit(self, kind, title, body="", *, route, command, key, urgent=False, replaces=None) -> Notice | None:  # noqa: PLR0913
+        self.emitted.append(
+            {
+                "kind": kind,
+                "title": title,
+                "body": body,
+                "key": key,
+                "urgent": urgent,
+                "route": route,
+                "replaces": replaces,
+            }
+        )
         return Notice(
             id=str(len(self.emitted)),
             kind=kind,
@@ -209,6 +219,16 @@ def test_the_watch_notices_rain_the_swing_and_the_alert_once(service):
     later = NOW + timedelta(minutes=31)
     watcher.clock = lambda: later
     assert watcher.watch(notices).changes == []  # the same news is not news again
+
+
+def test_each_notice_replaces_the_older_one_of_its_place_and_type(service):
+    notices = Recorder()
+    service().watch(notices)
+    replaces = [item["replaces"] for item in notices.emitted]
+    assert replaces[0] == "rain:Berlin, DE"
+    assert replaces[1] == "swing:Berlin, DE"
+    assert replaces[2].startswith("alert:Berlin, DE:")
+    assert len(set(replaces)) == len(replaces)
 
 
 def test_the_watch_stays_quiet_without_a_location_or_key(service):
