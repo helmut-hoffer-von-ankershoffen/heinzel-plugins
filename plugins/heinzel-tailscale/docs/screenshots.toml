@@ -3,11 +3,44 @@ bootstrap = "docs/screenshot_fixture.py"
 browser_time = "2026-10-31T12:00:00Z"
 
 [[scenes]]
+name = "sharing-existing-private"
+surface = "ui"
+route = "/"
+appearance = "dark"
+caption = "An existing private route to this Heinzel is ready to adopt — fictional local Tailscale demo"
+timeout_ms = 30000
+
+[[scenes.steps]]
+action = "click"
+role = "button"
+name_regex = "^Dismiss Doctor"
+optional = true
+
+[[scenes.steps]]
+action = "click"
+role = "button"
+name_regex = "^Tailscale"
+within_role = "contentinfo"
+
+[[scenes.steps]]
+action = "wait"
+role = "region"
+name = "Tailscale"
+
+[[scenes.steps]]
+action = "wait"
+text = "Private route to this Heinzel found."
+
+[scenes.focus]
+role = "region"
+name = "Tailscale"
+
+[[scenes]]
 name = "sharing-ready"
 surface = "ui"
 route = "/"
 appearance = "dark"
-caption = "Sharing On with Copy link and Open (fictional demo); the capture tool hides the share link as [authentication link hidden]"
+caption = "One switch adopts the existing private route, then shows Copy link and Open (fictional demo); the capture tool hides the share link as [authentication link hidden]"
 timeout_ms = 30000
 
 [[scenes.steps]]

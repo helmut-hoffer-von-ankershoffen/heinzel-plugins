@@ -4,20 +4,21 @@ Someone who wants to reach their authenticated Heinzel web app privately from an
 
 ## Outcome
 
-Show the real sharing control becoming ready, the corresponding honest CLI status, and the control being turned off. The fictional example demonstrates local configuration and readiness; it does not prove that a remote phone can connect. Tailscale must already be installed and signed in, and the remote browser still needs authentication (`README.md`).
+Show the real sharing control recognizing an existing route to this Heinzel and taking over with one action, the corresponding honest CLI status, and the control being turned off. The fictional example demonstrates local configuration and readiness; it does not prove that a remote phone can connect. Tailscale must already be installed and signed in, and the remote browser still needs authentication (`README.md`).
 
 ## Scenes
 
-1. **Sharing ready — dark.** In the genuine footer Tailscale pane, turn on **Share over Tailscale** and wait for **Open**. Show the requested choice and the ready link together, using the fictional local node.
-2. **Status after enabling — CLI.** Run `hz tailscale status --json`. Show the mapped target and `apply-required` if that is the actual separate CLI result: a CLI process cannot verify the web listener and must not claim web readiness.
-3. **Sharing off — light.** Return to the same genuine pane, turn sharing off, and show **Off**. This is a meaningful second state of the actual feature, not a duplicate capture.
-4. **Status after disabling — CLI.** Run `hz tailscale status --json` again to show the resulting unmapped state. Treat the target port and all other values as observed output, not a guarantee imposed by the caption.
+1. **Existing private route — dark.** Show the genuine footer pane recognizing the fictional preexisting route while the sharing switch is off.
+2. **Sharing ready — dark.** In the genuine footer Tailscale pane, turn on **Share over Tailscale** and wait for **Open**. Show the requested choice and the ready link together, using the fictional local node.
+3. **Status after enabling — CLI.** Run `hz tailscale status --json`. Show the mapped target and `apply-required` if that is the actual separate CLI result: a CLI process cannot verify the web listener and must not claim web readiness.
+4. **Sharing off — light.** Return to the same genuine pane, turn sharing off, and show **Off**. This is a meaningful second state of the actual feature, not a duplicate capture.
+5. **Status after disabling — CLI.** Run `hz tailscale status --json` again to show the resulting unmapped state. Treat the target port and all other values as observed output, not a guarantee imposed by the caption.
 
-Capture in this order with shared isolated fixture state. The existing plan already demonstrates the useful on/off flow and both applied appearances, so it is preserved. If capture isolation resets state between scenes, or the observed state differs from the captions, resolve that before publication rather than staging a result.
+Capture in this order with shared isolated fixture state. The plan demonstrates detection and adoption, and preserves the on/off flow, CLI results and both appearances. If capture isolation resets state between scenes, or the observed state differs from the captions, resolve that before publication rather than staging a result.
 
 ## Fictional fixtures
 
-`docs/screenshot_fixture.py` supplies a fictional `workstation.tail-example.ts.net` node, a loopback-only LocalAPI, and an unrelated example service. It uses the plugin's real sharing operations and checks that the unrelated service remains unchanged. Its bootstrap is for an explicit capture only; it was inspected, not run. The fixture does not establish real Tailscale login, remote access, or phone pairing.
+`docs/screenshot_fixture.py` supplies a fictional `workstation.tail-example.ts.net` node, a loopback-only LocalAPI, and an unrelated example service. It uses the plugin's real sharing operations and checks that the unrelated service remains unchanged. The fixture pre-seeds a private route to the actual demo listener before the first web status read, with no saved plugin ownership. The fixture does not establish real Tailscale login, remote access, or phone pairing.
 
 Normal presentation fictionalization is explicitly limited to verified owning-interpreter paths becoming `/demo-profile/.venv`, and only the verified whole hostname detail in the genuine Doctor row becoming `demo-host`. The capture tool also replaces the authenticated share link the ready pane shows with the text `[authentication link hidden]`, because that link can carry a login token; the app itself shows the link. These mappings change no SDK health status or remaining detail and establish no privacy acceptance. Unknown identities still fail, and independent review must inspect every image and transcript.
 
@@ -27,7 +28,7 @@ A copied URL may contain a session token and must be treated like a password (`R
 
 ## Acceptance criteria
 
-- Four distinct captures show genuine product surfaces, in sequence: ready and off in the feature pane, with the two corresponding useful CLI results. No forged HTML, terminal output masquerading as feature UI, duplicate captures, or caption-only state changes.
+- Five distinct captures show genuine product surfaces, in sequence: the existing private route, ready and off in the feature pane, and two corresponding CLI results. No forged HTML, terminal output masquerading as feature UI, duplicate captures, or caption-only state changes.
 - The ready pane visibly reaches the real **Open** link; the off pane visibly reaches **Off**. Dark and light appearances are actually applied. Capture waits for real outcomes and does not manufacture them.
 - CLI results agree with their captions and preserve the distinction between a mapped request and authenticated web readiness. If they do not, correct the capture or caption based on observed output.
 - Captions identify demo data; all images and transcripts pass the independent privacy review described above. A successful local demonstration is not represented as proof of remote access.

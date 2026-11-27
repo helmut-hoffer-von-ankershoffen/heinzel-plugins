@@ -9,11 +9,12 @@ from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from socketserver import TCPServer
 
-from heinzel import Config, Kernel, Settings
+from heinzel import Config, Kernel, LocalWebRuntime, Settings
 from heinzel.heads.cli import build
 from heinzel.kernel import discover
 from heinzel_tailscale import TailscaleCli
 from heinzel_tailscale._cli import Result
+from heinzel_tailscale._mapping import Mapping
 
 DNS = "workstation.tail-example.ts.net"
 PASSWORD = "documentation-only-local-api"
@@ -98,6 +99,20 @@ class LocalAPI(BaseHTTPRequestHandler):
 class DemoCli(TailscaleCli):
     """Emulate only vendor discovery reads; the real ServeStore performs authenticated local HTTP writes."""
 
+    def seed_route(self):
+        port = kernel.resolve(LocalWebRuntime).port
+        if port is None:
+            return
+        with LOCK:
+            current = state()
+            if current.get("seeded"):
+                return
+            current.update(config=Mapping.for_node(DNS, port).enable(current["config"]), seeded=True)
+            temporary = STATE.with_suffix(".next")
+            temporary.write_text(json.dumps(current))
+            temporary.chmod(0o600)
+            temporary.replace(STATE)
+
     def executable(self):
         return "/fixture/never-executed-tailscale"
 
@@ -105,6 +120,7 @@ class DemoCli(TailscaleCli):
         if tuple(arguments) == ("status", "--json", "--peers=false"):
             payload = {"BackendState": "Running", "Self": {"DNSName": DNS + "."}, "CertDomains": [DNS]}
         elif tuple(arguments) == ("serve", "status", "--json"):
+            self.seed_route()
             payload = state()["config"]
         elif tuple(arguments) == ("debug", "local-creds"):
             return Result(

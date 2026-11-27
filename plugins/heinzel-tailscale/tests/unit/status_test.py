@@ -318,7 +318,7 @@ def test_every_state_has_a_short_line_in_the_persons_words_or_none():
         "Port 443 is public (Funnel). Pick another port.",
         "Port 443 is taken. Pick another port in Settings.",
         "Stop tailscale serve in the terminal, then try again.",
-        "hz did not set this up. Check Tailscale Serve.",
+        "Existing Tailscale route in use.",
         "Turning on…",
         "Could not finish turning it on. Try again.",
         "Set up for another hz port. Try again to move it.",
@@ -330,13 +330,7 @@ def test_preexisting_matching_manual_mapping_is_reported_as_unowned():
     result = service(Settings(ui_allowed_origins={MAPPING.origin}), FakeCli(serve=MAPPING.enable({}))).status()
     assert result.state == "blocked"
     assert result.mapped
-    assert result.message == (
-        "Tailscale already shares this app, and hz did not set that up.\n"
-        "So hz left it alone. You can keep it as it is.\n"
-        "To let hz manage sharing, delete that mapping with this command:\n"
-        "tailscale serve --https=443 --set-path=/ off\n"
-        "Then switch sharing on here."
-    )
+    assert result.message == "Open sharing in the Heinzel web app that this route points to."
     for jargon in ("Inspect", "inspect", "not verified", "owned"):
         assert jargon not in result.message
 
@@ -347,12 +341,11 @@ def test_the_pane_shows_one_short_line_and_keeps_the_long_text_for_details():
     # Whichever toggle contract the installed core has, the long explanation is never bulleted under the switch.
     if heinzel_tailscale._PANE_LINES:
         assert item.detail == []
-        assert item.toggle.status == "hz did not set this up. Check Tailscale Serve."
+        assert item.toggle.status == "Existing Tailscale route in use."
         assert item.toggle.problem is None  # Not switched on yet: the switch is the action, not Try again.
-        assert item.toggle.explanation.startswith("Tailscale already shares this app, and hz did not set that up.")
-        assert "tailscale serve --https=443 --set-path=/ off" in item.toggle.explanation
+        assert item.toggle.explanation == "Open sharing in the Heinzel web app that this route points to."
     else:
-        assert item.detail == [DetailLine(text="hz did not set this up. Check Tailscale Serve.")]
+        assert item.detail == [DetailLine(text="Existing Tailscale route in use.")]
 
 
 def test_a_cause_the_person_must_fix_offers_try_again_once_they_switched_it_on():
@@ -512,7 +505,8 @@ def test_no_message_offers_a_port_wide_off_command():
     ]
     for text in texts:
         assert not re.search(r"--https=\d+ off", text)
-    assert "--set-path=/ off" in texts[0]
+    assert "tailscale serve" not in texts[0]
+    assert "--set-path=/ off" in texts[2]
 
 
 @pytest.mark.parametrize(
