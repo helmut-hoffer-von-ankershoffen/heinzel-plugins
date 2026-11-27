@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.9.12
+
+Package the World Clock view once when building a wheel from a source snapshot.
+
 ## 0.9.11
 
 Requires Python 3.15; relocked.

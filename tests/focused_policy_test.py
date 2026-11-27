@@ -186,3 +186,39 @@ def test_gallery_plan_covers_every_published_owner_and_named_clock_view():
         "heinzel-zoom",
     }
     assert [p for p in targets if "/web/" in p] == ["plugins/heinzel-clock/web/src/ClockPanel.test.tsx"]
+
+
+def test_gallery_hosted_repair_requires_exact_parent_and_reviewed_blobs(history, monkeypatch):
+    repo, original, _, _ = history
+    candidate, _ = policy.PLANS[original]
+    git(repo, "checkout", "-q", "--detach", candidate)
+    (repo / "policy").write_text("first hosted candidate\n")
+    hosted = commit(repo, "hosted")
+    metadata = "plugins/heinzel-weather/pyproject.toml"
+    updated = repo / metadata
+    updated.parent.mkdir(parents=True)
+    updated.write_text('version = "0.5.9"\n')
+    fixture = repo / policy.GALLERY_CAPTURE_FIXTURE
+    fixture.parent.mkdir()
+    fixture.write_text("reviewed fixture\n")
+    repair = commit(repo, "exact repair")
+    monkeypatch.setattr(policy, "GALLERY_ORIGINAL", original)
+    monkeypatch.setattr(policy, "GALLERY_HOSTED_HEAD", hosted)
+    monkeypatch.setattr(policy, "GALLERY_RUNTIME_BLOBS", {})
+    monkeypatch.setattr(policy, "GALLERY_POLICY_PATHS", policy.GALLERY_POLICY_PATHS | {"policy"})
+    monkeypatch.setattr(
+        policy,
+        "GALLERY_FORWARD_BLOBS",
+        {path: git(repo, "rev-parse", f"{repair}:{path}") for path in (metadata, policy.GALLERY_CAPTURE_FIXTURE)},
+    )
+    assert policy.GALLERY_CAPTURE_FIXTURE in policy.plan(repo, hosted, repair, repair).tooling
+    with pytest.raises(ValueError, match="pinned, direct policy successor"):
+        policy.plan(repo, original, repair, repair)
+    git(repo, "checkout", "-q", "--detach", hosted)
+    updated.parent.mkdir(parents=True, exist_ok=True)
+    updated.write_text('version = "0.5.10"\n')
+    fixture.parent.mkdir(exist_ok=True)
+    fixture.write_text("reviewed fixture\n")
+    differently_versioned = commit(repo, "unreviewed package version")
+    with pytest.raises(ValueError, match="gallery runtime input differs from its reviewed blob"):
+        policy.plan(repo, hosted, differently_versioned, differently_versioned)

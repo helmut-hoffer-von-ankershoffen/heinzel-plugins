@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.5.9
+
+Package the Weather forecast view once when building a wheel from a source snapshot.
+
 ## 0.5.8
 
 A newer weather notice replaces the older one for the same place and type: "Rain in Berlin, DE from 02:00" replaces "from 00:00". Alerts of different types stay separate. Needs Heinzel Core 0.9.56.
