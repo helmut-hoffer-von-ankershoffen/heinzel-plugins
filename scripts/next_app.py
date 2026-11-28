@@ -14,13 +14,15 @@ from urllib.parse import urlsplit
 from packaging.utils import parse_wheel_filename
 from packaging.version import Version
 
-from heinzel_plugin_tools.publishing import api, fetch_bytes, find_release
+from heinzel_plugin_tools.publishing import api, fetch_bytes, find_release, tag_revision
 
 CORE_REPOSITORY = "helmut-hoffer-von-ankershoffen/heinzel"
 EDGE_POINTER = f"https://github.com/{CORE_REPOSITORY}/releases/download/edge-channel/edge.json"
 MAX_METADATA = 2 * 1024 * 1024
 EXPLICIT_METADATA_ATTEMPTS = 4
 EXPLICIT_METADATA_WAIT = 10
+PLUGINS_REPOSITORY = f"{CORE_REPOSITORY}-plugins"
+STABLE_VERSION = re.compile(r"\d+\.\d+\.\d+", re.ASCII)
 
 
 def download(url, limit=MAX_METADATA):
@@ -42,7 +44,7 @@ def download(url, limit=MAX_METADATA):
 def package(version=""):
     suffix = f"{version}/" if version else ""
     url = f"https://pypi.org/pypi/heinzel/{suffix}json"
-    explicit = bool(re.fullmatch(r"[0-9]+\.[0-9]+\.[0-9]+", version)) and str(Version(version)) == version
+    explicit = bool(STABLE_VERSION.fullmatch(version)) and str(Version(version)) == version
     attempt = 0
     while True:
         attempt += 1
@@ -140,7 +142,7 @@ def select(repository, *, version="", core_wheel=""):
         or parsed.is_prerelease
         or parsed.is_devrelease
         or parsed.local
-        or not re.fullmatch(r"[0-9]+\.[0-9]+\.[0-9]+", version)
+        or not STABLE_VERSION.fullmatch(version)
     ):
         raise ValueError("Only canonical stable SDK releases can become the standard app")
     if metadata["info"]["version"] != version:
@@ -194,7 +196,12 @@ def select_held(repository):
     """
     for release in api(f"repos/{CORE_REPOSITORY}/releases?per_page=10"):
         tag = release["tag_name"]
-        if not (release.get("prerelease") and not release.get("draft") and re.fullmatch(r"v\d+\.\d+\.\d+", tag)):
+        if not (
+            release.get("prerelease")
+            and not release.get("draft")
+            and tag.startswith("v")
+            and STABLE_VERSION.fullmatch(tag[1:])
+        ):
             continue
         version = tag[1:]
         filename = f"heinzel-{version}-py3-none-any.whl"
@@ -239,8 +246,59 @@ def selected(repository, version, core_wheel):
         raise
 
 
+def recovery_selection(repository, version, core_wheel, environ):
+    """Select the exact stated Core release, including one held before PyPI publication."""
+    marker = environ.get("RECOVERY_MARKER", "")
+    plugins_sha = environ.get("EXPECTED_PLUGINS_SHA", "")
+    core_version = environ.get("EXPECTED_CORE_VERSION", "")
+    core_sha = environ.get("EXPECTED_CORE_SHA", "")
+    wheel_sha256 = environ.get("EXPECTED_CORE_WHEEL_SHA256", "")
+    pins = environ.get("DEPENDENCY_PINS", "").encode()
+    if not any((marker, plugins_sha, core_version, core_sha, wheel_sha256, pins)):
+        return None
+    if (
+        repository != PLUGINS_REPOSITORY
+        or environ.get("GITHUB_REF") != "refs/heads/main"
+        or environ.get("GITHUB_EVENT_NAME") != "workflow_dispatch"
+        or environ.get("GITHUB_RUN_ATTEMPT") != "1"
+        or not re.fullmatch(r"[a-f0-9]{40}", plugins_sha)
+        or plugins_sha != environ.get("GITHUB_SHA")
+        or not 0 < len(pins) <= 16 * 1024
+        or not re.fullmatch(r"dep-[1-9][0-9]*-" + hashlib.sha256(pins).hexdigest(), marker)
+        or not re.fullmatch(r"[a-f0-9]{40}", core_sha)
+        or not re.fullmatch(r"[a-f0-9]{64}", wheel_sha256)
+        or not STABLE_VERSION.fullmatch(core_version)
+        or core_version != str(Version(core_version))
+        or (version and version != core_version)
+    ):
+        raise ValueError("Recovery requires all exact source inputs on the first protected main dispatch")
+    tag = f"v{core_version}"
+    filename = f"heinzel-{core_version}-py3-none-any.whl"
+    url = f"https://github.com/{CORE_REPOSITORY}/releases/download/{tag}/{filename}"
+    if core_wheel and core_wheel != url:
+        raise ValueError("Recovery SDK URL must match the exact official wheel")
+    release = find_release(CORE_REPOSITORY, tag)
+    wheels = [asset for asset in (release or {}).get("assets", []) if asset.get("name") == filename]
+    if (
+        not release
+        or release.get("draft") is not False
+        or len(wheels) != 1
+        or wheels[0].get("digest") != f"sha256:{wheel_sha256}"
+        or tag_revision(CORE_REPOSITORY, tag) != core_sha
+    ):
+        raise ValueError("Recovery SDK release, source or wheel digest differs from the requested identity")
+    app_tag = f"app-v{core_version}"
+    if find_release(repository, app_tag) or api(f"repos/{repository}/git/ref/tags/{app_tag}", missing=True):
+        raise ValueError("The standard app identity already exists; recovery will not replace it")
+    return {"version": core_version, "core_wheel": url}
+
+
 def main():
-    chosen = selected(os.environ["GH_REPO"], os.environ.get("VERSION", ""), os.environ.get("CORE_URL", ""))
+    repository = os.environ["GH_REPO"]
+    version, core_wheel = os.environ.get("VERSION", ""), os.environ.get("CORE_URL", "")
+    chosen = recovery_selection(repository, version, core_wheel, os.environ) or selected(
+        repository, version, core_wheel
+    )
     if chosen:
         with Path(os.environ["GITHUB_OUTPUT"]).open("a") as output:
             for key, value in chosen.items():
