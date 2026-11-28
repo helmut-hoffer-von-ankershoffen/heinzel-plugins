@@ -38,11 +38,28 @@ def digest() -> Module:
 
 
 def hz(kernel: Kernel, *args: str) -> tuple[int, object]:
+    """Run `hz ... --json`: the exit code and the parsed result; for a failure, just its message."""
     result = CliRunner().invoke(build(kernel), [*args, "--json"])
     try:
-        return result.exit_code, json.loads(result.output)
+        output = json.loads(result.output)
     except json.JSONDecodeError:
-        return result.exit_code, result.output
+        output = result.output
+    return result.exit_code, failure_message(output) if result.exit_code else output
+
+
+def failure_message(output: object) -> object:
+    """The message of a failed command, as Core prints it under `--json`: `Error: ...` text or an `error` object."""
+    if isinstance(output, dict) and isinstance(output.get("error"), str):
+        return output["error"]
+    if isinstance(output, str):
+        return output.strip().removeprefix("Error:").strip()
+    return output
+
+
+def test_a_failure_reads_the_same_as_text_or_as_a_json_error_object():
+    assert failure_message("Error: gh is missing\n") == "gh is missing"
+    assert failure_message({"error": "gh is missing", "code": "not_supported"}) == "gh is missing"
+    assert failure_message({"checks": []}) == {"checks": []}  # a result that sets the exit code stays as it is
 
 
 @pytest.fixture
