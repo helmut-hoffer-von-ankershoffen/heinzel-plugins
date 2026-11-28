@@ -4,6 +4,7 @@ import hashlib
 import json
 import runpy
 import zipfile
+from contextlib import contextmanager
 from pathlib import Path
 from types import SimpleNamespace
 
@@ -198,14 +199,16 @@ def test_dependency_receipt_is_only_for_exact_absent_enrolled_releases(tmp_path,
     restored = []
 
     def absent(repo, tag):
-        assert repo == repository and "unrelated" not in tag
+        assert repo == repository
+        assert "unrelated" not in tag
         checked.append(tag)
         return "missing" in tag and (result != "appeared" or checked.count(tag) == 1)
 
+    @contextmanager
     def core(*_):
         if result == "broken-core":
             raise ValueError("attestation failed")
-        return "b" * 40, "c" * 64
+        yield tmp_path / "heinzel-1.2.4-py3-none-any.whl", "b" * 40, "c" * 64
 
     def restore(repo, tag, name, _):
         assert (repo, tag, name) == (repository, "heinzel-published/v1.2.3", "heinzel-published")
@@ -221,7 +224,7 @@ def test_dependency_receipt_is_only_for_exact_absent_enrolled_releases(tmp_path,
         "restore": restore,
     }.items():
         monkeypatch.setitem(scope, name, replacement)
-    arguments = ("https://example.invalid/wheel", "1.2.4", "heinzel-1.2.4-py3-none-any.whl")
+    arguments = ("https://example.invalid/wheel", "1.2.4")
     receipt = tmp_path / "standard-app-dependency.json"
     if result == "missing":
         with pytest.raises(SystemExit, match="Missing enrolled plugin publication"):
@@ -326,3 +329,133 @@ def test_dependency_pin_parser_refuses_empty_noncanonical_or_oversized_inputs(ra
     parse = runpy.run_path(str(Path(__file__).parents[1] / "scripts/compose.py"))["parse_dependency_pins"]
     with pytest.raises(ValueError, match="pin"):
         parse(raw)
+
+
+@pytest.mark.parametrize(
+    ("version", "tag", "wheel_tags"),
+    [
+        ("1.2.3", "v1.2.3", "py3-none-any"),
+        ("1.2.4.dev3", "edge-v1.2.4.dev3", "py3-none-any"),
+        ("1.2.3", "v1.2.3", "1-py3-none-any"),
+    ],
+)
+def test_core_attests_private_response_before_exposing_canonical_wheel(monkeypatch, version, tag, wheel_tags):
+    verify = runpy.run_path(str(Path(__file__).parents[1] / "scripts/compose.py"))["verified_core"]
+    scope = verify.__wrapped__.__globals__
+    repository = scope["CORE_REPOSITORY"]
+    filename = f"heinzel-{version}-{wheel_tags}.whl"
+    url = f"https://github.com/{repository}/releases/download/{tag}/{filename}"
+    content = b"exact fetched release fixture"
+    revision = "b" * 40
+    digest = hashlib.sha256(content).hexdigest()
+    locations = []
+
+    def fetch(source, *, hosts, timeout, limit):
+        assert source == url
+        assert hosts == {"github.com"}
+        assert timeout == 60
+        assert limit == scope["CORE_WHEEL_LIMIT"]
+        return source, content
+
+    def peel(repo, tag_name):
+        assert (repo, tag_name) == (repository, tag)
+        return revision
+
+    def attest(command):
+        assert command[:3] == ["gh", "attestation", "verify"]
+        assert command[4:] == ["--repo", repository, "--source-digest", revision, "--deny-self-hosted-runners"]
+        temporary = Path(command[3])
+        assert temporary.read_bytes() == content
+        assert not (temporary.parent / filename).exists()
+        locations.append(temporary.parent)
+
+    for name, replacement in {"fetch_bytes": fetch, "tag_revision": peel, "run": attest}.items():
+        monkeypatch.setitem(scope, name, replacement)
+    monkeypatch.setenv("EXPECTED_CORE_SHA", revision)
+    monkeypatch.setenv("EXPECTED_CORE_WHEEL_SHA256", digest)
+    with verify(url, version) as (wheel, actual_revision, actual_digest):
+        assert wheel.name == filename
+        assert wheel.parent == locations[0]
+        assert wheel.read_bytes() == content
+        assert (actual_revision, actual_digest) == (revision, digest)
+    assert not locations[0].exists()
+
+
+@pytest.mark.parametrize("failure", ["core-revision", "wheel-digest", "attestation", "changed-after-attestation"])
+def test_core_never_exposes_unverified_wheel(monkeypatch, failure):
+    verify = runpy.run_path(str(Path(__file__).parents[1] / "scripts/compose.py"))["verified_core"]
+    scope = verify.__wrapped__.__globals__
+    repository = scope["CORE_REPOSITORY"]
+    filename = "heinzel-1.2.3-py3-none-any.whl"
+    url = f"https://github.com/{repository}/releases/download/v1.2.3/{filename}"
+    content = b"Core release fixture"
+    monkeypatch.setitem(scope, "fetch_bytes", lambda source, **_: (source, content))
+    monkeypatch.setitem(scope, "tag_revision", lambda *_: "a" * 40)
+    monkeypatch.setenv("EXPECTED_CORE_SHA", "b" * 40 if failure == "core-revision" else "a" * 40)
+    monkeypatch.setenv(
+        "EXPECTED_CORE_WHEEL_SHA256", "c" * 64 if failure == "wheel-digest" else hashlib.sha256(content).hexdigest()
+    )
+    locations = []
+
+    def attest(command):
+        assert failure in {"attestation", "changed-after-attestation"}
+        staged = Path(command[3])
+        destination = staged.parent
+        assert not (destination / filename).exists()
+        locations.append(destination)
+        if failure == "attestation":
+            raise ValueError("test attestation failed")
+        staged.write_bytes(b"changed state after verification")
+
+    monkeypatch.setitem(scope, "run", attest)
+    with (
+        pytest.raises(
+            ValueError, match="differs from the recovery request|attestation failed|changed before composition"
+        ),
+        verify(url, "1.2.3"),
+    ):
+        pytest.fail("An unverified wheel must not be exposed")
+    assert all(not location.exists() for location in locations)
+
+
+@pytest.mark.parametrize("suffix", ["?source=other", "#fragment", "/alternate.whl", "\t"])
+def test_core_refuses_noncanonical_url_before_downloading(monkeypatch, suffix):
+    verify = runpy.run_path(str(Path(__file__).parents[1] / "scripts/compose.py"))["verified_core"]
+    scope = verify.__wrapped__.__globals__
+    repository = scope["CORE_REPOSITORY"]
+    url = f"https://github.com/{repository}/releases/download/v1.2.3/heinzel-1.2.3-py3-none-any.whl"
+    monkeypatch.setitem(scope, "fetch_bytes", lambda *a, **kw: pytest.fail("Noncanonical wheel must not be downloaded"))
+    with pytest.raises(ValueError, match="official core release"), verify(url + suffix, "1.2.3"):
+        pytest.fail("Noncanonical wheel must not be exposed")
+
+
+@pytest.mark.parametrize("kind", ["directory-symlink", "artifact-symlink", "artifact-directory", "none"])
+def test_composition_exposes_wheel_only_to_a_regular_destination(tmp_path, kind):
+    copy = runpy.run_path(str(Path(__file__).parents[1] / "scripts/compose.py"))["copy_accepted_artifacts"]
+    source = tmp_path / "heinzel-1.2.3-py3-none-any.whl"
+    source.write_bytes(b"verified release fixture")
+    destination = tmp_path / "composition"
+    if kind == "directory-symlink":
+        untouched = tmp_path / "other"
+        untouched.mkdir()
+        destination.symlink_to(untouched, target_is_directory=True)
+    else:
+        destination.mkdir()
+    target = destination / source.name
+    if kind == "artifact-symlink":
+        untouched = tmp_path / "existing-fixture"
+        untouched.write_bytes(b"unchanged")
+        target.symlink_to(untouched)
+    elif kind == "artifact-directory":
+        target.mkdir()
+    profile = {"artifacts": [{"url": str(source), "filename": source.name}]}
+    if kind == "none":
+        copy(profile, destination)
+        assert target.read_bytes() == source.read_bytes()
+    else:
+        with pytest.raises(ValueError, match="destination must be"):
+            copy(profile, destination)
+    if kind == "directory-symlink":
+        assert not list(untouched.iterdir())
+    elif kind == "artifact-symlink":
+        assert untouched.read_bytes() == b"unchanged"

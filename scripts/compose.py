@@ -12,6 +12,7 @@ import re
 import shutil
 import tempfile
 import zipfile
+from contextlib import contextmanager
 from email.parser import Parser
 from pathlib import Path
 from urllib.parse import quote, urlsplit
@@ -25,6 +26,8 @@ from heinzel_plugin_tools.publishing import api, fetch_bytes, find_release, rest
 
 CORE_REPOSITORY = "helmut-hoffer-von-ankershoffen/heinzel"
 PLUGINS_REPOSITORY = f"{CORE_REPOSITORY}-plugins"
+CORE_WHEEL_LIMIT = 128 * 1024 * 1024
+WHEEL_FILENAME = re.compile(r"[\w.+-]+\.whl", re.ASCII)
 
 
 def release_absent(repository: str, tag: str) -> bool:
@@ -49,7 +52,7 @@ def dependency_context() -> dict | None:
         or os.environ.get("GITHUB_EVENT_NAME") not in {"schedule", "workflow_dispatch"}
         or os.environ.get("GITHUB_RUN_ATTEMPT") != "1"
         or not re.fullmatch(r"[a-f0-9]{40}", plugins_sha)
-        or not re.fullmatch(r"[1-9][0-9]*", run_id)
+        or not re.fullmatch(r"[1-9]\d*", run_id, re.ASCII)
     ):
         return None
     return {"plugins_sha": plugins_sha, "run_id": int(run_id), "run_attempt": 1}
@@ -69,7 +72,7 @@ def parse_dependency_pins(raw: str) -> dict[str, dict]:
     ):
         raise ValueError("Recovery needs a nonempty canonical dependency pin map")
     for tag, pin in pins.items():
-        identity = re.fullmatch(r"(heinzel-[a-z0-9]+(?:-[a-z0-9]+)*)/v([0-9]+\.[0-9]+\.[0-9]+)", tag)
+        identity = re.fullmatch(r"(heinzel-[a-z0-9]+(?:-[a-z0-9]+)*)/v(\d+\.\d+\.\d+)", tag, re.ASCII)
         if (
             not identity
             or not isinstance(pin, dict)
@@ -121,6 +124,50 @@ def core_python(core: Path) -> list[str]:
     return ["--python", requires.strip()] if requires and requires.strip() else []
 
 
+def verify_unchanged(verified: dict[Path, str]) -> None:
+    for artifact, digest in verified.items():
+        if hashlib.sha256(artifact.read_bytes()).hexdigest() != digest:
+            raise ValueError("A verified release artifact changed before composition")
+
+
+def restore_standard(
+    standard: dict, repository: str, core: Path, destination: Path, pins: dict, verified: dict[Path, str]
+) -> dict[str, Path]:
+    selected = {}
+    for tag, project in standard.items():
+        validate_lock(project, str(core))
+        release = restore(repository, tag, project.name, destination / ".verified" / project.name)
+        if tag in pins:
+            verify_dependency_pin(tag, release, pins[tag])
+        wheel = next(Path(path) for path in release["artifacts"] if path.endswith(".whl"))
+        verified[wheel] = release["artifact_hashes"][str(wheel)]
+        verify_unchanged(verified)
+        selected[project.name] = wheel
+        if any((project.directory / "tests" / name).is_dir() for name in ("acceptance", "browser", "e2e")):
+            acceptance(project, str(core), wheel=wheel)
+        verify_unchanged(verified)
+    return selected
+
+
+def copy_accepted_artifacts(result: dict, destination: Path) -> None:
+    """Copy verified release bytes without following or overwriting unexpected filesystem targets."""
+    if destination.is_symlink() or not destination.is_dir():
+        raise ValueError("Composition destination must be a real directory")
+    for artifact in result["artifacts"]:
+        filename = artifact["filename"]
+        if not WHEEL_FILENAME.fullmatch(filename):
+            raise ValueError("Composition output must have a canonical wheel filename")
+        source, target = Path(artifact["url"]), destination / filename
+        if target.is_symlink() or (target.exists() and not target.is_file()):
+            raise ValueError("Composition artifact destination must be a regular file")
+        if source.resolve() == target.resolve():
+            continue
+        with tempfile.TemporaryDirectory(dir=destination) as temporary:
+            snapshot = Path(temporary) / "wheel"
+            shutil.copyfile(source, snapshot)
+            snapshot.replace(target)
+
+
 def compose(
     core: Path,
     destination: Path,
@@ -144,17 +191,12 @@ def compose(
         raise ValueError("Set GH_REPO to the reviewed composition repository's owner/name")
     verified = {core: core_sha256 or hashlib.sha256(core.read_bytes()).hexdigest()}
 
-    def unchanged():
-        for artifact, digest in verified.items():
-            if hashlib.sha256(artifact.read_bytes()).hexdigest() != digest:
-                raise ValueError("A verified release artifact changed before composition")
-
-    unchanged()
+    verify_unchanged(verified)
     environment = destination / "acceptance"
     isolated = isolated_environment(destination / "acceptance-state")
     run(["uv", "venv", "--clear", *core_python(core), str(environment)], env=isolated)
     interpreter = environment / "bin/python"
-    unchanged()
+    verify_unchanged(verified)
     run(["uv", "pip", "install", "--python", str(interpreter), str(core)], env=isolated)
     # Check the accepted SDK's actual profile parser before restoring or testing independent providers.
     # Format 2 promises managed startup continuity; the plugin ABI remains sdk=1.
@@ -162,25 +204,10 @@ def compose(
     profile([], core, probe, None)
     check_profile_format(interpreter, probe, env=isolated, runner=run)
     probe.unlink()
-    selected = {}
-    for tag, project in standard.items():
-        validate_lock(project, str(core))
-        release = restore(repository, tag, project.name, destination / ".verified" / project.name)
-        if tag in pins:
-            verify_dependency_pin(tag, release, pins[tag])
-        wheel = next(Path(path) for path in release["artifacts"] if path.endswith(".whl"))
-        verified[wheel] = release["artifact_hashes"][str(wheel)]
-        unchanged()
-        selected[project.name] = wheel
-        if any((project.directory / "tests" / name).is_dir() for name in ("acceptance", "browser", "e2e")):
-            acceptance(project, str(core), wheel=wheel)
-        unchanged()
-    unchanged()
+    selected = restore_standard(standard, repository, core, destination, pins, verified)
+    verify_unchanged(verified)
     result = profile(inventory, core, destination / "local.json", None, selected_wheels=selected)
-    for artifact in result["artifacts"]:
-        target = destination / artifact["filename"]
-        if Path(artifact["url"]).resolve() != target.resolve():
-            shutil.copyfile(artifact["url"], target)
+    copy_accepted_artifacts(result, destination)
     run(
         [
             str(interpreter),
@@ -213,7 +240,7 @@ def compose(
         env=isolated,
     )
     verify_managed_profile(interpreter, destination / "local.json")
-    unchanged()
+    verify_unchanged(verified)
     write_accepted_profile(
         result,
         destination / "local.json",
@@ -231,35 +258,57 @@ def core_tag(version: str) -> str:
     return f"{'edge-v' if Version(version).is_devrelease else 'v'}{version}"
 
 
-def verified_core(url: str, version: str, core: Path) -> tuple[str, str]:
-    """Download and attest the official wheel without importing its code."""
-    _, content = fetch_bytes(url, hosts={"github.com"}, timeout=60, limit=128 * 1024 * 1024)
-    if len(content) > 128 * 1024 * 1024:
+def core_wheel_filename(url: str, version: str) -> str:
+    parsed = urlsplit(url)
+    filename = parsed.path.rsplit("/", 1)[-1]
+    if str(Version(version)) != version or not WHEEL_FILENAME.fullmatch(filename):
+        raise ValueError("Use a canonical Core version and wheel filename")
+    expected = f"https://github.com/{CORE_REPOSITORY}/releases/download/{core_tag(version)}/{filename}"
+    if url != expected:
+        raise ValueError("Use the immutable HTTPS wheel URL from the official core release")
+    name, wheel_version, _, _ = parse_wheel_filename(filename)
+    if name != "heinzel" or str(wheel_version) != version:
+        raise ValueError("The core wheel must match the requested version")
+    return filename
+
+
+@contextmanager
+def verified_core(url: str, version: str):
+    """Attest the official response in private storage before exposing its canonical filename."""
+    filename = core_wheel_filename(url, version)
+    _, content = fetch_bytes(url, hosts={"github.com"}, timeout=60, limit=CORE_WHEEL_LIMIT)
+    if len(content) > CORE_WHEEL_LIMIT:
         raise ValueError("Core wheel exceeds its size limit")
-    core.write_bytes(content)
     revision = tag_revision(CORE_REPOSITORY, core_tag(version))
     digest = hashlib.sha256(content).hexdigest()
     expected_revision = os.environ.get("EXPECTED_CORE_SHA", "")
     expected_digest = os.environ.get("EXPECTED_CORE_WHEEL_SHA256", "")
     if (expected_revision and revision != expected_revision) or (expected_digest and digest != expected_digest):
         raise ValueError("The official Core source or downloaded wheel differs from the recovery request")
-    run(
-        [
-            "gh",
-            "attestation",
-            "verify",
-            str(core),
-            "--repo",
-            CORE_REPOSITORY,
-            "--source-digest",
-            revision,
-            "--deny-self-hosted-runners",
-        ]
-    )
-    return revision, digest
+    with tempfile.TemporaryDirectory(prefix="heinzel-core-") as temporary:
+        with tempfile.NamedTemporaryFile(dir=temporary, suffix=".whl") as staged:
+            staged.write(content)
+            staged.flush()
+            run(
+                [
+                    "gh",
+                    "attestation",
+                    "verify",
+                    staged.name,
+                    "--repo",
+                    CORE_REPOSITORY,
+                    "--source-digest",
+                    revision,
+                    "--deny-self-hosted-runners",
+                ]
+            )
+            core = Path(temporary) / filename
+            os.link(staged.name, core, follow_symlinks=False)
+            verify_unchanged({core: digest})
+            yield core, revision, digest
 
 
-def check_dependencies(url: str, version: str, filename: str) -> None:
+def check_dependencies(url: str, version: str) -> None:
     """Emit a receipt for missing publication after passive checks of exact release inputs."""
     context = dependency_context()
     if context is None or Version(version).is_prerelease:
@@ -272,10 +321,8 @@ def check_dependencies(url: str, version: str, filename: str) -> None:
     missing = {tag for _, tag in selected if release_absent(PLUGINS_REPOSITORY, tag)}
     if not missing:
         return
-    with tempfile.TemporaryDirectory() as temporary:
-        destination = Path(temporary)
-        core = destination / filename
-        revision, digest = verified_core(url, version, core)
+    with verified_core(url, version) as (core, revision, digest):
+        destination = core.parent
         for project, tag in selected:
             validate_lock(project, str(core))
             if tag not in missing:
@@ -305,38 +352,38 @@ def check_dependencies(url: str, version: str, filename: str) -> None:
     raise SystemExit("Missing enrolled plugin publication: " + ", ".join(sorted(missing)))
 
 
+def composition_destination() -> Path:
+    dist = ROOT / "dist"
+    destination = dist / "standard"
+    for directory in (dist, destination):
+        if directory.is_symlink() or (directory.exists() and not directory.is_dir()):
+            raise ValueError("Composition destination must be a real directory")
+        directory.mkdir(exist_ok=True)
+    return destination
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument("--core-url", required=True)
     parser.add_argument("--version", required=True)
     parser.add_argument("--dependency-check", action="store_true")
     args = parser.parse_args()
-    version = str(Version(args.version))
-    if args.version != version:
-        parser.error("Use the canonical core version, for example 0.9.0")
-    url = urlsplit(args.core_url)
-    filename = Path(url.path).name
-    expected_path = f"/{CORE_REPOSITORY}/releases/download/{core_tag(version)}/{filename}"
-    if url.scheme != "https" or url.netloc != "github.com" or url.path != expected_path or url.query or url.fragment:
-        parser.error("Use the immutable HTTPS wheel URL from the official core release")
-    name, wheel_version, _, _ = parse_wheel_filename(filename)
-    if name != "heinzel" or str(wheel_version) != version:
-        parser.error("The core wheel must match the requested version")
+    try:
+        core_wheel_filename(args.core_url, args.version)
+    except ValueError as error:
+        parser.error(str(error))
     pins = parse_dependency_pins(os.environ.get("DEPENDENCY_PINS", ""))
     if args.dependency_check:
-        check_dependencies(args.core_url, version, filename)
+        check_dependencies(args.core_url, args.version)
         return
-    destination = ROOT / "dist/standard"
-    destination.mkdir(parents=True, exist_ok=True)
-    core = destination / filename
-    _, digest = verified_core(args.core_url, version, core)
-    compose(
-        core,
-        destination,
-        f"https://github.com/{PLUGINS_REPOSITORY}/releases/download/app-v{version}",
-        core_sha256=digest,
-        dependency_pins=pins,
-    )
+    with verified_core(args.core_url, args.version) as (core, _, digest):
+        compose(
+            core,
+            composition_destination(),
+            f"https://github.com/{PLUGINS_REPOSITORY}/releases/download/app-v{args.version}",
+            core_sha256=digest,
+            dependency_pins=pins,
+        )
 
 
 if __name__ == "__main__":

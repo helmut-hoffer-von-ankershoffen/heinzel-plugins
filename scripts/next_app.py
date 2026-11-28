@@ -21,7 +21,8 @@ EDGE_POINTER = f"https://github.com/{CORE_REPOSITORY}/releases/download/edge-cha
 MAX_METADATA = 2 * 1024 * 1024
 EXPLICIT_METADATA_ATTEMPTS = 4
 EXPLICIT_METADATA_WAIT = 10
-PLUGINS_REPOSITORY = "helmut-hoffer-von-ankershoffen/heinzel-plugins"
+PLUGINS_REPOSITORY = f"{CORE_REPOSITORY}-plugins"
+STABLE_VERSION = re.compile(r"\d+\.\d+\.\d+", re.ASCII)
 
 
 def download(url, limit=MAX_METADATA):
@@ -43,7 +44,7 @@ def download(url, limit=MAX_METADATA):
 def package(version=""):
     suffix = f"{version}/" if version else ""
     url = f"https://pypi.org/pypi/heinzel/{suffix}json"
-    explicit = bool(re.fullmatch(r"[0-9]+\.[0-9]+\.[0-9]+", version)) and str(Version(version)) == version
+    explicit = bool(STABLE_VERSION.fullmatch(version)) and str(Version(version)) == version
     attempt = 0
     while True:
         attempt += 1
@@ -141,7 +142,7 @@ def select(repository, *, version="", core_wheel=""):
         or parsed.is_prerelease
         or parsed.is_devrelease
         or parsed.local
-        or not re.fullmatch(r"[0-9]+\.[0-9]+\.[0-9]+", version)
+        or not STABLE_VERSION.fullmatch(version)
     ):
         raise ValueError("Only canonical stable SDK releases can become the standard app")
     if metadata["info"]["version"] != version:
@@ -195,7 +196,12 @@ def select_held(repository):
     """
     for release in api(f"repos/{CORE_REPOSITORY}/releases?per_page=10"):
         tag = release["tag_name"]
-        if not (release.get("prerelease") and not release.get("draft") and re.fullmatch(r"v\d+\.\d+\.\d+", tag)):
+        if not (
+            release.get("prerelease")
+            and not release.get("draft")
+            and tag.startswith("v")
+            and STABLE_VERSION.fullmatch(tag[1:])
+        ):
             continue
         version = tag[1:]
         filename = f"heinzel-{version}-py3-none-any.whl"
@@ -261,7 +267,7 @@ def recovery_selection(repository, version, core_wheel, environ):
         or not re.fullmatch(r"dep-[1-9][0-9]*-" + hashlib.sha256(pins).hexdigest(), marker)
         or not re.fullmatch(r"[a-f0-9]{40}", core_sha)
         or not re.fullmatch(r"[a-f0-9]{64}", wheel_sha256)
-        or not re.fullmatch(r"[0-9]+\.[0-9]+\.[0-9]+", core_version)
+        or not STABLE_VERSION.fullmatch(core_version)
         or core_version != str(Version(core_version))
         or (version and version != core_version)
     ):
