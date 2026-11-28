@@ -19,6 +19,7 @@ from heinzel_plugin_tools.privacy import (
     RENDER_INTEGRITY_EXIT,
     RENDER_MISMATCH_EXIT,
     CaptureError,
+    RenderComparison,
     _confidentiality_module,
     regular_bytes,
     safe_path,
@@ -51,11 +52,24 @@ class RenderStage(StrEnum):
 class RenderCheckFailure(CaptureError):
     """A public failure with a host-defined stage and no worker data."""
 
-    def __init__(self, stage: RenderStage) -> None:
+    def __init__(self, stage: RenderStage, comparison: RenderComparison | None = None) -> None:
         self.stage = stage
-        super().__init__(
-            f"Zero-secret rendering comparison failed ({stage.value}); no private-policy approval or publication"
+        self.comparison = (
+            comparison if stage is RenderStage.COMPARISON and isinstance(comparison, RenderComparison) else None
         )
+        diagnostic = f" [{self.comparison.value}]" if self.comparison is not None else ""
+        super().__init__(
+            f"Zero-secret rendering comparison failed ({stage.value}){diagnostic}; "
+            "no private-policy approval or publication"
+        )
+
+
+def unique_render_fields(pairs: list[tuple[str, object]]) -> dict[str, object]:
+    """Refuse conflicting JSON members instead of silently trusting the last occurrence."""
+    fields = dict(pairs)
+    if len(fields) != len(pairs):
+        raise ValueError("Duplicate render worker fields")
+    return fields
 
 
 def require_render_match(returncode: int, report: object) -> None:
@@ -67,12 +81,21 @@ def require_render_match(returncode: int, report: object) -> None:
         and report.get("ok") is True
         and report.get("verified") is True
         and "comparison_mismatch" not in report
+        and "comparison" not in report
     ):
         return
-    if set(report) == {"ok", "comparison_mismatch"} and report["ok"] is False:
-        if returncode == RENDER_MISMATCH_EXIT and report["comparison_mismatch"] is True:
-            raise RenderCheckFailure(RenderStage.COMPARISON)
-        if returncode == 1 and report["comparison_mismatch"] is False:
+    base_fields = {"ok", "comparison_mismatch"}
+    if report.get("ok") is False:
+        if returncode == RENDER_MISMATCH_EXIT and report.get("comparison_mismatch") is True:
+            if set(report) == base_fields:
+                raise RenderCheckFailure(RenderStage.COMPARISON)
+            if set(report) == base_fields | {"comparison"} and isinstance(report["comparison"], str):
+                try:
+                    comparison = RenderComparison(report["comparison"])
+                except ValueError:
+                    raise RenderCheckFailure(RenderStage.PROTOCOL) from None
+                raise RenderCheckFailure(RenderStage.COMPARISON, comparison)
+        if returncode == 1 and set(report) == base_fields and report["comparison_mismatch"] is False:
             raise RenderCheckFailure(RenderStage.CAPTURE)
     raise RenderCheckFailure(RenderStage.PROTOCOL)
 
@@ -476,7 +499,7 @@ def run(args) -> dict:
                 raise integrity_failure
             raise CaptureError("The isolated source snapshot differs from the owning screenshot inputs")
         try:
-            report = json.loads(result.stdout)
+            report = json.loads(result.stdout, object_pairs_hook=unique_render_fields if render_check else None)
         except (ValueError, TypeError) as error:
             if render_check:
                 known_exit = result.returncode in (0, 1, RENDER_MISMATCH_EXIT)

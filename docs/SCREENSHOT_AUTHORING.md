@@ -278,8 +278,12 @@ establish a protected GitHub approval or a fork-PR acceptance path.
 
 `make screenshots-render-check NAME=<plugin>` is the secret-free CI path for ordinary and fork PRs. It
 returns `render_verified: true`, `private_scan: false`, and `scope: render-only` only after a real fresh
-comparison. It emits counts rather than unscanned transcripts, captions, images, or worker stderr, and
-does not copy results out of the private scratch directory. It cannot publish. CI OK requires this executed rendering result for selected plugins, including fork PRs;
+comparison. A comparison failure may show one fixed diagnostic category after source integrity verification.
+The category distinguishes UI from CLI transcript mismatches and can identify a system-health footer
+change without including its state or scene. Mixed, ambiguous or strict-image failures retain the generic
+comparison result. The worker does not publish unscanned transcripts, captions, images or stderr, and
+does not copy results out of the private scratch directory.
+CI OK requires this executed rendering result for selected plugins, including fork PRs;
 a missing plan or skipped selected render fails. Unselected changes retain the existing plan selection. Before public gallery
 changes are admitted, the approved local tooling must run the full private-policy verification and
 bind the passing scan to the exact committed gallery files. A future hosted private scan requires
