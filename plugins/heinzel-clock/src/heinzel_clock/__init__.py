@@ -7,7 +7,7 @@ CLI command, MCP tool, REST endpoint, configuration, validation, health reportin
 
 import warnings
 from contextlib import suppress
-from datetime import UTC, datetime
+from datetime import UTC, date, datetime, timedelta
 from pathlib import Path
 from typing import Annotated, Any, Self, cast
 from zoneinfo import ZoneInfo, available_timezones
@@ -17,8 +17,9 @@ from heinzel import (
     ConfigEditor,
     DetailLine,
     HeinzelError,
+    ListEntry,
+    ListWidget,
     LiveClock,
-    MetricWidget,
     Module,
     ModuleSettings,
     Navigate,
@@ -273,13 +274,149 @@ module.action(
 )
 
 
-@module.widget(source="clock")
-def at_work(times: list[ZoneTime]) -> MetricWidget | None:
-    """How many of the team's zones are at work now, out of all of them."""
-    if not times:
+Window = tuple[datetime, datetime]
+"""A working window in UTC: its start and its end."""
+NIGHT = (22, 6)
+"""Local hours outside work that count as night: from 22:00 to 06:00."""
+WEEK = 8
+"""How many days ahead the next common working window is looked for."""
+MAX_ROWS = 7
+"""Zone rows under the headline; more zones show six and a count of the rest."""
+PANEL = Navigate(path="/?panel=clock:world-clock")
+
+
+def _wall(zone: ZoneInfo, day: date, hour: int, *, fold: int) -> datetime:
+    """`hour` o'clock on `day` there, in UTC; 24 is the next midnight, a skipped hour starts after the gap."""
+    if hour == 24:  # noqa: PLR2004 - the end of a day
+        day, hour = day + timedelta(days=1), 0
+    return datetime(day.year, day.month, day.day, hour, tzinfo=zone, fold=fold).astimezone(UTC)
+
+
+def working_windows(zone: ZoneTime, moment: datetime) -> list[Window]:
+    """The zone's working windows, Monday to Friday local time, from the day before `moment` for a week."""
+    info = ZoneInfo(zone.zone)
+    today = moment.astimezone(info).date()
+    start, end = zone.hours
+    days = (today + timedelta(days=offset) for offset in range(-1, WEEK + 1))
+    return [
+        (_wall(info, day, start, fold=0), _wall(info, day, end, fold=1)) for day in days if day.weekday() < SATURDAY
+    ]
+
+
+def _intersect(left: list[Window], right: list[Window]) -> list[Window]:
+    return [(max(a, c), min(b, d)) for a, b in left for c, d in right if max(a, c) < min(b, d)]
+
+
+def common_hours(zones: list[ZoneTime], moment: datetime) -> Window | None:
+    """The current or next window in which every zone works, within a week; None if there is none."""
+    if not zones:
         return None
-    count = working(times)
-    return MetricWidget(label="Zones at work now", value=f"{count}/{len(times)}", tone="ok" if count else "neutral")
+    windows = working_windows(zones[0], moment)
+    for zone in zones[1:]:
+        windows = _intersect(windows, working_windows(zone, moment))
+    return next((window for window in sorted(windows) if window[1] > moment), None)
+
+
+def _span(start: datetime, end: datetime) -> str:
+    """`2 h 30 m` from `start` to `end`, rounded up to the minute."""
+    hours, minutes = divmod(-((start - end) // timedelta(minutes=1)), 60)
+    return " ".join(
+        part for part in (f"{hours} h" if hours else "", f"{minutes} m" if minutes or not hours else "") if part
+    )
+
+
+def _offset(zone: ZoneInfo, you: ZoneInfo, moment: datetime) -> str:
+    """How far the zone's clock is ahead of yours, with a minus sign when behind: `+6 h`, `+4:30 h`."""
+    difference = (moment.astimezone(zone).utcoffset() or timedelta()) - (
+        moment.astimezone(you).utcoffset() or timedelta()
+    )
+    minutes = int(difference.total_seconds()) // 60
+    sign = "+" if minutes > 0 else "\u2212" if minutes < 0 else "±"
+    hours, rest = divmod(abs(minutes), 60)
+    return f"{sign}{hours}:{rest:02d} h" if rest else f"{sign}{hours} h"
+
+
+def _when(moment: datetime, at: datetime, you: ZoneInfo) -> str:
+    """`in 2 h` within a day, otherwise the weekday and your local time: `Mon 09:00`."""
+    if at - moment < timedelta(days=1):
+        return f"in {_span(moment, at)}"
+    return at.astimezone(you).strftime("%a %H:%M")
+
+
+def _row(zone: ZoneTime, moment: datetime, you: ZoneInfo, *, primary: bool) -> ListEntry:
+    info = ZoneInfo(zone.zone)
+    local = moment.astimezone(info)
+    windows = working_windows(zone, moment)
+    active = next((window for window in windows if window[0] <= moment < window[1]), None)
+    if active:
+        state, plan = "Working", f"ends {_when(moment, active[1], you)}"
+    else:
+        night = local.hour >= NIGHT[0] or local.hour < NIGHT[1]
+        upcoming = next(start for start, _ in windows if start > moment)
+        state, plan = "Night" if night else "Off", f"starts {_when(moment, upcoming, you)}"
+    same_day = local.date() == moment.astimezone(you).date()
+    clock = local.strftime("%H:%M" if same_day else "%a %H:%M")
+    relation = "you" if primary else _offset(info, you, moment)
+    return ListEntry(
+        text=f"{city(zone.zone)} {clock} · {relation} · {state}",
+        detail=f"Works {zone.hours[0]:02d}\u2013{zone.hours[1]:02d} · {plan}",
+        tone="ok" if active else "neutral",
+        effect=PANEL,
+    )
+
+
+def _headline(zones: list[ZoneTime], moment: datetime, you: ZoneInfo) -> ListEntry:
+    rows = [_row(zone, moment, you, primary=False) for zone in zones]
+    count = sum(row.tone == "ok" for row in rows)
+    noun = "zone" if len(zones) == 1 else "zones"
+    who = "Everyone" if len(zones) > 1 else None
+    window = common_hours(zones, moment)
+    today = moment.astimezone(you).date()
+    if window and window[0] <= moment:
+        until = window[1].astimezone(you).strftime("%H:%M")
+        detail = f"{who} works until {until}" if who else f"Works until {until}"
+    elif window:
+        start, end = (edge.astimezone(you) for edge in window)
+        hours = f"{start:%H:%M}\u2013{end:%H:%M}"
+        if start.date() == today:
+            detail = f"{who} overlaps {hours} today" if who else f"Works {hours} today"
+        else:
+            detail = f"No common hours today; next {start:%a} {hours}"
+    else:
+        starts = [(start, zone) for zone in zones for start, _ in working_windows(zone, moment) if start > moment]
+        start, first = min(starts, key=lambda pair: pair[0])
+        detail = f"No common working hours; {city(first.zone)} starts {_when(moment, start, you)}"
+    return ListEntry(
+        text=f"{count} of {len(zones)} {noun} working", detail=detail, tone="ok" if count else "neutral", effect=PANEL
+    )
+
+
+def timezones(times: list[ZoneTime], moment: datetime) -> ListWidget:
+    """Who works now, when everyone overlaps, and one row per zone sorted by its UTC offset."""
+    zones = list({zone.zone: zone for zone in reversed(times)}.values())[::-1]
+    if not zones:
+        return ListWidget(
+            title="Timezones",
+            items=[
+                ListEntry(text="No time zones yet", detail="Add your team's zones in the World clock", effect=PANEL)
+            ],
+        )
+    you = ZoneInfo(zones[0].zone)
+    order = sorted(
+        range(len(zones)),
+        key=lambda index: (moment.astimezone(ZoneInfo(zones[index].zone)).utcoffset() or timedelta(), index),
+    )
+    rows = [_row(zones[index], moment, you, primary=index == 0) for index in order]
+    if len(rows) > MAX_ROWS:
+        rest = len(rows) - MAX_ROWS + 1
+        rows = [*rows[: MAX_ROWS - 1], ListEntry(text=f"+{rest} more zones in the World clock", effect=PANEL)]
+    return ListWidget(title="Timezones", items=[_headline(zones, moment, you), *rows])
+
+
+@module.widget(source="clock")
+def at_work(times: list[ZoneTime]) -> ListWidget:
+    """The Today widget "Timezones": who works now, the next common hours and every zone's time."""
+    return timezones(times, _now())
 
 
 @module.health

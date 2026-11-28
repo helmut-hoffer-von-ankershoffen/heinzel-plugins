@@ -36,9 +36,9 @@ license notices are packaged alongside the built view.
 
 Find overlap across Berlin, New York and Los Angeles with the World Clock — fictional demonstration time
 
-<img src="docs/assets/screenshots/team-overview.png" alt="Fictional team working hours at a glance: the Today count and the primary footer clock" width="960">
+<img src="docs/assets/screenshots/team-overview.png" alt="Fictional team working hours at a glance: the Today timezones with their common hours and the primary footer clock" width="960">
 
-Fictional team working hours at a glance: the Today count and the primary footer clock
+Fictional team working hours at a glance: the Today timezones with their common hours and the primary footer clock
 
 <img src="docs/assets/screenshots/footer-detail.png" alt="Inspect all configured time zones from the primary footer clock — fictional demonstration data" width="960">
 

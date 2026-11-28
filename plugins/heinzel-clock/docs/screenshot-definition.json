@@ -13,11 +13,11 @@
       "steps": [
         {
           "action": "wait",
-          "text": "Zones at work now"
+          "text": "Timezones"
         },
         {
           "action": "wait",
-          "text": "2/3"
+          "text": "2 of 3 zones working"
         },
         {
           "action": "click",
@@ -40,11 +40,11 @@
       "surface": "ui",
       "route": "/",
       "appearance": "dark",
-      "caption": "Fictional team working hours at a glance: the Today count and the primary footer clock",
+      "caption": "Fictional team working hours at a glance: the Today timezones with their common hours and the primary footer clock",
       "steps": [
         {
           "action": "wait",
-          "text": "2/3"
+          "text": "2 of 3 zones working"
         },
         {
           "action": "click",
@@ -67,7 +67,7 @@
       "steps": [
         {
           "action": "wait",
-          "text": "2/3"
+          "text": "2 of 3 zones working"
         },
         {
           "action": "click",
@@ -100,7 +100,7 @@
       "steps": [
         {
           "action": "wait",
-          "text": "2/3"
+          "text": "2 of 3 zones working"
         },
         {
           "action": "click",
