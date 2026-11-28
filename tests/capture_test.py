@@ -40,6 +40,57 @@ def owner(tmp_path):
     return tmp_path
 
 
+@pytest.mark.parametrize(
+    ("committed", "fresh", "positions", "expected"),
+    [
+        ("v0.9.56\nTheme\nv0.9.56", "v0.9.57\nTheme\nv0.9.57", [0, 2], True),
+        ("v0.9.56\nTheme", "v0.9.57\nTheme", [0], True),
+        ("v0.9.56\nTheme\nv0.9.56", "v0.9.57\nTheme\nv0.9.57", [0], False),
+        ("v0.9.56\nTheme", "v0.9.57\nTheme", [], False),
+        ("v0.9.56\nTheme", "v0.9.58\nTheme", [0], False),
+        ("v0.9.55\nTheme", "v0.9.57\nTheme", [0], False),
+        ("v0.9.56\nTheme", "v0.9.56\nTheme", [0], False),
+        ("v0.9.57\nTheme", "v0.9.57\nTheme", [0], False),
+        ("v0.9.56\nTheme", "Theme\nv0.9.57", [1], False),
+        ("v0.9.56\nTheme", "v0.9.57\nTheme\nv0.9.57", [0, 2], False),
+        ("v0.9.56\nTheme\nv0.9.56", "v0.9.57\nTheme", [0], False),
+        ("v0.9.56\nTheme", "v0.9.57\nSound", [0], False),
+        ("Core v0.9.56", "Core v0.9.57", [0], False),
+        ("v0.9.56\nCore v0.9.56", "v0.9.57\nCore v0.9.57", [0], False),
+        ("12:00\nv0.9.56", "15:30\nv0.9.57", [1], True),
+    ],
+)
+def test_equal_transcripts_requires_structurally_proven_exact_core_version_pairs(committed, fresh, positions, expected):
+    assert capture.equal_transcripts(committed, fresh, "0.9.56", "0.9.57", positions) is expected
+
+
+@pytest.mark.parametrize(("recorded", "installed"), [(None, "0.9.57"), ("0.09.56", "0.9.57"), ("0.9.56", "0.9.57RC1")])
+def test_equal_transcripts_rejects_noncanonical_core_version_evidence(recorded, installed):
+    assert not capture.equal_transcripts(f"v{recorded}", f"v{installed}", recorded, installed, [0])
+
+
+def test_core_version_positions_accepts_only_standalone_lines_without_changing_captured_body():
+    body = "v0.9.57\nTheme\nCore v0.9.57\nv0.9.57"
+
+    def probe(_, arguments):
+        assert arguments["label"] == "v0.9.57"
+        marker = arguments["marker"]
+        return f"{marker}\nTheme\nCore {marker}\n{arguments['label']}"
+
+    page = SimpleNamespace(evaluate=probe)
+    assert capture.core_version_positions(page, body, "0.9.57") == [0]
+
+
+@pytest.mark.parametrize(
+    ("marked", "version"),
+    [(None, "0.9.57"), ("unexpected extra line", "0.9.57"), (None, "0.9.57RC1")],
+)
+def test_core_version_positions_refuses_invalid_live_evidence(marked, version):
+    page = SimpleNamespace(evaluate=lambda *_: marked)
+    with pytest.raises(privacy.CaptureError, match="Visible Core version evidence"):
+        capture.core_version_positions(page, "v0.9.57", version)
+
+
 def recorded(owner):
     capture.write_default_plan(owner)
     plan = capture.read_plan(owner)

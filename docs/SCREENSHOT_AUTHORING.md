@@ -177,6 +177,9 @@ run `make screenshots-verify NAME=<plugin>` locally with configured private term
 differences: two captures can differ in antialiasing and cursor pixels even on one machine, and fonts differ
 between operating systems (`--strict-images` makes them gate). Clock readings (hh:mm) are not compared, since
 fixtures may anchor their data on the real time; set `browser_time` to fix the browser's clock.
+The Core version in the footer or a built-in Settings header may advance from the recorded manifest version to the
+installed version at the same standalone transcript line. The verifier identifies and validates those fields in the
+live UI. Plugin version labels and other text still use the ordinary comparison.
 
 The zero-secret CI render check performs the public-pattern checks and the real rendering comparison; it does
 not approve confidential terms or publish images. Full local capture and verification require configured private

@@ -128,6 +128,8 @@ class FakePage:
 
     def evaluate(self, script, argument=None):
         self.log.append(("evaluate", argument))
+        if "NodeFilter.SHOW_TEXT" in script:
+            return self.text
         return None
 
     def title(self):
