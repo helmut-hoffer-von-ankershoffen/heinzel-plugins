@@ -19,6 +19,15 @@
           "action": "wait",
           "role": "heading",
           "name": "Launch review"
+        },
+        {
+          "action": "wait",
+          "role": "link",
+          "name": "Launch review"
+        },
+        {
+          "action": "wait",
+          "text": "· EM"
         }
       ]
     },
@@ -39,6 +48,15 @@
           "action": "wait",
           "role": "heading",
           "name": "Launch review"
+        },
+        {
+          "action": "wait",
+          "role": "link",
+          "name": "Launch review"
+        },
+        {
+          "action": "wait",
+          "text": "· EM"
         }
       ]
     },

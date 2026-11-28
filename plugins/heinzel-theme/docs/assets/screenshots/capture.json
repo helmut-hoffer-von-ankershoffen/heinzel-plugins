@@ -2,7 +2,7 @@
   "format": 2,
   "plugin": "heinzel-theme",
   "core_version": "0.9.57",
-  "inputs_sha256": "acd487f27366b95f61d28bf3b581d2ab2caa91ab0bed639b4a4b0ee58b7348ce",
+  "inputs_sha256": "5c54bdc74258b02af982fb0a94b0241101966b3de5199ca5921ee65e9fa672ab",
   "images": {
     "docs/assets/screenshots/theme-light.png": "e139707eae341c4b9d605aa60f8c070ceae3baa234a1782a9aa9956969c1acea",
     "docs/assets/screenshots/theme-dark.png": "4f8bee4177d8e991f3417e45efe2f89b1c7fa81f850c2fe858b039eb9f3685f9",
