@@ -34,7 +34,11 @@ def main() -> None:
         command = ["make", "check-fast"]
     else:
         command = ["uv", "run", "--frozen", "--group", "tooling", "hz-plugin", "check-changed", "--git-hook"]
-    raise SystemExit(subprocess.run(command, check=False).returncode)  # noqa: S603 - fixed commands
+    # make check-fast runs the tooling tests, whose fixture git must not reach the pushing worktree through GIT_*.
+    # check-changed reads the hook's index itself (a partial commit has its own) and strips GIT_* for its children.
+    hook_free = {"env": {key: value for key, value in os.environ.items() if not key.startswith("GIT_")}}
+    options = hook_free if mode == "tooling" else {}
+    raise SystemExit(subprocess.run(command, check=False, **options).returncode)  # noqa: S603 - fixed commands
 
 
 if __name__ == "__main__":

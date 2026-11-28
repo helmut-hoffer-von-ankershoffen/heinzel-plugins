@@ -131,11 +131,21 @@ def plan(
     }
 
 
+def hook_free_environment(env: dict | None = None) -> dict[str, str]:
+    """ENV (default: this process's) without the GIT_* a git hook exports for the repository it runs for.
+
+    A check's tests run git in their own fixture repositories; an inherited GIT_DIR or GIT_INDEX_FILE would make
+    them write to the committing or pushing worktree's index instead.
+    """
+    source = os.environ if env is None else env
+    return {key: value for key, value in source.items() if not key.startswith("GIT_")}
+
+
 def run(command: list[str], *, cwd: Path = ROOT, env: dict | None = None, timeout: int | None = 600) -> None:
     """Print bounded, useful progress and stop at the failing owning command."""
     started = time.monotonic()
     print("→ " + " ".join(command), flush=True)
-    result = subprocess.run(command, cwd=cwd, env=env, check=False, timeout=timeout)
+    result = subprocess.run(command, cwd=cwd, env=hook_free_environment(env), check=False, timeout=timeout)
     print(f"{'✓' if result.returncode == 0 else '✗'} {command[0]}: {time.monotonic() - started:.2f}s", flush=True)
     if result.returncode:
         raise SystemExit(result.returncode)
