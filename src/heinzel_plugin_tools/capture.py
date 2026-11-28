@@ -29,6 +29,8 @@ from datetime import datetime
 from pathlib import Path
 from urllib.parse import urlsplit
 
+from packaging.version import InvalidVersion, Version
+
 if __package__ in {None, ""}:
     sys.path.insert(0, str(Path(__file__).resolve().parent.parent))
 
@@ -670,6 +672,83 @@ def redact_auth_presentation(page, tokens: tuple[str, ...] = (), private_paths: 
     )
 
 
+def core_version_label(version: object) -> str | None:
+    """The exact canonical version in an authenticated Core metadata source."""
+    if not isinstance(version, str):
+        return None
+    try:
+        return f"v{version}" if str(Version(version)) == version else None
+    except InvalidVersion:
+        return None
+
+
+def core_version_positions(page, body: str, version: str) -> list[int]:
+    """Map visible Core-owned version fields to standalone lines without retaining DOM changes."""
+    label = core_version_label(version)
+    marker = "\ue000" + (label or "")[1:]
+    if marker in body:
+        raise CaptureError("The gallery transcript contains the reserved Core version probe")
+    marked = page.evaluate(
+        """({ label, marker }) => {
+            const visible = element => {
+                const box = element.getBoundingClientRect();
+                return box.width > 0 && box.height > 0 && getComputedStyle(element).visibility === 'visible';
+            };
+            const find = (root, selector) => [...root.querySelectorAll(selector)].filter(visible);
+            const shells = find(document, '#root [data-testid="app-shell"]')
+                .filter(node => !node.parentElement.closest('[data-testid="app-shell"]'));
+            if (shells.length > 1) return null;
+            if (!shells.length) return document.body.innerText;
+            const shell = shells[0];
+            // Shell mounts the same footer immediately beneath its page column or workspace.
+            const footers = find(shell, ':scope > .workspace-area > div > div > footer[data-footer-width], '
+                + ':scope > .workspace-area > .workspace-scroll > div > div > div > footer[data-footer-width]');
+            const dialogs = find(shell, ':scope > .viewport-overlay > '
+                + '[role="dialog"][aria-modal="true"][aria-labelledby]')
+                .filter(dialog => dialog.querySelector(':scope > header > h2[id]')?.id
+                    === dialog.getAttribute('aria-labelledby'));
+            if (footers.length > 1 || dialogs.length > 1) return null;
+            const footer = footers.flatMap(node => find(node, ':scope > [data-footer-part="@version"]'
+                + ' > [data-footer-host="@version"] > div > [data-footer-content="@version"] button'));
+            const settings = dialogs.flatMap(dialog => {
+                const nav = dialog.querySelector(':scope > div > nav[aria-label]');
+                const current = nav?.querySelector('button[aria-current="page"]')?.textContent.trim();
+                const panel = nav?.nextElementSibling;
+                if (!current || !panel?.matches('[data-settings-content]')) return [];
+                const first = panel.firstElementChild;
+                // The module header comes first, either directly or in the built-in section wrapper.
+                const header = first?.querySelector(':scope > div > h3') ? first : first?.firstElementChild;
+                if (header?.querySelector(':scope > div > h3')?.textContent.trim() !== current) return [];
+                return find(header, ':scope > div > p > a[href="https://github.com/helmut-hoffer-von-ankershoffen/heinzel"]'
+                    + ' + span.tabular-nums');
+            });
+            if (footer.length > 1 || settings.length > 1) return null;
+            const nodes = [];
+            for (const field of [...footer, ...settings]) {
+                if (label === null || field.innerText.trim() !== label) return null;
+                const walker = document.createTreeWalker(field, NodeFilter.SHOW_TEXT);
+                const text = [];
+                while (walker.nextNode()) {
+                    if (walker.currentNode.data) text.push(walker.currentNode);
+                }
+                if (text.map(node => node.data).join('') !== label) return null;
+                nodes.push([text[0], text[0].data]);
+            }
+            try {
+                // React may put the literal "v" and version in different text nodes.
+                for (const [node, original] of nodes) node.data = marker[0] + original.slice(1);
+                return document.body.innerText;
+            } finally {
+                for (const [node, original] of nodes) node.data = original;
+            }
+        }""",
+        {"label": label, "marker": marker},
+    )
+    if not isinstance(marked, str) or marked.replace(marker, label or "") != body:
+        raise CaptureError("Visible Core version evidence did not match the captured transcript")
+    return [index for index, line in enumerate(canonical_text(marked).split("\n")) if line == marker]
+
+
 def safe_screenshot(
     page,
     path: Path,
@@ -679,6 +758,7 @@ def safe_screenshot(
     owning_interpreter_prefix: OwningPrefix | None = None,
     clip: dict | None = None,
     scan_path: Path | None = None,
+    version_probe: tuple[str, list[int]] | None = None,
 ) -> str:
     """Redact authentication presentation and reject unsafe text before writing any PNG."""
     if owning_interpreter_prefix:
@@ -686,6 +766,9 @@ def safe_screenshot(
         redact_owning_prefix(page, owning_interpreter_prefix)
     redact_auth_presentation(page, tokens, private_paths)
     body = page.locator("body").inner_text()
+    if version_probe is not None:
+        version, positions = version_probe
+        positions.extend(core_version_positions(page, body, version))
     inspected = page_text(page)
     scan_text(inspected)
     if scan_path is not None:
@@ -989,6 +1072,7 @@ def capture(
     prepared_python: Path | None = None,
     prepared_approval: str | None = None,
     source_files: list[str] | None = None,
+    version_positions: dict[str, list[int]] | None = None,
 ) -> dict:
     """Prepare the owning artifact, record every scene, and publish a complete gallery only after success."""
     root = root.resolve()
@@ -1237,6 +1321,10 @@ def capture(
                                     "width": width,
                                     "height": height,
                                 }
+                            version_probe = None
+                            if version_positions is not None and scene["surface"] == "ui":
+                                positions = version_positions.setdefault(scene["name"], [])
+                                version_probe = version, positions
                             body = safe_screenshot(
                                 page,
                                 work / f"{scene['name']}.png",
@@ -1245,6 +1333,7 @@ def capture(
                                 owning_interpreter_prefix=owning_identity,
                                 clip=clip,
                                 scan_path=work / f"{scene['name']}.scan.txt",
+                                version_probe=version_probe,
                             )
                             if scene["surface"] == "ui":
                                 (work / f"{scene['name']}.txt").write_text(canonical_text(body))
@@ -1326,6 +1415,28 @@ def capture(
     return publish_draft(root)
 
 
+def equal_transcripts(
+    committed: str, fresh: str, recorded_core: object, installed_core: object, version_positions: list[int]
+) -> bool:
+    """Compare all text, allowing only the exact Core version at a structurally verified position."""
+    before = CLOCK_READING.sub("hh:mm", committed).split("\n")
+    after = CLOCK_READING.sub("hh:mm", fresh).split("\n")
+    if len(before) != len(after):
+        return False
+    recorded = core_version_label(recorded_core)
+    installed = core_version_label(installed_core)
+    for position in version_positions:
+        if (
+            not 0 <= position < len(before)
+            or recorded is None
+            or installed is None
+            or (before[position], after[position]) != (recorded, installed)
+        ):
+            return False
+        before[position] = installed
+    return before == after
+
+
 def verify(
     root: Path,
     *,
@@ -1340,13 +1451,14 @@ def verify(
 
     The local digest covers only UI inputs, so a displayed string that comes from plugin Python or metadata, or a
     Core change, can leave a committed gallery behind; a fresh deterministic capture against compatible released Core
-    shows it. The rendered text of every scene (its transcript) must be identical, except clock readings (hh:mm),
-    which fixtures may anchor on the real time. Image bytes are compared and listed; they gate with `strict_images`,
+    shows it. The rendered text must match aside from clock readings and the verified installed version at the same
+    Core-owned positions. Image bytes are compared and listed; they gate with `strict_images`,
     since antialiasing differs between runs and fonts between operating systems.
     """
     root = root.resolve()
     check_capture(root, source_files=source_files)
     command = regenerate_command(root)
+    version_positions: dict[str, list[int]] = {}
     capture(
         root,
         core=core,
@@ -1355,6 +1467,7 @@ def verify(
         prepared_python=prepared_python,
         prepared_approval=prepared_approval,
         source_files=source_files,
+        version_positions=version_positions,
     )
     plan = read_plan(root)
     folder = safe_path(root, DRAFT)
@@ -1365,7 +1478,9 @@ def verify(
         name = scene["name"]
         fresh = safe_path(folder, f"{name}.txt").read_text()
         committed = safe_path(root, OUTPUT / f"{name}.txt").read_text()
-        if CLOCK_READING.sub("hh:mm", fresh) != CLOCK_READING.sub("hh:mm", committed):
+        if not equal_transcripts(
+            committed, fresh, manifest["core_version"], draft["core_version"], version_positions.get(name, [])
+        ):
             texts.append(f"{name}.txt")
         if safe_path(folder, f"{name}.png").read_bytes() != safe_path(root, OUTPUT / f"{name}.png").read_bytes():
             images.append(f"{name}.png")

@@ -70,6 +70,10 @@
         {
           "action": "wait",
           "text": "Singularity"
+        },
+        {
+          "action": "wait",
+          "text": "Doctor: 5 checks need attention"
         }
       ]
     },

@@ -11,6 +11,7 @@ from pathlib import Path
 from types import SimpleNamespace
 
 import pytest
+import yaml
 
 from heinzel_plugin_tools import capture, cli, privacy
 
@@ -37,6 +38,57 @@ def owner(tmp_path):
         '[project.entry-points."heinzel.modules"]\ntides="heinzel_harbor"\n'
     )
     return tmp_path
+
+
+@pytest.mark.parametrize(
+    ("committed", "fresh", "positions", "expected"),
+    [
+        ("v0.9.56\nTheme\nv0.9.56", "v0.9.57\nTheme\nv0.9.57", [0, 2], True),
+        ("v0.9.56\nTheme", "v0.9.57\nTheme", [0], True),
+        ("v0.9.56\nTheme\nv0.9.56", "v0.9.57\nTheme\nv0.9.57", [0], False),
+        ("v0.9.56\nTheme", "v0.9.57\nTheme", [], False),
+        ("v0.9.56\nTheme", "v0.9.58\nTheme", [0], False),
+        ("v0.9.55\nTheme", "v0.9.57\nTheme", [0], False),
+        ("v0.9.56\nTheme", "v0.9.56\nTheme", [0], False),
+        ("v0.9.57\nTheme", "v0.9.57\nTheme", [0], False),
+        ("v0.9.56\nTheme", "Theme\nv0.9.57", [1], False),
+        ("v0.9.56\nTheme", "v0.9.57\nTheme\nv0.9.57", [0, 2], False),
+        ("v0.9.56\nTheme\nv0.9.56", "v0.9.57\nTheme", [0], False),
+        ("v0.9.56\nTheme", "v0.9.57\nSound", [0], False),
+        ("Core v0.9.56", "Core v0.9.57", [0], False),
+        ("v0.9.56\nCore v0.9.56", "v0.9.57\nCore v0.9.57", [0], False),
+        ("12:00\nv0.9.56", "15:30\nv0.9.57", [1], True),
+    ],
+)
+def test_equal_transcripts_requires_structurally_proven_exact_core_version_pairs(committed, fresh, positions, expected):
+    assert capture.equal_transcripts(committed, fresh, "0.9.56", "0.9.57", positions) is expected
+
+
+@pytest.mark.parametrize(("recorded", "installed"), [(None, "0.9.57"), ("0.09.56", "0.9.57"), ("0.9.56", "0.9.57RC1")])
+def test_equal_transcripts_rejects_noncanonical_core_version_evidence(recorded, installed):
+    assert not capture.equal_transcripts(f"v{recorded}", f"v{installed}", recorded, installed, [0])
+
+
+def test_core_version_positions_accepts_only_standalone_lines_without_changing_captured_body():
+    body = "v0.9.57\nTheme\nCore v0.9.57\nv0.9.57"
+
+    def probe(_, arguments):
+        assert arguments["label"] == "v0.9.57"
+        marker = arguments["marker"]
+        return f"{marker}\nTheme\nCore {marker}\n{arguments['label']}"
+
+    page = SimpleNamespace(evaluate=probe)
+    assert capture.core_version_positions(page, body, "0.9.57") == [0]
+
+
+@pytest.mark.parametrize(
+    ("marked", "version"),
+    [(None, "0.9.57"), ("unexpected extra line", "0.9.57"), (None, "0.9.57RC1")],
+)
+def test_core_version_positions_refuses_invalid_live_evidence(marked, version):
+    page = SimpleNamespace(evaluate=lambda *_: marked)
+    with pytest.raises(privacy.CaptureError, match="Visible Core version evidence"):
+        capture.core_version_positions(page, "v0.9.57", version)
 
 
 def recorded(owner):
@@ -71,6 +123,80 @@ def recorded(owner):
         capture.preview_document("heinzel-harbor", plan["scenes"], "0.9.8")
     )
     return shots
+
+
+@pytest.mark.parametrize(
+    ("terms", "source", "error"),
+    [
+        ("Fictional Sentinel", "clean", None),
+        ("", "clean", "The private gallery terms are required for publication."),
+        ("Fictional screenshot test", "clean", "The required private gallery check failed."),
+        ("Fictional Sentinel", "dirty", ""),
+        ("Fictional Sentinel", "wrong-revision", ""),
+    ],
+)
+def test_protected_release_gallery_guard_scans_the_exact_committed_gallery(owner, terms, source, error):
+    recorded(owner)
+    # The fixture supplies the locked interpreter directly, avoiding dependency downloads in this unit check.
+    interpreter = owner / ".venv/bin/python"
+    interpreter.parent.mkdir(parents=True)
+    interpreter.write_text('#!/bin/sh\nexec "$SCANNER_PYTHON" "$@"\n')
+    interpreter.chmod(0o755)
+    (owner / ".gitignore").write_text(".venv/\n")
+    git = shutil.which("git")
+    assert git
+    subprocess.run([git, "add", "."], cwd=owner, check=True)  # noqa: S603
+    subprocess.run(  # noqa: S603
+        [
+            git,
+            "-c",
+            "user.name=Fixture",
+            "-c",
+            "user.email=test@example.invalid",
+            "-c",
+            "commit.gpgsign=false",
+            "commit",
+            "-qm",
+            "Record fictional gallery",
+        ],
+        cwd=owner,
+        check=True,
+    )
+    sha = subprocess.check_output([git, "rev-parse", "HEAD"], cwd=owner, text=True).strip()  # noqa: S603
+    root = Path(__file__).resolve().parents[1]
+    workflow = yaml.safe_load((root / ".github/workflows/release.yml").read_text())
+    scan = workflow["jobs"]["private-gallery"]["steps"][-1]
+    if source == "dirty":
+        (owner / "untracked").touch()
+    output = owner.with_suffix(".private-scan-output")
+    environment = dict(
+        os.environ,
+        CONFIDENTIAL_TERMS=terms,
+        CONFIDENTIAL_TERMS_FILE=str(owner.parent / "missing-terms"),
+        CONFIDENTIALITY_REQUIRED=scan["env"]["CONFIDENTIALITY_REQUIRED"],
+        GITHUB_ACTIONS="true",
+        GITHUB_OUTPUT=str(output),
+        GITHUB_SHA=sha if source != "wrong-revision" else "0" * 40,
+        PLUGIN="heinzel-harbor",
+        PLUGIN_SOURCE_ROOT=str(owner),
+        PYTHONPATH=str(root / scan["env"]["PYTHONPATH"]),
+        SCANNER_PYTHON=sys.executable,
+    )
+    result = subprocess.run(  # noqa: S603
+        ["/bin/bash", "-ec", scan["run"]],
+        cwd=owner,
+        env=environment,
+        capture_output=True,
+        text=True,
+    )
+    if error is not None:
+        assert result.returncode != 0
+        if error:
+            assert error in result.stderr
+        assert not output.exists()
+    else:
+        assert result.returncode == 0, result.stderr
+        assert output.read_text() == f"source={sha}\n"
 
 
 def draft_of(owner):

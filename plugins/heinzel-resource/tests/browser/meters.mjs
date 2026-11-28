@@ -12,6 +12,8 @@ try {
   // Not scoped to the footer: when the meter doesn't fit, "More status items" shows it in a popover outside it.
   const control = page.locator('[data-footer-content="resource:machine"] button').first();
   for (const width of [1280,360,390]) {
+    // Clear hover previews before relocating the footer under the pointer.
+    await page.mouse.move(0, 0);
     await page.setViewportSize({width,height:900});
     await page.evaluate(async () => {await document.fonts.ready; await new Promise(r => requestAnimationFrame(() => requestAnimationFrame(r)));});
     const more = page.getByRole("button",{name:"More status items",exact:true});
@@ -23,7 +25,11 @@ try {
       const overflow = document.querySelector('[data-footer-part="resource:machine"][data-footer-hidden="overflow"]');
       return visible(control) || (overflow && visible(document.querySelector('button[aria-label="More status items"]')));
     });
-    if (!await control.isVisible()) await more.click();
+    if (!await control.isVisible()) {
+      await more.click();
+      // Opening More relocates status triggers. Move away from any incidental preview.
+      await page.mouse.move(0, 0);
+    }
     await control.waitFor({state:"visible"});
     assert.match(await control.getAttribute("aria-label"), /CPU.*Memory.*Load/);
     assert.equal(await control.locator('span[aria-hidden] > span').count(),3);
@@ -34,7 +40,11 @@ try {
     const box = await detail.boundingBox();
     assert.ok(box && box.x >= 0 && box.x + box.width <= width + 1);
     await page.keyboard.press("Escape");
+    await detail.waitFor({state:"hidden"});
     const popup = page.getByRole("region",{name:"More status items",exact:true});
-    if (await popup.isVisible()) await page.keyboard.press("Escape");
+    if (await popup.isVisible()) {
+      await page.keyboard.press("Escape");
+      await popup.waitFor({state:"hidden"});
+    }
   }
 } finally {await browser.close();}

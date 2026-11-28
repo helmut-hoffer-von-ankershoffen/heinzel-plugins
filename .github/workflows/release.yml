@@ -30,7 +30,66 @@ on:
         type: string
 permissions: {}
 jobs:
+  private-gallery:
+    if: inputs.publish && inputs.resume_tag == '' && github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    outputs:
+      source: ${{ steps.scan.outputs.source }}
+    steps:
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.sha }}
+          persist-credentials: false
+      - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e # v10.3.2
+        with:
+          enable-cache: false
+      - name: Install locked scan tooling without the project
+        run: uv sync --frozen --no-build --no-install-project --group tooling
+      - name: Check committed owner gallery with private policy
+        id: scan
+        env:
+          PLUGIN: ${{ inputs.plugin }}
+          PYTHONPATH: src
+          CONFIDENTIAL_TERMS: ${{ secrets.CONFIDENTIAL_TERMS }}
+          CONFIDENTIALITY_REQUIRED: 'true'
+        run: |
+          test "$GITHUB_SHA" = "$(git rev-parse HEAD)"
+          test -z "$(git status --porcelain)"
+          .venv/bin/python - <<'PYTHON'
+          import os
+
+          from heinzel_plugin_tools.cli import check_screenshots, has_gallery, projects
+          from heinzel_plugin_tools.privacy import CaptureError, confidential_patterns
+
+          try:
+              confidential_patterns()
+          except CaptureError:
+              raise SystemExit("The private gallery terms are required for publication.") from None
+
+          try:
+              name = os.environ["PLUGIN"]
+              [project] = [item for item in projects() if name in (item.name, item.name.removeprefix("heinzel-"))]
+              if has_gallery(project):
+                  check_screenshots(project)
+          except ValueError:
+              raise SystemExit("The required private gallery check failed.") from None
+          PYTHON
+          echo "source=$GITHUB_SHA" >> "$GITHUB_OUTPUT"
   build:
+    needs: private-gallery
+    if: >-
+      ${{
+        !cancelled() &&
+        (!inputs.publish || github.ref == 'refs/heads/main') &&
+        (
+          (inputs.publish && inputs.resume_tag == '' &&
+            needs.private-gallery.result == 'success' && needs.private-gallery.outputs.source == github.sha) ||
+          ((!inputs.publish || inputs.resume_tag != '') && needs.private-gallery.result == 'skipped')
+        )
+      }}
     runs-on: ubuntu-latest
     timeout-minutes: 20
     env:
@@ -47,6 +106,7 @@ jobs:
     steps:
       - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          ref: ${{ github.sha }}
           persist-credentials: false
       - name: Verify the automatic release source
         if: inputs.expected_sha != '' || inputs.expected_tag != '' || inputs.expected_tag_revision != ''
@@ -100,6 +160,8 @@ jobs:
           PUBLISH: ${{ inputs.publish }}
           REGISTRY: ${{ inputs.registry }}
           PRIVATE: ${{ github.event.repository.private }}
+          # The dependency above enforces the private scan before any fresh publishing build.
+          CONFIDENTIALITY_REQUIRED: 'false'
         run: |
           test "$PUBLISH" != true || test "$REF" = refs/heads/main
           if [ "$REGISTRY" = pypi ] && [ "$PRIVATE" = true ]; then

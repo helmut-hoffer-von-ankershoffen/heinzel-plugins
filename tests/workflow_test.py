@@ -132,6 +132,44 @@ def test_confidential_terms_are_scoped_to_real_gallery_and_policy_steps():
     assert "sonar-ratings" in jobs["ok"]["needs"]
 
 
+def test_fresh_plugin_publication_requires_an_isolated_private_gallery_job_at_its_exact_sha():
+    workflow = yaml.safe_load((ROOT / ".github/workflows/release.yml").read_text())
+    jobs = workflow["jobs"]
+    keys = {"CONFIDENTIAL_TERMS", "CONFIDENTIAL_TERMS_FILE"}
+    assert not keys.intersection(workflow.get("env", {}))
+    scoped = []
+    for name, job in jobs.items():
+        assert not keys.intersection(job.get("env", {}))
+        for step in job.get("steps", []):
+            if keys.intersection(step.get("env", {})):
+                scoped.append((name, step))
+    [(name, scan)] = scoped
+    assert (name, scan["id"]) == ("private-gallery", "scan")
+    assert scan["env"]["CONFIDENTIAL_TERMS"] == "${{ secrets.CONFIDENTIAL_TERMS }}"
+    assert scan["env"]["CONFIDENTIALITY_REQUIRED"] == "true"
+    assert jobs[name]["if"] == "inputs.publish && inputs.resume_tag == '' && github.ref == 'refs/heads/main'"
+    assert jobs[name]["permissions"] == {"contents": "read"}
+    assert jobs[name]["outputs"] == {"source": "${{ steps.scan.outputs.source }}"}
+    assert jobs[name]["steps"][-2]["run"] == "uv sync --frozen --no-build --no-install-project --group tooling"
+    assert jobs[name]["steps"][-1] == scan
+    assert ".venv/bin/python - <<" in scan["run"]
+    for job in ("private-gallery", "build"):
+        checkout = jobs[job]["steps"][0]
+        assert checkout["uses"].startswith("actions/checkout@")
+        assert checkout["with"] == {"ref": "${{ github.sha }}", "persist-credentials": False}
+    assert jobs["build"]["needs"] == "private-gallery"
+    assert " ".join(jobs["build"]["if"].split()) == (
+        "${{ !cancelled() && (!inputs.publish || github.ref == 'refs/heads/main') && ( "
+        "(inputs.publish && inputs.resume_tag == '' && needs.private-gallery.result == 'success' && "
+        "needs.private-gallery.outputs.source == github.sha) || "
+        "((!inputs.publish || inputs.resume_tag != '') && needs.private-gallery.result == 'skipped') ) }}"
+    )
+    verify = next(step for step in jobs["build"]["steps"] if step.get("id") == "verify")
+    assert verify["env"]["CONFIDENTIALITY_REQUIRED"] == "false"
+    assert 'hz-plugin verify-release "$PLUGIN" --core "$CORE" --output release-dist' in verify["run"]
+    assert jobs["publish"]["needs"] == jobs["github-publish"]["needs"] == "build"
+
+
 @pytest.mark.parametrize("drift", ["none", "sha", "tag"])
 def test_automatic_release_guards_execute_against_checkout_and_build(drift):
     import os

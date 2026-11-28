@@ -1,19 +1,19 @@
 {
   "format": 2,
   "plugin": "heinzel-theme",
-  "core_version": "0.9.56",
-  "inputs_sha256": "a3b4587e4ba7b2b59c06853d7dffa0329af0149b554cc57591cc9f360ef88691",
+  "core_version": "0.9.57",
+  "inputs_sha256": "acd487f27366b95f61d28bf3b581d2ab2caa91ab0bed639b4a4b0ee58b7348ce",
   "images": {
-    "docs/assets/screenshots/theme-light.png": "b377a40e6533e2f14c529506acb746d5125b581ab60f849728d9774cb6f8cb30",
-    "docs/assets/screenshots/theme-dark.png": "b4c17d433ce34671b9745f644e3452ea5ac420bcbabbb4e7f46669d7e62b0cb5",
-    "docs/assets/screenshots/theme-soundscapes.png": "cdd3b515366890387c9e618cf688bf137e54c39010571c71e358830e6be74ec2",
+    "docs/assets/screenshots/theme-light.png": "e139707eae341c4b9d605aa60f8c070ceae3baa234a1782a9aa9956969c1acea",
+    "docs/assets/screenshots/theme-dark.png": "4f8bee4177d8e991f3417e45efe2f89b1c7fa81f850c2fe858b039eb9f3685f9",
+    "docs/assets/screenshots/theme-soundscapes.png": "d1007208e540dad6abee6c25cc2afd62f985a26759928f226b1ebbf8114587ea",
     "docs/assets/screenshots/theme-cli.png": "3af21d7491826f9804a98d10bd433dc37a978ec6fc4aa60a991e6dfa1bbc036f",
     "docs/assets/screenshots/soundscapes-cli.png": "ccf896df651d9361bacdaee5ef88f1050ad9e80135f4a264f82897b2663287b8"
   },
   "transcripts": {
-    "theme-light.txt": "e004f972321f77c7c28fdee5c50e89426d4c2b133cb95f73076bd287a946f629",
-    "theme-dark.txt": "e004f972321f77c7c28fdee5c50e89426d4c2b133cb95f73076bd287a946f629",
-    "theme-soundscapes.txt": "541d8be86a6af421c5724bdfe0144a51b17f3e4c3fe27f685282505516ef13b2",
+    "theme-light.txt": "ba8fd9f48223d8d38cc413d1fd71fd6b35dcec37338487b1e2bce7d9bf8c8fb3",
+    "theme-dark.txt": "ba8fd9f48223d8d38cc413d1fd71fd6b35dcec37338487b1e2bce7d9bf8c8fb3",
+    "theme-soundscapes.txt": "927afdbb58facf3d6bafa111c5512d4451e7e1f870e465d41b8196ec66a68b04",
     "theme-cli.txt": "36d653efa87eeec3a67c92ac4c27069a4697714578a9cd172bda926c27fdfa1f",
     "soundscapes-cli.txt": "cd38af525b281ab23c011973e24a2aa2b3e12431b6963c8dfe2226341e0c5a78"
   }
