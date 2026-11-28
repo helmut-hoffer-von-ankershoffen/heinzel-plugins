@@ -19,6 +19,20 @@
           "action": "wait",
           "role": "heading",
           "name": "Launch review"
+        },
+        {
+          "action": "wait",
+          "role": "link",
+          "name": "Launch review"
+        },
+        {
+          "action": "wait",
+          "text": "· EM"
+        },
+        {
+          "action": "wait",
+          "role": "button",
+          "name": "System health, warning"
         }
       ]
     },
@@ -39,6 +53,20 @@
           "action": "wait",
           "role": "heading",
           "name": "Launch review"
+        },
+        {
+          "action": "wait",
+          "role": "link",
+          "name": "Launch review"
+        },
+        {
+          "action": "wait",
+          "text": "· EM"
+        },
+        {
+          "action": "wait",
+          "role": "button",
+          "name": "System health, warning"
         }
       ]
     },
@@ -74,6 +102,11 @@
         {
           "action": "wait",
           "text": "Doctor: 5 checks need attention"
+        },
+        {
+          "action": "wait",
+          "role": "button",
+          "name": "System health, warning"
         }
       ]
     },

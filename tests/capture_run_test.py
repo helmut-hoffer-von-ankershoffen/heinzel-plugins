@@ -1119,9 +1119,12 @@ def test_verify_fails_naming_the_command_when_displayed_text_changed_outside_the
     record(harness)
     (harness.interpreter.parent / "hz").write_text('print("Ahoy, Mira!")\n')
     assert capture.check_capture(harness.owner)["fresh"], "the narrow local digest does not see this change"
-    with pytest.raises(privacy.StaleGallery, match=r"differs from the committed gallery \(cli.txt\)") as stale:
+    with pytest.raises(
+        privacy.RenderedGalleryMismatch, match=r"differs from the committed gallery \(cli.txt\)"
+    ) as stale:
         capture.verify(harness.owner, core=None, headed=False, **prepared(harness))
     assert stale.value.command == "make screenshots NAME=heinzel-harbor"
+    assert stale.value.comparison is privacy.RenderComparison.CLI_TRANSCRIPT
 
 
 def test_verify_lists_image_differences_and_gates_them_only_when_strict(harness):

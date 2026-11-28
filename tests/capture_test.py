@@ -1371,6 +1371,26 @@ def test_zero_secret_render_check_never_reads_policy_or_publishes_unscanned_data
     ("status", "stdout", "mutated", "stage"),
     [
         (42, '{"ok":false,"comparison_mismatch":true}', False, "comparison"),
+        (42, '{"ok":false,"comparison_mismatch":true,"comparison":"ui-health-footer"}', False, "comparison"),
+        (42, '{"ok":false,"comparison_mismatch":true,"comparison":"ui-health-footer"}', True, "source-integrity"),
+        (42, '{"ok":false,"comparison_mismatch":true,"comparison":"unscanned-provider-output"}', False, "protocol"),
+        (42, '{"ok":false,"comparison_mismatch":true,"comparison":["ui-health-footer"]}', False, "protocol"),
+        (42, '{"ok":false,"comparison_mismatch":true,"comparison":true}', False, "protocol"),
+        (42, '{"ok":false,"comparison_mismatch":true,"comparison":"ui-health-footer","rows":17}', False, "protocol"),
+        (
+            42,
+            '{"ok":false,"comparison_mismatch":true,"comparison":"ui-health-footer","path":"/unscanned-fixture/draft"}',
+            False,
+            "protocol",
+        ),
+        (
+            42,
+            '{"ok":false,"comparison_mismatch":true,"comparison":"ui-health-footer","comparison":"cli-transcript"}',
+            False,
+            "protocol",
+        ),
+        (1, '{"ok":false,"comparison_mismatch":false,"comparison":"ui-health-footer"}', False, "protocol"),
+        (0, '{"ok":true,"verified":true,"comparison":"ui-health-footer"}', False, "protocol"),
         (42, '{"ok":false,"comparison_mismatch":true}', True, "source-integrity"),
         (43, '{"ok":false,"comparison_mismatch":false}', False, "source-integrity"),
         (0, "unscanned-provider-output", True, "source-integrity"),
@@ -1418,13 +1438,24 @@ def test_render_check_failure_never_reads_host_private_policy_or_prints_unscanne
     report = json.loads(shown.out)
     assert report["scope"] == "render-only" and report["private_scan"] is False
     assert report["stage"] == stage and f"failed ({stage})" in shown.err
-    assert "unscanned-provider-output" not in shown.out + shown.err
+    public = shown.out + shown.err
+    assert ("[ui-health-footer]" in public) == (stage == "comparison" and '"comparison":"ui-health-footer"' in stdout)
+    assert "unscanned-provider-output" not in public
+    assert "/unscanned-fixture/draft" not in public
+    assert set(report) == {"ok", "error", "next", "scope", "render_verified", "private_scan", "stage"}
     assert (owner / capture.MANIFEST).read_bytes() == before and not (owner / capture.DRAFT).exists()
 
 
-@pytest.mark.parametrize("error_type", [privacy.StaleGallery, privacy.RenderedGalleryMismatch])
+@pytest.mark.parametrize(
+    ("error_type", "comparison"),
+    [
+        (privacy.StaleGallery, None),
+        (privacy.RenderedGalleryMismatch, None),
+        (privacy.RenderedGalleryMismatch, privacy.RenderComparison.UI_HEALTH_FOOTER),
+    ],
+)
 def test_zero_secret_worker_distinguishes_post_render_mismatch_from_freshness(
-    owner, tmp_path, monkeypatch, capsys, error_type
+    owner, tmp_path, monkeypatch, capsys, error_type, comparison
 ):
     inventory = tmp_path / "source-files.json"
     inventory.write_text('["pyproject.toml"]')
@@ -1439,14 +1470,61 @@ def test_zero_secret_worker_distinguishes_post_render_mismatch_from_freshness(
     )
 
     def fail(*args, **kwargs):
+        if comparison is not None:
+            raise error_type("unscanned-provider-output", "unscanned-command", comparison=comparison)
         raise error_type("unscanned-provider-output", "unscanned-command")
 
     monkeypatch.setattr(capture, "verify", fail)
     mismatch = error_type is privacy.RenderedGalleryMismatch
     assert capture.main() == (privacy.RENDER_MISMATCH_EXIT if mismatch else 1)
     shown = capsys.readouterr()
-    assert json.loads(shown.out) == {"ok": False, "comparison_mismatch": mismatch}
+    report = {"ok": False, "comparison_mismatch": mismatch}
+    if comparison is not None:
+        report["comparison"] = comparison.value
+    assert json.loads(shown.out) == report
     assert not shown.err
+
+
+@pytest.mark.parametrize(
+    ("surface", "before", "after", "positions", "category"),
+    [
+        ("ui", "System health, warning\n", "System health, error\n", [], "ui-health-footer"),
+        ("ui", "v0.9.56\nSystem health, warning\n", "v0.9.57\nSystem health, off\n", [0], "ui-health-footer"),
+        ("ui", "System health, warning\nA\n", "System health, error\nB\n", [], "ui-transcript"),
+        ("ui", "System health, warning\n", "System health, fictional-provider-output\n", [], "ui-transcript"),
+        ("ui", "System health, warning\nHeading\n", "Heading\nSystem health, OK\n", [], "ui-transcript"),
+        (
+            "ui",
+            "System health, warning\nSystem health, off\n",
+            "System health, error\nSystem health, off\n",
+            [],
+            "ui-transcript",
+        ),
+        ("ui", "Heading\n· EM\n", "Heading\n", [], "ui-transcript"),
+        ("cli", "System health, warning\n", "System health, error\n", [], "cli-transcript"),
+    ],
+)
+def test_render_comparison_classifies_only_known_public_signals(surface, before, after, positions, category):
+    assert not capture.equal_transcripts(before, after, "0.9.56", "0.9.57", positions)
+    assert capture.transcript_comparison(surface, before, after, "0.9.56", "0.9.57", positions).value == category
+
+
+@pytest.mark.parametrize(
+    ("categories", "strict_image_mismatch", "expected"),
+    [
+        ([], True, None),
+        (["cli-transcript"], False, "cli-transcript"),
+        (["ui-health-footer", "ui-health-footer"], False, "ui-health-footer"),
+        (["ui-transcript", "ui-health-footer"], False, None),
+        (["ui-health-footer", "cli-transcript"], False, None),
+        (["ui-transcript"], True, None),
+    ],
+)
+def test_render_comparison_exposes_a_single_category_for_the_whole_failure(categories, strict_image_mismatch, expected):
+    actual = capture.render_comparison(
+        {privacy.RenderComparison(category) for category in categories}, strict_image_mismatch=strict_image_mismatch
+    )
+    assert (actual.value if actual is not None else None) == expected
 
 
 def test_capture_retains_full_private_dom_evidence_without_changing_visible_transcript(tmp_path, monkeypatch):

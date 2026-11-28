@@ -48,6 +48,7 @@ from heinzel_plugin_tools.privacy import (
     DRAFT,
     RENDER_MISMATCH_EXIT,
     CaptureError,
+    RenderComparison,
     RenderedGalleryMismatch,
     StaleGallery,
     atomic_text,
@@ -1437,6 +1438,33 @@ def equal_transcripts(
     return before == after
 
 
+HEALTH_FOOTER_LINES = frozenset(f"System health, {state}" for state in ("off", "warning", "error", "OK"))
+
+
+def transcript_comparison(
+    surface: str, committed: str, fresh: str, recorded_core: object, installed_core: object, positions: list[int]
+) -> RenderComparison:
+    """Classify an already rejected transcript; none of these categories permits a mismatch."""
+    if surface == "cli":
+        return RenderComparison.CLI_TRANSCRIPT
+    before, after = committed.split("\n"), fresh.split("\n")
+    old_health = [index for index, line in enumerate(before) if line in HEALTH_FOOTER_LINES]
+    new_health = [index for index, line in enumerate(after) if line in HEALTH_FOOTER_LINES]
+    if len(old_health) == 1 and old_health == new_health:
+        index = old_health[0]
+        if before[index] != after[index]:
+            before[index] = after[index]
+            if equal_transcripts("\n".join(before), fresh, recorded_core, installed_core, positions):
+                return RenderComparison.UI_HEALTH_FOOTER
+    return RenderComparison.UI_TRANSCRIPT
+
+
+def render_comparison(categories: set[RenderComparison], *, strict_image_mismatch: bool) -> RenderComparison | None:
+    if len(categories) == 1 and not strict_image_mismatch:
+        return next(iter(categories))
+    return None
+
+
 def verify(
     root: Path,
     *,
@@ -1474,14 +1502,15 @@ def verify(
     manifest = json.loads(safe_path(root, MANIFEST).read_text())
     draft = json.loads(safe_path(folder, DRAFT_MANIFEST).read_text())
     texts, images = [], []
+    comparisons: set[RenderComparison] = set()
     for scene in plan["scenes"]:
         name = scene["name"]
         fresh = safe_path(folder, f"{name}.txt").read_text()
         committed = safe_path(root, OUTPUT / f"{name}.txt").read_text()
-        if not equal_transcripts(
-            committed, fresh, manifest["core_version"], draft["core_version"], version_positions.get(name, [])
-        ):
+        versions = manifest["core_version"], draft["core_version"], version_positions.get(name, [])
+        if not equal_transcripts(committed, fresh, *versions):
             texts.append(f"{name}.txt")
+            comparisons.add(transcript_comparison(scene["surface"], committed, fresh, *versions))
         if safe_path(folder, f"{name}.png").read_bytes() != safe_path(root, OUTPUT / f"{name}.png").read_bytes():
             images.append(f"{name}.png")
     report = {
@@ -1501,6 +1530,7 @@ def verify(
             f"{manifest['plugin']}: a fresh capture against Core {draft['core_version']} differs from the committed "
             f"gallery ({differ}). Run {command} and commit the regenerated gallery",
             command,
+            comparison=render_comparison(comparisons, strict_image_mismatch=bool(strict_images and images)),
         )
     return report
 
@@ -1609,14 +1639,20 @@ def main() -> int:
         return 0
     except Exception as error:  # The subprocess boundary must preserve the JSON result even if a browser adapter fails.
         if args.render_check_worker:
-            mismatch = isinstance(error, RenderedGalleryMismatch)
-            print(json.dumps({"ok": False, "comparison_mismatch": mismatch}))
-            return RENDER_MISMATCH_EXIT if mismatch else 1
+            if isinstance(error, RenderedGalleryMismatch):
+                mismatch: dict[str, bool | str] = {"ok": False, "comparison_mismatch": True}
+                if isinstance(error.comparison, RenderComparison):
+                    mismatch["comparison"] = error.comparison.value
+                print(json.dumps(mismatch))
+                return RENDER_MISMATCH_EXIT
+            print(json.dumps({"ok": False, "comparison_mismatch": False}))
+            return 1
         if args.render_check:
             from heinzel_plugin_tools.capture_linux import RenderCheckFailure, RenderStage
 
             stage = error.stage if isinstance(error, RenderCheckFailure) else RenderStage.UNKNOWN
-            message = str(RenderCheckFailure(stage))
+            comparison = error.comparison if isinstance(error, RenderCheckFailure) else None
+            message = str(RenderCheckFailure(stage, comparison))
         else:
             message = safe_failure_message(error)
         if args.json:

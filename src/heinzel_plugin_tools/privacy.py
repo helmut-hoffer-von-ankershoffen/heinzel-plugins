@@ -13,6 +13,7 @@ import re
 import socket
 import stat
 import sys
+from enum import StrEnum
 from pathlib import Path
 
 DRAFT = Path(".preview/screenshots/draft")
@@ -53,8 +54,18 @@ class StaleGallery(CaptureError):
         self.command = command
 
 
+class RenderComparison(StrEnum):
+    UI_HEALTH_FOOTER = "ui-health-footer"
+    UI_TRANSCRIPT = "ui-transcript"
+    CLI_TRANSCRIPT = "cli-transcript"
+
+
 class RenderedGalleryMismatch(StaleGallery):
     """A completed render differs from the committed gallery."""
+
+    def __init__(self, message: str, command: str, *, comparison: RenderComparison | None = None) -> None:
+        super().__init__(message, command)
+        self.comparison = comparison
 
 
 RENDER_MISMATCH_EXIT = 42
