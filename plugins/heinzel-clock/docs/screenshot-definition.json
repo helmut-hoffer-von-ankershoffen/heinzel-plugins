@@ -17,7 +17,7 @@
         },
         {
           "action": "wait",
-          "text": "2 of 3 zones working"
+          "text": "2 of 3 working"
         },
         {
           "action": "click",
@@ -44,7 +44,7 @@
       "steps": [
         {
           "action": "wait",
-          "text": "2 of 3 zones working"
+          "text": "2 of 3 working"
         },
         {
           "action": "click",
@@ -67,7 +67,7 @@
       "steps": [
         {
           "action": "wait",
-          "text": "2 of 3 zones working"
+          "text": "2 of 3 working"
         },
         {
           "action": "click",
@@ -100,7 +100,7 @@
       "steps": [
         {
           "action": "wait",
-          "text": "2 of 3 zones working"
+          "text": "2 of 3 working"
         },
         {
           "action": "click",
@@ -120,6 +120,37 @@
           "action": "hover",
           "role": "region",
           "name": "World clock"
+        }
+      ],
+      "viewport": {
+        "width": 390,
+        "height": 844
+      }
+    },
+    {
+      "name": "phone-today",
+      "surface": "ui",
+      "route": "/",
+      "caption": "The Timezones card on a phone: who works now, the common hours and each fictional team zone",
+      "steps": [
+        {
+          "action": "wait",
+          "text": "2 of 3 working"
+        },
+        {
+          "action": "wait",
+          "text": "Overlap 17–18 today"
+        },
+        {
+          "action": "click",
+          "role": "button",
+          "name_regex": "^Dismiss Doctor",
+          "optional": true
+        },
+        {
+          "action": "hover",
+          "role": "region",
+          "name": "Today"
         }
       ],
       "viewport": {

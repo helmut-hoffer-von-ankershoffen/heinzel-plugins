@@ -283,6 +283,8 @@ WEEK = 8
 MAX_ROWS = 7
 """Zone rows under the headline; more zones show six and a count of the rest."""
 PANEL = Navigate(path="/?panel=clock:world-clock")
+LINE_BUDGET = 30
+"""Characters per line that fit the narrowest Today card, beside an open side panel, without clipping."""
 
 
 def _wall(zone: ZoneInfo, day: date, hour: int, *, fold: int) -> datetime:
@@ -343,6 +345,17 @@ def _when(moment: datetime, at: datetime, you: ZoneInfo) -> str:
     return at.astimezone(you).strftime("%a %H:%M")
 
 
+def _hour(moment: datetime) -> str:
+    """`17` on the hour, `17:30` otherwise."""
+    return f"{moment:%H}" if moment.minute == 0 else f"{moment:%H:%M}"
+
+
+def _fit(name: str, rest: str) -> str:
+    """`name` and `rest` within the line budget, shortening only the name: `Ust-Nera Tue 03:00` stays whole."""
+    room = LINE_BUDGET - len(rest)
+    return (name if len(name) <= room else f"{name[: room - 1]}\u2026") + rest
+
+
 def _row(zone: ZoneTime, moment: datetime, you: ZoneInfo, *, primary: bool) -> ListEntry:
     info = ZoneInfo(zone.zone)
     local = moment.astimezone(info)
@@ -358,49 +371,50 @@ def _row(zone: ZoneTime, moment: datetime, you: ZoneInfo, *, primary: bool) -> L
     clock = local.strftime("%H:%M" if same_day else "%a %H:%M")
     relation = "you" if primary else _offset(info, you, moment)
     return ListEntry(
-        text=f"{city(zone.zone)} {clock} · {relation} · {state}",
-        detail=f"Works {zone.hours[0]:02d}\u2013{zone.hours[1]:02d} · {plan}",
+        text=_fit(city(zone.zone), f" {clock} · {relation}"),
+        detail=f"{state} · {plan}",
         tone="ok" if active else "neutral",
         effect=PANEL,
     )
 
 
-def _headline(zones: list[ZoneTime], moment: datetime, you: ZoneInfo) -> ListEntry:
-    rows = [_row(zone, moment, you, primary=False) for zone in zones]
-    count = sum(row.tone == "ok" for row in rows)
-    noun = "zone" if len(zones) == 1 else "zones"
-    who = "Everyone" if len(zones) > 1 else None
+def _overlap(zones: list[ZoneTime], moment: datetime, you: ZoneInfo) -> str | None:
+    """The next common working hours in your time, or None when there are none within a week."""
     window = common_hours(zones, moment)
-    today = moment.astimezone(you).date()
-    if window and window[0] <= moment:
-        until = window[1].astimezone(you).strftime("%H:%M")
-        detail = f"{who} works until {until}" if who else f"Works until {until}"
-    elif window:
-        start, end = (edge.astimezone(you) for edge in window)
-        hours = f"{start:%H:%M}\u2013{end:%H:%M}"
-        if start.date() == today:
-            detail = f"{who} overlaps {hours} today" if who else f"Works {hours} today"
-        else:
-            detail = f"No common hours today; next {start:%a} {hours}"
-    else:
+    if window is None:
+        return None
+    start, end = (edge.astimezone(you) for edge in window)
+    if start <= moment:
+        return f"Overlap until {end:%H:%M}"
+    hours = f"{_hour(start)}\u2013{_hour(end)}"
+    return (
+        f"Overlap {hours} today"
+        if start.date() == moment.astimezone(you).date()
+        else f"Next overlap {start:%a} {hours}"
+    )
+
+
+def _headline(zones: list[ZoneTime], moment: datetime, you: ZoneInfo) -> ListEntry:
+    count = sum(any(a <= moment < b for a, b in working_windows(zone, moment)) for zone in zones)
+    text = f"{count} of {len(zones)} working"
+    detail = _overlap(zones, moment, you)
+    if len(zones) == 1:
+        detail = detail and detail.replace("Next overlap", "Works").replace("Overlap", "Works")
+    elif detail is None:
+        text += " · no overlap"
+    if detail is None:
         starts = [(start, zone) for zone in zones for start, _ in working_windows(zone, moment) if start > moment]
         start, first = min(starts, key=lambda pair: pair[0])
-        detail = f"No common working hours; {city(first.zone)} starts {_when(moment, start, you)}"
-    return ListEntry(
-        text=f"{count} of {len(zones)} {noun} working", detail=detail, tone="ok" if count else "neutral", effect=PANEL
-    )
+        detail = _fit(city(first.zone), f" starts {_when(moment, start, you)}")
+    return ListEntry(text=text, detail=detail, tone="ok" if count else "neutral", effect=PANEL)
 
 
 def timezones(times: list[ZoneTime], moment: datetime) -> ListWidget:
     """Who works now, when everyone overlaps, and one row per zone sorted by its UTC offset."""
     zones = list({zone.zone: zone for zone in reversed(times)}.values())[::-1]
     if not zones:
-        return ListWidget(
-            title="Timezones",
-            items=[
-                ListEntry(text="No time zones yet", detail="Add your team's zones in the World clock", effect=PANEL)
-            ],
-        )
+        empty = ListEntry(text="No time zones yet", detail="Add them in the World clock", effect=PANEL)
+        return ListWidget(title="Timezones", items=[empty])
     you = ZoneInfo(zones[0].zone)
     order = sorted(
         range(len(zones)),
@@ -409,7 +423,7 @@ def timezones(times: list[ZoneTime], moment: datetime) -> ListWidget:
     rows = [_row(zones[index], moment, you, primary=index == 0) for index in order]
     if len(rows) > MAX_ROWS:
         rest = len(rows) - MAX_ROWS + 1
-        rows = [*rows[: MAX_ROWS - 1], ListEntry(text=f"+{rest} more zones in the World clock", effect=PANEL)]
+        rows = [*rows[: MAX_ROWS - 1], ListEntry(text=f"+{rest} more in the World clock", effect=PANEL)]
     return ListWidget(title="Timezones", items=[_headline(zones, moment, you), *rows])
 
 

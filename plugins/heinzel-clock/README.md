@@ -48,6 +48,10 @@ Inspect all configured time zones from the primary footer clock — fictional de
 
 The globe and three fictional team clocks on a phone — fixed demonstration time
 
+<img src="docs/assets/screenshots/phone-today.png" alt="The Timezones card on a phone: who works now, the common hours and each fictional team zone" width="960">
+
+The Timezones card on a phone: who works now, the common hours and each fictional team zone
+
 <details>
 <summary>Command line</summary>
 

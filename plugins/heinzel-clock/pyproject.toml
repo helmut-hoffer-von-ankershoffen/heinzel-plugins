@@ -166,6 +166,11 @@ surface = "ui"
 caption = "The globe and three fictional team clocks on a phone — fixed demonstration time"
 
 [[tool.heinzel.catalog.screenshots]]
+path = "docs/assets/screenshots/phone-today.png"
+surface = "ui"
+caption = "The Timezones card on a phone: who works now, the common hours and each fictional team zone"
+
+[[tool.heinzel.catalog.screenshots]]
 path = "docs/assets/screenshots/terminal-current.png"
 surface = "cli"
 caption = "CLI: fictional demo team at 15:30 UTC: Berlin and New York are within working hours; Los Angeles starts in 30 minutes."

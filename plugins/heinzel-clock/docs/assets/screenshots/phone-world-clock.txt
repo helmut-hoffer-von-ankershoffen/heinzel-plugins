@@ -4,14 +4,14 @@ Today
 2
 Today
 Timezones
-2 of 3 zones working
-Everyone overlaps 17:00–18:00 today
-Los Angeles 08:30 · −8 h · Off
-Works 09–18 · starts in 30 m
-New York 11:30 · −5 h · Working
-Works 09–18 · ends in 6 h 30 m
-Berlin 16:30 · you · Working
-Works 09–18 · ends in 1 h 30 m
+2 of 3 working
+Overlap 17–18 today
+Los Angeles 08:30 · −8 h
+Off · starts in 30 m
+New York 11:30 · −5 h
+Working · ends in 6 h 30 m
+Berlin 16:30 · you
+Working · ends in 1 h 30 m
 
 Nothing needs you right now. Ask anything below.
 

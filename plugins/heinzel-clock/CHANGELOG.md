@@ -2,7 +2,7 @@
 
 ## 0.9.13
 
-Rename the Today widget "Zones at work now" to "Timezones" and make it useful: a headline with how many zones work now and when everyone overlaps next (or which zone starts next), then one row per zone sorted by UTC offset with its local time, the weekday when it differs from yours, its offset from you and a Working, Off or Night state in words. Weekends, daylight saving time and the date line are taken into account.
+Rename the Today widget "Zones at work now" to "Timezones" and make it useful: a headline with how many zones work now and when everyone overlaps next (or which zone starts next), then one row per zone sorted by UTC offset with its local time, the weekday when it differs from yours, its offset from you and a Working, Off or Night state in words. Weekends, daylight saving time and the date line are taken into account. Every line fits the narrowest Today card.
 
 ## 0.9.12
 
