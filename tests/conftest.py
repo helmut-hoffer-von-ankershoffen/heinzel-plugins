@@ -15,13 +15,17 @@ GIT_IDENTITY = {
 }
 
 
+HOOK_PREFIXES = ("GIT_", "PRE_COMMIT", "PREK_")
+
+
 def strip_git_environment() -> None:
-    """Drop GIT_* (GIT_DIR, GIT_INDEX_FILE, GIT_WORK_TREE, ...) that a git hook exported for its repository.
+    """Drop what a git hook exported: GIT_* (GIT_DIR, GIT_INDEX_FILE, ...) and prek's PRE_COMMIT*/PREK_* context.
 
     A test that runs git in a fixture repository would otherwise write to the committing or pushing worktree's index
-    (it once staged 908 rendered template files there).
+    (it once staged 908 rendered template files there), and the fixture's own hooks would believe they run inside
+    the outer push (PRE_COMMIT_FROM_REF) and refuse.
     """
-    for key in [key for key in os.environ if key.startswith("GIT_")]:
+    for key in [key for key in os.environ if key.startswith(HOOK_PREFIXES)]:
         del os.environ[key]
 
 
@@ -39,7 +43,7 @@ def _no_hook_git_environment() -> None:
 
 def git_environment() -> dict[str, str]:
     """The environment for a fixture git: no inherited GIT_*, no global or system configuration, a fixed identity."""
-    environment = {key: value for key, value in os.environ.items() if not key.startswith("GIT_")}
+    environment = {key: value for key, value in os.environ.items() if not key.startswith(HOOK_PREFIXES)}
     environment.update(GIT_CONFIG_GLOBAL=os.devnull, GIT_CONFIG_NOSYSTEM="1", **GIT_IDENTITY)
     return environment
 

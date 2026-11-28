@@ -68,6 +68,18 @@ def test_fixture_git_commits_in_its_repository_while_a_hook_points_git_elsewhere
     assert fixture_git(fixture, "show", "HEAD:AGENTS.md").stdout == "three\nline\nfile\n"
 
 
+def test_the_session_strip_also_drops_the_outer_hooks_prek_context(monkeypatch):
+    conftest = _load("tests_conftest_copy", ROOT / "tests" / "conftest.py")
+    for key in ("GIT_DIR", "PRE_COMMIT", "PRE_COMMIT_FROM_REF", "PRE_COMMIT_TO_REF", "PREK_HOOK_STAGE"):
+        monkeypatch.setenv(key, "from-the-outer-push")
+    monkeypatch.setenv("CONFIDENTIAL_TERMS", "kept")
+
+    conftest.strip_git_environment()
+
+    assert [key for key in os.environ if key.startswith(conftest.HOOK_PREFIXES)] == []
+    assert os.environ["CONFIDENTIAL_TERMS"] == "kept"
+
+
 def test_a_suite_started_by_a_hook_cannot_reach_the_hooks_repository(tmp_path, fixture_git):
     """End to end: pytest launched with a hook's GIT_*, a test running plain git (no helper) in its fixture."""
     decoy, head, index = _decoy(tmp_path, fixture_git)
@@ -87,11 +99,11 @@ def test_a_suite_started_by_a_hook_cannot_reach_the_hooks_repository(tmp_path, f
                 (tmp_path / "AGENTS.md").write_text("three\\nline\\nfile\\n")
                 run("add", "AGENTS.md")
                 run("commit", "-q", "-m", "probe")
-                assert [key for key in os.environ if key.startswith("GIT_")] == []
+                assert [key for key in os.environ if key.startswith(("GIT_", "PRE_COMMIT", "PREK_"))] == []
             """
         )
     )
-    environment = {**os.environ, **_point_at(decoy)}
+    environment = {**os.environ, **_point_at(decoy), "PRE_COMMIT_FROM_REF": "a" * 40, "PREK_HOOK_STAGE": "pre-push"}
     environment.pop("PYTEST_ADDOPTS", None)
     result = subprocess.run(  # noqa: S603 - this interpreter, fixed arguments
         [sys.executable, "-m", "pytest", "-q", "-p", "no:cacheprovider", "--rootdir", str(suite), str(suite)],
