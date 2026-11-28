@@ -5,9 +5,9 @@ alerts, `hz weather forecast` the days. Each is a CLI command, an MCP tool and a
 `watch` job, which records a notice when rain starts within the hour, the temperature swings or an alert is issued.
 `hz weather info` names the provider and the attribution its data asks for (Open-Meteo: CC BY 4.0).
 
-The web app gets the weather as data (ADR 0056): a footer and sidebar status item with the temperature and sky, and a
-Today widget with the next days. `hz weather conditions` also says what the Heinzelmännchen wears for it (an umbrella,
-sunglasses, a scarf): the `accessories` of its avatar.
+The web app gets the weather as data (ADR 0056): a footer and sidebar status item with the temperature and sky, and one
+Today card with the dressed Heinzelmännchen, the temperature now and the next three days. `hz weather conditions` also
+says what the Heinzelmännchen wears for it (an umbrella, sunglasses, a scarf): the `accessories` of its avatar.
 """
 
 from importlib.metadata import PackageNotFoundError, version
@@ -23,11 +23,10 @@ from heinzel import (
     ConfigEditor,
     Credentials,
     DetailLine,
+    GraphicRow,
     GraphicWidget,
     HeinzelError,
     Kernel,
-    ListEntry,
-    ListWidget,
     Navigate,
     NavSettings,
     Notifications,
@@ -95,6 +94,8 @@ module.view(
 )
 MAX_TEXT = 80
 """The longest text of a status item or a widget title (ADR 0056)."""
+FORECAST_DAYS = 3
+"""How many of the next days the Today card shows, from tomorrow."""
 CHART_HOURS = 24
 """How many hours the Today chart spans."""
 RAINY = 0.5
@@ -189,18 +190,40 @@ def _weather_status(value: UiWeather) -> StatusItem:
     )
 
 
+def _degrees(value: float) -> int:
+    return round(value) + 0  # never "-0"
+
+
+def _day_row(day: Day, degree: str) -> GraphicRow:
+    sky = day.description.capitalize()
+    rain = f"{round(day.rain_chance * 100)}% rain"
+    return GraphicRow(
+        label=f"{day.day:%a}",
+        value=f"{_degrees(day.low)} to {_degrees(day.high)}{degree}",
+        icon=ui_icon(day.condition),
+        icon_label=sky[:MAX_TEXT],
+        detail=rain,
+        hint=f"{sky}, {rain}"[:MAX_TEXT],
+    )
+
+
 def _weather_card(value: UiWeather) -> GraphicWidget | None:
+    """The one Today card: the dressed figure, the temperature now, what it feels like and the next three days."""
     conditions = value.conditions
     now = conditions.now
     if now is None:
         return None
+    degree = now.units.degree
     stale = " · last observation" if value.stale else ""
+    worn = f" · wearing {', '.join(conditions.accessories)}" if conditions.accessories else ""
     return GraphicWidget(
         label=f"Weather in {now.location}"[:MAX_TEXT],
-        value=f"{round(now.temperature) + 0}{now.units.degree}",
+        value=f"{_degrees(now.temperature)}{degree}",
         caption=f"{now.description[:24]}{stale}",
+        detail=f"Feels like {_degrees(now.feels_like)}{degree}{worn}",
         avatar=Avatar(accessories=conditions.accessories),
-        size="medium",
+        rows=[_day_row(day, degree) for day in conditions.days[1 : 1 + FORECAST_DAYS]],
+        size="wide",
     )
 
 
@@ -237,30 +260,6 @@ def _temperature_chart(value: UiWeather) -> ChartWidget | None:
     )
 
 
-def _forecast_card(value: UiWeather) -> ListWidget | None:
-    conditions = value.conditions
-    now = conditions.now
-    if now is None:
-        return None
-    degree = now.units.degree
-    feels = f"feels like {round(now.feels_like) + 0}{degree}"
-    worn = f", wearing {', '.join(conditions.accessories)}" if conditions.accessories else ""
-    items = [
-        ListEntry(
-            text=f"{now.icon} {round(now.temperature) + 0}{degree} {now.description}",
-            detail=f"{feels}{worn}",
-        ),
-        *(
-            ListEntry(
-                text=f"{day.day:%a} {day.icon} {round(day.low) + 0} to {round(day.high) + 0}{degree}",
-                detail=f"{day.description}, {round(day.rain_chance * 100)}% rain",
-            )
-            for day in conditions.days[1:4]
-        ),
-    ]
-    return ListWidget(title=f"Weather in {now.location}"[:MAX_TEXT], items=items)
-
-
 @module.operation(audience="everyday")
 def ui(service: WeatherService) -> UiWeather:
     """Return the shared cached observation for the app's status and Today card."""
@@ -289,9 +288,9 @@ def current_weather(value: UiWeather) -> StatusItem:
     return _weather_status(value)
 
 
-@module.widget(source="ui", name="weather-today", refresh="15m")
+@module.widget(source="ui", name="weather-today", refresh="15m", replaces=("forecast-today",))
 def today_weather(value: UiWeather) -> GraphicWidget | None:
-    """Show the current temperature with the weather accessory on Today."""
+    """Show the weather on Today in one card: the dressed figure, the temperature now and the next three days."""
     return _weather_card(value)
 
 
@@ -299,12 +298,6 @@ def today_weather(value: UiWeather) -> GraphicWidget | None:
 def temperature_today(value: UiWeather) -> ChartWidget | None:
     """Show the temperature over the next hours with the chance of rain, and a marker for now."""
     return _temperature_chart(value)
-
-
-@module.widget(source="ui", name="forecast-today", refresh="15m")
-def forecast_today(value: UiWeather) -> ListWidget | None:
-    """Show the current weather and near forecast on Today."""
-    return _forecast_card(value)
 
 
 @module.operation(render=_now_line, audience="everyday")
