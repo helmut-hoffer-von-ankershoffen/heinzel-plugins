@@ -19,6 +19,7 @@ v0.9.56
 Updates, off
 0
 System health, warning
+3h
 Daemon not installed, off
 Audio
 Settings

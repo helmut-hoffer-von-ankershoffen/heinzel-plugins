@@ -196,16 +196,16 @@ Development and release commands: [repository guide](../../README.md).
 
 Heinzel&#x27;s Connectors settings show Google selected for documents, calendar and mail in the fictional demonstration profile.
 
+<img src="docs/assets/screenshots/google-calendar-week.png" alt="The Core calendar shows a fictional week from Work and Family with both calendars selected in the open Calendars picker; no Google account is contacted." width="960">
+
+The Core calendar shows a fictional week from Work and Family with both calendars selected in the open Calendars picker; no Google account is contacted.
+
 <img src="docs/assets/screenshots/google-source-review.png" alt="Inspect a fictional selected-source identity as the Google source review panel shows it." width="960">
 
 Inspect a fictional selected-source identity as the Google source review panel shows it.
 
 <details>
 <summary>Command line</summary>
-
-<img src="docs/assets/screenshots/google-calendar-week.png" alt="The real Google Calendar adapter lists fictional meetings for a fixed week through a documentation-only command." width="960">
-
-The real Google Calendar adapter lists fictional meetings for a fixed week through a documentation-only command.
 
 <img src="docs/assets/screenshots/launch-files-json.png" alt="Inspect a fixed three-day launch-file query as structured data — actual Google operation, fictional Workspace replies and demonstration clock." width="960">
 

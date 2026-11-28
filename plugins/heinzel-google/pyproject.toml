@@ -1,12 +1,12 @@
 [project]
 name = "heinzel-google"
-version = "0.9.10"
+version = "0.9.11"
 description = "Google Docs, Sheets, Slides, Drive, Calendar and Gmail: the documents, calendar and mail capabilities."
 readme = "README.md"
 license = "MIT"
 license-files = ["LICENSE"]
 requires-python = ">=3.15"
-dependencies = ["heinzel>=0.9.30,<0.10"]
+dependencies = ["heinzel>=0.9.56,<0.10"]
 
 [project.urls]
 Source = "https://github.com/helmut-hoffer-von-ankershoffen/heinzel-plugins/tree/main/plugins/heinzel-google"
@@ -149,8 +149,8 @@ caption = "Heinzel's Connectors settings show Google selected for documents, cal
 
 [[tool.heinzel.catalog.screenshots]]
 path = "docs/assets/screenshots/google-calendar-week.png"
-surface = "cli"
-caption = "The real Google Calendar adapter lists fictional meetings for a fixed week through a documentation-only command."
+surface = "ui"
+caption = "The Core calendar shows a fictional week from Work and Family with both calendars selected in the open Calendars picker; no Google account is contacted."
 
 [[tool.heinzel.catalog.screenshots]]
 path = "docs/assets/screenshots/google-source-review.png"

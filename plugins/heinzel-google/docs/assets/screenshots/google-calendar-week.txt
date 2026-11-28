@@ -1,7 +1,52 @@
-┏━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┳━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┓
-┃ UTC start ┃ Meeting                                   ┃ People                      ┃
-┡━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━━╇━━━━━━━━━━━━━━━━━━━━━━━━━━━━━┩
-│ Thu 13:00 │ Launch readiness review                   │ Mira Example, Jonas Example │
-│ Thu 14:00 │ Mira Example / Priya Example — one-on-one │ Priya Example               │
-│ Fri 14:00 │ Rollout checkpoint                        │                             │
-└───────────┴───────────────────────────────────────────┴─────────────────────────────┘
+Skip to content
+Heinzelmännchen
+Heinzelmännchen
+Contracts
+Team graph
+Organisation
+Team roster
+M
+Mira
+· EM
+Today
+Today
+Doctor: 5 checks need attention
+
+ai.access ai access, system.doctor installation, system.prerequisite system: gh…
+
+Open
+v0.9.56
+Updates, off
+0
+System health, warning
+3h
+Daemon not installed, off
+Calendar
+
+Turn on Calendar reminders in Notification settings first.
+
+Calendars (2)
+Calendars
+Work (primary)
+Family
+
+Now: nothing. Next: Launch readiness review in 3 h.
+
+TODAY · THU 22 OCT
+12:00
+15:00
+15:30
+Launch readiness review
+in 3 h
+TOMORROW · FRI 23 OCT
+11:00
+11:30
+Mira Example / Priya Example — one-on-one
+16:00
+16:20
+Rollout checkpoint
+19:00
+20:00
+Family dinner
+Notification settings
+Audio

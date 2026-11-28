@@ -2,16 +2,19 @@
 
 import re
 from datetime import UTC, datetime, timedelta
+from typing import get_type_hints
 from zoneinfo import ZoneInfo
 
 import pytest
-from heinzel import EventChange, EventDraft, HeinzelError, Window
+from heinzel import CalendarSource, EventChange, EventDraft, HeinzelError, Window
+from pydantic import ValidationError
 
 from heinzel_google import GoogleCalendar, Process
 
 pytestmark = pytest.mark.unit
 
 EVENTS = ("calendar", "events", "list")
+CALENDARS = ("calendar", "calendarList", "list")
 SINCE = datetime(2026, 10, 19, tzinfo=UTC)
 UNTIL = datetime(2026, 10, 26, tzinfo=UTC)
 WEEK = Window(since=SINCE, until=UNTIL)
@@ -46,6 +49,87 @@ def test_the_request_expands_recurrences_and_includes_cancelled(session, fake_gw
         "showDeleted": True,
         "maxResults": 250,
     }
+
+
+def test_shared_calendar_uses_the_same_event_reader(session, fake_gws):
+    family = "family@example.com"
+    fake_gws.json(EVENTS, {"items": [event("e1", "2026-10-20T10:00:00Z", "2026-10-20T11:00:00Z")]})
+    assert [item.id for item in GoogleCalendar(session).events_for(family, WEEK)] == ["e1"]
+    (read,) = fake_gws.api_runs
+    assert read.params["calendarId"] == family
+
+
+@pytest.mark.parametrize("calendar", ["", ".", "..", "../primary", "name%2Fcalendar"])
+def test_an_invalid_calendar_id_never_reaches_google(session, fake_gws, calendar):
+    with pytest.raises(HeinzelError, match="invalid identifier"):
+        GoogleCalendar(session).events_for(calendar, WEEK)
+    assert not fake_gws.api_runs
+
+
+def test_calendar_list_reads_shared_sources_and_skips_free_busy_only(session, fake_gws):
+    fake_gws.json(
+        CALENDARS,
+        {
+            "items": [
+                {"id": "family@example.com", "summary": "Shared", "summaryOverride": "Family", "accessRole": "reader"},
+                {"id": "other@example.com", "summary": "Other", "accessRole": "freeBusyReader"},
+            ],
+            "nextPageToken": "more",
+        },
+    )
+    fake_gws.json(
+        CALENDARS,
+        {"items": [{"id": "self@example.com", "summary": "Personal", "primary": True, "accessRole": "owner"}]},
+        page="more",
+    )
+    calendars = GoogleCalendar(session).calendars()
+    assert all(isinstance(item, CalendarSource) for item in calendars)
+    assert [(item.id, item.title, item.primary) for item in calendars] == [
+        ("self@example.com", "Personal", True),
+        ("family@example.com", "Family", False),
+    ]
+    first, more = fake_gws.api_runs
+    assert first.params["minAccessRole"] == "reader"
+    assert more.params["pageToken"] == "more"
+
+
+def test_calendar_list_bounds_display_titles_and_keeps_usable_ids(session, fake_gws):
+    long_id = "c" * 1024
+    long_name = "F" * 257
+    fake_gws.json(
+        CALENDARS,
+        {
+            "items": [
+                {"id": "personal", "summary": "Personal", "primary": True, "accessRole": "owner"},
+                {"id": "family", "summaryOverride": long_name, "accessRole": "reader"},
+                {"id": long_id, "accessRole": "reader"},
+                {"id": ".", "summary": "Dot", "accessRole": "reader"},
+                {"id": "..", "summary": "Parent", "accessRole": "reader"},
+            ]
+        },
+    )
+    fake_gws.json(EVENTS, {"items": []})
+    adapter = GoogleCalendar(session)
+    assert {calendar.id: calendar.title for calendar in adapter.calendars()} == {
+        "personal": "Personal",
+        "family": long_name[:256],
+        long_id: long_id[:256],
+    }
+    assert adapter.events_for(long_id, WEEK) == []
+    assert fake_gws.api_runs[-1].params["calendarId"] == long_id
+
+
+def test_calendar_source_uses_the_public_core_contract():
+    assert get_type_hints(GoogleCalendar.calendars)["return"] == list[CalendarSource]
+    source = CalendarSource(id="family@example.com", title="Family")
+    assert source.model_dump() == {"id": "family@example.com", "title": "Family", "primary": False}
+    for fields in (
+        {"id": "", "title": "Family"},
+        {"id": "c" * 1025, "title": "Family"},
+        {"id": "calendar", "title": "t" * 257},
+    ):
+        with pytest.raises(ValidationError):
+            CalendarSource(**fields)
 
 
 def test_events_with_people_and_a_zoom_meeting(events):
