@@ -2,11 +2,11 @@
   "format": 2,
   "plugin": "heinzel-google",
   "core_version": "0.9.56",
-  "inputs_sha256": "a8434f8fcdcdbd2fcc4f2c38ac1dc4a419417e9e7e7d4d36d4085db40ae4d2a2",
+  "inputs_sha256": "e36cb0bf552bff04cd1dc102a76fe36f547dc6d12271a29bf1221e7363e6f0e1",
   "images": {
     "docs/assets/screenshots/google-connector.png": "f3ddfb93035f965a3ecec385ca029a52f9eaedfe86e4c5e8fde2bfb7f856db69",
-    "docs/assets/screenshots/google-calendar-week.png": "8cf45e4405c6b78614b02576beabbf8362062b69e34cf0a5beb76d4c3805af5c",
-    "docs/assets/screenshots/google-source-review.png": "b1d8bd29842cb82b89bf73d66bac02cb9d6108385a11b49abe8fa3e8be103582",
+    "docs/assets/screenshots/google-calendar-week.png": "4597ccc0aa80e2f0dd8de8cb0312e5d90ed1bd21be1d7064267066dedb027d85",
+    "docs/assets/screenshots/google-source-review.png": "9bcebe03ee80af2609c9b3a9c43343eb22b487e19dcbd8b1c15e6f27a1616a26",
     "docs/assets/screenshots/launch-files-json.png": "cf4dfd7993cec3d369cae09c39b475c7eaea4e03f55c4bf7f43757682853c11b",
     "docs/assets/screenshots/launch-files-week.png": "676c9a7ae8ce4fee16454b3873377d2d3f4eb17d423639bd7f8ef5624d33caf4",
     "docs/assets/screenshots/launch-plan.png": "2933ffc09b64230177b816c3d11a711c78921f100c2baee42fe84ccfb0d03745",
@@ -14,9 +14,9 @@
     "docs/assets/screenshots/mail-content.png": "213a4112d8ef0227320c76132092b2ebca04e0afc3f569c5e3887318b5cc411d"
   },
   "transcripts": {
-    "google-connector.txt": "cbc689ddaac9cc25bdb44c540bb68e652449f03031188cae21e6a2b9d4cb714c",
-    "google-calendar-week.txt": "e250699589991f5049a57eaf68fc2b88f1f97e6699de64482230518d448ba9a3",
-    "google-source-review.txt": "61c0e571c88509101f0c80f0c98f4795a93294cc873a97237b0c60169e980d76",
+    "google-connector.txt": "30f5e980d1ced5483735a7d1aeadb39db82a41196832336fca3e4fa696b43c74",
+    "google-calendar-week.txt": "8bfc051437c513f26fffc26e18435a8a1606ca6d5da85e651ed6bcb8297ff71f",
+    "google-source-review.txt": "a8f2dcd75842ea729b2e88487756d50beab17eaf7feb02089f46d0c438ad9f1d",
     "launch-files-json.txt": "6b6fbbd15ae8ecf731b7889a66cce9a7baa9f5286af5718d7c4a0581ccfd0f7a",
     "launch-files-week.txt": "90c3bfdaf563c935ae80be3b4fcb708419b7aaaf47a58a4a1dc426319cf80749",
     "launch-plan.txt": "a7ded47e8432d800d520488f35d85f613b09609b4041a074ae8a13aaa7c37d91",

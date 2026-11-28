@@ -6,6 +6,7 @@ import heinzel
 import pytest
 from heinzel import Config, Kernel
 from heinzel.heads.cli import build
+from heinzel.kernel import CAPABILITIES
 from typer.testing import CliRunner
 
 from heinzel_google import Process
@@ -32,7 +33,7 @@ def test_signed_in_and_bound_it_is_connected_and_lists_its_tools(google_kernel, 
     assert connector["login"]["signed_in"] is True
     assert connector["connect"] == ["hz system connector connect google", "hz setup google"]  # its own sign-in first
     searching = {("documents", "search")} if hasattr(heinzel, "DocumentHit") else set()  # Core 0.9.43 and later
-    assert {(t["capability"], t["method"]) for t in connector["tools"]} - searching == {
+    expected = {
         ("documents", "read"),
         ("calendar", "events"),
         ("calendar", "free_busy"),
@@ -48,6 +49,9 @@ def test_signed_in_and_bound_it_is_connected_and_lists_its_tools(google_kernel, 
         ("mail", "send_draft"),
         ("mail", "relabel"),
     }
+    if "calendars" in CAPABILITIES["calendar"].methods:
+        expected.update({("calendar", "calendars"), ("calendar", "events_for")})
+    assert {(t["capability"], t["method"]) for t in connector["tools"]} - searching == expected
     assert fake_gws.api_runs == []
 
 
