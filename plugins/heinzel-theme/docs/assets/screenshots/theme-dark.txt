@@ -32,7 +32,7 @@ the packet the agent gets; nothing is spent
 hz heinzel wake me:launch-review
 Run in terminal
 draft it now, at most 0.5 USD; the draft is saved under /demo-profile/data_dir/workflow/drafts/me-launch-review
-v0.9.57
+v0.9.58
 Updates, off
 0
 System health, warning

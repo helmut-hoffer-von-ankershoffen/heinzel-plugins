@@ -15,7 +15,7 @@ Doctor: 5 checks need attention
 ai.access ai access, system.doctor installation, system.prerequisite system: gh…
 
 Open
-v0.9.57
+v0.9.58
 Updates, off
 0
 System health, warning
@@ -56,7 +56,7 @@ Web server
 Appearance
 
 First-party
-v0.9.57
+v0.9.58
 
 Mode
 
@@ -72,6 +72,14 @@ Your message
 Heinzelmännchen
 theme
 In use
+Today
+Search
+Today
+Weekly digest
+Due Friday · 3 updates
+Confirm
+Your message
+Paper
 Sound
 
 Pick a soundscape and it plays. It mutes in meetings and, where supported, gets softer while you type.
@@ -111,3 +119,9 @@ Three Heinzels above the player jump, sway and nod with the music.
 Expert mode
 
 Off: the navigation, search and `hz --help` list the everyday screens and commands; every other one still works.
+
+Appearance
+Theme
+Show team name in sidebar
+
+Use your team name in the sidebar when one is set. Otherwise use the selected theme's branding.
