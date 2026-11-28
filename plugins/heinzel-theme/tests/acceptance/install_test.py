@@ -54,9 +54,11 @@ def test_installed_catalog_is_complete_and_silent_by_default(installed):
     hz, _ = installed
     themes = hz("system", "theme", "list")
     assert themes["selected"] == "heinzelmaennchen"
-    assert [(item["name"], item["plugin"]) for item in themes["themes"]] == [
+    # The plugin contributes exactly its own theme; any other entry is a Core built-in (Core 0.9.58 adds "paper").
+    assert [(item["name"], item["plugin"]) for item in themes["themes"] if item["plugin"] is not None] == [
         ("heinzelmaennchen", "heinzel-theme"),
     ]
+    assert {item["name"] for item in themes["themes"] if item["plugin"] is None} <= {"default", "paper"}
     sounds = hz("system", "sound", "list")
     # Core owns the initial selection. Core 0.9.55 defaults to off, and playback requires Play.
     assert sounds["selected"] in {"off", "singularity"}
@@ -70,7 +72,9 @@ def test_installed_catalog_is_complete_and_silent_by_default(installed):
 def test_theme_pairing_disable_and_removal_use_only_generic_operations(installed):
     hz, _ = installed
     assert hz("system", "theme", "use", "default")["selected"] == "default"
-    assert {item["name"] for item in hz("system", "theme", "list")["themes"]} == {"default", "heinzelmaennchen"}
+    listed = hz("system", "theme", "list")["themes"]
+    assert {item["name"] for item in listed if item["plugin"] is not None} == {"heinzelmaennchen"}
+    assert "default" in {item["name"] for item in listed if item["plugin"] is None}
     assert hz("system", "theme", "use", "heinzelmaennchen")["selected"] == "heinzelmaennchen"
     hz("system", "config", "set", "system.sound.follow_theme", "true")
     assert hz("system", "sound", "list")["effective"] == "focus"
