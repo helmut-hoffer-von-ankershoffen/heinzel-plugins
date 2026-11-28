@@ -11,6 +11,51 @@ pytestmark = pytest.mark.unit
 SELECT = runpy.run_path(str(Path(__file__).parents[1] / "scripts/next_app.py"))["select"]
 
 
+@pytest.mark.parametrize(
+    "case", ["held", "changed-plugins", "partial", "changed-core", "changed-wheel", "app-exists", "changed-pins"]
+)
+def test_recovery_selects_only_the_exact_held_sdk(case, monkeypatch):
+    scope = SELECT.__globals__
+    repository, core = scope["PLUGINS_REPOSITORY"], scope["CORE_REPOSITORY"]
+    plugins_sha, core_sha, digest = "a" * 40, "b" * 40, "c" * 64
+    pins = '{"bound":true}'
+    environment = {
+        "RECOVERY_MARKER": f"dep-123-{hashlib.sha256(pins.encode()).hexdigest()}",
+        "EXPECTED_PLUGINS_SHA": plugins_sha,
+        "EXPECTED_CORE_VERSION": "1.2.3",
+        "EXPECTED_CORE_SHA": core_sha,
+        "EXPECTED_CORE_WHEEL_SHA256": digest,
+        "DEPENDENCY_PINS": pins + " " if case == "changed-pins" else pins,
+        "GITHUB_REF": "refs/heads/main",
+        "GITHUB_EVENT_NAME": "workflow_dispatch",
+        "GITHUB_RUN_ATTEMPT": "1",
+        "GITHUB_SHA": "d" * 40 if case == "changed-plugins" else plugins_sha,
+    }
+    if case == "partial":
+        del environment["EXPECTED_CORE_WHEEL_SHA256"]
+    filename = "heinzel-1.2.3-py3-none-any.whl"
+    release = {
+        "draft": False,
+        "prerelease": True,
+        "assets": [{"name": filename, "digest": "sha256:" + ("d" * 64 if case == "changed-wheel" else digest)}],
+    }
+    monkeypatch.setitem(
+        scope, "find_release", lambda repo, _: release if repo == core or case == "app-exists" else None
+    )
+    monkeypatch.setitem(scope, "tag_revision", lambda *_: "d" * 40 if case == "changed-core" else core_sha)
+    monkeypatch.setitem(scope, "api", lambda *_args, **_kw: None)
+    monkeypatch.setitem(scope, "package", lambda *_: pytest.fail("held recovery must not wait for PyPI"))
+    recover = scope["recovery_selection"]
+    if case != "held":
+        with pytest.raises(ValueError, match="Recovery|already exists"):
+            recover(repository, "", "", environment)
+        return
+    assert recover(repository, "", "", environment) == {
+        "version": "1.2.3",
+        "core_wheel": f"https://github.com/{core}/releases/download/v1.2.3/{filename}",
+    }
+
+
 @pytest.fixture
 def releases(monkeypatch):
     metadata = {

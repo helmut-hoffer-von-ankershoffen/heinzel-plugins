@@ -1,4 +1,8 @@
 name: Standard app composition
+run-name: >-
+  ${{ inputs.recovery_marker &&
+      format('Compose recovery {0} {1} {2} {3}', inputs.recovery_marker, inputs.expected_core_version,
+        inputs.expected_core_sha, inputs.expected_core_wheel_sha256) || 'Standard app composition' }}
 on:
   schedule:
     - cron: '7,22,37,52 * * * *'
@@ -11,6 +15,24 @@ on:
       version:
         description: Optional SDK version paired with the wheel URL
         required: false
+        type: string
+      recovery_marker:
+        description: Recovery marker from the failed composition receipt
+        type: string
+      expected_plugins_sha:
+        description: Exact protected Plugins commit from the receipt
+        type: string
+      expected_core_version:
+        description: Exact Core version from the receipt
+        type: string
+      expected_core_sha:
+        description: Exact Core release-tag commit from the receipt
+        type: string
+      expected_core_wheel_sha256:
+        description: Exact Core wheel digest from the receipt
+        type: string
+      dependency_pins:
+        description: Canonical JSON with the verified dependency tag revisions and asset hashes
         type: string
 permissions: {}
 concurrency:
@@ -38,6 +60,12 @@ jobs:
           GH_REPO: ${{ github.repository }}
           CORE_URL: ${{ inputs.core_wheel }}
           VERSION: ${{ inputs.version }}
+          RECOVERY_MARKER: ${{ inputs.recovery_marker }}
+          EXPECTED_PLUGINS_SHA: ${{ inputs.expected_plugins_sha }}
+          EXPECTED_CORE_VERSION: ${{ inputs.expected_core_version }}
+          EXPECTED_CORE_SHA: ${{ inputs.expected_core_sha }}
+          EXPECTED_CORE_WHEEL_SHA256: ${{ inputs.expected_core_wheel_sha256 }}
+          DEPENDENCY_PINS: ${{ inputs.dependency_pins }}
         run: uv run --frozen --no-build --group tooling python scripts/next_app.py
   compose:
     needs: select
@@ -51,15 +79,37 @@ jobs:
         with:
           persist-credentials: false
       - uses: astral-sh/setup-uv@07a047e608db84b3d8c06cd9a7c7dcc9c355c18e # v10.3.2
+      - name: Check enrolled plugin publications
+        id: dependencies
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          CORE_URL: ${{ needs.select.outputs.core_wheel }}
+          VERSION: ${{ needs.select.outputs.version }}
+          EXPECTED_CORE_SHA: ${{ inputs.expected_core_sha }}
+          EXPECTED_CORE_WHEEL_SHA256: ${{ inputs.expected_core_wheel_sha256 }}
+          DEPENDENCY_PINS: ${{ inputs.dependency_pins }}
+        run: |
+          test "$GITHUB_REF" = refs/heads/main
+          test "$(git rev-parse HEAD)" = "$GITHUB_SHA"
+          uv run --frozen --no-build --group tooling python scripts/compose.py --core-url "$CORE_URL" --version "$VERSION" --dependency-check
+      - name: Upload enrolled plugin dependency evidence
+        uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2
+        if: failure() && steps.dependencies.outputs.dependency_missing == 'true'
+        with:
+          name: standard-app-dependency
+          path: ${{ runner.temp }}/standard-app-dependency.json
+          if-no-files-found: error
       - name: Build and verify the locally enrolled standard profile
         env:
           GH_TOKEN: ${{ github.token }}
           GH_REPO: ${{ github.repository }}
           CORE_URL: ${{ needs.select.outputs.core_wheel }}
           VERSION: ${{ needs.select.outputs.version }}
-          REF: ${{ github.ref }}
+          EXPECTED_CORE_SHA: ${{ inputs.expected_core_sha }}
+          EXPECTED_CORE_WHEEL_SHA256: ${{ inputs.expected_core_wheel_sha256 }}
+          DEPENDENCY_PINS: ${{ inputs.dependency_pins }}
         run: |
-          test "$REF" = refs/heads/main
           BROWSER_PROFILE=standard uv run --frozen --no-build --group tooling python scripts/browser_dependencies.py
           uv run --frozen --no-build --group tooling python scripts/compose.py --core-url "$CORE_URL" --version "$VERSION"
       - uses: actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9 # v7.0.2

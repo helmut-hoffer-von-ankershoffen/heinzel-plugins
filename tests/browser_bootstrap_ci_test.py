@@ -142,12 +142,25 @@ def test_new_ci_script_declares_python_metadata():
 
 
 def test_published_composition_prepares_exact_profile_before_acceptance():
-    step = next(
-        step for step in workflow("compose")["jobs"]["compose"]["steps"] if "scripts/compose.py" in step.get("run", "")
-    )
+    steps = workflow("compose")["jobs"]["compose"]["steps"]
+    check, upload, step = steps[2:5]
+    assert check["id"] == "dependencies"
+    assert check["run"].index('test "$GITHUB_REF" = refs/heads/main') < check["run"].index("--dependency-check")
+    assert 'test "$(git rev-parse HEAD)" = "$GITHUB_SHA"' in check["run"]
+    assert upload["if"] == "failure() && steps.dependencies.outputs.dependency_missing == 'true'"
+    assert upload["with"]["name"] == "standard-app-dependency"
+    assert step["name"] == "Build and verify the locally enrolled standard profile"
     hook = f"BROWSER_PROFILE=standard {COMMAND}"
-    assert step["run"].index('test "$REF" = refs/heads/main') < step["run"].index(hook)
     assert step["run"].index(hook) < step["run"].index("python scripts/compose.py")
+
+
+def test_compose_run_title_binds_exact_recovery_core_inputs():
+    title = " ".join(workflow("compose")["run-name"].split())
+    assert title == (
+        "${{ inputs.recovery_marker && "
+        "format('Compose recovery {0} {1} {2} {3}', inputs.recovery_marker, inputs.expected_core_version, "
+        "inputs.expected_core_sha, inputs.expected_core_wheel_sha256) || 'Standard app composition' }}"
+    )
 
 
 def test_composition_profile_selects_only_its_owning_projects(tmp_path, monkeypatch):
