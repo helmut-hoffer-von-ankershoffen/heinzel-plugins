@@ -203,7 +203,7 @@ def _day_row(day: Day, degree: str) -> GraphicRow:
         icon=ui_icon(day.condition),
         icon_label=sky[:MAX_TEXT],
         detail=rain,
-        hint=f"{sky}, {rain}"[:MAX_TEXT],
+        hint=sky[:MAX_TEXT],  # the sky in words as the tooltip; the rain chance is on the row already
     )
 
 

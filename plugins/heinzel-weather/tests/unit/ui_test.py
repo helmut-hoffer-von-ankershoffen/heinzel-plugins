@@ -75,7 +75,7 @@ def test_one_today_card_holds_the_figure_the_temperature_what_it_wears_and_the_n
         assert row.detail == f"{round(day.rain_chance * 100)}% rain"
         assert row.icon is not None
         assert row.icon_label == day.description.capitalize()  # the icon in words, for a screen reader
-        assert row.hint == f"{day.description.capitalize()}, {round(day.rain_chance * 100)}% rain"
+        assert row.hint == day.description.capitalize()
 
 
 def test_the_card_says_nothing_worn_when_nothing_is_and_never_shows_minus_zero(service):

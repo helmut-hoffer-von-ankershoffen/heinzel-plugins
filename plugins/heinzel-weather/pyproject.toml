@@ -157,7 +157,7 @@ highlights = [
 [[tool.heinzel.catalog.screenshots]]
 path = "docs/assets/screenshots/today-weather.png"
 surface = "ui"
-caption = "Current weather and the coming days on Today — fictional Berlin forecast"
+caption = "One weather card on Today: the dressed Heinzel, the temperature now and the next three days — fictional Berlin forecast"
 
 [[tool.heinzel.catalog.screenshots]]
 path = "docs/assets/screenshots/weather-detail.png"
@@ -172,7 +172,7 @@ caption = "Explore current conditions, the hourly outlook and a warning — fict
 [[tool.heinzel.catalog.screenshots]]
 path = "docs/assets/screenshots/phone-weather.png"
 surface = "ui"
-caption = "Weather and near forecast in the phone-sized Today view — fictional local forecast"
+caption = "The one weather card in the phone-sized Today view — fictional local forecast"
 
 [[tool.heinzel.catalog.screenshots]]
 path = "docs/assets/screenshots/cli-weather.png"

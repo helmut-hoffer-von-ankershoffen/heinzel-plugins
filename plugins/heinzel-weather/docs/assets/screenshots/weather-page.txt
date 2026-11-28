@@ -1,6 +1,5 @@
 Skip to content
 Heinzelmännchen
-Heinzelmännchen
 Contracts
 Team graph
 Organisation
@@ -172,11 +171,11 @@ Saturday
 
 Updated 12:00
 
-v0.9.56
+v0.9.59+g0934164d0
 Updates, off
 0
 System health, warning
 ?
 22°C Berlin, DE, off
-Daemon not installed, off
+Background service not installed, off
 Audio

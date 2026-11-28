@@ -1,5 +1,9 @@
 # Changelog
 
+## 0.6.0
+
+Today shows one weather card instead of two: the Heinzel dressed for the weather, the temperature now, the sky, what it feels like and what it wears, and the next three days (low to high, rain chance, an icon with the sky in words, which is also its tooltip). On a phone the days wrap under the figure. If you had hidden or shown the old forecast card, the one card keeps that choice. The footer and sidebar temperature stay as they were. Needs Heinzel Core 0.9.59.
+
 ## 0.5.9
 
 Package the Weather forecast view once when building a wheel from a source snapshot.

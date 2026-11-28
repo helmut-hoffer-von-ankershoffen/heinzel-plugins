@@ -8,11 +8,15 @@
       "surface": "ui",
       "route": "/",
       "appearance": "light",
-      "caption": "Current weather and the coming days on Today — fictional Berlin forecast",
+      "caption": "One weather card on Today: the dressed Heinzel, the temperature now and the next three days — fictional Berlin forecast",
       "steps": [
         {
           "action": "wait",
           "text": "Weather in Berlin, DE"
+        },
+        {
+          "action": "wait",
+          "text": "Feels like 21°C · wearing umbrella"
         },
         {
           "action": "click",
@@ -85,11 +89,15 @@
       "surface": "ui",
       "route": "/",
       "appearance": "dark",
-      "caption": "Weather and near forecast in the phone-sized Today view — fictional local forecast",
+      "caption": "The one weather card in the phone-sized Today view — fictional local forecast",
       "steps": [
         {
           "action": "wait",
           "text": "Weather in Berlin, DE"
+        },
+        {
+          "action": "wait",
+          "text": "Feels like 21°C · wearing umbrella"
         },
         {
           "action": "click",
