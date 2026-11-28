@@ -1,21 +1,21 @@
 {
   "format": 2,
   "plugin": "heinzel-weather",
-  "core_version": "0.9.56",
-  "inputs_sha256": "8abde57cb19d7703acefefb8fca98e43fdad3fb250a9dc9f9efbabeb65191b77",
+  "core_version": "0.9.59+g0934164d0",
+  "inputs_sha256": "1bf88b1a49f60ed612081b39a72cd8f3923b8e28bb3069dbf8292b9079914237",
   "images": {
-    "docs/assets/screenshots/today-weather.png": "8515a48b68ac44089545b94806090b12c7a29c41316c45b5d072f33d278350c4",
+    "docs/assets/screenshots/today-weather.png": "71f647e147006f6f1da0afb3f70d9ddd399b9a005b2e72cdf49a5435ca74306a",
     "docs/assets/screenshots/weather-detail.png": "ab3826e3b8455191073655df664280bf128326cd92f75b240e5cecd9c1b420ad",
-    "docs/assets/screenshots/weather-page.png": "e2b8e9b14920a1d7d7bad661967effbd7bf250344ecab96015b38d5aeae733cb",
-    "docs/assets/screenshots/phone-weather.png": "793c57f42bdcdea9f9abaec04f8c3821825fe3d2b7c7334a9e02102f7adb3e52",
+    "docs/assets/screenshots/weather-page.png": "5f24dc0e058ee856e7f3c151fd4a510ce7cd1fe4cf15a9f1fb137f52e346eb55",
+    "docs/assets/screenshots/phone-weather.png": "c070c65d2a8b11e2b601dfb92e265d938b424a95bf61d0d5af073545e1a82bb9",
     "docs/assets/screenshots/cli-weather.png": "71b3f9d23c8b638b2d5f1dd167624092d6c80ef6151303da19c7676a38b3b15c",
     "docs/assets/screenshots/cli-forecast.png": "a7bbaca71180265eafddbfb8c79c7e4afa148f6d41f9bd48d2e175530e75a18a"
   },
   "transcripts": {
-    "today-weather.txt": "0f124405c64400cd25354d23197a8cb9355420abb80fbb56ae91f11eef81947e",
-    "weather-detail.txt": "c021cbc74ff82f2198257c46a9a4dc61f380fa35af8f784318b2500338770bac",
-    "weather-page.txt": "e943ebb0c6d028d5ecc23bc7c07267cb3c380e4b1d6d13fbdd98f56ee0024240",
-    "phone-weather.txt": "30af1197769fc3a2529ce22b8a1eb0e493a79c86d813c950b422a7f8876c907a",
+    "today-weather.txt": "421ccfdbebb150ce6965b49effe195e78545ea6de8cfacebb14385ff03331ce0",
+    "weather-detail.txt": "46eadacaca83311d524035fa78b3b61ae5f2de994f4eb66c61f56df0f0401474",
+    "weather-page.txt": "4c82afd410e9c3b63f83aff4a9e04c53789cbc6b2fc2c930c3a173530cd4c5b4",
+    "phone-weather.txt": "3d68ce8b07c03ac9f7cdaa9b1ac50f248bb9c547a12e80f5f1be1dae9b54df24",
     "cli-weather.txt": "6a2fba007fcf1e2fc362a66bd59844d8aad7228ce5ef8352cab3c08edd3e6ee3",
     "cli-forecast.txt": "2fc2ea8b6b92c9139b6d004e94a367066f8ed7e19ed9b41fd8fab01b13c3b647"
   }

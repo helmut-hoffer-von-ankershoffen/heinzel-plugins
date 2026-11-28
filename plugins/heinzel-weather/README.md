@@ -33,8 +33,9 @@ Contributed as data (ADR 0056), nothing to install on the app's side:
   and mph by locale. The button beside the place name opens Settings > Weather; without a place it asks for one.
 - A status item in the footer and the sidebar: the temperature and sky, with the place, feels-like, what the
   Heinzelmännchen wears; "Change place" opens Settings > Weather; nothing is typed into a terminal.
-- Today: a graphic with the temperature beside the Heinzelmännchen dressed for the weather (an umbrella in or near rain,
-  sunglasses in clear daylight, a scarf in the cold), and a list of the next days.
+- Today: one card with the Heinzelmännchen dressed for the weather (an umbrella in or near rain, sunglasses in clear
+  daylight, a scarf in the cold), the temperature now, the sky, what it feels like and what it wears, and the next three
+  days (low to high, rain chance; the sky in words for screen readers and as the tooltip).
 - Notices (the daemon's `weather.watch` job) when rain starts within the hour, the temperature swings or, with
   OpenWeather, an alert is issued.
 
@@ -95,9 +96,9 @@ Development and release commands: [repository guide](../../README.md).
 <!-- screenshots:start -->
 ## Screenshots
 
-<img src="docs/assets/screenshots/today-weather.png" alt="Current weather and the coming days on Today — fictional Berlin forecast" width="960">
+<img src="docs/assets/screenshots/today-weather.png" alt="One weather card on Today: the dressed Heinzel, the temperature now and the next three days — fictional Berlin forecast" width="960">
 
-Current weather and the coming days on Today — fictional Berlin forecast
+One weather card on Today: the dressed Heinzel, the temperature now and the next three days — fictional Berlin forecast
 
 <img src="docs/assets/screenshots/weather-detail.png" alt="Inspect conditions, feels-like temperature and rain chance — fictional local forecast" width="960">
 
@@ -107,9 +108,9 @@ Inspect conditions, feels-like temperature and rain chance — fictional local f
 
 Explore current conditions, the hourly outlook and a warning — fictional Berlin forecast
 
-<img src="docs/assets/screenshots/phone-weather.png" alt="Weather and near forecast in the phone-sized Today view — fictional local forecast" width="960">
+<img src="docs/assets/screenshots/phone-weather.png" alt="The one weather card in the phone-sized Today view — fictional local forecast" width="960">
 
-Weather and near forecast in the phone-sized Today view — fictional local forecast
+The one weather card in the phone-sized Today view — fictional local forecast
 
 <details>
 <summary>Command line</summary>

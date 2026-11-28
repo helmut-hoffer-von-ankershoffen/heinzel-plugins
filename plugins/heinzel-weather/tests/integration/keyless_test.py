@@ -1,7 +1,7 @@
 """The plugin through hz's real heads with its default provider: Open-Meteo, no key, the recorded Lisbon answers."""
 
 import json
-from datetime import UTC, datetime
+from datetime import UTC, date, datetime
 from functools import wraps
 
 import pytest
@@ -51,7 +51,8 @@ def test_info_shows_the_attribution(hz):
 
 def test_the_web_app_gets_a_status_item_and_widgets_as_data(hz):
     listed = {item["id"]: item for item in hz("system", "ui", "list").json}
-    assert {"weather:weather-now", "weather:weather-today", "weather:forecast-today"} <= set(listed)
+    assert {"weather:weather-now", "weather:weather-today"} <= set(listed)
+    assert "weather:forecast-today" not in listed  # merged into the one weather card
     item = hz("system", "ui", "status").json
     now = next(entry for entry in item if entry["id"] == "weather:weather-now")
     assert now["item"]["text"].startswith("12°C Lisbon, PT")
@@ -62,7 +63,12 @@ def test_the_web_app_gets_a_status_item_and_widgets_as_data(hz):
     assert (graphic["kind"], graphic["value"]) == ("graphic", "12°C")
     assert graphic["caption"] == "mainly clear"
     assert graphic["avatar"] == {"accessories": ["umbrella"]}
-    assert not any("Open-Meteo" in entry["text"] for entry in widgets["weather:forecast-today"]["items"])
+    assert graphic["detail"].startswith("Feels like ")
+    days = hz("weather", "conditions").json["days"][1:4]  # the next days, from tomorrow
+    assert [row["label"] for row in graphic["rows"]] == [date.fromisoformat(day["day"]).strftime("%a") for day in days]
+    assert graphic["rows"]
+    assert all(row["icon"] and row["icon_label"] for row in graphic["rows"])
+    assert not any("Open-Meteo" in json.dumps(row) for row in graphic["rows"])
     page = hz("weather", "page").json  # the attribution the page's info button shows
     assert "Open-Meteo.com (CC BY 4.0)" in page["attribution"]
 
@@ -111,3 +117,16 @@ def test_the_optional_key_never_degrades_health_with_the_default_provider(hz):
     key = [check for check in every if check["name"] == "credential weather/api-key"]
     assert [check["status"] for check in key] == ["up"]  # declared, optional: reported, never a degraded health
     assert {check["status"] for check in checks["weather"]} == {"up"}
+
+
+def test_a_person_who_hid_the_old_forecast_card_keeps_the_one_weather_card_hidden(hz):
+    """`forecast-today` merged into `weather-today`: the choice carries over, so no card returns or doubles."""
+    hz("system", "ui", "hide", "weather:forecast-today", "--slot", "today")
+    listed = {item["id"]: item for item in hz("system", "ui", "list").json}
+    assert "weather:forecast-today" not in listed
+    assert listed["weather:weather-today"]["slots"]["today"] is False
+    hz("system", "ui", "show", "weather:forecast-today", "--slot", "today")  # the old id still works
+    listed = {item["id"]: item for item in hz("system", "ui", "list").json}
+    assert listed["weather:weather-today"]["slots"]["today"] is True
+    shown = [entry["id"] for entry in hz("system", "ui", "widgets").json if entry["id"].startswith("weather:")]
+    assert shown.count("weather:weather-today") == 1

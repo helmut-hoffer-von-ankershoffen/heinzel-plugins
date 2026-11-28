@@ -1,6 +1,6 @@
 [project]
 name = "heinzel-weather"
-version = "0.5.9"
+version = "0.6.0"
 description = "Weather where you are, keyless from Open-Meteo (or OpenWeather with your key): now, the next hours and days, and a heads-up when it changes. Set your place in Settings; until then your time zone's city is used."
 readme = "README.md"
 authors = [{ name = "Helmut Hoffer von Ankershoffen", email = "helmuthva@gmail.com" }]
@@ -16,7 +16,7 @@ classifiers = [
     "Programming Language :: Python :: 3",
     "Typing :: Typed",
 ]
-dependencies = ["heinzel>=0.9.56,<0.10", "httpx>=0.28"]
+dependencies = ["heinzel>=0.9.59,<0.10", "httpx>=0.28"]
 
 [project.entry-points."heinzel.modules"]
 weather = "heinzel_weather"
@@ -157,7 +157,7 @@ highlights = [
 [[tool.heinzel.catalog.screenshots]]
 path = "docs/assets/screenshots/today-weather.png"
 surface = "ui"
-caption = "Current weather and the coming days on Today — fictional Berlin forecast"
+caption = "One weather card on Today: the dressed Heinzel, the temperature now and the next three days — fictional Berlin forecast"
 
 [[tool.heinzel.catalog.screenshots]]
 path = "docs/assets/screenshots/weather-detail.png"
@@ -172,7 +172,7 @@ caption = "Explore current conditions, the hourly outlook and a warning — fict
 [[tool.heinzel.catalog.screenshots]]
 path = "docs/assets/screenshots/phone-weather.png"
 surface = "ui"
-caption = "Weather and near forecast in the phone-sized Today view — fictional local forecast"
+caption = "The one weather card in the phone-sized Today view — fictional local forecast"
 
 [[tool.heinzel.catalog.screenshots]]
 path = "docs/assets/screenshots/cli-weather.png"

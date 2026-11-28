@@ -86,11 +86,11 @@ def test_app_weather_items_are_discoverable_with_readable_status_and_controls(hz
     status = hz("system", "ui", "status", "--item", "weather:weather-now").json[0]
     widgets = hz("system", "ui", "widgets").json
     widget = next(item for item in widgets if item["id"] == "weather:weather-today")
-    forecast = next(item for item in widgets if item["id"] == "weather:forecast-today")
+    assert not any(item["id"] == "weather:forecast-today" for item in widgets)
     actions = hz("system", "ui", "actions").json
     navigation = hz("system", "ui", "navigation").json
 
-    assert status["refresh"] == widget["refresh"] == forecast["refresh"] == 900
+    assert status["refresh"] == widget["refresh"] == 900
     assert status["item"]["icon"] == "sun"
     assert status["item"]["text"].startswith("22°C Berlin, DE")
     assert status["item"]["effect"] == {
@@ -105,7 +105,8 @@ def test_app_weather_items_are_discoverable_with_readable_status_and_controls(hz
     assert "Weather data by" not in widget["widget"]["caption"]
     assert not any("Weather data by" in line["text"] for line in status["item"]["detail"])
     assert widget["widget"]["avatar"]["accessories"] == ["umbrella"]
-    assert not any("Weather data by" in item["text"] for item in forecast["widget"]["items"])
+    assert [row["detail"].endswith("% rain") for row in widget["widget"]["rows"]] == [True, True, True]
+    assert not any("Weather data by" in (row.get("hint") or "") for row in widget["widget"]["rows"])
     assert not any(action["id"] == "weather:weather-report" for action in actions)
     weather = next(entry for entry in navigation if entry["id"] == "weather:weather")
     assert weather["title"] == "Weather"

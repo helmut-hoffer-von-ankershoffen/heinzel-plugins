@@ -24,8 +24,11 @@ def test_weather_ui_placements_share_one_read_only_source_and_refresh_every_900_
     assert [(item.source, item.name, item.refresh) for item in widgets] == [
         ("ui", "weather-today", timedelta(seconds=900)),
         ("ui", "temperature-today", timedelta(seconds=900)),
-        ("ui", "forecast-today", timedelta(seconds=900)),
     ]
+    assert {item.name: item.replaces for item in widgets} == {
+        "weather-today": ("forecast-today",),  # a hidden or shown forecast card carries over to the one card
+        "temperature-today": (),
+    }
     assert not actions
     assert len(navigation) == 1
     assert navigation[0].settings.sections == ("weather",)
@@ -47,6 +50,63 @@ def test_weather_status_and_today_card_expose_condition_and_accessible_forecast_
     assert card.avatar.accessories == ["umbrella"]
     assert card.caption == "clear sky"  # the attribution lives behind the info button of the Weather page
     assert not any("Weather data by" in line.text for line in status.detail)
+
+
+def _scene(observed, **now):
+    conditions = observed.conditions
+    changed = conditions.model_copy(update={"now": conditions.now.model_copy(update=now)})
+    return observed.model_copy(update={"conditions": changed})
+
+
+def test_one_today_card_holds_the_figure_the_temperature_what_it_wears_and_the_next_three_days(service):
+    observed = service().ui_weather()
+    card = _weather_card(_scene(observed, temperature=-2.2, feels_like=-7.4))
+    days = observed.conditions.days[1:4]
+
+    assert card.kind == "graphic"
+    assert card.size == "wide"
+    assert (card.label, card.value) == ("Weather in Berlin, DE", "-2°C")
+    assert card.avatar.accessories == observed.conditions.accessories == ["umbrella"]
+    assert card.detail == "Feels like -7°C · wearing umbrella"
+    assert [row.label for row in card.rows] == [f"{day.day:%a}" for day in days]
+    assert len(card.rows) == 3
+    for row, day in zip(card.rows, days, strict=True):
+        assert row.value == f"{round(day.low) + 0} to {round(day.high) + 0}°C"
+        assert row.detail == f"{round(day.rain_chance * 100)}% rain"
+        assert row.icon is not None
+        assert row.icon_label == day.description.capitalize()  # the icon in words, for a screen reader
+        assert row.hint == day.description.capitalize()
+
+
+def test_the_card_says_nothing_worn_when_nothing_is_and_never_shows_minus_zero(service):
+    observed = service().ui_weather()
+    conditions = observed.conditions.model_copy(update={"accessories": []})
+    bare = _scene(observed.model_copy(update={"conditions": conditions}), temperature=-0.3, feels_like=-0.4)
+    card = _weather_card(bare)
+    assert (card.value, card.detail) == ("0°C", "Feels like 0°C")
+    assert card.avatar.accessories == []
+
+
+def test_fewer_days_give_fewer_rows_and_a_stale_reading_says_so(service):
+    observed = service().ui_weather()
+    conditions = observed.conditions.model_copy(update={"days": observed.conditions.days[:2]})
+    card = _weather_card(observed.model_copy(update={"conditions": conditions, "stale": True}))
+    assert len(card.rows) == 1
+    assert card.caption == "clear sky · last observation"
+    none = observed.model_copy(update={"conditions": conditions.model_copy(update={"days": []})})
+    assert _weather_card(none).rows == []
+
+
+def test_without_a_place_there_is_no_card(service):
+    observed = service().ui_weather()
+    empty = observed.model_copy(update={"conditions": observed.conditions.model_copy(update={"now": None})})
+    assert _weather_card(empty) is None
+
+
+def test_imperial_cards_use_fahrenheit_in_every_row(service):
+    card = _weather_card(service(units="imperial").ui_weather())
+    assert card.value.endswith("°F")
+    assert all(row.value.endswith("°F") for row in card.rows)
 
 
 def test_without_a_place_the_status_opens_this_plugins_settings_never_a_terminal(service):
