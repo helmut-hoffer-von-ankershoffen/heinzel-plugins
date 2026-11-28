@@ -237,9 +237,8 @@ class GoogleCalendar:
         }
         calendars: dict[str, heinzel.CalendarSource] = {}
         for items, _ in self._session.pages(API, CALENDARS, params, "your calendar list", "items"):
-            for item in items:
-                if not isinstance(item, dict):
-                    continue
+            for raw in items:
+                item = _object(raw)
                 identifier = item.get("id")
                 if not _valid_calendar_id(identifier):
                     continue
