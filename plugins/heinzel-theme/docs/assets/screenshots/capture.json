@@ -1,20 +1,20 @@
 {
   "format": 2,
   "plugin": "heinzel-theme",
-  "core_version": "0.9.57",
+  "core_version": "0.9.58",
   "inputs_sha256": "3561ccd3d97405b3c701cd001adb1abc9c8bd0c29662330a07438763bdebf891",
   "images": {
-    "docs/assets/screenshots/theme-light.png": "e139707eae341c4b9d605aa60f8c070ceae3baa234a1782a9aa9956969c1acea",
-    "docs/assets/screenshots/theme-dark.png": "4f8bee4177d8e991f3417e45efe2f89b1c7fa81f850c2fe858b039eb9f3685f9",
-    "docs/assets/screenshots/theme-soundscapes.png": "d1007208e540dad6abee6c25cc2afd62f985a26759928f226b1ebbf8114587ea",
-    "docs/assets/screenshots/theme-cli.png": "3af21d7491826f9804a98d10bd433dc37a978ec6fc4aa60a991e6dfa1bbc036f",
+    "docs/assets/screenshots/theme-light.png": "a0bb8e52d300e06728426f0a57d059473199c7da58fd84bbc1cda791c21e421d",
+    "docs/assets/screenshots/theme-dark.png": "6caeac86a91b831a0b2ef441f665be16f05cba9d8ecb532ed2ecd586c96daccd",
+    "docs/assets/screenshots/theme-soundscapes.png": "9780e70ccdbfefcfad903d134ce569a5acf8d11e78b3e148f99695e5e0fd0311",
+    "docs/assets/screenshots/theme-cli.png": "fbc229a2217a0f420a053d837d9b7d625bf9f3022983335061ffdf6fd10b0f87",
     "docs/assets/screenshots/soundscapes-cli.png": "ccf896df651d9361bacdaee5ef88f1050ad9e80135f4a264f82897b2663287b8"
   },
   "transcripts": {
-    "theme-light.txt": "ba8fd9f48223d8d38cc413d1fd71fd6b35dcec37338487b1e2bce7d9bf8c8fb3",
-    "theme-dark.txt": "ba8fd9f48223d8d38cc413d1fd71fd6b35dcec37338487b1e2bce7d9bf8c8fb3",
-    "theme-soundscapes.txt": "927afdbb58facf3d6bafa111c5512d4451e7e1f870e465d41b8196ec66a68b04",
-    "theme-cli.txt": "36d653efa87eeec3a67c92ac4c27069a4697714578a9cd172bda926c27fdfa1f",
+    "theme-light.txt": "4aac515589de3af5cc2a46df471cc8d0ac38949540e41d8a0a39a5b4965407b2",
+    "theme-dark.txt": "4aac515589de3af5cc2a46df471cc8d0ac38949540e41d8a0a39a5b4965407b2",
+    "theme-soundscapes.txt": "57d4b2597dca30c439c6c3007c581776174c59f9e1ed620898617a6b31d31f51",
+    "theme-cli.txt": "3a9fed1eb31a02a57e09b6f587c17db6b46c22de48c40405cd65af96eca6f734",
     "soundscapes-cli.txt": "cd38af525b281ab23c011973e24a2aa2b3e12431b6963c8dfe2226341e0c5a78"
   }
 }

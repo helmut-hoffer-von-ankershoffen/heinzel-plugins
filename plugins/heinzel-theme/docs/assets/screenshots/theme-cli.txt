@@ -1,4 +1,5 @@
    Theme             Title            From           Colours
 *  heinzelmaennchen  Heinzelmännchen  heinzel-theme  ██ ██
+   paper             Paper            built in       ██ ██
 Next:
   hz system theme use default
