@@ -1,7 +1,7 @@
 import tomllib
 
 import pytest
-from heinzel import LiveClock, MetricWidget, Navigate
+from heinzel import LiveClock, Navigate
 from heinzel.kernel import user_config_dir
 from pydantic import ValidationError
 
@@ -211,10 +211,16 @@ def test_the_status_item_ticks_in_the_primary_zone_and_lists_the_others():
     assert primary_zone([]) is None
 
 
-def test_the_widget_and_the_badge_count_the_zones_at_work():
+def test_the_badge_counts_the_zones_at_work_and_the_widget_shows_them_now(monkeypatch):
+    from datetime import UTC, datetime
+
+    import heinzel_clock
+
     assert working(TIMES) == 2
-    assert at_work(TIMES) == MetricWidget(label="Zones at work now", value="2/3", tone="ok")
-    assert at_work([]) is None
+    moment = datetime(2026, 10, 26, 15, 30, tzinfo=UTC)
+    monkeypatch.setattr(heinzel_clock, "_now", lambda: moment)
+    assert at_work(TIMES) == heinzel_clock.timezones(TIMES, moment)
+    assert at_work(TIMES).title == "Timezones"
 
 
 def test_the_web_app_gets_the_clock_in_the_footer_not_the_sidebar_until_asked(hz, monkeypatch):
@@ -238,7 +244,7 @@ def test_the_header_action_opens_the_existing_world_clock_panel(hz):
     assert action["effect"] == {"kind": "navigate", "path": "/?panel=clock:world-clock"}
     assert isinstance(action["badge"], int)
     (widget,) = hz("system", "ui", "widgets", "--item", "clock:at-work").json
-    assert widget["widget"]["kind"] == "metric"
+    assert (widget["widget"]["kind"], widget["widget"]["title"]) == ("list", "Timezones")
 
 
 def test_an_unknown_zone_is_a_problem_of_the_item_not_of_the_bar(hz, monkeypatch):

@@ -3,9 +3,15 @@ M
 Today
 2
 Today
-Zones at work now
-
-2/3
+Timezones
+2 of 3 working
+Overlap 17–18 today
+Los Angeles 08:30 · −8 h
+Off · starts in 30 m
+New York 11:30 · −5 h
+Working · ends in 6 h 30 m
+Berlin 16:30 · you
+Working · ends in 1 h 30 m
 
 Nothing needs you right now. Ask anything below.
 
@@ -26,7 +32,7 @@ Los Angeles
 Starts in 30m · 2d 14h 30m since end
 08:30:00
 Edit time zones
-v0.9.56
+v0.9.58
 Updates, off
 System health, warning
 ?

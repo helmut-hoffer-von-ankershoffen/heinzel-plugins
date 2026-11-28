@@ -1,6 +1,6 @@
 [project]
 name = "heinzel-clock"
-version = "0.9.12"
+version = "0.9.13"
 description = "What time it is for everyone on the team: a Heinzelmännchen plugin."
 readme = "README.md"
 license = "MIT"
@@ -153,7 +153,7 @@ caption = "Find overlap across Berlin, New York and Los Angeles with the World C
 [[tool.heinzel.catalog.screenshots]]
 path = "docs/assets/screenshots/team-overview.png"
 surface = "ui"
-caption = "Fictional team working hours at a glance: the Today count and the primary footer clock"
+caption = "Fictional team working hours at a glance: the Today timezones with their common hours and the primary footer clock"
 
 [[tool.heinzel.catalog.screenshots]]
 path = "docs/assets/screenshots/footer-detail.png"
@@ -164,6 +164,11 @@ caption = "Inspect all configured time zones from the primary footer clock — f
 path = "docs/assets/screenshots/phone-world-clock.png"
 surface = "ui"
 caption = "The globe and three fictional team clocks on a phone — fixed demonstration time"
+
+[[tool.heinzel.catalog.screenshots]]
+path = "docs/assets/screenshots/phone-today.png"
+surface = "ui"
+caption = "The Timezones card on a phone: who works now, the common hours and each fictional team zone"
 
 [[tool.heinzel.catalog.screenshots]]
 path = "docs/assets/screenshots/terminal-current.png"
