@@ -131,22 +131,51 @@ def plan(
     }
 
 
-def hook_free_environment(env: dict | None = None) -> dict[str, str]:
-    """ENV (default: this process's) without the GIT_* a git hook exports for the repository it runs for.
+def child_environment(env: dict | None = None) -> dict[str, str]:
+    """The environment of a child command: ENV (default: this process's) without the GIT_* of a git hook.
 
     A check's tests run git in their own fixture repositories; an inherited GIT_DIR or GIT_INDEX_FILE would make
     them write to the committing or pushing worktree's index instead.
     """
     source = os.environ if env is None else env
-    return {key: value for key, value in source.items() if not key.startswith("GIT_")}
+    return {str(key): str(value) for key, value in source.items() if not str(key).startswith("GIT_")}
+
+
+def command_arguments(command: list[str] | tuple[str, ...]) -> tuple[str, ...]:
+    """The argument vector as a tuple of plain strings, refusing an empty command and control characters.
+
+    Raises:
+        ValueError: The command is empty or an argument is not a string or carries a NUL or line break.
+    """
+    if not command:
+        raise ValueError("a command needs an executable")
+    for argument in command:
+        if not isinstance(argument, str) or any(character in argument for character in "\0\n\r"):
+            raise ValueError("command arguments must be single-line strings")
+    return tuple(command)
+
+
+def resolve_executable(name: str, env: dict[str, str]) -> str:
+    """The absolute executable for NAME on the child's PATH; an option-like or missing name stops the check."""
+    if name.startswith("-"):
+        raise SystemExit(f"refused to run an option as a command: {name}")
+    resolved = shutil.which(name, path=env.get("PATH"))
+    if resolved is None:
+        raise SystemExit(f"{name}: not found on PATH; install it or run `make setup`")
+    return str(Path(resolved).absolute())
 
 
 def run(command: list[str], *, cwd: Path = ROOT, env: dict | None = None, timeout: int | None = 600) -> None:
     """Print bounded, useful progress and stop at the failing owning command."""
     started = time.monotonic()
-    print("→ " + " ".join(command), flush=True)
-    result = subprocess.run(command, cwd=cwd, env=hook_free_environment(env), check=False, timeout=timeout)
-    print(f"{'✓' if result.returncode == 0 else '✗'} {command[0]}: {time.monotonic() - started:.2f}s", flush=True)
+    arguments = command_arguments(command)
+    environment = child_environment(env)
+    executable = resolve_executable(arguments[0], environment)
+    print("→ " + " ".join(arguments), flush=True)
+    result = subprocess.run(  # noqa: S603 - resolved executable, validated argument vector, no shell
+        arguments, executable=executable, cwd=cwd, env=environment, check=False, timeout=timeout
+    )
+    print(f"{'✓' if result.returncode == 0 else '✗'} {arguments[0]}: {time.monotonic() - started:.2f}s", flush=True)
     if result.returncode:
         raise SystemExit(result.returncode)
 
@@ -978,6 +1007,23 @@ def capture_plugin(
     return result.returncode or (0 if report.get("ok") else 1)
 
 
+SCAFFOLD_PRESETS = {"minimal": "minimal", "contributions": "contributions"}
+SCAFFOLD_VALUE = re.compile(r"[A-Za-z0-9_.~+@:/=<>,!*^%#?&\[\] -]{1,512}")
+
+
+def scaffold_value(label: str, value: str | None) -> str | None:
+    """A core, template or ref operand: one token that cannot be read as an option of uv or hz.
+
+    Raises:
+        ValueError: The value starts with '-' or holds characters outside a package, path, URL or ref spelling.
+    """
+    if value is None:
+        return None
+    if value.startswith("-") or not SCAFFOLD_VALUE.fullmatch(value):
+        raise ValueError(f"--{label} must be a package spec, path, URL or ref, not an option: {value!r}")
+    return value
+
+
 def scaffold(
     name: str, core: str | None, template: str | None, ref: str | None, preset: str, *, screenshots: bool = True
 ) -> None:
@@ -988,6 +1034,12 @@ def scaffold(
     destination = ROOT / "plugins" / f"heinzel-{short}"
     if destination.exists():
         raise ValueError(f"{destination} already exists; choose a new plugin name.")
+    if preset not in SCAFFOLD_PRESETS:
+        raise ValueError(f"Choose a preset from {', '.join(SCAFFOLD_PRESETS)}.")
+    preset = SCAFFOLD_PRESETS[preset]  # the reviewed literal, never the caller's string
+    core, template, ref = (
+        scaffold_value(label, value) for label, value in (("core", core), ("template", template), ("ref", ref))
+    )
     command = [
         "uv",
         "tool",
@@ -1425,7 +1477,7 @@ def main() -> int:
     parser.add_argument("--template", default=os.environ.get("PLUGIN_TEMPLATE") or None)
     parser.add_argument("--ref", default=os.environ.get("PLUGIN_TEMPLATE_REF") or None)
     parser.add_argument(
-        "--preset", choices=["minimal", "contributions"], default=os.environ.get("PLUGIN_PRESET") or "minimal"
+        "--preset", choices=list(SCAFFOLD_PRESETS), default=os.environ.get("PLUGIN_PRESET") or "minimal"
     )
     parser.add_argument("--registry", choices=["github", "pypi"], default=os.environ.get("PLUGIN_REGISTRY") or None)
     parser.add_argument("--json", action="store_true", help="Screenshot result as JSON; progress goes to stderr")
