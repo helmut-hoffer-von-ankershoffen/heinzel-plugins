@@ -762,3 +762,44 @@ def test_an_unrecognized_heinzel_prefixed_dependency_is_treated_as_a_sibling(col
     project.metadata["project"]["dependencies"].append("heinzel-never-installed")
     with pytest.raises(ValueError, match="sibling plugin distribution"):
         cli.boundaries(project)
+
+
+@pytest.mark.parametrize(
+    ("core", "template", "ref", "preset"),
+    [
+        ("--with=evil", None, None, "minimal"),
+        (None, "--output=/elsewhere", None, "minimal"),
+        (None, None, "-x", "minimal"),
+        (None, None, "v1\nextra", "minimal"),
+        (None, None, None, "--defaults"),
+    ],
+)
+def test_scaffold_operands_cannot_become_options_of_uv_or_hz(monkeypatch, core, template, ref, preset):
+    monkeypatch.setattr(cli, "run", lambda *a, **k: pytest.fail("no command for an option-like operand"))
+    with pytest.raises(ValueError, match=r".+"):
+        cli.scaffold("quay", core, template, ref, preset, screenshots=False)
+
+
+def test_run_resolves_the_executable_and_passes_a_validated_argument_tuple(monkeypatch, tmp_path):
+    tool = tmp_path / "tool"
+    tool.write_text("#!/bin/sh\n")
+    tool.chmod(0o700)
+    seen = []
+
+    def record(command, **kw):
+        seen.append((command, kw))
+        return subprocess.CompletedProcess(command, 0)
+
+    monkeypatch.setattr(cli.subprocess, "run", record)
+    cli.run(["tool", "--flag", "value"], env={"PATH": str(tmp_path), "GIT_DIR": "/the-pushing-worktree/.git"})
+    [(command, options)] = seen
+    assert command == ("tool", "--flag", "value")
+    assert options["executable"] == str(tool)
+    assert options["env"] == {"PATH": str(tmp_path)}
+
+
+@pytest.mark.parametrize("command", [[], ["-c", "x"], ["missing-tool-8329"], ["tool", "a\0b"]])
+def test_run_refuses_an_empty_option_like_missing_or_malformed_command(monkeypatch, command):
+    monkeypatch.setattr(cli.subprocess, "run", lambda *a, **k: pytest.fail("nothing may start"))
+    with pytest.raises((SystemExit, ValueError)):
+        cli.run(command, env={"PATH": "/nonexistent-8329"})
